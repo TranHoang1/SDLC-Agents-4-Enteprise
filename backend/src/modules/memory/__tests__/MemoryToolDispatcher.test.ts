@@ -1,0 +1,85 @@
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
+import { DatabaseManager } from '../../../engine/db/database-manager.js';
+import { MemoryEngine } from '../MemoryEngine.js';
+import { MemoryToolDispatcher } from '../MemoryToolDispatcher.js';
+import { QueryLayer } from '../../../engine/query/query-layer.js';
+
+describe('MemoryToolDispatcher sync_code & live status', () => {
+  let tmpDir: string;
+  let dbPath: string;
+  let dbManager: DatabaseManager;
+  let engine: MemoryEngine;
+  let queryLayer: QueryLayer;
+  let dispatcher: MemoryToolDispatcher;
+
+  beforeEach(() => {
+    (DatabaseManager as any).sharedDb = null;
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ksa-mem-test-'));
+    dbPath = path.join(tmpDir, 'index.db');
+    dbManager = new DatabaseManager(dbPath);
+    dbManager.initialize();
+
+    engine = new MemoryEngine(dbManager.getDb());
+    queryLayer = new QueryLayer(dbManager);
+    dispatcher = new MemoryToolDispatcher(engine, tmpDir, queryLayer);
+  });
+
+  afterEach(() => {
+    dbManager.close();
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  it('reports correct live counts in status action', () => {
+    const statusBefore = dispatcher.dispatch('mem_status', {});
+    expect(statusBefore).toBe('Entries: 0 | Edges: 0');
+
+    // Insert an entry manually
+    engine.insert({
+      content: 'test content',
+      summary: 'test summary',
+      type: 'CONTEXT',
+      tier: 'WORKING',
+    });
+
+    const statusAfter = dispatcher.dispatch('mem_status', {});
+    expect(statusAfter).toBe('Entries: 1 | Edges: 0');
+  });
+
+  it('performs sync_code and creates cross-references', () => {
+    const db = dbManager.getDb();
+    
+    // 1. Seed files and symbols in database
+    db.prepare("INSERT INTO files (path, relative_path, language, content_hash, size_bytes) VALUES ('C:/projects/kiro/src/index.ts', 'src/index.ts', 'typescript', 'hash123', 100)").run();
+    const fileId = (db.prepare("SELECT id FROM files WHERE relative_path = 'src/index.ts'").get() as any).id;
+    
+    db.prepare(`
+      INSERT INTO symbols (file_id, name, kind, signature, start_line, end_line, visibility) 
+      VALUES (?, 'MyClass', 'class', 'class MyClass {}', 10, 20, 'public')
+    `).run(fileId);
+
+    // 2. Seed a document in knowledge entries referencing the class name
+    engine.insert({
+      content: 'Documentation for MyClass, which implements some feature.',
+      summary: 'MyClass Doc',
+      type: 'REQUIREMENT',
+      tier: 'SEMANTIC',
+    });
+
+    // 3. Dispatch sync_code
+    const syncRes = dispatcher.dispatch('mem_sync_code', {});
+    expect(syncRes).toContain('Synced: 1 code symbols, 1 cross-reference edges');
+
+    // 4. Verify counts
+    const statusRes = dispatcher.dispatch('mem_status', {});
+    expect(statusRes).toBe('Entries: 2 | Edges: 1');
+
+    // 5. Verify the code entity was inserted with type CODE_ENTITY
+    const entries = engine.findFiltered(undefined, 'CODE_ENTITY');
+    expect(entries).toHaveLength(1);
+    expect(entries[0].summary).toBe('class: MyClass (src/index.ts)');
+    expect(entries[0].content).toContain('class MyClass');
+  });
+});

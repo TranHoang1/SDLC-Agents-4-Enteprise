@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-21T10:00:00.000Z" agent="Kiro SDLC" version="24.0.0">
+  <diagram id="doc-pipeline" name="Document Pipeline">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Document Pipeline — Each Phase Builds on the Previous" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="320" y="20" width="500" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- Row 1: Forward flow -->
+        <mxCell id="brd" value="📋 BRD&#xa;Business Requirements&#xa;&#xa;👤 BA Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="fsd" value="📐 FSD&#xa;Functional Spec&#xa;&#xa;👤 BA + TA Agents" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="280" y="80" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="tdd" value="🏗️ TDD&#xa;Technical Design&#xa;&#xa;👤 SA Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="80" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="stp" value="🧪 STP&#xa;Test Plan&#xa;&#xa;👤 QA Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="720" y="80" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="stc" value="📊 STC&#xa;Test Cases&#xa;&#xa;👤 QA Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="940" y="80" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Row 1 arrows -->
+        <mxCell id="a1" style="rounded=1;strokeWidth=2;strokeColor=#333;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="brd" target="fsd">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" style="rounded=1;strokeWidth=2;strokeColor=#333;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="fsd" target="tdd">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" style="rounded=1;strokeWidth=2;strokeColor=#333;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="tdd" target="stp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" style="rounded=1;strokeWidth=2;strokeColor=#333;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="stp" target="stc">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Connector down -->
+        <mxCell id="a-down" style="rounded=1;strokeWidth=2;strokeColor=#333;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="stc" target="code">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Row 2: Implementation flow (right to left) -->
+        <mxCell id="code" value="💻 Code&#xa;Implementation&#xa;&#xa;👤 DEV Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="720" y="260" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="tests" value="✅ Tests&#xa;Execution + Report&#xa;&#xa;👤 QA Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="500" y="260" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="ug" value="📖 User Guide&#xa;Documentation&#xa;&#xa;👤 DEV + BA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="280" y="260" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="dpg" value="🚀 DPG + RLN&#xa;Deploy + Release&#xa;&#xa;👤 DevOps Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=11;fontStyle=0;align=center;" vertex="1" parent="1">
+          <mxGeometry x="60" y="260" width="160" height="90" as="geometry" />
+        </mxCell>
+
+        <!-- Row 2 arrows (right to left) -->
+        <mxCell id="a5" style="rounded=1;strokeWidth=2;strokeColor=#333;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="code" target="tests">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a6" style="rounded=1;strokeWidth=2;strokeColor=#333;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="tests" target="ug">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a7" style="rounded=1;strokeWidth=2;strokeColor=#333;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ug" target="dpg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Security overlay -->
+        <mxCell id="security" value="🔒 Security Review (parallel)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;dashed=1;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="940" y="280" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="a-sec" style="rounded=1;strokeWidth=1;strokeColor=#666;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="code" target="security">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Done -->
+        <mxCell id="done" value="🎉 DONE" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=3;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="390" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a-done" style="rounded=1;strokeWidth=2;strokeColor=#82b366;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="dpg" target="done">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Feedback loop -->
+        <mxCell id="feedback" style="rounded=1;strokeWidth=1;strokeColor=#b85450;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="tests" target="fsd">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="580" y="220" />
+              <mxPoint x="360" y="220" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="feedback-label" value="bugs found → update spec" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontStyle=2;fontColor=#b85450;" vertex="1" connectable="0" parent="feedback">
+          <mxGeometry x="-0.3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Jira auto-attach note -->
+        <mxCell id="jira-note" value="📎 Every document auto-attached to Jira as DOCX" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=2;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="380" y="420" width="320" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

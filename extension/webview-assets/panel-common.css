@@ -1,0 +1,125 @@
+/**
+ * Panel Common Styles — Shared layout and component styles for all KB panels.
+ */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  color: var(--text-primary);
+  background: var(--surface-primary);
+  overflow-x: hidden;
+}
+
+h2, h3, h4 {
+  margin: 0 0 var(--space-sm) 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+h2 { font-size: var(--font-size-xl); }
+h3 { font-size: var(--font-size-lg); }
+
+/* Cards */
+.card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-xs) var(--space-sm);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background 0.15s;
+}
+
+.btn-primary {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+}
+.btn-primary:hover { background: var(--btn-hover); }
+
+.btn-secondary {
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-fg);
+}
+
+.btn.active {
+  background: var(--btn-bg);
+  color: var(--btn-fg);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+th, td {
+  text-align: left;
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+th {
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--surface-secondary);
+}
+
+tr:hover td { background: var(--surface-hover); }
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: var(--font-size-sm);
+  background: var(--badge-bg);
+  color: var(--badge-fg);
+}
+
+/* Lists */
+ol, ul { padding-left: var(--space-lg); margin: 0; }
+li { padding: var(--space-xs) 0; }
+
+/* Grid layouts */
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-md);
+}
+
+/* Scrollable containers */
+.scroll-y {
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+/* Select */
+select {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-xs) var(--space-sm);
+  font-size: var(--font-size);
+}
+
+/* Checkbox */
+input[type="checkbox"] {
+  accent-color: var(--btn-bg);
+}

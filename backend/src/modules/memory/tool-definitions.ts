@@ -1,0 +1,31 @@
+/**
+ * Tool definitions for Memory module — 14 consolidated tools.
+ */
+import type { ToolDefinition } from '../../types/tool.js';
+
+export const TOOL_DEFINITIONS: ToolDefinition[] = [
+  { name: 'mem_search', description: 'Hybrid search across KB (BM25 + graph).', inputSchema: { type: 'object', properties: { query: { type: 'string' }, limit: { type: 'number' }, tier: { type: 'string' }, type: { type: 'string' }, detail: { type: 'boolean' } }, required: ['query'] }, category: 'memory' },
+  { name: 'mem_ingest', description: 'Store a knowledge entry.', inputSchema: { type: 'object', properties: { content: { type: 'string' }, summary: { type: 'string' }, type: { type: 'string' }, source: { type: 'string' }, tags: { type: 'string' }, agent_name: { type: 'string' } }, required: ['content'] }, category: 'memory' },
+  { name: 'mem_ingest_file', description: 'Ingest document from disk by path.', inputSchema: { type: 'object', properties: { file_path: { type: 'string' }, type: { type: 'string' } }, required: ['file_path'] }, category: 'memory' },
+  { name: 'mem_pin', description: 'Core Memory: pin/unpin entries for auto-recall.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, entry_id: { type: 'number' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_map', description: 'Structured Map: view/update entry metadata.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, entry_id: { type: 'number' }, map: { type: 'object' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_crud', description: 'CRUD operations: get, delete, list.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, id: { type: 'number' }, tier: { type: 'string' }, type: { type: 'string' }, limit: { type: 'number' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_graph', description: 'Knowledge graph: neighbors, add_edge, path.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, node_id: { type: 'number' }, source_id: { type: 'number' }, target_id: { type: 'number' }, relation: { type: 'string' } } }, category: 'memory' },
+  { name: 'mem_consolidate', description: 'Tier consolidation: promote/demote entries.', inputSchema: { type: 'object', properties: { dry_run: { type: 'boolean' } } }, category: 'memory' },
+  { name: 'mem_lifecycle', description: 'Entry lifecycle: staleness, archive, reminders.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, entry_id: { type: 'number' }, interval_days: { type: 'number' }, assignee: { type: 'string' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_templates', description: 'Manage content templates.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, name: { type: 'string' }, type: { type: 'string' }, required_sections: { type: 'string' }, entry_id: { type: 'number' } } }, category: 'memory' },
+  { name: 'mem_attachments', description: 'File attachments for entries.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, entry_id: { type: 'number' }, file_path: { type: 'string' }, attachment_id: { type: 'number' } } }, category: 'memory' },
+  { name: 'mem_discover', description: 'Find relevant entries: suggest or related.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, query: { type: 'string' }, entry_id: { type: 'number' }, limit: { type: 'number' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_tags', description: 'Tag taxonomy: create, tag, untag, search.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, tag: { type: 'string' }, tags: { type: 'string' }, entry_id: { type: 'number' }, category: { type: 'string' }, operator: { type: 'string' } } }, category: 'memory' },
+  { name: 'mem_citations', description: 'Citation tracking: record, most_cited, uncited.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, entry_id: { type: 'number' }, cited_by: { type: 'string' }, context: { type: 'string' }, limit: { type: 'number' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_conversation', description: 'Conversation history: save turns, query.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, session_id: { type: 'string' }, role: { type: 'string' }, content: { type: 'string' }, query: { type: 'string' }, limit: { type: 'number' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_scoring', description: 'Quality scoring + feedback.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, entry_id: { type: 'number' }, rating: { type: 'number' }, comment: { type: 'string' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_admin', description: 'System admin: status, audit, sessions, analytics.', inputSchema: { type: 'object', properties: { action: { type: 'string' }, limit: { type: 'number' }, operation: { type: 'string' } }, required: ['action'] }, category: 'memory' },
+  { name: 'mem_get', description: 'Get a knowledge entry by ID (alias for mem_crud get).', inputSchema: { type: 'object', properties: { id: { type: 'number' } }, required: ['id'] }, category: 'memory' },
+  { name: 'mem_delete', description: 'Delete a knowledge entry by ID (alias for mem_crud delete).', inputSchema: { type: 'object', properties: { id: { type: 'number' } }, required: ['id'] }, category: 'memory' },
+  { name: 'mem_list', description: 'List knowledge entries (alias for mem_crud list).', inputSchema: { type: 'object', properties: { limit: { type: 'number' }, tier: { type: 'string' }, type: { type: 'string' } } }, category: 'memory' },
+  { name: 'mem_status', description: 'Get memory status (alias for mem_admin status).', inputSchema: { type: 'object', properties: {} }, category: 'memory' },
+  { name: 'mem_audit', description: 'Get memory audit log (alias for mem_admin audit).', inputSchema: { type: 'object', properties: { limit: { type: 'number' }, operation: { type: 'string' } } }, category: 'memory' },
+  { name: 'mem_sessions', description: 'List memory sessions (alias for mem_admin sessions).', inputSchema: { type: 'object', properties: {} }, category: 'memory' },
+];
+

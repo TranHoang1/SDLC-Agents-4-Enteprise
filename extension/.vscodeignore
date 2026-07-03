@@ -1,0 +1,13 @@
+.github/**
+src/**
+scripts/**
+*.ts
+*.map
+.mocharc.yml
+vitest.config.*
+tsconfig.json
+esbuild.js
+node_modules/**
+mcp-server/**
+**/*.vsix
+.gitignore

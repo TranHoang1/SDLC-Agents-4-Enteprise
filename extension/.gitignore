@@ -1,0 +1,15 @@
+node_modules/
+!mcp-server/node_modules/
+# Exclude native build artifacts from mcp-server (downloaded at runtime via NativeAddonManager)
+mcp-server/node_modules/better-sqlite3/build/
+mcp-server/node_modules/better-sqlite3/deps/
+mcp-server/node_modules/better-sqlite3/src/
+mcp-server/node_modules/onnxruntime-node/bin/
+mcp-server/node_modules/prebuild-install/
+mcp-server/node_modules/**/node-gyp/
+mcp-server/node_modules/.vite/
+out/
+*.vsix
+resources/.analysis/code-intelligence/scripts/nodejs/node_modules/
+resources/.analysis/code-intelligence/scripts/python/__pycache__/
+resources/.analysis/code-intelligence/scripts/java/out/

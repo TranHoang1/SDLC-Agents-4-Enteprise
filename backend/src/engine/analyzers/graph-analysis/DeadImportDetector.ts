@@ -1,0 +1,70 @@
+/**
+ * KSA-163: Dead Import Detector — Finds unused imports.
+ */
+
+import Database from 'better-sqlite3';
+import type { DeadImport } from './types.js';
+
+export class DeadImportDetector {
+  private db: Database.Database;
+
+  constructor(db: Database.Database) {
+    this.db = db;
+  }
+
+  /** Find dead (unused) imports in a file or across the project. */
+  detect(options: { filePath?: string; module?: string; limit?: number } = {}): DeadImport[] {
+    const limit = options.limit ?? 50;
+
+    // Find imports where the target symbol is never referenced elsewhere in the same file
+    let sql = `
+      SELECT r.file_path as filePath, r.line, r.target_symbol as importedSymbol,
+             r.metadata
+      FROM relationships r
+      WHERE r.kind = 'imports'
+        AND NOT EXISTS (
+          SELECT 1 FROM relationships r2
+          WHERE r2.file_path = r.file_path
+            AND r2.kind IN ('calls', 'uses')
+            AND r2.target_symbol = r.target_symbol
+            AND r2.id != r.id
+        )
+    `;
+    const params: unknown[] = [];
+
+    if (options.filePath) {
+      sql += ' AND r.file_path LIKE ?';
+      params.push(`%${options.filePath}%`);
+    }
+    if (options.module) {
+      sql += ' AND r.file_path LIKE ?';
+      params.push(`%${options.module}%`);
+    }
+
+    sql += ' ORDER BY r.file_path, r.line LIMIT ?';
+    params.push(limit);
+
+    const rows = this.db.prepare(sql).all(...params) as Array<{
+      filePath: string;
+      line: number;
+      importedSymbol: string;
+      metadata: string | null;
+    }>;
+
+    return rows.map(row => {
+      let fromModule = '';
+      if (row.metadata) {
+        try {
+          const meta = JSON.parse(row.metadata);
+          fromModule = meta.source ?? meta.from ?? '';
+        } catch { /* ignore */ }
+      }
+      return {
+        filePath: row.filePath,
+        line: row.line,
+        importedSymbol: row.importedSymbol,
+        fromModule,
+      };
+    });
+  }
+}

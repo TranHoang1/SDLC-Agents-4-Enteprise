@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <processType>AutoLaunchedFlow</processType>
+    <status>Active</status>
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isInput>true</isInput>
+    </variables>
+    <variables>
+        <name>accountName</name>
+        <dataType>String</dataType>
+        <isInput>false</isInput>
+    </variables>
+    <decisions>
+        <name>Check_Account_Type</name>
+        <label>Check Account Type</label>
+    </decisions>
+    <actionCalls>
+        <name>Update_Account</name>
+        <actionType>apex</actionType>
+        <actionName>AccountUpdateAction</actionName>
+    </actionCalls>
+    <recordLookups>
+        <name>Get_Account</name>
+        <object>Account</object>
+    </recordLookups>
+    <recordUpdates>
+        <name>Update_Contact</name>
+        <object>Contact</object>
+    </recordUpdates>
+</Flow>

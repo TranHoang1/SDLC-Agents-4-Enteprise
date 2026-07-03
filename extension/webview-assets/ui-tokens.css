@@ -1,0 +1,58 @@
+/**
+ * UI Design Tokens — Maps VS Code theme variables to semantic tokens.
+ * All panels inherit these tokens for consistent theming.
+ */
+
+:root {
+  /* Surface colors */
+  --surface-primary: var(--vscode-editor-background);
+  --surface-secondary: var(--vscode-sideBar-background);
+  --surface-elevated: var(--vscode-editorWidget-background);
+  --surface-hover: var(--vscode-list-hoverBackground);
+
+  /* Text colors */
+  --text-primary: var(--vscode-foreground);
+  --text-secondary: var(--vscode-descriptionForeground);
+  --text-muted: var(--vscode-disabledForeground);
+  --text-link: var(--vscode-textLink-foreground);
+
+  /* Border colors */
+  --border-default: var(--vscode-editorWidget-border);
+  --border-subtle: var(--vscode-widget-border);
+
+  /* Interactive colors */
+  --btn-bg: var(--vscode-button-background);
+  --btn-fg: var(--vscode-button-foreground);
+  --btn-hover: var(--vscode-button-hoverBackground);
+  --btn-secondary-bg: var(--vscode-button-secondaryBackground);
+  --btn-secondary-fg: var(--vscode-button-secondaryForeground);
+
+  /* Status colors */
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-error: #f44336;
+  --color-info: #2196f3;
+
+  /* Badge */
+  --badge-bg: var(--vscode-badge-background);
+  --badge-fg: var(--vscode-badge-foreground);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Border radius */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+
+  /* Font */
+  --font-family: var(--vscode-font-family);
+  --font-size: var(--vscode-font-size);
+  --font-size-sm: 11px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+}

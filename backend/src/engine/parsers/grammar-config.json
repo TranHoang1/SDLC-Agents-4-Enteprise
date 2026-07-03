@@ -1,0 +1,58 @@
+{
+  "languages": [
+    {
+      "id": "typescript",
+      "extensions": [".ts", ".tsx"],
+      "wasmPath": "grammars/tree-sitter-typescript.wasm",
+      "parserModule": "./languages/typescript-parser.js"
+    },
+    {
+      "id": "javascript",
+      "extensions": [".js", ".jsx", ".mjs", ".cjs"],
+      "wasmPath": "grammars/tree-sitter-javascript.wasm",
+      "parserModule": "./languages/typescript-parser.js"
+    },
+    {
+      "id": "python",
+      "extensions": [".py", ".pyi"],
+      "wasmPath": "grammars/tree-sitter-python.wasm",
+      "parserModule": "./languages/python-parser.js"
+    },
+    {
+      "id": "kotlin",
+      "extensions": [".kt", ".kts"],
+      "wasmPath": "grammars/tree-sitter-kotlin.wasm",
+      "parserModule": "./languages/kotlin-parser.js"
+    },
+    {
+      "id": "java",
+      "extensions": [".java"],
+      "wasmPath": "grammars/tree-sitter-java.wasm",
+      "parserModule": "./languages/java-parser.js"
+    },
+    {
+      "id": "go",
+      "extensions": [".go"],
+      "wasmPath": "grammars/tree-sitter-go.wasm",
+      "parserModule": "./languages/go-parser.js"
+    },
+    {
+      "id": "rust",
+      "extensions": [".rs"],
+      "wasmPath": "grammars/tree-sitter-rust.wasm",
+      "parserModule": "./languages/rust-parser.js"
+    },
+    {
+      "id": "apex",
+      "extensions": [".cls", ".trigger"],
+      "wasmPath": "grammars/tree-sitter-apex.wasm",
+      "parserModule": "./languages/apex-parser.js"
+    },
+    {
+      "id": "salesforce-meta",
+      "extensions": [".flow-meta.xml", ".object-meta.xml", ".field-meta.xml", ".js-meta.xml", ".component-meta.xml"],
+      "wasmPath": null,
+      "parserModule": "./languages/salesforce-meta-parser.js"
+    }
+  ]
+}

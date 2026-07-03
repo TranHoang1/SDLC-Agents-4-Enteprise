@@ -1,0 +1,162 @@
+<mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="MCP Server Ecosystem — Nested Orchestration" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="450" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="One unified interface to discover and execute tools across all connected services" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=2;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="320" y="50" width="500" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- AI Agent -->
+        <mxCell id="agent" value="🤖 AI Agent (Kiro)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="90" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="agent-calls" value="find_tools() → execute_dynamic_tool()" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=2;fontColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="420" y="145" width="280" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Main MCP Server -->
+        <mxCell id="main-mcp" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="200" y="180" width="720" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="main-title" value="🧠 MCP Code Intelligence Server" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="380" y="190" width="300" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Core modules -->
+        <mxCell id="registry" value="📇 UnifiedRegistry&#xa;Token search + scoring" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9e6;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="220" y="230" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="routing" value="🗺️ RoutingTable&#xa;O(1) tool→server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9e6;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="380" y="230" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="router" value="🔀 SmartRouter&#xa;Timeout + fallback" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9e6;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="530" y="230" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="manager" value="⚙️ ServerManager&#xa;Subprocess lifecycle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9e6;strokeColor=#d6b656;fontSize=10;align=center;" vertex="1" parent="1">
+          <mxGeometry x="680" y="230" width="140" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Built-in tools -->
+        <mxCell id="builtin-label" value="Built-in Tools:" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="295" width="90" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-search" value="code_search" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f3ff;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="220" y="320" width="80" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-symbols" value="code_symbols" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f3ff;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="310" y="320" width="80" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-mem" value="mem_search" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f3ff;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="400" y="320" width="80" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-ingest" value="mem_ingest" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f3ff;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="490" y="320" width="80" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-graph" value="mem_graph" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f3ff;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="580" y="320" width="80" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-lifecycle" value="mem_lifecycle" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f3ff;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="670" y="320" width="80" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-more" value="+20 more..." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e6f3ff;strokeColor=#6c8ebf;fontSize=9;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="760" y="320" width="80" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="tool-count" value="35+ built-in tools" style="text;html=1;align=right;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=1;fontColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="750" y="350" width="100" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Arrow: Agent → MCP -->
+        <mxCell id="a-agent-mcp" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#d6b656;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="agent" target="main-mcp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Child MCP Servers -->
+        <mxCell id="child-label" value="🔌 Extensible: Add Your Own MCP Servers (optional, user-configured)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="300" y="410" width="480" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Atlassian -->
+        <mxCell id="atlassian" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="450" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="atl-title" value="🎫 Jira / Confluence" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="110" y="460" width="140" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="atl-desc" value="Issue tracking, wiki pages&#xa;transitions, comments" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="100" y="495" width="170" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="atl-note" value="(user-configured)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="120" y="555" width="110" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Bridge -->
+        <mxCell id="bridge" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="450" width="200" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="bridge-title" value="🌐 Browser Automation" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="340" y="460" width="160" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="bridge-desc" value="Navigate pages, screenshots&#xa;web testing, performance" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="340" y="495" width="180" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="bridge-note" value="(user-configured)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="370" y="555" width="110" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Fetch -->
+        <mxCell id="fetch" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="560" y="450" width="180" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="fetch-title" value="🗄️ Database" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="600" y="460" width="110" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="fetch-desc" value="Query databases&#xa;from agent context" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="580" y="495" width="150" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="fetch-note" value="(user-configured)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="600" y="555" width="110" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Custom -->
+        <mxCell id="custom" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="450" width="180" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="custom-title" value="🔌 Any MCP Server" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="460" width="150" height="25" as="geometry" />
+        </mxCell>
+        <mxCell id="custom-desc" value="Add to orchestration.json&#xa;→ auto-discovered&#xa;via find_tools()" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="800" y="500" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="custom-examples" value="slack, aws, github..." style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#666666;" vertex="1" parent="1">
+          <mxGeometry x="810" y="555" width="140" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows: MCP → Children -->
+        <mxCell id="a-mcp-atl" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#9673a6;exitX=0.2;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="main-mcp" target="atlassian">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a-mcp-bridge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#82b366;exitX=0.4;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="main-mcp" target="bridge">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a-mcp-fetch" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#b85450;exitX=0.6;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="main-mcp" target="fetch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a-mcp-custom" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeWidth=2;strokeColor=#666666;dashed=1;exitX=0.8;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="main-mcp" target="custom">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Key insight box -->
+        <mxCell id="insight-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e6f7ff;strokeColor=#0077b6;strokeWidth=1;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="620" width="880" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="insight-text" value="💡 Key: Agent calls find_tools(&quot;describe what you need&quot;) → Server discovers tools from ALL configured servers → Agent calls execute_dynamic_tool() → Routed automatically" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;fontStyle=0;" vertex="1" parent="1">
+          <mxGeometry x="100" y="630" width="840" height="30" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>

@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-05-21T10:00:00.000Z" agent="Kiro SDLC" version="24.0.0">
+  <diagram id="agent-pipeline" name="Agent Pipeline">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="600" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="SDLC Agent Pipeline — From Ticket to Deployment" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="400" y="20" width="500" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- User -->
+        <mxCell id="user" value="👤 You" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="240" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- SM Agent -->
+        <mxCell id="sm" value="🎯 SM&#xa;Scrum Master" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="240" width="130" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 1: Requirements -->
+        <mxCell id="phase1-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="80" width="200" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="phase1-label" value="Phase 1: Requirements" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#2d6a2d;" vertex="1" parent="1">
+          <mxGeometry x="400" y="85" width="150" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ba" value="📋 BA&#xa;→ BRD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="110" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ta" value="🔧 TA&#xa;→ FSD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="490" y="110" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ba-ta-loop" value="↔ feedback" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="430" y="175" width="80" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 2: Design -->
+        <mxCell id="phase2-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="80" width="120" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2-label" value="Phase 2: Design" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#7a6a00;" vertex="1" parent="1">
+          <mxGeometry x="630" y="85" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="sa" value="🏗️ SA&#xa;→ TDD" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="110" width="80" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="sa-feedback" value="↩ discrepancy?" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="640" y="175" width="90" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 2.5: UI -->
+        <mxCell id="phase25-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="80" width="120" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="phase25-label" value="Phase 2.5: UI" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#7a2020;" vertex="1" parent="1">
+          <mxGeometry x="800" y="85" width="80" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="ui" value="🎨 UI&#xa;→ Wireframes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="795" y="110" width="90" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 3: Testing -->
+        <mxCell id="phase3-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="350" width="200" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="phase3-label" value="Phase 3: Testing" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#5c3d6e;" vertex="1" parent="1">
+          <mxGeometry x="420" y="355" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="qa" value="🧪 QA&#xa;→ STP + STC" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="380" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 4: Implementation -->
+        <mxCell id="phase4-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="620" y="350" width="120" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="phase4-label" value="Phase 4: Code" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#2d4a7a;" vertex="1" parent="1">
+          <mxGeometry x="640" y="355" width="90" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="dev" value="💻 DEV&#xa;→ Code" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="640" y="380" width="80" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 5: Security -->
+        <mxCell id="phase5-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="780" y="350" width="130" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="phase5-label" value="Phase 5: Security" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="795" y="355" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="security" value="🔒 Security&#xa;→ Audit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="380" width="90" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Phase 6: Deploy -->
+        <mxCell id="phase6-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=1;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="950" y="350" width="130" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="phase6-label" value="Phase 6: Deploy" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#2d6a2d;" vertex="1" parent="1">
+          <mxGeometry x="970" y="355" width="100" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="devops" value="🚀 DevOps&#xa;→ DPG + RLN" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="960" y="380" width="110" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Done -->
+        <mxCell id="done" value="✅ Done&#xa;Deployed!" style="shape=ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;strokeWidth=2;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="380" width="100" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Arrows -->
+        <mxCell id="a1" style="rounded=1;strokeWidth=2;strokeColor=#333;" edge="1" parent="1" source="user" target="sm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a2" style="rounded=1;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="sm" target="ba">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a3" style="rounded=1;strokeWidth=1;strokeColor=#82b366;" edge="1" parent="1" source="ba" target="ta">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a4" style="rounded=1;strokeWidth=2;strokeColor=#d6b656;" edge="1" parent="1" source="ta" target="sa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a5" style="rounded=1;strokeWidth=2;strokeColor=#b85450;" edge="1" parent="1" source="sa" target="ui">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a6" style="rounded=1;strokeWidth=2;strokeColor=#9673a6;" edge="1" parent="1" source="sm" target="qa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a7" style="rounded=1;strokeWidth=2;strokeColor=#6c8ebf;" edge="1" parent="1" source="qa" target="dev">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a8" style="rounded=1;strokeWidth=2;strokeColor=#666666;" edge="1" parent="1" source="dev" target="security">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a9" style="rounded=1;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="security" target="devops">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a10" style="rounded=1;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="devops" target="done">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Feedback loop arrow (SA → BA) -->
+        <mxCell id="feedback-arrow" style="rounded=1;strokeWidth=1;strokeColor=#b85450;dashed=1;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="sa" target="ba">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="200" />
+              <mxPoint x="500" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="feedback-label" value="auto-fix loop (max 5x)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=9;fontStyle=2;fontColor=#b85450;" vertex="1" connectable="0" parent="feedback-arrow">
+          <mxGeometry x="-0.3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

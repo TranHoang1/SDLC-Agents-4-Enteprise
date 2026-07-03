@@ -1,0 +1,227 @@
+/**
+ * KSA-168: Dead Code Detector — Find unreachable code using call graph reachability.
+ * BFS from entry points through call graph, then score unreachable functions.
+ */
+
+import Database from 'better-sqlite3';
+import type { DeadCodeCandidate, DeadCodeReport } from './types.js';
+
+interface FunctionInfo {
+  id: number;
+  name: string;
+  kind: string;
+  filePath: string;
+  startLine: number;
+  isExported: boolean;
+  isAsync: boolean;
+  hasDecorators: boolean;
+  hasTests: boolean;
+}
+
+export class DeadCodeDetector {
+  private db: Database.Database;
+  private minConfidence: number;
+
+  constructor(db: Database.Database, minConfidence: number = 60) {
+    this.db = db;
+    this.minConfidence = minConfidence;
+  }
+
+  /** Detect dead code with confidence scoring. */
+  detect(options: { filePath?: string; module?: string; limit?: number } = {}): DeadCodeReport {
+    const t0 = performance.now();
+
+    // 1. Get all entry points
+    const entryPointIds = this.getEntryPoints();
+
+    // 2. Compute reachability via BFS
+    const reachable = this.computeReachability(entryPointIds);
+
+    // 3. Get all functions
+    const allFunctions = this.getAllFunctions(options.filePath, options.module);
+
+    // 4. Find unreachable functions
+    const unreachable = allFunctions.filter(f => !reachable.has(f.id));
+
+    // 5. Score each candidate
+    const candidates: DeadCodeCandidate[] = [];
+    for (const func of unreachable) {
+      const { confidence, reasons } = this.scoreCandidate(func);
+      if (confidence >= this.minConfidence) {
+        candidates.push({
+          symbolId: func.id,
+          name: func.name,
+          kind: func.kind,
+          filePath: func.filePath,
+          startLine: func.startLine,
+          confidence,
+          reasons,
+        });
+      }
+    }
+
+    // Sort by confidence descending
+    candidates.sort((a, b) => b.confidence - a.confidence);
+    const limit = options.limit ?? 50;
+
+    const elapsed = performance.now() - t0;
+    return {
+      candidates: candidates.slice(0, limit),
+      totalFunctions: allFunctions.length,
+      reachableCount: reachable.size,
+      unreachableCount: unreachable.length,
+      scanDurationMs: Math.round(elapsed),
+    };
+  }
+
+  private getEntryPoints(): number[] {
+    try {
+      const rows = this.db.prepare(
+        'SELECT symbol_id FROM entry_points'
+      ).all() as { symbol_id: number }[];
+      return rows.map(r => r.symbol_id);
+    } catch {
+      // entry_points table may not exist — fall back to exported symbols
+      const rows = this.db.prepare(
+        'SELECT id FROM symbols WHERE is_exported = 1'
+      ).all() as { id: number }[];
+      return rows.map(r => r.id);
+    }
+  }
+
+  private computeReachability(entryPointIds: number[]): Set<number> {
+    const visited = new Set<number>();
+    const queue: number[] = [...entryPointIds];
+
+    // Load call graph edges
+    const edges = this.db.prepare(`
+      SELECT source_symbol_id, target_symbol_id
+      FROM relationships
+      WHERE kind = 'calls' AND target_symbol_id IS NOT NULL
+    `).all() as { source_symbol_id: number; target_symbol_id: number }[];
+
+    // Build adjacency list (caller → callees)
+    const callGraph = new Map<number, number[]>();
+    for (const edge of edges) {
+      if (!callGraph.has(edge.source_symbol_id)) callGraph.set(edge.source_symbol_id, []);
+      callGraph.get(edge.source_symbol_id)!.push(edge.target_symbol_id);
+    }
+
+    // BFS
+    while (queue.length > 0) {
+      const node = queue.shift()!;
+      if (visited.has(node)) continue;
+      visited.add(node);
+
+      const callees = callGraph.get(node);
+      if (callees) {
+        for (const callee of callees) {
+          if (!visited.has(callee)) queue.push(callee);
+        }
+      }
+    }
+
+    return visited;
+  }
+
+  private getAllFunctions(filePath?: string, module?: string): FunctionInfo[] {
+    let sql = `
+      SELECT s.id, s.name, s.kind, f.relative_path as filePath, s.start_line as startLine,
+             s.is_exported as isExported, s.is_async as isAsync, s.decorators
+      FROM symbols s
+      JOIN files f ON f.id = s.file_id
+      WHERE s.kind IN ('function', 'method', 'arrow_function', 'generator')
+    `;
+    const params: unknown[] = [];
+
+    if (filePath) {
+      sql += ` AND f.relative_path LIKE ?`;
+      params.push(`%${filePath}%`);
+    }
+    if (module) {
+      sql += ` AND f.module = ?`;
+      params.push(module);
+    }
+
+    const rows = this.db.prepare(sql).all(...params) as Array<{
+      id: number; name: string; kind: string; filePath: string; startLine: number;
+      isExported: number; isAsync: number; decorators: string | null;
+    }>;
+
+    return rows.map(r => ({
+      id: r.id,
+      name: r.name,
+      kind: r.kind,
+      filePath: r.filePath,
+      startLine: r.startLine,
+      isExported: r.isExported === 1,
+      isAsync: r.isAsync === 1,
+      hasDecorators: !!r.decorators,
+      hasTests: false, // Will be checked in scoring
+    }));
+  }
+
+  private scoreCandidate(func: FunctionInfo): { confidence: number; reasons: string[] } {
+    let score = 0;
+    const reasons: string[] = [];
+
+    // No callers (already unreachable) — base score
+    score += 40;
+    reasons.push('no_callers');
+
+    // Not exported — higher confidence it's dead
+    if (!func.isExported) {
+      score += 20;
+      reasons.push('not_exported');
+    }
+
+    // Check if it has tests referencing it
+    const hasTests = this.hasTestReferences(func.id);
+    if (!hasTests) {
+      score += 15;
+      reasons.push('no_tests');
+    }
+
+    // Has decorators — might be used via reflection/DI
+    if (func.hasDecorators) {
+      score -= 30;
+      reasons.push('has_decorators_dynamic_dispatch');
+    }
+
+    // Check if name suggests it's a lifecycle/hook method
+    if (this.isLifecycleMethod(func.name)) {
+      score -= 25;
+      reasons.push('lifecycle_method');
+    }
+
+    // Check if recently modified (within last 30 days via git)
+    // Simplified: skip git check for now, can be enhanced later
+
+    return { confidence: Math.max(0, Math.min(100, score)), reasons };
+  }
+
+  private hasTestReferences(symbolId: number): boolean {
+    try {
+      const row = this.db.prepare(`
+        SELECT COUNT(*) as count
+        FROM relationships r
+        JOIN files f ON f.id = (SELECT file_id FROM symbols WHERE id = r.source_symbol_id)
+        WHERE r.target_symbol_id = ?
+          AND (f.relative_path LIKE '%test%' OR f.relative_path LIKE '%spec%')
+      `).get(symbolId) as { count: number };
+      return row.count > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  private isLifecycleMethod(name: string): boolean {
+    const lifecyclePatterns = [
+      /^on[A-Z]/, /^handle[A-Z]/, /^before[A-Z]/, /^after[A-Z]/,
+      /^init/, /^destroy/, /^setup/, /^teardown/,
+      /^ngOn/, /^componentDid/, /^componentWill/,
+      /^use[A-Z]/, // React hooks
+    ];
+    return lifecyclePatterns.some(p => p.test(name));
+  }
+}

@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+.code-intel/
+
+# Build
+dist/
+out/
+*.vsix
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Runtime
+*.db
+*.db-shm
+*.db-wal
+
+# Test
+test-results/
+coverage/

@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "language": "typescript",
+  "display_name": "TypeScript",
+  "extensions": [".ts", ".tsx"],
+  "grammar_wasm": "tree-sitter-typescript.wasm",
+  "parser_config": {
+    "include_private": false,
+    "include_tests": false,
+    "parse_docs": true,
+    "max_file_size": 1048576,
+    "max_function_size": 10000,
+    "timeout_per_file": 5000
+  },
+  "entities": {
+    "function": {
+      "node_types": ["function_declaration", "generator_function_declaration"],
+      "name_field": "identifier",
+      "body_field": "statement_block",
+      "kind": "function",
+      "extract_params": true,
+      "extract_return_type": true,
+      "extract_modifiers": true
+    },
+    "class": {
+      "node_types": ["class_declaration"],
+      "name_field": "type_identifier",
+      "body_field": "class_body",
+      "kind": "class",
+      "extract_modifiers": true
+    },
+    "interface": {
+      "node_types": ["interface_declaration"],
+      "name_field": "type_identifier",
+      "kind": "interface"
+    },
+    "type_alias": {
+      "node_types": ["type_alias_declaration"],
+      "name_field": "type_identifier",
+      "kind": "type"
+    },
+    "enum": {
+      "node_types": ["enum_declaration"],
+      "name_field": "identifier",
+      "kind": "enum"
+    },
+    "method": {
+      "node_types": ["method_definition"],
+      "name_field": "property_identifier",
+      "body_field": "statement_block",
+      "kind": "method",
+      "extract_params": true,
+      "extract_return_type": true,
+      "extract_modifiers": true
+    }
+  },
+  "relationships": {
+    "calls": { "node_types": ["call_expression"], "kind": "calls", "target_field": "function" },
+    "imports": { "node_types": ["import_statement"], "kind": "imports", "target_field": "source" },
+    "inherits": { "node_types": ["extends_clause"], "kind": "inherits", "target_field": "type_identifier" },
+    "implements": { "node_types": ["implements_clause"], "kind": "implements", "target_field": "type_identifier" }
+  },
+  "scoping": {
+    "class_containers": ["class_declaration", "class_expression"],
+    "namespace_containers": ["module", "namespace_declaration"]
+  }
+}
