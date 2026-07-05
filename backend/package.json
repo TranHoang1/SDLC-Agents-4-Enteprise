@@ -1,19 +1,30 @@
 {
-  "name": "code-intel-backend",
-  "version": "1.0.0",
-  "description": "Code Intelligence Backend MCP Server — standalone HTTP process",
+  "name": "mcp-code-intelligence",
+  "version": "1.1.0",
+  "description": "Code Intelligence MCP Server — multi-agent SDLC pipeline with semantic memory, code graph, and draw.io integration",
   "main": "dist/index.js",
+  "bin": {
+    "mcp-code-intelligence": "dist/index.js"
+  },
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "prepublishOnly": "npm run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:unit": "vitest run src/",
     "test:integration": "vitest run tests/integration/",
     "test:e2e-api": "vitest run tests/e2e/",
     "test:e2e-ui": "npx playwright test"
+  },
+  "keywords": ["mcp", "code-intelligence", "sdlc", "agents", "memory", "knowledge-base", "draw.io"],
+  "author": "SA4E Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dnguyenminh/SDLC-Agents-4-Enteprise.git"
   },
   "engines": {
     "node": ">=18.14.1"
