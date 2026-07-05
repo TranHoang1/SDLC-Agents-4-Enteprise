@@ -103,7 +103,7 @@ jobs:
           npm ci
           npm run build
           npm publish --access public
-          echo "✅ Published mcp-code-intelligence@${{ steps.bump.outputs.version }} to npm"
+          echo "✅ Published sdlc-agent-4-enterprise-server@${{ steps.bump.outputs.version }} to npm"
 
       - name: Create GitHub Release
         if: steps.bump.outputs.version != ''
