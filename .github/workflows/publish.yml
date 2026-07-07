@@ -111,12 +111,37 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      - name: Verify NPM_TOKEN is configured
+        run: |
+          if [ -z "${NODE_AUTH_TOKEN}" ]; then
+            echo "::error::NPM_TOKEN secret is empty or not set. Create an npm Automation token and set it via 'gh secret set NPM_TOKEN'."
+            exit 1
+          fi
+          echo "🔑 NPM_TOKEN is present"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Check if version already published
+        id: version_check
+        run: |
+          PKG_NAME=$(jq -r .name package.json)
+          VERSION="${{ needs.version-check.outputs.version }}"
+          if npm view "${PKG_NAME}@${VERSION}" version > /dev/null 2>&1; then
+            echo "already_published=true" >> "$GITHUB_OUTPUT"
+            echo "⚠️ ${PKG_NAME}@${VERSION} is already published — skipping publish to avoid 403."
+          else
+            echo "already_published=false" >> "$GITHUB_OUTPUT"
+            echo "✅ ${PKG_NAME}@${VERSION} not yet published — proceeding."
+          fi
+
       - name: Publish to npm
+        if: steps.version_check.outputs.already_published == 'false'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          PKG_NAME=$(jq -r .name package.json)
           npm publish --access public
-          echo "✅ Published mcp-code-intelligence@${{ needs.version-check.outputs.version }}"
+          echo "✅ Published ${PKG_NAME}@${{ needs.version-check.outputs.version }}"
 
       - name: Upload dist to GitHub Release
         uses: softprops/action-gh-release@v2
