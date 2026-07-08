@@ -2,6 +2,8 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import type { ModuleRegistry } from '../modules/ModuleRegistry.js';
 import type { Logger } from 'pino';
+import { resolveCoreToolNames } from '../config/CoreTools.js';
+import { trackToolUsage } from './toolUsageTracker.js';
 
 const connectedTransports = new Set<any>();
 
@@ -19,9 +21,19 @@ export function getMcpServer(registry: ModuleRegistry, logger: Logger): Server {
   const tools = registry.getAllToolDefinitions();
   const handlers = registry.getToolHandlers();
 
+  // Resolve CORE allowlist once (SA4E-18); warn on unmatched core names (BR-04).
+  const coreNames = resolveCoreToolNames(logger);
+  const registered = new Set(tools.map(t => t.name));
+  for (const name of coreNames) {
+    if (!registered.has(name)) {
+      logger.warn({ name }, 'CORE_TOOLS name has no registered tool — skipped (BR-04)');
+    }
+  }
+
   server.setRequestHandler(ListToolsRequestSchema, async () => {
+    const filtered = tools.filter(t => coreNames.has(t.name)); // BR-01
     return {
-      tools: tools.map(tool => ({
+      tools: filtered.map(tool => ({
         name: tool.name,
         description: tool.description || '',
         inputSchema: tool.inputSchema || { type: 'object', properties: {} }
@@ -43,8 +55,9 @@ export function getMcpServer(registry: ModuleRegistry, logger: Logger): Server {
     try {
       const result = await handler(args || {});
       
-      // Auto-emit notifications for KB changes
+      // Track usage + auto-emit notifications for KB changes
       if (!result.isError) {
+        trackToolUsage(registry, logger, name); // BR-07/BR-12: count only success
         if (name.includes('ingest') || name.includes('create')) {
           broadcastNotification('kb_entry_added', { tool: name });
         } else if (name.includes('update') || name.includes('modify')) {

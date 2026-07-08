@@ -10,6 +10,7 @@ import type { Logger } from 'pino';
 import type { ModuleRegistry } from '../ModuleRegistry.js';
 import type { MemoryModule } from '../memory/MemoryModule.js';
 import { McpClientManager } from './McpClientManager.js';
+import { trackToolUsage } from '../../server/toolUsageTracker.js';
 
 export class OrchestrationModule implements IModule {
   readonly name = 'orchestration';
@@ -44,10 +45,14 @@ export class OrchestrationModule implements IModule {
   getToolHandlers(): Map<string, ToolHandler> {
     const handlers = new Map<string, ToolHandler>();
 
-    handlers.set('orchestration_status', async () => ({
-      content: [{ type: 'text', text: JSON.stringify({ servers: [], status: 'ready' }) }],
-      isError: false,
-    }));
+    handlers.set('orchestration_status', async () => {
+      const servers = this.clientManager.getServersStatus();
+      const totalProxiedTools = servers.reduce((sum, s) => sum + s.toolCount, 0);
+      return {
+        content: [{ type: 'text', text: JSON.stringify({ servers, serverCount: servers.length, totalProxiedTools, status: 'ready' }) }],
+        isError: false,
+      };
+    });
 
     handlers.set('find_tools', async (args: any) => {
       const query = args.query as string;
@@ -104,6 +109,9 @@ export class OrchestrationModule implements IModule {
       if (this.clientManager.ownsTool(toolName)) {
         try {
           const result = await this.clientManager.executeTool(toolName, toolArgs);
+          if (this.registry && !result.isError) {
+            trackToolUsage(this.registry, this.logger, toolName); // BR-07 (OI-4: proxied inner tool)
+          }
           return result;
         } catch (err: any) {
           return {
@@ -132,6 +140,9 @@ export class OrchestrationModule implements IModule {
       
       try {
         const result = await handler(toolArgs);
+        if (this.registry && !result.isError) {
+          trackToolUsage(this.registry, this.logger, toolName); // BR-07: resolved inner tool
+        }
         return result;
       } catch (err: any) {
         this.logger.error({ err, toolName, toolArgs }, 'Failed to execute dynamic tool');

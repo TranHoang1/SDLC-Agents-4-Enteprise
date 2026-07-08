@@ -101,6 +101,14 @@ export class McpClientManager {
     return this.proxiedTools;
   }
 
+  getServersStatus(): Array<{ name: string; connected: boolean; toolCount: number }> {
+    return Array.from(this.clients.keys()).map((name) => ({
+      name,
+      connected: true,
+      toolCount: this.getServerToolCount(name),
+    }));
+  }
+
   ownsTool(toolName: string): boolean {
     return this.toolsToServer.has(toolName);
   }

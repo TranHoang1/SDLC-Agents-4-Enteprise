@@ -118,6 +118,13 @@ CREATE TABLE IF NOT EXISTS mcp_tools (
   vector BLOB
 );
 
+-- Per-tool usage counters (SA4E-18)
+CREATE TABLE IF NOT EXISTS tool_usage (
+  tool_name      TEXT PRIMARY KEY,
+  call_count     INTEGER NOT NULL DEFAULT 0,
+  last_called_at TEXT
+);
+
 -- MEMORY TABLES
 ${MEMORY_SCHEMA}
 `;

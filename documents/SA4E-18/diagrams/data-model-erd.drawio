@@ -1,0 +1,54 @@
+<mxGraphModel adaptiveColors="auto" dx="900" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;SA4E-18 Data Model — Logical Entity Relationships&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="330" y="20" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="core" value="CORE_TOOLS&#10;(config constant)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;verticalAlign=top;spacingTop=6;" vertex="1" parent="1">
+      <mxGeometry x="80" y="120" width="220" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="core_attr" value="+ names: string[]&#10;(not a DB table — selects visible subset)" style="text;html=1;align=left;verticalAlign=top;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="88" y="150" width="204" height="52" as="geometry"/>
+    </mxCell>
+    <mxCell id="mcp" value="mcp_tools&#10;(EXISTING — unchanged)" style="shape=table;startSize=48;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;verticalAlign=top;spacingTop=4;collapsible=0;" vertex="1" parent="1">
+      <mxGeometry x="480" y="110" width="240" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="mcp_r1" value="id: int (PK)" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="mcp">
+      <mxGeometry y="48" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="mcp_r2" value="name: string" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="mcp">
+      <mxGeometry y="70" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="mcp_r3" value="description: string" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="mcp">
+      <mxGeometry y="92" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="mcp_r4" value="schema_json: string" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="mcp">
+      <mxGeometry y="114" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="mcp_r5" value="category: string" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="mcp">
+      <mxGeometry y="136" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="mcp_r6" value="vector: blob" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="mcp">
+      <mxGeometry y="158" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="usage" value="tool_usage&#10;(NEW)" style="shape=table;startSize=48;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;verticalAlign=top;spacingTop=4;collapsible=0;" vertex="1" parent="1">
+      <mxGeometry x="480" y="400" width="240" height="114" as="geometry"/>
+    </mxCell>
+    <mxCell id="usage_r1" value="tool_name: string (PK)" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="usage">
+      <mxGeometry y="48" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="usage_r2" value="call_count: int" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="usage">
+      <mxGeometry y="70" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="usage_r3" value="last_called_at: timestamp" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=10;spacingLeft=8;" vertex="1" parent="usage">
+      <mxGeometry y="92" width="240" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_core_mcp" value="selects visible subset by name" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endSize=8;dashed=1;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="core" target="mcp">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mcp_usage" value="1 : 0..1  logical ref by name" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endSize=8;dashed=1;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="mcp" target="usage">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -1,0 +1,25 @@
+test_case_id,tool_name,invocation_path,result_is_error,repeat_count,expected_call_count,expected_result,description
+PBT-04,arbitrary_tool,engine.incrementToolUsage,false,N(1..200),N,call_count==N,Property: N increments yield call_count N
+UT-06,mem_search,engine.incrementToolUsage,false,1,1,row inserted call_count=1,First call inserts row (BR-07/12)
+UT-07,code_search,engine.incrementToolUsage,false,3,3,single row call_count=3,UPSERT increments existing row (BR-12)
+UT-08,find_tools,engine seed,false,9,9,ordered desc,Seed find_tools=9 mem_search=5 code_search=2 for ordering test
+UT-08,mem_search,engine seed,false,5,5,ordered desc,Seed row for ordering test
+UT-08,code_search,engine seed,false,2,2,ordered desc,Seed row for ordering test
+UT-09,mem_search,engine seed,false,1,1,single row returned,getToolUsage filter by name returns one row
+UT-09,never_called,engine getToolUsage,false,0,0,empty array,Filter for non-existent tool returns empty (no throw)
+UT-10,mem_search,trackToolUsage(memory not ready),false,1,0,no-op no increment,Memory module not ready -> silent no-op (BR-09)
+UT-11,mem_search,trackToolUsage(engine throws),false,1,0,warn logged not thrown,DB write throws swallowed with warn (BR-09)
+UT-12,"",trackToolUsage(empty name),false,1,0,guard early return,Empty tool name guarded - no increment
+IT-02,mem_search,CallTool success,false,1,1,counter incremented,CallTool success increments counter (BR-07)
+IT-02,failing_tool,CallTool isError,true,1,0,counter not incremented,Error result not counted (BR-12)
+IT-03,mem_admin,execute_dynamic_tool inner,false,1,1,inner counted once,Dynamic path inner tool counted exactly once (BR-12)
+IT-03,execute_dynamic_tool,CallTool wrapper,false,1,1,wrapper counted separately,Wrapper counted in distinct row (OI-3)
+IT-04,mem_search,mem_admin action=tool_usage read,false,0,seeded,rows returned,Read path returns usage rows (OI-1)
+IT-05,mem_search,schema apply + seed,false,1,1,preserved after re-apply,Idempotent DDL preserves data (BR-10)
+E2E-API-05,mem_admin,execute_dynamic_tool status,false,1,1,isError=false same output,Hidden tool callable dynamically (BR-14/16)
+E2E-API-06,mem_admin,direct CallTool status,false,1,1,isError=false no Unknown tool,Hidden tool callable directly (BR-15)
+E2E-API-07,code_search,CallTool then execute_dynamic_tool,false,2,2,call_count==2,Both paths contribute to same counter (BR-07)
+E2E-API-08,mem_search,CallTool then restart,false,3,3,persisted after restart,Counts survive restart (BR-10)
+E2E-API-09,mem_search,CallTool with forced write failure,false,1,0,result returned warn logged,Non-blocking on write failure (BR-09)
+E2E-API-10,mem_admin,execute_dynamic_tool once,false,1,1,inner=1 wrapper=1,No double count of inner tool (BR-12)
+E2E-API-10,execute_dynamic_tool,wrapper row,false,1,1,distinct row,Wrapper counted separately (OI-3)

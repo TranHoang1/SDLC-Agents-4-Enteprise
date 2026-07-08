@@ -344,6 +344,7 @@ export class MemoryToolDispatcher {
         return `Entries: ${entries} | Edges: ${edges}`;
       }
       case 'sync_code': return this.handleSyncCode(a);
+      case 'tool_usage': return JSON.stringify(this.engine.getToolUsage(a.tool_name as string | undefined));
       case 'audit': return this.engine.listAudit((a.limit as number) ?? 20, a.operation as string).map((e: any) => `[${e.operation}] ${e.created_at}`).join('\n') || 'Empty';
       case 'sessions': return this.engine.listSessions().map((s: any) => `[${s.session_id}] ${s.status}`).join('\n') || 'None';
       case 'analytics': case 'popular': return '{}';

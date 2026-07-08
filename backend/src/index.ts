@@ -50,7 +50,10 @@ async function main() {
   if (memoryModule && memoryModule.status === 'ready') {
     const memEngine = memoryModule.getEngine();
     const db = memEngine.getDb();
-    const allTools = registry.getAllToolDefinitions();
+    // Include proxied child-server tools so find_tools can discover them (hidden but discoverable).
+    const orchestrationModule = registry.getModule('orchestration') as OrchestrationModule | undefined;
+    const proxiedTools = orchestrationModule?.getClientManager().getProxiedTools() ?? [];
+    const allTools = [...registry.getAllToolDefinitions(), ...proxiedTools];
     let ingestedCount = 0;
     
     const embeddingService = EmbeddingService.getInstance();
