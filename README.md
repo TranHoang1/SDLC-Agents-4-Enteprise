@@ -16,7 +16,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.2.1.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.3.0.vsix
 ```
 
 ### 3. Use
@@ -41,6 +41,7 @@ kiro --install-extension sdlc-agents-4-enterprise-1.2.1.vsix
 ## Key Features
 
 - 9 SDLC Agents - Full pipeline from requirements to deployment
+- Multi-IDE Support - Inject agents into Kiro, VSCode/Copilot, Claude Code, or Codex/OpenAI
 - Knowledge Base - SQLite + ONNX embeddings, 30+ memory tools
 - Sensitive Data Masking - Read-time PII/credential/business logic redaction
 - Internet Tools - fetch_url, web_search, git_browse, download_file, api_call, read_webpage
@@ -62,6 +63,15 @@ MIT
 ---
 
 ## Changelog
+
+### v1.3.0 (2026-07-09)
+
+- **Multi-IDE Agent Injection** — IDE target picker (Kiro, VSCode/Copilot, Claude Code, Codex/OpenAI)
+- **Pre-converted agent bundles** — Proper format per IDE (frontmatter, folder structure, hooks)
+- **Codex/OpenAI conversion** — Full `conversions/codex-openai/` with 9 agents
+- **Bundled backend** — No more Python/NodeJS/Kotlin runtime picker
+- **IDE Adapter architecture** — Strategy pattern, pre-built files copied at inject time
+- Updated CONVERSION-GUIDE.md and GAPS.md
 
 ### v1.2.1 (2026-07-08)
 

@@ -7,37 +7,72 @@ import * as fs from "fs";
 import * as path from "path";
 import { Component, CORE_COMPONENTS } from "./config";
 import { detectModifiedFiles, loadBundledManifest, buildManifestAfterInject, getFileStatuses, migrateLegacyVersion, FileStatus } from "./checksum";
-import { injectMcpConfig, migrateLegacyScripts, hasMcpConfig } from "./mcp-injector";
+import { injectMcpConfig, migrateLegacyScripts, hasMcpConfig, writeBundledMcpConfig } from "./mcp-injector";
 import { forceUpdate, updateSkipModified, updateWithBackup, injectComponent, promptUpdateWithDetails } from "./injector-helpers";
+import { IdeTarget, IDE_TARGETS, createAdapter } from "./ide-adapters";
 
 export { migrateLegacyScripts, injectMcpConfig } from "./mcp-injector";
 
 export async function injectAll(root: string, extensionPath: string): Promise<string[]> {
   migrateLegacyVersion(root, extensionPath);
+
+  const ideTarget = await showIdePicker();
+  if (!ideTarget) { return []; }
+
   const injected: string[] = [];
-  for (const component of CORE_COMPONENTS) {
-    if (injectComponent(component, root, extensionPath)) { injected.push(component.id); }
+
+  if (ideTarget === "kiro") {
+    // Default Kiro behavior — unchanged
+    for (const component of CORE_COMPONENTS) {
+      if (injectComponent(component, root, extensionPath)) { injected.push(component.id); }
+    }
+    writeBundledMcpConfig(root, 9181);
+    injected.push("mcp-bundled");
+  } else {
+    // Use IDE-specific adapter — copy pre-converted files
+    const adapter = createAdapter(ideTarget);
+    if (adapter.inject(root, extensionPath)) {
+      injected.push(`ide:${ideTarget}`);
+    }
   }
-  const variantId = await injectMcpConfig(root);
-  if (variantId) { injected.push(`mcp-${variantId}`); }
+
   buildManifestAfterInject(root, extensionPath);
   return injected;
 }
 
 export async function injectSelective(root: string, extensionPath: string): Promise<string[]> {
   migrateLegacyVersion(root, extensionPath);
+
+  const ideTarget = await showIdePicker();
+  if (!ideTarget) { return []; }
+
+  if (ideTarget !== "kiro") {
+    // Non-Kiro IDEs: inject all pre-converted files (no component picking — it's a flat copy)
+    const adapter = createAdapter(ideTarget);
+    const injected: string[] = [];
+    if (adapter.inject(root, extensionPath)) { injected.push(`ide:${ideTarget}`); }
+    // Templates always go to documents/templates regardless of IDE
+    const tplComponent = CORE_COMPONENTS.find(c => c.id === "templates");
+    if (tplComponent && injectComponent(tplComponent, root, extensionPath)) { injected.push("templates"); }
+    buildManifestAfterInject(root, extensionPath);
+    return injected;
+  }
+
+  // Kiro: component-level selection
   const selected = await showComponentPicker();
   if (!selected || selected.length === 0) { return []; }
+
   const injected: string[] = [];
   for (const pick of selected) {
     if (pick.id === "mcp-config") {
-      const variantId = await injectMcpConfig(root);
-      if (variantId) { injected.push(`mcp-${variantId}`); }
+      writeBundledMcpConfig(root, 9181);
+      injected.push("mcp-bundled");
     } else {
       const component = CORE_COMPONENTS.find(c => c.id === pick.id);
       if (component && injectComponent(component, root, extensionPath)) { injected.push(component.id); }
     }
   }
+
   buildManifestAfterInject(root, extensionPath);
   return injected;
 }
@@ -79,8 +114,17 @@ export function getVersionReport(root: string, extensionPath: string): string {
   return lines.join("\n");
 }
 
+async function showIdePicker(): Promise<IdeTarget | undefined> {
+  const picks = IDE_TARGETS.map(t => ({ label: t.label, description: t.description, id: t.id }));
+  const selected = await vscode.window.showQuickPick(picks, {
+    placeHolder: "Select target IDE for agent injection",
+    title: "IDE Target"
+  });
+  return selected?.id;
+}
+
 async function showComponentPicker() {
   const corePicks = CORE_COMPONENTS.map(c => ({ label: c.label, description: c.description, id: c.id, picked: true }));
-  const mcpPick = { label: "Code Intelligence MCP Server", description: "MCP server config", id: "mcp-config", picked: true };
+  const mcpPick = { label: "Code Intelligence MCP Server", description: "Bundled backend (HTTP Streamable)", id: "mcp-config", picked: true };
   return vscode.window.showQuickPick([...corePicks, mcpPick], { canPickMany: true, placeHolder: "Select components to inject" });
 }

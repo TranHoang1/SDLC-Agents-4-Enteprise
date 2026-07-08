@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.2.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.3.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -47,10 +47,10 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.2.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.3.0.vsix
 
 # Or VS Code
-code --install-extension sdlc-agents-4-enterprise-1.2.0.vsix
+code --install-extension sdlc-agents-4-enterprise-1.3.0.vsix
 ```
 
 3. **Verify connection**: Command Palette → "SDLC Agents: Settings" → Server Settings → Test Connection
@@ -64,8 +64,9 @@ code --install-extension sdlc-agents-4-enterprise-1.2.0.vsix
 ```
 1. Ensure backend is running (http://localhost:48721/health → "healthy")
 2. Open Command Palette: Ctrl+Shift+P → "SDLC Agents: Inject All Agents"
-3. Check sidebar: SDLC AGENTS 4 ENTERPRISE → should show server connected
-4. Give a Jira ticket to SM: @sm-agent KSA-14
+3. Select target IDE (Kiro, VSCode/Copilot, Claude Code, or Codex/OpenAI)
+4. Check sidebar: SDLC AGENTS 4 ENTERPRISE → should show server connected
+5. Give a Jira ticket to SM: @sm-agent KSA-14
 ```
 
 ---
@@ -242,6 +243,19 @@ MIT
 ---
 
 ## Changelog
+
+### v1.3.0 (2026-07-09)
+
+- **Multi-IDE Agent Injection** — "Inject All Agents" now shows IDE target picker:
+  - Kiro (default): `.kiro/agents/`, `.kiro/steering/`, `.kiro/hooks/`
+  - VSCode / GitHub Copilot: `.github/agents/`, `.github/copilot-instructions.md`
+  - Claude Code: `.claude/agents/`, `.claude/rules/`, `CLAUDE.md`
+  - Codex (OpenAI): `AGENTS.md`, `agents/` subdirectory
+- **Pre-converted agent bundles** — Each IDE gets properly formatted files (correct frontmatter, folder structure, hooks format)
+- **Codex/OpenAI conversion** — New `conversions/codex-openai/` with all 9 agents + subdirectory AGENTS.md
+- **Runtime picker removed** — No longer asks to choose Python/NodeJS/Kotlin (bundled backend handles everything)
+- **IDE Adapter architecture** — Strategy pattern with `PreConvertedAdapter` (copies pre-built files, no runtime conversion)
+- Updated CONVERSION-GUIDE.md and GAPS.md with Codex column
 
 ### v1.2.1 (2026-07-08)
 

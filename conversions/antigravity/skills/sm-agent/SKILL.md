@@ -1478,3 +1478,109 @@ After each sub-agent completes:
 
 **SM PHẢI chạy verification checklist SAU MỖI sub-agent call.** Không được skip verification khi chạy "tạo tài liệu đầy đủ" (pipeline mode). Pipeline mode = Phase 1 verify → Phase 2 verify → Phase 3 verify. Mỗi phase PHẢI pass verification trước khi chuyển sang phase tiếp theo.
 
+
+
+## Circuit Breaker
+
+**SM MUST check circuit breaker state BEFORE each phase execution.**
+
+### States
+- `closed` → Execute phase normally
+- `open` → HARD STOP, report user, do NOT retry
+- `half-open` → Allow 1 retry after cooldown expires
+
+### Rules
+1. Before each phase: read `circuitBreaker.phase_{name}` from STATUS.json
+2. On failure: increment attempts. If attempts ≥ 3 → set `open`
+3. On success at half-open: reset to `closed`
+4. Cooldown: 30 min after open → auto `half-open`
+5. User "retry {phase}" → force reset to `closed`
+
+### Report (when open)
+```
+⛔ Circuit Breaker OPEN — Phase: {name}
+Attempts: {N}/3 | Last error: {msg} | Options: 1. Retry 2. Skip 3. Abort
+```
+
+## Run Log per Ticket
+
+SM appends to `documents/{TICKET}/RUN-LOG.md` after EVERY sub-agent invocation:
+
+```markdown
+| # | Timestamp | Agent | Phase | Action | Result | Tokens | Duration |
+|---|-----------|-------|-------|--------|--------|--------|----------|
+```
+
+Rules: append only, never truncate, create with header if not exists.
+
+## Token Budget Tracking
+
+### STATUS.json Extension
+```json
+{ "tokenBudget": { "dailyCap": 500000, "usedToday": 0, "lastReset": "...", "mode": "normal" } }
+```
+
+### Modes
+- `normal` (< 80%) → proceed
+- `report-only` (80-99%) → SM report only, NO invocations
+- `stopped` (≥ 100%) → hard stop all
+
+### Pre-Invoke Check (MANDATORY)
+Before EVERY agent invoke: estimate tokens, check budget, proceed/warn/stop.
+
+### Token Estimates
+| Action | Tokens |
+|--------|--------|
+| BRD | ~50k | FSD | ~80k | TDD | ~70k | STP/STC | ~60k |
+| Code | ~100k | UG | ~40k | Review | ~20k | Small fix | ~30k |
+
+## Autonomy Levels
+
+| Level | Name | Behavior |
+|-------|------|----------|
+| L1 | Report | Status only, no agents, no Jira transitions |
+| L2 | Assisted (default) | Agents + ask user per phase transition |
+| L3 | Unattended | Full pipeline, STOPS at: UAT, Deploy, circuit breaker |
+
+Detection: "chạy L3"/"unattended" → L3, "L1"/"report only" → L1, default → L2.
+
+## Two-Axis Code Review (Phase 6b — BEFORE QA tests)
+
+SM runs 2 PARALLEL reviews after DEV pushes code:
+
+### Axis 1: Standards Review (DEV agent)
+- File size ≤200, function ≤20 lines
+- SOLID violations, Fowler code smells
+- Model/processing separation, design patterns
+- Exception handling, serialization
+
+### Axis 2: Spec Compliance (QA agent)
+- Missing features from TDD
+- Scope creep (code not in spec)
+- API contracts match, business rules implemented
+- Error codes, security, integration
+
+### Outcomes
+| Axis 1 | Axis 2 | Action |
+|--------|--------|--------|
+| PASS | PASS | Proceed to QA tests |
+| FAIL | * | DEV fixes (max 2 iterations) |
+| * | FAIL | DEV fixes (max 2 iterations) |
+
+## Domain Glossary Extraction (Phase 1 — after BRD)
+
+BA MUST extract ≥5 domain terms into KB:
+```
+mem_ingest(content: "GLOSSARY | term={Term} | definition={Def} | avoid={Bad alternatives}")
+```
+
+All agents MUST `mem_search("glossary {PROJECT}")` before producing output.
+
+SM verifies: ≥5 entries, key entities covered, no conflicts.
+
+## Loop Constraints Pre-Check
+
+SM reads loop constraints before Step 0. Key limits:
+- Fix attempts: 3 | Feedback loops: 5 | Sub-agent retries: 2 | Session invokes: 30
+- Never: force push, auto-merge main, fabricate results, delete STATUS.json
+- Budget: 80% → report-only, 100% → hard stop
