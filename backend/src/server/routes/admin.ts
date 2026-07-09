@@ -1218,7 +1218,9 @@ export function createAdminRoute(logger: Logger, registry?: any): Hono {
     const base = llm.baseUrl || 'http://localhost:11434';
 
     // SSRF protection (Finding #11): validate configured LLM URL
-    if (llm.baseUrl && llm.baseUrl !== 'http://localhost:11434') {
+    // Skip SSRF check for local providers (localhost, 127.0.0.1) — they are valid LLM endpoints
+    const isLocalUrl = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(base);
+    if (llm.baseUrl && llm.baseUrl !== 'http://localhost:11434' && !isLocalUrl) {
       const urlCheck = validateExternalUrl(base);
       if (!urlCheck.valid) {
         return c.json({ success: false, message: `SSRF blocked: ${urlCheck.error}` }, 400);
