@@ -71,6 +71,10 @@ MIT
 - **Codex/OpenAI conversion** — Full `conversions/codex-openai/` with 9 agents
 - **Bundled backend** — No more Python/NodeJS/Kotlin runtime picker
 - **IDE Adapter architecture** — Strategy pattern, pre-built files copied at inject time
+- **LLM Provider Registry** — 135 providers (from 6) matching OpenCode/litellm ecosystem
+- **Data-driven Settings dropdown** — Grouped by Cloud/Enterprise/Gateway/Local, dynamic from registry
+- **SSRF fix** — Localhost LLM providers no longer blocked by SSRF protection
+- **TagAnalyzer health check** — Only enables LLM tagging if provider is reachable at startup
 - Updated CONVERSION-GUIDE.md and GAPS.md
 
 ### v1.2.1 (2026-07-08)

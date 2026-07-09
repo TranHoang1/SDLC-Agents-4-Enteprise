@@ -115,16 +115,14 @@ Open from sidebar → "Knowledge Base" section, or Command Palette → "KB".
 
 ### Chat Panel
 
-Built-in chat interface with LLM integration. Supports multiple providers:
+Built-in chat interface with LLM integration. Supports 135+ providers:
 
-| Provider | Setup |
-|----------|-------|
-| Anthropic | API key in Settings |
-| OpenAI | API key in Settings |
-| Ollama | Local server URL |
-| LM Studio | Local server URL |
-| OpenRouter | API key + model selection |
-| Kiro Gateway | Auto (uses IDE credentials) |
+| Category | Examples |
+|----------|----------|
+| Cloud | Anthropic, OpenAI, Google/Gemini, DeepSeek, Mistral, xAI/Grok, Groq, Together, Fireworks, Cerebras, Cohere, Perplexity... |
+| Enterprise | Azure OpenAI, AWS Bedrock, Databricks, SAP AI Core, Snowflake Cortex |
+| Gateways | OpenRouter (200+ models), Cloudflare AI, Vercel AI, Kiro Gateway |
+| Local | Ollama, LM Studio, llama.cpp, vLLM, ONNX Runtime |
 
 Configure: Command Palette → "SDLC Agents: Settings" → LLM Provider tab.
 
@@ -255,6 +253,10 @@ MIT
 - **Codex/OpenAI conversion** — New `conversions/codex-openai/` with all 9 agents + subdirectory AGENTS.md
 - **Runtime picker removed** — No longer asks to choose Python/NodeJS/Kotlin (bundled backend handles everything)
 - **IDE Adapter architecture** — Strategy pattern with `PreConvertedAdapter` (copies pre-built files, no runtime conversion)
+- **LLM Provider Registry** — 135 providers (from 6), data-driven `provider-registry.ts`, matching OpenCode/litellm ecosystem
+- **Settings dropdown dynamic** — Provider picker generated from registry, grouped by Cloud/Enterprise/Gateway/Local
+- **SSRF fix** — Localhost LLM providers (LM Studio, Ollama, vLLM, llama.cpp) no longer blocked by SSRF check
+- **TagAnalyzer health check** — Backend checks if LLM provider is reachable before enabling; silent fallback to keyword tagging
 - Updated CONVERSION-GUIDE.md and GAPS.md with Codex column
 
 ### v1.2.1 (2026-07-08)
