@@ -1,0 +1,15 @@
+test_case_id,tool_name,tier,is_meta,expected_in_listtools,description
+E2E-API-01,mem_search,CORE,false,true,CORE tool - visible in ListTools
+E2E-API-01,mem_ingest,CORE,false,true,CORE tool - visible in ListTools
+E2E-API-01,mem_ingest_file,CORE,false,true,CORE tool - visible in ListTools
+E2E-API-01,code_search,CORE,false,true,CORE tool - visible in ListTools
+E2E-API-01,get_curated_context,CORE,false,true,CORE tool - visible in ListTools
+E2E-API-01,find_tools,CORE,true,true,Meta-tool - always visible (BR-03)
+E2E-API-01,execute_dynamic_tool,CORE,true,true,Meta-tool - always visible (BR-03)
+E2E-API-01,orchestration_status,CORE,true,true,Meta-tool - always visible (BR-03)
+E2E-API-04,mem_admin,EXTENDED,false,false,EXTENDED - hidden from ListTools but discoverable via find_tools (BR-13)
+E2E-API-06,mem_admin,EXTENDED,false,false,EXTENDED - callable via direct CallTool (BR-15)
+IT-01,mem_promote,EXTENDED,false,false,EXTENDED - hidden but registered/callable
+IT-01,agent_log,EXTENDED,false,false,EXTENDED - hidden from ListTools
+IT-01,mem_audit,EXTENDED,false,false,EXTENDED - hidden from ListTools
+SIT-03,mem_admin,EXTENDED,false,false,Maintainer promotes to CORE via config edit, restart -> becomes visible (UC-02)

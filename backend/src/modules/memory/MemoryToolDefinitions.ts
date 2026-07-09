@@ -273,15 +273,16 @@ export const TIER3_TOOLS = [
   },
   {
     name: 'mem_admin',
-    description: 'System administration: status, audit trail, sessions, analytics, dashboard, code sync.',
+    description: 'System administration: status, audit trail, sessions, analytics, dashboard, code sync, tool usage counters.',
     inputSchema: {
       type: 'object',
       properties: {
-        action: { type: 'string', description: 'Action: status, audit, sessions, analytics, dashboard, sync_code, popular, gaps, zero_results, metrics, recommendations, trends' },
+        action: { type: 'string', description: 'Action: status, audit, sessions, analytics, dashboard, sync_code, tool_usage, popular, gaps, zero_results, metrics, recommendations, trends' },
         limit: { type: 'number', description: 'Max results (default: 20)' },
         operation: { type: 'string', description: 'Filter audit by operation: INGEST, DELETE, SEARCH, CONSOLIDATE, ACCESS' },
         days: { type: 'number', description: 'Trend period in days (default: 30)' },
         kind: { type: 'string', description: 'For sync_code: class, interface, function (default: class+interface)' },
+        tool_name: { type: 'string', description: 'For tool_usage: filter counters for a single tool (default: all tools, desc by call_count)' },
       },
       required: ['action'],
     },

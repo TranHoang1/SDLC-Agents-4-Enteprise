@@ -68,6 +68,38 @@ SM coordinates: BA → SA → DEV → QA → DevOps.
 
 ### Anti-Loop: max 2 per doc, follow order, detect placeholders
 
+### Circuit Breaker
+- SM checks state BEFORE each phase: closed→execute, open→STOP, half-open→1 retry
+- 3 failures → open. User "retry" → reset. 30min cooldown → half-open.
+
+### Run Log
+- SM appends to `documents/{TICKET}/RUN-LOG.md` after EVERY sub-agent call
+- Never truncate — append only
+
+### Token Budget
+- dailyCap: 500k. Modes: normal (<80%), report-only (80-99%), stopped (≥100%)
+- SM checks budget BEFORE every invoke
+
+### Autonomy Levels
+- L1 (Report): status only, no agents
+- L2 (Assisted, default): agents + ask user per phase
+- L3 (Unattended): full pipeline, stops at UAT/Deploy/circuit breaker
+
+### Domain Glossary (Phase 1)
+- BA extracts ≥5 domain terms into KB after BRD
+- All agents: `mem_search("glossary {PROJECT}")` before producing output
+
+### Two-Axis Code Review (Phase 6)
+- Axis 1 (Standards): DEV reviews SOLID, Fowler smells, size limits
+- Axis 2 (Spec Compliance): QA checks TDD/FSD coverage, scope creep
+- Both PASS → QA tests. FAIL → DEV fixes (max 2 iterations)
+
+### Loop Constraints
+- Path denylist: .env, secrets, *.pem, production configs, jira.conf
+- Limits: 3 fix attempts, 5 feedback loops, 2 retries per phase, 30 invocations/session
+- Budget: 80% → report-only, 100% → hard stop
+- Never: force push, auto-merge main, fabricate results, delete STATUS.json
+
 ---
 
 ## Dynamic Tool Execution
@@ -124,6 +156,13 @@ SM coordinates: BA → SA → DEV → QA → DevOps.
 - Fix root cause, not symptoms
 - Single source of truth
 - Involve SA+TA+DEV for cross-module
+
+## DEV Bug Diagnosis Loop
+- Core rule: "No red-capable command, no fix attempt" — MUST have failing test first
+- 6 phases: Build → Reproduce → Hypothesise → Instrument → Fix → Cleanup
+- Max 3 hypotheses before seeking help
+- Report: root cause, files changed, reproduction test, regression status
+- FORBIDDEN: guess-and-check, shotgun fix, skip cleanup, bug+refactor in same commit
 
 ---
 

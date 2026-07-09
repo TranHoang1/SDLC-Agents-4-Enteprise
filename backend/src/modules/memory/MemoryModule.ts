@@ -59,7 +59,7 @@ export class MemoryModule implements IModule {
       const promotionService = new ScopePromotionService(this.dbManager.getDb(), this.logger);
       this.dispatcher.setPromotionService(promotionService);
 
-      // Initialize LLM-based tag analyzer
+      // Initialize LLM-based tag analyzer (only if provider is reachable)
       try {
         const llmConfig = {
           provider: (process.env.LLM_PROVIDER || 'lmstudio') as any,
@@ -69,12 +69,19 @@ export class MemoryModule implements IModule {
           temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
           maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '500', 10),
         };
-        const llmService = new LLMService(llmConfig);
-        const tagAnalyzer = new TagAnalyzerService(llmService, this.logger);
-        this.dispatcher.setTagAnalyzer(tagAnalyzer);
-        this.logger.info({ provider: llmConfig.provider, model: llmConfig.model, baseUrl: llmConfig.baseUrl }, 'TagAnalyzerService initialized — LLM auto-tagging enabled');
+        // Health check: verify provider is reachable before enabling LLM tagging
+        const healthUrl = llmConfig.baseUrl.replace(/\/v1\/?$/, '') + '/v1/models';
+        const healthResp = await fetch(healthUrl, { signal: AbortSignal.timeout(3000) }).catch(() => null);
+        if (!healthResp || !healthResp.ok) {
+          this.logger.info({ provider: llmConfig.provider, baseUrl: llmConfig.baseUrl }, 'TagAnalyzer LLM provider not reachable — using keyword fallback only');
+        } else {
+          const llmService = new LLMService(llmConfig);
+          const tagAnalyzer = new TagAnalyzerService(llmService, this.logger);
+          this.dispatcher.setTagAnalyzer(tagAnalyzer);
+          this.logger.info({ provider: llmConfig.provider, model: llmConfig.model, baseUrl: llmConfig.baseUrl }, 'TagAnalyzerService initialized — LLM auto-tagging enabled');
+        }
       } catch (err) {
-        this.logger.warn({ err }, 'TagAnalyzerService init failed — fallback keyword tagging only');
+        this.logger.info('TagAnalyzer LLM unavailable — using keyword fallback only');
       }
 
       // Start periodic promotion scan (every 1 hour)

@@ -57,17 +57,17 @@ Kiro's `inclusion: manual` has no equivalent. All manual steering merged into al
 
 ## 6. Summary Table
 
-| Feature | Claude | Copilot | Antigravity |
-|---------|--------|---------|-------------|
-| Always-on steering | ✅ | ✅ | ✅ |
-| Conditional steering | ✅ | ✅ | ⚠️ |
-| preToolUse hooks | ✅ | ✅ | ✅ |
-| postToolUse hooks | ✅ | ✅ | ✅ |
-| promptSubmit hooks | ✅ | ✅ | ✅ |
-| agentStop hooks | ✅ | ✅ | ✅ |
-| fileEdited hooks | ❌ | ❌ | ❌ |
-| fileCreated hooks | ❌ | ❌ | ❌ |
-| fileDeleted hooks | ❌ | ❌ | ❌ |
-| askAgent type | ⚠️ echo | ⚠️ echo | ⚠️ echo |
-| runTool type | ❌ | ❌ | ❌ |
-| Manual activation | ❌ always-on | ❌ always-on | ❌ always-on |
+| Feature | Claude | Copilot | Antigravity | Codex |
+|---------|--------|---------|-------------|-------|
+| Always-on steering | ✅ | ✅ | ✅ | ✅ |
+| Conditional steering | ✅ | ✅ | ⚠️ | ✅ |
+| preToolUse hooks | ✅ | ✅ | ✅ | ❌ |
+| postToolUse hooks | ✅ | ✅ | ✅ | ❌ |
+| promptSubmit hooks | ✅ | ✅ | ✅ | ❌ |
+| agentStop hooks | ✅ | ✅ | ✅ | ❌ |
+| fileEdited hooks | ❌ | ❌ | ❌ | ❌ |
+| fileCreated hooks | ❌ | ❌ | ❌ | ❌ |
+| fileDeleted hooks | ❌ | ❌ | ❌ | ❌ |
+| askAgent type | ⚠️ echo | ⚠️ echo | ⚠️ echo | ❌ |
+| runTool type | ❌ | ❌ | ❌ | ❌ |
+| Manual activation | ❌ always-on | ❌ always-on | ❌ always-on | ❌ always-on |

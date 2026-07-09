@@ -1,0 +1,9 @@
+test_case_id,input_core_tools,expected_output_names,expected_warn,expected_throw,description
+UT-01,"mem_search|mem_ingest|mem_ingest_file|code_search|get_curated_context|find_tools|execute_dynamic_tool|orchestration_status","mem_search|mem_ingest|mem_ingest_file|code_search|get_curated_context|find_tools|execute_dynamic_tool|orchestration_status",false,false,Valid full CORE set resolves to exactly 8 names
+UT-02,"","find_tools|execute_dynamic_tool|orchestration_status",true,false,Empty CORE_TOOLS falls back to META_TOOLS only (BR-03/EF-1)
+UT-03,"mem_search|mem_search|find_tools","mem_search|find_tools|execute_dynamic_tool|orchestration_status",false,false,Duplicate mem_search de-duplicated (BR-08)
+UT-04,"|   |mem_search","mem_search|find_tools|execute_dynamic_tool|orchestration_status",true,false,Empty and whitespace entries ignored with warning (BR-05)
+UT-05,"mem_search|not_a_real_tool","mem_search|not_a_real_tool|find_tools|execute_dynamic_tool|orchestration_status",true,false,Unknown name kept in set; mcpServer warns and skips at serialize (BR-04)
+PBT-01,"<arbitrary string array>","<must include find_tools|execute_dynamic_tool|orchestration_status>",false,false,Property: META_TOOLS always present for any input
+PBT-02,"<array with duplicates>","<distinct valid names + META_TOOLS>",false,false,Property: output always duplicate-free
+PBT-03,"<mixed empty/whitespace/valid>","<valid names + META_TOOLS, invalid dropped>",true,false,Property: never throws; invalid entries dropped

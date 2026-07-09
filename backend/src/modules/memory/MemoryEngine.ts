@@ -7,7 +7,7 @@ import Database from 'better-sqlite3';
 import type {
   KnowledgeEntry, SearchResult, GraphEdge,
   TierStats, ConsolidationResult, ConversationTurn, ConversationSession,
-  KBScope, ScopeContext,
+  KBScope, ScopeContext, ToolUsageRow,
 } from './models.js';
 
 export class MemoryEngine {
@@ -235,5 +235,29 @@ export class MemoryEngine {
 
   buildScopeParams(ctx: ScopeContext): unknown[] {
     return [ctx.userId];
+  }
+
+  // ─── Tool Usage (SA4E-18) ─────────────────────────────────────────
+
+  /** Increment (or insert) per-tool usage counter. Idempotent UPSERT. */
+  incrementToolUsage(toolName: string): void {
+    this.db.prepare(`
+      INSERT INTO tool_usage (tool_name, call_count, last_called_at)
+      VALUES (?, 1, datetime('now'))
+      ON CONFLICT(tool_name) DO UPDATE SET
+        call_count = call_count + 1,
+        last_called_at = datetime('now')
+    `).run(toolName);
+  }
+
+  /** Read usage rows for operator inspection (OI-1). */
+  getToolUsage(toolName?: string): ToolUsageRow[] {
+    return (toolName
+      ? this.db.prepare(
+          'SELECT tool_name, call_count, last_called_at FROM tool_usage WHERE tool_name = ?'
+        ).all(toolName)
+      : this.db.prepare(
+          'SELECT tool_name, call_count, last_called_at FROM tool_usage ORDER BY call_count DESC'
+        ).all()) as ToolUsageRow[];
   }
 }

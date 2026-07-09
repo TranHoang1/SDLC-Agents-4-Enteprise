@@ -104,3 +104,10 @@ export interface ConversationSession {
   roles: string[];
   last_turn_at: string;
 }
+
+/** Per-tool usage counter row (SA4E-18). */
+export interface ToolUsageRow {
+  tool_name: string;
+  call_count: number;
+  last_called_at: string | null;
+}

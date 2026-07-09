@@ -1,0 +1,50 @@
+<mxGraphModel adaptiveColors="auto" dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="1150" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;SA4E-18 Test Execution Flow — Level Gates + Defect Loop&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="240" y="20" width="440" height="30" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="lane_pbt" value="PBT" style="swimlane;horizontal=0;startSize=90;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="70" width="820" height="140" as="geometry"/></mxCell>
+    <mxCell id="lane_ut" value="UT" style="swimlane;horizontal=0;startSize=90;fillColor=#e8f5e9;strokeColor=#388e3c;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="210" width="820" height="140" as="geometry"/></mxCell>
+    <mxCell id="lane_it" value="IT" style="swimlane;horizontal=0;startSize=90;fillColor=#fff3e0;strokeColor=#f57c00;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="350" width="820" height="140" as="geometry"/></mxCell>
+    <mxCell id="lane_api" value="E2E-API" style="swimlane;horizontal=0;startSize=90;fillColor=#f3e5f5;strokeColor=#7b1fa2;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="490" width="820" height="140" as="geometry"/></mxCell>
+    <mxCell id="lane_sit" value="SIT (manual)" style="swimlane;horizontal=0;startSize=90;fillColor=#fff2cc;strokeColor=#d6b656;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="630" width="820" height="140" as="geometry"/></mxCell>
+    <mxCell id="lane_done" value="Report" style="swimlane;horizontal=0;startSize=90;fillColor=#f5f5f5;strokeColor=#666666;html=1;" vertex="1" parent="1"><mxGeometry x="40" y="770" width="820" height="120" as="geometry"/></mxCell>
+
+    <mxCell id="start" value="Build passes&#10;(npm run build)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="130" y="105" width="120" height="60" as="geometry"/></mxCell>
+    <mxCell id="pbt" value="Run PBT-01..04&#10;(resolver + counter invariants)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="320" y="100" width="180" height="70" as="geometry"/></mxCell>
+    <mxCell id="pbt_gate" value="All pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="580" y="100" width="120" height="70" as="geometry"/></mxCell>
+
+    <mxCell id="ut" value="Run UT-01..12&#10;(edge cases, branches >=90%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="320" y="240" width="180" height="70" as="geometry"/></mxCell>
+    <mxCell id="ut_gate" value="All pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="580" y="240" width="120" height="70" as="geometry"/></mxCell>
+
+    <mxCell id="it" value="Run IT-01..05&#10;(handlers + real SQLite)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="320" y="380" width="180" height="70" as="geometry"/></mxCell>
+    <mxCell id="it_gate" value="All pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="580" y="380" width="120" height="70" as="geometry"/></mxCell>
+
+    <mxCell id="api" value="Run E2E-API-01..10&#10;(TDD 11.2; token>=70%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="320" y="520" width="180" height="70" as="geometry"/></mxCell>
+    <mxCell id="api_gate" value="All pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="580" y="520" width="120" height="70" as="geometry"/></mxCell>
+
+    <mxCell id="sit" value="Manual SIT-01..03&#10;(context, operator read, config)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="320" y="660" width="180" height="70" as="geometry"/></mxCell>
+    <mxCell id="sit_gate" value="Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="580" y="660" width="120" height="70" as="geometry"/></mxCell>
+
+    <mxCell id="defect" value="Log defect&#10;-> DEV fix&#10;-> retest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="740" y="380" width="100" height="90" as="geometry"/></mxCell>
+
+    <mxCell id="report" value="TEST-REPORT + RTM 100%&#10;(all levels green)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1"><mxGeometry x="320" y="795" width="180" height="70" as="geometry"/></mxCell>
+
+    <mxCell id="e_s_pbt" edge="1" parent="1" source="start" target="pbt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_pbt_g" edge="1" parent="1" source="pbt" target="pbt_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_pbt_ut" value="Yes" edge="1" parent="1" source="pbt_gate" target="ut" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_ut_g" edge="1" parent="1" source="ut" target="ut_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_ut_it" value="Yes" edge="1" parent="1" source="ut_gate" target="it" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_it_g" edge="1" parent="1" source="it" target="it_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_it_api" value="Yes" edge="1" parent="1" source="it_gate" target="api" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_api_g" edge="1" parent="1" source="api" target="api_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_api_sit" value="Yes" edge="1" parent="1" source="api_gate" target="sit" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_sit_g" edge="1" parent="1" source="sit" target="sit_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_sit_rep" value="Yes" edge="1" parent="1" source="sit_gate" target="report" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_gate_def" value="No / fail" edge="1" parent="1" source="it_gate" target="defect" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;dashed=1;labelBackgroundColor=#ffffff;fontSize=10;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e_def_it" value="retest" edge="1" parent="1" source="defect" target="it" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;dashed=1;labelBackgroundColor=#ffffff;fontSize=10;"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

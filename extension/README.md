@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="resources/icon.png" alt="Kiro SDLC Agents" width="128" height="128">
+  <img src="resources/icon.png" alt="SDLC Agents 4 Enterprise" width="128" height="128">
 </p>
 
-<h1 align="center">Kiro SDLC Agents</h1>
+<h1 align="center">SDLC Agents 4 Enterprise</h1>
 
 <p align="center">
   <strong>Your entire software team — in one extension.</strong><br>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.1-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.3.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -24,13 +24,16 @@ This extension is a **thin client** — it requires the **Code Intelligence Back
 
 ### Setup Steps
 
-1. **Download and start the backend server** (see [backend README](../backend/README.md)):
+1. **Start the backend server** — published on [npm](https://www.npmjs.com/package/sdlc-agent-4-enterprise-server), no source download needed:
 
 ```bash
-cd backend
-npm ci
-npm run build
-npm start
+# Run directly with npx (recommended)
+npx sdlc-agent-4-enterprise-server
+
+# Or install globally, then run
+npm install -g sdlc-agent-4-enterprise-server
+sdlc-agent-4-enterprise-server
+
 # Server runs at http://localhost:48721
 ```
 
@@ -38,19 +41,19 @@ npm start
 
 ```bash
 # Build the extension
-cd kiro-sdlc-agents
+cd extension
 npm ci
 npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension kiro-sdlc-agents-2.0.1.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.3.0.vsix
 
 # Or VS Code
-code --install-extension kiro-sdlc-agents-2.0.1.vsix
+code --install-extension sdlc-agents-4-enterprise-1.3.0.vsix
 ```
 
-3. **Verify connection**: Command Palette → "Kiro SDLC: Settings" → Server Settings → Test Connection
+3. **Verify connection**: Command Palette → "SDLC Agents: Settings" → Server Settings → Test Connection
 
 > Without the backend server, agent tools, KB panels, and indexing features will not work.
 
@@ -60,9 +63,10 @@ code --install-extension kiro-sdlc-agents-2.0.1.vsix
 
 ```
 1. Ensure backend is running (http://localhost:48721/health → "healthy")
-2. Open Command Palette: Ctrl+Shift+P → "Kiro SDLC: Inject All Agents"
-3. Check sidebar: KIRO SDLC AGENTS → should show server connected
-4. Give a Jira ticket to SM: @sm-agent KSA-14
+2. Open Command Palette: Ctrl+Shift+P → "SDLC Agents: Inject All Agents"
+3. Select target IDE (Kiro, VSCode/Copilot, Claude Code, or Codex/OpenAI)
+4. Check sidebar: SDLC AGENTS 4 ENTERPRISE → should show server connected
+5. Give a Jira ticket to SM: @sm-agent KSA-14
 ```
 
 ---
@@ -122,7 +126,7 @@ Built-in chat interface with LLM integration. Supports multiple providers:
 | OpenRouter | API key + model selection |
 | Kiro Gateway | Auto (uses IDE credentials) |
 
-Configure: Command Palette → "Kiro SDLC: Settings" → LLM Provider tab.
+Configure: Command Palette → "SDLC Agents: Settings" → LLM Provider tab.
 
 ---
 
@@ -130,11 +134,11 @@ Configure: Command Palette → "Kiro SDLC: Settings" → LLM Provider tab.
 
 | Feature | Command |
 |---------|---------|
-| Symbol Search | `Kiro SDLC: Symbol Search` |
-| Impact Analysis | `Kiro SDLC: Impact Analysis` |
-| Security Panel | `Kiro SDLC: Security Panel` |
-| AI Context | `Kiro SDLC: Get AI Context for Symbol` |
-| Salesforce Index | `Kiro SDLC: Index Salesforce Project` |
+| Symbol Search | `SDLC Agents: Symbol Search` |
+| Impact Analysis | `SDLC Agents: Impact Analysis` |
+| Security Panel | `SDLC Agents: Security Panel` |
+| AI Context | `SDLC Agents: Get AI Context for Symbol` |
+| Salesforce Index | `SDLC Agents: Index Salesforce Project` |
 
 ---
 
@@ -142,17 +146,17 @@ Configure: Command Palette → "Kiro SDLC: Settings" → LLM Provider tab.
 
 | Command | Description |
 |---------|-------------|
-| `Kiro SDLC: Inject All Agents` | Install agents, steering, hooks, templates |
-| `Kiro SDLC: Inject (Select Components)` | Pick specific components to inject |
-| `Kiro SDLC: Update Agents` | Update to latest bundled version |
-| `Kiro SDLC: Show Status` | Check all components + server status |
-| `Kiro SDLC: Settings` | Open settings panel (LLM + Server) |
-| `Kiro SDLC: Reconnect to Backend` | Reconnect if connection dropped |
-| `Kiro SDLC: Disconnect` | Disconnect from backend |
-| `Kiro SDLC: Index Salesforce Project` | Index SFDX project metadata |
-| `Kiro SDLC: Symbol Search` | Search symbols across codebase |
-| `Kiro SDLC: Impact Analysis` | Blast radius for a symbol |
-| `Kiro SDLC: Open KB in Browser` | Open web dashboard in browser |
+| `SDLC Agents: Inject All Agents` | Install agents, steering, hooks, templates |
+| `SDLC Agents: Inject (Select Components)` | Pick specific components to inject |
+| `SDLC Agents: Update Agents` | Update to latest bundled version |
+| `SDLC Agents: Show Status` | Check all components + server status |
+| `SDLC Agents: Settings` | Open settings panel (LLM + Server) |
+| `SDLC Agents: Reconnect to Backend` | Reconnect if connection dropped |
+| `SDLC Agents: Disconnect` | Disconnect from backend |
+| `SDLC Agents: Index Salesforce Project` | Index SFDX project metadata |
+| `SDLC Agents: Symbol Search` | Search symbols across codebase |
+| `SDLC Agents: Impact Analysis` | Blast radius for a symbol |
+| `SDLC Agents: Open KB in Browser` | Open web dashboard in browser |
 
 ---
 
@@ -206,8 +210,8 @@ Configure in IDE settings (`Ctrl+,` → search "kiroSdlc") or via Settings panel
 
 ### Extension shows "disconnected"
 
-- Backend server may have crashed — restart it: `cd backend && npm start`
-- Or reconnect: Command Palette → "Kiro SDLC: Reconnect to Backend"
+- Backend server may have crashed — restart it: `npx sdlc-agent-4-enterprise-server`
+- Or reconnect: Command Palette → "SDLC Agents: Reconnect to Backend"
 
 ### Panels show blank/empty
 
@@ -217,7 +221,7 @@ Configure in IDE settings (`Ctrl+,` → search "kiroSdlc") or via Settings panel
 ### Agent tools timeout
 
 - Backend must be running and healthy
-- Check backend logs for errors: look at terminal where `npm start` is running
+- Check backend logs for errors: look at the terminal where `sdlc-agent-4-enterprise-server` is running
 
 ---
 
@@ -225,7 +229,7 @@ Configure in IDE settings (`Ctrl+,` → search "kiroSdlc") or via Settings panel
 
 The extension can index SFDX projects:
 
-1. Command Palette → "Kiro SDLC: Index Salesforce Project"
+1. Command Palette → "SDLC Agents: Index Salesforce Project"
 2. Extension detects `sfdx-project.json` in workspace
 3. Counts and indexes: Apex classes, Triggers, Flows, Custom Objects, LWC components
 4. All SF symbols become searchable via code intelligence tools
@@ -235,3 +239,53 @@ The extension can index SFDX projects:
 ## License
 
 MIT
+
+---
+
+## Changelog
+
+### v1.3.0 (2026-07-09)
+
+- **Multi-IDE Agent Injection** — "Inject All Agents" now shows IDE target picker:
+  - Kiro (default): `.kiro/agents/`, `.kiro/steering/`, `.kiro/hooks/`
+  - VSCode / GitHub Copilot: `.github/agents/`, `.github/copilot-instructions.md`
+  - Claude Code: `.claude/agents/`, `.claude/rules/`, `CLAUDE.md`
+  - Codex (OpenAI): `AGENTS.md`, `agents/` subdirectory
+- **Pre-converted agent bundles** — Each IDE gets properly formatted files (correct frontmatter, folder structure, hooks format)
+- **Codex/OpenAI conversion** — New `conversions/codex-openai/` with all 9 agents + subdirectory AGENTS.md
+- **Runtime picker removed** — No longer asks to choose Python/NodeJS/Kotlin (bundled backend handles everything)
+- **IDE Adapter architecture** — Strategy pattern with `PreConvertedAdapter` (copies pre-built files, no runtime conversion)
+- Updated CONVERSION-GUIDE.md and GAPS.md with Codex column
+
+### v1.2.1 (2026-07-08)
+
+- **Loop Engineering Guardrails** — Inspired by [loop-engineering](https://github.com/cobusgreyling/loop-engineering):
+  - Loop Constraints (path denylist, execution limits, push/merge safety)
+  - Token Budget Tracking via KB (daily cap, 80% warning, 100% hard stop)
+  - Circuit Breaker (closed/open/half-open, 30min cooldown, user override)
+  - Run Log per ticket (append-only with tokens column)
+  - Phased Autonomy (L1 report-only / L2 assisted / L3 unattended)
+  - Failure Mode Catalog (7 patterns: infinite loop, verifier theater, token burn, etc.)
+- **Engineering Skills** — Inspired by [mattpocock/skills](https://github.com/mattpocock/skills):
+  - Domain Glossary via KB (BA extracts terms in Phase 1, all agents consume)
+  - Two-Axis Code Review (Standards + Spec axes run parallel before QA)
+  - DEV Bug Diagnosis Loop (6-phase: feedback loop → reproduce → hypothesise → instrument → fix → cleanup)
+- **41 steering files** bundled (up from 32)
+- Install instructions updated for v1.2.1
+
+### v1.2.0 (2026-07-08)
+
+- **Local tools discoverable in MCP** — `stream_write_file` and `embed_image` now appear in `tools/list` with description + inputSchema
+- **`embed_image` fully implemented** — Processes markdown files: replaces local PNG/JPG image refs with base64 data URIs, outputs self-contained `-embedded.md`
+- **`stream_write_file` param fix** — Now accepts both `file_path` (preferred) and `path` arguments
+- **`injectLocalTools()` in wrapper** — Local tool definitions merged into backend `tools/list` responses (deduplicated)
+- Install instructions updated for v1.2.0
+
+### v1.1.0
+
+- Thin client architecture (extension → backend HTTP)
+- 9 SDLC agents with Scrum Master orchestration
+- Knowledge Base UI (5 panels)
+- Chat panel with multi-LLM support
+- Code intelligence (Symbol Search, Impact Analysis)
+- Salesforce project indexing

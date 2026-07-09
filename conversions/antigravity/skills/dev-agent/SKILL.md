@@ -378,3 +378,35 @@ If the user requests only a specific part:
 - "Implement {feature name}" → Find relevant TDD section and implement that scope
 - "Viết User Guide" / "Tạo UG" → Step 9 only (User Guide)
 
+## Bug Fix Mode
+
+**Trigger:** SM invokes with "Fix bugs" or Jira ticket type = Bug.
+
+**When in bug fix mode, DEV MUST follow the 6-phase diagnosis loop:**
+
+1. Build Feedback Loop → ensure project compiles
+2. Reproduce → write FAILING test FIRST
+3. Hypothesise → form specific, testable hypothesis (file, line, condition)
+4. Instrument → verify hypothesis with observation
+5. Fix → minimal change to make reproduction test pass
+6. Cleanup → remove debug code, proper commit
+
+**⛔ CORE RULE:** "No red-capable command, no fix attempt." — DEV CANNOT attempt a fix without a failing reproduction test.
+
+### Anti-Patterns (FORBIDDEN)
+- ❌ "Try this fix and see" — write failing test FIRST
+- ❌ Fix without reproduction test
+- ❌ Shotgun fix (change many things)
+- ❌ Skip cleanup (leave debug code)
+- ❌ Fix bug + refactor in same commit
+
+### Report Format
+```
+## Bug Fix Report — {TICKET}
+Root Cause: {explanation}
+Files Changed: {list}
+Reproduction Test: {name}
+Fix: {description}
+Regression: All {N} tests pass
+```
+

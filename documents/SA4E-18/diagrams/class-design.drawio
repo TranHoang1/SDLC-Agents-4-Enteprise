@@ -1,0 +1,42 @@
+<mxGraphModel dx="1050" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="640" math="0" shadow="0" adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-18 — Class Design (key types &amp; relations)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="10" width="460" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="coretools" value="&lt;&lt;module&gt;&gt; CoreTools&#10;──────────────&#10;+CORE_TOOLS: readonly string[]&#10;+META_TOOLS: readonly string[]&#10;──────────────&#10;+resolveCoreToolNames(logger?): Set&lt;string&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="70" width="270" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="tracker" value="&lt;&lt;module&gt;&gt; toolUsageTracker&#10;──────────────&#10;+trackToolUsage(registry, logger, toolName): void" style="rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="250" width="270" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="engine" value="MemoryEngine&#10;──────────────&#10;-db: Database&#10;──────────────&#10;+getDb(): Database&#10;+incrementToolUsage(toolName): void&#10;+getToolUsage(toolName?): ToolUsageRow[]" style="rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="420" y="220" width="290" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="row" value="&lt;&lt;interface&gt;&gt; ToolUsageRow&#10;──────────────&#10;+tool_name: string&#10;+call_count: number&#10;+last_called_at: string | null" style="rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="770" y="230" width="200" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="registry" value="ModuleRegistry&#10;──────────────&#10;+getAllToolDefinitions(): ToolDefinition[]&#10;+getToolHandlers(): Map&#10;+getModule(name): IModule" style="rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="420" y="70" width="290" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="mem" value="MemoryModule&#10;──────────────&#10;+getEngine(): MemoryEngine&#10;+status: ModuleStatus" style="rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=8;verticalAlign=top;spacingTop=6;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="420" y="430" width="290" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1" value="uses" style="html=1;endArrow=open;endSize=10;dashed=1;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="tracker" target="registry">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2" value="getEngine()" style="html=1;endArrow=open;endSize=10;dashed=1;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="tracker" target="mem">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3" value="owns" style="html=1;endArrow=diamondThin;endFill=1;endSize=12;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="mem" target="engine">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4" value="returns" style="html=1;endArrow=open;endSize=10;dashed=1;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="engine" target="row">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend" value="Legend:  green = NEW   yellow = MODIFIED   grey = unchanged   purple = new model type" style="text;html=1;align=left;verticalAlign=middle;fillColor=none;strokeColor=none;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="400" width="330" height="30" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

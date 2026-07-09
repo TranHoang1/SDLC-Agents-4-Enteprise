@@ -1,0 +1,42 @@
+<mxGraphModel adaptiveColors="auto" dx="1000" dy="640" grid="0" page="1" pageWidth="1200" pageHeight="640">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;SA4E-18 Tool Lifecycle &amp;amp; Visibility Tier — State Diagram&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="560" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="init" value="" style="ellipse;shape=doubleEllipse;fillColor=#000000;strokeColor=#000000;html=1;" vertex="1" parent="1">
+      <mxGeometry x="90" y="70" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="registered" value="&lt;b&gt;REGISTERED&lt;/b&gt;&#10;Tool in ModuleRegistry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="160" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ingested" value="&lt;b&gt;INGESTED&lt;/b&gt;&#10;in mcp_tools index (full set)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="300" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="core" value="&lt;b&gt;CORE (visible)&lt;/b&gt;&#10;returned by ListTools" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="330" y="230" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="extended" value="&lt;b&gt;EXTENDED (hidden)&lt;/b&gt;&#10;absent from ListTools" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="330" y="400" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="discovered" value="&lt;b&gt;DISCOVERED&lt;/b&gt;&#10;via find_tools(query)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="620" y="400" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="invoked" value="&lt;b&gt;INVOKED&lt;/b&gt;&#10;CallTool / execute_dynamic_tool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="620" y="230" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="counted" value="&lt;b&gt;USAGE COUNTED&lt;/b&gt;&#10;call_count++ persisted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="920" y="230" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="s1" value="server startup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="init" target="registered"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="s2" value="startup index build (full set)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="registered" target="ingested"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="s3" value="name IN CORE_TOOLS" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ingested" target="core"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="s4" value="name NOT in CORE_TOOLS" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="ingested" target="extended"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="s5" value="direct CallTool" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="core" target="invoked"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="s6" value="find_tools(query)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="extended" target="discovered"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="s7" value="execute_dynamic_tool(name)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="discovered" target="invoked"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="s8" value="increment (non-blocking)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="invoked" target="counted"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="s9" value="future: auto re-classify" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;dashed=1;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="counted" target="ingested"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>
