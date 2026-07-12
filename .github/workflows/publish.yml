@@ -143,11 +143,5 @@ jobs:
           npm publish --access public
           echo "✅ Published ${PKG_NAME}@${{ needs.version-check.outputs.version }}"
 
-      - name: Upload dist to GitHub Release
-        uses: softprops/action-gh-release@v2
-        if: github.ref_type == 'tag'
-        continue-on-error: true
-        with:
-          files: |
-            backend/dist/**/*.js
-          fail_on_unmatched_files: false
+      # Backend is published to npm above. dist/ JS files are NOT uploaded
+      # to avoid GitHub API rate limits on hundreds of individual assets.
