@@ -79,6 +79,7 @@ export function initSchema(db: Database.Database): void {
       label TEXT NOT NULL DEFAULT '',
       type TEXT NOT NULL DEFAULT 'DOCUMENT',
       tier TEXT NOT NULL DEFAULT 'SHARED',
+      project_id TEXT NOT NULL DEFAULT '',
       x REAL NOT NULL DEFAULT 0,
       y REAL NOT NULL DEFAULT 0,
       z REAL NOT NULL DEFAULT 0,
@@ -101,10 +102,17 @@ export function initSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_graph_nodes_z ON graph_nodes(z);
     CREATE INDEX IF NOT EXISTS idx_graph_nodes_level ON graph_nodes(level);
     CREATE INDEX IF NOT EXISTS idx_graph_nodes_cluster ON graph_nodes(cluster_id);
+    CREATE INDEX IF NOT EXISTS idx_graph_nodes_project ON graph_nodes(project_id);
     CREATE INDEX IF NOT EXISTS idx_graph_edges_source ON graph_edges(source);
     CREATE INDEX IF NOT EXISTS idx_graph_edges_target ON graph_edges(target);
     CREATE INDEX IF NOT EXISTS idx_graph_edges_source_target ON graph_edges(source, target);
   `);
+
+  // Idempotent migration: add project_id to graph_nodes for existing DBs
+  try {
+    db.exec(`ALTER TABLE graph_nodes ADD COLUMN project_id TEXT NOT NULL DEFAULT ''`);
+  } catch { /* column already exists */ }
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_graph_nodes_project ON graph_nodes(project_id)`);
 }
 
 export function seedDefaults(db: Database.Database): void {

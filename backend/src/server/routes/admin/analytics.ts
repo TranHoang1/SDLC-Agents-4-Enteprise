@@ -55,8 +55,8 @@ export function createAnalyticsRoutes(ctx: AdminContext): Hono {
     } catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to read code symbols count from index.db'); }
     let graphTotalNodes = 0, graphKbNodes = 0, graphCodeNodes = 0;
     try {
-      graphTotalNodes = (d.prepare('SELECT COUNT(*) as cnt FROM graph_nodes').get() as { cnt: number }).cnt || 0;
-      graphCodeNodes = (d.prepare("SELECT COUNT(*) as cnt FROM graph_nodes WHERE type IN ('FUNCTION','METHOD','CLASS','INTERFACE','TYPE','CONSTRUCTOR','ENUM','CONSTANT','VARIABLE')").get() as { cnt: number }).cnt || 0;
+      graphTotalNodes = (d.prepare('SELECT COUNT(*) as cnt FROM graph_nodes WHERE project_id = ?').get(currentProjectId) as { cnt: number }).cnt || 0;
+      graphCodeNodes = (d.prepare("SELECT COUNT(*) as cnt FROM graph_nodes WHERE project_id = ? AND type IN ('FUNCTION','METHOD','CLASS','INTERFACE','TYPE','CONSTRUCTOR','ENUM','CONSTANT','VARIABLE')").get(currentProjectId) as { cnt: number }).cnt || 0;
       graphKbNodes = graphTotalNodes - graphCodeNodes;
     } catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to query graph node counts from database'); }
     return c.json({

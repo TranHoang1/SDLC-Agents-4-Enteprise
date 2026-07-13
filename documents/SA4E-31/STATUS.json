@@ -1,0 +1,20 @@
+{
+  "ticket": "SA4E-31",
+  "currentPhase": "implementation",
+  "autonomyLevel": "L3",
+  "architecturePattern": "ai-agent",
+  "phases": {
+    "requirements": { "status": "skipped", "reason": "Bug fix — no BRD needed" },
+    "specification": { "status": "skipped", "reason": "Bug fix — no FSD needed" },
+    "design": { "status": "skipped", "reason": "Bug fix — no TDD needed" },
+    "implementation": { "status": "in_progress", "startedAt": "2026-07-13T23:30:00Z" },
+    "testing": { "status": "not_started" },
+    "deployment": { "status": "not_started" }
+  },
+  "bugFix": {
+    "mode": "quick-fix",
+    "diagnosis": "Known root cause from ticket description",
+    "rootCause": "graph_nodes table lacks project_id; admin routes don't pass projectId; kbEngine methods don't filter by projectId"
+  },
+  "lastUpdated": "2026-07-13T23:30:00Z"
+}
