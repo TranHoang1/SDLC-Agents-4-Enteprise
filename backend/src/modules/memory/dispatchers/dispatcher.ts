@@ -8,6 +8,7 @@ import type { QueryLayer } from '../../../engine/query/query-layer.js';
 import type { KBScope, ScopeContext } from '../models.js';
 import type { ScopePromotionService } from '../promotion/service.js';
 import type { TagAnalyzerService } from '../llm/analyzer.js';
+import type { ClassifyService } from '../llm/classify-service.js';
 import type { ConvertToolResolver } from '../ingest/ConvertToolResolver.js';
 import { handleSearch, handleDiscover, handleTags, handleCitations } from './search.js';
 import { handleIngest, handleIngestFile, handlePin, handleMap, handleCrud } from './crud.js';
@@ -17,6 +18,7 @@ import {
   handleScoring, handlePromote,
 } from './analytics.js';
 import { handleOutcome, handleVerify, handleConfigureDecay } from './evolution.js';
+import { handleSmartIngest, handleSmartIngestCleanup } from './smart-ingest.js';
 
 type Args = Record<string, unknown>;
 
@@ -34,6 +36,7 @@ export class MemoryToolDispatcher {
   private scopeCtx: ScopeContext | undefined;
   private promotionService: ScopePromotionService | undefined;
   private tagAnalyzer: TagAnalyzerService | undefined;
+  private classifyService: ClassifyService | undefined;
   private convertResolver: ConvertToolResolver | undefined;
 
   constructor(
@@ -56,6 +59,10 @@ export class MemoryToolDispatcher {
 
   setConvertResolver(resolver: ConvertToolResolver): void {
     this.convertResolver = resolver;
+  }
+
+  setClassifyService(svc: ClassifyService): void {
+    this.classifyService = svc;
   }
 
   async dispatch(name: string, args: Args): Promise<string | null> {
@@ -82,6 +89,8 @@ export class MemoryToolDispatcher {
       case 'mem_outcome': return handleOutcome(this.engine, merged);
       case 'mem_verify': return handleVerify(this.engine, merged);
       case 'mem_configure_decay': return handleConfigureDecay(this.engine, merged);
+      case 'mem_smart_ingest': return handleSmartIngest(this.engine, this.scopeCtx, this.classifyService, merged);
+      case 'mem_smart_ingest_cleanup': return handleSmartIngestCleanup(this.engine, this.scopeCtx, this.classifyService, merged);
       default: return null;
     }
   }

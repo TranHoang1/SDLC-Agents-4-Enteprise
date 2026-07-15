@@ -1,0 +1,79 @@
+<mxfile>
+  <diagram name="Page-1">
+    <mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;SA4E-38 Smart KB Ingest - Component Diagram&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="200" y="10" width="400" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pkg_defs" value="&lt;b&gt;tool-definitions.ts&lt;/b&gt;&#10;(MODIFIED)" style="swimlane;startSize=30;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="200" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="def_smart" value="mem_smart_ingest schema&#10;mem_smart_ingest_cleanup schema" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="pkg_defs">
+      <mxGeometry x="10" y="40" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pkg_dispatch" value="&lt;b&gt;dispatchers/&lt;/b&gt;" style="swimlane;startSize=30;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="200" width="200" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="disp_main" value="dispatcher.ts&#10;(MODIFIED: +2 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="pkg_dispatch">
+      <mxGeometry x="10" y="40" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="disp_smart" value="smart-ingest.ts&#10;(NEW: handler funcs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="pkg_dispatch">
+      <mxGeometry x="10" y="110" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pkg_llm" value="&lt;b&gt;llm/&lt;/b&gt;" style="swimlane;startSize=30;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="320" y="200" width="200" height="250" as="geometry"/>
+    </mxCell>
+    <mxCell id="llm_classify" value="classify-service.ts&#10;(NEW: ClassifyService)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="pkg_llm">
+      <mxGeometry x="10" y="40" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="llm_svc" value="LLMService.ts&#10;(EXISTING)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="pkg_llm">
+      <mxGeometry x="10" y="110" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="llm_ollama" value="ollama-adapter.ts&#10;(EXISTING)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="pkg_llm">
+      <mxGeometry x="10" y="180" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pkg_engine" value="&lt;b&gt;engine/&lt;/b&gt;" style="swimlane;startSize=30;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="580" y="200" width="200" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="eng_core" value="core.ts - MemoryEngine&#10;(EXISTING: insert, find,&#10;update, delete)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="pkg_engine">
+      <mxGeometry x="10" y="40" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="pkg_tests" value="&lt;b&gt;__tests__/&lt;/b&gt;" style="swimlane;startSize=30;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="580" y="360" width="200" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="test_smart" value="SmartIngest.test.ts (NEW)&#10;ClassifyService.test.ts (NEW)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="pkg_tests">
+      <mxGeometry x="10" y="40" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_defs_disp" value="registers" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="pkg_defs" target="pkg_dispatch" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_disp_llm" value="uses" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="disp_smart" target="llm_classify" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_classify_llmsvc" value="delegates" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="llm_classify" target="llm_svc" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_llmsvc_ollama" value="adapts" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="llm_svc" target="llm_ollama" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_disp_engine" value="persists" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="disp_smart" target="eng_core" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_tests_smart" value="tests" style="dashed=1;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="test_smart" target="disp_smart" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_tests_classify" value="tests" style="dashed=1;edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="test_smart" target="llm_classify" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="iface_box" value="&lt;b&gt;interface ClassifyStrategy&lt;/b&gt;&#10;+ classify(msg): Promise&#10;+ isAvailable(): Promise" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="320" y="60" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_impl" value="" style="endArrow=block;endSize=12;endFill=0;rounded=1;html=1;" edge="1" source="llm_classify" target="iface_box" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
+  </diagram>
+</mxfile>

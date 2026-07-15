@@ -23,6 +23,7 @@ import { startScheduler, stopScheduler } from './evolution/Scheduler.js';
 import type { SchedulerHandles } from './evolution/Scheduler.js';
 import { TagAnalyzerService } from './llm/analyzer.js';
 import { LLMService } from './llm/LLMService.js';
+import { ClassifyService } from './llm/classify-service.js';
 import type { ScopeContext } from './models.js';
 
 export class MemoryModule implements IModule {
@@ -100,6 +101,11 @@ export class MemoryModule implements IModule {
           const tagAnalyzer = new TagAnalyzerService(llmService, this.logger);
           this.dispatcher.setTagAnalyzer(tagAnalyzer);
           this.logger.info({ provider: llmConfig.provider, model: llmConfig.model, baseUrl: llmConfig.baseUrl }, 'TagAnalyzerService initialized — LLM auto-tagging enabled');
+
+          // Wire ClassifyService for smart ingest (SA4E-38)
+          const classifyService = new ClassifyService(llmService);
+          this.dispatcher.setClassifyService(classifyService);
+          this.logger.info('ClassifyService initialized — Smart KB Ingest enabled');
         }
       } catch (err) {
         this.logger.error({ err }, 'TagAnalyzer LLM unavailable — using keyword fallback only');

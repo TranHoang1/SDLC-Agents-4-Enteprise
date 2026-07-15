@@ -1,0 +1,115 @@
+<mxfile>
+  <diagram name="Page-1">
+    <mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;Test Execution Flow — SA4E-38: Smart KB Ingest&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="160" y="10" width="420" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="start" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="330" y="60" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt" value="PBT&#10;Property-Based&#10;(5 tests)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#7b1fa2;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="310" y="140" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt_gate" value="All&#10;pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="330" y="220" width="80" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut" value="Unit Tests&#10;(18 tests)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="310" y="320" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut_gate" value="All&#10;pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="330" y="400" width="80" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="it" value="Integration Tests&#10;(8 tests)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="310" y="500" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="it_gate" value="All&#10;pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="330" y="580" width="80" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e" value="E2E API Tests&#10;(12 tests)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="310" y="680" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e_gate" value="All&#10;pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="330" y="760" width="80" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit" value="SIT Tests&#10;(5 tests)&#10;Real Ollama" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="310" y="860" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit_gate" value="All&#10;pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="330" y="940" width="80" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="done" value="DONE&#10;All 48 Pass" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="320" y="1040" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="fix" value="Fix &amp; Retest" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="500" width="100" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_start_pbt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" source="start" target="pbt" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pbt_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" source="pbt" target="pbt_gate" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pbt_ut" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="pbt_gate" target="ut" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ut_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" source="ut" target="ut_gate" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ut_it" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="ut_gate" target="it" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_it_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" source="it" target="it_gate" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_it_e2e" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="it_gate" target="e2e" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_e2e_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" source="e2e" target="e2e_gate" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_e2e_sit" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="e2e_gate" target="sit" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_sit_gate" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" source="sit" target="sit_gate" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_sit_done" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="sit_gate" target="done" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pbt_fix" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" source="pbt_gate" target="fix" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ut_fix" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" source="ut_gate" target="fix" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_it_fix" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" source="it_gate" target="fix" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_e2e_fix" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" source="e2e_gate" target="fix" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_sit_fix" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" source="sit_gate" target="fix" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_fix_pbt" value="Rerun" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" source="fix" target="pbt" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="580" y="140"/>
+          <mxPoint x="480" y="140"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ci_note" value="CI Pipeline:&#10;PBT + UT + IT + E2E-API&#10;run on every push" style="text;html=1;align=left;verticalAlign=top;strokeColor=#666666;fillColor=#f5f5f5;fontSize=9;dashed=1;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="300" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="manual_note" value="SIT: Manual trigger&#10;(requires real Ollama)" style="text;html=1;align=left;verticalAlign=top;strokeColor=#666666;fillColor=#f5f5f5;fontSize=9;dashed=1;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="860" width="150" height="40" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
+
+  </diagram>
+</mxfile>
