@@ -1,0 +1,90 @@
+# SDLC Agents 4 Enterprise
+# ============================================================
+# OFFLINE / AIR-GAPPED SETUP
+# Run the following on a machine WITH internet access, then
+# export and transfer the resulting files to the target server.
+#
+#   1. Build & tag the backend image:
+#        docker compose build
+#
+#   2. Pull the Ollama image and pre-load the LLM model:
+#        docker pull ollama/ollama:latest
+#        docker run --rm -v ollama-data:/root/.ollama \
+#          ollama/ollama pull qwen2.5:7b-instruct-q4_K_M
+#
+#   3. Export everything to a single archive:
+#        docker save sdlc-agents-4-enterprise-backend ollama/ollama \
+#          | gzip > sdlc-images.tar.gz
+#        docker run --rm -v ollama-data:/data alpine \
+#          tar czf - /data > ollama-data.tar.gz
+#
+#   4. On the air-gapped server:
+#        docker load < sdlc-images.tar.gz
+#        docker volume create ollama-data
+#        docker run --rm -v ollama-data:/data alpine \
+#          tar xzf - < ollama-data.tar.gz
+#        cp .env.example .env   # edit WORKSPACE_PATH etc.
+#        docker compose up -d
+# ============================================================
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: sdlc-agents-4-enterprise-backend
+    container_name: sdlc-backend
+    restart: unless-stopped
+    ports:
+      - "${CODE_INTEL_PORT:-48721}:48721"
+    volumes:
+      - sdlc-data:/data
+      # Mount the source workspace (read-only).
+      # Set WORKSPACE_PATH in .env to the absolute path on the host.
+      - ${WORKSPACE_PATH:-.}:/workspace:ro
+    environment:
+      CODE_INTEL_PORT: "48721"
+      CODE_INTEL_HOST: "0.0.0.0"
+      CODE_INTEL_DATA_DIR: /data/.code-intel
+      CODE_INTEL_WORKSPACE: /workspace
+      CODE_INTEL_LOG_LEVEL: ${LOG_LEVEL:-info}
+      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://ollama:11434}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b-instruct-q4_K_M}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+    networks:
+      - app-network
+#    depends_on:
+#      - ollama
+
+  # ── Local LLM (default for air-gapped deployments) ──────────────
+  # The model must be pre-pulled BEFORE going offline (see above).
+  # To use an external provider instead (OpenAI, Anthropic, LM Studio…)
+  # set LLM_PROVIDER / LLM_BASE_URL / LLM_API_KEY in .env and
+  # comment out this service and the depends_on above.
+  # ────────────────────────────────────────────────────────────────
+#  ollama:
+#    image: ollama/ollama:latest
+#    container_name: sdlc-ollama
+#    restart: unless-stopped
+#    ports:
+#      - "11434:11434"
+#    volumes:
+#      - ollama-data:/root/.ollama
+    # ── NVIDIA GPU support (uncomment to enable) ──
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+volumes:
+  # Persistent backend state: SQLite databases, .code-intel project data
+  sdlc-data:
+  # Ollama model weights — pre-populated before going offline
+#  ollama-data:
+networks:
+  app-network:
+    external: true
