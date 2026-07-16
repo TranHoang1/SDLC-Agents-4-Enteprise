@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.10.0] - 2026-07-17
+
+### Added
+- **SA4E-29: Generic Schema-Driven Base64 Proxy** — transparent file ↔ base64 bridge for remote backend:
+  - `Base64ProxyService` — auto-detects proxy tools from schema (zero hardcoding); rewrites schemas for LLM (hides content_base64, shows file_path)
+  - `WrapperServer` — HTTP MCP proxy on port 9181; routes tools/list + tools/call with automatic base64 I/O
+  - `execute_dynamic_tool` unwrapping — proxies nested arguments for dynamically-invoked tools
+  - `find_tools` response rewriting — schemas in discovery responses consistent with tools/list
+  - 29 automated tests (19 UT + 10 IT/E2E-API/PBT) — all passing
+
+### Fixed
+- **SA4E-43: Extension compile errors** — created missing langgraph subgraph stubs + fixed type errors + mcpClient property
+- **SA4E-42: find_tools re-index** — semantic index now refreshes on child MCP server connect/disconnect events (backend)
+
 ## [1.25.0] - 2025-07-29
 
 ### Added
@@ -11,7 +25,8 @@
   - Keyboard navigation (ArrowUp/Down/Enter/Escape) crossing section boundaries
   - Agent selection inserts /agent-name  prefix in textarea
   - Steering selection adds context chip via existing ddContextChip()
-  - Full accessibility: ole=listbox, ria-activedescendant, screen reader announcements
+  - Full accessibility: 
+ole=listbox, ria-activedescendant, screen reader announcements
   - 57 automated tests (12 PBT + 30 UT + 15 IT) — all passing
 
 

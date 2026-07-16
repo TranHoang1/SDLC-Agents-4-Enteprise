@@ -2,7 +2,7 @@
   "name": "sdlc-agents-4-enterprise",
   "displayName": "SDLC Agents 4 Enterprise",
   "description": "Multi-agent SDLC pipeline for enterprise — 9 AI agents (SM, BA, TA, SA, QA, DEV, DevOps, Security, UI) orchestrated via MCP",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "publisher": "dnguyenminh",
   "license": "MIT",
   "repository": {
@@ -216,7 +216,15 @@
         "kiroSdlc.llmProvider": {
           "type": "string",
           "default": "anthropic",
-          "enum": ["anthropic", "openai", "ollama", "lmstudio", "openrouter", "onnx", "kiro"],
+          "enum": [
+            "anthropic",
+            "openai",
+            "ollama",
+            "lmstudio",
+            "openrouter",
+            "onnx",
+            "kiro"
+          ],
           "description": "Active LLM provider"
         },
         "kiroSdlc.llmModel": {
@@ -300,6 +308,7 @@
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^2.24.0",
     "esbuild": "^0.21.0",
+    "fast-check": "^4.9.0",
     "glob": "^13.0.6",
     "mocha": "^10.7.3",
     "sinon": "^17.0.1",
