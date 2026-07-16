@@ -125,14 +125,20 @@ CREATE INDEX IF NOT EXISTS idx_symbols_proj_kind ON symbols(project_id, kind);
 CREATE INDEX IF NOT EXISTS idx_modules_project ON modules(project_id);
 
 -- MCP Tools
+-- SA4E-42: server = owning child-server for proxied tools (NULL = local/core tool).
+-- Dedicated scoping key so a scoped delete by server can never match core tools.
 CREATE TABLE IF NOT EXISTS mcp_tools (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   name TEXT NOT NULL UNIQUE,
   description TEXT NOT NULL,
   schema_json TEXT NOT NULL,
   category TEXT,
+  server TEXT,
   vector BLOB
 );
+
+-- SA4E-42: index-backed scoped delete/prune per owning server
+CREATE INDEX IF NOT EXISTS idx_mcp_tools_server ON mcp_tools(server);
 
 -- Per-tool usage counters (SA4E-18)
 CREATE TABLE IF NOT EXISTS tool_usage (

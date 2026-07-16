@@ -92,6 +92,23 @@ export function runMigrations(db: Database.Database, legacyProjectId: string = '
   if (current < 5) {
     applyMigrationV5(db, legacyProjectId);
   }
+
+  // SA4E-42: additive `server` column on mcp_tools (idempotent, always probed)
+  migrateAddMcpToolsServerColumn(db);
+}
+
+/**
+ * SA4E-42 — add the `server` scoping column to `mcp_tools` for existing DBs.
+ * Uses a PRAGMA table_info probe (F-02) instead of a swallow-all catch, so a
+ * genuine migration failure surfaces rather than being silently ignored.
+ */
+export function migrateAddMcpToolsServerColumn(db: Database.Database): void {
+  const existing = getExistingColumns(db, 'mcp_tools');
+  if (!existing.has('server')) {
+    db.exec('ALTER TABLE mcp_tools ADD COLUMN server TEXT');
+    logger.error('[migrations] SA4E-42: added mcp_tools.server column');
+  }
+  db.exec('CREATE INDEX IF NOT EXISTS idx_mcp_tools_server ON mcp_tools(server)');
 }
 
 function applyMigrationV4(db: Database.Database): void {
