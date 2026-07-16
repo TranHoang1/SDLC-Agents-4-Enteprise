@@ -13,9 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# @xenova/transformers v2 reads TRANSFORMERS_CACHE (not HF_HOME) for cache dir
-ENV TRANSFORMERS_CACHE=/app/.hf-cache
-
 # Install dependencies first (layer cache reuse on source changes)
 COPY backend/package.json backend/package-lock.json ./
 RUN npm ci
@@ -47,15 +44,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 COPY --from=builder /app/dist         ./dist
+# node_modules includes the model cache at node_modules/@xenova/transformers/.cache/
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./
-# Baked-in HF model cache — enables air-gapped / no-internet operation
-COPY --from=builder /app/.hf-cache    ./.hf-cache
 
 RUN mkdir -p /data
 
 ENV NODE_ENV=production \
-    TRANSFORMERS_CACHE=/app/.hf-cache \
     CODE_INTEL_PORT=48721 \
     CODE_INTEL_HOST=0.0.0.0 \
     CODE_INTEL_DATA_DIR=/data/.code-intel \
