@@ -17,6 +17,8 @@ import { ENTRY_POINT_TOOL_DEFINITION, handleEntryPointTool } from '../analyzers/
 import { GRAPH_ANALYSIS_TOOL_DEFINITIONS, handleGraphAnalysisTool } from '../analyzers/graph-analysis/GraphAnalysisTools.js';
 import { AI_CONTEXT_TOOL_DEFINITIONS, handleGetAIContext, handleGetEditContext, handleGetCuratedContext } from './ai-context-tools.js';
 import { SIMILARITY_TOOL_DEFINITIONS, handleSimilarityTool } from '../analyzers/similarity/SimilarityTools.js';
+import { resolveWithinWorkspace } from '../../shared/path-safety.js';
+import { requireProjectId } from '../query/code-intel-isolation.js';
 
 export const CODE_INTEL_TOOL_DEFINITIONS = [
   { name: 'code_search', description: 'Full-text search across indexed code symbols (functions, classes, interfaces). Uses SQLite FTS5 with porter stemming.', inputSchema: { type: 'object', properties: { query: { type: 'string', description: 'Search query' }, limit: { type: 'number', description: 'Max results (default 20)' } }, required: ['query'] } },
@@ -54,31 +56,32 @@ export async function dispatchCodeIntelTool(
     case 'code_context': return handleCodeContext(args, queryLayer, workspace, projectId);
     case 'code_modules': return handleCodeModules(args, queryLayer, projectId);
     case 'code_index_status': return handleCodeIndexStatus(args, queryLayer, indexer, workspace, projectId);
-    case 'stream_write_file': return handleStreamWriteFile(args, workspace);
+    case 'stream_write_file': return handleStreamWriteFile(args, workspace, projectId);
     case 'code_kb_export': return handleCodeKbExport(args, queryLayer, workspace);
     case 'drawio_auto_layout': return handleDrawioLayout(args, workspace);
     case 'drawio_export_png': return handleDrawioExportPng(args, workspace, null as any);
-    case 'code_callers': return handleCodeCallers(args, dbManager.getDb());
-    case 'code_callees': return handleCodeCallees(args, dbManager.getDb());
-    case 'code_dependencies': return handleCodeDependencies(args, dbManager.getDb(), workspace);
-    case 'code_impact': return handleCodeImpact(args, dbManager.getDb(), workspace);
-    case 'code_traverse': return handleCodeTraverse(args, dbManager.getDb(), workspace);
-    case 'complexity_analysis': return handleComplexityTool(args, dbManager.getDb());
-    case 'find_entry_points': return handleEntryPointTool(args, dbManager.getDb());
+    // SA4E-41 SEC-01: thread projectId into every graph/analysis tool (fail-closed).
+    case 'code_callers': return handleCodeCallers(args, dbManager.getDb(), projectId);
+    case 'code_callees': return handleCodeCallees(args, dbManager.getDb(), projectId);
+    case 'code_dependencies': return handleCodeDependencies(args, dbManager.getDb(), workspace, projectId);
+    case 'code_impact': return handleCodeImpact(args, dbManager.getDb(), workspace, projectId);
+    case 'code_traverse': return handleCodeTraverse(args, dbManager.getDb(), workspace, projectId);
+    case 'complexity_analysis': return handleComplexityTool(args, dbManager.getDb(), projectId);
+    case 'find_entry_points': return handleEntryPointTool(args, dbManager.getDb(), projectId);
     case 'find_circular_deps':
     case 'find_related_tests':
     case 'find_hot_paths':
     case 'find_dead_imports':
     case 'module_summary':
-      return handleGraphAnalysisTool(name, args, dbManager.getDb()) ?? `Unknown tool: ${name}`;
-    case 'get_ai_context': return handleGetAIContext(args, dbManager.getDb(), workspace);
-    case 'get_edit_context': return handleGetEditContext(args, dbManager.getDb(), workspace);
+      return handleGraphAnalysisTool(name, args, dbManager.getDb(), projectId) ?? `Unknown tool: ${name}`;
+    case 'get_ai_context': return handleGetAIContext(args, dbManager.getDb(), workspace, projectId);
+    case 'get_edit_context': return handleGetEditContext(args, dbManager.getDb(), workspace, projectId);
     case 'get_curated_context': return handleGetCuratedContext(args, dbManager.getDb(), workspace, dbManager, projectId);
     case 'find_duplicates':
     case 'find_dead_code':
     case 'git_search':
     case 'git_index':
-      return handleSimilarityTool(name, args, dbManager.getDb(), workspace) ?? `Unknown tool: ${name}`;
+      return handleSimilarityTool(name, args, dbManager.getDb(), workspace, projectId) ?? `Unknown tool: ${name}`;
     default:
       return `Unknown tool: ${name}`;
   }
@@ -124,7 +127,9 @@ function handleCodeSymbols(args: Record<string, unknown>, ql: QueryLayer, projec
 function handleCodeContext(args: Record<string, unknown>, ql: QueryLayer, workspace: string, projectId?: string): string {
   const file = args.file as string;
   if (!file) return 'Parameter "file" is required';
-  const fullPath = path.resolve(workspace, file);
+  // SEC-04: reject absolute/traversal/null-byte paths and confirm containment.
+  const fullPath = resolveWithinWorkspace(workspace, file);
+  if (!fullPath) return `Invalid path: ${file}`;
   if (!fs.existsSync(fullPath)) return `File not found: ${file}`;
   const content = fs.readFileSync(fullPath, 'utf-8');
   const lines = content.split('\n');
@@ -173,12 +178,16 @@ async function handleCodeIndexStatus(args: Record<string, unknown>, ql: QueryLay
   return lines.join('\n');
 }
 
-function handleStreamWriteFile(args: Record<string, unknown>, workspace: string): string {
+function handleStreamWriteFile(args: Record<string, unknown>, workspace: string, projectId?: string): string {
   const rawPath = args.file_path as string;
   if (!rawPath) return '{"error":"file_path is required"}';
+  // A4: writes must fail loud without tenant context (fail-closed).
+  try { requireProjectId(projectId); } catch { return JSON.stringify({ error: 'PROJECT_REQUIRED: X-Project-Id needed to write files' }); }
   const mode = (args.mode as string) ?? 'write';
   const content = (args.content as string) ?? '';
-  const filePath = path.isAbsolute(rawPath) ? rawPath : path.resolve(workspace, rawPath);
+  // SEC-05: reject absolute paths + traversal; constrain writes under the workspace root.
+  const filePath = resolveWithinWorkspace(workspace, rawPath);
+  if (!filePath) return JSON.stringify({ error: `Invalid or out-of-workspace path: ${rawPath}` });
   const dir = path.dirname(filePath);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   if (mode === 'append') fs.appendFileSync(filePath, content, 'utf-8');
