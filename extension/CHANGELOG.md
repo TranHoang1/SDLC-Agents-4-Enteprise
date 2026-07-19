@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.14.0] - 2026-07-19
+
+### Added
+- **SA4E-48: MCP Streamable HTTP Compliance** — `WrapperServer` implements the mandatory MCP handshake so VS Code connects cleanly (no more `-32601 Method not supported: initialize` stop/restart loop):
+  - `initialize` — negotiates `protocolVersion` (2024-11-05 → 2025-06-18), returns `capabilities.tools` and `serverInfo`
+  - `notifications/initialized` — acknowledged (HTTP 202, no response body)
+  - `ping` — returns empty result
+  - `GET /mcp` — opens SSE stream (`text/event-stream`) per the Streamable HTTP transport spec
+   - 5 new integration tests (TC-32–TC-36) for handshake and SSE channel
+- **OpenCode SSE Compatibility** — Added `event: endpoint` to SSE stream so OpenCode v1.17.15 SSE client connects properly (fixes `Non-200 status code (405)` error)
+
 ## [1.11.0] - 2026-07-18
 
 ### Added

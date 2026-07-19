@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.13.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.14.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,11 @@ MIT
 ---
 
 ## Changelog
+
+### v1.14.0 (2026-07-19)
+
+- **SA4E-48: MCP Streamable HTTP Compliance** — `WrapperServer` implements the required MCP `initialize` handshake (plus `ping`, `notifications/initialized`, and `GET /mcp` SSE), fixing the VS Code `-32601 Method not supported: initialize` stop/restart loop. Added integration tests TC-32–TC-36.
+- **OpenCode SSE Compatibility** — Added `event: endpoint` to SSE stream so OpenCode v1.17.15 SSE client connects properly (fixes `Non-200 status code (405)` error)
 
 ### v1.13.0 (2026-07-19)
 
