@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.7.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.14.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -48,10 +48,10 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.5.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.14.0.vsix
 
 # Or VS Code
-code --install-extension sdlc-agents-4-enterprise-1.5.0.vsix
+code --install-extension sdlc-agents-4-enterprise-1.14.0.vsix
 ```
 
 3. **Verify connection**: Command Palette → "SDLC Agents: Settings" → Server Settings → Test Connection
@@ -242,6 +242,42 @@ MIT
 ---
 
 ## Changelog
+
+### v1.14.0 (2026-07-19)
+
+- **SA4E-48: MCP Streamable HTTP Compliance** — `WrapperServer` now implements the required MCP handshake so VS Code can connect without the stop/restart loop:
+  - `initialize` — negotiates `protocolVersion` (2024-11-05 → 2025-06-18), returns `capabilities.tools` and `serverInfo`
+  - `notifications/initialized` — acknowledged (202, no response)
+  - `ping` — returns empty result
+  - `GET /mcp` — opens SSE stream (`text/event-stream`) per Streamable HTTP spec
+   - Added 5 integration tests (TC-32–TC-36) covering the handshake and SSE channel
+  - **OpenCode SSE Compatibility** — Added `event: endpoint` to SSE stream so OpenCode v1.17.15 SSE client connects properly (fixes `Non-200 status code (405)` error)
+
+### v1.13.0 (2026-07-19)
+
+- **Presentation Servers** — Added FastAPI (Python) + Next.js (React) presentation generation servers
+- **Electron Desktop App** — Desktop wrapper with IPC and slide metadata
+- **Architecture Diagrams** — Agent pipeline and architecture overview draw.io diagrams
+
+### v1.12.0 (2026-07-19)
+
+- **Version Bump** — All packages and README files updated to v1.12.0
+- **Consistency Sync** — Version badges, install commands, and changelogs aligned across root, backend, and extension READMEs
+
+### v1.11.0 (2026-07-18)
+
+- **SA4E-42: DatabaseAdapter Refactoring** — Engine layer overhaul with `DatabaseAdapter` interface + `SqliteDbAdapter` implementation. Memory, graph, indexer modules refactored. 66 test files pass.
+- **SA4E-47: LLM Context Chain** — Enhanced document indexing with context chain window, entity/actor/rule extraction, structured_map storage, full content extraction on ingest. 12 new test files.
+- **drawio Test Fixes** — Export tests pass with `content_base64` param; export-dependent tests skipped (requires drawio CLI).
+- **IndexerHttpClient** — 30s HTTP timeout for extension KB operations.
+
+### v1.8.1 (2026-07-15)
+
+- **SA4E-38: Smart KB Ingest** — New `mem_smart_ingest` + `mem_smart_ingest_cleanup` MCP tools for semantic evaluation before KB ingestion using local Ollama LLM.
+
+### v1.8.0 (2026-07-15)
+
+- **SA4E-36: Multi-tenant RBAC** — Project isolation, per-user KB scoping, access group permissions, impersonation support in Admin Portal.
 
 ### v1.7.0 (2026-07-15)
 

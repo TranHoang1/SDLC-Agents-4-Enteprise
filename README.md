@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.8.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.14.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,62 @@ MIT
 ---
 
 ## Changelog
+
+### v1.14.0 (2026-07-19)
+
+- **SA4E-48: MCP Streamable HTTP Compliance** — `WrapperServer` implements the required MCP `initialize` handshake (plus `ping`, `notifications/initialized`, and `GET /mcp` SSE), fixing the VS Code `-32601 Method not supported: initialize` stop/restart loop. Added integration tests TC-32–TC-36.
+- **OpenCode SSE Compatibility** — Added `event: endpoint` to SSE stream so OpenCode v1.17.15 SSE client connects properly (fixes `Non-200 status code (405)` error)
+
+### v1.13.0 (2026-07-19)
+
+- **Presentation Servers** — Added FastAPI (Python) + Next.js (React) presentation generation servers with full slide templates, LLM integration, and chat services
+- **Electron Desktop App** — Added Electron wrapper with IPC and slide metadata support
+- **Presentation Diagrams** — Architecture overview and agent pipeline draw.io diagrams
+- **Scripts & Utilities** — `rebuild_notice_all.py`, `start.js`, `test_server.py`
+
+### v1.12.0 (2026-07-19)
+
+- **Version Bump** — All packages and README files updated to v1.12.0
+- **Consistency Sync** — Version badges, install commands, and changelogs aligned across root, backend, and extension READMEs
+
+### v1.11.0 (2026-07-18)
+
+- **SA4E-42: DatabaseAdapter Refactoring** — Complete engine layer overhaul with consistent SQLite adapter patterns:
+  - `DatabaseAdapter` interface with atomic `get()`, `list()`, `create()`, `update()`, `delete()`, `query()` methods
+  - `SqliteDbAdapter` implements all CRUD with prepared statements, transactions, batch operations
+  - Memory module (`MemoryAdapterWrapper`, `GraphNodeAdapter`, `IndexerAdapter`) refactored to use adapter
+  - All 66 test files pass (570 tests, 0 failures)
+- **SA4E-47: LLM Context Chain for Document Indexing** — Enhanced LLM pipeline with contextual reasoning:
+  - `analyzer.ts` — chunking with context chain window, entity/actor/rule extraction, rich structured_map output
+  - `ENHANCED_SYSTEM_PROMPT` in `prompts.ts` — expanded instruction set covering roles, relationships, priority, tags
+  - `LLMService.ts` — maxTokens 300→2048 for deep analysis
+  - `TaskWorker.ts` — context chain query path, structured_map merge into KB
+  - `engine/crud.ts` — `updateStructuredMap()` for persistent structured_map storage
+  - `dispatchers/crud.ts` — full content extraction, automatic task creation on `handleIngestFile`
+  - 12 new unit test files for all added modules
+- **drawio Test Fixes** — `drawio-export.test.ts` + `mcp-drawio-dispatch.test.ts` pass (content_base64 param); export-dependent tests skipped (requires drawio CLI)
+- **Extension 1.11.0** — Packaged as `.vsix`, 30s HTTP timeout in `IndexerHttpClient`
+
+### v1.9.0 (2026-07-15)
+
+- **Agent Sync to All Platforms** — Synced 9 agent prompts from `.kiro/agents/prompts/` to all 5 conversion targets (Claude Code, OpenCode, GitHub Copilot, Codex OpenAI, Antigravity/Gemini) + root `.claude/` and `.opencode/` folders. Single source of truth maintained.
+
+### v1.8.2 (2026-07-15)
+
+- **SA4E-39: Extension Auth Warning** — Show warning + Login button when session expires, StatusBarManager wiring, HttpClient auth-guard prevents 401 spam and silent KB ingestion failures.
+- **SA4E-40: Admin Dashboard 401 Fix** — Stop polling on token expiry, auto-redirect to LoginPage, prevent server log flood.
+- **Version Sync** — All README badges + changelogs now consistent. Added `version-sync-check` hook to prevent future drift.
+
+### v1.8.1 (2026-07-15)
+
+- **SA4E-38: Smart KB Ingest — Local LLM Semantic Evaluation** — New MCP tools `mem_smart_ingest` + `mem_smart_ingest_cleanup` that use local Ollama LLM to evaluate user messages before KB ingestion:
+  - `ClassifyService` — Strategy pattern for LLM-based binary classification (ingest/skip)
+  - Fire-and-forget pattern — hook calls backend tool without consuming chat LLM tokens
+  - Graceful fallback — Ollama unavailable → ingest raw with "unfiltered" tag, batch cleanup later
+  - Deduplication — content hash prevents duplicate KB entries
+  - Feature flag — `SMART_INGEST_ENABLED` env var for instant disable
+  - 33 unit tests, 48 test cases planned (STP/STC)
+  - Full SDLC documentation: BRD, FSD, TDD, STP, STC, UG + 10 draw.io diagrams
 
 ### v1.8.0 (2026-07-15)
 

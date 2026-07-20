@@ -2,7 +2,7 @@
   "name": "sdlc-agents-4-enterprise",
   "displayName": "SDLC Agents 4 Enterprise",
   "description": "Multi-agent SDLC pipeline for enterprise — 9 AI agents (SM, BA, TA, SA, QA, DEV, DevOps, Security, UI) orchestrated via MCP",
-  "version": "1.8.0",
+  "version": "1.14.0",
   "publisher": "dnguyenminh",
   "license": "MIT",
   "repository": {
@@ -216,7 +216,15 @@
         "kiroSdlc.llmProvider": {
           "type": "string",
           "default": "anthropic",
-          "enum": ["anthropic", "openai", "ollama", "lmstudio", "openrouter", "onnx", "kiro"],
+          "enum": [
+            "anthropic",
+            "openai",
+            "ollama",
+            "lmstudio",
+            "openrouter",
+            "onnx",
+            "kiro"
+          ],
           "description": "Active LLM provider"
         },
         "kiroSdlc.llmModel": {
@@ -287,7 +295,8 @@
     "watch": "tsc -watch -p ./",
     "copy-resources": "node scripts/copy-resources.js",
     "gen-checksums": "node scripts/gen-checksums.js",
-    "test": "vitest run",
+    "test": "vitest run --exclude '**/*.e2e.test.ts'",
+    "test:e2e": "vitest run src/__tests__/cross-process.e2e.test.ts src/__tests__/drawio-convert.e2e.test.ts",
     "test:watch": "vitest watch"
   },
   "devDependencies": {
@@ -300,7 +309,9 @@
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^2.24.0",
     "esbuild": "^0.21.0",
+    "fast-check": "^4.9.0",
     "glob": "^13.0.6",
+    "jsdom": "^29.1.1",
     "mocha": "^10.7.3",
     "sinon": "^17.0.1",
     "ts-node": "^10.9.2",

@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.14.0] - 2026-07-19
+
+### Added
+- **SA4E-48: MCP Streamable HTTP Compliance** — `WrapperServer` implements the mandatory MCP handshake so VS Code connects cleanly (no more `-32601 Method not supported: initialize` stop/restart loop):
+  - `initialize` — negotiates `protocolVersion` (2024-11-05 → 2025-06-18), returns `capabilities.tools` and `serverInfo`
+  - `notifications/initialized` — acknowledged (HTTP 202, no response body)
+  - `ping` — returns empty result
+  - `GET /mcp` — opens SSE stream (`text/event-stream`) per the Streamable HTTP transport spec
+   - 5 new integration tests (TC-32–TC-36) for handshake and SSE channel
+- **OpenCode SSE Compatibility** — Added `event: endpoint` to SSE stream so OpenCode v1.17.15 SSE client connects properly (fixes `Non-200 status code (405)` error)
+
+## [1.11.0] - 2026-07-18
+
+### Added
+- **SA4E-42: DatabaseAdapter Refactoring** — Engine layer overhaul with `DatabaseAdapter` interface + `SqliteDbAdapter` implementation. Memory, graph, indexer modules refactored. 66 test files, 570 tests pass.
+- **SA4E-47: LLM Context Chain for Document Indexing** — Enhanced analyzer (context chunking, entity/actor/rule extraction), ENHANCED_SYSTEM_PROMPT, LLM maxTokens 2048, TaskWorker context chain query, structured_map merge, full content extraction on ingest. 12 new test files.
+
+### Fixed
+- **drawio Export Tests** — `drawio-export.test.ts` + `mcp-drawio-dispatch.test.ts` updated for `content_base64` param; export-dependent tests skip gracefully when drawio CLI unavailable
+
+### Changed
+- **IndexerHttpClient** — 30s HTTP timeout to prevent silent KB ingestion failures
+- **Backend version** — synced to 1.11.0
+
+## [1.10.0] - 2026-07-17
+
+### Added
+- **SA4E-29: Generic Schema-Driven Base64 Proxy** — transparent file ↔ base64 bridge for remote backend:
+  - `Base64ProxyService` — auto-detects proxy tools from schema (zero hardcoding); rewrites schemas for LLM (hides content_base64, shows file_path)
+  - `WrapperServer` — HTTP MCP proxy on port 9181; routes tools/list + tools/call with automatic base64 I/O
+  - `execute_dynamic_tool` unwrapping — proxies nested arguments for dynamically-invoked tools
+  - `find_tools` response rewriting — schemas in discovery responses consistent with tools/list
+  - 29 automated tests (19 UT + 10 IT/E2E-API/PBT) — all passing
+
+### Fixed
+- **SA4E-43: Extension compile errors** — created missing langgraph subgraph stubs + fixed type errors + mcpClient property
+- **SA4E-42: find_tools re-index** — semantic index now refreshes on child MCP server connect/disconnect events (backend)
+
 ## [1.25.0] - 2025-07-29
 
 ### Added
@@ -11,7 +49,8 @@
   - Keyboard navigation (ArrowUp/Down/Enter/Escape) crossing section boundaries
   - Agent selection inserts /agent-name  prefix in textarea
   - Steering selection adds context chip via existing ddContextChip()
-  - Full accessibility: ole=listbox, ria-activedescendant, screen reader announcements
+  - Full accessibility: 
+ole=listbox, ria-activedescendant, screen reader announcements
   - 57 automated tests (12 PBT + 30 UT + 15 IT) — all passing
 
 
