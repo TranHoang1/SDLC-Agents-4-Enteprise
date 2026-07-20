@@ -1,0 +1,52 @@
+<mxfile>
+  <diagram name="Page-1">
+    <mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;System Context — mem_smart_ingest&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="220" y="10" width="360" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="boundary" value="Backend MCP Server" style="rounded=1;dashed=1;dashPattern=5 5;fillColor=none;strokeColor=#0288d1;verticalAlign=top;fontSize=12;arcSize=8;html=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="120" width="400" height="280" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_hook" value="Hook&#10;stream-user-prompt" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="200" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_admin" value="Admin/Developer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="340" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="smart_ingest" value="&lt;b&gt;mem_smart_ingest&lt;/b&gt;&#10;Classify message&#10;Auto-ingest if valuable" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="280" y="180" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="cleanup" value="&lt;b&gt;mem_smart_ingest_cleanup&lt;/b&gt;&#10;Batch re-evaluate&#10;unfiltered entries" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="280" y="300" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="ollama" value="&lt;b&gt;Ollama Server&lt;/b&gt;&#10;localhost:11434&#10;Local LLM (qwen3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="680" y="180" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="kb_storage" value="&lt;b&gt;KB Storage&lt;/b&gt;&#10;SQLite&#10;Knowledge Entries" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=10;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="680" y="310" width="140" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="execute_dynamic_tool" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="actor_hook" target="smart_ingest" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="trigger cleanup" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="actor_admin" target="cleanup" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="REST /api/chat" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="smart_ingest" target="ollama" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="REST /api/chat" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" source="cleanup" target="ollama" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="mem_ingest" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="smart_ingest" target="kb_storage" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="update/delete" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" source="cleanup" target="kb_storage" parent="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,81 @@
+<mxfile>
+  <diagram name="Page-1">
+    <mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;Sequence — Fallback Flow (Ollama Unavailable)&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="120" y="10" width="420" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_hook" value="Hook" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="80" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_handler" value="SmartIngest&#10;Handler" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="220" y="60" width="100" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_adapter" value="Ollama&#10;Adapter" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="400" y="60" width="80" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_kb" value="KB&#10;Engine" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="560" y="60" width="80" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="m1" value="1. mem_smart_ingest({message})" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="140" as="sourcePoint"/>
+        <mxPoint x="270" y="140" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m2" value="2. isAvailable(config) [3s timeout]" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="270" y="170" as="sourcePoint"/>
+        <mxPoint x="440" y="170" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m3" value="3. fetch /api/tags → timeout/error" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;strokeColor=#c62828;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="440" y="200" as="sourcePoint"/>
+        <mxPoint x="440" y="230" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="490" y="200"/>
+          <mxPoint x="490" y="230"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m4" value="4. false (unavailable)" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;strokeColor=#c62828;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="440" y="260" as="sourcePoint"/>
+        <mxPoint x="270" y="260" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m5" value="5. log warning" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="270" y="290" as="sourcePoint"/>
+        <mxPoint x="270" y="310" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="320" y="290"/>
+          <mxPoint x="320" y="310"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m6" value="6. mem_ingest(truncated_msg, tags=unfiltered)" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="270" y="340" as="sourcePoint"/>
+        <mxPoint x="600" y="340" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m7" value="7. entry_id" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="600" y="370" as="sourcePoint"/>
+        <mxPoint x="270" y="370" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m8" value="8. {action:ingest_unfiltered, reason:llm_unavailable}" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="270" y="400" as="sourcePoint"/>
+        <mxPoint x="100" y="400" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>
+  </diagram>
+</mxfile>

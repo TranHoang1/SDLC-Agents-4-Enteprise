@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.7.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.14.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/tools-66+-teal?style=for-the-badge" alt="Tools">
   <img src="https://img.shields.io/badge/node-%3E%3D18-green?style=for-the-badge" alt="Node">
 </p>
@@ -233,6 +233,14 @@ The embedding model is expected at `.code-intel/models/model.onnx`. Download it:
 
 | Version | Date | Ticket | Changes |
 |---------|------|--------|---------|
+| 1.14.0 | 2026-07-19 | SA4E-48 | Extension `WrapperServer` MCP Streamable HTTP compliance: `initialize` handshake, `ping`, `notifications/initialized`, `GET /mcp` SSE — fixes VS Code `-32601` stop/restart loop + OpenCode SSE `endpoint` event fix |
+| 1.13.0 | 2026-07-19 | — | Presentation servers (FastAPI + Next.js), Electron desktop app, architecture diagrams, utility scripts |
+| 1.12.0 | 2026-07-19 | — | Version bump + README sync across all packages |
+| 1.11.0 | 2026-07-18 | SA4E-42/47 | DatabaseAdapter refactoring (engine, memory, graph, indexer) + LLM Context Chain for document indexing (analyzer, prompts, TaskWorker, structured_map, full content extraction). 66 files, 570 tests pass. |
+| 1.10.1 | 2026-07-16 | — | Bump version + update README |
+| 1.9.0 | 2026-07-15 | — | Agent Sync to All Platforms — 9 agent prompts synced to 5 conversion targets + root `.claude/` and `.opencode/` folders |
+| 1.8.1 | 2026-07-15 | SA4E-38 | Smart KB Ingest: `mem_smart_ingest` + `mem_smart_ingest_cleanup` tools using local Ollama LLM for semantic evaluation before KB ingestion. ClassifyService + SmartIngestHandler. |
+| 1.8.0 | 2026-07-15 | SA4E-36 | Multi-tenant RBAC: Project isolation via X-Project-Id header, per-user KB scoping, access group permissions, impersonation. |
 | 1.7.0 | 2026-07-15 | SA4E-37 | Health Check & Auto-Reconnect: HealthMonitor (parallel pings), ReconnectManager (exponential backoff + jitter), ConnectionStateTracker (state machine + events), TransportFactory. McpClientManager refactored as Facade. 54 unit tests. |
 | 1.6.0 | 2026-07-15 | SA4E-34 | Multi-database Support: DatabaseAdapter strategy pattern, PostgresAdapter, MysqlAdapter, MigrationService, Admin UI database tab |
 | 1.5.0 | 2026-07-13 | SA4E-125 | Pipeline Refactoring v2-v6: index-based routing, PipelineDefinition in state, sandboxed hot-swap, resolvePhaseIndex() realignment, orphan detection, skip/cancel decisions, 3-layer skip fix, Ghost Context Barrier. LangGraph restructured into core/pipeline/agents/engine/subgraphs/workflow/helpers/hooks/vscode. 13 architecture diagrams. |

@@ -9,10 +9,11 @@ import { ContextSection, ContextItem } from './types.js';
 export async function searchCode(
   analysis: { ftsQuery: string; symbolCandidates: string[] },
   queryLayer: QueryLayer,
-  resolver: SymbolResolver
+  resolver: SymbolResolver,
+  projectId?: string
 ): Promise<{ source: string; results: any[] }> {
   try {
-    const ftsResults = queryLayer.searchCode(analysis.ftsQuery, 30);
+    const ftsResults = queryLayer.searchCode(projectId, analysis.ftsQuery, 30);
 
     const symbolResults: any[] = [];
     for (const candidate of analysis.symbolCandidates.slice(0, 5)) {
@@ -41,19 +42,24 @@ export async function searchCode(
 
 export async function searchMemory(
   analysis: { ftsQuery: string; keywords: string[] },
-  db: Database.Database
+  db: Database.Database,
+  projectId?: string
 ): Promise<{ source: string; results: any[] }> {
   try {
+    // SA4E-41 §6.4: fail-closed — never search the shared KB without a tenant scope.
+    if (!projectId) return { source: 'memory', results: [] };
     const query = analysis.keywords.slice(0, 5).join(' ');
+    // Scope KB results to the tenant's project_id (mirrors the memory IsolationLayer).
     const rows = db.prepare(`
       SELECT id, content, summary, type, tags, created_at
       FROM knowledge_entries
-      WHERE id IN (
-        SELECT rowid FROM knowledge_fts WHERE knowledge_fts MATCH ?
-      )
+      WHERE project_id = ?
+        AND id IN (
+          SELECT rowid FROM knowledge_fts WHERE knowledge_fts MATCH ?
+        )
       ORDER BY created_at DESC
       LIMIT 10
-    `).all(query) as any[];
+    `).all(projectId, query) as any[];
 
     return {
       source: 'memory',

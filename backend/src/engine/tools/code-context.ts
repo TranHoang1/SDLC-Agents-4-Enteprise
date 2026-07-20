@@ -4,10 +4,10 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { QueryLayer } from '../query/query-layer.js';
+import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 
 export function registerCodeContext(
   server: McpServer, queryLayer: QueryLayer, workspace: string
@@ -21,9 +21,10 @@ export function registerCodeContext(
       startLine: z.number().optional().describe('Start line (1-based)'),
       endLine: z.number().optional().describe('End line (1-based)'),
       contextLines: z.number().optional().default(5).describe('Extra lines above/below'),
+      __projectId: z.string().optional().describe('SA4E-41 tenant scope (injected)'),
     },
-    async ({ file, symbol, startLine, endLine, contextLines }) => {
-      const text = getContext(workspace, file, symbol, startLine, endLine, contextLines, queryLayer);
+    async ({ file, symbol, startLine, endLine, contextLines, __projectId }) => {
+      const text = getContext(workspace, file, symbol, startLine, endLine, contextLines, queryLayer, __projectId);
       return { content: [{ type: 'text', text }] };
     }
   );
@@ -32,16 +33,18 @@ export function registerCodeContext(
 function getContext(
   workspace: string, file: string, symbol: string | undefined,
   startLine: number | undefined, endLine: number | undefined,
-  contextLines: number, queryLayer: QueryLayer
+  contextLines: number, queryLayer: QueryLayer, projectId?: string
 ): string {
-  const fullPath = path.resolve(workspace, file);
+  // SEC-04: reject absolute/traversal/null-byte paths and confirm containment.
+  const fullPath = resolveWithinWorkspace(workspace, file);
+  if (!fullPath) return `Invalid path: ${file}`;
   if (!fs.existsSync(fullPath)) return `File not found: ${file}`;
 
   const content = fs.readFileSync(fullPath, 'utf-8');
   const lines = content.split('\n');
 
   if (symbol) {
-    return getSymbolContext(file, symbol, lines, contextLines, queryLayer);
+    return getSymbolContext(file, symbol, lines, contextLines, queryLayer, projectId);
   }
 
   const start = Math.max(0, (startLine ?? 1) - 1 - contextLines);
@@ -51,9 +54,9 @@ function getContext(
 
 function getSymbolContext(
   file: string, symbol: string, lines: string[],
-  contextLines: number, queryLayer: QueryLayer
+  contextLines: number, queryLayer: QueryLayer, projectId?: string
 ): string {
-  const symbols = queryLayer.getFileSymbols(file);
+  const symbols = queryLayer.getFileSymbols(projectId, file);
   const match = symbols.find(s => s.name === symbol);
   if (!match) return `Symbol "${symbol}" not found in ${file}`;
 

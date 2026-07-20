@@ -11,13 +11,15 @@ export function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | un
 
   const limit = (a.limit as number) ?? 10000;
   const kind = a.kind as string | undefined;
+  // SA4E-41: scope symbol reads to the request tenant (fail-closed if absent).
+  const projectId = a.__projectId as string | undefined;
 
   let symbols: any[] = [];
   if (kind) {
-    symbols = queryLayer.findSymbols('', kind, limit);
+    symbols = queryLayer.findSymbols(projectId, '', kind, limit);
   } else {
-    const classes = queryLayer.findSymbols('', 'class', Math.floor(limit / 2));
-    const interfaces = queryLayer.findSymbols('', 'interface', Math.floor(limit / 2));
+    const classes = queryLayer.findSymbols(projectId, '', 'class', Math.floor(limit / 2));
+    const interfaces = queryLayer.findSymbols(projectId, '', 'interface', Math.floor(limit / 2));
     symbols = [...classes, ...interfaces];
   }
 
@@ -25,7 +27,7 @@ export function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | un
     return 'No code symbols found to sync.';
   }
 
-  const db = engine.getDb();
+  const db = engine.getDb() as any;
   const checkStmt = db.prepare(`
     SELECT id FROM knowledge_entries 
     WHERE type = 'CODE_ENTITY' AND source = ? AND summary = ?

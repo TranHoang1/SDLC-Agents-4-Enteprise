@@ -2,7 +2,8 @@
  * KSA-158/159/160: AI Context MCP tool handlers and definitions.
  */
 
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
+import { SqliteDbAdapter } from '../../modules/memory/task-queue/SqliteDbAdapter.js';
 import { SymbolResolver } from '../graph/symbol-resolver.js';
 import { CallGraphService } from '../graph/call-graph-service.js';
 import { TestDetector } from '../graph/test-detector.js';
@@ -72,9 +73,10 @@ export const AI_CONTEXT_TOOL_DEFINITIONS = [
 ];
 
 /** Handle get_ai_context tool call. */
-export function handleGetAIContext(args: Record<string, unknown>, db: Database.Database, workspace: string): string {
-  const resolver = new SymbolResolver(db);
-  const graphRepo = new GraphRepository(db);
+export function handleGetAIContext(args: Record<string, unknown>, db: Database.Database, workspace: string, projectId?: string): string {
+  const adapter = new SqliteDbAdapter(db);
+  const resolver = new SymbolResolver(db, projectId);
+  const graphRepo = new GraphRepository(adapter, projectId);
   const callGraph = new CallGraphService(graphRepo, resolver);
   const service = new AIContextService(db, resolver, callGraph, workspace);
 
@@ -91,11 +93,12 @@ export function handleGetAIContext(args: Record<string, unknown>, db: Database.D
 }
 
 /** Handle get_edit_context tool call. */
-export function handleGetEditContext(args: Record<string, unknown>, db: Database.Database, workspace: string): string {
-  const resolver = new SymbolResolver(db);
-  const graphRepo = new GraphRepository(db);
+export function handleGetEditContext(args: Record<string, unknown>, db: Database.Database, workspace: string, projectId?: string): string {
+  const adapter = new SqliteDbAdapter(db);
+  const resolver = new SymbolResolver(db, projectId);
+  const graphRepo = new GraphRepository(adapter, projectId);
   const callGraph = new CallGraphService(graphRepo, resolver);
-  const testDetector = new TestDetector(db);
+  const testDetector = new TestDetector(db, projectId);
   const service = new EditContextService(db, resolver, callGraph, testDetector, workspace);
 
   const params = {
@@ -117,10 +120,11 @@ export function handleGetCuratedContext(
   args: Record<string, unknown>,
   db: Database.Database,
   workspace: string,
-  dbManager: DatabaseManager
+  dbManager: DatabaseManager,
+  projectId?: string
 ): string {
-  const resolver = new SymbolResolver(db);
-  const traverser = new GraphTraverser(db, resolver, workspace);
+  const resolver = new SymbolResolver(db, projectId);
+  const traverser = new GraphTraverser(db, resolver, workspace, projectId);
   const queryLayer = new QueryLayer(dbManager);
   const service = new CuratedContextService(db, queryLayer, traverser, resolver);
 
@@ -130,7 +134,8 @@ export function handleGetCuratedContext(
     include_source: (args.include_source as boolean) ?? true,
     include_memory: (args.include_memory as boolean) ?? true,
     include_graph: (args.include_graph as boolean) ?? true,
-    source_weights: args.source_weights as any
+    source_weights: args.source_weights as any,
+    projectId
   };
 
   const result = executeSync(() => service.getContext(params));

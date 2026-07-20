@@ -7,7 +7,9 @@ import type { MemoryEngine } from '../engine/core.js';
 import type { QueryLayer } from '../../../engine/query/query-layer.js';
 import type { KBScope, ScopeContext } from '../models.js';
 import type { ScopePromotionService } from '../promotion/service.js';
+import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import type { TagAnalyzerService } from '../llm/analyzer.js';
+import type { ClassifyService } from '../llm/classify-service.js';
 import type { ConvertToolResolver } from '../ingest/ConvertToolResolver.js';
 import { handleSearch, handleDiscover, handleTags, handleCitations } from './search.js';
 import { handleIngest, handleIngestFile, handlePin, handleMap, handleCrud } from './crud.js';
@@ -17,6 +19,7 @@ import {
   handleScoring, handlePromote,
 } from './analytics.js';
 import { handleOutcome, handleVerify, handleConfigureDecay } from './evolution.js';
+import { handleSmartIngest, handleSmartIngestCleanup } from './smart-ingest.js';
 
 type Args = Record<string, unknown>;
 
@@ -34,7 +37,10 @@ export class MemoryToolDispatcher {
   private scopeCtx: ScopeContext | undefined;
   private promotionService: ScopePromotionService | undefined;
   private tagAnalyzer: TagAnalyzerService | undefined;
+  private classifyService: ClassifyService | undefined;
   private convertResolver: ConvertToolResolver | undefined;
+  private dbAdapter: DatabaseAdapter | undefined;
+  private embeddingAvailable = false;
 
   constructor(
     private readonly engine: MemoryEngine,
@@ -58,12 +64,24 @@ export class MemoryToolDispatcher {
     this.convertResolver = resolver;
   }
 
+  setClassifyService(svc: ClassifyService): void {
+    this.classifyService = svc;
+  }
+
+  setDbAdapter(adapter: DatabaseAdapter): void {
+    this.dbAdapter = adapter;
+  }
+
+  setEmbeddingAvailable(available: boolean): void {
+    this.embeddingAvailable = available;
+  }
+
   async dispatch(name: string, args: Args): Promise<string | null> {
     const [resolved, merged] = this.resolveAlias(name, args);
     switch (resolved) {
       case 'mem_search': return handleSearch(this.engine, this.scopeCtx, merged);
-      case 'mem_ingest': return handleIngest(this.engine, this.scopeCtx, this.tagAnalyzer, merged);
-      case 'mem_ingest_file': return handleIngestFile(this.engine, this.scopeCtx, this.workspace, merged, this.convertResolver);
+      case 'mem_ingest': return handleIngest(this.engine, this.scopeCtx, this.tagAnalyzer, merged, this.dbAdapter, this.embeddingAvailable);
+      case 'mem_ingest_file': return handleIngestFile(this.engine, this.scopeCtx, this.workspace, merged, this.convertResolver, this.dbAdapter, this.embeddingAvailable);
       case 'mem_pin': return handlePin(merged);
       case 'mem_map': return handleMap(merged);
       case 'mem_crud': return handleCrud(this.engine, this.scopeCtx, merged);
@@ -82,6 +100,8 @@ export class MemoryToolDispatcher {
       case 'mem_outcome': return handleOutcome(this.engine, merged);
       case 'mem_verify': return handleVerify(this.engine, merged);
       case 'mem_configure_decay': return handleConfigureDecay(this.engine, merged);
+      case 'mem_smart_ingest': return handleSmartIngest(this.engine, this.scopeCtx, this.classifyService, merged);
+      case 'mem_smart_ingest_cleanup': return handleSmartIngestCleanup(this.engine, this.scopeCtx, this.classifyService, merged);
       default: return null;
     }
   }

@@ -1,0 +1,100 @@
+<mxfile>
+  <diagram name="Page-1">
+    <mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;Sequence — Main Flow (Ollama Available)&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="150" y="10" width="400" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_hook" value="Hook" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="80" height="500" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_handler" value="SmartIngest&#10;Handler" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="220" y="60" width="100" height="500" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_adapter" value="Ollama&#10;Adapter" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="400" y="60" width="80" height="500" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_ollama" value="Ollama&#10;Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="560" y="60" width="80" height="500" as="geometry"/>
+    </mxCell>
+    <mxCell id="ll_kb" value="KB&#10;Engine" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;size=16;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="720" y="60" width="80" height="500" as="geometry"/>
+    </mxCell>
+    <mxCell id="m1" value="1. mem_smart_ingest({message})" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="140" as="sourcePoint"/>
+        <mxPoint x="270" y="140" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m2" value="2. isAvailable(config)" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="270" y="170" as="sourcePoint"/>
+        <mxPoint x="440" y="170" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m3" value="3. GET /api/tags" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="440" y="200" as="sourcePoint"/>
+        <mxPoint x="600" y="200" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m4" value="4. 200 OK" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="600" y="230" as="sourcePoint"/>
+        <mxPoint x="440" y="230" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m5" value="5. true" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="440" y="260" as="sourcePoint"/>
+        <mxPoint x="270" y="260" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m6" value="6. complete(eval_prompt + message)" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="270" y="290" as="sourcePoint"/>
+        <mxPoint x="440" y="290" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m7" value="7. POST /api/chat" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="440" y="320" as="sourcePoint"/>
+        <mxPoint x="600" y="320" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m8" value="8. {verdict:ingest, summary}" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="600" y="360" as="sourcePoint"/>
+        <mxPoint x="440" y="360" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m9" value="9. LLMResponse" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="440" y="390" as="sourcePoint"/>
+        <mxPoint x="270" y="390" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m10" value="10. mem_ingest(summary, tags)" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="270" y="420" as="sourcePoint"/>
+        <mxPoint x="760" y="420" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m11" value="11. entry_id" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="760" y="450" as="sourcePoint"/>
+        <mxPoint x="270" y="450" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m12" value="12. {action:ingest, summary}" style="html=1;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;dashed=1;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="270" y="480" as="sourcePoint"/>
+        <mxPoint x="100" y="480" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>
+  </diagram>
+</mxfile>

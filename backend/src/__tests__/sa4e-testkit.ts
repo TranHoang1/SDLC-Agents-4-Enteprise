@@ -5,6 +5,7 @@
 
 import { DatabaseManager } from '../engine/db/database-manager.js';
 import { MemoryEngine } from '../modules/memory/engine/index.js';
+import { SqliteDbAdapter } from '../modules/memory/task-queue/SqliteDbAdapter.js';
 import type { IModule, ModuleStatus } from '../types/module.js';
 import type { ToolHandler, ToolDefinition } from '../types/tool.js';
 import pino from 'pino';
@@ -28,7 +29,7 @@ export function makeTempDb(): TempDb {
   const dbPath = path.join(tmpDir, 'index.db');
   const dbManager = new DatabaseManager(dbPath);
   dbManager.initialize();
-  const engine = new MemoryEngine(dbManager.getDb());
+  const engine = new MemoryEngine(new SqliteDbAdapter(dbManager.getDb()));
   return {
     dbManager,
     engine,
@@ -100,8 +101,9 @@ export async function connectMcp(registry: ModuleRegistry): Promise<McpHarness> 
   };
 }
 
-/** The canonical 8 CORE tool names (5 memory + 3 meta). */
-export const CORE_8 = [
+/** The canonical 10 CORE tool names (5 memory + 3 meta + 2 drawio). */
+export const CORE_10 = [
   'mem_search', 'mem_ingest', 'mem_ingest_file', 'code_search',
   'get_curated_context', 'find_tools', 'execute_dynamic_tool', 'orchestration_status',
+  'drawio_export_png', 'drawio_auto_layout',
 ];

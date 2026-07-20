@@ -7,7 +7,7 @@ import Database from 'better-sqlite3';
 import * as fs from 'fs';
 import * as path from 'path';
 import pino from 'pino';
-import { runMigrations } from './migrations.js';
+import { runMigrations, getCurrentVersion } from './migrations.js';
 import { resolveNativeBinding, resolveNativeBindingSync } from './resolver/index.js';
 
 const logger = pino({ name: 'database-manager' });
@@ -15,12 +15,19 @@ const logger = pino({ name: 'database-manager' });
 export class DatabaseManager {
   private db: Database.Database | null = null;
   private readonly dbPath: string;
+  private readonly projectId: string;
   private static resolvedBinding: string | undefined | null = null; // null = not yet resolved
   private static sharedDb: Database.Database | null = null;
   private static initPromise: Promise<void> | null = null;
 
-  constructor(dbPath: string) {
+  /**
+   * @param dbPath  Path to the SQLite index.db file.
+   * @param projectId  Booting workspace's derived project id (SA4E-41) — used as
+   *                   the legacy backfill value for the V5 multi-tenant migration.
+   */
+  constructor(dbPath: string, projectId: string = 'default') {
     this.dbPath = dbPath;
+    this.projectId = projectId;
   }
 
   /**
@@ -54,9 +61,29 @@ export class DatabaseManager {
     }
 
     this.configureDatabase();
-    runMigrations(this.db);
+    this.backupBeforeV5();
+    runMigrations(this.db, this.projectId);
     DatabaseManager.sharedDb = this.db;
     logger.error(`[db] Initialized at ${this.dbPath}`);
+  }
+
+  /**
+   * SA4E-41 (TDD §10.3): snapshot the pre-V5 index.db before the multi-tenant
+   * migration runs, so a failed migration can be rolled back. Uses VACUUM INTO for
+   * a consistent copy (WAL-safe). Skipped for in-memory DBs and when already ≥ V5.
+   */
+  private backupBeforeV5(): void {
+    if (!this.db || this.dbPath === ':memory:') return;
+    try {
+      if (getCurrentVersion(this.db) >= 5) return;
+      const backupPath = `${this.dbPath}.pre-v5.bak`;
+      if (fs.existsSync(backupPath)) return; // don't overwrite an existing snapshot
+      this.db.exec(`VACUUM INTO '${backupPath.replace(/'/g, "''")}'`);
+      logger.error(`[db] Pre-V5 backup written to ${backupPath}`);
+    } catch (err) {
+      // Non-fatal: log loudly but let migration proceed (backup is best-effort).
+      logger.error({ err }, '[db] Pre-V5 backup failed (continuing with migration)');
+    }
   }
 
   /** Get the underlying database instance. */
