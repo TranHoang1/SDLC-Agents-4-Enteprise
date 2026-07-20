@@ -63,12 +63,12 @@ services:
   # set LLM_PROVIDER / LLM_BASE_URL / LLM_API_KEY in .env and
   # comment out this service and the depends_on above.
   # ────────────────────────────────────────────────────────────────
-#  ollama:
-#    image: ollama/ollama:latest
-#    container_name: sdlc-ollama
-#    restart: unless-stopped
-#    ports:
-#      - "11434:11434"
+  ollama:
+    image: hoangtran4080/ollama:v1
+    container_name: sdlc-ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
 #    volumes:
 #      - ollama-data:/root/.ollama
     # ── NVIDIA GPU support (uncomment to enable) ──
