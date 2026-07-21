@@ -4,7 +4,7 @@
  * Implements: UC-05, ISP
  */
 
-import type { GraphNodeCounts, UpsertNodeParams, AuditEntry, PaginatedResult } from './types.js';
+import type { GraphNodeCounts, UpsertNodeParams, AuditEntry, PaginatedResult, SymbolDetail } from './types.js';
 
 /**
  * Graph data access — graph_nodes and graph_edges operations.
@@ -17,6 +17,8 @@ export interface IGraphRepository {
   resetGraph(): void;
   /** INSERT OR REPLACE a graph node. */
   upsertNode(params: UpsertNodeParams): void;
+  /** Register/update a project in project_registry. [Source: api-index.ts] */
+  registerProject(projectId: string, displayName: string, workspacePath: string): void;
 }
 
 /**
@@ -39,6 +41,8 @@ export interface IUserRepository {
 export interface ISymbolRepository {
   /** Count of code symbols matching SYMBOL_KINDS. */
   getSymbolCount(): number;
+  /** Get detail of a single symbol by ID (for KB Graph node click). */
+  getSymbolDetail(symbolId: string): SymbolDetail | null;
 }
 
 /**

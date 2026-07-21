@@ -1,6 +1,6 @@
 /**
  * KB entries routes — search, list, and detail for KB entries.
- * SA4E-45: Uses getIndexAdapter() for multi-DB support.
+ * SA4E-50: Symbol detail via SymbolRepository.
  */
 
 import { Hono } from 'hono';
@@ -11,7 +11,6 @@ import {
   searchKbEntries,
   recordQueryLog,
 } from '../../../admin/admin-db.js';
-import { getIndexAdapter } from '../../../admin/db/core.js';
 import type { AdminContext } from './context.js';
 
 export function createKbEntriesRoutes(ctx: AdminContext): Hono {
@@ -115,41 +114,32 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
   return app;
 }
 
-/** Fetch code symbol detail from index DB via adapter for KB Graph node click. */
+/** Fetch code symbol detail via SymbolRepository for KB Graph node click. */
 function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Record<string, unknown> | null {
   try {
-    const adapter = getIndexAdapter();
-    const row = adapter.get<any>(
-      `SELECT s.id, s.name, s.kind, s.signature, s.start_line, s.end_line,
-              s.parent_symbol, s.visibility, s.doc_comment,
-              f.relative_path, f.language, f.module
-       FROM symbols s
-       JOIN files f ON s.file_id = f.id
-       WHERE s.id = ?`,
-      [symbolId]
-    );
-    if (!row) return null;
-    const lines = row.start_line && row.end_line
-      ? `Lines ${row.start_line}\u2013${row.end_line}`
+    const detail = ctx.db.symbol.getSymbolDetail(symbolId);
+    if (!detail) return null;
+    const lines = detail.startLine && detail.endLine
+      ? `Lines ${detail.startLine}\u2013${detail.endLine}`
       : '';
     const contentParts = [
-      row.signature ? `**Signature:** \`${row.signature}\`` : '',
-      row.doc_comment ? `**Doc:** ${row.doc_comment}` : '',
-      `**Kind:** ${row.kind}`,
-      `**File:** ${row.relative_path}`,
+      detail.signature ? `**Signature:** \`${detail.signature}\`` : '',
+      detail.docComment ? `**Doc:** ${detail.docComment}` : '',
+      `**Kind:** ${detail.kind}`,
+      `**File:** ${detail.relativePath}`,
       lines ? `**Location:** ${lines}` : '',
-      row.module ? `**Module:** ${row.module}` : '',
-      row.visibility ? `**Visibility:** ${row.visibility}` : '',
-      row.parent_symbol ? `**Parent:** ${row.parent_symbol}` : '',
+      detail.module ? `**Module:** ${detail.module}` : '',
+      detail.visibility ? `**Visibility:** ${detail.visibility}` : '',
+      detail.parentSymbol ? `**Parent:** ${detail.parentSymbol}` : '',
     ].filter(Boolean).join('\n');
     return {
-      id: `code:${row.id}`,
-      title: `${row.name} (${row.kind})`,
+      id: `code:${detail.id}`,
+      title: `${detail.name} (${detail.kind})`,
       content: contentParts,
       tier: 'CODE',
       type: 'CODE_ENTITY',
-      source: row.relative_path || '',
-      tags: [row.kind, row.language, row.module].filter(Boolean),
+      source: detail.relativePath || '',
+      tags: [detail.kind, detail.language, detail.module].filter(Boolean),
       links: [],
       qualityScore: null,
       createdAt: null,

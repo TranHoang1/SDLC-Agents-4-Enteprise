@@ -18,6 +18,7 @@ export type {
   UpsertNodeParams,
   AuditEntry,
   PaginatedResult,
+  SymbolDetail,
 } from './types.js';
 
 // Implementations

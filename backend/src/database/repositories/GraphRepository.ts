@@ -80,6 +80,27 @@ export class GraphRepository implements IGraphRepository {
     }
   }
 
+  /**
+   * Register or update a project in project_registry (non-fatal upsert).
+   * @param projectId - The project identifier
+   * @param displayName - Human-readable project name
+   * @param workspacePath - Filesystem path to the workspace
+   * @throws RepositoryError on database failure
+   */
+  registerProject(projectId: string, displayName: string, workspacePath: string): void {
+    try {
+      this.adapter.run(
+        `INSERT INTO project_registry (project_id, display_name, workspace_path, last_seen)
+         VALUES (?, ?, ?, datetime('now'))
+         ON CONFLICT(project_id) DO UPDATE SET
+           workspace_path = excluded.workspace_path, last_seen = datetime('now')`,
+        [projectId, displayName, workspacePath],
+      );
+    } catch (err) {
+      throw translateError(err);
+    }
+  }
+
   /** Count graph_nodes matching a WHERE clause. */
   private countByWhere(where: string, params: unknown[]): number {
     const row = this.adapter.get<{ cnt: number }>(

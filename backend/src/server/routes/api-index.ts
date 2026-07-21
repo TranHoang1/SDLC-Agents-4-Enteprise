@@ -11,7 +11,8 @@ import * as path from 'path';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
 import type { CodeIntelModule } from '../../modules/code-intel/CodeIntelModule.js';
 import { loadConfig } from '../../config/index.js';
-import { getAdminDb } from '../../admin/admin-db.js';
+import { getAdminAdapter } from '../../admin/db/core.js';
+import { GraphRepository } from '../../database/repositories/GraphRepository.js';
 import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
 import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 
@@ -43,12 +44,8 @@ function writeFilesPhase(workspace: string, files: SourceFile[]): { written: num
 /** Phase: register/update the project in the admin registry (non-fatal). */
 function registerProjectPhase(projectId: string, workspace: string, logger: Logger): void {
   try {
-    getAdminDb().prepare(`
-      INSERT INTO project_registry (project_id, display_name, workspace_path, last_seen)
-      VALUES (?, ?, ?, datetime('now'))
-      ON CONFLICT(project_id) DO UPDATE SET
-        workspace_path = excluded.workspace_path, last_seen = datetime('now')
-    `).run(projectId, path.basename(workspace), workspace);
+    const graphRepo = new GraphRepository(getAdminAdapter());
+    graphRepo.registerProject(projectId, path.basename(workspace), workspace);
   } catch (err) {
     logger.warn({ err, projectId }, '[index] project registry upsert skipped (non-fatal)');
   }
@@ -92,10 +89,11 @@ function ensureProjectKbEntry(registry: ModuleRegistry, scope: IndexScope, writt
 /** Upsert the project-metadata graph node (INSERT OR REPLACE to fix stale/missing rows). */
 function upsertProjectGraphNode(entryId: string, displayName: string, projectId: string, logger: Logger): void {
   try {
-    getAdminDb().prepare(
-      `INSERT OR REPLACE INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(entryId, `Project: ${displayName}`, 'CONTEXT', 'SEMANTIC', projectId, 0, 0, 0, 'macro', '0');
+    const graphRepo = new GraphRepository(getAdminAdapter());
+    graphRepo.upsertNode({
+      entryId, label: `Project: ${displayName}`, type: 'CONTEXT',
+      tier: 'SEMANTIC', projectId, x: 0, y: 0, z: 0, level: 'macro', clusterId: '0',
+    });
   } catch (err) {
     logger.warn({ err }, '[index] graph node upsert skipped (non-fatal)');
   }
