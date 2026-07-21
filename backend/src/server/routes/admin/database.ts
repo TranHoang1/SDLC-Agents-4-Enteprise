@@ -130,37 +130,18 @@ export function createDatabaseRoutes(ctx: AdminContext): Hono {
         password = savedEngine.password;
       }
     }
-    // SA4E-45: Migrate from BOTH SQLite files (admin.db + index.db) into single PG
-    const adminDbPath = path.join(dataDir, 'admin.db');
-    const indexDbPath = path.join(dataDir, 'index.db');
-    const adminSource = DatabaseAdapterFactory.create({ engine: 'sqlite' as const, dbPath: adminDbPath });
-    const indexSource = DatabaseAdapterFactory.create({ engine: 'sqlite' as const, dbPath: indexDbPath });
-    await adminSource.connect();
-    await indexSource.connect();
+    // SA4E-49: Single unified DB — migrate one SQLite file into PG/MySQL
+    const unifiedDbPath = path.join(dataDir, 'index.db');
+    const sqliteSource = DatabaseAdapterFactory.create({ engine: 'sqlite' as const, dbPath: unifiedDbPath });
+    await sqliteSource.connect();
     return streamSSE(c, async (stream) => {
       const targetConfig = { engine, host, port, username, password, database, ssl };
       const progress = (ev: MigrationProgress) => { stream.writeSSE({ event: ev.phase === 'complete' ? 'complete' : 'progress', data: JSON.stringify(ev) }); };
 
-      // Pass 1: Migrate admin.db tables
-      const adminMigration = new MigrationService(adminSource, targetConfig, configService, progress);
-      activeMigration = adminMigration;
-      const adminResult = await adminMigration.migrate();
-      if (!adminResult.success) {
-        stream.writeSSE({ event: 'error', data: JSON.stringify(adminResult) });
-        activeMigration = null;
-        await adminSource.disconnect();
-        await indexSource.disconnect();
-        return;
-      }
-
-      // Pass 2: Migrate index.db tables (skip setActiveEngine since pass 1 already did)
-      const indexMigration = new MigrationService(indexSource, targetConfig, configService, progress);
-      activeMigration = indexMigration;
-      const indexResult = await indexMigration.migrate();
-
-      const finalResult = indexResult.success
-        ? { success: true, tablesProcessed: adminResult.tablesProcessed + indexResult.tablesProcessed, totalTime: adminResult.totalTime + indexResult.totalTime }
-        : indexResult;
+      // Single-pass migration: all tables from unified DB
+      const migration = new MigrationService(sqliteSource, targetConfig, configService, progress);
+      activeMigration = migration;
+      const finalResult = await migration.migrate();
 
       if (finalResult.success) {
         resetAdminDb();
@@ -168,8 +149,7 @@ export function createDatabaseRoutes(ctx: AdminContext): Hono {
       }
       stream.writeSSE({ event: finalResult.success ? 'complete' : 'error', data: JSON.stringify(finalResult) });
       activeMigration = null;
-      await adminSource.disconnect();
-      await indexSource.disconnect();
+      await sqliteSource.disconnect();
     });
   });
 

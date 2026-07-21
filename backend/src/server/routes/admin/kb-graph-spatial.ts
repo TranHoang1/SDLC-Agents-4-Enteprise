@@ -5,7 +5,7 @@
  */
 
 import { Hono } from 'hono';
-import { getKbEntries, getKbEntryCount } from '../../../admin/admin-db.js';
+import { getKbEntries, getKbEntryCount, getAdminDb } from '../../../admin/admin-db.js';
 import type { AdminContext } from './context.js';
 
 export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
@@ -24,7 +24,6 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
     // This matches the Dashboard stats logic (analytics.ts) which correctly shows counts.
     try {
       const pid = ctx.getRequestProjectId(c);
-      const { getAdminDb } = await import('../../../admin/admin-db.js');
       const d = getAdminDb();
       const CODE_TYPES = "('FUNCTION','METHOD','CLASS','INTERFACE','TYPE','CONSTRUCTOR','ENUM','CONSTANT','VARIABLE')";
       let totalNodes = (d.prepare('SELECT COUNT(*) as cnt FROM graph_nodes WHERE project_id = ?').get(pid) as { cnt: number }).cnt || 0;

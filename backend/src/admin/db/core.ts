@@ -1,7 +1,9 @@
 /**
- * admin/db/core.ts — Central admin database access layer.
- * Provides both raw SQLite handles (legacy) and DatabaseAdapter (multi-DB).
+ * admin/db/core.ts — Central database access layer (unified single DB).
  * SA4E-45: getIndexAdapter() / getAdminAdapter() enable PostgreSQL/MySQL support.
+ * SA4E-49: Consolidated into single DB file — admin tables live alongside index tables.
+ *          Previously admin.db (users, graph_nodes) was separate from index.db
+ *          (knowledge_entries, symbols), causing split-data bugs.
  */
 
 import Database from 'better-sqlite3';
@@ -26,10 +28,12 @@ const __dirname = path.dirname(__filename);
 const config = loadConfig();
 
 const DATA_DIR = path.resolve(getWorkspacePath(), config.dataDir);
-const DB_PATH = path.resolve(DATA_DIR, 'admin.db');
+// SA4E-49: Single unified DB path — all tables in one file.
+const DB_PATH = path.resolve(DATA_DIR, config.sqliteDbPath);
 
+/** @deprecated Use DB_PATH directly. Kept for backward compat during migration. */
 export function getIndexDbPath(): string {
-  return path.resolve(getWorkspacePath(), config.dataDir, config.sqliteDbPath);
+  return DB_PATH;
 }
 
 /** Get active database engine from database.json config */
@@ -75,19 +79,16 @@ let adminAdapter: DatabaseAdapter | null = null;
 
 /**
  * Get DatabaseAdapter for index data (knowledge_entries, files, symbols, etc.).
- * When engine=sqlite: wraps index.db via SqliteDbAdapter (same behavior as before).
+ * SA4E-49: Now shares the same unified DB as admin tables.
+ * When engine=sqlite: wraps the unified DB via SqliteDbAdapter.
  * When engine=postgresql/mysql: connects to the configured remote DB.
  */
 export function getIndexAdapter(): DatabaseAdapter {
   if (!indexAdapter) {
     const engine = getActiveEngine();
     if (engine === 'sqlite') {
-      const indexDbPath = getIndexDbPath();
-      const dir = path.dirname(indexDbPath);
-      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-      const indexDb = new Database(indexDbPath);
-      indexDb.pragma('journal_mode = WAL');
-      indexAdapter = new SqliteDbAdapter(indexDb);
+      // SA4E-49: Reuse the same DB handle as getAdminDb() — single unified DB.
+      indexAdapter = new SqliteDbAdapter(getAdminDb());
     } else {
       const configService = new DatabaseConfigService(DATA_DIR);
       const activeConfig = configService.getActiveConfig();
@@ -124,16 +125,11 @@ export function getAdminAdapter(): DatabaseAdapter {
 
 /** Reset cached DB instance and adapters (used after DB switch/migration) */
 export function resetAdminDb(): void {
+  // SA4E-49: indexAdapter shares the same DB handle, clear references first.
+  indexAdapter = null;
+  adminAdapter = null;
   if (db) {
     db.close();
     db = null;
-  }
-  if (indexAdapter) {
-    indexAdapter.disconnect().catch(() => {});
-    indexAdapter = null;
-  }
-  if (adminAdapter) {
-    adminAdapter.disconnect().catch(() => {});
-    adminAdapter = null;
   }
 }
