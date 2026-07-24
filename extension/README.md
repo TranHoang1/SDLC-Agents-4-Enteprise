@@ -243,6 +243,15 @@ MIT
 
 ## Changelog
 
+### v1.15.0 (2026-07-24)
+
+- **SA4E-49: Multi-Database Backend** — PostgreSQL adapter with full async `DatabaseAdapter` methods. All admin/KB/graph modules migrated from raw SQLite to adapter interface. Consolidated `index.db` + `admin.db` into single unified DB. Sequence migration for PostgreSQL identity columns.
+- **SA4E-49: Knowledge Base Tags** — Fixed tag scope isolation bug (6,251 entries were invisible due to `USER`-scoped tag entries). Taxonomy-enforced LLM prompts with `normalizeTags()` post-processing. Admin UI now shows 4,038 unique tags.
+- **SA4E-49: Admin API & Auth** — JWT authentication with session management (`login`, `logout`, `refresh`, `change-password`). Config change tracking with audit log. RBAC tools (`list-users`, `list-groups`, `add/remove-user`). Database engine switch UI.
+- **SA4E-49: Developer Infrastructure** — DI Container, DatabaseManager, ModuleFactory, MemoryModuleBuilder, EventBus, ToolHandlerDecorators. Async SqliteAdapter/PostgresAdapter. Repository pattern (`UserRepository`, `KbRepository`, `GraphRepository`, `AuditRepository`, `SymbolRepository`).
+- **SA4E-50/51: RBAC & Graph Fixes** — Project isolation via `X-Project-Id` header, per-user KB scoping, access group permissions. GraphService now uses `DatabaseAdapter` instead of hardcoded SQLite. PostgreSQL insert ID fix for code symbols.
+- **Agent Sync** — Agent prompts synced to `kiro`, `claude-code`, `codex-openai`, `github-copilot` conversion targets.
+
 ### v1.14.0 (2026-07-19)
 
 - **SA4E-48: MCP Streamable HTTP Compliance** — `WrapperServer` now implements the required MCP handshake so VS Code can connect without the stop/restart loop:

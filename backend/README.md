@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.14.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.15.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/tools-66+-teal?style=for-the-badge" alt="Tools">
   <img src="https://img.shields.io/badge/node-%3E%3D18-green?style=for-the-badge" alt="Node">
 </p>
@@ -233,6 +233,7 @@ The embedding model is expected at `.code-intel/models/model.onnx`. Download it:
 
 | Version | Date | Ticket | Changes |
 |---------|------|--------|---------|
+| 1.15.0 | 2026-07-24 | SA4E-49/50/51 | PostgreSQL adapter with async DatabaseAdapter. KB tag scope fix (USER→PROJECT, now 4k+ tags visible). JWT auth, RBAC tools, config tracking. DI Container, ModuleFactory, EventBus. Agent sync to kiro/claude-code/codex-openai/github-copilot. |
 | 1.14.0 | 2026-07-19 | SA4E-48 | Extension `WrapperServer` MCP Streamable HTTP compliance: `initialize` handshake, `ping`, `notifications/initialized`, `GET /mcp` SSE — fixes VS Code `-32601` stop/restart loop + OpenCode SSE `endpoint` event fix |
 | 1.13.0 | 2026-07-19 | — | Presentation servers (FastAPI + Next.js), Electron desktop app, architecture diagrams, utility scripts |
 | 1.12.0 | 2026-07-19 | — | Version bump + README sync across all packages |
