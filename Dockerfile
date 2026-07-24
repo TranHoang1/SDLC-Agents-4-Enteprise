@@ -1,72 +1,51 @@
-# syntax=docker/dockerfile:1
-
-# ===================================================================
-# Stage 1 — Builder
-# Compiles TypeScript, builds native addons, downloads HF model.
-# ===================================================================
-FROM node:20-bookworm AS builder
-
-# Required for native addons: better-sqlite3 and onnxruntime-node
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 make g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-# Install dependencies first (layer cache reuse on source changes)
-COPY backend/package.json backend/package-lock.json ./
-RUN npm ci
-
-# Copy source and compile
-COPY backend/ .
-RUN npm run build
-
-# tsc does not copy non-TS assets; copy WASM grammars and JSON configs
-RUN mkdir -p dist/engine/parsers/grammars \
-    && cp src/engine/parsers/grammars/*.wasm dist/engine/parsers/grammars/ \
-    && cp src/engine/parsers/grammars/*.json dist/engine/parsers/grammars/
-
-# Pre-download Xenova/paraphrase-multilingual-MiniLM-L12-v2.
-# The script must run from /app so Node can resolve @xenova/transformers.
-COPY docker/preload-model.mjs ./preload-model.mjs
-RUN node preload-model.mjs && rm preload-model.mjs
-
-# ===================================================================
-# Stage 2 — Production
-# Lean runtime image — no build tools, no source files.
-# ===================================================================
-FROM node:20-bookworm-slim
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tini ca-certificates curl git \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /app
-
-COPY --from=builder /app/dist         ./dist
-# node_modules includes the model cache at node_modules/@xenova/transformers/.cache/
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./
-
-RUN mkdir -p /data
-
-ENV NODE_ENV=production \
-    CODE_INTEL_PORT=48721 \
-    CODE_INTEL_HOST=0.0.0.0 \
-    CODE_INTEL_DATA_DIR=/data/.code-intel \
-    CODE_INTEL_LOG_LEVEL=info \
-    LLM_PROVIDER=ollama \
-    LLM_BASE_URL=http://ollama:11434 \
-    LLM_MODEL=qwen2.5:7b-instruct-q4_K_M
-
-EXPOSE 48721
-
-# /data      — persistent SQLite databases and project state
-# /workspace — source code to analyse (mount at runtime, read-only)
-VOLUME ["/data", "/workspace"]
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f http://localhost:48721/health || exit 1
-
-ENTRYPOINT ["tini", "--"]
-CMD ["node", "dist/index.js"]
+## SA4E-44 Backend Dockerfile
+## Node.js 20 + Hono backend for Code Intelligence MCP Server
+#FROM node:20-alpine AS base
+#
+#WORKDIR /app
+#
+## Install dependencies for native modules (better-sqlite3, onnxruntime-node)
+#RUN apk add --no-cache python3 make g++ git
+#
+## --- Dependencies stage ---
+#FROM base AS deps
+#COPY package.json package-lock.json ./
+#RUN npm ci --omit=dev
+#
+## --- Build stage ---
+#FROM base AS build
+#COPY package.json package-lock.json ./
+#RUN npm ci
+#COPY tsconfig.json ./
+#COPY src/ ./src/
+#RUN npm run build
+#
+## --- Production stage ---
+#FROM node:20-alpine AS production
+#
+#WORKDIR /app
+#
+## Runtime dependencies only
+#RUN apk add --no-cache git
+#
+#COPY --from=deps /app/node_modules ./node_modules
+#COPY --from=build /app/dist ./dist
+#COPY --from=build /app/package.json ./
+#
+## Create non-root user
+#RUN addgroup -g 1001 -S sa4e && \
+#    adduser -S sa4e -u 1001 -G sa4e && \
+#    mkdir -p /app/.code-intel && \
+#    chown -R sa4e:sa4e /app
+#
+#USER sa4e
+#
+#ENV NODE_ENV=production
+#ENV PORT=48721
+#
+#EXPOSE 48721
+#
+#HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+#  CMD wget --no-verbose --tries=1 --spider http://localhost:48721/health || exit 1
+#
+#CMD ["node", "dist/index.js"]

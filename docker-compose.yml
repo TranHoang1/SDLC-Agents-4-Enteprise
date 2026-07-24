@@ -1,90 +1,50 @@
-# SDLC Agents 4 Enterprise
-# ============================================================
-# OFFLINE / AIR-GAPPED SETUP
-# Run the following on a machine WITH internet access, then
-# export and transfer the resulting files to the target server.
+## SA4E-44 Docker Compose — Local Dev & Test Environment
+#version: "3.9"
 #
-#   1. Build & tag the backend image:
-#        docker compose build
-#
-#   2. Pull the Ollama image and pre-load the LLM model:
-#        docker pull ollama/ollama:latest
-#        docker run --rm -v ollama-data:/root/.ollama \
-#          ollama/ollama pull qwen2.5:7b-instruct-q4_K_M
-#
-#   3. Export everything to a single archive:
-#        docker save sdlc-agents-4-enterprise-backend ollama/ollama \
-#          | gzip > sdlc-images.tar.gz
-#        docker run --rm -v ollama-data:/data alpine \
-#          tar czf - /data > ollama-data.tar.gz
-#
-#   4. On the air-gapped server:
-#        docker load < sdlc-images.tar.gz
-#        docker volume create ollama-data
-#        docker run --rm -v ollama-data:/data alpine \
-#          tar xzf - < ollama-data.tar.gz
-#        cp .env.example .env   # edit WORKSPACE_PATH etc.
-#        docker compose up -d
-# ============================================================
-
-services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: sdlc-agents-4-enterprise-backend
-    container_name: sdlc-backend
-    restart: unless-stopped
-    ports:
-      - "${CODE_INTEL_PORT:-48721}:48721"
-    volumes:
-      - sdlc-data:/data
-      # Mount the source workspace (read-only).
-      # Set WORKSPACE_PATH in .env to the absolute path on the host.
-      - ${WORKSPACE_PATH:-.}:/workspace:ro
-    environment:
-      CODE_INTEL_PORT: "48721"
-      CODE_INTEL_HOST: "0.0.0.0"
-      CODE_INTEL_DATA_DIR: /data/.code-intel
-      CODE_INTEL_WORKSPACE: /workspace
-      CODE_INTEL_LOG_LEVEL: ${LOG_LEVEL:-info}
-      LLM_PROVIDER: ${LLM_PROVIDER:-ollama}
-      LLM_BASE_URL: ${LLM_BASE_URL:-http://ollama:11434}
-      LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b-instruct-q4_K_M}
-      LLM_API_KEY: ${LLM_API_KEY:-}
-    networks:
-      - app-network
-#    depends_on:
-#      - ollama
-
-  # ── Local LLM (default for air-gapped deployments) ──────────────
-  # The model must be pre-pulled BEFORE going offline (see above).
-  # To use an external provider instead (OpenAI, Anthropic, LM Studio…)
-  # set LLM_PROVIDER / LLM_BASE_URL / LLM_API_KEY in .env and
-  # comment out this service and the depends_on above.
-  # ────────────────────────────────────────────────────────────────
-  ollama:
-    image: hoangtran4080/ollama:v1
-    container_name: sdlc-ollama
-    restart: unless-stopped
-    ports:
-      - "11434:11434"
+#services:
+#  # Backend service (Node.js 20 + Hono)
+#  backend:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#      target: production
+#    container_name: sa4e-backend
+#    environment:
+#      NODE_ENV: development
+#      PORT: 48721
+##      DATABASE_URL: postgresql://sa4e_user:sa4e_local_dev_password@postgres:5432/sa4e_db
+##      DATABASE_ADAPTER: postgresql
+#      TASK_WORKER_ENABLED: "true"
+#      TASK_WORKER_POLL_INTERVAL_MS: "5000"
+#      TASK_WORKER_MAX_RETRIES: "3"
+#      TASK_WORKER_BACKOFF_BASE_MS: "1000"
+#      CODE_INTEL_ENABLED: "true"
+#      CODE_INTEL_MAX_BATCH_SIZE: "100"
+#      CODE_INTEL_UPLOAD_TIMEOUT_MS: "30000"
+#      ONNX_RUNTIME_URL: http://onnx-runtime:8080
+#    ports:
+#      - "48721:48721"
 #    volumes:
-#      - ollama-data:/root/.ollama
-    # ── NVIDIA GPU support (uncomment to enable) ──
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: all
-    #           capabilities: [gpu]
-
-volumes:
-  # Persistent backend state: SQLite databases, .code-intel project data
-  sdlc-data:
-  # Ollama model weights — pre-populated before going offline
-#  ollama-data:
-networks:
-  app-network:
-    external: true
+#      - code_intel_data:/app/.code-intel
+#    networks:
+#      - sa4e-network
+#    restart: unless-stopped
+#
+#  # ONNX Runtime sidecar (optional — for vector embeddings)
+#  onnx-runtime:
+#    image: mcr.microsoft.com/onnxruntime/server:latest
+#    container_name: sa4e-onnx
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - sa4e-network
+#    profiles:
+#      - embeddings
+#    restart: unless-stopped
+#
+#volumes:
+#  code_intel_data:
+#
+#networks:
+#  sa4e-network:
+#    driver: bridge

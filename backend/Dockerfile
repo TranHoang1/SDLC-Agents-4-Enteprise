@@ -1,11 +1,11 @@
 # SA4E-44 Backend Dockerfile
 # Node.js 20 + Hono backend for Code Intelligence MCP Server
-FROM node:20-alpine AS base
+# Uses node:20-slim (Debian/glibc) — onnxruntime-node requires glibc, not musl (Alpine)
+FROM node:20-slim AS base
 
 WORKDIR /app
 
-# Install dependencies for native modules (better-sqlite3, onnxruntime-node)
-RUN apk add --no-cache python3 make g++ git
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ git && rm -rf /var/lib/apt/lists/*
 
 # --- Dependencies stage ---
 FROM base AS deps
@@ -18,23 +18,28 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY tsconfig.json ./
 COPY src/ ./src/
+COPY scripts/ ./scripts/
 RUN npm run build
 
+# Pre-download embedding model into image so it works offline
+ENV TRANSFORMERS_CACHE=/app/.hf-cache
+RUN node scripts/preload-models.mjs
+
 # --- Production stage ---
-FROM node:20-alpine AS production
+FROM node:20-slim AS production
 
 WORKDIR /app
 
-# Runtime dependencies only
-RUN apk add --no-cache git
+RUN apt-get update && apt-get install -y --no-install-recommends git wget && rm -rf /var/lib/apt/lists/*
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/package.json ./
+COPY --from=build /app/.hf-cache /app/.hf-cache
 
 # Create non-root user
-RUN addgroup -g 1001 -S sa4e && \
-    adduser -S sa4e -u 1001 -G sa4e && \
+RUN groupadd -g 1001 sa4e && \
+    useradd -u 1001 -g sa4e -m -s /bin/bash sa4e && \
     mkdir -p /app/.code-intel && \
     chown -R sa4e:sa4e /app
 
@@ -42,6 +47,7 @@ USER sa4e
 
 ENV NODE_ENV=production
 ENV PORT=48721
+ENV TRANSFORMERS_CACHE=/app/.hf-cache
 
 EXPOSE 48721
 
