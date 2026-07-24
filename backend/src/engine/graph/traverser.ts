@@ -1,9 +1,10 @@
 /**
  * KSA-157: Graph Traverser - generic BFS/DFS engine with edge/node type filtering.
  * Provides the core traversal logic for the code_traverse MCP tool.
+ * SA4E-45: Refactored to use DatabaseAdapter abstraction.
  */
 
-import Database from 'better-sqlite3';
+import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { SymbolResolver } from './symbol-resolver.js';
 import { getNeighbors, getSourceSnippet } from './traverse-helpers.js';
 
@@ -52,23 +53,23 @@ export interface TraverseResponse {
 }
 
 export class GraphTraverser {
-  private db: Database.Database;
+  private adapter: DatabaseAdapter;
   private resolver: SymbolResolver;
   private workspace: string;
   private projectId: string | undefined;
 
   /**
-   * @param projectId  SA4E-41 tenant scope. Undefined ⇒ fail-closed (no neighbors).
+   * @param projectId  SA4E-41 tenant scope. Undefined => fail-closed (no neighbors).
    */
-  constructor(db: Database.Database, resolver: SymbolResolver, workspace: string, projectId?: string) {
-    this.db = db;
+  constructor(adapter: DatabaseAdapter, resolver: SymbolResolver, workspace: string, projectId?: string) {
+    this.adapter = adapter;
     this.resolver = resolver;
     this.workspace = workspace;
     this.projectId = projectId;
   }
 
-  resolveNode(identifier: string): GraphNode | null {
-    const resolved = this.resolver.resolve(identifier);
+  async resolveNode(identifier: string): Promise<GraphNode | null> {
+    const resolved = await this.resolver.resolve(identifier);
     if (resolved.length === 0) return null;
     return {
       id: resolved[0].id,
@@ -79,7 +80,7 @@ export class GraphTraverser {
     };
   }
 
-  traverse(startNode: GraphNode, config: TraverseConfig): TraverseResultItem[] {
+  async traverse(startNode: GraphNode, config: TraverseConfig): Promise<TraverseResultItem[]> {
     const visited = new Set<number>();
     const queue: Array<{ node: GraphNode; depth: number; path: string[] }> = [
       { node: startNode, depth: 0, path: [startNode.name] },
@@ -95,7 +96,7 @@ export class GraphTraverser {
         }
       }
       if (depth < config.maxDepth) {
-        const neighbors = getNeighbors(node.id, config, this.db, this.projectId);
+        const neighbors = await getNeighbors(node.id, config, this.adapter, this.projectId);
         for (const neighbor of neighbors) {
           if (!visited.has(neighbor.id)) {
             queue.push({ node: neighbor, depth: depth + 1, path: [...currentPath, neighbor.name] });

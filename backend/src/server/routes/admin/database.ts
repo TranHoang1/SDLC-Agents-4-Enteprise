@@ -19,7 +19,7 @@ const connectionSchema = z.object({
   host: z.string().min(1),
   port: z.number().int().min(1).max(65535),
   username: z.string().min(1),
-  password: z.string().min(1),
+  password: z.string().default(''),
   database: z.string().min(1),
   ssl: z.boolean().default(false),
 });
@@ -31,8 +31,20 @@ export function createDatabaseRoutes(ctx: AdminContext): Hono {
   const cfg = loadConfig();
   const dataDir = path.isAbsolute(cfg.dataDir) ? cfg.dataDir : path.resolve(cfg.workspace, cfg.dataDir);
   const configService = new DatabaseConfigService(dataDir);
+  // SA4E-45: registry for hot-swap after engine switch
+  const registry = ctx.registry;
 
-  app.get('/api/admin/database/status', (c) => {
+  // SEC: Auth helper — all database endpoints require CONFIG_EDIT permission
+  async function authGuard(c: any): Promise<Response | null> {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const perm = await ctx.requirePermission(c, user.userId, 'CONFIG_EDIT');
+    if (perm instanceof Response) return perm;
+    return null;
+  }
+
+  app.get('/api/admin/database/status', async (c) => {
+    const deny = await authGuard(c); if (deny) return deny;
     try {
       const config = configService.load();
       const engine = config.activeEngine;
@@ -46,6 +58,7 @@ export function createDatabaseRoutes(ctx: AdminContext): Hono {
   });
 
   app.post('/api/admin/database/test-connection', async (c) => {
+    const deny = await authGuard(c); if (deny) return deny;
     const body = await c.req.json();
     const parsed = connectionSchema.safeParse(body);
     if (!parsed.success) return c.json({ success: false, error: { code: 'VALIDATION', message: parsed.error.message } }, 400);
@@ -68,51 +81,122 @@ export function createDatabaseRoutes(ctx: AdminContext): Hono {
     }
   });
 
+  /**
+   * SA4E-45: Validate if target DB already has the expected schema.
+   * Returns which required tables exist and whether schema is fully compatible.
+   */
+  app.post('/api/admin/database/validate-schema', async (c) => {
+    const deny = await authGuard(c); if (deny) return deny;
+    const body = await c.req.json();
+    const parsed = connectionSchema.safeParse(body);
+    if (!parsed.success) return c.json({ success: false, error: { code: 'VALIDATION', message: parsed.error.message } }, 400);
+    const { engine, host, port, username, password, database, ssl } = parsed.data;
+    const adapter = DatabaseAdapterFactory.create({ engine, host, port, username, password, database, ssl });
+    try {
+      await adapter.connect();
+      const existingTables = await adapter.getTableNames();
+      await adapter.disconnect();
+
+      // Required tables for engine layer to function
+      const requiredTables = [
+        'knowledge_entries', 'knowledge_vectors', 'knowledge_graph_edges',
+        'memory_sessions', 'memory_audit', 'conversation_turns',
+        'entity_index', 'agent_scope_config', 'quality_scores',
+        'tags', 'entry_tags', 'citations', 'attachments',
+        'files', 'symbols', 'modules', 'embeddings', 'mcp_tools', 'tool_usage',
+      ];
+
+      const found = requiredTables.filter(t => existingTables.includes(t));
+      const missing = requiredTables.filter(t => !existingTables.includes(t));
+      const schemaReady = missing.length === 0;
+
+      return c.json({
+        success: true,
+        data: {
+          schemaReady,
+          totalRequired: requiredTables.length,
+          found: found.length,
+          missing,
+          existingTables: existingTables.length,
+          message: schemaReady
+            ? 'Schema is fully compatible. You can switch without migration.'
+            : `Missing ${missing.length} required tables. Migration needed.`,
+        },
+      });
+    } catch (err) {
+      return c.json({ success: false, error: { code: 'CONN_ERROR', message: (err as Error).message } }, 400);
+    }
+  });
+
   app.post('/api/admin/database/migrate', async (c) => {
+    const deny = await authGuard(c); if (deny) return deny;
     const body = await c.req.json();
     const parsed = connectionSchema.safeParse(body);
     if (!parsed.success) return c.json({ success: false, error: { code: 'VALIDATION', message: parsed.error.message } }, 400);
     if (activeMigration) return c.json({ success: false, error: { code: 'MIGRATION_ACTIVE', message: 'Already migrating' } }, 409);
-    const { engine, host, port, username, password, database, ssl } = parsed.data;
-    const sourceConfig = configService.getActiveConfig();
-    const source = DatabaseAdapterFactory.create(sourceConfig);
-    await source.connect();
+    let { engine, host, port, username, password, database, ssl } = parsed.data;
+    // SA4E-45: If password is placeholder/empty, use saved password from database.json
+    if (!password || password === '••••••••••••••••••••' || password.length < 2) {
+      const savedConfig = configService.load();
+      const savedEngine = savedConfig.engines[engine as 'postgresql' | 'mysql'];
+      if (savedEngine?.password) {
+        password = savedEngine.password;
+      }
+    }
+    // SA4E-49: Single unified DB — migrate one SQLite file into PG/MySQL
+    // Use cfg.sqliteDbPath (from config/env) instead of hardcoding 'index.db'
+    const unifiedDbPath = path.join(dataDir, cfg.sqliteDbPath);
+    const sqliteSource = DatabaseAdapterFactory.create({ engine: 'sqlite' as const, dbPath: unifiedDbPath });
+    await sqliteSource.connect();
     return streamSSE(c, async (stream) => {
-      const migration = new MigrationService(source, { engine, host, port, username, password, database, ssl }, configService,
-        (ev: MigrationProgress) => { stream.writeSSE({ event: ev.phase === 'complete' ? 'complete' : 'progress', data: JSON.stringify(ev) }); }
-      );
+      const targetConfig = { engine, host, port, username, password, database, ssl };
+      const progress = (ev: MigrationProgress) => { stream.writeSSE({ event: ev.phase === 'complete' ? 'complete' : 'progress', data: JSON.stringify(ev) }); };
+
+      // Single-pass migration: all tables from unified DB
+      const migration = new MigrationService(sqliteSource, targetConfig, configService, progress);
       activeMigration = migration;
-      try {
-        const result = await migration.migrate();
-        if (result.success) { resetAdminDb(); }
-        stream.writeSSE({ event: result.success ? 'complete' : 'error', data: JSON.stringify(result) });
-      } finally { activeMigration = null; await source.disconnect(); }
+      const finalResult = await migration.migrate();
+
+      if (finalResult.success) {
+        resetAdminDb();
+        if (registry) await registry.reinitializeEngineModules();
+      }
+      stream.writeSSE({ event: finalResult.success ? 'complete' : 'error', data: JSON.stringify(finalResult) });
+      activeMigration = null;
+      await sqliteSource.disconnect();
     });
   });
 
-  app.post('/api/admin/database/migrate/cancel', (c) => {
+  app.post('/api/admin/database/migrate/cancel', async (c) => {
+    const deny = await authGuard(c); if (deny) return deny;
     if (!activeMigration) return c.json({ success: false, error: { code: 'NO_MIGRATION', message: 'No active migration' } }, 400);
     activeMigration.cancel();
     return c.json({ success: true, data: { message: 'Cancel requested' } });
   });
 
-  app.post('/api/admin/database/switch-to-sqlite', (c) => {
+  app.post('/api/admin/database/switch-to-sqlite', async (c) => {
+    const deny = await authGuard(c); if (deny) return deny;
     try { configService.setActiveEngine('sqlite'); return c.json({ success: true, data: { message: 'Switched to SQLite' } }); }
     catch (err) { return c.json({ success: false, error: { code: 'CONFIG_WRITE_FAIL', message: (err as Error).message } }, 500); }
   });
 
   app.post('/api/admin/database/switch', async (c) => {
+    const deny = await authGuard(c); if (deny) return deny;
     const body = await c.req.json();
     const { engine, host, port, username, password, database, ssl } = body;
     if (!engine || engine === 'sqlite') {
       configService.setActiveEngine('sqlite');
       resetAdminDb();
-      return c.json({ success: true, data: { message: 'Switched to SQLite. Restart server to apply.' } });
+      // SA4E-45: hot-swap engine modules to use new adapter
+      if (registry) await registry.reinitializeEngineModules();
+      return c.json({ success: true, data: { message: 'Switched to SQLite. Engine modules reinitialized.' } });
     }
     try {
       configService.setActiveEngine(engine, { host, port, username, password, database, ssl, pool: { min: 2, max: 10 } });
       resetAdminDb();
-      return c.json({ success: true, data: { message: `Switched to ${engine}. Restart server to apply.` } });
+      // SA4E-45: hot-swap engine modules to use new adapter
+      if (registry) await registry.reinitializeEngineModules();
+      return c.json({ success: true, data: { message: `Switched to ${engine}. Engine modules reinitialized.` } });
     } catch (err) {
       return c.json({ success: false, error: { code: 'SWITCH_FAIL', message: (err as Error).message } }, 500);
     }

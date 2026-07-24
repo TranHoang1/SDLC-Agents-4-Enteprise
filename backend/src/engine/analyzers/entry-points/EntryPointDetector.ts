@@ -2,7 +2,7 @@
  * KSA-162: Entry Point Detector — Main orchestrator.
  */
 
-import Database from 'better-sqlite3';
+import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import type { EntryPoint, EntryPointFilters, EntryPointQueryResult } from './types.js';
 import { PatternRegistry } from './PatternRegistry.js';
 import { FrameworkDetector } from './FrameworkDetector.js';
@@ -20,27 +20,27 @@ export class EntryPointDetector {
   private cliDetector: CLIDetector;
   private eventDetector: EventDetector;
   private store: EntryPointStore;
-  private db: Database.Database;
+  private adapter: DatabaseAdapter;
 
   /**
    * @param projectId  SA4E-41 read scope. Undefined ⇒ query() is fail-closed.
    */
-  constructor(db: Database.Database, projectId?: string) {
-    this.db = db;
+  constructor(adapter: DatabaseAdapter, projectId?: string) {
+    this.adapter = adapter;
     this.registry = new PatternRegistry();
     this.frameworkDetector = new FrameworkDetector(this.registry);
     this.httpDetector = new HTTPHandlerDetector(this.registry);
     this.mainDetector = new MainDetector(this.registry);
     this.cliDetector = new CLIDetector();
     this.eventDetector = new EventDetector();
-    this.store = new EntryPointStore(db, projectId);
+    this.store = new EntryPointStore(adapter, projectId);
   }
 
   /** Detect all entry points in a file. */
-  detectFile(filePath: string, source: string, language: string, symbols: Array<{
+  async detectFile(filePath: string, source: string, language: string, symbols: Array<{
     id: number; name: string; decorators?: string[]; parentName?: string | null;
     filePath: string; startLine: number;
-  }>): EntryPoint[] {
+  }>): Promise<EntryPoint[]> {
     const allEntryPoints: EntryPoint[] = [];
 
     // 1. Detect framework
@@ -66,14 +66,14 @@ export class EntryPointDetector {
 
     // Store results
     if (allEntryPoints.length > 0) {
-      this.store.upsertBatch(allEntryPoints);
+      await this.store.upsertBatch(allEntryPoints);
     }
 
     return allEntryPoints;
   }
 
   /** Query stored entry points. */
-  query(filters: EntryPointFilters): EntryPointQueryResult {
+  async query(filters: EntryPointFilters): Promise<EntryPointQueryResult> {
     return this.store.query(filters);
   }
 }

@@ -3,7 +3,7 @@
  * Uses cosine similarity on body embeddings + Union-Find clustering.
  */
 
-import Database from 'better-sqlite3';
+import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import { ClusterBuilder } from './ClusterBuilder.js';
 import type { SimilarityPair, DuplicateCluster, DuplicateReport, ClusterMember } from './types.js';
 import { buildCodeScopeFilter } from '../../query/code-intel-isolation.js';
@@ -25,7 +25,7 @@ interface SymbolRow {
 }
 
 export class DuplicateDetector {
-  private db: Database.Database;
+  private adapter: DatabaseAdapter;
   private minSimilarity: number;
   private minLines: number;
   private projectId: string | undefined;
@@ -33,19 +33,19 @@ export class DuplicateDetector {
   /**
    * @param projectId  SA4E-41 tenant scope. Undefined ⇒ fail-closed (no rows).
    */
-  constructor(db: Database.Database, minSimilarity: number = 0.85, minLines: number = 5, projectId?: string) {
-    this.db = db;
+  constructor(adapter: DatabaseAdapter, minSimilarity: number = 0.85, minLines: number = 5, projectId?: string) {
+    this.adapter = adapter;
     this.minSimilarity = minSimilarity;
     this.minLines = minLines;
     this.projectId = projectId;
   }
 
   /** Find duplicate functions in the codebase. */
-  detect(options: { filePath?: string; module?: string; limit?: number } = {}): DuplicateReport {
+  async detect(options: { filePath?: string; module?: string; limit?: number } = {}): Promise<DuplicateReport> {
     const t0 = performance.now();
 
     // 1. Load body embeddings with symbol info
-    const embeddings = this.loadEmbeddings(options.filePath, options.module);
+    const embeddings = await this.loadEmbeddings(options.filePath, options.module);
     if (embeddings.length < 2) {
       return { clusters: [], totalPairsScanned: 0, totalDuplicates: 0, scanDurationMs: 0 };
     }
@@ -68,7 +68,7 @@ export class DuplicateDetector {
     };
   }
 
-  private loadEmbeddings(filePath?: string, module?: string): Array<{ symbolId: number; vector: number[]; info: SymbolRow }> {
+  private async loadEmbeddings(filePath?: string, module?: string): Promise<Array<{ symbolId: number; vector: number[]; info: SymbolRow }>> {
     const scope = buildCodeScopeFilter(this.projectId, 's'); // fail-closed
     let sql = `
       SELECT be.symbol_id, be.chunk_index, be.embedding, be.token_count,
@@ -91,7 +91,7 @@ export class DuplicateDetector {
       params.push(module);
     }
 
-    const rows = this.db.prepare(sql).all(...params) as Array<EmbeddingRow & SymbolRow>;
+    const rows = await this.adapter.allAsync<EmbeddingRow & SymbolRow>(sql, params);
 
     return rows.map(row => ({
       symbolId: row.symbol_id,

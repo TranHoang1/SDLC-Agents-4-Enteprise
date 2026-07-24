@@ -12,7 +12,8 @@ import type { DatabaseConnectionConfig } from '../factory/DatabaseAdapterFactory
 export interface DatabaseJsonConfig {
   activeEngine: DatabaseEngine;
   engines: {
-    sqlite: { adminDbPath: string; indexDbPath: string };
+    // SA4E-49: Unified single DB file
+    sqlite: { dbPath: string };
     postgresql?: ConnectionParams;
     mysql?: ConnectionParams;
   };
@@ -66,7 +67,7 @@ export class DatabaseConfigService {
     const config = this.load();
     switch (config.activeEngine) {
       case 'sqlite':
-        return { engine: 'sqlite', dbPath: path.join(this.dataDir, config.engines.sqlite.adminDbPath) };
+        return { engine: 'sqlite', dbPath: path.join(this.dataDir, config.engines.sqlite.dbPath) };
       case 'postgresql': {
         const pg = config.engines.postgresql!;
         return { engine: 'postgresql', ...pg };
@@ -90,7 +91,8 @@ export class DatabaseConfigService {
   private defaultConfig(): DatabaseJsonConfig {
     return {
       activeEngine: 'sqlite',
-      engines: { sqlite: { adminDbPath: 'admin.db', indexDbPath: 'index.db' } },
+      // SA4E-49: Single unified DB file
+      engines: { sqlite: { dbPath: 'index.db' } },
       migration: { lastMigration: null, backupSqlitePaths: [] },
     };
   }

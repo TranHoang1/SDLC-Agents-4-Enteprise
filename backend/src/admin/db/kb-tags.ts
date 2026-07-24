@@ -1,175 +1,209 @@
-import * as fs from 'fs';
-import Database from 'better-sqlite3';
-import { getIndexDbPath, logger } from './core.js';
+/**
+ * admin/db/kb-tags.ts — KB tag management via DatabaseAdapter.
+ * SA4E-50: All functions are async; use getIndexAdapter() for multi-DB support.
+ */
+
+import { getIndexAdapter, getActiveEngine, logger } from './core.js';
 import { buildAdminScopeFilter } from './kb-scope-filter.js';
 
-export function getAllKbTags(projectId?: string, userId?: string): Record<string, { count: number; lastUsed: string }> {
+/** Check if knowledge_entries table exists (SQLite only guard). */
+async function tableExists(): Promise<boolean> {
+  const adapter = getIndexAdapter();
+  if (!adapter.isConnected()) return false; // PG not yet connected — skip gracefully
+  if (getActiveEngine() !== 'sqlite') return true;
+  const row = await adapter.getAsync<{ cnt: number }>(
+    "SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' AND name='knowledge_entries'",
+  );
+  return (row?.cnt ?? 0) > 0;
+}
+
+/** Parse comma-separated tags string into a trimmed, non-empty array. */
+function parseTags(raw: string): string[] {
+  return raw.split(',').map(t => t.trim()).filter(t => t.length > 0);
+}
+
+/**
+ * Get all tags with usage counts across KB entries.
+ * @returns Map of tag name → { count, lastUsed }
+ */
+export async function getAllKbTags(
+  projectId?: string,
+  userId?: string,
+): Promise<Record<string, { count: number; lastUsed: string }>> {
   const tagCounts: Record<string, { count: number; lastUsed: string }> = {};
   try {
-    const indexDbPath = getIndexDbPath();
-    if (!fs.existsSync(indexDbPath)) return tagCounts;
-    const indexDb = new Database(indexDbPath, { readonly: true });
+    if (!(await tableExists())) return tagCounts;
+    const adapter = getIndexAdapter();
+    const filter = buildAdminScopeFilter(projectId, userId);
+    let rows: { tags: string; created_at: string }[];
 
-    const tableExists = indexDb.prepare("SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' AND name='knowledge_entries'").get() as { cnt: number } | undefined;
-    if (tableExists && tableExists.cnt > 0) {
-      let rows: { tags: string; created_at: string }[];
-      const filter = buildAdminScopeFilter(projectId, userId);
-      if (filter) {
-        rows = indexDb.prepare(`SELECT tags, created_at FROM knowledge_entries WHERE tags IS NOT NULL AND tags != '' AND (${filter.clause})`).all(...filter.params) as { tags: string; created_at: string }[];
-      } else {
-        rows = indexDb.prepare("SELECT tags, created_at FROM knowledge_entries WHERE tags IS NOT NULL AND tags != ''").all() as { tags: string; created_at: string }[];
-      }
-      for (const row of rows) {
-        if (!row.tags) continue;
-        const tags = row.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
-        for (const tag of tags) {
-          if (!tagCounts[tag]) {
-            tagCounts[tag] = { count: 0, lastUsed: row.created_at || new Date().toISOString() };
-          }
-          tagCounts[tag].count++;
-          if (row.created_at && new Date(row.created_at) > new Date(tagCounts[tag].lastUsed)) {
-            tagCounts[tag].lastUsed = row.created_at;
-          }
+    if (filter) {
+      rows = await adapter.allAsync<{ tags: string; created_at: string }>(
+        `SELECT tags, created_at FROM knowledge_entries WHERE tags IS NOT NULL AND tags != '' AND (${filter.clause})`,
+        filter.params as unknown[],
+      );
+    } else {
+      rows = await adapter.allAsync<{ tags: string; created_at: string }>(
+        "SELECT tags, created_at FROM knowledge_entries WHERE tags IS NOT NULL AND tags != ''",
+      );
+    }
+
+    for (const row of rows) {
+      if (!row.tags) continue;
+      for (const tag of parseTags(row.tags)) {
+        if (!tagCounts[tag]) tagCounts[tag] = { count: 0, lastUsed: row.created_at || new Date().toISOString() };
+        tagCounts[tag].count++;
+        if (row.created_at && new Date(row.created_at) > new Date(tagCounts[tag].lastUsed)) {
+          tagCounts[tag].lastUsed = row.created_at;
         }
       }
     }
-    indexDb.close();
   } catch (e) {
-    logger.error({ err: e }, 'Error in getAllKbTags:');
+    logger.error({ err: e }, 'Error in getAllKbTags');
   }
   return tagCounts;
 }
 
-export function updateKbEntryTags(entryId: string, tags: string[]): void {
+/**
+ * Replace all tags on a KB entry.
+ * @param entryId - ID of the entry to update
+ * @param tags - New tag list
+ */
+export async function updateKbEntryTags(entryId: string, tags: string[]): Promise<void> {
   try {
-    const indexDbPath = getIndexDbPath();
-    if (!fs.existsSync(indexDbPath)) return;
-    const indexDb = new Database(indexDbPath);
-
-    const tableExists = indexDb.prepare("SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' AND name='knowledge_entries'").get() as { cnt: number } | undefined;
-    if (tableExists && tableExists.cnt > 0) {
-      const tagsStr = tags.join(',');
-      indexDb.prepare('UPDATE knowledge_entries SET tags = ? WHERE id = ?').run(tagsStr, entryId);
-    }
-    indexDb.close();
+    if (!(await tableExists())) return;
+    const adapter = getIndexAdapter();
+    await adapter.runAsync(
+      'UPDATE knowledge_entries SET tags = ? WHERE id = ?',
+      [tags.join(','), entryId],
+    );
   } catch (e) {
-    logger.error({ err: e }, 'Error in updateKbEntryTags:');
+    logger.error({ err: e }, 'Error in updateKbEntryTags');
   }
 }
 
-export function renameKbTag(oldName: string, newName: string): number {
+/**
+ * Rename a tag across all entries.
+ * @returns Number of entries updated
+ */
+export async function renameKbTag(oldName: string, newName: string): Promise<number> {
   let renamed = 0;
   try {
-    const indexDbPath = getIndexDbPath();
-    if (!fs.existsSync(indexDbPath)) return 0;
-    const indexDb = new Database(indexDbPath);
-    const tableExists = indexDb.prepare("SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' AND name='knowledge_entries'").get() as { cnt: number } | undefined;
-    if (tableExists && tableExists.cnt > 0) {
-      const rows = indexDb.prepare('SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?').all(`%${oldName}%`) as { id: string; tags: string }[];
-      const updateStmt = indexDb.prepare('UPDATE knowledge_entries SET tags = ? WHERE id = ?');
-      for (const row of rows) {
-        if (!row.tags) continue;
-        const tagArr = row.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
-        const idx = tagArr.indexOf(oldName);
-        if (idx !== -1) {
-          tagArr[idx] = newName.trim();
-          updateStmt.run(tagArr.join(','), row.id);
-          renamed++;
-        }
+    if (!(await tableExists())) return 0;
+    const adapter = getIndexAdapter();
+    const rows = await adapter.allAsync<{ id: string; tags: string }>(
+      'SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?',
+      [`%${oldName}%`],
+    );
+    for (const row of rows) {
+      if (!row.tags) continue;
+      const tagArr = parseTags(row.tags);
+      const idx = tagArr.indexOf(oldName);
+      if (idx !== -1) {
+        tagArr[idx] = newName.trim();
+        await adapter.runAsync('UPDATE knowledge_entries SET tags = ? WHERE id = ?', [tagArr.join(','), row.id]);
+        renamed++;
       }
     }
-    indexDb.close();
   } catch (e) {
-    logger.error({ err: e }, 'Error in renameKbTag:');
+    logger.error({ err: e }, 'Error in renameKbTag');
   }
   return renamed;
 }
 
-export function deleteKbTag(tagName: string): number {
+/**
+ * Remove a tag from all entries.
+ * @returns Number of entries updated
+ */
+export async function deleteKbTag(tagName: string): Promise<number> {
   let removed = 0;
   try {
-    const indexDbPath = getIndexDbPath();
-    if (!fs.existsSync(indexDbPath)) return 0;
-    const indexDb = new Database(indexDbPath);
-    const tableExists = indexDb.prepare("SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' AND name='knowledge_entries'").get() as { cnt: number } | undefined;
-    if (tableExists && tableExists.cnt > 0) {
-      const rows = indexDb.prepare('SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?').all(`%${tagName}%`) as { id: string; tags: string }[];
-      const updateStmt = indexDb.prepare('UPDATE knowledge_entries SET tags = ? WHERE id = ?');
-      for (const row of rows) {
-        if (!row.tags) continue;
-        const tagArr = row.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
-        const idx = tagArr.indexOf(tagName);
-        if (idx !== -1) {
-          tagArr.splice(idx, 1);
-          updateStmt.run(tagArr.join(','), row.id);
-          removed++;
-        }
+    if (!(await tableExists())) return 0;
+    const adapter = getIndexAdapter();
+    const rows = await adapter.allAsync<{ id: string; tags: string }>(
+      'SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?',
+      [`%${tagName}%`],
+    );
+    for (const row of rows) {
+      if (!row.tags) continue;
+      const tagArr = parseTags(row.tags);
+      const idx = tagArr.indexOf(tagName);
+      if (idx !== -1) {
+        tagArr.splice(idx, 1);
+        await adapter.runAsync('UPDATE knowledge_entries SET tags = ? WHERE id = ?', [tagArr.join(','), row.id]);
+        removed++;
       }
     }
-    indexDb.close();
   } catch (e) {
-    logger.error({ err: e }, 'Error in deleteKbTag:');
+    logger.error({ err: e }, 'Error in deleteKbTag');
   }
   return removed;
 }
 
-export function mergeKbTags(sourceTag: string, targetTag: string): number {
+/**
+ * Merge sourceTag into targetTag across all entries.
+ * @returns Number of entries updated
+ */
+export async function mergeKbTags(sourceTag: string, targetTag: string): Promise<number> {
   let merged = 0;
   try {
-    const indexDbPath = getIndexDbPath();
-    if (!fs.existsSync(indexDbPath)) return 0;
-    const indexDb = new Database(indexDbPath);
-    const tableExists = indexDb.prepare("SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' AND name='knowledge_entries'").get() as { cnt: number } | undefined;
-    if (tableExists && tableExists.cnt > 0) {
-      const rows = indexDb.prepare('SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?').all(`%${sourceTag}%`) as { id: string; tags: string }[];
-      const updateStmt = indexDb.prepare('UPDATE knowledge_entries SET tags = ? WHERE id = ?');
-      for (const row of rows) {
-        if (!row.tags) continue;
-        const tagArr = row.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0);
-        const idx = tagArr.indexOf(sourceTag);
-        if (idx !== -1) {
-          tagArr.splice(idx, 1);
-          if (!tagArr.includes(targetTag)) {
-            tagArr.push(targetTag);
-          }
-          updateStmt.run(tagArr.join(','), row.id);
-          merged++;
-        }
+    if (!(await tableExists())) return 0;
+    const adapter = getIndexAdapter();
+    const rows = await adapter.allAsync<{ id: string; tags: string }>(
+      'SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?',
+      [`%${sourceTag}%`],
+    );
+    for (const row of rows) {
+      if (!row.tags) continue;
+      const tagArr = parseTags(row.tags);
+      const idx = tagArr.indexOf(sourceTag);
+      if (idx !== -1) {
+        tagArr.splice(idx, 1);
+        if (!tagArr.includes(targetTag)) tagArr.push(targetTag);
+        await adapter.runAsync('UPDATE knowledge_entries SET tags = ? WHERE id = ?', [tagArr.join(','), row.id]);
+        merged++;
       }
     }
-    indexDb.close();
   } catch (e) {
-    logger.error({ err: e }, 'Error in mergeKbTags:');
+    logger.error({ err: e }, 'Error in mergeKbTags');
   }
   return merged;
 }
 
-export function getKbEntriesByTag(tagName: string, projectId?: string, userId?: string): any[] {
-  const entries: any[] = [];
+/**
+ * Get all entries with a specific tag.
+ * @returns Array of raw entry rows
+ */
+export async function getKbEntriesByTag(
+  tagName: string,
+  projectId?: string,
+  userId?: string,
+): Promise<any[]> {
   try {
-    const indexDbPath = getIndexDbPath();
-    if (!fs.existsSync(indexDbPath)) return entries;
-    const indexDb = new Database(indexDbPath, { readonly: true });
-    const tableExists = indexDb.prepare("SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' AND name='knowledge_entries'").get() as { cnt: number } | undefined;
-    if (tableExists && tableExists.cnt > 0) {
-      let rows: Record<string, unknown>[];
-      const filter = buildAdminScopeFilter(projectId, userId);
-      if (filter) {
-        rows = indexDb.prepare(`SELECT * FROM knowledge_entries WHERE tags LIKE ? AND (${filter.clause})`).all(`%${tagName}%`, ...filter.params) as Record<string, unknown>[];
-      } else {
-        rows = indexDb.prepare('SELECT * FROM knowledge_entries WHERE tags LIKE ?').all(`%${tagName}%`) as Record<string, unknown>[];
-      }
-      for (const row of rows) {
-        if (!row.tags) continue;
-        const tagArr = (row.tags as string).split(',').map((t: string) => t.trim());
-        if (tagArr.includes(tagName)) {
-          entries.push(row);
-        }
-      }
+    if (!(await tableExists())) return [];
+    const adapter = getIndexAdapter();
+    const filter = buildAdminScopeFilter(projectId, userId);
+    let rows: Record<string, unknown>[];
+
+    if (filter) {
+      rows = await adapter.allAsync<Record<string, unknown>>(
+        `SELECT * FROM knowledge_entries WHERE tags LIKE ? AND (${filter.clause})`,
+        [`%${tagName}%`, ...(filter.params as unknown[])],
+      );
+    } else {
+      rows = await adapter.allAsync<Record<string, unknown>>(
+        'SELECT * FROM knowledge_entries WHERE tags LIKE ?',
+        [`%${tagName}%`],
+      );
     }
-    indexDb.close();
+
+    // Filter to exact tag matches (LIKE may include superset tags)
+    return rows.filter(row => {
+      if (!row.tags) return false;
+      return parseTags(row.tags as string).includes(tagName);
+    });
   } catch (e) {
-    logger.error({ err: e }, 'Error in getKbEntriesByTag:');
+    logger.error({ err: e }, 'Error in getKbEntriesByTag');
+    return [];
   }
-  return entries;
 }

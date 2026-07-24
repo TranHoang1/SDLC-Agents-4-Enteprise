@@ -1,8 +1,9 @@
 /**
  * KSA-162: MCP Tool registration for find_entry_points.
+ * SA4E-45: Refactored to accept DatabaseAdapter.
  */
 
-import Database from 'better-sqlite3';
+import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import { EntryPointDetector } from './EntryPointDetector.js';
 import type { EntryType } from './types.js';
 
@@ -24,10 +25,10 @@ export const ENTRY_POINT_TOOL_DEFINITION = {
 };
 
 /** Handle find_entry_points tool call (SA4E-41: tenant-scoped, fail-closed). */
-export function handleEntryPointTool(args: Record<string, unknown>, db: Database.Database, projectId?: string): string {
-  const detector = new EntryPointDetector(db, projectId);
+export async function handleEntryPointTool(args: Record<string, unknown>, adapter: DatabaseAdapter, projectId?: string): Promise<string> {
+  const detector = new EntryPointDetector(adapter, projectId);
 
-  const result = detector.query({
+  const result = await detector.query({
     entryType: args.entry_type as EntryType | undefined,
     framework: args.framework as string | undefined,
     httpMethod: args.http_method as string | undefined,

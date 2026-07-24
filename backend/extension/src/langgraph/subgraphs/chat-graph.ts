@@ -96,7 +96,7 @@ export async function buildChatSubgraph(
   const wsRoot = workspaceRoot || require("vscode").workspace.workspaceFolders?.[0]?.uri.fsPath || "";
 
   // Detect context window for budget-aware message building
-  const contextWindow = llmProvider?.getContextWindow() || 0;
+  const contextWindow = llmProvider?.getContextWindow?.() || 0;
   if (contextWindow > 0) {
     debugLog(`[chat-graph] Context window detected: ${contextWindow} tokens`);
   }
@@ -118,7 +118,10 @@ export async function buildChatSubgraph(
         } as any);
       }
     }
-  } catch { /* fallback to base prompt */ }
+  } catch (err) {
+    console.debug(`[chat-graph] steering injection failed (non-fatal): ${(err as Error).message}`);
+    /* fallback to base prompt */
+  }
 
   const verifyNode = createVerifyResponseNode(llmProvider, streamHandler);
 

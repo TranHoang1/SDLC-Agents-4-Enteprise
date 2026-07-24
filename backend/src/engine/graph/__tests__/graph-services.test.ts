@@ -148,30 +148,30 @@ describe('SymbolResolver', () => {
   before(() => { db = setupTestDb(); });
   after(() => { db.close(); });
 
-  it('resolves exact symbol name', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const results = resolver.resolve('getUser');
+  it('resolves exact symbol name', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const results = await resolver.resolve('getUser');
     assert.ok(results.length >= 1);
     assert.equal(results[0].name, 'getUser');
   });
 
-  it('resolves qualified name (Class.method)', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const results = resolver.resolve('UserService.getUser');
+  it('resolves qualified name (Class.method)', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const results = await resolver.resolve('UserService.getUser');
     assert.equal(results.length, 1);
     assert.equal(results[0].name, 'getUser');
     assert.equal(results[0].filePath, 'src/service.ts');
   });
 
-  it('returns empty for non-existent symbol', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const results = resolver.resolve('nonExistentSymbol');
+  it('returns empty for non-existent symbol', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const results = await resolver.resolve('nonExistentSymbol');
     assert.equal(results.length, 0);
   });
 
-  it('suggests similar symbols', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const suggestions = resolver.suggest('User');
+  it('suggests similar symbols', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const suggestions = await resolver.suggest('User');
     assert.ok(suggestions.length > 0);
     assert.ok(suggestions.some(s => s.includes('User')));
   });
@@ -181,62 +181,62 @@ describe('CallGraphService', () => {
   before(() => { db = setupTestDb(); });
   after(() => { db.close(); });
 
-  it('finds direct callers of a method', () => {
+  it('finds direct callers of a method', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const service = new CallGraphService(graphRepo, resolver);
 
-    const result = service.findCallers('getUser', 1, 20);
+    const result = await service.findCallers('getUser', 1, 20);
     assert.ok(result.results.length >= 1);
     assert.ok(result.results.some(r => r.symbol === 'handleGetUser'));
     assert.equal(result.metadata.depthSearched, 1);
   });
 
-  it('finds transitive callers with depth 2', () => {
+  it('finds transitive callers with depth 2', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const service = new CallGraphService(graphRepo, resolver);
 
-    const result = service.findCallers('findById', 2, 20);
+    const result = await service.findCallers('findById', 2, 20);
     // findById <- getUser <- handleGetUser
     assert.ok(result.results.length >= 1);
   });
 
-  it('finds callees of a method', () => {
+  it('finds callees of a method', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const service = new CallGraphService(graphRepo, resolver);
 
-    const result = service.findCallees('handleGetUser', 1, 20);
+    const result = await service.findCallees('handleGetUser', 1, 20);
     assert.ok(result.results.length >= 1);
     assert.ok(result.results.some(r => r.symbol === 'getUser'));
   });
 
-  it('returns empty for unknown symbol', () => {
+  it('returns empty for unknown symbol', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const service = new CallGraphService(graphRepo, resolver);
 
-    const result = service.findCallers('unknownFunction', 1, 20);
+    const result = await service.findCallers('unknownFunction', 1, 20);
     assert.equal(result.results.length, 0);
     assert.equal(result.resolvedTo.length, 0);
   });
 
-  it('respects limit parameter', () => {
+  it('respects limit parameter', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const service = new CallGraphService(graphRepo, resolver);
 
-    const result = service.findCallers('getUser', 3, 1);
+    const result = await service.findCallers('getUser', 3, 1);
     assert.ok(result.results.length <= 1);
   });
 
-  it('clamps depth to max 5', () => {
+  it('clamps depth to max 5', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const service = new CallGraphService(graphRepo, resolver);
 
-    const result = service.findCallers('getUser', 10, 20);
+    const result = await service.findCallers('getUser', 10, 20);
     assert.equal(result.metadata.depthSearched, 5);
   });
 });
@@ -246,26 +246,26 @@ describe('FileResolver', () => {
   after(() => { db.close(); });
 
   it('resolves exact relative path', () => {
-    const resolver = new FileResolver(db, '/project', 'test_proj');
+    const resolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
     const result = resolver.resolveFile('src/service.ts');
     assert.equal(result, 'src/service.ts');
   });
 
   it('returns null for non-indexed file', () => {
-    const resolver = new FileResolver(db, '/project', 'test_proj');
+    const resolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
     const result = resolver.resolveFile('src/nonexistent.ts');
     assert.equal(result, null);
   });
 
   it('identifies external modules', () => {
-    const resolver = new FileResolver(db, '/project', 'test_proj');
+    const resolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
     assert.equal(resolver.isExternal('fs'), true);
     assert.equal(resolver.isExternal('path'), true);
     assert.equal(resolver.isExternal('lodash'), true);
   });
 
   it('identifies relative imports as non-external', () => {
-    const resolver = new FileResolver(db, '/project', 'test_proj');
+    const resolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
     assert.equal(resolver.isExternal('./service'), false);
   });
 });
@@ -275,8 +275,8 @@ describe('DependencyGraphService', () => {
   after(() => { db.close(); });
 
   it('finds outgoing dependencies', () => {
-    const fileResolver = new FileResolver(db, '/project', 'test_proj');
-    const service = new DependencyGraphService(db, fileResolver, 'test_proj');
+    const fileResolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
+    const service = new DependencyGraphService(new SqliteDbAdapter(db), fileResolver, 'test_proj');
 
     const result = service.query('src/service.ts', 'outgoing', 1, false, 50);
     assert.equal(result.root, 'src/service.ts');
@@ -284,16 +284,16 @@ describe('DependencyGraphService', () => {
   });
 
   it('returns empty for non-indexed file', () => {
-    const fileResolver = new FileResolver(db, '/project', 'test_proj');
-    const service = new DependencyGraphService(db, fileResolver, 'test_proj');
+    const fileResolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
+    const service = new DependencyGraphService(new SqliteDbAdapter(db), fileResolver, 'test_proj');
 
     const result = service.query('nonexistent.ts', 'outgoing', 1, false, 50);
     assert.equal(result.results.length, 0);
   });
 
   it('clamps depth to max 5', () => {
-    const fileResolver = new FileResolver(db, '/project', 'test_proj');
-    const service = new DependencyGraphService(db, fileResolver, 'test_proj');
+    const fileResolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
+    const service = new DependencyGraphService(new SqliteDbAdapter(db), fileResolver, 'test_proj');
 
     const result = service.query('src/service.ts', 'outgoing', 10, false, 50);
     // Should not crash, depth clamped
@@ -306,24 +306,24 @@ describe('TestDetector', () => {
   after(() => { db.close(); });
 
   it('identifies test files by path pattern', () => {
-    const detector = new TestDetector(db, 'test_proj');
+    const detector = new TestDetector(new SqliteDbAdapter(db), 'test_proj');
     assert.equal(detector.isTestFile('tests/service.test.ts'), true);
     assert.equal(detector.isTestFile('src/__tests__/foo.ts'), true);
     assert.equal(detector.isTestFile('src/service.ts'), false);
   });
 
   it('identifies test files by name pattern', () => {
-    const detector = new TestDetector(db, 'test_proj');
+    const detector = new TestDetector(new SqliteDbAdapter(db), 'test_proj');
     assert.equal(detector.isTestFile('foo.test.ts'), true);
     assert.equal(detector.isTestFile('foo.spec.js'), true);
     assert.equal(detector.isTestFile('FooTest.kt'), true);
     assert.equal(detector.isTestFile('test_foo.py'), true);
   });
 
-  it('finds related tests for a symbol', () => {
-    const detector = new TestDetector(db, 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const symbols = resolver.resolve('getUser');
+  it('finds related tests for a symbol', async () => {
+    const detector = new TestDetector(new SqliteDbAdapter(db), 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const symbols = await resolver.resolve('getUser');
     const tests = detector.findRelatedTests(symbols, []);
     assert.ok(tests.length >= 0); // May find tests/service.test.ts
   });
@@ -333,16 +333,16 @@ describe('ImpactAnalysisService', () => {
   before(() => { db = setupTestDb(); });
   after(() => { db.close(); });
 
-  it('analyzes impact of modifying a method', () => {
+  it('analyzes impact of modifying a method', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const callGraph = new CallGraphService(graphRepo, resolver);
-    const fileResolver = new FileResolver(db, '/project', 'test_proj');
-    const depGraph = new DependencyGraphService(db, fileResolver, 'test_proj');
-    const testDetector = new TestDetector(db, 'test_proj');
-    const service = new ImpactAnalysisService(db, callGraph, depGraph, resolver, testDetector);
+    const fileResolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
+    const depGraph = new DependencyGraphService(new SqliteDbAdapter(db), fileResolver, 'test_proj');
+    const testDetector = new TestDetector(new SqliteDbAdapter(db), 'test_proj');
+    const service = new ImpactAnalysisService(new SqliteDbAdapter(db), callGraph, depGraph, resolver, testDetector);
 
-    const result = service.analyzeImpact('getUser', 'modify', 3, true, 'low');
+    const result = await service.analyzeImpact('getUser', 'modify', 3, true, 'low');
     assert.equal(result.symbol, 'getUser');
     assert.equal(result.action, 'modify');
     assert.ok(result.blastRadius.totalAffected >= 0);
@@ -350,17 +350,17 @@ describe('ImpactAnalysisService', () => {
     assert.ok(Array.isArray(result.recommendations));
   });
 
-  it('classifies delete action as higher severity', () => {
+  it('classifies delete action as higher severity', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const callGraph = new CallGraphService(graphRepo, resolver);
-    const fileResolver = new FileResolver(db, '/project', 'test_proj');
-    const depGraph = new DependencyGraphService(db, fileResolver, 'test_proj');
-    const testDetector = new TestDetector(db, 'test_proj');
-    const service = new ImpactAnalysisService(db, callGraph, depGraph, resolver, testDetector);
+    const fileResolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
+    const depGraph = new DependencyGraphService(new SqliteDbAdapter(db), fileResolver, 'test_proj');
+    const testDetector = new TestDetector(new SqliteDbAdapter(db), 'test_proj');
+    const service = new ImpactAnalysisService(new SqliteDbAdapter(db), callGraph, depGraph, resolver, testDetector);
 
-    const modifyResult = service.analyzeImpact('getUser', 'modify', 2, false, 'low');
-    const deleteResult = service.analyzeImpact('getUser', 'delete', 2, false, 'low');
+    const modifyResult = await service.analyzeImpact('getUser', 'modify', 2, false, 'low');
+    const deleteResult = await service.analyzeImpact('getUser', 'delete', 2, false, 'low');
 
     // Delete should have same or more critical/high items
     const modifyCritical = modifyResult.blastRadius.summary.critical + modifyResult.blastRadius.summary.high;
@@ -368,16 +368,16 @@ describe('ImpactAnalysisService', () => {
     assert.ok(deleteCritical >= modifyCritical);
   });
 
-  it('returns empty result for unknown symbol', () => {
+  it('returns empty result for unknown symbol', async () => {
     const graphRepo = new GraphRepository(new SqliteDbAdapter(db), 'test_proj');
-    const resolver = new SymbolResolver(db, 'test_proj');
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
     const callGraph = new CallGraphService(graphRepo, resolver);
-    const fileResolver = new FileResolver(db, '/project', 'test_proj');
-    const depGraph = new DependencyGraphService(db, fileResolver, 'test_proj');
-    const testDetector = new TestDetector(db, 'test_proj');
-    const service = new ImpactAnalysisService(db, callGraph, depGraph, resolver, testDetector);
+    const fileResolver = new FileResolver(new SqliteDbAdapter(db), '/project', 'test_proj');
+    const depGraph = new DependencyGraphService(new SqliteDbAdapter(db), fileResolver, 'test_proj');
+    const testDetector = new TestDetector(new SqliteDbAdapter(db), 'test_proj');
+    const service = new ImpactAnalysisService(new SqliteDbAdapter(db), callGraph, depGraph, resolver, testDetector);
 
-    const result = service.analyzeImpact('nonExistent', 'modify', 3, true, 'low');
+    const result = await service.analyzeImpact('nonExistent', 'modify', 3, true, 'low');
     assert.equal(result.blastRadius.totalAffected, 0);
     assert.ok(result.recommendations.length > 0);
   });
@@ -387,24 +387,24 @@ describe('GraphTraverser', () => {
   before(() => { db = setupTestDb(); });
   after(() => { db.close(); });
 
-  it('resolves a start node', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const traverser = new GraphTraverser(db, resolver, '/project', 'test_proj');
+  it('resolves a start node', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const traverser = new GraphTraverser(new SqliteDbAdapter(db), resolver, '/project', 'test_proj');
 
-    const node = traverser.resolveNode('UserService');
+    const node = await traverser.resolveNode('UserService');
     assert.ok(node !== null);
     assert.equal(node!.name, 'UserService');
     assert.equal(node!.kind, 'class');
   });
 
-  it('traverses outgoing edges from a node', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const traverser = new GraphTraverser(db, resolver, '/project', 'test_proj');
+  it('traverses outgoing edges from a node', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const traverser = new GraphTraverser(new SqliteDbAdapter(db), resolver, '/project', 'test_proj');
 
-    const node = traverser.resolveNode('handleGetUser');
+    const node = await traverser.resolveNode('handleGetUser');
     assert.ok(node !== null);
 
-    const results = traverser.traverse(node!, {
+    const results = await traverser.traverse(node!, {
       edgeTypes: ['calls'],
       nodeTypes: [],
       direction: 'outgoing',
@@ -415,14 +415,14 @@ describe('GraphTraverser', () => {
     assert.ok(results.length >= 0);
   });
 
-  it('traverses incoming edges', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const traverser = new GraphTraverser(db, resolver, '/project', 'test_proj');
+  it('traverses incoming edges', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const traverser = new GraphTraverser(new SqliteDbAdapter(db), resolver, '/project', 'test_proj');
 
-    const node = traverser.resolveNode('getUser');
+    const node = await traverser.resolveNode('getUser');
     assert.ok(node !== null);
 
-    const results = traverser.traverse(node!, {
+    const results = await traverser.traverse(node!, {
       edgeTypes: ['calls'],
       nodeTypes: [],
       direction: 'incoming',
@@ -432,22 +432,22 @@ describe('GraphTraverser', () => {
     assert.ok(results.length >= 0);
   });
 
-  it('returns null for unknown symbol', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const traverser = new GraphTraverser(db, resolver, '/project', 'test_proj');
+  it('returns null for unknown symbol', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const traverser = new GraphTraverser(new SqliteDbAdapter(db), resolver, '/project', 'test_proj');
 
-    const node = traverser.resolveNode('nonExistentSymbol');
+    const node = await traverser.resolveNode('nonExistentSymbol');
     assert.equal(node, null);
   });
 
-  it('respects maxResults limit', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const traverser = new GraphTraverser(db, resolver, '/project', 'test_proj');
+  it('respects maxResults limit', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const traverser = new GraphTraverser(new SqliteDbAdapter(db), resolver, '/project', 'test_proj');
 
-    const node = traverser.resolveNode('UserService');
+    const node = await traverser.resolveNode('UserService');
     assert.ok(node !== null);
 
-    const results = traverser.traverse(node!, {
+    const results = await traverser.traverse(node!, {
       edgeTypes: [],
       nodeTypes: [],
       direction: 'outgoing',
@@ -457,14 +457,14 @@ describe('GraphTraverser', () => {
     assert.ok(results.length <= 1);
   });
 
-  it('formats response correctly', () => {
-    const resolver = new SymbolResolver(db, 'test_proj');
-    const traverser = new GraphTraverser(db, resolver, '/project', 'test_proj');
+  it('formats response correctly', async () => {
+    const resolver = new SymbolResolver(new SqliteDbAdapter(db), 'test_proj');
+    const traverser = new GraphTraverser(new SqliteDbAdapter(db), resolver, '/project', 'test_proj');
 
-    const node = traverser.resolveNode('UserService');
+    const node = await traverser.resolveNode('UserService');
     assert.ok(node !== null);
 
-    const results = traverser.traverse(node!, {
+    const results = await traverser.traverse(node!, {
       edgeTypes: [],
       nodeTypes: [],
       direction: 'outgoing',

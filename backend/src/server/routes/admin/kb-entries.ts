@@ -1,32 +1,31 @@
+﻿/**
+ * KB entries routes — search, list, and detail for KB entries.
+ * SA4E-50: All admin-db calls are awaited since they are now async.
+ */
+
 import { Hono } from 'hono';
-import fs from 'node:fs';
-import Database from 'better-sqlite3';
 import {
-  getKbEntries,
-  getKbEntryCount,
-  getKbEntryById,
-  searchKbEntries,
-  recordQueryLog,
+  getKbEntries, getKbEntryCount, getKbEntryById,
+  searchKbEntries, recordQueryLog,
 } from '../../../admin/admin-db.js';
-import { getIndexDbPath } from '../../../admin/db/core.js';
 import type { AdminContext } from './context.js';
 
 export function createKbEntriesRoutes(ctx: AdminContext): Hono {
   const app = new Hono();
 
   app.post('/api/admin/search', async (c) => {
-    const user = ctx.requireAuth(c);
+    const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
-    const permCheck = ctx.requirePermission(c, user.userId, 'SEARCH_EXPLORE');
+    const permCheck = await ctx.requirePermission(c, user.userId, 'SEARCH_EXPLORE');
     if (permCheck instanceof Response) return permCheck;
     const maxResults = (permCheck.roleData as any)?.maxResults;
     const { query, debug } = await c.req.json();
     if (!query) return c.json({ results: [] });
     const startTime = Date.now();
-    const realResults = searchKbEntries(query, ctx.getRequestProjectId(c));
+    const realResults = await searchKbEntries(query, ctx.getRequestProjectId(c));
     if (realResults.items.length > 0) {
       const responseTimeMs = Date.now() - startTime;
-      recordQueryLog(query, responseTimeMs, realResults.items.length, user.userId);
+      await recordQueryLog(query, responseTimeMs, realResults.items.length, user.userId);
       const resultLimit = (typeof maxResults === 'number' && maxResults > 0) ? Math.min(maxResults, 20) : 20;
       const results = realResults.items.slice(0, resultLimit).map((item: any) => ({
         id: item.id || item.entry_id || 'unknown',
@@ -47,46 +46,42 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     const responseTimeMs = Date.now() - startTime;
     let finalResults = filtered.length > 0 ? filtered : mockResults.slice(0, 2);
     if (typeof maxResults === 'number' && maxResults > 0) finalResults = finalResults.slice(0, maxResults);
-    recordQueryLog(query, responseTimeMs, finalResults.length, user.userId);
+    await recordQueryLog(query, responseTimeMs, finalResults.length, user.userId);
     return c.json({ results: finalResults, debug: debug ? { queryTokens: query.split(/\s+/), totalCandidates: 42, searchTimeMs: responseTimeMs } : undefined });
   });
 
-  app.get('/api/admin/kb/entries', (c) => {
-    const user = ctx.requireAuth(c);
+  app.get('/api/admin/kb/entries', async (c) => {
+    const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
-    const permCheck = ctx.requirePermission(c, user.userId, 'KB_READ');
+    const permCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
     if (permCheck instanceof Response) return permCheck;
     const page = parseInt(c.req.query('page') || '1');
     const pageSize = parseInt(c.req.query('pageSize') || '20');
     const sortBy = c.req.query('sortBy') || 'created_at';
     const sortDir = (c.req.query('sortDir') || 'desc') as 'asc' | 'desc';
-    const result = getKbEntries(page, pageSize, sortBy, sortDir, ctx.getRequestProjectId(c));
+    const result = await getKbEntries(page, pageSize, sortBy, sortDir, ctx.getRequestProjectId(c));
     const allowedTiers = (permCheck.roleData as any)?.allowedTiers;
     let entries = result.items;
     if (Array.isArray(allowedTiers)) entries = entries.filter((e: any) => { const t = e.tier || e.scope || 'SHARED'; return allowedTiers.includes(t); });
     return c.json({ entries, total: Array.isArray(allowedTiers) ? entries.length : result.total, page, pageSize, totalPages: Math.ceil((Array.isArray(allowedTiers) ? entries.length : result.total) / pageSize) });
   });
 
-  app.get('/api/admin/kb/entries/:id', (c) => {
-    const user = ctx.requireAuth(c);
+  app.get('/api/admin/kb/entries/:id', async (c) => {
+    const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
-    const permCheck = ctx.requirePermission(c, user.userId, 'KB_READ');
+    const permCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
     if (permCheck instanceof Response) return permCheck;
     const entryId = c.req.param('id');
 
-    // CODE_ENTITY nodes: fetch detail from symbols table (index.db)
     if (entryId.startsWith('code:') || entryId.startsWith('sym-')) {
-      const symbolId = entryId.startsWith('code:')
-        ? entryId.replace('code:', '')
-        : entryId.replace('sym-', '');
+      const symbolId = entryId.startsWith('code:') ? entryId.replace('code:', '') : entryId.replace('sym-', '');
       const detail = getCodeSymbolDetail(symbolId, ctx);
       if (detail) return c.json(detail);
       return c.json({ error: 'Code symbol not found' }, 404);
     }
 
-    // KB document nodes (doc-{id}): strip prefix to get numeric ID
     const lookupId = entryId.startsWith('doc-') ? entryId.replace('doc-', '') : entryId;
-    const entry = getKbEntryById(lookupId);
+    const entry = await getKbEntryById(lookupId);
     if (!entry) return c.json({ error: 'Entry not found' }, 404);
     const allowedTiers = (permCheck.roleData as any)?.allowedTiers;
     if (Array.isArray(allowedTiers)) {
@@ -112,51 +107,29 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
   return app;
 }
 
-/** Fetch code symbol detail from index.db for KB Graph node click. */
-function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Record<string, unknown> | null {
+/** Fetch code symbol detail via SymbolRepository for KB Graph node click. */
+async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise<Record<string, unknown> | null> {
   try {
-    const indexDbPath = getIndexDbPath();
-    if (!fs.existsSync(indexDbPath)) return null;
-    const indexDb = new Database(indexDbPath, { readonly: true });
-    try {
-      const row = indexDb.prepare(`
-        SELECT s.id, s.name, s.kind, s.signature, s.start_line, s.end_line,
-               s.parent_symbol, s.visibility, s.doc_comment,
-               f.relative_path, f.language, f.module
-        FROM symbols s
-        JOIN files f ON s.file_id = f.id
-        WHERE s.id = ?
-      `).get(symbolId) as any;
-      if (!row) return null;
-      const lines = row.start_line && row.end_line
-        ? `Lines ${row.start_line}–${row.end_line}`
-        : '';
-      const contentParts = [
-        row.signature ? `**Signature:** \`${row.signature}\`` : '',
-        row.doc_comment ? `**Doc:** ${row.doc_comment}` : '',
-        `**Kind:** ${row.kind}`,
-        `**File:** ${row.relative_path}`,
-        lines ? `**Location:** ${lines}` : '',
-        row.module ? `**Module:** ${row.module}` : '',
-        row.visibility ? `**Visibility:** ${row.visibility}` : '',
-        row.parent_symbol ? `**Parent:** ${row.parent_symbol}` : '',
-      ].filter(Boolean).join('\n');
-      return {
-        id: `code:${row.id}`,
-        title: `${row.name} (${row.kind})`,
-        content: contentParts,
-        tier: 'CODE',
-        type: 'CODE_ENTITY',
-        source: row.relative_path || '',
-        tags: [row.kind, row.language, row.module].filter(Boolean),
-        links: [],
-        qualityScore: null,
-        createdAt: null,
-        updatedAt: null,
-      };
-    } finally {
-      indexDb.close();
-    }
+    const detail = await ctx.db.symbol.getSymbolDetail(symbolId);
+    if (!detail) return null;
+    const lines = detail.startLine && detail.endLine ? `Lines ${detail.startLine}\u2013${detail.endLine}` : '';
+    const contentParts = [
+      detail.signature ? `**Signature:** \`${detail.signature}\`` : '',
+      detail.docComment ? `**Doc:** ${detail.docComment}` : '',
+      `**Kind:** ${detail.kind}`, `**File:** ${detail.relativePath}`,
+      lines ? `**Location:** ${lines}` : '',
+      detail.module ? `**Module:** ${detail.module}` : '',
+      detail.visibility ? `**Visibility:** ${detail.visibility}` : '',
+      detail.parentSymbol ? `**Parent:** ${detail.parentSymbol}` : '',
+    ].filter(Boolean).join('\n');
+    return {
+      id: `code:${detail.id}`,
+      title: `${detail.name} (${detail.kind})`,
+      content: contentParts, tier: 'CODE', type: 'CODE_ENTITY',
+      source: detail.relativePath || '',
+      tags: [detail.kind, detail.language, detail.module].filter(Boolean),
+      links: [], qualityScore: null, createdAt: null, updatedAt: null,
+    };
   } catch {
     ctx.logger.warn({ symbolId }, 'Failed to fetch code symbol detail');
     return null;

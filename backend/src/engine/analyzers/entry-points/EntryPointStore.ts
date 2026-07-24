@@ -1,8 +1,10 @@
 /**
- * KSA-162: Entry Point Store — SQLite CRUD for detected entry points.
+ * KSA-162: Entry Point Store — CRUD for detected entry points.
+ * SA4E-53: async API for PostgreSQL compatibility, uses DialectHelper for upserts.
  */
 
-import Database from 'better-sqlite3';
+import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
+import { DialectHelper } from '../../../database/dialect/DialectHelper.js';
 import type { EntryPoint, EntryPointFilters, EntryPointQueryResult } from './types.js';
 import { buildCodeScopeFilter } from '../../query/code-intel-isolation.js';
 
@@ -30,51 +32,43 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_ep_symbol ON entry_points(symbol_id);
 `;
 
 export class EntryPointStore {
-  private db: Database.Database;
+  private adapter: DatabaseAdapter;
+  private dialect: DialectHelper;
   private projectId: string | undefined;
-  private stmts!: {
-    upsert: Database.Statement;
-    deleteBySymbol: Database.Statement;
-  };
+  private tableReady: Promise<void>;
 
   /**
-   * @param projectId  SA4E-41 read scope. Undefined ⇒ query() is fail-closed.
+   * @param projectId  SA4E-41 read scope. Undefined => query() is fail-closed.
    */
-  constructor(db: Database.Database, projectId?: string) {
-    this.db = db;
+  constructor(adapter: DatabaseAdapter, projectId?: string) {
+    this.adapter = adapter;
+    this.dialect = new DialectHelper(adapter.getEngine());
     this.projectId = projectId;
-    this.ensureTable();
-    this.prepareStatements();
+    // SA4E-53: async table creation — fire-and-forget in constructor, awaited before first use
+    this.tableReady = this.ensureTable();
   }
 
   /** Store or update an entry point. */
-  upsert(ep: EntryPoint): void {
-    this.stmts.upsert.run(
-      ep.symbol_id,
-      ep.entry_type,
-      ep.framework,
-      ep.http_method,
-      ep.route_path,
-      ep.full_route,
-      JSON.stringify(ep.middleware),
-      ep.has_auth ? 1 : 0,
-      ep.controller,
-      ep.event_name,
-      ep.confidence
-    );
+  async upsert(ep: EntryPoint): Promise<void> {
+    await this.tableReady;
+    const sql = this.buildUpsertSql();
+    await this.adapter.runAsync(sql, [
+      ep.symbol_id, ep.entry_type, ep.framework, ep.http_method,
+      ep.route_path, ep.full_route, JSON.stringify(ep.middleware),
+      ep.has_auth ? 1 : 0, ep.controller, ep.event_name, ep.confidence,
+    ]);
   }
 
   /** Batch upsert entry points. */
-  upsertBatch(entries: EntryPoint[]): void {
-    const transaction = this.db.transaction((items: EntryPoint[]) => {
-      for (const ep of items) this.upsert(ep);
+  async upsertBatch(entries: EntryPoint[]): Promise<void> {
+    await this.adapter.transactionAsync(async () => {
+      for (const ep of entries) await this.upsert(ep);
     });
-    transaction(entries);
   }
 
   /** Query entry points with filters. */
-  query(filters: EntryPointFilters): EntryPointQueryResult {
-    // entry_points has no project_id column — scope via the joined symbols table.
+  async query(filters: EntryPointFilters): Promise<EntryPointQueryResult> {
+    await this.tableReady;
     const scope = buildCodeScopeFilter(this.projectId, 's');
     let sql = `
       SELECT ep.*, s.name as symbol_name, f.relative_path as file_path, s.start_line
@@ -110,62 +104,72 @@ export class EntryPointStore {
       params.push(`%${filters.filePath}%`);
     }
 
-    // Count
-    const countSql = sql.replace(/SELECT ep\.\*.*?FROM/, 'SELECT COUNT(*) as total FROM');
-    const totalRow = this.db.prepare(countSql).get(...params) as { total: number } | undefined;
-    const total = totalRow?.total ?? 0;
-
+    const total = await this.countResults(sql, params);
     sql += ' ORDER BY ep.entry_type, ep.full_route LIMIT ?';
     params.push(filters.limit);
 
-    const rows = this.db.prepare(sql).all(...params) as Array<EntryPoint & { middleware: string }>;
+    const rows = await this.adapter.allAsync<EntryPoint & { middleware: string }>(sql, params);
     const results = rows.map(r => ({
       ...r,
       middleware: r.middleware ? JSON.parse(r.middleware as string) : [],
       has_auth: Boolean(r.has_auth),
     }));
 
-    // Summary (tenant-scoped via joined symbols)
+    const summary = await this.buildSummary(scope);
+    return { results, total, summary };
+  }
+
+  /** Delete entry point for a symbol. */
+  async deleteBySymbol(symbolId: number): Promise<void> {
+    await this.adapter.runAsync('DELETE FROM entry_points WHERE symbol_id = ?', [symbolId]);
+  }
+
+  private buildUpsertSql(): string {
+    const columns = [
+      'symbol_id', 'entry_type', 'framework', 'http_method', 'route_path',
+      'full_route', 'middleware', 'has_auth', 'controller', 'event_name',
+      'confidence', 'detected_at',
+    ];
+    const updateCols = columns.filter(c => c !== 'symbol_id');
+    return this.adapter.getEngine() === 'sqlite'
+      ? `INSERT OR REPLACE INTO entry_points (${columns.join(', ')}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`
+      : `INSERT INTO entry_points (${columns.join(', ')}) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW()) ON CONFLICT (symbol_id) DO UPDATE SET ${updateCols.map(c => `${c} = EXCLUDED.${c}`).join(', ')}`;
+  }
+
+  private async countResults(sql: string, params: unknown[]): Promise<number> {
+    const countSql = sql.replace(/SELECT ep\.\*.*?FROM/, 'SELECT COUNT(*) as total FROM');
+    const row = await this.adapter.getAsync<{ total: number }>(countSql, params);
+    return row?.total ?? 0;
+  }
+
+  private async buildSummary(scope: { clause: string; params: readonly unknown[] }) {
     const scoped = (col: string, extra = '') => `
       SELECT ep.${col}, COUNT(*) as count
       FROM entry_points ep JOIN symbols s ON s.id = ep.symbol_id
       WHERE ${scope.clause} ${extra} GROUP BY ep.${col}`;
-    const typeRows = this.db.prepare(scoped('entry_type')).all(...scope.params) as Array<{ entry_type: string; count: number }>;
+
+    const typeRows = await this.adapter.allAsync<{ entry_type: string; count: number }>(
+      scoped('entry_type'), [...scope.params]);
     const byType: Record<string, number> = {};
     for (const r of typeRows) byType[r.entry_type] = r.count;
 
-    const fwRows = this.db.prepare(scoped('framework', 'AND ep.framework IS NOT NULL')).all(...scope.params) as Array<{ framework: string; count: number }>;
+    const fwRows = await this.adapter.allAsync<{ framework: string; count: number }>(
+      scoped('framework', 'AND ep.framework IS NOT NULL'), [...scope.params]);
     const byFramework: Record<string, number> = {};
     for (const r of fwRows) byFramework[r.framework] = r.count;
 
-    const authRows = this.db.prepare(scoped('has_auth')).all(...scope.params) as Array<{ has_auth: number; count: number }>;
+    const authRows = await this.adapter.allAsync<{ has_auth: number; count: number }>(
+      scoped('has_auth'), [...scope.params]);
     const authCoverage = { withAuth: 0, withoutAuth: 0 };
     for (const r of authRows) {
       if (r.has_auth) authCoverage.withAuth = r.count;
       else authCoverage.withoutAuth = r.count;
     }
 
-    return { results, total, summary: { byType, byFramework, authCoverage } };
+    return { byType, byFramework, authCoverage };
   }
 
-  /** Delete entry point for a symbol. */
-  deleteBySymbol(symbolId: number): void {
-    this.stmts.deleteBySymbol.run(symbolId);
-  }
-
-  private ensureTable(): void {
-    this.db.exec(CREATE_TABLE);
-  }
-
-  private prepareStatements(): void {
-    this.stmts = {
-      upsert: this.db.prepare(`
-        INSERT OR REPLACE INTO entry_points
-          (symbol_id, entry_type, framework, http_method, route_path, full_route,
-           middleware, has_auth, controller, event_name, confidence, detected_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-      `),
-      deleteBySymbol: this.db.prepare('DELETE FROM entry_points WHERE symbol_id = ?'),
-    };
+  private async ensureTable(): Promise<void> {
+    await this.adapter.execAsync(CREATE_TABLE);
   }
 }

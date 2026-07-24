@@ -1,42 +1,41 @@
+/**
+ * KB Graph Spatial routes — 3D spatial queries for graph visualization.
+ * SA4E-45: Uses getIndexAdapter() for multi-DB support.
+ * SA4E-49: Counts use graph_nodes table (authoritative) instead of knowledge_entries/symbols.
+ */
+
 import { Hono } from 'hono';
-import * as fs from 'fs';
-import Database from 'better-sqlite3';
 import { getKbEntries, getKbEntryCount } from '../../../admin/admin-db.js';
-import { getIndexDbPath } from '../../../admin/db/core.js';
 import type { AdminContext } from './context.js';
 
 export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
   const app = new Hono();
 
-  app.get('/api/admin/kb/graph/positions', (c) => {
-    const user = ctx.requireAuth(c);
+  app.get('/api/admin/kb/graph/positions', async (c) => {
+    const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
-    const kbPermCheck = ctx.requirePermission(c, user.userId, 'KB_READ');
+    const kbPermCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
     if (kbPermCheck instanceof Response) return kbPermCheck;
     const allowedTiers = (kbPermCheck.roleData as { allowedTiers?: string[] })?.allowedTiers;
     let kbCount = 0;
     let codeCount = 0;
-    try { kbCount = getKbEntryCount(ctx.getRequestProjectId(c)); } catch { ctx.logger.warn({ context: 'kb-graph' }, 'Failed to get KB entry count'); }
+    // SA4E-49/50: Use repository for graph_nodes counts (authoritative source).
     try {
-      // SA4E-41: count only the requesting tenant's code symbols (fail-closed).
       const pid = ctx.getRequestProjectId(c);
-      const indexDbPath = getIndexDbPath();
-      if (pid && fs.existsSync(indexDbPath)) {
-        const indexDb = new Database(indexDbPath, { readonly: true });
-        const row = indexDb.prepare("SELECT COUNT(*) as cnt FROM symbols WHERE project_id = ? AND kind IN ('function','class','interface','method','type','enum','constructor')").get(pid) as { cnt: number } | undefined;
-        codeCount = row?.cnt || 0; indexDb.close();
-      }
-    } catch { ctx.logger.warn({ context: 'kb-graph' }, 'Failed to count code symbols'); }
+      const counts = await ctx.db.graph.getNodeCounts(pid);
+      codeCount = counts.code;
+      kbCount = counts.kb;
+    } catch { ctx.logger.warn({ context: 'kb-graph' }, 'Failed to count graph nodes'); }
     const graphService = (globalThis as Record<string, unknown>).__sqliteGraphService as { ready?: boolean; getAllPositions?: (projectId?: string) => any } | undefined;
     if (graphService && graphService.ready) {
       try {
-        const result = graphService.getAllPositions!(ctx.getRequestProjectId(c));
+        const result = await graphService.getAllPositions!(ctx.getRequestProjectId(c));
         if (Array.isArray(allowedTiers)) result.nodes = result.nodes.filter((n: any) => n.tier === 'CODE' || allowedTiers.includes(n.tier));
         result.kbCount = kbCount; result.codeCount = codeCount;
         return c.json(result);
       } catch (err: any) { ctx.logger.warn({ error: err.message }, 'getAllPositions failed'); }
     }
-    const allEntries = getKbEntries(1, 100000, 'created_at', 'desc', ctx.getRequestProjectId(c));
+    const allEntries = await getKbEntries(1, 100000, 'created_at', 'desc', ctx.getRequestProjectId(c));
     const items = allEntries.items;
     const golden = (1 + Math.sqrt(5)) / 2;
     const groups = new Map<string, number>();
@@ -64,9 +63,9 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
   });
 
   app.get('/api/admin/kb/graph/spatial', async (c) => {
-    const user = ctx.requireAuth(c);
+    const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
-    const kbPermCheck = ctx.requirePermission(c, user.userId, 'KB_READ');
+    const kbPermCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
     if (kbPermCheck instanceof Response) return kbPermCheck;
     const camX = parseFloat(c.req.query('x') || '0');
     const camY = parseFloat(c.req.query('y') || '0');
@@ -74,13 +73,13 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
     const zoom = parseFloat(c.req.query('zoom') || '500');
     const graphService = (globalThis as Record<string, unknown>).__sqliteGraphService as { ready?: boolean; spatialQuery?: Function } | undefined;
     if (graphService && graphService.ready) {
-      try { return c.json(graphService.spatialQuery!({ camX, camY, camZ, zoom }, ctx.getRequestProjectId(c))); }
+      try { return c.json(await graphService.spatialQuery!({ camX, camY, camZ, zoom }, ctx.getRequestProjectId(c))); }
       catch (err: any) { ctx.logger.warn({ error: err.message }, 'SQLite graph spatial query failed, using inline fallback'); }
     }
-    const graphPermCheck = ctx.checkPermission(user.userId, 'GRAPH_VIEW');
+    const graphPermCheck = await ctx.checkPermission(user.userId, 'GRAPH_VIEW');
     const maxNodes = (graphPermCheck.roleData as { maxNodes?: number })?.maxNodes || 500;
     const allowedTiers = (kbPermCheck.roleData as { allowedTiers?: string[] })?.allowedTiers;
-    const allEntries = getKbEntries(1, maxNodes, 'created_at', 'desc', ctx.getRequestProjectId(c));
+    const allEntries = await getKbEntries(1, maxNodes, 'created_at', 'desc', ctx.getRequestProjectId(c));
     let items = allEntries.items;
     if (Array.isArray(allowedTiers)) items = items.filter((e: any) => allowedTiers.includes(e.tier || e.scope || 'SHARED'));
     items = items.slice(0, maxNodes);
@@ -125,8 +124,9 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
       for (let i = 1; i < members.length; i += 3) edges.push({ source: members[i - 1].id, target: members[i].id, weight: 0.5 });
     }
     const level = zoom > 500 ? 'macro' : zoom > 200 ? 'mid' : 'micro';
-    return c.json({ nodes: filteredNodes, edges, stats: { totalNodes: filteredNodes.length, totalEdges: edges.length, queryTimeMs: 0, level, source: 'sqlite-fallback', totalEntries: getKbEntryCount(ctx.getRequestProjectId(c)) } });
+    return c.json({ nodes: filteredNodes, edges, stats: { totalNodes: filteredNodes.length, totalEdges: edges.length, queryTimeMs: 0, level, source: 'sqlite-fallback', totalEntries: await getKbEntryCount(ctx.getRequestProjectId(c)) } });
   });
 
   return app;
 }
+

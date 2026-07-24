@@ -3,7 +3,7 @@
  * Orchestrates symbol resolution, section fetching, and budget management.
  */
 
-import Database from 'better-sqlite3';
+import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { SymbolResolver } from '../graph/symbol-resolver.js';
 import { CallGraphService } from '../graph/call-graph-service.js';
 import { TokenBudgetManager } from './token-budget-manager.js';
@@ -13,19 +13,19 @@ import { AIContextParams, AIContextResponse } from './types.js';
 import { fetchSection, notFoundResponse } from './context-sections.js';
 
 export class AIContextService {
-  private db: Database.Database;
+  private adapter: DatabaseAdapter;
   private resolver: SymbolResolver;
   private callGraph: CallGraphService;
   private gitService: GitService;
   private workspace: string;
 
   constructor(
-    db: Database.Database,
+    adapter: DatabaseAdapter,
     resolver: SymbolResolver,
     callGraph: CallGraphService,
     workspace: string
   ) {
-    this.db = db;
+    this.adapter = adapter;
     this.resolver = resolver;
     this.callGraph = callGraph;
     this.gitService = new GitService(workspace);
@@ -37,7 +37,7 @@ export class AIContextService {
     const startTime = Date.now();
     const { symbol, intent = 'explain', token_budget = 4000, caller_depth = 1 } = params;
 
-    const resolved = this.resolver.resolve(symbol);
+    const resolved = await this.resolver.resolve(symbol);
     if (resolved.length === 0) {
       return notFoundResponse(symbol, intent, token_budget, startTime, this.resolver);
     }
@@ -56,7 +56,7 @@ export class AIContextService {
         continue;
       }
 
-      const content = fetchSection(section, targetSymbol, caller_depth, this.db, this.callGraph, this.resolver, this.gitService, this.workspace);
+      const content = fetchSection(section, targetSymbol, caller_depth, this.adapter, this.callGraph, this.resolver, this.gitService, this.workspace);
       if (content == null) {
         continue;
       }

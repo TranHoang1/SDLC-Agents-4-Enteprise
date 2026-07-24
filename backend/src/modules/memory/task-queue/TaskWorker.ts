@@ -58,11 +58,34 @@ export class TaskWorker {
   setEmbeddingService(service: EmbeddingService): void { this.embeddingService = service; }
   setLlmService(service: { getConfig(): { model: string } }): void { this.llmService = service; }
 
+  /**
+   * Update mutable config fields at runtime — no restart needed.
+   * Called when admin changes taskWorker config via Admin UI.
+   * Supported keys: concurrency (1-8), baseInterval, maxInterval.
+   */
+  updateConfig(patch: Partial<Pick<TaskWorkerConfig, 'concurrency' | 'baseInterval' | 'maxInterval'>>): void {
+    if (patch.concurrency !== undefined) {
+      (this.config as any).concurrency = Math.max(1, Math.min(patch.concurrency, 8));
+    }
+    if (patch.baseInterval !== undefined) (this.config as any).baseInterval = patch.baseInterval;
+    if (patch.maxInterval !== undefined) (this.config as any).maxInterval = patch.maxInterval;
+    this.logger.info(
+      { concurrency: this.config.concurrency, baseInterval: this.config.baseInterval },
+      '[TaskWorker] Config updated live',
+    );
+  }
+
   start(): void {
     if (this.running) return;
     this.running = true;
     this.logger.info('TaskWorker started');
-    this.schedulePoll(0);
+    // On startup: reset any PROCESSING tasks from previous run (crash/restart recovery)
+    this.resetProcessingOnStartup().catch(err =>
+      this.logger.warn({ err }, 'TaskWorker: startup reset failed (non-fatal)'),
+    );
+    // Delay first poll by 6s to allow LLM health check + tagAnalyzer init to complete.
+    // LLMInitializer is fire-and-forget async (5s timeout) — 6s ensures it's ready.
+    this.schedulePoll(6000);
   }
 
   stop(): Promise<void> {
@@ -73,14 +96,25 @@ export class TaskWorker {
     return new Promise<void>(resolve => { this.shutdownResolve = resolve; });
   }
 
-  recoverStaleTasks(): number {
-    const recovered = this.repo.recoverStaleTasks(this.config.staleThreshold);
+  /**
+   * Reset ALL tasks stuck in PROCESSING to PENDING on startup.
+   * Called once at start() — handles server restart/crash recovery immediately,
+   * no need to wait for staleThreshold timeout.
+   */
+  async resetProcessingOnStartup(): Promise<number> {
+    const result = await this.repo.resetAllProcessing();
+    if (result > 0) this.logger.info({ reset: result }, 'TaskWorker: reset stuck PROCESSING tasks on startup');
+    return result;
+  }
+
+  async recoverStaleTasks(): Promise<number> {
+    const recovered = await this.repo.recoverStaleTasks(this.config.staleThreshold);
     if (recovered > 0) this.logger.info({ recovered }, 'Recovered stale tasks');
     return recovered;
   }
 
-  getStats(): TaskWorkerStats {
-    const dbStats = this.repo.getStats();
+  async getStats(): Promise<TaskWorkerStats> {
+    const dbStats = await this.repo.getStats();
     return { ...dbStats, isRunning: this.running, lastPollAt: this.lastPollAt };
   }
 
@@ -97,8 +131,9 @@ export class TaskWorker {
     if (!this.running) { this.finishShutdown(); return; }
     this.lastPollAt = new Date().toISOString();
     try {
-      const task = this.repo.claimNext();
-      if (!task) {
+      const concurrency = this.config.concurrency ?? 1;
+      const tasks = await this.repo.claimBatch(concurrency);
+      if (tasks.length === 0) {
         this.consecutiveEmpty++;
         const delay = Math.min(
           this.config.baseInterval * Math.pow(2, this.consecutiveEmpty),
@@ -108,7 +143,8 @@ export class TaskWorker {
       }
       this.consecutiveEmpty = 0;
       this.processing = true;
-      await this.processTask(task);
+      // Run all claimed tasks concurrently — keeps GPU busy between token batches
+      await Promise.allSettled(tasks.map(task => this.processTask(task)));
       this.processing = false;
       if (!this.running) { this.finishShutdown(); return; }
       this.schedulePoll(this.config.baseInterval);
@@ -127,8 +163,8 @@ export class TaskWorker {
 
   private async processTask(task: PendingTask): Promise<void> {
     try {
-      const entry = this.engine.findById(task.entry_id);
-      if (!entry) { this.repo.markFailed(task.id, 'entry_not_found'); return; }
+      const entry = await this.engine.findById(task.entry_id);
+      if (!entry) { await this.repo.markFailed(task.id, 'entry_not_found'); return; }
       let payload: any;
       try { payload = JSON.parse(task.payload); }
       catch { this.repo.markFailed(task.id, 'invalid_json_payload'); return; }
@@ -140,9 +176,9 @@ export class TaskWorker {
           await this.processVectorEmbedding(task, payload);
           break;
         default:
-          this.repo.markFailed(task.id, `unknown_task_type: ${task.task_type}`);
+          await this.repo.markFailed(task.id, `unknown_task_type: ${task.task_type}`);
       }
-    } catch (err: any) { this.handleTaskError(task, err); }
+    } catch (err: any) { await this.handleTaskError(task, err); }
   }
 
   // ── SA4E-47: Enhanced Tag Enrichment ──
@@ -166,11 +202,11 @@ export class TaskWorker {
         ? payload.existing_tags.split(',').map((t: string) => t.trim()).filter(Boolean)
         : [];
       const merged = [...new Set([...existing, ...result.appliedTags])];
-      this.engine.updateTags(task.entry_id, merged.join(','));
+      await this.engine.updateTags(task.entry_id, merged.join(','));
     }
 
     await this.updateEntryStructuredMap(task.entry_id, result, context);
-    this.repo.markCompleted(task.id);
+    await this.repo.markCompleted(task.id);
   }
 
   private async loadPreviousContext(
@@ -179,9 +215,10 @@ export class TaskWorker {
   ): Promise<ContextChainInput | null> {
     if (!source) return null;
     try {
-      const prevEntry = (this.engine.getDb() as any).prepare(
+      const prevEntry = await this.engine.getAdapter().getAsync<{ id: number; structured_map: string | null }>(
         'SELECT id, structured_map FROM knowledge_entries WHERE source = ? AND id < ? ORDER BY id DESC LIMIT 1',
-      ).get(source, entryId);
+        [source, entryId],
+      );
       if (!prevEntry) {
         this.logger.debug({ entry_id: entryId, component: 'TaskWorker' },
           'No previous section found');
@@ -213,7 +250,7 @@ export class TaskWorker {
     context?: ContextChainInput | null,
   ): Promise<void> {
     try {
-      const entry = this.engine.findById(entryId);
+      const entry = await this.engine.findById(entryId);
       if (!entry) return;
       const existing = safeParseStructuredMap(entry.structured_map);
       const structuredMap: StructuredMapData = {
@@ -244,7 +281,7 @@ export class TaskWorker {
           'structured_map truncated due to size limit');
         jsonStr = JSON.stringify(structuredMap);
       }
-      this.engine.updateStructuredMap(entryId, jsonStr);
+      await this.engine.updateStructuredMap(entryId, jsonStr);
     } catch (err) {
       this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
         'structured_map update failed');
@@ -255,20 +292,22 @@ export class TaskWorker {
     if (!this.embeddingService) { this.repo.resetForRetry(task.id); return; }
     const vector = await this.embeddingService.generateEmbedding(payload.text);
     const buf = Buffer.from(new Float32Array(vector).buffer);
-    (this.engine.getDb() as any).prepare(
+    await this.engine.getAdapter().runAsync(
       'UPDATE knowledge_entries SET vector = ? WHERE id = ?',
-    ).run(buf, task.entry_id);
-    this.repo.markCompleted(task.id);
+      [buf, task.entry_id],
+    );
+    await this.repo.markCompleted(task.id);
   }
 
-  private handleTaskError(task: PendingTask, err: Error): void {
+  private async handleTaskError(task: PendingTask, err: Error): Promise<void> {
     const nonRetryable = err.message.includes('invalid_json')
       || err.message.includes('entry_not_found');
     if (nonRetryable || task.retry_count + 1 >= task.max_retries) {
-      this.repo.markFailed(task.id, err.message);
+      await this.repo.markFailed(task.id, err.message);
     } else {
-      this.repo.markFailed(task.id, err.message);
-      this.repo.resetForRetry(task.id);
+      await this.repo.markFailed(task.id, err.message);
+      await this.repo.resetForRetry(task.id);
     }
   }
 }
+

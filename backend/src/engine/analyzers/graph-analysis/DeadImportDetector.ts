@@ -2,24 +2,24 @@
  * KSA-163: Dead Import Detector — Finds unused imports.
  */
 
-import Database from 'better-sqlite3';
+import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import type { DeadImport } from './types.js';
 import { buildCodeScopeFilter } from '../../query/code-intel-isolation.js';
 
 export class DeadImportDetector {
-  private db: Database.Database;
+  private adapter: DatabaseAdapter;
   private projectId: string | undefined;
 
   /**
    * @param projectId  SA4E-41 tenant scope. Undefined ⇒ fail-closed (no rows).
    */
-  constructor(db: Database.Database, projectId?: string) {
-    this.db = db;
+  constructor(adapter: DatabaseAdapter, projectId?: string) {
+    this.adapter = adapter;
     this.projectId = projectId;
   }
 
   /** Find dead (unused) imports in a file or across the project. */
-  detect(options: { filePath?: string; module?: string; limit?: number } = {}): DeadImport[] {
+  async detect(options: { filePath?: string; module?: string; limit?: number } = {}): Promise<DeadImport[]> {
     const limit = options.limit ?? 50;
     const scope = buildCodeScopeFilter(this.projectId, 'r'); // fail-closed
 
@@ -53,12 +53,12 @@ export class DeadImportDetector {
     sql += ' ORDER BY r.file_path, r.line LIMIT ?';
     params.push(limit);
 
-    const rows = this.db.prepare(sql).all(...params) as Array<{
+    const rows = await this.adapter.allAsync<{
       filePath: string;
       line: number;
       importedSymbol: string;
       metadata: string | null;
-    }>;
+    }>(sql, params);
 
     return rows.map(row => {
       let fromModule = '';

@@ -1,10 +1,14 @@
+﻿/**
+ * sync-code.ts — Syncs code symbols from QueryLayer into KB knowledge_entries.
+ * SA4E-53: converted to async for PostgreSQL compatibility.
+ */
+
 import type { MemoryEngine } from '../engine/core.js';
 import type { QueryLayer } from '../../../engine/query/query-layer.js';
-import { resolvePath } from './helpers.js';
 
 type Args = Record<string, unknown>;
 
-export function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | undefined, workspace: string, a: Args): string {
+export async function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | undefined, workspace: string, a: Args): Promise<string> {
   if (!queryLayer) {
     return JSON.stringify({ error: 'mem_sync_code requires queryLayer (code indexer not available)' });
   }
@@ -13,13 +17,15 @@ export function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | un
   const kind = a.kind as string | undefined;
   // SA4E-41: scope symbol reads to the request tenant (fail-closed if absent).
   const projectId = a.__projectId as string | undefined;
+  const projectCtx = a._projectContext as { userId?: string; projectId?: string } | undefined;
+  const userId = (a.__userId as string) ?? projectCtx?.userId ?? null;
 
   let symbols: any[] = [];
   if (kind) {
-    symbols = queryLayer.findSymbols(projectId, '', kind, limit);
+    symbols = await queryLayer.findSymbols(projectId, '', kind, limit);
   } else {
-    const classes = queryLayer.findSymbols(projectId, '', 'class', Math.floor(limit / 2));
-    const interfaces = queryLayer.findSymbols(projectId, '', 'interface', Math.floor(limit / 2));
+    const classes = await queryLayer.findSymbols(projectId, '', 'class', Math.floor(limit / 2));
+    const interfaces = await queryLayer.findSymbols(projectId, '', 'interface', Math.floor(limit / 2));
     symbols = [...classes, ...interfaces];
   }
 
@@ -27,16 +33,15 @@ export function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | un
     return 'No code symbols found to sync.';
   }
 
-  const db = engine.getDb() as any;
-  const checkStmt = db.prepare(`
-    SELECT id FROM knowledge_entries 
-    WHERE type = 'CODE_ENTITY' AND source = ? AND summary = ?
-  `);
+  const adapter = engine.getAdapter();
 
   const created: Array<[number, any]> = [];
   for (const sym of symbols) {
     const summary = `${sym.kind}: ${sym.name} (${sym.filePath})`;
-    const exists = checkStmt.get(sym.filePath, summary);
+    const exists = await adapter.getAsync<{ id: number }>(
+      `SELECT id FROM knowledge_entries WHERE type = 'CODE_ENTITY' AND source = ? AND summary = ?`,
+      [sym.filePath, summary],
+    );
     if (exists) continue;
 
     const parts = [`${sym.kind} ${sym.name}`];
@@ -46,11 +51,14 @@ export function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | un
     if (sym.docComment) parts.push(`Doc: ${sym.docComment}`);
     const content = parts.join('\n');
 
-    const id = engine.insert({
+    const id = await engine.insert({
       content,
       summary,
       type: 'CODE_ENTITY',
       tier: 'SEMANTIC',
+      scope: 'PROJECT',
+      user_id: userId,
+      project_id: projectId ?? null,
       source: sym.filePath,
       tags: `${sym.kind},${sym.name},code`,
     });
@@ -58,22 +66,20 @@ export function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | un
   }
 
   let linked = 0;
-  const edgeCheckStmt = db.prepare(`
-    SELECT id FROM knowledge_graph_edges 
-    WHERE source_id = ? AND target_id = ? AND relation = ?
-  `);
-
   for (const [codeId, sym] of created) {
-    const results = engine.search(sym.name, 5);
+    const results = await engine.search(sym.name, 5);
     const relatedIds = results
       .filter(r => r.entry.type !== 'CODE_ENTITY')
       .map(r => r.entry.id)
       .slice(0, 3);
 
     for (const docId of relatedIds) {
-      const exists = edgeCheckStmt.get(codeId, docId, 'IMPLEMENTED_BY');
+      const exists = await adapter.getAsync<{ id: number }>(
+        `SELECT id FROM knowledge_graph_edges WHERE source_id = ? AND target_id = ? AND relation = ?`,
+        [codeId, docId, 'IMPLEMENTED_BY'],
+      );
       if (!exists) {
-        engine.addEdge(codeId, docId, 'IMPLEMENTED_BY');
+        await engine.addEdge(codeId, docId, 'IMPLEMENTED_BY');
         linked++;
       }
     }
