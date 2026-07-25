@@ -46,6 +46,7 @@ export class MemoryModule implements IModule {
   engine!: MemoryEngine;
   dispatcher!: MemoryToolDispatcher;
   promotionInterval: ReturnType<typeof setInterval> | null = null;
+  consolidationInterval: ReturnType<typeof setInterval> | null = null;
   readonly sessionName: string;
   schedulerHandles: SchedulerHandles | null = null;
   taskWorker: TaskWorker | null = null;
@@ -68,6 +69,7 @@ export class MemoryModule implements IModule {
   setDispatcher(d: MemoryToolDispatcher): void { this.dispatcher = d; }
   setTaskWorker(w: TaskWorker): void { this.taskWorker = w; }
   setPromotionInterval(i: ReturnType<typeof setInterval> | null): void { this.promotionInterval = i; }
+  setConsolidationInterval(i: ReturnType<typeof setInterval> | null): void { this.consolidationInterval = i; }
   setSchedulerHandles(h: SchedulerHandles | null): void { this.schedulerHandles = h; }
   setStatus(s: 'ready' | 'error'): void { this._status = s; }
 
@@ -87,6 +89,7 @@ export class MemoryModule implements IModule {
       builder.withDispatcher(this.registry);
       builder.withTaskWorker();
       builder.withPromotion();
+      builder.withConsolidation();
       builder.withBackgroundLLM();
       builder.build();
 
@@ -128,6 +131,7 @@ export class MemoryModule implements IModule {
     this.logger.info('Shutting down memory module');
     if (this.schedulerHandles) { stopScheduler(this.schedulerHandles); this.schedulerHandles = null; }
     if (this.promotionInterval) { clearInterval(this.promotionInterval); this.promotionInterval = null; }
+    if (this.consolidationInterval) { clearInterval(this.consolidationInterval); this.consolidationInterval = null; }
     if (this.engine) this.engine.endSession();
     if (this.dbManager) this.dbManager.close();
     this._status = 'stopped';

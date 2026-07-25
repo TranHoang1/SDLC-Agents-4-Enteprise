@@ -187,6 +187,51 @@ export async function updateUserEmail(userId: string, email: string): Promise<vo
   await adapter.runAsync('UPDATE users SET email = ? WHERE user_id = ?', [email, userId]);
 }
 
+/**
+ * Update user details (username, email, access_group_id).
+ * @throws Error if username conflicts or group doesn't exist
+ */
+export async function updateUser(
+  userId: string,
+  updates: { username?: string; email?: string; accessGroupId?: string }
+): Promise<User> {
+  const adapter = getAdminAdapter();
+
+  // Validate username uniqueness if changing
+  if (updates.username) {
+    const existing = await adapter.getAsync<{ user_id: string }>(
+      'SELECT user_id FROM users WHERE username = ? AND user_id != ?',
+      [updates.username, userId],
+    );
+    if (existing) throw new Error('Username already exists');
+  }
+
+  // Validate group exists if changing
+  if (updates.accessGroupId) {
+    const group = await adapter.getAsync<{ access_group_id: string }>(
+      'SELECT access_group_id FROM access_groups WHERE access_group_id = ?',
+      [updates.accessGroupId],
+    );
+    if (!group) throw new Error('Access group not found');
+  }
+
+  const fields: string[] = [];
+  const params: unknown[] = [];
+
+  if (updates.username) { fields.push('username = ?'); params.push(updates.username); }
+  if (updates.email !== undefined) { fields.push('email = ?'); params.push(updates.email); }
+  if (updates.accessGroupId) { fields.push('access_group_id = ?'); params.push(updates.accessGroupId); }
+
+  if (fields.length === 0) throw new Error('No updates provided');
+
+  params.push(userId);
+  await adapter.runAsync(`UPDATE users SET ${fields.join(', ')} WHERE user_id = ?`, params);
+
+  const updated = await getUserById(userId);
+  if (!updated) throw new Error('User not found after update');
+  return updated;
+}
+
 /** Count total active users (used by dashboard stats). */
 export async function getUserCount(): Promise<number> {
   const adapter = getAdminAdapter();

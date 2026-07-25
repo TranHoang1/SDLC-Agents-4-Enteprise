@@ -117,42 +117,47 @@ export function createToolsRoute(router: ToolRouter, logger: Logger): Hono {
 
   // GET /mcp/tools/list — list available tool definitions (auth required, filtered by MCP_ACCESS roleData)
   app.get('/mcp/tools/list', async (c) => {
-    const caller = await resolveCallerIdentity(c);
-    if (!caller) {
-      return c.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, 401);
-    }
+    try {
+      const caller = await resolveCallerIdentity(c);
+      if (!caller) {
+        return c.json({ error: { code: 'UNAUTHORIZED', message: 'Authentication required' } }, 401);
+      }
 
-    let tools = router.listTools();
+      let tools = router.listTools();
 
-    // RBAC filter: if session user (not API key), apply MCP_ACCESS.toolAccess restrictions
-    if (!caller.apiKey && caller.userId !== 'api-key-user') {
-      try {
-        const permissions = await getUserPermissions(caller.userId);
-        const mcpAccess = permissions.find((p: any) => p.permissionId === 'MCP_ACCESS');
-        if (!mcpAccess) {
-          // No MCP_ACCESS permission → return empty list
+      // RBAC filter: if session user (not API key), apply MCP_ACCESS.toolAccess restrictions
+      if (!caller.apiKey && caller.userId !== 'api-key-user') {
+        try {
+          const permissions = await getUserPermissions(caller.userId);
+          const mcpAccess = permissions.find((p: any) => p.permissionId === 'MCP_ACCESS');
+          if (!mcpAccess) {
+            // No MCP_ACCESS permission → return empty list
+            return c.json({ tools: [] });
+          }
+          // Apply per-server/per-tool filter from roleData.toolAccess
+          const toolAccess = (mcpAccess.roleData as any)?.toolAccess as Record<string, { enabled?: boolean; tools?: Record<string, boolean> }> | undefined;
+          if (toolAccess && Object.keys(toolAccess).length > 0) {
+            tools = tools.filter(t => {
+              for (const [, srvAccess] of Object.entries(toolAccess)) {
+                if (srvAccess.enabled === false) continue;
+                const toolPerms = srvAccess.tools || {};
+                if (Object.keys(toolPerms).length === 0) return true;
+                if (toolPerms[t.name] !== false) return true;
+              }
+              return false;
+            });
+          }
+        } catch (err) {
+          logger.warn({ err, userId: caller.userId }, '[tools/list] RBAC check failed — returning empty list');
           return c.json({ tools: [] });
         }
-        // Apply per-server/per-tool filter from roleData.toolAccess
-        const toolAccess = (mcpAccess.roleData as any)?.toolAccess as Record<string, { enabled?: boolean; tools?: Record<string, boolean> }> | undefined;
-        if (toolAccess && Object.keys(toolAccess).length > 0) {
-          tools = tools.filter(t => {
-            for (const [, srvAccess] of Object.entries(toolAccess)) {
-              if (srvAccess.enabled === false) continue;
-              const toolPerms = srvAccess.tools || {};
-              if (Object.keys(toolPerms).length === 0) return true;
-              if (toolPerms[t.name] !== false) return true;
-            }
-            return false;
-          });
-        }
-      } catch (err) {
-        logger.warn({ err, userId: caller.userId }, '[tools/list] RBAC check failed — returning empty list');
-        return c.json({ tools: [] });
       }
-    }
 
-    return c.json({ tools });
+      return c.json({ tools });
+    } catch (e) {
+      logger.error({ err: e }, '[tools/list] Failed to list tools');
+      return c.json({ error: { code: 'INTERNAL_ERROR', message: 'Failed to list tools' } }, 500);
+    }
   });
 
   // POST /mcp/tools/call — execute an MCP tool
@@ -190,7 +195,13 @@ export function createToolsRoute(router: ToolRouter, logger: Logger): Hono {
       return c.json({ error: { code: 'TOOL_NOT_FOUND', message: `Tool '${tool_name}' not found` } }, 404);
     }
 
-    const result = await router.route({ tool_name, arguments: args });
+    let result: unknown;
+    try {
+      result = await router.route({ tool_name, arguments: args });
+    } catch (err) {
+      logger.error({ err, tool_name }, 'Tool call failed');
+      return c.json({ error: { code: 'EXECUTION_ERROR', message: (err as Error).message } }, 500);
+    }
     return c.json(result, 200);
   });
 

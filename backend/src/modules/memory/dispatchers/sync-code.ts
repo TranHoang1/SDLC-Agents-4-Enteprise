@@ -5,8 +5,11 @@
 
 import type { MemoryEngine } from '../engine/core.js';
 import type { QueryLayer } from '../../../engine/query/query-layer.js';
+import { EpochService } from '../evolution/EpochService.js';
+import pino from 'pino';
 
 type Args = Record<string, unknown>;
+const logger = pino({ name: 'sync-code' });
 
 export async function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLayer | undefined, workspace: string, a: Args): Promise<string> {
   if (!queryLayer) {
@@ -83,6 +86,14 @@ export async function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLaye
         linked++;
       }
     }
+  }
+
+  if (created.length > 0) {
+    const epochSvc = new EpochService(adapter, logger);
+    const epochId = `epoch-sync-${Date.now()}`;
+    epochSvc.trigger('CODE_SYNC', epochId).catch((err: unknown) => {
+      logger.warn({ err: err instanceof Error ? err.message : String(err) }, 'Auto epoch trigger failed');
+    });
   }
 
   return `Synced: ${created.length} code symbols, ${linked} cross-reference edges`;

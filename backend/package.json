@@ -17,7 +17,9 @@
     "test:unit": "vitest run src/",
     "test:integration": "vitest run tests/integration/",
     "test:e2e-api": "vitest run --config vitest.e2e.config.ts",
-    "test:e2e-ui": "npx playwright test"
+    "test:e2e-ui": "npx playwright test",
+    "lint": "npx eslint src/ --ext .ts",
+    "lint:fix": "eslint src/ --ext .ts --fix"
   },
   "keywords": [
     "mcp",
@@ -52,11 +54,13 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.60.0",
     "@types/better-sqlite3": "^7.6.0",
     "@types/express": "^5.0.6",
     "@types/node": "^20.0.0",
     "fast-check": "^4.9.0",
+    "globals": "^17.7.0",
     "tsx": "^4.0.0",
     "typescript": "^5.5.0",
     "vitest": "^4.1.9"

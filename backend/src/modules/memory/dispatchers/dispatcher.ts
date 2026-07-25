@@ -21,6 +21,7 @@ import {
 } from './analytics.js';
 import { handleOutcome, handleVerify, handleConfigureDecay } from './evolution.js';
 import { handleSmartIngest, handleSmartIngestCleanup } from './smart-ingest.js';
+import { handleProcedure, handleSkillCapture, handleSkillExecute } from './procedure.js';
 
 type Args = Record<string, unknown>;
 
@@ -36,6 +37,8 @@ export interface DispatchContext {
   convertResolver: ConvertToolResolver | undefined;
   dbAdapter: DatabaseAdapter | undefined;
   embeddingAvailable: boolean;
+  /** Dispatch another tool by name — allows handlers to call tools recursively. */
+  dispatch?: (toolName: string, args: Args) => Promise<string | null>;
 }
 
 type ToolHandlerFn = (ctx: DispatchContext, args: Args) => Promise<string | null>;
@@ -70,7 +73,7 @@ const HANDLER_REGISTRY: Record<string, ToolHandlerFn> = {
   mem_map:                  (_ctx, a) => p(handleMap(a)),
   mem_crud:                 (ctx, a) => p(handleCrud(ctx.engine, ctx.scopeCtx, a)),
   mem_graph:                (ctx, a) => p(handleGraph(ctx.engine, a)),
-  mem_consolidate:          (_ctx, _a) => p(handleConsolidate()),
+  mem_consolidate:          (ctx, a) => p(handleConsolidate(ctx.engine, a)),
   mem_lifecycle:            (_ctx, a) => p(handleLifecycle(a)),
   mem_templates:            (_ctx, a) => p(handleTemplates(a)),
   mem_attachments:          (_ctx, a) => p(handleAttachments(a)),
@@ -86,6 +89,11 @@ const HANDLER_REGISTRY: Record<string, ToolHandlerFn> = {
   mem_configure_decay:      (ctx, a) => p(handleConfigureDecay(ctx.engine, a)),
   mem_smart_ingest:         (ctx, a) => p(handleSmartIngest(ctx.engine, ctx.scopeCtx, ctx.classifyService, a)),
   mem_smart_ingest_cleanup: (ctx, a) => p(handleSmartIngestCleanup(ctx.engine, ctx.scopeCtx, ctx.classifyService, a)),
+  mem_procedure:            (ctx, a) => p(handleProcedure(ctx.engine, ctx.scopeCtx, a)),
+  mem_skill_capture:        (ctx, a) => p(handleSkillCapture(ctx.engine, ctx.scopeCtx, a)),
+  mem_skill_execute:        (ctx, a) => p(handleSkillExecute(ctx.engine, ctx.scopeCtx, a, ctx.dispatch)),
+  mem_skill_share:          (ctx, a) => p(handleProcedure(ctx.engine, ctx.scopeCtx, { action: 'share', ...a })),
+  mem_skill_list_shared:    (ctx, a) => p(handleProcedure(ctx.engine, ctx.scopeCtx, { action: 'list_shared', ...a })),
 };
 
 export class MemoryToolDispatcher {
@@ -134,6 +142,7 @@ export class MemoryToolDispatcher {
       convertResolver: this.convertResolver,
       dbAdapter: this.dbAdapter,
       embeddingAvailable: this.embeddingAvailable,
+      dispatch: this.dispatch.bind(this),
     };
   }
 
