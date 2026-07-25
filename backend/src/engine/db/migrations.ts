@@ -80,10 +80,10 @@ export function runMigrations(db: Database.Database, legacyProjectId: string = '
     applyMigrationV2(db);
   }
 
-  // Run V3 graph migrations (KSA-145/153/169) — idempotent
+  // Run V3 graph migrations (KSA-145/153/169) — idempotent, SQLite synchronous execution
   if (current < 3) {
     try {
-      runGraphMigrations(new SqliteDbAdapter(db));
+      applyGraphMigrationsSync(db);
     } catch (err) {
       logger.error({ err }, '[migrations] V3 graph migration error (graceful):');
     }
@@ -185,4 +185,110 @@ function applyMigrationV2(db: Database.Database): void {
 function getExistingColumns(db: Database.Database, table: string): Set<string> {
   const rows = db.pragma(`table_info(${table})`) as { name: string }[];
   return new Set(rows.map(r => r.name));
+}
+
+function applyGraphMigrationsSync(db: Database.Database): void {
+  logger.error('[migrations] Running graph schema migrations (SQLite sync)...');
+  
+  // 1. Add enhanced columns to symbols
+  const existing = getExistingColumns(db, 'symbols');
+  let added = 0;
+  for (const col of [
+    { name: 'parameters', type: 'TEXT' },
+    { name: 'return_type', type: 'TEXT' },
+    { name: 'parent_symbol_id', type: 'INTEGER' },
+    { name: 'decorators', type: 'TEXT' },
+    { name: 'complexity', type: 'INTEGER' },
+    { name: 'is_async', type: 'INTEGER DEFAULT 0' },
+    { name: 'is_exported', type: 'INTEGER DEFAULT 0' },
+    { name: 'doc_comment_full', type: 'TEXT' },
+    { name: 'modifiers', type: 'TEXT' },
+  ]) {
+    if (!existing.has(col.name)) {
+      try {
+        db.exec(`ALTER TABLE symbols ADD COLUMN ${col.name} ${col.type}`);
+        added++;
+      } catch {
+        // Column may already exist
+      }
+    }
+  }
+
+  if (added > 0) {
+    logger.error(`[migrations] Added ${added} enhanced symbol columns`);
+    try {
+      db.exec('CREATE INDEX IF NOT EXISTS idx_sym_parent ON symbols(parent_symbol_id)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_sym_exported ON symbols(is_exported)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_sym_file_kind ON symbols(file_id, kind)');
+    } catch {
+      // Indexes may already exist
+    }
+  }
+
+  // 2. Create relationships table
+  db.exec(`
+CREATE TABLE IF NOT EXISTS relationships (
+    id INTEGER PRIMARY KEY,
+    source_symbol_id INTEGER NOT NULL,
+    target_symbol TEXT NOT NULL,
+    target_symbol_id INTEGER,
+    kind TEXT NOT NULL CHECK(kind IN ('calls','imports','inherits','implements','uses','decorates')),
+    file_path TEXT NOT NULL,
+    line INTEGER NOT NULL,
+    metadata TEXT,
+    FOREIGN KEY (source_symbol_id) REFERENCES symbols(id) ON DELETE CASCADE,
+    FOREIGN KEY (target_symbol_id) REFERENCES symbols(id) ON DELETE SET NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rel_source_kind ON relationships(source_symbol_id, kind);
+CREATE INDEX IF NOT EXISTS idx_rel_target_kind ON relationships(target_symbol, kind);
+CREATE INDEX IF NOT EXISTS idx_rel_file ON relationships(file_path);
+  `);
+  logger.error('[migrations] Relationships table ready');
+
+  // 3. Create file_index table
+  db.exec(`
+CREATE TABLE IF NOT EXISTS file_index (
+    path TEXT PRIMARY KEY,
+    mtime INTEGER NOT NULL,
+    content_hash TEXT NOT NULL,
+    size_bytes INTEGER NOT NULL,
+    last_indexed TEXT NOT NULL DEFAULT (datetime('now')),
+    symbol_count INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_file_index_hash ON file_index(content_hash);
+  `);
+  logger.error('[migrations] File index table ready');
+
+  // 4. Create graph_meta table
+  db.exec(`
+CREATE TABLE IF NOT EXISTS graph_meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+INSERT OR IGNORE INTO graph_meta (key, value) VALUES ('schema_version', '3');
+INSERT OR IGNORE INTO graph_meta (key, value) VALUES ('last_checkpoint', '');
+INSERT OR IGNORE INTO graph_meta (key, value) VALUES ('total_nodes', '0');
+INSERT OR IGNORE INTO graph_meta (key, value) VALUES ('total_edges', '0');
+  `);
+  logger.error('[migrations] Graph metadata table ready');
+
+  // 5. Create body_embeddings table
+  db.exec(`
+CREATE TABLE IF NOT EXISTS body_embeddings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    symbol_id INTEGER NOT NULL,
+    chunk_index INTEGER NOT NULL DEFAULT 0,
+    embedding BYTEA NOT NULL,
+    token_count INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(symbol_id, chunk_index),
+    FOREIGN KEY (symbol_id) REFERENCES symbols(id) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_body_embeddings_symbol ON body_embeddings(symbol_id);
+  `);
+  logger.error('[migrations] Body embeddings table ready');
+
+  // 6. Update schema version
+  db.prepare('INSERT OR REPLACE INTO schema_version (version) VALUES (?)').run(3);
+  logger.error('[migrations] Schema version set to 3 (sync)');
 }

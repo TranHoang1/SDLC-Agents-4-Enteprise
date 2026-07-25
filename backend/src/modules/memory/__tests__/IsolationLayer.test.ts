@@ -304,7 +304,7 @@ describe('SA4E-27 IT — IsolationLayer with Real SQLite', () => {
 
   it('IT-03: promoteEntry stamps project_id when USER -> PROJECT', async () => {
     const id = await ctx.engine.insert({ content: 'user entry', summary: 'promote-test', type: 'CONTEXT', scope: 'USER', user_id: 'u1' });
-    const result = ctx.engine.promoteEntry(id, 'PROJECT', 'app-A');
+    const result = await ctx.engine.promoteEntry(id, 'PROJECT', 'app-A');
     expect(result).toBe(true);
     const entry = await ctx.engine.findById(id);
     expect(entry?.scope).toBe('PROJECT');
@@ -313,7 +313,7 @@ describe('SA4E-27 IT — IsolationLayer with Real SQLite', () => {
 
   it('IT-04: promoteEntry without projectId does not stamp project_id', async () => {
     const id = await ctx.engine.insert({ content: 'user entry 2', summary: 'promote-no-pid', type: 'CONTEXT', scope: 'USER', user_id: 'u1' });
-    const result = ctx.engine.promoteEntry(id, 'PROJECT');
+    const result = await ctx.engine.promoteEntry(id, 'PROJECT');
     expect(result).toBe(true);
     const entry = await ctx.engine.findById(id);
     expect(entry?.scope).toBe('PROJECT');
