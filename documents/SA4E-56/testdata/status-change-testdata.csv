@@ -1,0 +1,8 @@
+test_case_id,action,initial_state,expected_final_state,expected_result,description
+IT-014,bfs_crawl,empty,complete,no_infinite_loop,BFS crawl with circular references — visitedKeys prevents infinite loop
+IT-015,bfs_crawl_1000,empty,partial,iterations_1000,BFS crawl with 1000+ rules — hits MAX_ITERATIONS limit
+ST-003-incr,first_index,none,indexed,"written: 5",First full index run
+ST-003-incr,second_index_same,indexed,indexed,"skipped: 5",Second run with same hashes
+ST-003-incr,third_index_mixed,indexed,indexed,"written: 2, skipped: 3",Third run with mixed changes
+ST-003-incr,fourth_index_no_hash,indexed,indexed,"written: 5",Fourth run without hashes
+ST-010,index_with_pega_project,none,indexed_with_pega,pega_crawl_completed,Workspace indexing with Pega project triggers BFS crawl

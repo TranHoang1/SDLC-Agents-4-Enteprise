@@ -1,0 +1,202 @@
+{
+  "pxCreateDateTime": "20050131T145619.933 GMT",
+  "pxCreateOperator": "jgajnak",
+  "pxCreateOpName": "Jim Gajnak",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "10ca48531decc0fe0ffd70aa96579109",
+  "pxInsId": "RULE-APPLICATION",
+  "pxInsName": "RULE-APPLICATION",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxSiblingCount": "",
+  "pxUpdateDateTime": "20081208T214134.048 GMT",
+  "pxUpdateOperator": "Paul.Gagnon@pega.com",
+  "pxUpdateOpName": "Paul A. Gagnon",
+  "pxUpdateSystemID": "PRPCDevelopment",
+  "pxUpdateTime": "",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyApplet": "Rule-Application",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "",
+  "pyBaseRule": "true",
+  "pyCategory": "Application Definition",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Application",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "false",
+  "pyClassName": "Rule-Application",
+  "pyClassType": "Concrete",
+  "pyDateRangeRuleResolution": "false",
+  "pyDeprecated": "false",
+  "pyDerivesFrom": "Rule-",
+  "pyDescription": "Rule-Application serves as a definition of RuleSets to support a given PegaRULES Process Commander application.",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormType": "Harness",
+  "pyHasInstances": "true",
+  "pyID": "",
+  "pyInitialVersion": "05-05-01",
+  "pyInterface": "",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Application",
+  "pyLabelOld": "Application",
+  "pyMethodStatus": "",
+  "pyOrgDivision": "AdvancedTechnology",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Application",
+  "pyRuleResolution": "false",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-",
+  "pyTemplateCheckbox": "false",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyUsage": "Define application RuleSet lists using this class of instances. Users may define other Rule-Application instances to extend a given instance, and may also reference Rule-Application instances from their Requestor, Organization, Division, and AccessGroup instances.",
+  "pyValueChanged": "false",
+  "pyWorkKey": "",
+  "pzChecksum": "-1102899865",
+  "pzIndexCount": "165",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-APPLICATION",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-APPLICATION",
+  "pzReindex": "true",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Application",
+      "pxRuleFamilyName": "PYPRODUCTVERSION",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyRuleName": "pyProductVersion",
+      "pzIndexes": {
+        "RuleReference": "161"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Application",
+      "pxRuleFamilyName": "PYPRODUCTNAME",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyRuleName": "pyProductName",
+      "pzIndexes": {
+        "RuleReference": "162"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-",
+      "pxRuleFamilyName": "RULE-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyRuleName": "Rule-",
+      "pzIndexes": {
+        "RuleReference": "163"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!APPLICATION DEFINITION",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyRuleName": "pyCategory Application Definition",
+      "pzIndexes": {
+        "RuleReference": "164"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Name",
+      "pyKeyName": "pyProductName"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Version",
+      "pyKeyName": "pyProductVersion"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

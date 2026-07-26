@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Decision-DDF",
+  "pyPatternParent": "Rule-Decision-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-DecisionEngine",
+  "pyRuleName": "Rule-Decision-DDF",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Decision-",
+  "pyClassName": "Rule-Decision-DDF"
+}

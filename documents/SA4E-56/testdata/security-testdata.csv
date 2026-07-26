@@ -1,0 +1,9 @@
+test_case_id,path,content,expected_rejected,expected_http_code,expected_log_level,description
+SEC-001-1,../../../etc/passwd,root:x:0:0:root,true,200,WARN,Basic POSIX traversal
+SEC-001-2,..\..\..\windows\win.ini,"[fonts]",true,200,WARN,Windows traversal
+SEC-001-3,valid/../../../etc/shadow,test:!:10000:0:99999:7::: ,true,200,WARN,Nested traversal
+SEC-001-4,....//....//etc/passwd,root:x:0:0:root,true,200,WARN,Dots-only traversal attempt
+SEC-001-5,,%2e%2e%2fetc%2fpasswd,true|false,200,WARN,URL-encoded traversal (may be normalized)
+SEC-004-1,"; rm -rf /","echo vulnerable",true|false,200,WARN,Command injection via path
+SEC-004-2,src/xss-test.ts,"<script>alert('xss')</script>",false,200,,XSS in content (treated as data)
+UT-018,settings.json,pegaPassword=test123,,,CRITICAL,Password must NOT be in settings.json

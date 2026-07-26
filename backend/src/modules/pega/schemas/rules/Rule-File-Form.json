@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-File-Form",
+  "pyPatternParent": "Rule-File-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-File-Form",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-File-Text",
+  "pyClassName": "Rule-File-Form"
+}

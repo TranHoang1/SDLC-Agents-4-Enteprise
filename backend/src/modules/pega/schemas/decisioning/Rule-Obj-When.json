@@ -1,0 +1,25 @@
+{
+  "targetClass": "Rule-Obj-When",
+  "displayName": "When Condition",
+  "description": "Boolean evaluation rule combining boolean conditions, comparison operators, and sub-When rules to return True/False.",
+  "exactStructure": {
+    "rootProperties": {
+      "pxObjClass": { "type": "string", "exactValue": "Rule-Obj-When", "required": true },
+      "pyClassName": { "type": "string", "required": true },
+      "pyLabel": { "type": "string", "required": true },
+      "pyRuleset": { "type": "string", "required": true },
+      "pyRulesetVersion": { "type": "string", "required": true }
+    },
+    "conditionArrayProperty": "pyLogicConditions",
+    "conditionObjectStructure": {
+      "pyField1": { "type": "string" },
+      "pyField2": { "type": "string" },
+      "pyWhenName": { "type": "string" }
+    }
+  },
+  "dependencyPaths": [
+    "pyLogicConditions[].pyField1",
+    "pyLogicConditions[].pyField2",
+    "pyLogicConditions[].pyWhenName"
+  ]
+}

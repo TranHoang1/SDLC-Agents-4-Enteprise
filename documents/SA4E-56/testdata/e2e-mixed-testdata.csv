@@ -1,0 +1,9 @@
+test_case_id,path,content,expected_written,expected_http_code,description
+ST-002-ts,src/service.ts,"export class Service { process() { return true; } }","1",200,TS file in mixed batch
+ST-002-java,src/com/myapp/MyService.java,"package com.myapp; import com.myapp.Helper; public class MyService {}","1",200,Java file in mixed batch — non-JDK import
+ST-002-py,src/utils/helper.py,"from . import config; def helper(): pass","1",200,Python file in mixed batch
+ST-002-pega,Work-Order.MyFlow.Rule-Obj-Flow.pega,"{""pxObjClass"":""Rule-Obj-Flow"",""pyClassName"":""Work-Order"",""pyFlowName"":""MyFlow""}","1",200,Pega file in mixed batch
+IT-007-valid1,src/valid1.ts,"export const a = 1;","1",200,Valid file in partial failure batch
+IT-007-valid2,src/valid2.py,"x = 1","1",200,Another valid file in partial failure batch
+IT-007-traversal,../../etc/passwd,"root:x:0:0:root","0",200,Traversal attempt — rejected
+IT-007-invalid-json,src/bad.pega,"not json{{{","1",200,Invalid JSON — written but parse error

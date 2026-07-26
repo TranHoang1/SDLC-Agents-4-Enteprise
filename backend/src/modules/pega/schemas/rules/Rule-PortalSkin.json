@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-PortalSkin",
+  "pyPatternParent": "Rule-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-PortalSkin",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-",
+  "pyClassName": "Rule-PortalSkin"
+}

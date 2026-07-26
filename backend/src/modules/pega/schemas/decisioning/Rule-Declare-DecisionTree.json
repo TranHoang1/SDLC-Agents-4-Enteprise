@@ -1,0 +1,26 @@
+{
+  "targetClass": "Rule-Declare-DecisionTree",
+  "displayName": "Decision Tree",
+  "description": "Hierarchical tree decision rule evaluating nested IF-THEN-ELSE branch conditions to compute outcomes.",
+  "exactStructure": {
+    "rootProperties": {
+      "pxObjClass": { "type": "string", "exactValue": "Rule-Declare-DecisionTree", "required": true },
+      "pyClassName": { "type": "string", "required": true },
+      "pyLabel": { "type": "string", "required": true },
+      "pyRuleset": { "type": "string", "required": true },
+      "pyRulesetVersion": { "type": "string", "required": true }
+    },
+    "branchArrayProperty": "pyBranches",
+    "branchObjectStructure": {
+      "pyPropertyName": { "type": "string" },
+      "pyWhenName": { "type": "string" },
+      "pyReturnTransform": { "type": "string" }
+    }
+  },
+  "dependencyPaths": [
+    "pyPropertyEvaluated",
+    "pyBranches[].pyPropertyName",
+    "pyBranches[].pyWhenName",
+    "pyBranches[].pyReturnTransform"
+  ]
+}

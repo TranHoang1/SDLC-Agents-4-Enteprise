@@ -31,13 +31,13 @@ export async function promptIndexAfterInject(root: string, token?: string): Prom
     if (action === "Index Now") { await runIndexWorkspace(root, token); }
 }
 
-export async function handleIndexWorkspace(token?: string): Promise<void> {
+export async function handleIndexWorkspace(token?: string, secrets?: vscode.SecretStorage): Promise<void> {
     const root = getWorkspaceRoot();
     if (!root) { return; }
-    await runIndexWorkspace(root, token);
+    await runIndexWorkspace(root, token, secrets);
 }
 
-async function runIndexWorkspace(root: string, token?: string): Promise<void> {
+async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.SecretStorage): Promise<void> {
     const picks = await showIndexOptions();
     if (!picks || picks.length === 0) { return; }
 
@@ -48,7 +48,7 @@ async function runIndexWorkspace(root: string, token?: string): Promise<void> {
     };
 
     const service = createService();
-    const results = await service.indexWorkspace(root, options, token);
+    const results = await service.indexWorkspace(root, options, token, secrets);
     showIndexResults(results, picks, root);
 }
 

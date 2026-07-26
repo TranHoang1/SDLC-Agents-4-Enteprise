@@ -16,6 +16,7 @@ export const CORE_TOOLS: readonly string[] = [
   'code_search', 'get_curated_context',
   'find_tools', 'execute_dynamic_tool', 'orchestration_status',
   'drawio_export_png', 'drawio_auto_layout',
+  'pega_get_rule', 'pega_get_session_context',
 ] as const;
 
 /**

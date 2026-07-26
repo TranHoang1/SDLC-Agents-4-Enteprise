@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Edit-Input",
+  "pyPatternParent": "Rule-Edit-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Edit-Input",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Edit-",
+  "pyClassName": "Rule-Edit-Input"
+}

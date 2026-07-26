@@ -1,0 +1,279 @@
+{
+  "$schema": "pega-core-schemas-v3-exact-spec",
+  "description": "Comprehensive, Exact Pega PRPC Rule & Data Specification containing precise object trees, exact data types, UI selector maps, and sub-object schemas.",
+  "schemas": [
+    {
+      "targetClass": "Rule-Obj-Activity",
+      "displayName": "Activity",
+      "description": "Sequential procedural logic rule executing steps, methods (Call, Branch, Property-Set, Obj-Open, RDB-Save), page contexts, pre/post step conditions, and parameter arrays.",
+      "exactStructure": {
+        "rootProperties": {
+          "pxObjClass": { "type": "string", "exactValue": "Rule-Obj-Activity", "required": true },
+          "pyClassName": { "type": "string", "description": "Applies-To Class", "required": true },
+          "pyActivityName": { "type": "string", "description": "Activity Rule Name", "required": true },
+          "pyRuleset": { "type": "string", "description": "Ruleset Name", "required": true },
+          "pyRulesetVersion": { "type": "string", "description": "Ruleset Version (e.g. 01-01-01)", "required": true },
+          "pyLabel": { "type": "string", "description": "Human Readable Label", "required": false }
+        },
+        "stepArrayProperty": "steps",
+        "stepObjectStructure": {
+          "pyStepId": { "type": "string", "description": "Unique Step Row ID (e.g. ROW-1)", "required": true },
+          "pyStepNum": { "type": "string", "description": "Display Step Number (e.g. 1.1)", "required": true },
+          "pyStepContext": { "type": "string", "description": "Page Context (e.g. pyWorkPage.Customer)", "required": false },
+          "pyMethod": {
+            "type": "string",
+            "enum": ["Call", "Branch", "Property-Set", "Obj-Open", "Obj-Save", "RDB-Save", "Page-New", "Page-Remove"],
+            "required": true
+          },
+          "pyMethodParameters": { "type": "string", "description": "Target Called Activity or Method Params (e.g. Class.ActivityName)", "required": false },
+          "pyPreCondition": {
+            "type": "object",
+            "properties": {
+              "pyWhenName": { "type": "string", "description": "When Condition rule to skip step execution" }
+            }
+          },
+          "pyPostCondition": {
+            "type": "object",
+            "properties": {
+              "pyWhenName": { "type": "string", "description": "When Condition rule to trigger jump" },
+              "pyJumpToStep": { "type": "string", "description": "Target Step Number to jump on condition match" }
+            }
+          },
+          "pyParamArray": {
+            "type": "array",
+            "itemStructure": {
+              "pyParamName": { "type": "string" },
+              "pyParamValue": { "type": "string" }
+            }
+          }
+        }
+      },
+      "uiSelectors": {
+        "stepsTable": "table#stepsTable",
+        "addStepButton": "table#stepsTable button[data-click*='addStep']",
+        "rowContainer": "tr[data-rowid='{pyStepId}']",
+        "methodInput": "tr[data-rowid='{pyStepId}'] input[name$='pyMethod']",
+        "contextInput": "tr[data-rowid='{pyStepId}'] input[name$='pyStepContext']",
+        "paramsInput": "tr[data-rowid='{pyStepId}'] input[name$='pyMethodParameters']"
+      },
+      "dependencyPaths": [
+        "steps[].pyMethodParameters",
+        "steps[].pyStepContext",
+        "steps[].pyPreCondition.pyWhenName",
+        "steps[].pyPostCondition.pyWhenName",
+        "steps[].pyParamArray[].pyParamValue"
+      ]
+    },
+    {
+      "targetClass": "Rule-Obj-Model",
+      "displayName": "Data Transform",
+      "description": "Declarative or procedural data mapping rule configuring page context transitions, property assignments (Set), nested Data Transform applications, and page list iterations.",
+      "exactStructure": {
+        "rootProperties": {
+          "pxObjClass": { "type": "string", "exactValue": "Rule-Obj-Model", "required": true },
+          "pyClassName": { "type": "string", "description": "Applies-To Class", "required": true },
+          "pyModelName": { "type": "string", "description": "Data Transform Rule Name", "required": true },
+          "pyRuleset": { "type": "string", "required": true },
+          "pyRulesetVersion": { "type": "string", "required": true }
+        },
+        "actionArrayProperty": "pyActions",
+        "actionObjectStructure": {
+          "pyActionId": { "type": "string", "description": "Unique Action Row ID (e.g. ACTION-1)", "required": true },
+          "pyActionType": {
+            "type": "string",
+            "enum": ["Set", "Apply Data Transform", "Append and Map to", "ForEachPage", "Remove", "Update Page"],
+            "required": true
+          },
+          "pyTarget": { "type": "string", "description": "Target Property or Page Expression (e.g. .Customer.Status)", "required": false },
+          "pySource": { "type": "string", "description": "Source Expression or Value (e.g. Primary.pyStatus)", "required": false },
+          "pyTransformName": { "type": "string", "description": "Applied Data Transform Rule Name", "required": false },
+          "pyWhenCondition": { "type": "string", "description": "Conditional WHEN rule name", "required": false }
+        }
+      },
+      "uiSelectors": {
+        "actionsTable": "table#dtActionsTable",
+        "addActionBtn": "button#addDTActionBtn",
+        "rowContainer": "tr[data-actionid='{pyActionId}']",
+        "actionTypeSelect": "tr[data-actionid='{pyActionId}'] select[name$='pyActionType']",
+        "targetInput": "tr[data-actionid='{pyActionId}'] input[name$='pyTarget']",
+        "sourceInput": "tr[data-actionid='{pyActionId}'] input[name$='pySource']"
+      },
+      "dependencyPaths": [
+        "pyActions[].pyTarget",
+        "pyActions[].pySource",
+        "pyActions[].pyTransformName",
+        "pyActions[].pyWhenCondition"
+      ]
+    },
+    {
+      "targetClass": "Rule-Declare-DecisionTable",
+      "displayName": "Decision Table",
+      "description": "Tabular decision logic evaluating multiple input properties against row criteria to return computed results or trigger Data Transforms.",
+      "exactStructure": {
+        "rootProperties": {
+          "pxObjClass": { "type": "string", "exactValue": "Rule-Declare-DecisionTable", "required": true },
+          "pyClassName": { "type": "string", "required": true },
+          "pyLabel": { "type": "string", "required": true },
+          "pyRuleset": { "type": "string", "required": true },
+          "pyRulesetVersion": { "type": "string", "required": true },
+          "pyPropertyEvaluated": { "type": "string", "description": "Target Result Property Evaluated", "required": true }
+        },
+        "columnArrayProperty": "pyTableColumns",
+        "rowArrayProperty": "pyTableRows",
+        "rowObjectStructure": {
+          "pyRowId": { "type": "string", "required": true },
+          "pyConditions": {
+            "type": "array",
+            "itemStructure": {
+              "pyWhenName": { "type": "string" },
+              "pyOperator": { "type": "string", "enum": ["=", "!=", ">", "<", ">=", "<=", "Is Set", "Is Not Set"] },
+              "pyValue": { "type": "string" }
+            }
+          },
+          "pyReturnActions": {
+            "type": "array",
+            "itemStructure": {
+              "pyTransformName": { "type": "string" },
+              "pyReturnValue": { "type": "string" }
+            }
+          }
+        }
+      },
+      "uiSelectors": {
+        "decisionGrid": "div#decisionTableGrid",
+        "addRowBtn": "button#addDecisionRowBtn",
+        "columnHeader": "th.decColHeader"
+      },
+      "dependencyPaths": [
+        "pyPropertyEvaluated",
+        "pyTableColumns[].pyPropertyName",
+        "pyTableRows[].pyConditions[].pyWhenName",
+        "pyTableRows[].pyReturnActions[].pyTransformName"
+      ]
+    },
+    {
+      "targetClass": "Rule-Declare-Pages",
+      "displayName": "Data Page",
+      "description": "Read-only or read-write cached data retrieval rule (Thread, Requestor, Node scope) fetching data via Data Transform, Activity, Report Definition, REST, or Lookup.",
+      "exactStructure": {
+        "rootProperties": {
+          "pxObjClass": { "type": "string", "exactValue": "Rule-Declare-Pages", "required": true },
+          "pyPageName": { "type": "string", "description": "Data Page Name (e.g. D_CustomerProfile)", "required": true },
+          "pyDataPageClass": { "type": "string", "description": "Object Class returned by Data Page", "required": true },
+          "pyScope": { "type": "string", "enum": ["Thread", "Requestor", "Node"], "required": true },
+          "pyListOrSingle": { "type": "string", "enum": ["Page", "Page List"], "required": true },
+          "pyRuleset": { "type": "string", "required": true },
+          "pyRulesetVersion": { "type": "string", "required": true }
+        },
+        "dataSourceArrayProperty": "pyDataSources",
+        "dataSourceObjectStructure": {
+          "pySourceType": { "type": "string", "enum": ["Activity", "Data Transform", "Report Definition", "REST", "Lookup"], "required": true },
+          "pyDataSource": { "type": "string", "description": "Target Source Rule FQN or Name", "required": true },
+          "pyDataTransform": { "type": "string", "description": "Optional Post-Load Data Transform", "required": false },
+          "pyActivityName": { "type": "string", "description": "Source Activity Name", "required": false },
+          "pyReportDefinition": { "type": "string", "description": "Source Report Definition Name", "required": false }
+        }
+      },
+      "uiSelectors": {
+        "definitionTab": "a#dataPageDefinitionTab",
+        "scopeDropdown": "select#pyScope",
+        "sourceTypeSelect": "select#pySourceType",
+        "dataSourceInput": "input#pyDataSource"
+      },
+      "dependencyPaths": [
+        "pyDataSources[].pyDataSource",
+        "pyDataSources[].pyDataTransform",
+        "pyDataSources[].pyActivityName",
+        "pyDataSources[].pyReportDefinition",
+        "pyPostLoadDataTransform"
+      ]
+    },
+    {
+      "targetClass": "Rule-Obj-Flow",
+      "displayName": "Flow / Process",
+      "description": "Visual business process workflow diagram rule containing shapes (Assignment, Subprocess, Utility, Decision, Integrator) and transitions.",
+      "exactStructure": {
+        "rootProperties": {
+          "pxObjClass": { "type": "string", "exactValue": "Rule-Obj-Flow", "required": true },
+          "pyClassName": { "type": "string", "required": true },
+          "pyFlowName": { "type": "string", "required": true },
+          "pyRuleset": { "type": "string", "required": true },
+          "pyRulesetVersion": { "type": "string", "required": true }
+        },
+        "shapeArrayProperty": "pyShapes",
+        "shapeObjectStructure": {
+          "pyShapeId": { "type": "string", "required": true },
+          "pyShapeType": { "type": "string", "enum": ["Assignment", "Subprocess", "Utility", "Decision", "Integrator"], "required": true },
+          "pyActivityName": { "type": "string", "required": false },
+          "pyFlowName": { "type": "string", "required": false },
+          "pyFlowAction": { "type": "string", "required": false },
+          "pyDecisionTable": { "type": "string", "required": false },
+          "pyWhenName": { "type": "string", "required": false }
+        }
+      },
+      "uiSelectors": {
+        "flowCanvas": "svg#flowCanvas",
+        "shapeNode": "g.flowShape[data-shapeid='{pyShapeId}']"
+      },
+      "dependencyPaths": [
+        "pyShapes[].pyActivityName",
+        "pyShapes[].pyFlowName",
+        "pyShapes[].pyFlowAction",
+        "pyShapes[].pyDecisionTable",
+        "pyShapes[].pyWhenName"
+      ]
+    },
+    {
+      "targetClass": "Data-Admin-Operator-ID",
+      "displayName": "Operator ID",
+      "description": "System user account instance defining credentials, access groups, work groups, and org structure context.",
+      "exactStructure": {
+        "rootProperties": {
+          "pxObjClass": { "type": "string", "exactValue": "Data-Admin-Operator-ID", "required": true },
+          "pyUserIdentifier": { "type": "string", "description": "User Email / Identifier ID", "required": true },
+          "pyUserName": { "type": "string", "description": "Full Name", "required": true },
+          "pyAccessGroup": { "type": "string", "description": "Primary Active Access Group", "required": true },
+          "pyOrganization": { "type": "string", "required": false },
+          "pyDivision": { "type": "string", "required": false },
+          "pyUnit": { "type": "string", "required": false }
+        }
+      },
+      "uiSelectors": {
+        "operatorForm": "form#operatorIdForm",
+        "accessGroupInput": "input#pyAccessGroup"
+      },
+      "dependencyPaths": [
+        "pyAccessGroup",
+        "pyWorkGroup",
+        "pyOrganization"
+      ]
+    },
+    {
+      "targetClass": "Data-Admin-AccessGroup",
+      "displayName": "Access Group",
+      "description": "Security profile instance defining active application, application version, available roles, and ruleset stack.",
+      "exactStructure": {
+        "rootProperties": {
+          "pxObjClass": { "type": "string", "exactValue": "Data-Admin-AccessGroup", "required": true },
+          "pyAccessGroup": { "type": "string", "description": "Access Group Name (e.g. JiraIntegration:Authors)", "required": true },
+          "pyApplicationName": { "type": "string", "description": "Target Application Name", "required": true },
+          "pyApplicationVersion": { "type": "string", "description": "Target Application Version", "required": true }
+        },
+        "roleArrayProperty": "pyUserRoles",
+        "roleObjectStructure": {
+          "pyRoleName": { "type": "string", "description": "Access Role Name" }
+        }
+      },
+      "uiSelectors": {
+        "accessGroupForm": "form#accessGroupForm",
+        "appNameInput": "input#pyApplicationName",
+        "appVersionInput": "input#pyApplicationVersion"
+      },
+      "dependencyPaths": [
+        "pyApplicationName",
+        "pyApplicationVersion",
+        "pyUserRoles[]"
+      ]
+    }
+  ]
+}

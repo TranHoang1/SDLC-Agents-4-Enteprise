@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Admin-System",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-Admin-",
+  "pyPatternParent": "Rule-Admin-",
+  "pyClassName": "Rule-Admin-System",
+  "pyRuleName": "Rule-Admin-System",
+  "pyDescription": "System settings",
+  "pxObjClass": "Rule-Obj-Class"
+}

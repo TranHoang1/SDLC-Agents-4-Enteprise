@@ -43,7 +43,7 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     vscode.commands.registerCommand("kiroSdlc.injectSelective", () => handleInjectSelective(context)),
     vscode.commands.registerCommand("kiroSdlc.update", () => handleUpdate(context)),
     vscode.commands.registerCommand("kiroSdlc.status", () => handleStatus(context)),
-    vscode.commands.registerCommand("kiroSdlc.indexWorkspace", () => handleIndexWorkspace(authManager?.getTokenSync())),
+    vscode.commands.registerCommand("kiroSdlc.indexWorkspace", () => handleIndexWorkspace(authManager?.getTokenSync(), context.secrets)),
     vscode.commands.registerCommand("kiroSdlc.login", () => handleLogin(context, authManager, treeProvider)),
     vscode.commands.registerCommand("kiroSdlc.logout", () => handleLogout(authManager, panelManager)),
     vscode.commands.registerCommand("kiroSdlc.openKbGraph", () => panelManager?.openPanel("graph")),
@@ -58,6 +58,17 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     vscode.commands.registerCommand("kiroSdlc.editConfig", () => handleEditConfig()),
     vscode.commands.registerCommand("kiroSdlc.changeConfig", () => handleChangeConfig(mcpManager)),
     vscode.commands.registerCommand("kiroSdlc.openSettings", () => SettingsPanel.open(context.extensionUri, context.secrets)),
+    vscode.commands.registerCommand("kiroSdlc.fetchPegaContext", async () => {
+      const root = workspaceRoot || getWorkspaceRoot();
+      if (!root) { vscode.window.showErrorMessage("No workspace folder open."); return; }
+      try {
+        const client = new (await import("../services/PegaHttpClient")).PegaHttpClient(context.secrets);
+        const res = await client.fetchAndSavePegaContext(root);
+        vscode.window.showInformationMessage(`✅ Fetched Pega Context: App "${res.applicationName}" (${res.caseTypesCount} CaseTypes) saved to ${res.filePath}`);
+      } catch (err: any) {
+        vscode.window.showErrorMessage(`Failed to fetch Pega Context: ${err.message}`);
+      }
+    }),
   );
 
   if (mcpManager) {

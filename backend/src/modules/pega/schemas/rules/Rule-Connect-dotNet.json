@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Connect-dotNet",
+  "pyPatternParent": "Rule-Connect-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleName": "Rule-Connect-dotNet",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Connect-SOAP",
+  "pyClassName": "Rule-Connect-dotNet"
+}

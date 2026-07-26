@@ -1,0 +1,182 @@
+{
+  "pxCreateDateTime": "20010727T210651.691 GMT",
+  "pxCreateOperator": "vandj@pegasystems.com",
+  "pxCreateOpName": "John van der Meer",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "0e931e59e85c0c4d2ed584e62c2aad36",
+  "pxInsId": "RULE-OBJ-FLOWACTION",
+  "pxInsName": "RULE-OBJ-FLOWACTION",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "wfe",
+  "pxMoveImportDateTime": "20140922T154902.050 GMT",
+  "pxMoveImportOperId": "administrator@pega.com",
+  "pxMoveImportOperName": "External Import Utility",
+  "pxMoveOriginalKey": "RULE-OBJ-CLASS RULE-OBJ-FLOWACTION",
+  "pxMoveOriginalRuleSet": "Pega-ProCom",
+  "pxMoveOriginalRuleSetVersion": "01-16-01",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxOriginalInstanceKey": "RULE-OBJ-CLASS RULE-OBJ-FLOWACTION",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20140829T150904.759 GMT",
+  "pxUpdateOperator": "marik",
+  "pxUpdateOpName": "Ken Marin",
+  "pxUpdateSystemID": "sdev717",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "Rule-Obj-FlowAction",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "Stream",
+  "pyBaseRule": "true",
+  "pyCategory": "Process",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Obj-FlowAction",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Obj-FlowAction",
+  "pyClassType": "Concrete",
+  "pyDateRangeRuleResolution": "true",
+  "pyDerivesFrom": "Rule-HTML-Section",
+  "pyDescription": "Class Rule-Obj-FlowAction",
+  "pyEncryptBLOB": "",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormPost": "",
+  "pyFormType": "Harness",
+  "pyHasInstances": "true",
+  "pyHistoryObject": "",
+  "pyInitialVersion": "04-01-01",
+  "pyInsAvailable": "true",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "com.pega.pegarules.engine.generator.StreamBuilderAssembler",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Flow Action",
+  "pyLabelOld": "Flow Action",
+  "pyMethodStatus": "",
+  "pyMTInstanceOverrideAndVisibility": "OVERRIDE_DISABLED",
+  "pyNamespace": "",
+  "pyOrgDivision": "RulesEngineering",
+  "pyPatternInheritance": "false",
+  "pyPatternParent": "Rule-Obj-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Obj-FlowAction",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-ProCom",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-HTML-Section",
+  "pyTemplateInputBox": "",
+  "pyUsage": "Used in the Perform harness and flows to determine where the process should go next.",
+  "pyUseCache": "false",
+  "pyValueChanged": "false",
+  "pyWindowTitle": "",
+  "pyWorkKey": "",
+  "pzAvailabilityNotSet": "Set Availability",
+  "pzChecksum": "-1445021603",
+  "pzIndexCount": "60",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-OBJ-FLOWACTION",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-OBJ-FLOWACTION",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "RULE-HTML-SECTION",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Rule-HTML-Section",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-OBJ-FLOWACTION",
+      "pzIndexes": {
+        "RuleReference": "58"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!PROCESS",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyCategory Process",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-OBJ-FLOWACTION",
+      "pzIndexes": {
+        "RuleReference": "59"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Action Name",
+      "pyKeyName": "pyActionName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "Action",
+      "pyJavaClass": "com.pega.pegarules.engine.generator.AppRuleAssembler",
+      "pyPage": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

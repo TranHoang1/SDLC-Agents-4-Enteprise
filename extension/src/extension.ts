@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SDLC Agents 4 Enterprise — VS Code Extension entry point.
  * Thin activation shell — delegates command registration to CommandRegistrar and LlmCommands.
  */
@@ -19,6 +19,7 @@ import { registerCommands } from "./commands/CommandRegistrar";
 import { registerLlmCommands } from "./commands/LlmCommands";
 import { initPlatformSwap } from "./platform-swap";
 import { StatusBarManager } from "./ui/status-bar";
+import { SettingsPanel } from "./panels/settings/SettingsPanel";
 
 let mcpManager: McpServerManager | undefined;
 let panelManager: WebviewPanelManager | undefined;
@@ -35,6 +36,13 @@ export function getProjectId(): string { return _projectId; }
 export async function activate(context: vscode.ExtensionContext) {
   const statusBar = createStatusBar();
   context.subscriptions.push(statusBar);
+
+  // Register Settings command early — must work even without a workspace folder.
+  context.subscriptions.push(
+    vscode.commands.registerCommand("kiroSdlc.openSettings", () =>
+      SettingsPanel.open(context.extensionUri, context.secrets)
+    )
+  );
 
   const workspaceRoot = getWorkspaceRoot();
   if (workspaceRoot) {

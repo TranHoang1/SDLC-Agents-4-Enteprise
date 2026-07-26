@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Map-Eform",
+  "pyPatternParent": "Rule-Map-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleName": "Rule-Map-Eform",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Map-",
+  "pyClassName": "Rule-Map-Eform"
+}

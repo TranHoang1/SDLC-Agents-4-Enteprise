@@ -1,0 +1,38 @@
+test_case_id,domain,expected_result,description
+UT-004,parser,pega-rule,Rule name extraction priority — pyRuleName wins over pyActivityName
+UT-005,parser,valid_ast,20+ rule type builders produce valid AST structures
+UT-010,resolver,com_myapp_only,Java import resolution excludes JDK libraries
+UT-012,resolver,empty_array,DependencyResolver returns empty for unsupported extensions
+UT-013,resolver,empty_array,DependencyResolver handles invalid .pega JSON gracefully
+UT-015,parser,human_readable,PegaRuleAstParser.toPromptContext generates readable output
+UT-019,settings,saved,SettingsMessageHandler processes savePegaConfig and testPegaConnection
+UT-020,login,prefilled,Login panel pre-fills username and toggles password visibility
+IT-004,security,rejected,Path traversal with ../ patterns are rejected
+IT-005,auth,401,Missing or invalid Authorization header returns 401
+IT-006,validation,400,Missing files array returns 400 error
+IT-009,headers,fallback,Missing X-Project-Id falls back to boot config
+IT-011,pega,fallback,PegaHttpClient URL fallback pattern works
+IT-012,pega,crawl_stored,PegaHttpClient crawlPlan and crawlBatch integration works
+IT-013,pega,no_project_skip,IndexingService skips crawl when no Pega project detected
+ST-002,e2e,mixed_batch,Mixed batch with TS/Java/Python/Pega files indexed together
+ST-003,e2e,incremental,Incremental indexing: dedup first, re-index changed
+ST-004,pega,crawl_plan_batch,Pega crawlPlan + crawlBatch lifecycle works
+ST-005,auth,login_token_works,AuthManager login token used for successful indexing
+ST-006,pega,fetch_context,Pega settings save + test + fetch creates pega-project.json
+ST-007,ui,toggle_works,Login panel password toggle button works
+ST-009,settings,password_preserved,Empty password in save doesn't overwrite existing
+SEC-001,security,all_rejected,All path traversal patterns rejected with WARN logs
+SEC-002,auth,all_401,All unauthorized access attempts rejected with 401
+SEC-003,security,not_in_settings,Password stored in SecretStorage not settings.json
+SEC-004,security,sanitized,Injection attempts in path/content handled safely
+SEC-005,concurrency,no_corruption,Concurrent requests handled without data corruption
+PERF-002,performance,under_30s,Batch of 50 files completes under 30 seconds
+PERF-003,performance,under_100ms,Dedup check completes under 100ms
+PERF-004,performance,under_5min,BFS crawl with 1000 rules under 5 minutes
+PERF-005,performance,stable_throughput,10 concurrent requests do not degrade throughput
+UAT-001,uat,usable_api,Developer confirms CI pipeline usability
+UAT-002,uat,intuitive_workflow,Pega workflow: configure -> test -> fetch -> crawl
+UAT-003,uat,actionable_errors,Error scenarios provide actionable feedback
+UT-003,parser,error_returned,Empty or non-object JSON returns error in ParseResult
+IT-003,dedup,skipped,Dedup: same hash skips file, different hash re-indexes
+IT-007,resilience,partial_success,Partial failure: one bad file doesn't break entire batch

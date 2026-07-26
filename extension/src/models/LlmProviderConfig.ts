@@ -8,6 +8,7 @@ export const SECRET_KEYS: Record<string, string> = {
   openai: "kiroSdlc.openaiApiKey",
   openrouter: "kiroSdlc.openaiApiKey",
   lmstudio: "kiroSdlc.openaiApiKey",
+  pega: "kiroSdlc.pegaPassword",
 };
 
 /** Provider-specific base URL defaults */

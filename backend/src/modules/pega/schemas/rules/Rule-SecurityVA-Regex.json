@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-SecurityVA-Regex",
+  "pyPatternParent": "Rule-SecurityVA-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-SecurityVA",
+  "pyRuleName": "Rule-SecurityVA-Regex",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-SecurityVA-",
+  "pyClassName": "Rule-SecurityVA-Regex"
+}

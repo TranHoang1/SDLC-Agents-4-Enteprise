@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-AutoTest-Case",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-AutoTest-",
+  "pyPatternParent": "Rule-AutoTest-",
+  "pyClassName": "Rule-AutoTest-Case",
+  "pyRuleName": "Rule-AutoTest-Case",
+  "pyDescription": "Auto test case abstract",
+  "pxObjClass": "Rule-Obj-Class"
+}

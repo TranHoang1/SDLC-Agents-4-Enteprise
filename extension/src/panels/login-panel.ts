@@ -16,10 +16,11 @@ export class LoginPanel implements vscode.Disposable {
     private readonly extensionUri: vscode.Uri
   ) {}
 
-  show(): void {
+  async show(): Promise<void> {
     if (this.panel) { this.panel.reveal(); return; }
+    const lastUsername = await this.authManager.getLastUsername();
     this.panel = vscode.window.createWebviewPanel("kiroSdlc.login", "SDLC Agents 4 Enterprise — Login", vscode.ViewColumn.One, { enableScripts: true, retainContextWhenHidden: false });
-    this.panel.webview.html = this.getHtml();
+    this.panel.webview.html = this.getHtml(lastUsername);
     this.panel.webview.onDidReceiveMessage(async (msg) => { if (msg.type === "login") { await this.handleLogin(msg.username, msg.password); } }, null, this.disposables);
     this.panel.onDidDispose(() => { this.panel = null; }, null, this.disposables);
   }
@@ -39,7 +40,7 @@ export class LoginPanel implements vscode.Disposable {
 
   private postMessage(msg: unknown): void { this.panel?.webview.postMessage(msg); }
 
-  private getHtml(): string {
+  private getHtml(lastUsername: string = ""): string {
     const nonce = getNonce();
     const cspSource = this.panel!.webview.cspSource;
     return `<!DOCTYPE html>
@@ -58,6 +59,10 @@ export class LoginPanel implements vscode.Disposable {
     label { display: block; margin-bottom: 4px; font-size: 0.85em; color: var(--vscode-descriptionForeground); }
     input { width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 1em; border: 1px solid var(--vscode-input-border); background: var(--vscode-input-background); color: var(--vscode-input-foreground); border-radius: 4px; outline: none; }
     input:focus { border-color: var(--vscode-focusBorder); }
+    .password-wrapper { position: relative; display: flex; align-items: center; }
+    .password-wrapper input { padding-right: 40px; }
+    .toggle-password { position: absolute; right: 8px; background: none; border: none; cursor: pointer; color: var(--vscode-icon-foreground, #aaa); font-size: 1.1em; display: flex; align-items: center; justify-content: center; padding: 4px; border-radius: 3px; outline: none; user-select: none; }
+    .toggle-password:hover { color: var(--vscode-foreground); }
     .btn { width: 100%; padding: 12px; font-size: 1em; border: none; border-radius: 4px; cursor: pointer; margin-top: 8px; font-weight: 500; }
     .btn-primary { background: var(--vscode-button-background); color: var(--vscode-button-foreground); }
     .btn-primary:hover { background: var(--vscode-button-hoverBackground); }
@@ -73,11 +78,14 @@ export class LoginPanel implements vscode.Disposable {
     <form id="loginForm">
       <div class="form-group">
         <label for="username">Username</label>
-        <input type="text" id="username" autocomplete="username" placeholder="admin" required />
+        <input type="text" id="username" autocomplete="username" placeholder="admin" value="${lastUsername}" required />
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" autocomplete="current-password" required />
+        <div class="password-wrapper">
+          <input type="password" id="password" autocomplete="current-password" required />
+          <button type="button" class="toggle-password" id="togglePassword" title="Show/Hide Password" tabindex="-1">👁️</button>
+        </div>
       </div>
       <button type="submit" class="btn btn-primary" id="loginBtn">Login</button>
     </form>
@@ -90,9 +98,48 @@ export class LoginPanel implements vscode.Disposable {
     const loginBtn = document.getElementById('loginBtn');
     const errorMsg = document.getElementById('errorMsg');
     const successMsg = document.getElementById('successMsg');
-    form.addEventListener('submit', (e) => { e.preventDefault(); const u = document.getElementById('username').value.trim(); const p = document.getElementById('password').value; if (!u || !p) return; errorMsg.style.display = 'none'; vscode.postMessage({ type: 'login', username: u, password: p }); });
-    window.addEventListener('message', (event) => { const msg = event.data; if (msg.type === 'loading') { loginBtn.disabled = msg.loading; loginBtn.textContent = msg.loading ? 'Logging in...' : 'Login'; } else if (msg.type === 'error') { errorMsg.style.display = 'block'; errorMsg.textContent = msg.message; loginBtn.disabled = false; loginBtn.textContent = 'Login'; } else if (msg.type === 'success') { successMsg.style.display = 'block'; errorMsg.style.display = 'none'; loginBtn.disabled = true; loginBtn.textContent = 'Done'; } });
-    document.getElementById('username').focus();
+    const pwdInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePassword');
+
+    toggleBtn.addEventListener('click', () => {
+      const isPwd = pwdInput.type === 'password';
+      pwdInput.type = isPwd ? 'text' : 'password';
+      toggleBtn.textContent = isPwd ? '🙈' : '👁️';
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const u = document.getElementById('username').value.trim();
+      const p = pwdInput.value;
+      if (!u || !p) return;
+      errorMsg.style.display = 'none';
+      vscode.postMessage({ type: 'login', username: u, password: p });
+    });
+
+    window.addEventListener('message', (event) => {
+      const msg = event.data;
+      if (msg.type === 'loading') {
+        loginBtn.disabled = msg.loading;
+        loginBtn.textContent = msg.loading ? 'Logging in...' : 'Login';
+      } else if (msg.type === 'error') {
+        errorMsg.style.display = 'block';
+        errorMsg.textContent = msg.message;
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Login';
+      } else if (msg.type === 'success') {
+        successMsg.style.display = 'block';
+        errorMsg.style.display = 'none';
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Done';
+      }
+    });
+
+    const usernameInput = document.getElementById('username');
+    if (usernameInput.value) {
+      pwdInput.focus();
+    } else {
+      usernameInput.focus();
+    }
   </script>
 </body>
 </html>`;

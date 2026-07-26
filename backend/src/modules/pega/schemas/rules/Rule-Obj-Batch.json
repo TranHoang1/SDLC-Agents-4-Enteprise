@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Obj-Batch",
+  "pyPatternParent": "Rule-Obj-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RulesEngine",
+  "pyRuleName": "Rule-Obj-Batch",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Obj-",
+  "pyClassName": "Rule-Obj-Batch"
+}

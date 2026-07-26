@@ -1,0 +1,351 @@
+{
+  "pxCreateDateTime": "20030408T145543.323 GMT",
+  "pxCreateOperator": "grovs@pegasystems.com",
+  "pxCreateOpName": "Sapna Grover",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "a8e52c232299d2d92a1388ffab0b5f6b",
+  "pxInsId": "RULE-HTML-SECTION",
+  "pxInsName": "RULE-HTML-SECTION",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxOriginalInstanceKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+  "pxSaveDateTime": "20220217T144047.965 GMT",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20220217T144047.874 GMT",
+  "pxUpdateOperator": "gagnp",
+  "pxUpdateOpName": "Paul Gagnon",
+  "pxUpdateSystemID": "prpc",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "Rule-HTML-Section",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "Stream",
+  "pyBaseRule": "true",
+  "pyCategory": "User Interface",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-HTML-Section",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-HTML-Section",
+  "pyClassType": "Concrete",
+  "pyCreateDedicatedTable": "true",
+  "pyDateRangeRuleResolution": "true",
+  "pyDerivesFrom": "Rule-Obj-HTML",
+  "pyDescription": "Harness Section Definition Class",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormPost": "",
+  "pyFormType": "Harness",
+  "pyHasCustomFields": "",
+  "pyHasInstances": "true",
+  "pyHistoryObject": "",
+  "pyInitialVersion": "04-01-01",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "com.pega.pegarules.engine.generator.StreamBuilderAssembler",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Section",
+  "pyLabelOld": "Section",
+  "pyMethodStatus": "",
+  "pyMTInstanceOverrideAndVisibility": "OVERRIDE_DISABLED",
+  "pyNamespace": "",
+  "pyOrgDivision": "Engineering",
+  "pyPatternInheritance": "false",
+  "pyPatternParent": "Rule-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-HTML-Section",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-ProCom",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Obj-HTML",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTemporaryObject": "",
+  "pyUsage": "Harness Section Definition Class",
+  "pyValueChanged": "false",
+  "pyWindowTitle": "",
+  "pyWorkKey": "",
+  "pzAvailabilityNotSet": "Set Availability",
+  "pzChecksum": "346475374",
+  "pzIndexCount": "71",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+  "pzIsPrivateCheckOut": "",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pzTenantId": "",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "pyPurpose",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ".pySectionType"
+      },
+      {
+        "pxColumnName": "pyMode",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ".pyUDashWidgetIcon"
+      },
+      {
+        "pxColumnName": "pyListName",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ".pyUDashWidgetLabel"
+      },
+      {
+        "pxColumnName": "pyMessageName",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ".pyUDashWidgetDescription"
+      },
+      {
+        "pxColumnName": "pyCusClass",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ".pyUDashWidgetOptionsClass"
+      },
+      {
+        "pxColumnName": "pyActionName",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ".pyUDashWidgetOptionsFA"
+      },
+      {
+        "pxColumnName": "pyFormName",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ".pyUDashWidgetCategory"
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxResults": [
+    {
+      "pxObjClass": "Embed-CustomFields",
+      "pyColumnName": "pyActionName",
+      "pyPropertyName": "pyUDashWidgetOptionsFA"
+    },
+    {
+      "pxObjClass": "Embed-CustomFields",
+      "pyColumnName": "pyPurpose",
+      "pyPropertyName": "pySectionType"
+    },
+    {
+      "pxObjClass": "Embed-CustomFields",
+      "pyColumnName": "pyFormName",
+      "pyPropertyName": "pyUDashWidgetCategory"
+    },
+    {
+      "pxObjClass": "Embed-CustomFields",
+      "pyColumnName": "pyMode",
+      "pyPropertyName": "pyUDashWidgetIcon"
+    },
+    {
+      "pxObjClass": "Embed-CustomFields",
+      "pyColumnName": "pyListName",
+      "pyPropertyName": "pyUDashWidgetLabel"
+    },
+    {
+      "pxObjClass": "Embed-CustomFields",
+      "pyColumnName": "pyCusClass",
+      "pyPropertyName": "pyUDashWidgetOptionsClass"
+    },
+    {
+      "pxObjClass": "Embed-CustomFields",
+      "pyColumnName": "pyMessageName",
+      "pyPropertyName": "pyUDashWidgetDescription"
+    }
+  ],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "PYUDASHWIDGETLABEL",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyUDashWidgetLabel",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "61"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "PYUDASHWIDGETCATEGORY",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyUDashWidgetCategory",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "62"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "PYUDASHWIDGETOPTIONSFA",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyUDashWidgetOptionsFA",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "63"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "PYUDASHWIDGETICON",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyUDashWidgetIcon",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "64"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "PYUDASHWIDGETOPTIONSCLASS",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyUDashWidgetOptionsClass",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "65"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-HTML",
+      "pxRuleFamilyName": "RULE-OBJ-HTML",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "Deprecated",
+      "pyRuleName": "Rule-Obj-HTML",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "66"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "RULE-HTML-SECTION",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Rule-HTML-Section",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "67"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "PYSECTIONTYPE",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "",
+      "pyRuleName": "pySectionType",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "68"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-HTML-Section",
+      "pxRuleFamilyName": "PYUDASHWIDGETDESCRIPTION",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyUDashWidgetDescription",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "69"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!USER INTERFACE",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyCategory User Interface",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-HTML-SECTION",
+      "pzIndexes": {
+        "RuleReference": "70"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Purpose",
+      "pyKeyName": "pyStreamName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "Action",
+      "pyJavaClass": "com.pega.pegarules.engine.generator.AppRuleAssembler"
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

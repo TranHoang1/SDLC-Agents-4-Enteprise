@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Admin-Extract",
+  "pyPatternParent": "Rule-Admin-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-BIX",
+  "pyRuleName": "Rule-Admin-Extract",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Admin-",
+  "pyClassName": "Rule-Admin-Extract"
+}

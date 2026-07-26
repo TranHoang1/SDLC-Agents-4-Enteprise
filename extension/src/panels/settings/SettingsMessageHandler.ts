@@ -71,6 +71,28 @@ export class SettingsMessageHandler {
       case "restartMcpServer":
         await this.handleRestartMcpServer();
         break;
+      case "savePegaConfig":
+        try {
+          await this.configService.updatePegaConfig(msg.endpoint, msg.username, msg.password);
+          this.postMessage({ type: "pegaSaved", success: true });
+        } catch (err: any) {
+          this.postMessage({ type: "pegaSaved", success: false, error: err.message || "Failed to save Pega config" });
+        }
+        break;
+      case "testPegaConnection":
+        try {
+          await this.handleTestPegaConnection();
+        } catch (err: any) {
+          this.postMessage({ type: "pegaTestResult", success: false, message: `Connection failed: ${err.message}` });
+        }
+        break;
+      case "fetchPegaContext":
+        try {
+          await this.handleFetchPegaContext();
+        } catch (err: any) {
+          this.postMessage({ type: "pegaContextFetched", success: false, message: `Fetch failed: ${err.message}` });
+        }
+        break;
     }
   }
 
@@ -186,5 +208,31 @@ export class SettingsMessageHandler {
     } catch (err: any) {
       this.postMessage({ type: "mcpServerRestarted", success: false, message: `Restart failed: ${err.message}` });
     }
+  }
+
+  private async handleTestPegaConnection(): Promise<void> {
+    try {
+      const client = new (await import("../../services/PegaHttpClient")).PegaHttpClient(this.secrets);
+      const ctx = await client.getOperatorContext();
+      this.postMessage({ type: "pegaTestResult", success: true, message: `Connected as ${ctx.operatorId} (${ctx.currentApplication?.name || "Pega App"})` });
+    } catch (err: any) {
+      this.postMessage({ type: "pegaTestResult", success: false, message: `Connection failed: ${err.message}` });
+    }
+  }
+
+  private async handleFetchPegaContext(): Promise<void> {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders || folders.length === 0) {
+      this.postMessage({ type: "pegaContextFetched", success: false, message: "No workspace folder open to save Pega context." });
+      return;
+    }
+    const root = folders[0].uri.fsPath;
+    const client = new (await import("../../services/PegaHttpClient")).PegaHttpClient(this.secrets);
+    const result = await client.fetchAndSavePegaContext(root);
+    this.postMessage({
+      type: "pegaContextFetched",
+      success: true,
+      message: `Fetched context: App "${result.applicationName}" (${result.caseTypesCount} CaseTypes) → saved ${result.filePath}`
+    });
   }
 }

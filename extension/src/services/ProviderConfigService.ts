@@ -17,6 +17,7 @@ export class ProviderConfigService {
     provider: string; model: string; ollamaUrl: string; baseUrl: string;
     hasAnthropicKey: boolean; hasOpenaiKey: boolean;
     backendUrl: string; mcpServerPort: number; enableMcpServer: boolean;
+    pegaEndpoint: string; pegaUsername: string; hasPegaPassword: boolean;
   }> {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     const provider = config.get<string>("llmProvider", "anthropic");
@@ -30,12 +31,25 @@ export class ProviderConfigService {
 
     const anthropicKey = await this.secrets.get(SECRET_KEYS.anthropic);
     const openaiKey = await this.secrets.get(SECRET_KEYS.openai);
+    const pegaPassword = await this.secrets.get(SECRET_KEYS.pega);
+    const pegaEndpoint = config.get<string>("pegaEndpoint", "http://localhost:8080/prweb");
+    const pegaUsername = config.get<string>("pegaUsername", "");
 
     return {
       provider, model, ollamaUrl, baseUrl: baseUrl || "",
       hasAnthropicKey: !!anthropicKey, hasOpenaiKey: !!openaiKey,
       backendUrl, mcpServerPort, enableMcpServer,
+      pegaEndpoint, pegaUsername, hasPegaPassword: !!pegaPassword,
     };
+  }
+
+  async updatePegaConfig(endpoint: string, username: string, password?: string): Promise<void> {
+    const config = vscode.workspace.getConfiguration("kiroSdlc");
+    await config.update("pegaEndpoint", endpoint, vscode.ConfigurationTarget.Global);
+    await config.update("pegaUsername", username, vscode.ConfigurationTarget.Global);
+    if (password && password.trim().length > 0) {
+      await this.secrets.store(SECRET_KEYS.pega, password);
+    }
   }
 
   /**

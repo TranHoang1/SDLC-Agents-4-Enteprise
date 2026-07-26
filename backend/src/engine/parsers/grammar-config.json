@@ -53,6 +53,12 @@
       "extensions": [".flow-meta.xml", ".object-meta.xml", ".field-meta.xml", ".js-meta.xml", ".component-meta.xml"],
       "wasmPath": null,
       "parserModule": "./languages/salesforce-meta-parser.js"
+    },
+    {
+      "id": "pega",
+      "extensions": [".pega"],
+      "wasmPath": null,
+      "parserModule": "./languages/pega-parser.js"
     }
   ]
 }

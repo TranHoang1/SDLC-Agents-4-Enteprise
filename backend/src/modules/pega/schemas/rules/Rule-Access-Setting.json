@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Access-Setting",
+  "pyPatternParent": "Rule-Access-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Access-Setting",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Access-",
+  "pyClassName": "Rule-Access-Setting"
+}

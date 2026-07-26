@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Shortcut",
+  "pyPatternParent": "Rule-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-Reporting",
+  "pyRuleName": "Rule-Shortcut",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-",
+  "pyClassName": "Rule-Shortcut"
+}

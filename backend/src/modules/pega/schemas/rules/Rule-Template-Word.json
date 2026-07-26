@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Template-Word",
+  "pyPatternParent": "Rule-Template-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Template-Word",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-File-Binary",
+  "pyClassName": "Rule-Template-Word"
+}

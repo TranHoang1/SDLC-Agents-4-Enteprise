@@ -136,6 +136,10 @@
       {
         "command": "kiroSdlc.syncWorkspace",
         "title": "SDLC Agents: Sync Workspace"
+      },
+      {
+        "command": "kiroSdlc.fetchPegaContext",
+        "title": "SDLC Agents: Fetch Pega App Context"
       }
     ],
     "viewsContainers": {
@@ -261,6 +265,16 @@
           "type": "string",
           "default": "auto",
           "description": "Kiro gateway model selection"
+        },
+        "kiroSdlc.pegaEndpoint": {
+          "type": "string",
+          "default": "http://localhost:8080/prweb",
+          "description": "Pega Platform REST API Endpoint URL"
+        },
+        "kiroSdlc.pegaUsername": {
+          "type": "string",
+          "default": "",
+          "description": "Pega Operator ID (Username)"
         }
       }
     },
@@ -285,7 +299,7 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run copy-resources && npm run gen-checksums",
+    "vscode:prepublish": "npm run esbuild-production && npm run copy-resources && npm run gen-checksums",
     "package:debug": "npm run esbuild && vsce package --no-dependencies",
     "package:prod": "npm run esbuild-production && vsce package --no-dependencies",
     "compile": "tsc -p ./",

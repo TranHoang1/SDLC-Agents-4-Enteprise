@@ -1,0 +1,17 @@
+﻿{
+    "dependencyFields":  [
+                             "pyTargetProperty",
+                             "pyExpression",
+                             "pySteps",
+                             "pyResourcePath"
+                         ],
+    "description":  "Metadata schema for DATA-ADMIN-SECURITY-OAUTH2-REGISTEREDAPPLICATION extracted from Pega RAP catalog",
+    "sampleInstanceCount":  3,
+    "targetClass":  "DATA-ADMIN-SECURITY-OAUTH2-REGISTEREDAPPLICATION",
+    "requiredFields":  [
+                           "pxObjClass",
+                           "pyClassName",
+                           "pyRuleset"
+                       ],
+    "schemaVersion":  "1.0.0"
+}

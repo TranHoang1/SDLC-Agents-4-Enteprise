@@ -1,0 +1,27 @@
+{
+  "targetClass": "Data-Admin-AccessGroup",
+  "displayName": "Access Group",
+  "description": "Security profile instance defining active application, application version, available roles, and ruleset stack.",
+  "exactStructure": {
+    "rootProperties": {
+      "pxObjClass": { "type": "string", "exactValue": "Data-Admin-AccessGroup", "required": true },
+      "pyAccessGroup": { "type": "string", "required": true },
+      "pyApplicationName": { "type": "string", "required": true },
+      "pyApplicationVersion": { "type": "string", "required": true }
+    },
+    "roleArrayProperty": "pyUserRoles",
+    "roleObjectStructure": {
+      "pyRoleName": { "type": "string" }
+    }
+  },
+  "uiSelectors": {
+    "accessGroupForm": "form#accessGroupForm",
+    "appNameInput": "input#pyApplicationName",
+    "appVersionInput": "input#pyApplicationVersion"
+  },
+  "dependencyPaths": [
+    "pyApplicationName",
+    "pyApplicationVersion",
+    "pyUserRoles[]"
+  ]
+}

@@ -8,6 +8,7 @@
 export const CODE_TYPES = [
   'FUNCTION', 'METHOD', 'CLASS', 'INTERFACE',
   'TYPE', 'CONSTRUCTOR', 'ENUM', 'CONSTANT', 'VARIABLE',
+  'CODE_ENTITY', 'PEGA_RULE',
 ] as const;
 
 /** Pre-computed SQL IN clause string for CODE_TYPES. */

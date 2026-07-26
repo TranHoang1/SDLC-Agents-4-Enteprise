@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-PegaQ-Question",
+  "pyPatternParent": "Rule-PegaQ-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-Survey",
+  "pyRuleName": "Rule-PegaQ-Question",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-PegaQ-",
+  "pyClassName": "Rule-PegaQ-Question"
+}

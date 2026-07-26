@@ -1,0 +1,19 @@
+test_case_id,path,content,gitHash,checksum,expected_written,expected_skipped,expected_http_code,description
+IT-001,src/index.ts,"export const x = 1;
+import { helper } from './utils';",,,"1","0",200,Happy path TS file with import — written and deps resolved
+IT-008,src/a.ts,"import { common } from './common';",,,"1","0",200,Dedup test source A — same import as B
+IT-008,src/b.ts,"import { common } from './common';",,,"1","0",200,Dedup test source B — same import as A
+IT-003-first,src/dedup-test.ts,"const x = 'hello world';","a1b2c3d4e5f67890",,"1","0",200,First call with gitHash — file indexed
+IT-003-second,src/dedup-test.ts,"const x = 'hello world';","a1b2c3d4e5f67890",,"0","1",200,Second call with same gitHash — skipped
+IT-003-third,src/dedup-test.ts,"const x = 'hello world changed';","ffffffffffffffff",,"1","0",200,Third call with different gitHash — re-indexed
+IT-003-nohash,src/no-hash-test.ts,"const x = 'no hash';",,,"1","0",200,No gitHash — always processed
+PERF-001,src/large-file.ts,"export const largeFile = 'x'.repeat(100000);",,,"1","0",200,~100KB file for perf testing
+PERF-002-01,src/perf/file-01.ts,"export const a = 1;",,,"1","0",200,Perf test file 1 of 50
+PERF-002-50,src/perf/file-50.ts,"export const a = 1;",,,"1","0",200,Perf test file 50 of 50
+ST-001,src/index.ts,"import { helper } from './utils';",,,"1","0",200,Full lifecycle test — main entry point
+ST-001,src/utils.ts,"export const helper = () => 'hello';",,,"1","0",200,Full lifecycle test — dependency
+ST-001,src/config.ts,"export const config = { env: 'test' };",,,"1","0",200,Full lifecycle test — no imports
+UT-009,src/services/main.ts,"import { process } from './processor';",,,"1","0",200,TS import resolution — relative import
+UT-009b,src/main.ts,"const x = require('./utils');",,,"1","0",200,TS require resolution — extension priority
+UT-011,Work-Order.ValidateData.Rule-Obj-Activity.pega,"{""pxObjClass"":""Rule-Obj-Activity"",""pyActivityName"":""ValidateData""}",,,"0","0",200,Target .pega file for dependency hash computation
+ST-002-ts,src/service.ts,"export class Service { process() { return true; } }","1","0",200,Mixed batch — TS file

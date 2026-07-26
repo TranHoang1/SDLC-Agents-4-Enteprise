@@ -1,0 +1,12 @@
+test_case_id,username,password,token,expected_http_code,expected_state,description
+IT-005-no-header,,,,"401","UNAUTHENTICATED",No Authorization header — should get 401
+IT-005-invalid,,,invalid_token,"401","UNAUTHENTICATED",Invalid Bearer token — should get 401
+IT-005-basic,,,,"401","UNAUTHENTICATED",Wrong auth type (Basic vs Bearer) — should get 401
+ST-005-login,admin,admin123,,200,AUTHENTICATED,Valid login — should get token
+ST-005-index,admin,admin123,{login_token},200,AUTHENTICATED,Index with valid token from login — should succeed
+ST-005-logout,admin,admin123,{login_token},200,UNAUTHENTICATED,Logout — should clear token
+ST-005-after-logout,admin,admin123,,"401","UNAUTHENTICATED",Index after logout — should fail with 401
+UT-016,admin,password123,,"200","AUTHENTICATED",AuthManager login — persist last username
+UT-017,admin,password,,,"200","AUTHENTICATED",Token lifecycle — acquire
+ST-008,bad,invalid,,,"401","UNAUTHENTICATED",Invalid credentials — show error in UI
+SEC-002-expired,admin,admin123,expired_token,"401","UNAUTHENTICATED",Expired token — should get 401
