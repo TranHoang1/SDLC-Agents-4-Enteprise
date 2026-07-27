@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400">
+  <rect width="1000" height="400" fill="#1e1e2e" rx="10"/>
+  <text x="500" y="35" fill="#cba6f7" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">TDD Database Schema: PostgreSQL Storage Engine (sa4e_db)</text>
+
+  <rect x="80" y="80" width="380" height="280" fill="#181825" stroke="#cba6f7" stroke-width="2" rx="8"/>
+  <text x="270" y="110" fill="#cba6f7" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">knowledge_entries (66 KB Entries)</text>
+  <line x1="80" y1="125" x2="460" y2="125" stroke="#cba6f7"/>
+  <text x="100" y="150" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="11">PK: id (VARCHAR)</text>
+  <text x="100" y="175" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">project_id: VARCHAR (e.g. 3f261515800a)</text>
+  <text x="100" y="200" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">type: VARCHAR (PEGA_RULE, PEGA_DATA, PEGA_AST)</text>
+  <text x="100" y="225" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">source: VARCHAR (pzInsKey handle)</text>
+  <text x="100" y="250" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">content: TEXT (Full 27KB+ JSON Payload)</text>
+  <text x="100" y="275" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">ast: TEXT (Parsed Rule AST Nodes)</text>
+  <text x="100" y="300" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">created_at: TIMESTAMP</text>
+
+  <rect x="540" y="80" width="380" height="280" fill="#181825" stroke="#89b4fa" stroke-width="2" rx="8"/>
+  <text x="730" y="110" fill="#89b4fa" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">graph_nodes (33 Graph Nodes)</text>
+  <line x1="540" y1="125" x2="920" y2="125" stroke="#89b4fa"/>
+  <text x="560" y="150" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="11">PK: entry_id (VARCHAR: pega:RULE-OBJ-...)</text>
+  <text x="560" y="175" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">label: VARCHAR (pyRuleName / FQN)</text>
+  <text x="560" y="200" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="11">type: VARCHAR ('CODE_ENTITY') [Fixed Bug]</text>
+  <text x="560" y="225" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">tier: VARCHAR ('SEMANTIC')</text>
+  <text x="560" y="250" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">project_id: VARCHAR (3f261515800a)</text>
+  <text x="560" y="275" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">x, y, z, level, cluster_id: REAL / VARCHAR</text>
+</svg>

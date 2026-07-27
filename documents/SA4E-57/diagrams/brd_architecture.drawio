@@ -1,0 +1,75 @@
+<mxfile host="Electron" modified="2026-07-27T00:38:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="brd-arch" name="Pega REST Bridge Architecture">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Frontend Zone -->
+        <mxCell id="zone-vscode" value="VS Code Extension Layer (TypeScript)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="300" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="indexing-svc" value="IndexingService.ts&#10;(Workspace Materializer &amp; .pega.json Creator)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="zone-vscode">
+          <mxGeometry x="20" y="50" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pega-client" value="PegaHttpClient.ts&#10;(REST Bridge Client &amp; Auth Header Manager)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="zone-vscode">
+          <mxGeometry x="20" y="140" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="chat-panel" value="SDLC Agent Panel &amp; Webview Controllers&#10;(BA, SA, DEV, QA, DevOps UI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="zone-vscode">
+          <mxGeometry x="20" y="230" width="260" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="workspace-fs" value="Local Workspace Filesystem&#10;(rules/&lt;RuleType&gt;/&lt;RuleName&gt;.pega.json)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="zone-vscode">
+          <mxGeometry x="20" y="320" width="260" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Backend Zone -->
+        <mxCell id="zone-backend" value="Node.js Backend Server (Hono / PostgreSQL)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="400" y="40" width="340" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="pega-routes" value="pega-api.ts&#10;(REST API Routes: /pega/fetch-rule, /crawl-batch)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="zone-backend">
+          <mxGeometry x="30" y="50" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="rule-fetcher" value="PegaRuleFetcherService.ts&#10;(4-Layer Resilient Fetcher &amp; Session Auth)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="zone-backend">
+          <mxGeometry x="30" y="140" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pega-svc" value="PegaService.ts &amp; Knowledge Engine&#10;(AST Parser, DB Ingestion, Graph Projection)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="zone-backend">
+          <mxGeometry x="30" y="230" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="postgres-db" value="PostgreSQL DB (sa4e_db)&#10;(knowledge_entries &amp; graph_nodes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" vertex="1" parent="zone-backend">
+          <mxGeometry x="30" y="320" width="280" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Pega Server Zone -->
+        <mxCell id="zone-pega" value="Pega Platform Server (Service Package: KiroAgents)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="790" y="40" width="340" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-get" value="1. GET /api/v1/rules/{insKey}&#10;(Rule Instance Fetch by Handle)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="zone-pega">
+          <mxGeometry x="30" y="45" width="280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-query" value="2. POST /api/v1/rules/query&#10;(Query by pxObjClass + appliesTo + pyRuleName)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="zone-pega">
+          <mxGeometry x="30" y="105" width="280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-list" value="3. GET /api/v1/rules/list&#10;(List Application &amp; RuleSet Rules)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="zone-pega">
+          <mxGeometry x="30" y="165" width="280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-save" value="4. POST /api/v1/rules/save&#10;(Create / Update Pega Rule)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="zone-pega">
+          <mxGeometry x="30" y="225" width="280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-checkout" value="5. POST /api/v1/rules/checkout&#10;(Checkout / Checkin Lock Control)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="zone-pega">
+          <mxGeometry x="30" y="285" width="280" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="srv-test" value="6. POST /api/v1/rules/test&#10;(Execute Scenario Unit Test)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="zone-pega">
+          <mxGeometry x="30" y="345" width="280" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Connections -->
+        <mxCell id="conn1" value="HTTP Request" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="pega-client" target="pega-routes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="conn2" value="REST Bridge Calls" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="rule-fetcher" target="zone-pega">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

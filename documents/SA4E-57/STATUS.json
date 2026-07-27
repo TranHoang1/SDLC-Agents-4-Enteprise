@@ -1,0 +1,88 @@
+{
+  "epic": "SA4E-57",
+  "title": "Pega Parser L3-L4 (Execution-Level)",
+  "parentEpic": "SA4E-56",
+  "status": "in_progress",
+  "currentPhase": "requirements",
+  "totalEffortPersonWeeks": 42,
+  "workPackages": {
+    "WP1": {
+      "title": "Expression Language Parser",
+      "path": "WP1-Expression",
+      "phase": "requirements",
+      "effort": 8,
+      "priority": "P0",
+      "dependencies": []
+    },
+    "WP2": {
+      "title": "Workflow Interpreter Engine",
+      "path": "WP2-Workflow",
+      "phase": "not_started",
+      "effort": 10,
+      "priority": "P0",
+      "dependencies": ["WP1"]
+    },
+    "WP3": {
+      "title": "Decision Table/Tree Evaluator",
+      "path": "WP3-Decision",
+      "phase": "not_started",
+      "effort": 6,
+      "priority": "P1",
+      "dependencies": ["WP1"]
+    },
+    "WP4": {
+      "title": "Section/Harness UI Preview",
+      "path": "WP4-UI",
+      "phase": "not_started",
+      "effort": 7,
+      "priority": "P2",
+      "dependencies": ["WP1"]
+    },
+    "WP5": {
+      "title": "Security Hardening",
+      "path": "WP5-Security",
+      "phase": "not_started",
+      "effort": 3,
+      "priority": "P0",
+      "dependencies": ["WP1", "WP3", "WP4"]
+    },
+    "WP6": {
+      "title": "Test Strategy",
+      "path": "WP6-Tests",
+      "phase": "not_started",
+      "effort": 5,
+      "priority": "P1",
+      "dependencies": ["WP1", "WP2", "WP3", "WP4", "WP5"]
+    },
+    "WP7": {
+      "title": "Deployment & Performance",
+      "path": "WP7-Deploy",
+      "phase": "not_started",
+      "effort": 3,
+      "priority": "P1",
+      "dependencies": ["WP1", "WP3", "WP5"]
+    }
+  },
+  "phases": {
+    "PhaseA": {
+      "weeks": "1-11",
+      "title": "Foundation",
+      "workPackages": ["WP1", "WP5", "WP7"],
+      "effort": 14
+    },
+    "PhaseB": {
+      "weeks": "12-27",
+      "title": "Execution",
+      "workPackages": ["WP2", "WP3"],
+      "effort": 16
+    },
+    "PhaseC": {
+      "weeks": "28-42",
+      "title": "Experience",
+      "workPackages": ["WP4", "WP6"],
+      "effort": 12
+    }
+  },
+  "createdAt": "2026-07-27",
+  "updatedAt": "2026-07-27"
+}

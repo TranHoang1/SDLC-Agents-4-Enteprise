@@ -1,0 +1,86 @@
+<mxfile host="Electron" modified="2026-07-27T00:38:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="brd-usecases" name="6 Pega Bridge REST Services Use Cases">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Actors -->
+        <mxCell id="act-ba" value="BA Agent&#10;(Requirements &amp; Spec)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act-sa" value="SA Agent&#10;(Architecture &amp; Design)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="60" y="240" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act-dev" value="DEV Agent&#10;(Code Generation &amp; Fix)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="60" y="400" width="40" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="act-qa" value="QA Agent&#10;(Testing &amp; Quality Gate)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="60" y="560" width="40" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Use Cases Box -->
+        <mxCell id="box-uc" value="Pega REST Bridge Service Package (KiroAgents)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;startSize=30;" vertex="1" parent="1">
+          <mxGeometry x="220" y="40" width="680" height="660" as="geometry" />
+        </mxCell>
+
+        <!-- UC 1 -->
+        <mxCell id="uc1" value="UC-01: Fetch Rule Instance by Handle&#10;(GET /api/v1/rules/{insKey})" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="box-uc">
+          <mxGeometry x="40" y="50" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc1-desc" value="Tải 100% dữ liệu XML/JSON (27KB+)&#10;của Rule theo pzInsKey" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="box-uc">
+          <mxGeometry x="360" y="65" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- UC 2 -->
+        <mxCell id="uc2" value="UC-02: Query Rule by Identifiers&#10;(POST /api/v1/rules/query)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="box-uc">
+          <mxGeometry x="40" y="150" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc2-desc" value="Truy vấn chuẩn xác theo bộ 3:&#10;pxObjClass + appliesTo + pyRuleName" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="box-uc">
+          <mxGeometry x="360" y="165" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- UC 3 -->
+        <mxCell id="uc3" value="UC-03: List Application Rules&#10;(GET /api/v1/rules/list)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="box-uc">
+          <mxGeometry x="40" y="250" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc3-desc" value="Quét danh sách toàn bộ Rule&#10;trong Application &amp; RuleSet" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="box-uc">
+          <mxGeometry x="360" y="265" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- UC 4 -->
+        <mxCell id="uc4" value="UC-04: Create / Update Pega Rule&#10;(POST /api/v1/rules/save)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;" vertex="1" parent="box-uc">
+          <mxGeometry x="40" y="350" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc4-desc" value="Đẩy mã nguồn Pega do DEV Agent&#10;tự động sinh ngược lên Pega Server" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="box-uc">
+          <mxGeometry x="360" y="365" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- UC 5 -->
+        <mxCell id="uc5" value="UC-05: Checkout / Checkin Control&#10;(POST /api/v1/rules/checkout)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;" vertex="1" parent="box-uc">
+          <mxGeometry x="40" y="450" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc5-desc" value="Khóa và checkout Rule an toàn&#10;vào Private RuleSet trước khi sửa" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="box-uc">
+          <mxGeometry x="360" y="465" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- UC 6 -->
+        <mxCell id="uc6" value="UC-06: Execute Scenario Unit Test&#10;(POST /api/v1/rules/test)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontStyle=1;" vertex="1" parent="box-uc">
+          <mxGeometry x="40" y="550" width="300" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="uc6-desc" value="Chạy Pega Scenario Test / Test Suite&#10;để QA Agent tự động nghiệm thu" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="box-uc">
+          <mxGeometry x="360" y="565" width="280" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Actor Connectors -->
+        <mxCell id="c-ba1" edge="1" parent="1" source="act-ba" target="uc1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c-ba2" edge="1" parent="1" source="act-ba" target="uc2"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c-sa" edge="1" parent="1" source="act-sa" target="uc3"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c-dev1" edge="1" parent="1" source="act-dev" target="uc4"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c-dev2" edge="1" parent="1" source="act-dev" target="uc5"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="c-qa" edge="1" parent="1" source="act-qa" target="uc6"><mxGeometry relative="1" as="geometry" /></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

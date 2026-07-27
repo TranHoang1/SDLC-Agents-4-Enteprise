@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 400" width="1000" height="400">
+  <rect width="1000" height="400" fill="#1e1e2e" rx="10"/>
+  <text x="500" y="35" fill="#cba6f7" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle">FSD Data Mapping: Pega XML / JSON ➔ AST ➔ PostgreSQL ➔ Workspace</text>
+
+  <rect x="40" y="80" width="200" height="260" fill="#181825" stroke="#fab387" stroke-width="2" rx="8"/>
+  <text x="140" y="110" fill="#fab387" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">1. Pega Server</text>
+  <text x="60" y="150" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">pzInsKey</text>
+  <text x="60" y="180" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">pxObjClass</text>
+  <text x="60" y="210" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">pyClassName</text>
+  <text x="60" y="240" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">pyRuleName</text>
+  <text x="60" y="270" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">pySteps / pagedata</text>
+
+  <rect x="290" y="80" width="200" height="260" fill="#181825" stroke="#a6e3a1" stroke-width="2" rx="8"/>
+  <text x="390" y="110" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">2. Pega AST Engine</text>
+  <text x="310" y="150" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">fqn (pxObjClass:pyName)</text>
+  <text x="310" y="180" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">symbols &amp; AST Nodes</text>
+  <text x="310" y="210" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">unresolvedDependencies</text>
+  <text x="310" y="240" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">ruleReferences</text>
+
+  <rect x="540" y="80" width="200" height="260" fill="#181825" stroke="#cba6f7" stroke-width="2" rx="8"/>
+  <text x="640" y="110" fill="#cba6f7" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">3. PostgreSQL DB</text>
+  <text x="560" y="150" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">knowledge_entries (66)</text>
+  <text x="560" y="180" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">graph_nodes (33)</text>
+  <text x="560" y="210" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">type = CODE_ENTITY</text>
+  <text x="560" y="240" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">graph_edges (deps)</text>
+
+  <rect x="790" y="80" width="180" height="260" fill="#181825" stroke="#89b4fa" stroke-width="2" rx="8"/>
+  <text x="880" y="110" fill="#89b4fa" font-family="Arial, sans-serif" font-size="13" font-weight="bold" text-anchor="middle">4. Workspace File</text>
+  <text x="810" y="150" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">rules/&lt;RuleType&gt;/</text>
+  <text x="810" y="180" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="11">&lt;RuleName&gt;.pega.json</text>
+  <text x="810" y="210" fill="#a6adc8" font-family="Arial, sans-serif" font-size="10">Full Rich JSON File</text>
+
+  <line x1="240" y1="210" x2="290" y2="210" stroke="#fab387" stroke-width="2"/>
+  <line x1="490" y1="210" x2="540" y2="210" stroke="#a6e3a1" stroke-width="2"/>
+  <line x1="740" y1="210" x2="790" y2="210" stroke="#cba6f7" stroke-width="2"/>
+</svg>

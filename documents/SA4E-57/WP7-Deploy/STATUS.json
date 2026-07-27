@@ -1,0 +1,28 @@
+{
+  "epic": "SA4E-57",
+  "workPackage": "WP7",
+  "title": "Deployment & Performance",
+  "currentPhase": "not_started",
+  "phases": {
+    "requirements": {
+      "status": "completed",
+      "completedAt": "2026-07-27",
+      "artifacts": ["TASK.md"]
+    },
+    "design": {
+      "status": "not_started",
+      "artifacts": []
+    },
+    "implementation": {
+      "status": "not_started",
+      "artifacts": []
+    },
+    "testing": {
+      "status": "not_started",
+      "artifacts": []
+    }
+  },
+  "effortPersonWeeks": 3,
+  "dependencies": ["WP1 — Expression evaluator", "WP3 — Decision evaluator", "WP5 — Security sandbox"],
+  "downstreamDependents": []
+}
