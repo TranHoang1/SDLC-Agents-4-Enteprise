@@ -26,6 +26,12 @@ import { PegaWorkflowEngine } from '../../modules/pega/workflow/PegaWorkflowEngi
 import { PegaEvaluationSandbox } from '../../modules/pega/security/PegaEvaluationSandbox.js';
 import { PegaExpressionValidator } from '../../modules/pega/security/PegaExpressionValidator.js';
 import { PegaEvaluationCache } from '../../modules/pega/deploy/PegaEvaluationCache.js';
+import { PegaDecisionTableEvaluator } from '../../modules/pega/decision/PegaDecisionTableEvaluator.js';
+import { PegaDecisionTreeEvaluator } from '../../modules/pega/decision/PegaDecisionTreeEvaluator.js';
+import { PegaSectionRenderer } from '../../modules/pega/ui/PegaSectionRenderer.js';
+import { PegaHarnessAssembler } from '../../modules/pega/ui/PegaHarnessAssembler.js';
+import type { PegaDecisionTableRow, DecisionTreeNode } from '../../modules/pega/decision/PegaEvaluationResult.js';
+import type { PegaSection, PegaLayout, PegaField } from '../../modules/pega/ui/PegaUITypes.js';
 
 export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): Hono {
   const app = new Hono();
@@ -296,6 +302,77 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
     }
   });
 
+  app.post('/pega/evaluate-decision-table', async (c) => {
+    try {
+      const body = await c.req.json<{
+        rows: PegaDecisionTableRow[];
+        clipboard?: Record<string, Record<string, unknown>>;
+        currentPage?: string;
+      }>();
+      const ctx = new PegaClipboardContext(body.clipboard || {}, body.currentPage);
+      const evaluator = new PegaExpressionEvaluator();
+      const tableEval = new PegaDecisionTableEvaluator();
+      const result = tableEval.evaluate(body.rows, ctx, evaluator);
+      return c.json({ data: result, error: null });
+    } catch (err: any) {
+      logger.error({ err }, 'pega/evaluate-decision-table failed');
+      return c.json({ data: null, error: { code: 'INTERNAL_ERROR', message: err.message } }, 500);
+    }
+  });
+
+  app.post('/pega/evaluate-decision-tree', async (c) => {
+    try {
+      const body = await c.req.json<{
+        rootNode: DecisionTreeNode;
+        clipboard?: Record<string, Record<string, unknown>>;
+        currentPage?: string;
+      }>();
+      const ctx = new PegaClipboardContext(body.clipboard || {}, body.currentPage);
+      const evaluator = new PegaExpressionEvaluator();
+      const treeEval = new PegaDecisionTreeEvaluator();
+      const result = treeEval.evaluate(body.rootNode, ctx, evaluator);
+      return c.json({ data: result, error: null });
+    } catch (err: any) {
+      logger.error({ err }, 'pega/evaluate-decision-tree failed');
+      return c.json({ data: null, error: { code: 'INTERNAL_ERROR', message: err.message } }, 500);
+    }
+  });
+
+  app.post('/pega/render-section', async (c) => {
+    try {
+      const body = await c.req.json<{
+        section: PegaSection;
+        clipboard?: Record<string, Record<string, unknown>>;
+        currentPage?: string;
+      }>();
+      const ctx = new PegaClipboardContext(body.clipboard || {}, body.currentPage);
+      const sectionRenderer = new PegaSectionRenderer();
+      const html = sectionRenderer.renderSection(body.section, ctx);
+      return c.json({ data: { html }, error: null });
+    } catch (err: any) {
+      logger.error({ err }, 'pega/render-section failed');
+      return c.json({ data: null, error: { code: 'INTERNAL_ERROR', message: err.message } }, 500);
+    }
+  });
+
+  app.post('/pega/render-harness', async (c) => {
+    try {
+      const body = await c.req.json<{
+        sections: { header?: PegaSection; content?: PegaSection; footer?: PegaSection };
+        clipboard?: Record<string, Record<string, unknown>>;
+        currentPage?: string;
+      }>();
+      const ctx = new PegaClipboardContext(body.clipboard || {}, body.currentPage);
+      const sectionRenderer = new PegaSectionRenderer();
+      const assembler = new PegaHarnessAssembler();
+      const html = assembler.assemble(body.sections, ctx);
+      return c.json({ data: { html }, error: null });
+    } catch (err: any) {
+      logger.error({ err }, 'pega/render-harness failed');
+      return c.json({ data: null, error: { code: 'INTERNAL_ERROR', message: err.message } }, 500);
+    }
+  });
+
   app.get('/pega/health', async (c) => {
     return c.json({
       data: {
@@ -309,6 +386,10 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
           validation: true,
           sandbox: true,
           cache: true,
+          decisionTable: true,
+          decisionTree: true,
+          sectionRenderer: true,
+          harnessAssembler: true,
         },
       },
       error: null,
