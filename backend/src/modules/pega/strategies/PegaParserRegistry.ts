@@ -7,12 +7,14 @@ import { ActivityParserStrategy } from './ActivityParserStrategy.js';
 import { DataTransformParserStrategy } from './DataTransformParserStrategy.js';
 import { KbDrivenPegaParserStrategy } from './KbDrivenPegaParserStrategy.js';
 import { DefaultPegaParserStrategy } from './DefaultPegaParserStrategy.js';
+import { PegaDecisioningParser } from '../decisioning/PegaDecisioningParser.js';
 
 export class PegaParserRegistry {
   private strategies: IPegaRuleParserStrategy[] = [];
   private fallbackStrategy: IPegaRuleParserStrategy;
 
   constructor() {
+    this.strategies.push(new PegaDecisioningParser());
     this.strategies.push(new ActivityParserStrategy());
     this.strategies.push(new DataTransformParserStrategy());
     this.strategies.push(new KbDrivenPegaParserStrategy());

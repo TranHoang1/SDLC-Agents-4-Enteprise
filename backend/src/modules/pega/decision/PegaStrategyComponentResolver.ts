@@ -1,7 +1,10 @@
+import type { StrategyComponent, ComponentType } from '../decisioning/PegaDecisioningTypes.js';
+
 export interface StrategyReference {
-  type: 'decision_rule' | 'adaptive_model';
+  type: 'decision_rule' | 'adaptive_model' | 'strategy_component';
   ref: string;
   resolved: boolean;
+  componentType?: ComponentType;
 }
 
 export class PegaStrategyComponentResolver {
@@ -22,6 +25,15 @@ export class PegaStrategyComponentResolver {
       };
     }
 
+    if (ref.startsWith('Strategy:')) {
+      return {
+        type: 'strategy_component',
+        ref,
+        resolved: false,
+        componentType: 'Segment',
+      };
+    }
+
     return {
       type: 'decision_rule',
       ref,
@@ -37,5 +49,14 @@ export class PegaStrategyComponentResolver {
     }
 
     return resolved;
+  }
+
+  resolveComponentType(comp: StrategyComponent): StrategyReference {
+    return {
+      type: 'strategy_component',
+      ref: comp.pyName,
+      resolved: true,
+      componentType: comp.pyComponentType,
+    };
   }
 }
