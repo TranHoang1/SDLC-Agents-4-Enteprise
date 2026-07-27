@@ -2,7 +2,7 @@
   "name": "sdlc-agents-4-enterprise",
   "displayName": "SDLC Agents 4 Enterprise",
   "description": "Multi-agent SDLC pipeline for enterprise — 9 AI agents (SM, BA, TA, SA, QA, DEV, DevOps, Security, UI) orchestrated via MCP",
-  "version": "1.14.0",
+  "version": "1.16.0",
   "publisher": "dnguyenminh",
   "license": "MIT",
   "repository": {
@@ -297,9 +297,12 @@
     "gen-checksums": "node scripts/gen-checksums.js",
     "test": "vitest run --exclude '**/*.e2e.test.ts'",
     "test:e2e": "vitest run src/__tests__/cross-process.e2e.test.ts src/__tests__/drawio-convert.e2e.test.ts",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "lint": "npx eslint src/ --ext .ts",
+    "lint:fix": "npx eslint src/ --ext .ts --fix"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/express": "^5.0.6",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.6",
@@ -311,6 +314,7 @@
     "esbuild": "^0.21.0",
     "fast-check": "^4.9.0",
     "glob": "^13.0.6",
+    "globals": "^17.7.0",
     "jsdom": "^29.1.1",
     "mocha": "^10.7.3",
     "sinon": "^17.0.1",

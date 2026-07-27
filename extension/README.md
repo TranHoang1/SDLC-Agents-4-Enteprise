@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.14.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.16.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -48,10 +48,10 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.14.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.16.0.vsix
 
 # Or VS Code
-code --install-extension sdlc-agents-4-enterprise-1.14.0.vsix
+code --install-extension sdlc-agents-4-enterprise-1.16.0.vsix
 ```
 
 3. **Verify connection**: Command Palette → "SDLC Agents: Settings" → Server Settings → Test Connection
@@ -242,6 +242,14 @@ MIT
 ---
 
 ## Changelog
+
+### v1.16.0 (2026-07-25)
+
+- **Memory Evolution Levels L4-L6** — Replaced stub tools with database-backed services and graph algorithms:
+  - **Level 6 (Collective Graph)**: DB-backed graph query, node/edge insertion, PageRank, community detection (label propagation), cross-tenant sync (`kb_graph_cross_sync`, `kb_graph_remove_cross`), and project merge (`kb_graph_merge`).
+  - **Level 5 (Skill/Procedural Memory)**: Procedural memory CRUD (`mem_procedure`), auto-capturing tool execution sequences (`mem_skill_capture`), dynamic replay with variable substitution (`mem_skill_execute`), and cross-project sharing.
+  - **Level 4 (Reflective Consolidation)**: Automated tier consolidation background worker (`TierConsolidationService`) triggering every 30 minutes, plus automated trigger hooks on code sync and bulk ingest operations.
+- **Admin Portal & API Enhancements** — Configuration check resilience for Zen Upstream failures, TaskWorker stats and batch retry endpoints. User management updates with privilege escalation checks and password updates. Fully updated Admin Web UI for configuration edits and audit logs.
 
 ### v1.15.0 (2026-07-24)
 

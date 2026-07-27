@@ -19,6 +19,7 @@ import { TaskType } from '../task-queue/models.js';
 import { GraphRepository } from '../../../database/repositories/GraphRepository.js';
 import { getAdminAdapter } from '../../../admin/db/core.js';
 import { computePositionByIndex } from '../../kb-graph/service/nodes.js';
+import { EpochService } from '../evolution/EpochService.js';
 import pino from 'pino';
 import { loadFileMetadata } from '../../../engine/scanner/file-scanner.js';
 
@@ -228,6 +229,13 @@ export async function handleIngestFile(
     await upsertGraphNode(id, summary, type, scopeCtx?.projectId ?? null);
   }
   await engine.auditLog('INGEST_FILE');
+
+  if (created > 5) {
+    const epochSvc = new EpochService(engine.getAdapter(), logger);
+    const epochId = `epoch-ingest-${Date.now()}`;
+    epochSvc.trigger('BULK_INGEST', epochId).catch(() => {});
+  }
+
   return JSON.stringify({ status: 'ingested', entries: created, file: filePath } satisfies IngestFileResponse);
 }
 

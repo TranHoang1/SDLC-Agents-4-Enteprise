@@ -137,4 +137,12 @@ export class PendingTaskRepository {
       `SELECT * FROM pending_tasks WHERE id = ?`, [id],
     );
   }
+
+  async retryAllFailed(): Promise<number> {
+    const result = await this.db.runAsync(
+      `UPDATE pending_tasks SET status = ?, started_at = NULL, error = NULL, retry_count = 0 WHERE status = ?`,
+      [TaskStatus.PENDING, TaskStatus.FAILED],
+    );
+    return result.changes;
+  }
 }

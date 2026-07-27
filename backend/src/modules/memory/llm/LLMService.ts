@@ -14,6 +14,8 @@ const ADAPTERS: Record<LLMProvider, () => LLMAdapter> = {
   gemini: () => new OpenAIAdapter(),    // Gemini via compatible API
   lmstudio: () => new OpenAIAdapter(),  // LM Studio via OpenAI-compatible API
   copilot: () => new OpenAIAdapter(),   // Copilot via compatible API
+  opencode: () => new OpenAIAdapter(),   // OpenCode via OpenAI-compatible API
+  'opencode-zen': () => new OpenAIAdapter(), // OpenCode Zen via OpenAI-compatible API
 };
 
 const DEFAULT_CONFIGS: Record<LLMProvider, Partial<LLMConfig>> = {
@@ -23,6 +25,8 @@ const DEFAULT_CONFIGS: Record<LLMProvider, Partial<LLMConfig>> = {
   gemini: { baseUrl: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-1.5-flash', temperature: 0.3, maxTokens: 2048 },
   lmstudio: { baseUrl: 'http://localhost:1234/v1', model: 'default', temperature: 0.3, maxTokens: 2048 },
   copilot: { baseUrl: 'http://localhost:11435', model: 'copilot', temperature: 0.3, maxTokens: 2048 },
+  opencode: { baseUrl: 'https://opencode.ai/zen/go/v1', model: 'deepseek-v4-flash', temperature: 0.3, maxTokens: 2048 },
+  'opencode-zen': { baseUrl: 'https://opencode.ai/zen/v1', model: 'deepseek-v4-flash-free', temperature: 0.3, maxTokens: 2048 },
 };
 
 export class LLMService {

@@ -98,38 +98,112 @@ export function createConfigRoutes(ctx: AdminContext): Hono {
     } catch (e: any) { return c.json({ error: e.message || 'Connection failed', models: [] }); }
   });
 
+    const TEST_MODELS: Record<string, string> = {
+    ollama: 'llama3.1',
+    openai: 'gpt-4o-mini',
+    anthropic: 'claude-sonnet-4',
+    openrouter: 'openai/gpt-4o-mini',
+    lmstudio: 'local-model',
+    gemini: 'gemini-2.0-flash',
+    copilot: 'copilot',
+    opencode: 'deepseek-v4-flash',
+    'opencode-zen': 'deepseek-v4-flash-free',
+  };
+  const ZEN_FREE_MODELS = ['deepseek-v4-flash-free', 'big-pickle', 'mimo-v2.5-free', 'north-mini-code-free'];
+
+  async function doFetch(url: string, body: object, headers: Record<string, string>, signal: AbortSignal): Promise<{ ok: boolean; status: number; ms: number; text: string }> {
+    const t0 = Date.now();
+    try {
+      const r = await fetch(url, { method: 'POST', headers, signal, body: JSON.stringify(body) });
+      return { ok: r.ok, status: r.status, ms: Date.now() - t0, text: await r.text() };
+    } catch (e: any) {
+      return { ok: false, status: 0, ms: Date.now() - t0, text: e.message || 'Request failed' };
+    }
+  }
+
   app.post('/api/admin/llm/test', async (c) => {
     const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
-    // SEC: LLM test makes outbound HTTP (SSRF risk) — require CONFIG_EDIT
     const permCheck = await ctx.requirePermission(c, user.userId, 'CONFIG_EDIT');
     if (permCheck instanceof Response) return permCheck;
     const config = await getEffectiveConfig(ctx);
     const llm = config.llm || {};
     const prov = llm.provider || 'ollama';
-    const base = llm.baseUrl || 'http://localhost:11434';
+    let base = llm.baseUrl || 'http://localhost:11434';
     const isLocalUrl = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(base);
     if (llm.baseUrl && llm.baseUrl !== 'http://localhost:11434' && !isLocalUrl) {
       const urlCheck = validateExternalUrl(base);
-      if (!urlCheck.valid) return c.json({ success: false, message: `SSRF blocked: ${urlCheck.error}` }, 400);
+      if (!urlCheck.valid) return c.json({ success: false, errorType: 'blocked', message: `SSRF blocked: ${urlCheck.error}` }, 400);
     }
+    base = base.replace(/\/+$/, '');
+    const chatUrl = base.match(/\/v1$/i) ? base + '/chat/completions' : base + '/v1/chat/completions';
+    const anthropicUrl = base.match(/\/v1$/i) ? base.replace(/\/v1$/i, '') + '/v1/messages' : base + '/v1/messages';
+    const testModel = llm.model || TEST_MODELS[prov] || 'gpt-4o-mini';
+    const hasKey = !!(llm.apiKey && llm.apiKey !== '***');
+    const authHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (hasKey) authHeaders['Authorization'] = 'Bearer ' + llm.apiKey;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    const checks: string[] = [];
+
     try {
-      const start = Date.now();
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (llm.apiKey && llm.apiKey !== '***') { headers['Authorization'] = 'Bearer ' + llm.apiKey; headers['x-api-key'] = llm.apiKey; }
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
-      const r = prov === 'ollama'
-        ? await fetch(base + '/api/generate', { method: 'POST', headers, signal: controller.signal, body: JSON.stringify({ model: llm.model || 'llama3.1', prompt: 'Say hello in 5 words', stream: false, options: { num_predict: 20 } }) })
-        : await fetch(base + '/models', { headers, signal: controller.signal });
+      if (prov === 'ollama') {
+        const r = await doFetch(base + '/api/generate', { model: testModel, prompt: 'Say hello in 5 words', stream: false, options: { num_predict: 20 } }, authHeaders, controller.signal);
+        clearTimeout(timeout);
+        if (r.ok) { const info = JSON.parse(r.text).response || ''; return c.json({ success: true, errorType: null, message: `Connected (${r.ms}ms) [model: ${testModel}] — ${info.substring(0, 80)}` }); }
+        const body = JSON.parse(r.text); const msg = body.error?.message || body.response || r.text;
+        return c.json({ success: false, errorType: r.status === 401 ? 'auth' : 'http', message: `HTTP ${r.status} — ${msg.substring(0, 200)}` });
+      }
+
+      if (prov === 'anthropic') {
+        authHeaders['x-api-key'] = llm.apiKey || '';
+        const r = await doFetch(anthropicUrl, { model: testModel, max_tokens: 20, messages: [{ role: 'user', content: 'Say hello' }] }, authHeaders, controller.signal);
+        clearTimeout(timeout);
+        if (r.ok) { const info = JSON.parse(r.text)?.content?.[0]?.text || ''; return c.json({ success: true, errorType: null, message: `Connected + Authenticated (${r.ms}ms) [model: ${testModel}] — ${info.substring(0, 80)}` }); }
+        if (r.status === 401) return c.json({ success: false, errorType: 'auth', message: `HTTP ${r.status} — API key rejected (Unauthorized)` });
+        const body = JSON.parse(r.text); const msg = body.error?.message || r.text;
+        return c.json({ success: false, errorType: 'http', message: `HTTP ${r.status} — ${msg.substring(0, 300)}` });
+      }
+
+      // Step 1: connectivity probe
+      const isZen = prov === 'opencode-zen' || prov === 'opencode';
+      if (isZen) {
+        const probe = await doFetch(chatUrl, { model: 'deepseek-v4-flash-free', max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }, { 'Content-Type': 'application/json' }, controller.signal);
+        checks.push(probe.ok ? `✓ Reachable (${probe.ms}ms)` : `⚠ Endpoint: ${probe.status === 401 ? 'auth-gated' : 'HTTP ' + probe.status}`);
+      } else {
+        try { const p = await fetch(chatUrl.replace('/chat/completions', '/models'), { headers: { 'Content-Type': 'application/json' }, signal: controller.signal }); checks.push(`✓ Reachable`); } catch { checks.push(`⚠ Endpoint unreachable`); }
+      }
+
+      // Step 2: test user's model
+      const freeAndNoKey = isZen && ZEN_FREE_MODELS.includes(testModel) && !hasKey;
+      if (freeAndNoKey) { clearTimeout(timeout); return c.json({ success: true, errorType: null, message: `✓ Connected (free model) [model: ${testModel}]`, checks }); }
+
+      const r = await doFetch(chatUrl, { model: testModel, max_tokens: 20, messages: [{ role: 'user', content: 'Say hello' }] }, authHeaders, controller.signal);
       clearTimeout(timeout);
-      const ms = Date.now() - start;
+
       if (r.ok) {
-        const d = await r.json() as Record<string, unknown>;
-        const info = prov === 'ollama' ? ((d.response as string || '').substring(0, 80)) : ((d.data as unknown[] || []).length + ' models available');
-        return c.json({ success: true, message: `Connected (${ms}ms) — ${info}`, latencyMs: ms });
-      } else return c.json({ success: false, message: 'HTTP ' + r.status, latencyMs: ms });
-    } catch (e: any) { return c.json({ success: false, message: e.message || 'Connection failed' }); }
+        let info = 'responded';
+        try { const d = JSON.parse(r.text); if (d.choices?.[0]?.message?.content) info = d.choices[0].message.content.substring(0, 80); else if (d.content?.[0]?.text) info = d.content[0].text.substring(0, 80); } catch { }
+        return c.json({ success: true, errorType: null, message: `✓ Connected + Authenticated (${r.ms}ms) [model: ${testModel}] — ${info}`, checks });
+      }
+
+      // Error handling with suggestions
+      let msg = '';
+      try { const d = JSON.parse(r.text); const e = d.error || d; msg = e.message || JSON.stringify(d).substring(0, 300); } catch { msg = r.text.substring(0, 300); }
+      if (r.status === 401) return c.json({ success: false, errorType: 'auth', message: `HTTP ${r.status} — API key rejected (Unauthorized)`, checks });
+      if (r.status === 403) return c.json({ success: false, errorType: 'auth', message: `HTTP ${r.status} — API key lacks permissions (Forbidden)`, checks });
+      let hint = '';
+      if (isZen && r.status === 400 && (msg.includes('Upstream') || msg.includes('Console'))) hint = ' — This is an OpenCode Zen upstream issue. Try the free model "deepseek-v4-flash-free" or check your Zen balance.';
+      return c.json({ success: false, errorType: 'http', message: `HTTP ${r.status} — ${msg.substring(0, 300)}${hint}`, checks });
+    } catch (e: any) {
+      clearTimeout(timeout);
+      if (e.name === 'AbortError') return c.json({ success: false, errorType: 'connection', message: 'Timed out after 30s — server unreachable', checks });
+      const msg = e.message || '';
+      if (msg.includes('ECONNREFUSED') || msg.includes('connect') || msg.includes('fetch failed'))
+        return c.json({ success: false, errorType: 'connection', message: 'Cannot reach server — check the URL and network connectivity', checks });
+      return c.json({ success: false, errorType: 'unknown', message: msg.substring(0, 200), checks });
+    }
   });
 
   app.get('/api/admin/config', async (c) => {
@@ -222,6 +296,31 @@ export function createConfigRoutes(ctx: AdminContext): Hono {
     const userId = (user as { impersonating?: boolean }).impersonating ? user.userId : undefined;
     const result = await getAuditLogs({ userId, action, dateFrom, dateTo }, page, pageSize);
     return c.json({ entries: result.items, total: result.total, page, pageSize, totalPages: Math.ceil(result.total / pageSize) });
+  });
+
+  app.get('/api/admin/taskworker/stats', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const permCheck = await ctx.requirePermission(c, user.userId, 'CONFIG_EDIT');
+    if (permCheck instanceof Response) return permCheck;
+    const memory = ctx.registry?.getModule?.('memory');
+    const worker = memory?.taskWorker;
+    if (!worker) return c.json({ enabled: false, stats: null, message: 'TaskWorker not initialized' });
+    const stats = await worker.getStats();
+    const config = { concurrency: (worker as any).config?.concurrency, baseInterval: (worker as any).config?.baseInterval };
+    return c.json({ enabled: true, stats, config });
+  });
+
+  app.post('/api/admin/taskworker/retry-all', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const permCheck = await ctx.requirePermission(c, user.userId, 'CONFIG_EDIT');
+    if (permCheck instanceof Response) return permCheck;
+    const memory = ctx.registry?.getModule?.('memory');
+    const worker = memory?.taskWorker as any;
+    if (!worker?.getRepository) return c.json({ ok: false, error: 'TaskWorker not available' });
+    const count = await worker.getRepository().retryAllFailed();
+    return c.json({ ok: true, retried: count });
   });
 
   return app;

@@ -6,9 +6,10 @@
 import { Hono } from 'hono';
 import {
   getUserById, getUserPermissions, getUsers, createUser,
-  updateUserStatus, deleteUser, resetUserPassword,
+  updateUserStatus, deleteUser, resetUserPassword, changePassword,
   invalidateUserSessions, getUserSessions, recordAudit,
   getGroupById, getGroupPermissionIds,
+  updateUserEmail, getAdminAdapter,
 } from '../../../admin/admin-db.js';
 import type { AdminContext } from './context.js';
 
@@ -147,6 +148,62 @@ export function createUsersRoutes(ctx: AdminContext): Hono {
     return c.json({ success: true, sessionsTerminated });
   });
 
+  app.put('/api/admin/users/:id', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const permCheck = await ctx.requirePermission(c, user.userId, 'USER_MANAGE');
+    if (permCheck instanceof Response) return permCheck;
+    const targetId = c.req.param('id');
+    try {
+      const { username, email, accessGroupId } = await c.req.json();
+      const target = await getUserById(targetId);
+      if (!target) return c.json({ error: 'User not found' }, 404);
+      if (target.username === 'admin' && username && username !== 'admin') return c.json({ error: 'Cannot rename system admin' }, 403);
+      
+      // Validate email if provided
+      if (email !== undefined && email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return c.json({ error: 'Invalid email format' }, 400);
+      }
+      
+      // If accessGroupId provided, validate it exists and no privilege escalation
+      if (accessGroupId !== undefined) {
+        const [group, creatorPerms] = await Promise.all([
+          getGroupById(accessGroupId),
+          getUserPermissions(user.userId),
+        ]);
+        if (!group) return c.json({ error: 'Access group not found' }, 400);
+        const creatorPermSet = new Set(creatorPerms.map(p => p.permissionId));
+        const targetPerms = await getGroupPermissionIds(accessGroupId);
+        const escalated = targetPerms.filter(p => !creatorPermSet.has(p));
+        if (escalated.length > 0) {
+          await recordAudit(user.userId, user.username, 'UPDATE_USER_DENIED', 'users', targetId, JSON.stringify({ accessGroupId, escalatedPermissions: escalated }));
+          return c.json({ error: 'Cannot assign an access group with privileges higher than your own', escalatedPermissions: escalated }, 403);
+        }
+      }
+      
+      // Update user - we'll update fields that were provided
+      if (username !== undefined && username !== target.username) {
+        const adapter = getAdminAdapter();
+        await adapter.runAsync('UPDATE users SET username = ? WHERE user_id = ?', [username, targetId]);
+      }
+      if (email !== undefined && email !== target.email) {
+        await updateUserEmail(targetId, email);
+      }
+      if (accessGroupId !== undefined && accessGroupId !== target.accessGroupId) {
+        const adapter = getAdminAdapter();
+        await adapter.runAsync('UPDATE users SET access_group_id = ? WHERE user_id = ?', [accessGroupId, targetId]);
+      }
+      
+      const updated = await getUserById(targetId);
+      await recordAudit(user.userId, user.username, 'UPDATE_USER', 'users', targetId, JSON.stringify({ username, email, accessGroupId }));
+      return c.json({ success: true, user: updated });
+    } catch (err: any) {
+      if (err.message?.includes('UNIQUE constraint')) return c.json({ error: 'Username already exists' }, 409);
+      ctx.logger.error({ err }, 'Update user error');
+      return c.json({ error: err.message || 'Internal error' }, 500);
+    }
+  });
+
   app.delete('/api/admin/users/:id', async (c) => {
     const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
@@ -187,6 +244,21 @@ export function createUsersRoutes(ctx: AdminContext): Hono {
     await invalidateUserSessions(targetId);
     await recordAudit(user.userId, user.username, 'RESET_PASSWORD', 'users', targetId);
     return c.json({ success: true, temporaryPassword });
+  });
+
+  app.post('/api/admin/users/:id/change-password', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const permCheck = await ctx.requirePermission(c, user.userId, 'USER_MANAGE');
+    if (permCheck instanceof Response) return permCheck;
+    const targetId = c.req.param('id');
+    const target = await getUserById(targetId);
+    if (!target) return c.json({ error: 'User not found' }, 404);
+    const { newPassword } = await c.req.json();
+    if (!newPassword || newPassword.length < 6) return c.json({ error: 'Password must be at least 6 characters' }, 400);
+    await changePassword(targetId, newPassword);
+    await recordAudit(user.userId, user.username, 'CHANGE_PASSWORD_ADMIN', 'users', targetId);
+    return c.json({ success: true });
   });
 
   return app;

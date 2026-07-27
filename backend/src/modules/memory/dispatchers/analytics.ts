@@ -2,6 +2,7 @@ import type { MemoryEngine } from '../engine/core.js';
 import type { ScopeContext } from '../models.js';
 import type { ScopePromotionService } from '../promotion/service.js';
 import type { QueryLayer } from '../../../engine/query/query-layer.js';
+import { TierConsolidationService } from '../consolidation/service.js';
 import { handleSyncCode } from './sync-code.js';
 
 type Args = Record<string, unknown>;
@@ -35,8 +36,38 @@ export async function handleGraph(engine: MemoryEngine, a: Args): Promise<string
   }
 }
 
-export function handleConsolidate(): string {
-  return `Promoted: 0, Demoted: 0, Expired: 0`;
+export async function handleConsolidate(engine: MemoryEngine, a: Args): Promise<string> {
+  const action = (a.action as string) || 'consolidate';
+  const dryRun = (a.dry_run as boolean) ?? false;
+  const service = new TierConsolidationService(engine.getAdapter());
+
+  switch (action) {
+    case 'consolidate': {
+      const targetTier = a.target_tier as string | undefined;
+      const r = await service.runConsolidation(dryRun, targetTier);
+      const prefix = dryRun ? '[DRY-RUN] Would promote: ' : 'Promoted: ';
+      return `${prefix}${r.promoted}, Demoted: ${r.demoted}, Expired: ${r.expired}`;
+    }
+    case 'config': {
+      if (dryRun) return JSON.stringify(service.getConfig(), null, 2);
+      const updates = a.config as Partial<import('../consolidation/service.js').ConsolidationConfig> | undefined;
+      if (updates) service.updateConfig(updates);
+      return JSON.stringify(service.getConfig(), null, 2);
+    }
+    case 'stats': {
+      const adapter = engine.getAdapter();
+      const tiers = ['WORKING', 'EPISODIC', 'SEMANTIC'];
+      const lines: string[] = [];
+      for (const tier of tiers) {
+        const row = await adapter.getAsync<{ cnt: number }>(
+          'SELECT COUNT(*) as cnt FROM knowledge_entries WHERE tier = ? AND archived = 0', [tier],
+        );
+        lines.push(`${tier}: ${row?.cnt ?? 0}`);
+      }
+      return lines.join(' | ');
+    }
+    default: return `Unknown consolidate action: ${action}. Valid: consolidate, config, stats`;
+  }
 }
 
 export function handleLifecycle(a: Args): string {

@@ -29,6 +29,7 @@ import { migrate002AddEvolutionColumns } from './migrations/002-add-evolution-co
 import { migrate003PendingTasks } from './migrations/003-pending-tasks.js';
 import { migrate004ResetSequences } from './migrations/004-reset-sequences.js';
 import { ScopePromotionService } from './promotion/index.js';
+import { TierConsolidationService } from './consolidation/service.js';
 import { startScheduler, stopScheduler } from './evolution/Scheduler.js';
 import type { SchedulerHandles } from './evolution/Scheduler.js';
 import { TaskWorker } from './task-queue/TaskWorker.js';
@@ -38,6 +39,7 @@ import { initLLMInBackground } from './llm/LLMInitializer.js';
 import type { MemoryModule, MemoryModuleDeps } from './MemoryModule.js';
 
 const PROMOTION_SCAN_INTERVAL_MS = 60 * 60 * 1000;
+const CONSOLIDATION_INTERVAL_MS = 30 * 60 * 1000;
 
 export interface BuilderConfig {
   dataDir: string;
@@ -164,7 +166,21 @@ export class MemoryModuleBuilder {
     return this;
   }
 
-  /** Step 6: Kick off LLM initialization in background (non-blocking). */
+  /** Step 6: Start background tier consolidation (non-blocking). */
+  withConsolidation(): this {
+    if (this.memAdapter) {
+      const service = new TierConsolidationService(this.memAdapter);
+      const interval = setInterval(() => {
+        service.runConsolidation().catch((err: unknown) => {
+          this.logger.warn({ err }, '[MemoryModuleBuilder] Consolidation cycle failed');
+        });
+      }, CONSOLIDATION_INTERVAL_MS);
+      this.mod.setConsolidationInterval(interval);
+    }
+    return this;
+  }
+
+  /** Step 7: Kick off LLM initialization in background (non-blocking). */
   withBackgroundLLM(): this {
     if (this.mod.taskWorker) {
       try {

@@ -12,7 +12,7 @@ export {
 export {
   getUsers, getUserById, getUserByUsername, createUser, updateUserStatus,
   deleteUser, resetUserPassword, changePassword, updateLastLogin,
-  updateUserEmail, getUserCount, getUserCountByGroup,
+  updateUserEmail, updateUser, getUserCount, getUserCountByGroup,
 } from './db/users.js';
 
 export {

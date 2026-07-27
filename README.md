@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.14.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.16.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,14 @@ MIT
 ---
 
 ## Changelog
+
+### v1.16.0 (2026-07-25)
+
+- **Memory Evolution Levels L4-L6** — Replaced stub tools with database-backed services and graph algorithms:
+  - **Level 6 (Collective Graph)**: DB-backed graph query, node/edge insertion, PageRank, community detection (label propagation), cross-tenant sync (`kb_graph_cross_sync`, `kb_graph_remove_cross`), and project merge (`kb_graph_merge`).
+  - **Level 5 (Skill/Procedural Memory)**: Procedural memory CRUD (`mem_procedure`), auto-capturing tool execution sequences (`mem_skill_capture`), dynamic replay with variable substitution (`mem_skill_execute`), and cross-project sharing.
+  - **Level 4 (Reflective Consolidation)**: Automated tier consolidation background worker (`TierConsolidationService`) triggering every 30 minutes, plus automated trigger hooks on code sync and bulk ingest operations.
+- **Admin Portal & API Enhancements** — Configuration check resilience for Zen Upstream failures, TaskWorker stats and batch retry endpoints. User management updates with privilege escalation checks and password updates. Fully updated Admin Web UI for configuration edits and audit logs.
 
 ### v1.15.0 (2026-07-24)
 

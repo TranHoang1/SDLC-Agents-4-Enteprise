@@ -70,7 +70,10 @@ export class MemoryEngine extends MemoryEngineCrud {
       try {
         const rows = await this.adapter.allAsync<any>(sql, [ftsQuery, ...params, limit]);
         return this.applyCompositeScoring(rows);
-      } catch { return []; }
+      } catch (e) {
+        console.warn('[MemoryEngine] search sqlite fts failed', e);
+        return [];
+      }
     }
 
     if (engine === 'postgresql') {
@@ -86,7 +89,10 @@ export class MemoryEngine extends MemoryEngineCrud {
       try {
         const rows = await this.adapter.allAsync<any>(sql, [sanitized, sanitized, ...params, limit]);
         return this.applyCompositeScoring(rows);
-      } catch { return []; }
+      } catch (e) {
+        console.warn('[MemoryEngine] search pg fts failed', e);
+        return [];
+      }
     }
 
     const sql = `SELECT ke.*, MATCH(ke.content, ke.summary) AGAINST(? IN NATURAL LANGUAGE MODE) as rank
@@ -96,7 +102,10 @@ export class MemoryEngine extends MemoryEngineCrud {
     try {
       const rows = await this.adapter.allAsync<any>(sql, [query, query, ...params, limit]);
       return this.applyCompositeScoring(rows);
-    } catch { return []; }
+    } catch (e) {
+      console.warn('[MemoryEngine] search mysql fts failed', e);
+      return [];
+    }
   }
 
   private applyCompositeScoring(rows: any[]): SearchResult[] {
@@ -119,7 +128,8 @@ export class MemoryEngine extends MemoryEngineCrud {
       });
       scored.sort((a, b) => b.score - a.score);
       return scored;
-    } catch {
+    } catch (e) {
+      console.warn('[MemoryEngine] applyCompositeScoring failed', e);
       return rows.map(row => {
         const { rank, ...entry } = row;
         return { entry: entry as KnowledgeEntry, score: -rank, matchType: 'fts' };
@@ -140,7 +150,8 @@ export class MemoryEngine extends MemoryEngineCrud {
         `SELECT value FROM decay_config WHERE key = 'enable_predictive'`,
       ) as { value: string } | undefined;
       return { enablePredictive: row?.value === 'true' };
-    } catch {
+    } catch (e) {
+      console.warn('[MemoryEngine] readScoringOptionsSync failed', e);
       return {};
     }
   }

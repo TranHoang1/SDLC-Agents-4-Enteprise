@@ -5,7 +5,8 @@ import type { DatabaseEngine } from '../adapters/DatabaseAdapter.js';
  * Produces engine-specific SQL fragments for SQLite and PostgreSQL.
  */
 export class DialectHelper {
-  constructor(private readonly engine: DatabaseEngine) {}
+  readonly engine: DatabaseEngine;
+  constructor(engine: DatabaseEngine) { this.engine = engine; }
 
   /** Current timestamp expression for DML queries. */
   now(): string {
@@ -61,5 +62,32 @@ export class DialectHelper {
       return `datetime('now', '-' || ${seconds} || ' seconds')`;
     }
     return `NOW() - INTERVAL '1 second' * ${seconds}`;
+  }
+
+  /**
+   * Column-to-date comparison expression.
+   *
+   * Supports two operators:
+   *  - `'<= now -'`: column compared against now minus an interval (SQLite sign convention)
+   *  - `'<= now'`: column compared against now (no interval)
+   *
+   * @example
+   *   dialect.dateColumnCompare('created_at', '<= now -', '-24 hours')
+   *   // SQLite:  datetime(created_at) <= datetime('now', '-24 hours')
+   *   // PG:      created_at::timestamp <= NOW() - INTERVAL '24 hours'
+   */
+  dateColumnCompare(column: string, operator: '<= now -' | '<= now', interval?: string): string {
+    if (this.engine === 'postgresql' || this.engine === 'mysql') {
+      const tsCol = `${column}::timestamp`;
+      if (operator === '<= now -' && interval != null) {
+        const pgInterval = interval.startsWith('-') ? interval.slice(1) : interval;
+        return `${tsCol} <= NOW() - INTERVAL '${pgInterval}'`;
+      }
+      return `${tsCol} <= NOW()`;
+    }
+    if (operator === '<= now -' && interval != null) {
+      return `datetime(${column}) <= datetime('now', '${interval}')`;
+    }
+    return `datetime(${column}) <= datetime('now')`;
   }
 }
