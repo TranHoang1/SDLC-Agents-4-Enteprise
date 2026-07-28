@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<application name=" " description="" >
-	<sarfile name="HRAppsV2_0101_20260725T190725_GMT_schema.jar" order="1"/>
-	<parfile name="HRAppsV2_0101_20260725T190725_GMT_rules.jar" order="2"/>
-</application>

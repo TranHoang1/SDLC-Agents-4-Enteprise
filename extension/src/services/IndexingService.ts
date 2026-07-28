@@ -132,7 +132,12 @@ export class IndexingService {
                 this.log(`  - ${s}`);
             }
 
-            const projectId = getProjectId() || path.basename(root);
+            const projectId = appName || hierarchy.appName;
+            if (!projectId) {
+                this.log(`[Pega Indexer] ⚠️ Could not resolve Pega Application Name for Project ID. Aborting Pega index.`);
+                return null;
+            }
+            this.log(`[Pega Indexer] 📌 Target Pega Project ID (Pega App): "${projectId}"`);
             const visitedKeys = new Set<string>();
             let currentQueue = seeds;
             let totalStored = 0;

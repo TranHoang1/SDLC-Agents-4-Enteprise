@@ -199,6 +199,22 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
     }
   });
 
+  app.post('/pega/clear-project', async (c) => {
+    const service = getPegaService();
+    if (!service) return c.json({ error: { code: 'NOT_READY', message: 'Memory module not ready' } }, 503);
+    try {
+      const body = await c.req.json<{ projectId?: string }>();
+      const adapter = (service as any).memoryEngine.getAdapter();
+      const pid = body.projectId || 'PegaCollProj';
+      await adapter.runAsync("DELETE FROM knowledge_entries WHERE project_id = $1 OR project_id = 'PegaCollProj'", [pid]);
+      await adapter.runAsync("DELETE FROM graph_nodes WHERE project_id = $1 OR project_id = 'PegaCollProj'", [pid]);
+      return c.json({ data: { success: true, clearedProjectId: pid }, error: null });
+    } catch (err: any) {
+      logger.error({ err }, 'pega/clear-project failed');
+      return c.json({ data: null, error: { code: 'INTERNAL_ERROR', message: err.message } }, 500);
+    }
+  });
+
   // L3-L4 endpoints
 
   const evalCache = new PegaEvaluationCache();
