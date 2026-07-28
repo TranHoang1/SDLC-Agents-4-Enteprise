@@ -12,3 +12,5 @@ mcp-server/**
 **/*.vsix
 .gitignore
 tests/**
+../**
+.agents/**

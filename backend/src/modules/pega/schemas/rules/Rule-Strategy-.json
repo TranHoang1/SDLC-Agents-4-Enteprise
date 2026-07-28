@@ -1,0 +1,12 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Strategy-",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-",
+  "pyPatternParent": "Rule-",
+  "pyClassName": "Rule-Strategy-",
+  "pyRuleName": "Rule-Strategy-",
+  "pyClassType": "Abstract",
+  "pyDescription": "Base class for strategy rule types",
+  "pxObjClass": "Rule-Obj-Class"
+}

@@ -163,4 +163,97 @@ export class PegaMcpTools {
       return { success: false, error: err.message };
     }
   }
+
+  /**
+   * Service 1 MCP Handler: pega_get_rule
+   */
+  public async getRuleByInsKey(args: Record<string, unknown>): Promise<any> {
+    const insKey = (args.insKey as string) || (args.key as string) || "";
+    if (!insKey) return { success: false, error: "insKey parameter required" };
+    try {
+      const data = await this.client.getRuleByInsKey(insKey);
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Service 2 MCP Handler: pega_query_rule
+   */
+  public async queryRule(args: Record<string, unknown>): Promise<any> {
+    const pxObjClass = (args.pxObjClass as string) || (args.className as string) || "";
+    const appliesTo = (args.appliesTo as string) || (args.pyClassName as string) || "";
+    const pyRuleName = (args.pyRuleName as string) || (args.ruleName as string) || "";
+    if (!pxObjClass || !pyRuleName) {
+      return { success: false, error: "pxObjClass and pyRuleName required" };
+    }
+    try {
+      const data = await this.client.queryRuleByTriple(pxObjClass, appliesTo, pyRuleName);
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Service 3 MCP Handler: pega_list_rules
+   */
+  public async listRules(args: Record<string, unknown>): Promise<any> {
+    const pxObjClass = (args.pxObjClass as string) || (args.className as string) || "Rule-Obj-Activity";
+    const pageSize = (args.pageSize as number) || 50;
+    const pageIndex = (args.pageIndex as number) || 1;
+    try {
+      const data = await this.client.listApplicationRules(pxObjClass, pageSize, pageIndex);
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Service 4 MCP Handler: pega_save_rule
+   */
+  public async saveRule(args: Record<string, unknown>): Promise<any> {
+    const ruleJson = args.ruleJson || args.payload;
+    if (!ruleJson) return { success: false, error: "ruleJson payload required" };
+    try {
+      const data = await this.client.savePegaRule(ruleJson as any);
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Service 5 MCP Handler: pega_checkout_rule
+   */
+  public async checkoutRule(args: Record<string, unknown>): Promise<any> {
+    const insKey = (args.insKey as string) || "";
+    const action = ((args.action as string) || "CHECKOUT").toUpperCase() as "CHECKOUT" | "CHECKIN" | "UNDOCHECKOUT";
+    const comment = args.comment as string;
+    if (!insKey) return { success: false, error: "insKey parameter required" };
+    try {
+      const data = await this.client.checkoutPegaRule(insKey, action, comment);
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Service 6 MCP Handler: pega_run_tests
+   */
+  public async runTests(args: Record<string, unknown>): Promise<any> {
+    const testSuiteID = (args.testSuiteID as string) || (args.suiteId as string) || "";
+    const insKey = (args.insKey as string) || "";
+    if (!testSuiteID && !insKey) return { success: false, error: "testSuiteID or insKey required" };
+    try {
+      const data = await this.client.executeScenarioTestSuite(testSuiteID, insKey);
+      return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
 }
+

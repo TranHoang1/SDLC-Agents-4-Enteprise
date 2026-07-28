@@ -1,0 +1,48 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Test Coverage Summary — 200 Tests Total" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="180" y="20" width="500" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="WP1-WP3: Quality Module&#xa;55 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#2C6FBB;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="40" y="100" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="WP4: Schema Inference&#xa;79 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8A838;strokeColor=#C88A2A;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="280" y="100" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="WP4: Understanding&#xa;39 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A52;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="520" y="100" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="Quality Tests Subtotal&#xa;55 tests (27.5%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#2C6FBB;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=12;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="190" width="680" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="WP4: KB Service&#xa;24 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8A838;strokeColor=#C88A2A;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="40" y="270" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="8" value="WP4: Artifact Analyzer&#xa;27 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8E44AD;strokeColor=#6C2E8A;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="280" y="270" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="10" value="WP4 Tests Subtotal&#xa;145 tests (72.5%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8E44AD;strokeColor=#6C2E8A;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=12;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="360" width="680" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="Grand Total: 200 Tests (55 Quality + 145 Inference/Understanding/Artifact)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#333333;strokeColor=#222222;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=14;fontStyle=1" vertex="1" parent="1">
+      <mxGeometry x="40" y="440" width="680" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value="15 realistic rule samples&#xa;15 rule types" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=10;fontColor=#FFFFFF;" vertex="1" parent="1">
+      <mxGeometry x="40" y="165" width="200" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="13" value="Inferrer + Documentor&#xa;Type/child/reference detection" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=10;fontColor=#FFFFFF;" vertex="1" parent="1">
+      <mxGeometry x="280" y="165" width="200" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="14" value="7 services orchestrated&#xa;LLM-ready context" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=10;fontColor=#FFFFFF;" vertex="1" parent="1">
+      <mxGeometry x="520" y="165" width="200" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="Save/load/learn&#xa;Duplicate prevention" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=10;fontColor=#FFFFFF;" vertex="1" parent="1">
+      <mxGeometry x="40" y="340" width="200" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="16" value="Detect→Route→Analyze&#xa;4 analyzers" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=10;fontColor=#FFFFFF;" vertex="1" parent="1">
+      <mxGeometry x="280" y="340" width="200" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

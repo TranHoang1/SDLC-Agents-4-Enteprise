@@ -1,0 +1,88 @@
+[
+  {
+    "pxObjClass": "Rule-Obj-Product",
+    "pyClassName": "@baseclass",
+    "pyProductName": "PegaSampleLoan-Product",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDescription": "Pega Sample Loan Application Product Package v1.0",
+    "pyVersion": "01-01-01",
+    "pyRulesets": ["PegaSampleLoan:01-01-01"],
+    "pyApplications": ["PegaSampleLoan"]
+  },
+  {
+    "pxObjClass": "Rule-Obj-ProductPatch",
+    "pyClassName": "@baseclass",
+    "pyPatchName": "PegaSampleLoan-HotFix-CreditCheck",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyBaseProduct": "PegaSampleLoan-Product",
+    "pyPatchVersion": "01-01-02",
+    "pyDescription": "Hotfix: Fix credit score threshold validation in IsCreditCheckRequired When rule",
+    "pyAffectedRules": ["IsCreditCheckRequired", "ValidateLoanApplicationSubmission"]
+  },
+  {
+    "pxObjClass": "Rule-Obj-AppPackage",
+    "pyClassName": "@baseclass",
+    "pyPackageName": "PegaSampleLoan-AppPackage-v1",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyIncludedProducts": ["PegaSampleLoan-Product"],
+    "pyExportFormat": "ZIP",
+    "pyTargetEnvironments": ["Dev", "SIT", "UAT", "Prod"],
+    "pyIncludeData": false,
+    "pyIncludeSystemSettings": true
+  },
+  {
+    "pxObjClass": "Rule-Obj-Pipeline",
+    "pyClassName": "@baseclass",
+    "pyPipelineName": "LoanApplicationDeploymentPipeline",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyStages": [
+      { "pyStageName": "Build",   "pyActivity": "BuildAndValidatePackage",  "pyEnvironment": "Dev" },
+      { "pyStageName": "SIT",     "pyActivity": "DeployToSIT",               "pyEnvironment": "SIT",  "pyGate": "AutomatedTestPass" },
+      { "pyStageName": "UAT",     "pyActivity": "DeployToUAT",               "pyEnvironment": "UAT",  "pyGate": "ManualApproval" },
+      { "pyStageName": "Prod",    "pyActivity": "DeployToProduction",        "pyEnvironment": "Prod", "pyGate": "ChangeApprovalBoard" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-DeploymentManager",
+    "pyClassName": "@baseclass",
+    "pyDeploymentName": "LoanAppProdDeployment-20260725",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyPipeline": "LoanApplicationDeploymentPipeline",
+    "pyTargetEnvironment": "Prod",
+    "pyDeploymentWindow": "2026-07-25T22:00:00Z",
+    "pyApprovedBy": "ChangeApprovalBoard",
+    "pyRollbackPlan": "RevertToVersion01-01-00"
+  },
+  {
+    "pxObjClass": "Rule-Obj-TestPipeline",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyPipelineName": "LoanApplicationTestPipeline",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyTestSuites": ["LoanApplicationUnitTestSuite", "CreditCheckIntegrationTestSuite"],
+    "pyParallelExecution": true,
+    "pyFailureThreshold": 0,
+    "pyReportActivity": "GenerateTestExecutionReport"
+  },
+  {
+    "pxObjClass": "Rule-Obj-Migration",
+    "pyClassName": "@baseclass",
+    "pyMigrationName": "MigrateV1LoanDataToV2Schema",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyMigrationType": "Data",
+    "pySourceClass": "PegaSample-CustomerLoan-Work-LoanApplication-V1",
+    "pyTargetClass": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyMigrationActivity": "TransformV1LoanDataToV2",
+    "pyBatchSize": 500,
+    "pyValidateAfterMigration": true
+  },
+  {
+    "pxObjClass": "Rule-RuleSet-Version-Lock",
+    "pyClassName": "@baseclass",
+    "pyRulesetName": "PegaSampleLoan",
+    "pyRulesetVersion": "01-01-01",
+    "pyLockType": "Production",
+    "pyLockedBy": "AdminUser",
+    "pyLockedDateTime": "2026-07-25T10:00:00Z",
+    "pyLockReason": "Locked after successful UAT sign-off and Change Board approval"
+  }
+]

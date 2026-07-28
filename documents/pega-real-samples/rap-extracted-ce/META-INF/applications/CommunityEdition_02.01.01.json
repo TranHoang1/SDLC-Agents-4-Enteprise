@@ -1,0 +1,430 @@
+{
+"pxActorsCount":"0"
+,"pxAssumptionsCount":"0"
+,"pxAttachmentsCount":"0"
+,"pxBranchRuleSetCount":"0"
+,"pxCommitDateTime":"20260701T154134.961 GMT"
+,"pxCreateDateTime":"20210426T143207.089 GMT"
+,"pxCreateOperator":"matt.eckstein@pega.com"
+,"pxCreateOpName":"Matt Eckstein"
+,"pxCreateSystemID":"pega"
+,"pxHostId":"pega-pega-6c88f9d8fc-xqxtq"
+,"pxInsId":"COMMUNITYEDITION!02.01.01"
+,"pxInsName":"COMMUNITYEDITION!02.01.01"
+,"pxInstanceLockedBy":""
+,"pxInstanceLockedCreateDateTime":""
+,"pxInstanceLockedDateTime":""
+,"pxInstanceLockedKey":""
+,"pxInstanceLockedRuleSet":""
+,"pxInstanceLockedRuleSetVersion":""
+,"pxIterationsCount":"0"
+,"pxLimitedAccess":"Dev"
+,"pxMoveImportDateTime":"20250401T182900.462 GMT"
+,"pxMoveImportOperId":"Administrator@pega.com"
+,"pxMoveImportOperName":"Administrator"
+,"pxObjClass":"Rule-Application"
+,"pxOriginalCreateDateTime":""
+,"pxOriginalCreateOperator":""
+,"pxOriginalCreateOpName":""
+,"pxOriginalCreateSystemID":""
+,"pxOriginalRuleSet":"CommunityEdition"
+,"pxParticipantsCount":"0"
+,"pxReleasesCount":"0"
+,"pxSaveDateTime":"20211129T224151.080 GMT"
+,"pxUpdateDateTime":"20211129T224151.073 GMT"
+,"pxUpdateOperator":"matt.eckstein@pega.com"
+,"pxUpdateOpName":"Matt Eckstein"
+,"pxUpdateSystemID":"pega"
+,"pxUseDXAPI":"false"
+,"pyAccessGroupForAdministrator":""
+,"pyActorsComments":""
+,"pyAlternateDesignSystemName":""
+,"pyAlternateDesignSystemURL":""
+,"pyAMPManagerPassword":""
+,"pyAppTemplateBadgeImage":"AppTemplateBadge.png"
+,"pyAppTemplateDescription":""
+,"pyAppTemplateDescriptionImage":"AppTemplateDescription.png"
+,"pyAppTemplateLabel":"Community Edition"
+,"pyAppTemplateLabelImage":"AppTemplateLabel.png"
+,"pyBaseApplication":""
+,"pyBaseRule":"false"
+,"pyCallbackURI":""
+,"pyCircumstanceDate":""
+,"pyCircumstanceDateProp":""
+,"pyCircumstanceProp":""
+,"pyCircumstanceType":""
+,"pyCircumstanceVal":""
+,"pyClassName":""
+,"pyConfirmPassword":""
+,"pyConsumerKey":""
+,"pyContentSecurityPolicyMode":"report"
+,"pyContentSecurityPolicyName":""
+,"pyContentStorage":""
+,"pyContentStorageOverridden":"true"
+,"pyCurrentPushEnabledAndroid":"false"
+,"pyDataClassOfApp":""
+,"pyDataTypeAssociationChangeTime":"20210524T202728.817 GMT"
+,"pyDependsOnName":"CEBase"
+,"pyDependsOnVersion":"01.01.01"
+,"pyDescription":"My HR Application"
+,"pyDisplayMode":"clone"
+,"pyDisplayOption":"logo+application"
+,"pyElementName":""
+,"pyEnableUniqueID":"true"
+,"pyEnableUniqueIdFlag":"true"
+,"pyFormPost":""
+,"pyHasAlternateDesignSystem":"false"
+,"pyHistoryObject":"false"
+,"pyIncludeInBackgroundProcessing":"false"
+,"pyIntClassOfApp":""
+,"pyInterface":""
+,"pyIsApplicationEnabledForHealthCheck":"false"
+,"pyIsConstellationApp":"false"
+,"pyIsFirstOpenOfApplication":"false"
+,"pyIsParentIncluded":"false"
+,"pyIsSecured":"true"
+,"pyJavaStream":""
+,"pyLabel":"Community Edition"
+,"pyLabelOld":"Community Edition"
+,"pyLayerClassification":"Standard"
+,"pyLogoffRedirection":"ShowLogoffScreen"
+,"pyLogoReference":"webwb/py-logo.svg"
+,"pyMainClass":""
+,"pyMenuFlag":"true"
+,"pyMethodStatus":""
+,"pyMode":"Application"
+,"pyOwningDivision":"Div"
+,"pyOwningOrganization":"MyOrg"
+,"pyOwningUnit":"Unit"
+,"pyPassword":"\t{br}$2a$12$8oj3XTtIj8lRf6VGbas51e5zKRarkxtVOAQ.VIjlq/hzZt9Ax5YQW"
+,"pyPreviousApplicationName":"AcademyCommunityEdition"
+,"pyProductAlias":""
+,"pyProductName":"CommunityEdition"
+,"pyProductVersion":"02.01.01"
+,"pyProjectManagementEnabled":"false"
+,"pyProjectMethodology":"Scrum"
+,"pyRegenStartingFlows":"2"
+,"pyReloadForm":"true"
+,"pyRepositorySourcesEnabled":"false"
+,"pyRestoreAppTemplateBadgeImage":"true"
+,"pyRestoreAppTemplateDescriptionImage":"true"
+,"pyRestoreAppTemplateLabelImage":"true"
+,"pyRuleAvailable":"Yes"
+,"pyRuleEnds":""
+,"pyRuleName":"CommunityEdition 02.01.01"
+,"pyRuleParamsStreamName":""
+,"pyRuleSet":"CommunityEdition"
+,"pyRuleSetVersion":""
+,"pyRuleStarts":""
+,"pySetPassword":""
+,"pySetPasswordConfirm":""
+,"pySharedSecretKey":""
+,"pySkinType":"pyEndUser_ExpressDefault"
+,"pySortDateCircumWithinRSMajor":"true"
+,"pyStreamName":""
+,"pyTemplateDisplayText":"No ruleset versions available"
+,"pyTemplateInputBox":""
+,"pyTemporaryObject":""
+,"pyThreadPropertiesOnly":"true"
+,"pyUIPagesClass":""
+,"pyUsage":""
+,"pyUsedAs":"true"
+,"pyUseGraph":"false"
+,"pyUseWebstandardsUI":"true"
+,"pyValueChanged":"false"
+,"pyWebStorageEnabled":"false"
+,"pyWebStorageSourcesEnabled":"false"
+,"pyWindowTitle":""
+,"pyWorkKey":""
+,"pzChecksum":"-63172532"
+,"pzIndexCount":"221"
+,"pzInsKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIsPrivateCheckOut":""
+,"pzOriginalInstanceKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzRuleSetVersionMajor":"-1"
+,"pzRuleSetVersionMinor":"-1"
+,"pzRuleSetVersionPatch":"-1"
+,"pxAPIMethodReferences":[ ]
+,"pxNamedPageReferences":[ ]
+,"pxRuleReferences":[ 
+{
+"pxObjClass":"Embed-Reference-Rule"
+,"pxRuleClassName":""
+,"pxRuleFamilyName":"CEBASE!01.01.01"
+,"pxRuleObjClass":"Rule-Application"
+,"pyMethodStatus":""
+,"pyRuleName":"CEBase 01.01.01"
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"RuleReference":"215"
+}
+
+}
+,{
+"pxObjClass":"Embed-Reference-Rule"
+,"pxRuleClassName":""
+,"pxRuleFamilyName":"THEME-COSMOS!04.01"
+,"pxRuleObjClass":"Rule-Application"
+,"pyMethodStatus":""
+,"pyRuleName":"Theme-Cosmos 04.01"
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"RuleReference":"216"
+}
+
+}
+,{
+"pxObjClass":"Embed-Reference-Rule"
+,"pxRuleClassName":""
+,"pxRuleFamilyName":"COMMUNITYEDITION"
+,"pxRuleObjClass":"Rule-RuleSet-Name"
+,"pyMethodStatus":""
+,"pyRuleName":"CommunityEdition"
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"RuleReference":"217"
+}
+
+}
+,{
+"pxObjClass":"Embed-Reference-Rule"
+,"pxRuleClassName":""
+,"pxRuleFamilyName":"PEGA-CEOVERRIDES"
+,"pxRuleObjClass":"Rule-RuleSet-Name"
+,"pyRuleName":"Pega-CEOverrides"
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"RuleReference":"218"
+}
+
+}
+] 
+,"pxWarnings":[ 
+{
+"pxIsWarningJustified":"false"
+,"pxObjClass":"Embed-Warning"
+,"pxWarningCreatedTime":"20210426T143311.980 GMT"
+,"pxWarningCreateOperator":"matt.eckstein@pega.com"
+,"pxWarningDetails":"(Rule-Application)pxContentSecurity"
+,"pxWarningJustifiedOperator":""
+,"pxWarningJustifiedTime":""
+,"pxWarningMessage":"(Rule-Application)pxContentSecurity"
+,"pxWarningName":"Content Security Policy left blank"
+,"pxWarningRuleSetType":"PEGA"
+,"pxWarningSeverity":"3"
+,"pxWarningType":"Security"
+,"pyWarningJustifiedMessage":""
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"Warnings":"211"
+}
+
+}
+,{
+"pxIsWarningJustified":""
+,"pxObjClass":"Embed-Warning"
+,"pxWarningCreatedTime":"20210426T143311.981 GMT"
+,"pxWarningCreateOperator":"matt.eckstein@pega.com"
+,"pxWarningDetails":"(Rule-Application)pxUIPagesClassEmpty"
+,"pxWarningJustifiedOperator":""
+,"pxWarningJustifiedTime":""
+,"pxWarningMessage":"(Rule-Application)pxUIPagesClassEmpty"
+,"pxWarningName":"pxUIPagesClassEmpty"
+,"pxWarningRuleSetType":"PEGA"
+,"pxWarningSeverity":"3"
+,"pxWarningType":"Functionality"
+,"pyWarningJustifiedMessage":""
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"Warnings":"212"
+}
+
+}
+,{
+"pxIsWarningJustified":""
+,"pxObjClass":"Embed-Warning"
+,"pxWarningCreatedTime":"20210426T143311.982 GMT"
+,"pxWarningCreateOperator":"matt.eckstein@pega.com"
+,"pxWarningDetails":"(Rule-Application)pxIntegrationClassEmpty"
+,"pxWarningJustifiedOperator":""
+,"pxWarningJustifiedTime":""
+,"pxWarningMessage":"(Rule-Application)pxIntegrationClassEmpty"
+,"pxWarningName":"pxIntegrationClassEmpty"
+,"pxWarningRuleSetType":"PEGA"
+,"pxWarningSeverity":"3"
+,"pxWarningType":"Functionality"
+,"pyWarningJustifiedMessage":""
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"Warnings":"213"
+}
+
+}
+,{
+"pxIsWarningJustified":""
+,"pxObjClass":"Embed-Warning"
+,"pxWarningCreatedTime":"20210426T143311.983 GMT"
+,"pxWarningCreateOperator":"matt.eckstein@pega.com"
+,"pxWarningDetails":"(Rule-Application)pxDataClassEmpty"
+,"pxWarningJustifiedOperator":""
+,"pxWarningJustifiedTime":""
+,"pxWarningMessage":"(Rule-Application)pxDataClassEmpty"
+,"pxWarningName":"pxDataClassEmpty"
+,"pxWarningRuleSetType":"PEGA"
+,"pxWarningSeverity":"3"
+,"pxWarningType":"Functionality"
+,"pyWarningJustifiedMessage":""
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"Warnings":"214"
+}
+
+}
+] 
+,"pyActors":[ ]
+,"pyAssumptions":[ ]
+,"pyBranchList":[ ]
+,"pyBusinessFunctionList":[ ]
+,"pyChannelSecurity":{
+"pxObjClass":"Embed-Channel-Security"
+,"pyAuthMethod":"jwt"
+,"pyManagerId":""
+,"pyManagerKey":""
+}
+,"pyCMISDatasource":{
+"pxObjClass":"Embed-Application-CMISDatasource"
+,"pyConnectorClass":"CMIS-ServiceData"
+,"pyEnabled":""
+,"pySourceEnabled":"false"
+,"pySourceLabel":"Content from CMIS"
+}
+,"pyCmpShrRuleSetsList":[ 
+""
+] 
+,"pyCorrList":[ 
+{
+"pxObjClass":"Embed-Application-MetaData"
+,"pyName":""
+,"pyType":""
+}
+] 
+,"pyCustomFields":
+{
+}
+
+,"pyDependsOnList":[ 
+{
+"pxObjClass":"Embed-DependsOnApp"
+,"pyAppName":"CEBase"
+,"pyAppVersion":"01.01.01"
+,"pyMode":"Application"
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"pzBuiltons":"219"
+}
+
+}
+,{
+"pxObjClass":"Embed-DependsOnApp"
+,"pyAppName":"Theme-Cosmos"
+,"pyAppVersion":"04.01"
+,"pyMode":"Application"
+,"pzIndexOwnerKey":"RULE-APPLICATION COMMUNITYEDITION 02.01.01"
+,"pzIndexes":
+{
+"pzBuiltons":"220"
+}
+
+}
+] 
+,"pyGuides":[ ]
+,"pyIterations":[ ]
+,"pyMashupHostDomainList":[ ]
+,"pyOverrideRuleSetList":[ 
+""
+] 
+,"pyoverriderulesetlist_app":[ 
+{
+"pxObjClass":"Embed-Desktop-ValueList"
+,"pyLabel":""
+}
+] 
+,"pyPagesAndClasses":[ 
+{
+"pxObjClass":"Embed-PagesAndClasses"
+,"pyPagesAndClassesClass":""
+,"pyPagesAndClassesPage":""
+}
+] 
+,"pyProdRuleSetList":[ 
+""
+] 
+,"pyProjectParticipants":[ ]
+,"pyReleases":[ ]
+,"pyRemoteWorkMetaData":[ ]
+,"pyReportList":[ 
+{
+"pxObjClass":"Embed-Application-MetaData"
+,"pyName":""
+,"pyType":""
+}
+] 
+,"pyRepositorySources":[ 
+{
+"pxCreateDateTime":"20190326T161659.672 GMT"
+,"pxCreateOperator":"matt.eckstein@pega.com"
+,"pxCreateOpName":"Matt Eckstein"
+,"pxCreateSystemID":"pega"
+,"pxObjClass":"Embed-Application-StorageProvider-Repository"
+,"pyLabel":"Repository"
+,"pyRepository":""
+,"pySSOEnabled":"false"
+}
+] 
+,"pyRepoStorageTarget":{
+"pxCreateDateTime":"20190326T161659.664 GMT"
+,"pxCreateOperator":"matt.eckstein@pega.com"
+,"pxCreateOpName":"Matt Eckstein"
+,"pxCreateSystemID":"pega"
+,"pxObjClass":"Embed-Application-StorageProvider-Repository"
+,"pyLabel":"Repository"
+,"pyRepository":""
+,"pySSOEnabled":"false"
+}
+,"pyRuleSetList":[ 
+"CommunityEdition:02-01"
+,"Pega-CEOverrides:02-01"
+] 
+,"pySupportingMetaData":[ ]
+,"pyWebStorageSources":[ 
+{
+"pxCreateDateTime":"20190326T161659.650 GMT"
+,"pxCreateOperator":"matt.eckstein@pega.com"
+,"pxCreateOpName":"Matt Eckstein"
+,"pxCreateSystemID":"pega"
+,"pxObjClass":"Embed-Application-StorageProvider"
+,"pyLabel":"Box.com"
+,"pySSOEnabled":"false"
+}
+] 
+,"pyWebStorageTarget":{
+"pxCreateDateTime":"20190326T161659.657 GMT"
+,"pxCreateOperator":"matt.eckstein@pega.com"
+,"pxCreateOpName":"Matt Eckstein"
+,"pxCreateSystemID":"pega"
+,"pxObjClass":"Embed-Application-StorageProvider"
+,"pyAuthenticationProfile":""
+,"pyLabel":"Box.com"
+,"pySSOEnabled":"false"
+}
+,"pyWorkMetaData":[ ]
+}

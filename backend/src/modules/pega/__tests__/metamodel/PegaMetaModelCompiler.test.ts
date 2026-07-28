@@ -308,6 +308,28 @@ describe('PegaMetaModelCompiler', () => {
         expect(matching.length).toBeGreaterThanOrEqual(1);
       }
     });
+
+    it('returns strategies ordered by specificity (concrete before generic)', () => {
+      const strategies = compiler.compileAll();
+
+      const classDefs = strategies.map(s => (s as any).classDef as PegaClassDefinition);
+
+      const computeDepth = (cls: string): number => {
+        const def = metaRegistry.getParser(cls);
+        if (!def || !def.baseClass) return 0;
+        return 1 + computeDepth(def.baseClass);
+      };
+
+      const depths = classDefs.map(d => computeDepth(d.pxObjClass));
+
+      for (let i = 1; i < depths.length; i++) {
+        expect(depths[i]).toBeLessThanOrEqual(depths[i - 1]);
+      }
+
+      const classNames = classDefs.map(d => d.pxObjClass);
+      expect(classNames.indexOf('Rule-Obj-Activity')).toBeLessThan(classNames.indexOf('@baseclass'));
+      expect(classNames.indexOf('Rule-Obj-')).toBeLessThan(classNames.indexOf('Rule-'));
+    });
   });
 
   // ---------------------------------------------------------------------------

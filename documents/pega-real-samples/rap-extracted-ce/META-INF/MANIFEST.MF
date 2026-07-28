@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+ArtifactType: application
+ArtifactName: CommunityEdition
+ArtifactVersion: 02.01.01
+
+Name: FileMetadata
+

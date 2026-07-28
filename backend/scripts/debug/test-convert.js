@@ -8,7 +8,7 @@ const payload = JSON.stringify({
   arguments: {
     toolName: 'convert_to_markdown',
     arguments: {
-      uri: 'file:///C:/projects/kiro/FEC_CR_Builder/documents/KSA-14/STC-v1-KSA-14.xlsx'
+      uri: 'file:///C:/projects/kiro/SDLC-Agents-4-Enterprise/documents/KSA-14/STC-v1-KSA-14.xlsx'
     }
   }
 });

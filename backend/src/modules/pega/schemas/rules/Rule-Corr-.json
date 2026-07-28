@@ -1,0 +1,12 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Corr-",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-",
+  "pyPatternParent": "Rule-",
+  "pyClassName": "Rule-Corr-",
+  "pyRuleName": "Rule-Corr-",
+  "pyClassType": "Abstract",
+  "pyDescription": "Base class for all correspondence rule types",
+  "pxObjClass": "Rule-Obj-Class"
+}

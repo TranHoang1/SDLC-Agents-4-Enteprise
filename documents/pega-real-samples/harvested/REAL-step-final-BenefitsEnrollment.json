@@ -1,0 +1,267 @@
+﻿{
+    "caseTypeID":  "TGB-HRApps-Work-BenefitsEnrollment",
+    "createdBy":  "SSA@TGB",
+    "createTime":  "2026-07-25T18:29:38.471Z",
+    "ID":  "TGB-HRAPPS-WORK B-1",
+    "lastUpdatedBy":  "SSA@TGB",
+    "lastUpdateTime":  "2026-07-25T18:42:38.222Z",
+    "name":  "Benefits Enrollment",
+    "pxObjClass":  "Pega-API-CaseManagement-Case",
+    "stage":  "PRIM3",
+    "status":  "Resolved-Completed",
+    "urgency":  "10",
+    "content":  {
+                    "pxApplication":  "HRAppsV2",
+                    "pxApplicationVersion":  "01.01",
+                    "pxCommitDateTime":  "2026-07-25T18:42:38.225Z",
+                    "pxCoveredCount":  "0",
+                    "pxCoveredCountOpen":  "0",
+                    "pxCoveredCountUnsatisfied":  "0",
+                    "pxCreateDateTime":  "2026-07-25T18:29:38.471Z",
+                    "pxCreatedFromChannel":  "Web",
+                    "pxCreateOperator":  "SSA@TGB",
+                    "pxCreateOpName":  "Senior System Architect",
+                    "pxCreateSystemID":  "pega",
+                    "pxCurrentStage":  "PRIM3",
+                    "pxCurrentStageLabel":  "Review Selections",
+                    "pxCurrentStageSubscript":  "PRIM3_3",
+                    "pxExternalSystemUpdateCount":  "0",
+                    "pxInsName":  "B-1",
+                    "pxLockHandle":  "TGB-HRAPPS-WORK B-1",
+                    "pxObjClass":  "TGB-HRApps-Work-BenefitsEnrollment",
+                    "pxSaveDateTime":  "2026-07-25T18:42:38.222Z",
+                    "pxUpdateCounter":  "10",
+                    "pxUpdateDateTime":  "2026-07-25T18:42:38.222Z",
+                    "pxUpdateOperator":  "SSA@TGB",
+                    "pxUpdateOpName":  "Senior System Architect",
+                    "pxUpdateOrgUnit":  "Unit",
+                    "pxUpdateSystemID":  "pega",
+                    "pxUrgencyWork":  "10",
+                    "pxUrgencyWorkClass":  "10",
+                    "pxUrgencyWorkStageSLA":  "0",
+                    "pyAgeFromDate":  "2026-07-25T18:29:38.471Z",
+                    "pyConfirmationNote":  "pyStepRoutedConfirmation",
+                    "pyElapsedCustomerUnsatisfied":  "0.0",
+                    "pyElapsedStatusNew":  "768.0",
+                    "pyElapsedStatusOpen":  "10.0",
+                    "pyElapsedStatusPending":  "0",
+                    "pyFolderType":  "pyDefault",
+                    "pyID":  "B-1",
+                    "pyLabel":  "Benefits Enrollment",
+                    "pyLabelOld":  "Benefits Enrollment",
+                    "pyNextEmailThreadID":  "1",
+                    "pyNotifyQuickStream":  "QuestionAboutItem",
+                    "pyOrigDivision":  "Div",
+                    "pyOrigOrg":  "TGB",
+                    "pyOrigOrgUnit":  "Unit",
+                    "pyOrigUserDivision":  "Div",
+                    "pyOrigUserID":  "SSA@TGB",
+                    "pyOrigUserWorkgroup":  "default@TGB",
+                    "pyOwnerDivision":  "Div",
+                    "pyOwnerOrg":  "TGB",
+                    "pyOwnerOrgUnit":  "Unit",
+                    "pyPushNotificationsEnabled":  "false",
+                    "pyResolvedDivision":  "Div",
+                    "pyResolvedOrg":  "TGB",
+                    "pyResolvedOrgUnit":  "Unit",
+                    "pyResolvedTime":  "778.0",
+                    "pyResolvedTimestamp":  "2026-07-25T18:42:38.219Z",
+                    "pyResolvedUserDivision":  "Div",
+                    "pyResolvedUserID":  "SSA@TGB",
+                    "pyResolvedUserWorkgroup":  "default@TGB",
+                    "pySatisfactionChangeTimestamp":  "2026-07-25T18:29:38.635Z",
+                    "pyStatusCustomerSat":  "New",
+                    "pyStatusWork":  "Resolved-Completed",
+                    "pyStatusWorkOld":  "Resolved-Completed",
+                    "pyStatusWorkTimestamp":  "2026-07-25T18:42:38.220Z",
+                    "pyTemporaryObject":  "false",
+                    "pyWorkIDPrefix":  "B-",
+                    "pyWorkPartiesRule":  "pyCaseManagementDefault",
+                    "pzInsKey":  "TGB-HRAPPS-WORK B-1",
+                    "Dependents":  [
+                                       {
+                                           "pxObjClass":  "TGB-FW-HR-Data-Dependent",
+                                           "pyLabel":  " "
+                                       }
+                                   ],
+                    "pxFlow":  {
+
+                               },
+                    "pxResolveSummary":  [
+                                             {
+                                                 "pxObjClass":  "Embed-ResolveSummary",
+                                                 "pxResolvedDivision":  "Div",
+                                                 "pxResolvedOrg":  "TGB",
+                                                 "pxResolvedOrgUnit":  "Unit",
+                                                 "pxResolvedStatus":  "Resolved-Completed",
+                                                 "pxResolvedTimestamp":  "2026-07-25T18:42:38.219Z",
+                                                 "pxResolvedUserDivision":  "Div",
+                                                 "pxResolvedUserID":  "SSA@TGB",
+                                                 "pxResolvedUserName":  "Senior System Architect",
+                                                 "pxResolvedUserWorkgroup":  "default@TGB"
+                                             }
+                                         ],
+                    "pxStageHistory":  [
+                                           {
+                                               "pxCompletedBy":  "Senior System Architect",
+                                               "pxCompletedByOperator":  "SSA@TGB",
+                                               "pxCompletedStageTime":  "2026-07-25T18:42:29.610Z",
+                                               "pxEnterStageTime":  "2026-07-25T18:29:38.501Z",
+                                               "pxObjClass":  "Embed-StageHistory",
+                                               "pxStageID":  "PRIM1",
+                                               "pxStageName":  "Covered Parties",
+                                               "pxStageType":  "Primary",
+                                               "pxSubscript":  "PRIM1_1",
+                                               "pxWentTo":  "PRIM2",
+                                               "pyIsInitializationStage":  "true",
+                                               "pxProcesses":  [
+                                                                   {
+                                                                       "pxCompletedBy":  "Senior System Architect",
+                                                                       "pxCompletedByOperator":  "SSA@TGB",
+                                                                       "pxCompletedTime":  "2026-07-25T18:42:29.600Z",
+                                                                       "pxFlowID":  "FLOW0",
+                                                                       "pxIsComplete":  "True",
+                                                                       "pxIsOptional":  "false",
+                                                                       "pxObjClass":  "Embed-StageProcessHistory",
+                                                                       "pxProcessName":  "SelectParticipants_0",
+                                                                       "pxStartedBy":  "Senior System Architect",
+                                                                       "pxStartedByOperator":  "SSA@TGB",
+                                                                       "pxStartTime":  "2026-07-25T18:29:38.506Z",
+                                                                       "pxSubscript":  "SelectParticipants_0",
+                                                                       "pyLabel":  "Select Participants",
+                                                                       "pxSteps":  [
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-StageStepHistory",
+                                                                                           "pxStepID":  "ASSIGNMENT63",
+                                                                                           "pxStepType":  "ASSIGNMENT",
+                                                                                           "pyLabel":  "Confirm Employee Details"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-StageStepHistory",
+                                                                                           "pxStepID":  "Assignment1",
+                                                                                           "pxStepType":  "ASSIGNMENT",
+                                                                                           "pyLabel":  "Identify Dependents"
+                                                                                       }
+                                                                                   ]
+                                                                   }
+                                                               ]
+                                           },
+                                           {
+                                               "pxCameFrom":  "PRIM1",
+                                               "pxCompletedBy":  "Senior System Architect",
+                                               "pxCompletedByOperator":  "SSA@TGB",
+                                               "pxCompletedStageTime":  "2026-07-25T18:42:36.087Z",
+                                               "pxEnterStageTime":  "2026-07-25T18:42:29.610Z",
+                                               "pxObjClass":  "Embed-StageHistory",
+                                               "pxStageID":  "PRIM2",
+                                               "pxStageName":  "Insurance Selection",
+                                               "pxStageType":  "Primary",
+                                               "pxSubscript":  "PRIM2_2",
+                                               "pxWentTo":  "PRIM3",
+                                               "pxProcesses":  [
+                                                                   {
+                                                                       "pxCompletedBy":  "Senior System Architect",
+                                                                       "pxCompletedByOperator":  "SSA@TGB",
+                                                                       "pxCompletedTime":  "2026-07-25T18:42:36.085Z",
+                                                                       "pxFlowID":  "FLOW0",
+                                                                       "pxIsComplete":  "True",
+                                                                       "pxIsOptional":  "false",
+                                                                       "pxObjClass":  "Embed-StageProcessHistory",
+                                                                       "pxProcessName":  "InsuranceSelection_Flow_0",
+                                                                       "pxStartedBy":  "Senior System Architect",
+                                                                       "pxStartedByOperator":  "SSA@TGB",
+                                                                       "pxStartTime":  "2026-07-25T18:42:29.624Z",
+                                                                       "pxSubscript":  "InsuranceSelection_Flow_0",
+                                                                       "pyLabel":  "Insurance Selection",
+                                                                       "pxSteps":  [
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-StageStepHistory",
+                                                                                           "pxStepID":  "ASSIGNMENT63",
+                                                                                           "pxStepType":  "ASSIGNMENT",
+                                                                                           "pyLabel":  "Select Medical Coverage"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-StageStepHistory",
+                                                                                           "pxStepID":  "Assignment1",
+                                                                                           "pxStepType":  "ASSIGNMENT",
+                                                                                           "pyLabel":  "Select Dental Coverage"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-StageStepHistory",
+                                                                                           "pxStepID":  "Assignment2",
+                                                                                           "pxStepType":  "ASSIGNMENT",
+                                                                                           "pyLabel":  "Select Vision Coverage"
+                                                                                       }
+                                                                                   ]
+                                                                   }
+                                                               ]
+                                           },
+                                           {
+                                               "pxCameFrom":  "PRIM2",
+                                               "pxCompletedBy":  "Senior System Architect",
+                                               "pxCompletedByOperator":  "SSA@TGB",
+                                               "pxCompletedStageTime":  "2026-07-25T18:42:38.222Z",
+                                               "pxEnterStageTime":  "2026-07-25T18:42:36.086Z",
+                                               "pxObjClass":  "Embed-StageHistory",
+                                               "pxStageID":  "PRIM3",
+                                               "pxStageName":  "Review Selections",
+                                               "pxStageType":  "Primary",
+                                               "pxSubscript":  "PRIM3_3",
+                                               "pxProcesses":  [
+                                                                   {
+                                                                       "pxCompletedBy":  "Senior System Architect",
+                                                                       "pxCompletedByOperator":  "SSA@TGB",
+                                                                       "pxCompletedTime":  "2026-07-25T18:42:38.217Z",
+                                                                       "pxFlowID":  "FLOW0",
+                                                                       "pxIsComplete":  "True",
+                                                                       "pxIsOptional":  "false",
+                                                                       "pxObjClass":  "Embed-StageProcessHistory",
+                                                                       "pxProcessName":  "ReviewSelections_Flow_0",
+                                                                       "pxStartedBy":  "Senior System Architect",
+                                                                       "pxStartedByOperator":  "SSA@TGB",
+                                                                       "pxStartTime":  "2026-07-25T18:42:36.093Z",
+                                                                       "pxSubscript":  "ReviewSelections_Flow_0",
+                                                                       "pyLabel":  "Review Selections",
+                                                                       "pxSteps":  [
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-StageStepHistory",
+                                                                                           "pxStepID":  "ASSIGNMENT63",
+                                                                                           "pxStepType":  "ASSIGNMENT",
+                                                                                           "pyLabel":  "Review Selections"
+                                                                                       }
+                                                                                   ]
+                                                                   }
+                                                               ]
+                                           }
+                                       ],
+                    "pxSystemUpdateDetailsList":  [
+
+                                                  ],
+                    "pxTickets":  [
+                                      "Status-Resolved"
+                                  ],
+                    "pxTopicModelResult":  {
+
+                                           },
+                    "pyAttachmentCategories":  [
+
+                                               ]
+                },
+    "stages":  [
+                   {
+                       "ID":  "PRIM1",
+                       "name":  "Covered Parties",
+                       "pxObjClass":  "Pega-API-CaseManagement-Stage"
+                   },
+                   {
+                       "ID":  "PRIM2",
+                       "name":  "Insurance Selection",
+                       "pxObjClass":  "Pega-API-CaseManagement-Stage"
+                   },
+                   {
+                       "ID":  "PRIM3",
+                       "name":  "Review Selections",
+                       "pxObjClass":  "Pega-API-CaseManagement-Stage"
+                   }
+               ]
+}

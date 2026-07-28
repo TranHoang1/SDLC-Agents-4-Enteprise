@@ -1,0 +1,1782 @@
+﻿[
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "DATA-PARTY",
+        "pyPropertyName":  "PYTIN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY DATA-PARTY PYTIN #20250304T123557.596 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "DATA-PARTY",
+        "pyPropertyName":  "PYTIN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY DATA-PARTY PYTIN #20250416T200715.027 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "DATA-PARTY",
+        "pyPropertyName":  "TIN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY DATA-PARTY TIN #20250304T123558.029 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "DATA-PARTY",
+        "pyPropertyName":  "TIN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY DATA-PARTY TIN #20250416T200715.248 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "EMBED-ATTACH-FILE",
+        "pyPropertyName":  "WORKSAMPLE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY EMBED-ATTACH-FILE WORKSAMPLE #20250304T131124.121 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "EMBED-ATTACH-FILE",
+        "pyPropertyName":  "WORKSAMPLE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY EMBED-ATTACH-FILE WORKSAMPLE #20250416T200715.275 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "INDEX-CIRCUMSTANCEDEFINITION",
+        "pyPropertyName":  "FILINGSTATUS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY INDEX-CIRCUMSTANCEDEFINITION FILINGSTATUS #20250304T131124.468 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "INDEX-CIRCUMSTANCEDEFINITION",
+        "pyPropertyName":  "FILINGSTATUS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY INDEX-CIRCUMSTANCEDEFINITION FILINGSTATUS #20250416T200715.300 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "PEGASOCIAL-MESSAGE",
+        "pyPropertyName":  "PYSTATUSWORKTIMESTAMP",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY PEGASOCIAL-MESSAGE PYSTATUSWORKTIMESTAMP #20250304T123600.116 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "PEGASOCIAL-MESSAGE",
+        "pyPropertyName":  "PYSTATUSWORKTIMESTAMP",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY PEGASOCIAL-MESSAGE PYSTATUSWORKTIMESTAMP #20250416T200715.325 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-DATA-GOALS",
+        "pyPropertyName":  "ASSESSMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-DATA-GOALS ASSESSMENT #20240613T112517.331 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-DATA-GOALS",
+        "pyPropertyName":  "ASSESSMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-DATA-GOALS ASSESSMENT #20250304T123611.045 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-DATA-GOALS",
+        "pyPropertyName":  "ASSESSMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-DATA-GOALS ASSESSMENT #20250416T200715.341 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-DATA-GOALS",
+        "pyPropertyName":  "DESCRIPTION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-DATA-GOALS DESCRIPTION #20250304T123611.504 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-DATA-GOALS",
+        "pyPropertyName":  "DESCRIPTION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-DATA-GOALS DESCRIPTION #20250416T200715.354 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-DATA-GOALS",
+        "pyPropertyName":  "TITLE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-DATA-GOALS TITLE #20250304T123611.921 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-DATA-GOALS",
+        "pyPropertyName":  "TITLE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-DATA-GOALS TITLE #20250416T200715.367 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK",
+        "pyPropertyName":  "EMPLOYEE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK EMPLOYEE #20250304T123619.631 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK",
+        "pyPropertyName":  "EMPLOYEE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK EMPLOYEE #20250416T200716.042 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DENTALPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DENTALPLAN #20240618T115936.626 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DENTALPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DENTALPLAN #20250304T123619.700 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DENTALPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DENTALPLAN #20250416T200715.393 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DENTALPLANCOST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DENTALPLANCOST #20250304T123620.089 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DENTALPLANCOST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DENTALPLANCOST #20250416T200715.417 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DENTALPLANID",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DENTALPLANID #20250410T120110.452 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DENTALPLANID",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DENTALPLANID #20250416T200715.440 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DEPENDENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DEPENDENTS #20250304T123620.204 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "DEPENDENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT DEPENDENTS #20250416T200715.459 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MARITALSTATUS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MARITALSTATUS #20250304T123620.352 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MARITALSTATUS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MARITALSTATUS #20250416T200715.471 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MEDICALPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MEDICALPLAN #20240618T115937.112 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MEDICALPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MEDICALPLAN #20250304T123620.703 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MEDICALPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MEDICALPLAN #20250416T200715.494 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MEDICALPLANCOST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MEDICALPLANCOST #20250304T123620.865 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MEDICALPLANCOST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MEDICALPLANCOST #20250416T200715.508 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MEDICALPLANID",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MEDICALPLANID #20250410T114132.251 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "MEDICALPLANID",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT MEDICALPLANID #20250416T200715.522 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "TOTALBENEFITCOST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT TOTALBENEFITCOST #20250304T131150.586 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "TOTALBENEFITCOST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT TOTALBENEFITCOST #20250416T200715.543 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "VISIONPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT VISIONPLAN #20240618T115937.987 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "VISIONPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT VISIONPLAN #20250304T123621.112 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "VISIONPLAN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT VISIONPLAN #20250416T200715.570 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "VISIONPLANCOST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT VISIONPLANCOST #20250304T123621.304 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "VISIONPLANCOST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT VISIONPLANCOST #20250416T200715.605 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "VISIONPLANID",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT VISIONPLANID #20250410T120250.221 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "VISIONPLANID",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT VISIONPLANID #20250416T200715.622 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "WAIVEDENTAL",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT WAIVEDENTAL #20250410T121951.857 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "WAIVEDENTAL",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT WAIVEDENTAL #20250416T200715.638 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "WAIVEMEDICAL",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT WAIVEMEDICAL #20250304T123621.475 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "WAIVEMEDICAL",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT WAIVEMEDICAL #20250416T200715.652 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "WAIVEVISION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT WAIVEVISION #20250410T122019.223 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-BENEFITSENROLLMENT",
+        "pyPropertyName":  "WAIVEVISION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-BENEFITSENROLLMENT WAIVEVISION #20250416T200715.677 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "ASSESSMENTRATING",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE ASSESSMENTRATING #20250304T123621.913 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "ASSESSMENTRATING",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE ASSESSMENTRATING #20250416T200715.706 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "CANDIDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE CANDIDATE #20250304T123622.167 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "CANDIDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE CANDIDATE #20250416T200715.736 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "CANDIDATECOMMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE CANDIDATECOMMENT #20250304T131150.648 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "CANDIDATECOMMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE CANDIDATECOMMENT #20250416T200715.750 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "CREDITREPORT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE CREDITREPORT #20250304T123622.471 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "CREDITREPORT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE CREDITREPORT #20250416T200715.777 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "EDUCATION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE EDUCATION #20250304T131150.824 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "EDUCATION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE EDUCATION #20250416T200715.804 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "EXPERIENCE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE EXPERIENCE #20250304T123622.797 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "EXPERIENCE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE EXPERIENCE #20250416T200715.826 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "INTERVIEW",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE INTERVIEW #20250304T123622.931 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "INTERVIEW",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE INTERVIEW #20250416T200715.844 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "MANAGERAPPROVALCOMMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE MANAGERAPPROVALCOMMENT #20250304T131150.886 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "MANAGERAPPROVALCOMMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE MANAGERAPPROVALCOMMENT #20250416T200715.873 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "OFFEREDSALARY",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE OFFEREDSALARY #20250304T123623.176 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "OFFEREDSALARY",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE OFFEREDSALARY #20250416T200715.885 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "POSITION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE POSITION #20240610T135218.093 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "POSITION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE POSITION #20250304T123623.321 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "POSITION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE POSITION #20250416T200715.903 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "POSITIONAPPLIEDFOR",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE POSITIONAPPLIEDFOR #20240604T132505.297 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "POSITIONAPPLIEDFOR",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE POSITIONAPPLIEDFOR #20250304T131151.109 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "POSITIONAPPLIEDFOR",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE POSITIONAPPLIEDFOR #20250307T091421.702 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "POSITIONAPPLIEDFOR",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE POSITIONAPPLIEDFOR #20250416T200715.922 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "PROPOSEDSALARY",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE PROPOSEDSALARY #20250304T123623.595 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "PROPOSEDSALARY",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE PROPOSEDSALARY #20250416T200715.934 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "RECRUITERCOMMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE RECRUITERCOMMENTS #20250304T123623.728 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "RECRUITERCOMMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE RECRUITERCOMMENTS #20250416T200715.945 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "REFERREDBYEMPLOYEE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE REFERREDBYEMPLOYEE #20250304T131151.225 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "REFERREDBYEMPLOYEE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE REFERREDBYEMPLOYEE #20250416T200715.958 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "REFERRINGEMPLOYEE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE REFERRINGEMPLOYEE #20250304T131151.315 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "REFERRINGEMPLOYEE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE REFERRINGEMPLOYEE #20250416T200715.970 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "SCREENERCOMMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE SCREENERCOMMENTS #20250304T123624.304 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "SCREENERCOMMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE SCREENERCOMMENTS #20250416T200715.985 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "T",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE T #20210324T185007.198 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "T",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE T #20250304T123624.558 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "TGBAPPROVALS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE TGBAPPROVALS #20250304T123624.747 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "TGBAPPROVALS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE TGBAPPROVALS #20250416T200716.013 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "WORKSAMPLE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE WORKSAMPLE #20250304T131151.383 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-CANDIDATE",
+        "pyPropertyName":  "WORKSAMPLE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-CANDIDATE WORKSAMPLE #20250416T200716.028 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "ASSESSMENTSUMMARY",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION ASSESSMENTSUMMARY #20250304T123625.009 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "ASSESSMENTSUMMARY",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION ASSESSMENTSUMMARY #20250416T200716.055 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "AVERAGEASSESSMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION AVERAGEASSESSMENT #20250304T123625.144 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "AVERAGEASSESSMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION AVERAGEASSESSMENT #20250416T200716.069 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "EMDDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION EMDDATE #20211012T180112.276 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "EMDDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION EMDDATE #20250304T123625.229 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "EMDDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION EMDDATE #20250416T200716.090 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "EMPLOYEE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION EMPLOYEE #20250304T131151.508 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "EMPLOYEE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION EMPLOYEE #20250416T200716.105 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "ENDDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION ENDDATE #20250304T123625.445 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "ENDDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION ENDDATE #20250416T200716.120 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "GOALS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION GOALS #20250304T123625.539 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "GOALS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION GOALS #20250416T200716.148 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "RECOMMENDEDACTION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION RECOMMENDEDACTION #20240613T112517.777 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "RECOMMENDEDACTION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION RECOMMENDEDACTION #20250304T123625.700 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "RECOMMENDEDACTION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION RECOMMENDEDACTION #20250416T200716.171 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "STARTDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION STARTDATE #20250304T123625.793 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-EMPLOYEEEVALUATION",
+        "pyPropertyName":  "STARTDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-EMPLOYEEEVALUATION STARTDATE #20250416T200716.183 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "CERTIFIEDDOCUMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING CERTIFIEDDOCUMENTS #20250304T123625.914 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "CERTIFIEDDOCUMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING CERTIFIEDDOCUMENTS #20250416T200716.194 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "COURSES",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING COURSES #20240618T115725.796 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "COURSES",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING COURSES #20250304T123626.032 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "COURSES",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING COURSES #20250416T200716.210 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "ELIGIBILTYDOCUMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING ELIGIBILTYDOCUMENT #20250304T123626.114 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "ELIGIBILTYDOCUMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING ELIGIBILTYDOCUMENT #20250416T200716.223 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "EMPLOYMENTELIGIBILITYDOCUMENTATTACHMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING EMPLOYMENTELIGIBILITYDOCUMENTATTACHMENTS #20250304T123626.209 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "EMPLOYMENTELIGIBILITYDOCUMENTATTACHMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING EMPLOYMENTELIGIBILITYDOCUMENTATTACHMENTS #20250416T200716.235 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "FACILITIES",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING FACILITIES #20240621T074905.485 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "FACILITIES",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING FACILITIES #20250304T123626.343 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "FACILITIES",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING FACILITIES #20250416T200716.247 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "HARDWARE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING HARDWARE #20240618T115614.987 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "HARDWARE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING HARDWARE #20250304T123626.521 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "HARDWARE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING HARDWARE #20250416T200716.266 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "IDENTITYDOCUMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING IDENTITYDOCUMENT #20250304T131151.588 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "IDENTITYDOCUMENT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING IDENTITYDOCUMENT #20250416T200716.288 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "IDENTITYVERIFICATIONDOCUMENTATTACHMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING IDENTITYVERIFICATIONDOCUMENTATTACHMENTS #20250304T123626.782 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "IDENTITYVERIFICATIONDOCUMENTATTACHMENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING IDENTITYVERIFICATIONDOCUMENTATTACHMENTS #20250416T200716.308 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "LOCATION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING LOCATION #20240618T115726.224 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "LOCATION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING LOCATION #20250304T123626.962 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "LOCATION",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING LOCATION #20250416T200716.337 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "NEWSTARTDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING NEWSTARTDATE #20250304T123627.036 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "NEWSTARTDATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING NEWSTARTDATE #20250416T200716.359 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "OFFICE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING OFFICE #20240605T093834.787 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "OFFICE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING OFFICE #20250304T123627.260 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "OFFICE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING OFFICE #20250416T200716.378 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "REMOTE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING REMOTE #20250304T123627.345 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "REMOTE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING REMOTE #20250416T200716.404 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "SOFTWARE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING SOFTWARE #20240618T115615.450 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "SOFTWARE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING SOFTWARE #20250304T123627.428 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-ONBOARDING",
+        "pyPropertyName":  "SOFTWARE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-ONBOARDING SOFTWARE #20250416T200716.430 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "ACCOUNTNUMBER",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP ACCOUNTNUMBER #20250318T150609.956 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "ACCOUNTNUMBER",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP ACCOUNTNUMBER #20250416T200716.442 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "BANKNAME",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP BANKNAME #20250318T150620.545 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "BANKNAME",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP BANKNAME #20250416T200716.453 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "BIWEEKLYSALARY",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP BIWEEKLYSALARY #20250310T105245.955 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "BIWEEKLYSALARY",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP BIWEEKLYSALARY #20250416T200716.476 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "FILINGSTATUS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP FILINGSTATUS #20250318T150712.595 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "FILINGSTATUS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP FILINGSTATUS #20250416T195602.498 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "FILINGSTATUS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP FILINGSTATUS #20250416T200716.488 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "FINALWITHHOLDING",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP FINALWITHHOLDING #20250310T105109.202 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "FINALWITHHOLDING",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP FINALWITHHOLDING #20250416T200716.500 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "INTRODUCEERROR",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP INTRODUCEERROR #20250304T123627.545 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "INTRODUCEERROR",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP INTRODUCEERROR #20250416T200716.524 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "NUMBEROFDEPENDENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP NUMBEROFDEPENDENTS #20250318T150730.615 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "NUMBEROFDEPENDENTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP NUMBEROFDEPENDENTS #20250416T200716.548 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "NUMBEROFEXEMPTIONS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP NUMBEROFEXEMPTIONS #20250310T105020.363 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "NUMBEROFEXEMPTIONS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP NUMBEROFEXEMPTIONS #20250416T200716.569 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "ROUTINGNUMBER",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP ROUTINGNUMBER #20250318T150805.005 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "ROUTINGNUMBER",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP ROUTINGNUMBER #20250416T200716.591 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "VOIDEDCHEQUE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP VOIDEDCHEQUE #20240612T163400.561 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "VOIDEDCHEQUE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP VOIDEDCHEQUE #20250416T200716.625 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "WITHHOLDING",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP WITHHOLDING #20250310T104856.829 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPS-WORK-PAYROLLSETUP",
+        "pyPropertyName":  "WITHHOLDING",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPS-WORK-PAYROLLSETUP WITHHOLDING #20250416T200716.646 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPSV2-LINK-INTERVIEWOPERATORID",
+        "pyPropertyName":  "TO_PYUSERIDENTIFIER",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPSV2-LINK-INTERVIEWOPERATORID TO_PYUSERIDENTIFIER #20250409T101121.577 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-HRAPPSV2-LINK-INTERVIEWOPERATORID",
+        "pyPropertyName":  "TO_PYUSERIDENTIFIER",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-HRAPPSV2-LINK-INTERVIEWOPERATORID TO_PYUSERIDENTIFIER #20250416T200715.379 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITCHECK",
+        "pyPropertyName":  "CREDITCHECKREQUEST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITCHECK CREDITCHECKREQUEST #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITCHECK",
+        "pyPropertyName":  "CREDITCHECKRESPONSE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITCHECK CREDITCHECKRESPONSE #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITCHECKREQUESTTYPE",
+        "pyPropertyName":  "TIN",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITCHECKREQUESTTYPE TIN #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITCHECKRESPONSETYPE",
+        "pyPropertyName":  "CREDITREPORT",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITCHECKRESPONSETYPE CREDITREPORT #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITREPORT",
+        "pyPropertyName":  "ADDRESS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITREPORT ADDRESS #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITREPORT",
+        "pyPropertyName":  "CITYSTATE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITREPORT CITYSTATE #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITREPORT",
+        "pyPropertyName":  "NAME",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITREPORT NAME #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITREPORT",
+        "pyPropertyName":  "OPENACCOUNTS",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITREPORT OPENACCOUNTS #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "TGB-INT-CREDITCHECK-CREDITREPORT",
+        "pyPropertyName":  "TOTALBALANCE",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY TGB-INT-CREDITCHECK-CREDITREPORT TOTALBALANCE #20160927T130714.097 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    },
+    {
+        "pyRulesetVersion":  "01-01-01",
+        "pyType":  "Text",
+        "pyPropertyMode":  "Single Value",
+        "pyClassName":  "WORK-",
+        "pyPropertyName":  "PYURGENCYWORKADJUST",
+        "pyRuleset":  "HRAppsV2",
+        "pzInsKey":  "RULE-OBJ-PROPERTY WORK- PYURGENCYWORKADJUST #20250729T003927.998 GMT",
+        "pxObjClass":  "Rule-Obj-Property"
+    }
+]

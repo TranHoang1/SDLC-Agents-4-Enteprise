@@ -1,0 +1,14 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Security-VA",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-SecurityVA",
+  "pySuperClass": "Rule-SecurityVA-",
+  "pyPatternParent": "Rule-SecurityVA-",
+  "pyClassName": "Rule-Security-VA",
+  "pyRuleName": "Rule-Security-VA",
+  "pyClassType": "Concrete",
+  "pyDerivesFrom": "Rule-SecurityVA-",
+  "pyDescription": "Security Vulnerability Assessment rule",
+  "pyLabel": "Security VA",
+  "pxObjClass": "Rule-Obj-Class"
+}

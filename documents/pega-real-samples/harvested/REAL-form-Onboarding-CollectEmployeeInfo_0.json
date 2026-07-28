@@ -1,0 +1,10 @@
+﻿{
+    "view":  {
+                 "fua":  true,
+                 "showFlowActionButtons":  true,
+                 "fuaVersion":  "1.13"
+             },
+    "caseID":  "TGB-HRAPPS-WORK O-2",
+    "name":  "Collect Employee Info",
+    "actionID":  "CollectEmployeeInfo_0"
+}

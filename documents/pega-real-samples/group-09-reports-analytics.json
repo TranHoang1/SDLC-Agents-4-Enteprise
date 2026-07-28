@@ -1,0 +1,113 @@
+[
+  {
+    "pxObjClass": "Rule-Obj-Report-Definition",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "PendingLoanApplicationsReport",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyQueryType": "List",
+    "pyStorageClass": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyColumns": [
+      { "pyFieldName": ".pyID",              "pyLabel": "Case ID",       "pySortOrder": "Ascending" },
+      { "pyFieldName": ".FirstName",         "pyLabel": "First Name" },
+      { "pyFieldName": ".LastName",          "pyLabel": "Last Name" },
+      { "pyFieldName": ".LoanAmount",        "pyLabel": "Loan Amount" },
+      { "pyFieldName": ".InterestRate",      "pyLabel": "Interest Rate" },
+      { "pyFieldName": ".pyStatusWork",      "pyLabel": "Status" },
+      { "pyFieldName": ".pxCreateDateTime",  "pyLabel": "Submitted On" }
+    ],
+    "pyFilters": [
+      { "pyFieldName": ".pyStatusWork", "pyOperator": "=", "pyValue": "\"Pending-Approval\"" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Report-Category",
+    "pyClassName": "@baseclass",
+    "pyLabel": "Loan Operations Reports",
+    "pyCategoryName": "LoanOperations",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDescription": "All operational reports related to loan processing, approval, and disbursement",
+    "pyReports": [
+      "PendingLoanApplicationsReport",
+      "ApprovedLoansMonthlyReport",
+      "DisbursedLoansByBranchReport",
+      "OverdueLoanReport"
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-SummaryView",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "LoanApplicationSummaryView",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyAggregations": [
+      { "pyFunction": "COUNT",  "pyFieldName": ".pyID",       "pyAlias": "TotalApplications" },
+      { "pyFunction": "SUM",    "pyFieldName": ".LoanAmount", "pyAlias": "TotalLoanValue" },
+      { "pyFunction": "AVG",    "pyFieldName": ".LoanAmount", "pyAlias": "AverageLoanAmount" },
+      { "pyFunction": "MAX",    "pyFieldName": ".LoanAmount", "pyAlias": "LargestLoan" }
+    ],
+    "pyGroupBy": [".pyStatusWork", ".LoanPurpose"]
+  },
+  {
+    "pxObjClass": "Rule-Obj-ListView",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "MyAssignedLoanApplicationsListView",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyColumns": [
+      { "pyFieldName": ".pyID",          "pyLabel": "Case ID",    "pyWidth": "120px" },
+      { "pyFieldName": ".FirstName",     "pyLabel": "Applicant",  "pyWidth": "200px" },
+      { "pyFieldName": ".LoanAmount",    "pyLabel": "Amount",     "pyWidth": "120px", "pyFormat": "Currency" },
+      { "pyFieldName": ".pyStatusWork",  "pyLabel": "Status",     "pyWidth": "120px", "pyControl": "LoanStatusBadge" }
+    ],
+    "pyFilters": [
+      { "pyFieldName": ".pyAssignedOperatorID", "pyOperator": "=", "pyValue": "pxRequestor.pxOperatorID" }
+    ],
+    "pyDefaultSort": ".pxCreateDateTime DESC"
+  },
+  {
+    "pxObjClass": "Rule-Obj-Report-Shortcut",
+    "pyClassName": "@baseclass",
+    "pyLabel": "Pending Approvals Quick Link",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyReportDefinition": "PendingLoanApplicationsReport",
+    "pyCategory": "LoanOperations",
+    "pyDisplayInPortal": ["LoanOfficerPortal", "ManagerPortal"]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Chart",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "LoanApprovalRatePieChart",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyChartType": "Pie",
+    "pyDataSource": "PendingLoanApplicationsReport",
+    "pyLabelField": ".pyStatusWork",
+    "pyValueField": "TotalApplications",
+    "pyColors": ["#28a745", "#ffc107", "#dc3545", "#17a2b8"]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Dashboard",
+    "pyClassName": "@baseclass",
+    "pyLabel": "LoanOfficerDashboard",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDashboardType": "Personal",
+    "pyWidgets": [
+      { "pyWidgetType": "ListView",      "pyLabel": "My Assigned Applications",   "pyRule": "MyAssignedLoanApplicationsListView", "pyColumn": 1, "pyRow": 1 },
+      { "pyWidgetType": "Chart",         "pyLabel": "Approval Rate",              "pyRule": "LoanApprovalRatePieChart",           "pyColumn": 2, "pyRow": 1 },
+      { "pyWidgetType": "SummaryView",   "pyLabel": "Loan Portfolio Summary",     "pyRule": "LoanApplicationSummaryView",         "pyColumn": 1, "pyRow": 2 },
+      { "pyWidgetType": "ReportShortcut","pyLabel": "Pending Approvals",          "pyRule": "Pending Approvals Quick Link",        "pyColumn": 2, "pyRow": 2 }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-DataFlow",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "SyncLoanDataToDataWarehouse",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pySourceDataSet": "D_AllLoanApplications",
+    "pyDestinationDataSet": "D_LoanDataWarehouse",
+    "pyTransformations": [
+      { "pyStep": 1, "pyType": "Filter",    "pyCondition": ".pxCreateDateTime > pyToday - 30" },
+      { "pyStep": 2, "pyType": "MapFields", "pyMapping": "MapLoanToWarehouseSchema" },
+      { "pyStep": 3, "pyType": "Aggregate", "pyFunction": "SUM", "pyField": ".LoanAmount", "pyGroupBy": ".BranchCode" }
+    ],
+    "pySchedule": "0 2 * * *",
+    "pyOutputFormat": "Parquet"
+  }
+]

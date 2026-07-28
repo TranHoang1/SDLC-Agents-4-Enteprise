@@ -27,6 +27,7 @@ export interface PegaCheckRuleResponse {
 }
 
 export interface UnresolvedDependency {
+  insKey?: string;
   ruleType: string;
   className: string;
   ruleName: string;

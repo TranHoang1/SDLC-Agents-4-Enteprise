@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480">
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+  <text x="550" y="40" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">SA4E-58: TDD Component Lock Control Interaction Flow</text>
+
+  <rect x="60" y="140" width="260" height="260" rx="10" fill="#313244" stroke="#cba6f7" stroke-width="2"/>
+  <text x="190" y="180" fill="#cba6f7" font-family="Arial, sans-serif" font-size="15" font-weight="bold" text-anchor="middle">DEV Agent Action</text>
+  <text x="190" y="220" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">1. Request Checkout</text>
+  <text x="190" y="260" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">2. Edit &amp; Validate AST</text>
+  <text x="190" y="300" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">3. Request Save</text>
+  <text x="190" y="340" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">4. Request Checkin</text>
+
+  <path d="M 320 270 L 420 270" stroke="#f5c2e7" stroke-width="4"/>
+
+  <rect x="420" y="140" width="270" height="260" rx="10" fill="#313244" stroke="#f5c2e7" stroke-width="2"/>
+  <text x="555" y="180" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="15" font-weight="bold" text-anchor="middle">PegaMcpTools &amp; SDK</text>
+  <text x="555" y="220" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• checkoutRule(insKey, "CHECKOUT")</text>
+  <text x="555" y="260" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• saveRule(payload)</text>
+  <text x="555" y="300" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• checkoutRule(insKey, "CHECKIN")</text>
+  <text x="555" y="340" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• checkoutRule(insKey, "UNDOCHECKOUT")</text>
+
+  <path d="M 690 270 L 790 270" stroke="#a6e3a1" stroke-width="4"/>
+
+  <rect x="790" y="140" width="250" height="260" rx="10" fill="#313244" stroke="#a6e3a1" stroke-width="2"/>
+  <text x="915" y="180" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Pega Server Engine</text>
+  <text x="915" y="220" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• Locks Rule in DB</text>
+  <text x="915" y="260" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• Personal RuleSet Copy</text>
+  <text x="915" y="300" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• Transaction Commit</text>
+  <text x="915" y="340" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• Unlocks &amp; Merges Code</text>
+</svg>

@@ -17,7 +17,18 @@ export interface PegaOperatorContext {
 }
 
 export class PegaHttpClient {
-  constructor(private readonly secrets: vscode.SecretStorage) {}
+  constructor(
+    private readonly secrets: vscode.SecretStorage,
+    private readonly outputChannel?: vscode.OutputChannel
+  ) {}
+
+  private log(msg: string): void {
+    if (this.outputChannel) {
+      this.outputChannel.appendLine(msg);
+    } else {
+      console.log(msg);
+    }
+  }
 
   private async getAuthHeader(): Promise<string> {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
@@ -86,14 +97,449 @@ export class PegaHttpClient {
     throw new Error("Failed to connect to Pega Server");
   }
 
-  public async getObject(className: string, key: string): Promise<Record<string, unknown>> {
-    const endpoint = `${this.getPegaEndpoint()}/api/v1/objects/${encodeURIComponent(className)}/${encodeURIComponent(key)}`;
-    const authHeader = await this.getAuthHeader();
-    const res = await fetch(endpoint, { headers: { Authorization: authHeader } });
-    if (!res.ok) {
-      throw new Error(`Failed to fetch Pega object (${className}/${key}): ${res.statusText}`);
+  /**
+   * Deterministic 4-Step Hierarchy Resolution:
+   * Account (Operator ID) => Access Group => Application Rule => All RuleSets + Rules/Data
+   */
+  public async resolveDeterministicPegaHierarchy(operatorIdHint?: string): Promise<{
+    seeds: string[];
+    operatorId: string;
+    accessGroup: string;
+    appName: string;
+    ruleSets: string[];
+  }> {
+    const config = vscode.workspace.getConfiguration("kiroSdlc");
+    const opId = (operatorIdHint || config.get<string>("pegaUsername", "") || "SSA@TGB").trim();
+    const seedSet = new Set<string>();
+    let accessGroup = "";
+    let appName = "";
+    let appVersion = "";
+    const ruleSets: string[] = [];
+
+    // Step 1: Account Context (DATA-ADMIN-OPERATOR-ID)
+    const opInsKey = `DATA-ADMIN-OPERATOR-ID ${opId.toUpperCase()}`;
+    seedSet.add(opInsKey);
+    this.log(`[PegaHttpClient] 🔍 Step 1 (Account): Resolving Operator "${opId}"...`);
+    try {
+      const opObj = await this.getRuleByInsKey(opInsKey);
+      accessGroup = (opObj.pyDefaultAccessGroup as string) || (opObj.pyAccessGroup as string) || "";
+      this.log(`[PegaHttpClient] ✅ Step 1 Success: Default Access Group = "${accessGroup}"`);
+    } catch (err: any) {
+      this.log(`[PegaHttpClient] ⚠️ Step 1 Warning: Could not fetch Operator ${opInsKey}: ${err.message}`);
     }
-    return (await res.json()) as Record<string, unknown>;
+
+    // Step 2: Access Group => Application Rule
+    if (accessGroup) {
+      const agInsKey = `DATA-ADMIN-OPERATOR-ACCESSGROUP ${accessGroup}`;
+      seedSet.add(agInsKey);
+      this.log(`[PegaHttpClient] 🔍 Step 2 (Access Group): Resolving "${accessGroup}"...`);
+      try {
+        const agObj = await this.getRuleByInsKey(agInsKey);
+        appName = (agObj.pyApplication as string) || (agObj.pyAppName as string) || (agObj.pyApplicationName as string) || (agObj.pyAccessGroupAppName as string) || "";
+        appVersion = (agObj.pyApplicationVersion as string) || (agObj.pyAppVersion as string) || (agObj.pyAccessGroupAppVersion as string) || "";
+        if (!appName && accessGroup.includes(":")) {
+          appName = accessGroup.split(":")[0];
+        }
+        this.log(`[PegaHttpClient] ✅ Step 2 Success: Application = "${appName}" (Version: "${appVersion || "Auto"}")`);
+      } catch (err: any) {
+        if (accessGroup.includes(":")) {
+          appName = accessGroup.split(":")[0];
+        }
+        this.log(`[PegaHttpClient] ⚠️ Step 2 Warning: Could not fetch Access Group ${agInsKey}: ${err.message}`);
+      }
+    }
+
+    // Step 3: Application Rule => All RuleSets
+    if (appName) {
+      const appKeysToTry = [
+        appVersion ? `RULE-APPLICATION ${appName.toUpperCase()} ${appVersion}` : null,
+        `RULE-APPLICATION ${appName.toUpperCase()}`,
+        `RULE-APPLICATION ${appName}`,
+      ].filter(Boolean) as string[];
+
+      let appObj: Record<string, unknown> | null = null;
+      for (const appKey of appKeysToTry) {
+        try {
+          this.log(`[PegaHttpClient] 🔍 Step 3 (Application Rule): Fetching "${appKey}"...`);
+          appObj = await this.getRuleByInsKey(appKey);
+          seedSet.add(appKey);
+          this.log(`[PegaHttpClient] ✅ Step 3 Success: Loaded Application Rule "${appKey}"`);
+          break;
+        } catch {
+          // try next variation
+        }
+      }
+
+      if (appObj) {
+        // Read pyRuleSetList
+        const rawRuleSets = (appObj.pyRuleSetList || appObj.pyRuleSets) as any[];
+        if (Array.isArray(rawRuleSets)) {
+          for (const rs of rawRuleSets) {
+            const rsName = typeof rs === "string" ? rs : (rs.pyRuleSet || rs.pyRuleSetName || rs.pxSubRuleSet);
+            const rsVer = typeof rs === "object" ? (rs.pyRuleSetVersion || rs.pyVersion) : "";
+            if (rsName) {
+              const fullRsKey = rsVer ? `${rsName}:${rsVer}` : rsName;
+              ruleSets.push(fullRsKey);
+              seedSet.add(`RULE-RULESET-NAME ${rsName.toUpperCase()}`);
+            }
+          }
+        }
+        // Read pyWorkTypes / pyDataClasses
+        const workTypes = (appObj.pyWorkTypes || appObj.pyCaseTypes) as any[];
+        if (Array.isArray(workTypes)) {
+          for (const wt of workTypes) {
+            const className = typeof wt === "string" ? wt : (wt.pyWorkTypeClass || wt.pyClassName || wt.pxObjClass);
+            if (className) {
+              seedSet.add(`RULE-OBJ-CLASS ${className}`);
+            }
+          }
+        }
+      }
+    }
+
+    const seeds = Array.from(seedSet);
+    return {
+      seeds,
+      operatorId: opId,
+      accessGroup,
+      appName: appName || "PegaApp",
+      ruleSets,
+    };
+  }
+
+  private activePrefix: string | null = null;
+
+  public async getObject(className: string, key: string, appliesTo?: string): Promise<Record<string, unknown>> {
+    let insKey = key;
+    if (!key.includes(" ")) {
+      const cleanAppliesTo = (appliesTo && appliesTo !== "@baseclass") ? appliesTo : "";
+      if (cleanAppliesTo) {
+        insKey = `${className.toUpperCase()} ${cleanAppliesTo} ${key}`;
+      } else {
+        insKey = `${className.toUpperCase()} ${key}`;
+      }
+    }
+
+    try {
+      return await this.getRuleByInsKey(insKey);
+    } catch (err: any) {
+      if (err.message.includes("HTTP 504") || err.message.includes("HTTP 503") || err.message.includes("HTTP 502") || err.message.includes("HTTP 500") || err.message.includes("HTTP 401")) {
+        throw err;
+      }
+      // Fallback: try queryRuleByTriple
+      return await this.queryRuleByTriple(className, appliesTo || "", key);
+    }
+  }
+
+  private getCustomRestPrefixes(): string[] {
+    const base = this.getPegaEndpoint();
+    const prefixes = [
+      `${base}/api/CodeIntelligence/v1`,
+      `${base}/PRRestService/CodeIntelligence/v1`,
+      `${base}/api/HRAppsV2Service/V1`,
+      `${base}/PRRestService/HRAppsV2Service/V1`,
+      `${base}/api/HRAppsV2/V1`,
+      `${base}/PRRestService/HRAppsV2/V1`,
+      `${base}/api/v1`,
+      `${base}/PRRestService/v1`,
+    ];
+    if (this.activePrefix) {
+      return [this.activePrefix, ...prefixes.filter(p => p !== this.activePrefix)];
+    }
+    return prefixes;
+  }
+
+  private async delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  private async fetchWithRetry(url: string, init: RequestInit, maxRetries = 2): Promise<Response> {
+    let attempt = 0;
+    while (attempt <= maxRetries) {
+      try {
+        const res = await fetch(url, init);
+        if (res.status === 503 || res.status === 504 || res.status === 502) {
+          attempt++;
+          if (attempt <= maxRetries) {
+            const retryAfterHeader = res.headers.get("retry-after");
+            let backoffMs = Math.pow(2, attempt) * 1000 + Math.floor(Math.random() * 500);
+            if (retryAfterHeader && !isNaN(Number(retryAfterHeader))) {
+              backoffMs = Number(retryAfterHeader) * 1000;
+            }
+            this.log(`[PegaHttpClient] ⏳ HTTP ${res.status} on ${url}. Retrying in ${(backoffMs / 1000).toFixed(1)}s (Attempt ${attempt}/${maxRetries})...`);
+            await this.delay(backoffMs);
+            continue;
+          }
+        }
+        return res;
+      } catch (err: any) {
+        attempt++;
+        if (attempt <= maxRetries) {
+          const backoffMs = Math.pow(2, attempt) * 1000 + Math.floor(Math.random() * 500);
+          this.log(`[PegaHttpClient] ⏳ Network Error: ${err.message}. Retrying in ${(backoffMs / 1000).toFixed(1)}s (Attempt ${attempt}/${maxRetries})...`);
+          await this.delay(backoffMs);
+          continue;
+        }
+        throw err;
+      }
+    }
+    return fetch(url, init);
+  }
+
+  /**
+   * Service 1: GET /rules/{insKey}
+   * Tải 100% nội dung Rule XML/JSON gốc theo insKey duy nhất.
+   */
+  public async getRuleByInsKey(insKey: string): Promise<Record<string, unknown>> {
+    const authHeader = await this.getAuthHeader();
+    const logs: string[] = [];
+    for (const prefix of this.getCustomRestPrefixes()) {
+      const url = `${prefix}/rules/${encodeURIComponent(insKey)}`;
+      try {
+        const res = await this.fetchWithRetry(url, {
+          headers: { Authorization: authHeader, Accept: "application/json" },
+        });
+        const text = await res.text();
+        this.log(`[PegaHttpClient] 📡 GET ${url} => HTTP ${res.status} (${text.length} bytes)`);
+        
+        if (res.ok) {
+          this.activePrefix = prefix;
+          const json = JSON.parse(text) as Record<string, unknown>;
+          if (json && !json.error && json.pyHTTPResponseCode !== "404" && json.pyHTTPResponseCode !== 404) {
+            return json;
+          }
+          throw new Error(String(json.error || `Rule not found: ${insKey}`));
+        }
+
+        if (res.status === 404) {
+          this.activePrefix = prefix;
+          throw new Error(`Rule not found: ${insKey}`);
+        }
+
+        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500 || res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+        }
+
+        logs.push(`GET ${url} => HTTP ${res.status}: ${text.substring(0, 150)}`);
+      } catch (err: any) {
+        if (err.message.includes("Rule not found") || err.message.includes("HTTP 504") || err.message.includes("HTTP 503") || err.message.includes("HTTP 502") || err.message.includes("HTTP 401")) {
+          throw err;
+        }
+        logs.push(`GET ${url} => Network Error: ${err.message}`);
+      }
+    }
+    throw new Error(`GET /rules/${insKey} failed:\n  ${logs.join("\n  ")}`);
+  }
+
+  /**
+   * Service 2: POST /rules/query
+   * Truy vấn chính xác Rule theo bộ 3 pxObjClass, appliesTo, pyRuleName.
+   */
+  public async queryRuleByTriple(pxObjClass: string, appliesTo: string, pyRuleName: string): Promise<Record<string, unknown>> {
+    const authHeader = await this.getAuthHeader();
+    const logs: string[] = [];
+    for (const prefix of this.getCustomRestPrefixes()) {
+      const queryParams = `pxObjClass=${encodeURIComponent(pxObjClass)}&appliesTo=${encodeURIComponent(appliesTo || "")}&pyRuleName=${encodeURIComponent(pyRuleName)}&RequestClass=${encodeURIComponent(pxObjClass)}&RequestAppliesTo=${encodeURIComponent(appliesTo || "")}&RequestRuleName=${encodeURIComponent(pyRuleName)}`;
+      const url = `${prefix}/rules/query?${queryParams}`;
+      const payload = {
+        ruleJson: JSON.stringify({
+          RequestClass: pxObjClass,
+          RequestAppliesTo: appliesTo,
+          RequestRuleName: pyRuleName,
+        }),
+      };
+      try {
+        const res = await this.fetchWithRetry(url, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const text = await res.text();
+        this.log(`[PegaHttpClient] 📡 POST ${url} Payload: ${JSON.stringify(payload.ruleJson)} => HTTP ${res.status} (${text.length} bytes)`);
+
+        if (res.ok) {
+          this.activePrefix = prefix;
+          if (!text || !text.trim()) {
+            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+          }
+          let json: Record<string, unknown> = {};
+          try {
+            json = JSON.parse(text);
+          } catch {
+            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+          }
+          if (json && !json.error && json.pyHTTPResponseCode !== "404" && json.pyHTTPResponseCode !== 404) {
+            return json;
+          }
+          throw new Error(String(json.error || `Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`));
+        }
+
+        if (res.status === 404) {
+          this.activePrefix = prefix;
+          throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+        }
+
+        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500 || res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+        }
+
+        logs.push(`POST ${url} => HTTP ${res.status}: ${text.substring(0, 150)}`);
+      } catch (err: any) {
+        if (err.message.includes("Rule not found") || err.message.includes("HTTP 504") || err.message.includes("HTTP 503") || err.message.includes("HTTP 502") || err.message.includes("HTTP 401")) {
+          throw err;
+        }
+        logs.push(`POST ${url} => Network Error: ${err.message}`);
+      }
+    }
+    throw new Error(`POST /rules/query failed:\n  ${logs.join("\n  ")}`);
+  }
+
+  /**
+   * Service 3: POST /rules/list
+   * Quét danh sách tất cả các Rule summaries theo RuleSet / Application.
+   */
+  public async listApplicationRules(pxObjClass: string, appliesTo = "", pageSize = 50, pageIndex = 1): Promise<Record<string, unknown>> {
+    const authHeader = await this.getAuthHeader();
+    for (const prefix of this.getCustomRestPrefixes()) {
+      try {
+        const queryParams = `pxObjClass=${encodeURIComponent(pxObjClass)}&appliesTo=${encodeURIComponent(appliesTo)}&pageSize=${pageSize}&pageIndex=${pageIndex}&RequestClass=${encodeURIComponent(pxObjClass)}&RequestAppliesTo=${encodeURIComponent(appliesTo)}`;
+        const url = `${prefix}/rules/list?${queryParams}`;
+        const res = await this.fetchWithRetry(url, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({
+            ruleJson: JSON.stringify({
+              RequestClass: pxObjClass,
+              RequestAppliesTo: appliesTo,
+              pageSize,
+              pageIndex,
+            }),
+          }),
+        });
+        if (res.ok) {
+          const json = (await res.json()) as Record<string, unknown>;
+          if (json && !json.error) {
+            return json;
+          }
+        }
+      } catch { /* try next prefix */ }
+    }
+    throw new Error(`POST /rules/list failed on all custom REST prefixes`);
+  }
+
+  /**
+   * Truy vấn tất cả các Rule của 1 loại (Rule-Obj-Activity, Rule-Obj-Flow, Rule-Obj-Model...) thuộc về 1 Class cụ thể.
+   */
+  public async getClassRules(className: string, ruleType: string, pageSize = 200): Promise<Record<string, unknown>[]> {
+    try {
+      const data = await this.listApplicationRules(ruleType, className, pageSize, 1);
+      const pxResults = (data.pxResults || data.pxResult || data.rules || data.properties || []) as Record<string, unknown>[];
+      return Array.isArray(pxResults) ? pxResults : [];
+    } catch {
+      return [];
+    }
+  }
+
+  /**
+   * Truy vấn tất cả các Property (Rule-Obj-Property) thuộc về 1 Class cụ thể.
+   * Lớp Class => Lấy danh sách Property
+   */
+  public async getClassProperties(className: string, pageSize = 200): Promise<Record<string, unknown>[]> {
+    return this.getClassRules(className, "Rule-Obj-Property", pageSize);
+  }
+
+  /**
+   * Service 4: POST /rules/save
+   * Tạo mới hoặc cập nhật Rule Instance qua Transactional Commit.
+   */
+  public async savePegaRule(rulePayload: string | Record<string, unknown>): Promise<Record<string, unknown>> {
+    const authHeader = await this.getAuthHeader();
+    const payloadStr = typeof rulePayload === "object" ? JSON.stringify(rulePayload) : rulePayload;
+    for (const prefix of this.getCustomRestPrefixes()) {
+      try {
+        const url = `${prefix}/rules/save`;
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ ruleJson: payloadStr }),
+        });
+        if (res.ok) {
+          const json = (await res.json()) as Record<string, unknown>;
+          if (json && !json.error) {
+            return json;
+          }
+        }
+      } catch { /* try next prefix */ }
+    }
+    throw new Error(`POST /rules/save failed on all custom REST prefixes`);
+  }
+
+  /**
+   * Service 5: POST /rules/checkout
+   * Thực thi quy trình Lock Control (Checkout / Checkin / UndoCheckout).
+   */
+  public async checkoutPegaRule(insKey: string, action: "CHECKOUT" | "CHECKIN" | "UNDOCHECKOUT", comment?: string): Promise<Record<string, unknown>> {
+    const authHeader = await this.getAuthHeader();
+    for (const prefix of this.getCustomRestPrefixes()) {
+      try {
+        const queryParams = `insKey=${encodeURIComponent(insKey)}&action=${encodeURIComponent(action)}&comment=${encodeURIComponent(comment || "")}&RequestPZInsKey=${encodeURIComponent(insKey)}&RequestAction=${encodeURIComponent(action)}&RequestComment=${encodeURIComponent(comment || "")}`;
+        const url = `${prefix}/rules/checkout?${queryParams}`;
+        const bodyObj = {
+          insKey,
+          action,
+          comment: comment || "Updated via SDLC AI Multi-Agent Pipeline",
+          RequestPZInsKey: insKey,
+          RequestAction: action,
+          RequestComment: comment || "Updated via SDLC AI Multi-Agent Pipeline",
+          ruleJson: JSON.stringify({ insKey, action, comment }),
+        };
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(bodyObj),
+        });
+        if (res.ok) {
+          const json = (await res.json()) as Record<string, unknown>;
+          if (json && !json.error) {
+            return json;
+          }
+        }
+      } catch { /* try next prefix */ }
+    }
+    throw new Error(`POST /rules/checkout failed on all custom REST prefixes`);
+  }
+
+  /**
+   * Service 6: POST /rules/test
+   * Kích hoạt QA Scenario Unit Test Suite trên Pega Server.
+   */
+  public async executeScenarioTestSuite(testSuiteID?: string, insKey?: string): Promise<Record<string, unknown>> {
+    const authHeader = await this.getAuthHeader();
+    for (const prefix of this.getCustomRestPrefixes()) {
+      try {
+        const queryParams = `testSuiteID=${encodeURIComponent(testSuiteID || "")}&insKey=${encodeURIComponent(insKey || "")}&RequestTestSuiteID=${encodeURIComponent(testSuiteID || "")}&RequestPZInsKey=${encodeURIComponent(insKey || "")}`;
+        const url = `${prefix}/rules/test?${queryParams}`;
+        const bodyObj = {
+          testSuiteID: testSuiteID || "",
+          insKey: insKey || "",
+          RequestTestSuiteID: testSuiteID || "",
+          RequestPZInsKey: insKey || "",
+          ruleJson: JSON.stringify({ testSuiteID, insKey }),
+        };
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(bodyObj),
+        });
+        if (res.ok) {
+          const json = (await res.json()) as Record<string, unknown>;
+          if (json && !json.error) {
+            return json;
+          }
+        }
+      } catch { /* try next prefix */ }
+    }
+    throw new Error(`POST /rules/test failed on all custom REST prefixes`);
   }
 
   public async checkBackendCache(body: Record<string, unknown>): Promise<any> {

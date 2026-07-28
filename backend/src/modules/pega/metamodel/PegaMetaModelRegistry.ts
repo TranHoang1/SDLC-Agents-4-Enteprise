@@ -26,6 +26,10 @@ export class PegaMetaModelRegistry {
     return this.initPromise;
   }
 
+  public registerClass(def: PegaClassDefinition): void {
+    this.loader.registerClass(def);
+  }
+
   public getParser(pxObjClass: string): PegaClassDefinition | undefined {
     return this.loader.getClass(pxObjClass);
   }

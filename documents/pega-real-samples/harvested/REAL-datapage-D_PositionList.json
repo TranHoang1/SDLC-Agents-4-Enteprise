@@ -1,0 +1,1502 @@
+﻿{
+    "pxMore":  "false",
+    "pxObjClass":  "Code-Pega-List",
+    "pxPageCount":  "0",
+    "pxQueryTimeStamp":  "2026-07-25T18:29:50.205Z",
+    "pxResultCount":  "21",
+    "pxTotalResultCount":  "0",
+    "pyForceDBName":  "",
+    "pyForceUseStandardDB":  "false",
+    "pyMaxRecords":  "500",
+    "pyObjClass":  "TGB-FW-HR-Data-Position",
+    "pyQueryTimeoutInterval":  "30",
+    "pyRowCount":  "0",
+    "pyStartIndex":  "0",
+    "pyUseReportsDatabase":  "false",
+    "pzLoadTime":  "July 25, 2026, 6:29:50 PM GMT",
+    "pzPageNameHash":  "",
+    "pxResults":  [
+                      {
+                          "Department":  "Product Management",
+                          "ID":  "REQ-001",
+                          "JobDescription":  "As a director, review the product design ideas written by product manager. Formulate goals and strategies for each quarter.",
+                          "JobTitle":  "Director",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "165000",
+                          "MinimumSalary":  "130000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-001",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Marketing",
+                          "ID":  "REQ-002",
+                          "JobDescription":  "As a marketing manager, implement promotional plans and coordinate the sales managers to improve sales.",
+                          "JobTitle":  "Marketing Manager",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "150000",
+                          "MinimumSalary":  "120000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-002",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-003",
+                          "JobDescription":  "To design and develop user interfaces, knowledge of databases is mandatory.",
+                          "JobTitle":  "Sr Software Engineer",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "130000",
+                          "MinimumSalary":  "100000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-003",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-004",
+                          "JobDescription":  "To develop user interfaces, knowledge of databases is mandatory.",
+                          "JobTitle":  "Software Engineer",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "100000",
+                          "MinimumSalary":  "80000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-004",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-005",
+                          "JobDescription":  "To develop user interfaces.",
+                          "JobTitle":  "Jr Software Engineer",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "80000",
+                          "MinimumSalary":  "60000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-005",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-006",
+                          "JobDescription":  "Interpret statistical information to make it useful.",
+                          "JobTitle":  "Data Analyst",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "80000",
+                          "MinimumSalary":  "60000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-006",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-007",
+                          "JobDescription":  "Accurately and securely use, maintain and develop databases.",
+                          "JobTitle":  "Database Administrator",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "100000",
+                          "MinimumSalary":  "80000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-007",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-008",
+                          "JobDescription":  "Maintain the infrastructure for the software development department.",
+                          "JobTitle":  "Integration Engineer",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "100000",
+                          "MinimumSalary":  "80000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-008",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-009",
+                          "JobDescription":  "Work with departments to help improve their processes and systems.",
+                          "JobTitle":  "Business Analyst",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "80000",
+                          "MinimumSalary":  "60000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-009",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-010",
+                          "JobDescription":  "Design the front-end of user facing applications.",
+                          "JobTitle":  "UX Designer",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "100000",
+                          "MinimumSalary":  "80000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-010",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-011",
+                          "JobDescription":  "Write technical information for a variety of products.",
+                          "JobTitle":  "Technical Author",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "80000",
+                          "MinimumSalary":  "60000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-011",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-012",
+                          "JobDescription":  "Provide technical support to users.",
+                          "JobTitle":  "Helpdesk Analyst",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "80000",
+                          "MinimumSalary":  "60000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-012",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-013",
+                          "JobDescription":  "Create programs that test software throughout the development cycle.",
+                          "JobTitle":  "Test Automation Developer",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "80000",
+                          "MinimumSalary":  "60000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-013",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Marketing",
+                          "ID":  "REQ-014",
+                          "JobDescription":  "Support the work of marketing managers and executives on projects.",
+                          "JobTitle":  "Marketing Assistant",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "60000",
+                          "MinimumSalary":  "40000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-014",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Marketing",
+                          "ID":  "REQ-015",
+                          "JobDescription":  "Collect and interpret market data in order to forecast trends.",
+                          "JobTitle":  "Market Research Analyst",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "80000",
+                          "MinimumSalary":  "60000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-015",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-016",
+                          "JobDescription":  "Connect different devices together to form fast and efficient networks.",
+                          "JobTitle":  "Network Administrator",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "100000",
+                          "MinimumSalary":  "80000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-016",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Product Management",
+                          "ID":  "REQ-017",
+                          "JobDescription":  "Responsible for the efficient functioning of an office through a range of administrative, financial and managerial tasks.",
+                          "JobTitle":  "Office Manager",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "60000",
+                          "MinimumSalary":  "40000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-017",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ-018",
+                          "JobDescription":  "Responsible for the final step in the development of a software product before it is released to the public.",
+                          "JobTitle":  "QA Analyst",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "60000",
+                          "MinimumSalary":  "40000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ-018",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Product Management",
+                          "ID":  "REQ1",
+                          "JobDescription":  "As a director, review the product design ideas written by product manager. Formulate goals and strategies for each quarter.",
+                          "JobTitle":  "Director",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "165000",
+                          "MinimumSalary":  "130000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ1",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Marketing",
+                          "ID":  "REQ2",
+                          "JobDescription":  "As a marketing manager, implement promotional plans and coordinate the sales managers to improve sales.",
+                          "JobTitle":  "Marketing Manager",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "150000",
+                          "MinimumSalary":  "120000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ2",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      },
+                      {
+                          "Department":  "Engineering",
+                          "ID":  "REQ3",
+                          "JobDescription":  "To design and develop user interfaces, knowledge of databases is mandatory.",
+                          "JobTitle":  "Sr Software Engineer",
+                          "Manager":  "Manager@TGB",
+                          "MaximumSalary":  "130000",
+                          "MinimumSalary":  "100000",
+                          "pxObjClass":  "TGB-FW-HR-Data-Position",
+                          "pzInsKey":  "TGB-FW-HR-DATA-POSITION REQ3",
+                          "Recruiter":  "Employee@TGB",
+                          "VP":  "VP@TGB"
+                      }
+                  ],
+    "pyMapping":  [
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".ID",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "ID"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".JobTitle",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "JobTitle"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".JobDescription",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "JobDescription"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".Department",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "Department"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".Recruiter",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "Recruiter"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".Manager",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "Manager"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".VP",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "VP"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".MinimumSalary",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "MinimumSalary"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".MaximumSalary",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "MaximumSalary"
+                      },
+                      {
+                          "pxObjClass":  "Embed-ReportMapping",
+                          "pyClassName":  "TGB-FW-HR-Data-Position",
+                          "pyColumnName":  ".pzInsKey",
+                          "pyDoNotIgnoreRelatedClassInGroup":  "true",
+                          "pyIsMetaData":  "false",
+                          "pyPropertyName":  "pzInsKey"
+                      }
+                  ],
+    "pyPreparedValues":  [
+                             "TGB-FW-HR-Data-Position"
+                         ],
+    "pyReportDefinition":  {
+                               "pxCommitDateTime":  "2026-07-01T15:41:58.914Z",
+                               "pxCreateDateTime":  "2025-04-04T11:43:58.851Z",
+                               "pxCreateOperator":  "academyuser@pega.com",
+                               "pxCreateOpName":  "Academy User",
+                               "pxCreateSystemID":  "pega",
+                               "pxHostId":  "pega-pega-74fdf97f8b-7k87g",
+                               "pxInsId":  "!DATATABLEEDITORREPORT",
+                               "pxInsName":  "TGB-FW-HR-DATA-POSITION!DATATABLEEDITORREPORT",
+                               "pxLimitedAccess":  "Dev",
+                               "pxMoveImportDateTime":  "2025-09-15T20:42:10.471Z",
+                               "pxMoveImportOperId":  "academyuser@pega.com",
+                               "pxMoveImportOperName":  "Academy User",
+                               "pxMoveOriginalKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250304T131235.766 GMT",
+                               "pxMoveOriginalRuleSet":  "HRAppsBase",
+                               "pxMoveOriginalRuleSetVersion":  "01-01-01",
+                               "pxObjClass":  "Rule-Obj-Report-Definition",
+                               "pxOriginalRuleSet":  "HRAppsV2",
+                               "pxReportVersion":  "6.2",
+                               "pxSaveDateTime":  "2025-04-07T09:27:03.165Z",
+                               "pxUpdateDateTime":  "2025-04-07T09:27:03.162Z",
+                               "pxUpdateOperator":  "SSA@TGB",
+                               "pxUpdateOpName":  "Senior System Architect",
+                               "pxUpdateSystemID":  "pega",
+                               "pyAccessibilityCount":  "0",
+                               "pyAccessibilityLevel":  "0",
+                               "pyBaseRule":  "false",
+                               "pyBrowserSupportLevel":  "0",
+                               "pyClassName":  "TGB-FW-HR-Data-Position",
+                               "pyCompact":  "false",
+                               "pyDescription":  "Position",
+                               "pyDisplayMode":  "clone",
+                               "pyHistoryObject":  "false",
+                               "pyJavaClassName":  "Rule_Obj_Report_Definition_TGB_FW_HR_Data_Position_DataTableEditorReport_Action_20250404T114358_851_GMT",
+                               "pyJavaGenerateAPIVersion":  "04-02",
+                               "pyLabel":  "Position",
+                               "pyLabelOld":  "Position",
+                               "pyMemo":  "Refactored",
+                               "pyPreviousApplicationName":  "Employee",
+                               "pyReportTitle":  "Position",
+                               "pyRuleAvailable":  "Yes",
+                               "pyRuleName":  "DataTableEditorReport",
+                               "pyRuleSet":  "Employee",
+                               "pyRuleSetVersion":  "01-01-01",
+                               "pySelected":  "false",
+                               "pySortDateCircumWithinRSMajor":  "true",
+                               "pyStreamName":  "DataTableEditorReport",
+                               "pyTargetProperty":  "LocalDataStorageRD",
+                               "pyTemplateDisplayText":  "No ruleset versions available",
+                               "pyUsage":  "Position",
+                               "pyValueChanged":  "false",
+                               "pyXMLSignature":  "\u003cmethodSignature\u003e\u003cpyStepsPageAliases\u003e\u003c/pyStepsPageAliases\u003e\u003c/methodSignature\u003e",
+                               "pzChecksum":  "1880639905",
+                               "pzIndexCount":  "1296",
+                               "pzInsKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                               "pzInvalidateCss":  "true",
+                               "pzIsAutoGenerated":  "false",
+                               "pzOriginalInstanceKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250304T131235.766 GMT",
+                               "pzRuleSetVersionMajor":  "1",
+                               "pzRuleSetVersionMinor":  "1",
+                               "pzRuleSetVersionPatch":  "1",
+                               "pxAPIMethodReferences":  [
+
+                                                         ],
+                               "pxNamedPageReferences":  [
+
+                                                         ],
+                               "pxRuleReferences":  [
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!MAXIMUM SALARY",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption Maximum salary",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1274"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!MANAGER",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption Manager",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1275"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleFamilyName":  "PZOPERATORSBYWORKGROUPDROPDOWN",
+                                                            "pxRuleObjClass":  "Rule-HTML-Property",
+                                                            "pyMethodStatus":  "Internal",
+                                                            "pyRuleName":  "pzOperatorsByWorkGroupDropdown",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1276"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "MINIMUMSALARY",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "MinimumSalary",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1277"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleFamilyName":  "PZKEYINPUT",
+                                                            "pxRuleObjClass":  "Rule-HTML-Property",
+                                                            "pyMethodStatus":  "Internal",
+                                                            "pyRuleName":  "pzKeyInput",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1278"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "RECRUITER",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "Recruiter",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1279"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!JOB TITLE",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption Job title",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1280"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "DEPARTMENT",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "Department",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1281"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!MINIMUM SALARY",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption Minimum salary",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1282"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!RECRUITER",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption Recruiter",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1283"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "TGB-FW-HR-DATA-POSITION",
+                                                            "pxRuleObjClass":  "Rule-Obj-Class",
+                                                            "pyRuleName":  "TGB-FW-HR-Data-Position",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1284"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "JOBTITLE",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "JobTitle",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1285"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "MANAGER",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "Manager",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1286"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!POSITION",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption Position",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1287"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!VP",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption VP",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1288"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!JOB DESCRIPTION",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption Job description",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1289"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleFamilyName":  "INTEGER",
+                                                            "pxRuleObjClass":  "Rule-HTML-Property",
+                                                            "pyRuleName":  "Integer",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1290"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "MAXIMUMSALARY",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "MaximumSalary",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1291"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "ID",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "ID",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1292"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "VP",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "VP",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1293"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "TGB-FW-HR-Data-Position",
+                                                            "pxRuleFamilyName":  "JOBDESCRIPTION",
+                                                            "pxRuleObjClass":  "Rule-Obj-Property",
+                                                            "pyRuleName":  "JobDescription",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1294"
+                                                                          }
+                                                        },
+                                                        {
+                                                            "pxObjClass":  "Embed-Reference-Rule",
+                                                            "pxRuleClassName":  "@baseclass",
+                                                            "pxRuleFamilyName":  "PYCAPTION!DEPARTMENT",
+                                                            "pxRuleObjClass":  "Rule-Obj-FieldValue",
+                                                            "pyRuleName":  "pyCaption Department",
+                                                            "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                            "pzIndexes":  {
+                                                                              "RuleReference":  "1295"
+                                                                          }
+                                                        }
+                                                    ],
+                               "pxWarnings":  [
+                                                  {
+                                                      "pxObjClass":  "Embed-Warning",
+                                                      "pxWarningCreatedTime":  "2025-04-07T09:27:03.158Z",
+                                                      "pxWarningCreateOperator":  "academyuser@pega.com",
+                                                      "pxWarningDetails":  "(Rule-)pxPegaUnit",
+                                                      "pxWarningMessage":  "(Rule-)pxPegaUnit",
+                                                      "pxWarningName":  "Pega Unit Warning",
+                                                      "pxWarningRuleSetType":  "PEGA",
+                                                      "pxWarningSeverity":  "3",
+                                                      "pxWarningType":  "Maintainability",
+                                                      "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                      "pzIndexes":  {
+                                                                        "Warnings":  "1272"
+                                                                    }
+                                                  },
+                                                  {
+                                                      "pxObjClass":  "Embed-Warning",
+                                                      "pxWarningCreatedTime":  "2025-04-07T09:27:03.159Z",
+                                                      "pxWarningCreateOperator":  "academyuser@pega.com",
+                                                      "pxWarningDetails":  "(Rule-Obj-Report-Definition)pxCustomControlsInReport",
+                                                      "pxWarningMessage":  "(Rule-Obj-Report-Definition)pxCustomControlsInReport",
+                                                      "pxWarningName":  "Custom control in report",
+                                                      "pxWarningRuleSetType":  "PEGA",
+                                                      "pxWarningSeverity":  "3",
+                                                      "pxWarningType":  "Performance",
+                                                      "pzIndexOwnerKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                      "pzIndexes":  {
+                                                                        "Warnings":  "1273"
+                                                                    }
+                                                  }
+                                              ],
+                               "pyContent":  {
+                                                 "pxIsSummary":  "false",
+                                                 "pxObjClass":  "Embed-ReportContent",
+                                                 "pyClassName":  "TGB-FW-HR-Data-Position",
+                                                 "pyContentPageName":  "pyReportContentPage",
+                                                 "pyDoNotUseSortOrderForGrouping":  "false",
+                                                 "pyGetCachedDistinctValues":  "false",
+                                                 "pyGetDistinctRows":  "false",
+                                                 "pyMaxRecords":  "500",
+                                                 "pyQueryTimeoutValue":  "30",
+                                                 "pyReportContentPageName":  "D_PositionList",
+                                                 "pyRowLevelSecurityApplied":  "false",
+                                                 "pyUnionNotApplied":  "false",
+                                                 "pyAppContextInfo":  {
+                                                                          "pxObjClass":  "Embed-AppContextInfo"
+                                                                      },
+                                                 "pyFields":  {
+                                                                  "pxObjClass":  "Embed-ReportFields",
+                                                                  "pyAggregate":  [
+
+                                                                                  ],
+                                                                  "pyGroupBy":  [
+
+                                                                                ],
+                                                                  "pyIgnoredListFields":  [
+
+                                                                                          ],
+                                                                  "pyListFields":  [
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "ID*",
+                                                                                           "pyFieldName":  ".ID",
+                                                                                           "pySortOrder":  "1",
+                                                                                           "pySortType":  "ASC"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "Job title",
+                                                                                           "pyFieldName":  ".JobTitle",
+                                                                                           "pySortOrder":  "99999"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "Job description",
+                                                                                           "pyFieldName":  ".JobDescription",
+                                                                                           "pySortOrder":  "99999"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "Department",
+                                                                                           "pyFieldName":  ".Department",
+                                                                                           "pySortOrder":  "99999"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "Recruiter",
+                                                                                           "pyFieldName":  ".Recruiter",
+                                                                                           "pySortOrder":  "99999"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "Manager",
+                                                                                           "pyFieldName":  ".Manager",
+                                                                                           "pySortOrder":  "99999"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "VP",
+                                                                                           "pyFieldName":  ".VP",
+                                                                                           "pySortOrder":  "99999"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "Minimum salary",
+                                                                                           "pyFieldName":  ".MinimumSalary",
+                                                                                           "pySortOrder":  "99999"
+                                                                                       },
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-ReportListFields",
+                                                                                           "pyFieldLabel":  "Maximum salary",
+                                                                                           "pyFieldName":  ".MaximumSalary",
+                                                                                           "pySortOrder":  "99999"
+                                                                                       }
+                                                                                   ]
+                                                              },
+                                                 "pyFilters":  {
+                                                                   "pxObjClass":  "Embed-ReportFilters",
+                                                                   "pyFilter":  [
+
+                                                                                ],
+                                                                   "pyQueryTokenList":  [
+
+                                                                                        ]
+                                                               },
+                                                 "pyHavingFilters":  {
+                                                                         "pxObjClass":  "Embed-ReportFilters-Having",
+                                                                         "pyFilter":  [
+
+                                                                                      ]
+                                                                     },
+                                                 "pyInsertInfo":  {
+                                                                      "pySecurity":  {
+
+                                                                                     }
+                                                                  },
+                                                 "pyPagesAndClasses":  [
+                                                                           {
+                                                                               "pxObjClass":  "Embed-PagesAndClasses",
+                                                                               "pyPagesAndClassesClass":  "TGB-FW-HR-Data-Position"
+                                                                           }
+                                                                       ],
+                                                 "pyPaging":  {
+                                                                  "pxMorePages":  "false",
+                                                                  "pxObjClass":  "Embed-ReportPaging",
+                                                                  "pyAlignment":  "Right",
+                                                                  "pyPosition":  "Top",
+                                                                  "pyReturnTotalResultCount":  "true",
+                                                                  "pySortMode":  "dataset",
+                                                                  "pyWindowSize":  "10"
+                                                              },
+                                                 "pyParameters":  [
+                                                                      {
+                                                                          "pxObjClass":  "Embed-MethodParams"
+                                                                      }
+                                                                  ],
+                                                 "pyReportRank":  {
+                                                                      "pxObjClass":  "Embed-ReportRank",
+                                                                      "pyRankField":  {
+                                                                                          "pxObjClass":  "Embed-ReportListFields"
+                                                                                      }
+                                                                  },
+                                                 "pyReportStatsInfo":  {
+                                                                           "pxObjClass":  "Embed-ReportStatisticsInfo",
+                                                                           "pyModeofExecution":  "embedded",
+                                                                           "pyReportClassName":  "TGB-FW-HR-Data-Position",
+                                                                           "pyReportInsKey":  "RULE-OBJ-REPORT-DEFINITION TGB-FW-HR-DATA-POSITION DATATABLEEDITORREPORT #20250404T114358.851 GMT",
+                                                                           "pyReportStreamName":  "DataTableEditorReport"
+                                                                       },
+                                                 "pySecurity":  {
+                                                                    "pxObjClass":  "Embed-ReportSecurity",
+                                                                    "pyPrivilegeList":  [
+                                                                                            {
+                                                                                                "pxObjClass":  "Embed-Rule-PrivilegeSecurity"
+                                                                                            }
+                                                                                        ]
+                                                                },
+                                                 "pySource":  {
+                                                                  "pxObjClass":  "Embed-ReportSource",
+                                                                  "pyAllowApproximation":  "false",
+                                                                  "pyForceUseStandardDB":  "false",
+                                                                  "pyUseAlternateDB":  "true",
+                                                                  "pyUseImplementationClass":  "false",
+                                                                  "pyAssociations":  [
+
+                                                                                     ],
+                                                                  "pyIndexInfo":  [
+
+                                                                                  ],
+                                                                  "pyJoinInfo":  [
+
+                                                                                 ],
+                                                                  "pyRowKeyInfo":  {
+                                                                                       "pxObjClass":  "Embed-ReportRowKeyInfo",
+                                                                                       "pyGetRowKey":  "true",
+                                                                                       "pxResults":  [
+                                                                                                         {
+                                                                                                             "pyLabel":  ".pzInsKey"
+                                                                                                         }
+                                                                                                     ],
+                                                                                       "pyRowKeys":  [
+                                                                                                         ".pzInsKey"
+                                                                                                     ]
+                                                                                   },
+                                                                  "pySetQueries":  {
+                                                                                       "pxObjClass":  "Embed-ReportSetQueries",
+                                                                                       "pySetQueryInfo":  [
+
+                                                                                                          ]
+                                                                                   },
+                                                                  "pySubReportFrom":  {
+                                                                                          "pxObjClass":  "Embed-SubReportInfo",
+                                                                                          "pyColumns":  [
+
+                                                                                                        ],
+                                                                                          "pyFilters":  {
+                                                                                                            "pxObjClass":  "Embed-ReportFilters",
+                                                                                                            "pyFilter":  [
+
+                                                                                                                         ]
+                                                                                                        }
+                                                                                      },
+                                                                  "pySubReportInfo":  [
+
+                                                                                      ]
+                                                              }
+                                             },
+                               "pyContentSource":  {
+                                                       "pxObjClass":  "Embed-SummaryParams"
+                                                   },
+                               "pyIndirectIncludes":  [
+                                                          {
+                                                              "pxObjClass":  "Embed-Alias"
+                                                          }
+                                                      ],
+                               "pyPagesAndClasses":  [
+                                                         {
+                                                             "pxObjClass":  "Embed-PagesAndClasses",
+                                                             "pyPagesAndClassesClass":  "TGB-FW-HR-Data-Position"
+                                                         }
+                                                     ],
+                               "pyParameters":  [
+                                                    {
+                                                        "pxObjClass":  "Embed-MethodParams"
+                                                    }
+                                                ],
+                               "pyReportMetaData":  {
+                                                        "pxIsSummary":  "false",
+                                                        "pxObjClass":  "Embed-ReportMetaDataInfo"
+                                                    },
+                               "pyUI":  {
+                                            "pxObjClass":  "Embed-ReportUI",
+                                            "pyCategory":  "pyWorkAnalysis",
+                                            "pyIgnoreFormattingExcelExport":  "false",
+                                            "pyIgnoreFormattingPDFExport":  "false",
+                                            "pyIgnoreSkinPDFExport":  "false",
+                                            "pyIsCertified":  "false",
+                                            "pyReportContentPageName":  "pyReportContentPage",
+                                            "pyReportingDbDropdown":  "Alternate",
+                                            "pyShowUnExposedProperties":  "false",
+                                            "pySplitPDFExport":  "false",
+                                            "pySplitTableWithPageBreak":  "false",
+                                            "pyUseAlternateDb":  "false",
+                                            "pzIsSummary":  "false",
+                                            "pyBody":  {
+                                                           "pxObjClass":  "Embed-ReportBody",
+                                                           "pyCustomGroupingEnabled":  "false",
+                                                           "pyCustomRowEnabled":  "false",
+                                                           "pyExportGroupingToExcel":  "false",
+                                                           "pyGroupingEnabled":  "false",
+                                                           "pyGroupingSortNumber":  "1",
+                                                           "pyHeaderDisplay":  "Default",
+                                                           "pySpreadSheetStyle":  "false",
+                                                           "pyCustomFiltering":  {
+                                                                                     "pxObjClass":  "Embed-ReportCustomPrompt",
+                                                                                     "pyEnableCustomFiltering":  "false",
+                                                                                     "pyPromptPageName":  "CustomFilter"
+                                                                                 },
+                                                           "pyReportRank":  {
+                                                                                "pxObjClass":  "Embed-ReportRank",
+                                                                                "pyPartitionType":  "All",
+                                                                                "pyRankUIField":  {
+                                                                                                      "pxObjClass":  "Embed-ReportUIFields"
+                                                                                                  }
+                                                                            },
+                                                           "pyRows":  {
+                                                                          "pxObjClass":  "Embed-ReportRows",
+                                                                          "pyEvents":  {
+                                                                                           "pxObjClass":  "Embed-ReportEvents",
+                                                                                           "pyEventList":  [
+                                                                                                               {
+                                                                                                                   "pxObjClass":  "Embed-ReportEvent"
+                                                                                                               }
+                                                                                                           ]
+                                                                                       }
+                                                                      },
+                                                           "pyUIFields":  [
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Text",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".ID",
+                                                                                  "pyFieldLabel":  "ID*",
+                                                                                  "pyFieldName":  ".ID",
+                                                                                  "pyHide":  "false",
+                                                                                  "pySortOrder":  "1",
+                                                                                  "pySortType":  "ASC",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp",
+                                                                                                        "pyAutoHTML":  "false",
+                                                                                                        "pyLabel":  "KeyInput",
+                                                                                                        "pyPropertyName":  "pzKeyInput"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Text",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".JobTitle",
+                                                                                  "pyFieldLabel":  "Job title",
+                                                                                  "pyFieldName":  ".JobTitle",
+                                                                                  "pyHide":  "false",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Text",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".JobDescription",
+                                                                                  "pyFieldLabel":  "Job description",
+                                                                                  "pyFieldName":  ".JobDescription",
+                                                                                  "pyHide":  "false",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Text",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".Department",
+                                                                                  "pyFieldLabel":  "Department",
+                                                                                  "pyFieldName":  ".Department",
+                                                                                  "pyHide":  "false",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Text",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".Recruiter",
+                                                                                  "pyFieldLabel":  "Recruiter",
+                                                                                  "pyFieldName":  ".Recruiter",
+                                                                                  "pyHide":  "false",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp",
+                                                                                                        "pyAutoHTML":  "false",
+                                                                                                        "pyLabel":  "Operators by WorkGroup dropdown",
+                                                                                                        "pyPropertyName":  "pzOperatorsByWorkGroupDropdown"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Text",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".Manager",
+                                                                                  "pyFieldLabel":  "Manager",
+                                                                                  "pyFieldName":  ".Manager",
+                                                                                  "pyHide":  "false",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp",
+                                                                                                        "pyAutoHTML":  "false",
+                                                                                                        "pyLabel":  "Operators by WorkGroup dropdown",
+                                                                                                        "pyPropertyName":  "pzOperatorsByWorkGroupDropdown"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Text",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".VP",
+                                                                                  "pyFieldLabel":  "VP",
+                                                                                  "pyFieldName":  ".VP",
+                                                                                  "pyHide":  "false",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp",
+                                                                                                        "pyAutoHTML":  "false",
+                                                                                                        "pyLabel":  "Operators by WorkGroup dropdown",
+                                                                                                        "pyPropertyName":  "pzOperatorsByWorkGroupDropdown"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Integer",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".MinimumSalary",
+                                                                                  "pyFieldLabel":  "Minimum salary",
+                                                                                  "pyFieldName":  ".MinimumSalary",
+                                                                                  "pyHide":  "false",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp",
+                                                                                                        "pyLabel":  "Format an Integer property",
+                                                                                                        "pyPropertyName":  "Integer"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Embed-ReportUIFields",
+                                                                                  "pyDataType":  "Integer",
+                                                                                  "pyDisplayValues":  "false",
+                                                                                  "pyEchoFieldName":  ".MaximumSalary",
+                                                                                  "pyFieldLabel":  "Maximum salary",
+                                                                                  "pyFieldName":  ".MaximumSalary",
+                                                                                  "pyHide":  "false",
+                                                                                  "pyFieldFormat":  {
+                                                                                                        "pxObjClass":  "Embed-ReportHtmlProp",
+                                                                                                        "pyLabel":  "Format an Integer property",
+                                                                                                        "pyPropertyName":  "Integer"
+                                                                                                    },
+                                                                                  "pySQLFunction":  {
+                                                                                                        "pxObjClass":  "Embed-UserFunction"
+                                                                                                    }
+                                                                              }
+                                                                          ],
+                                                           "pyUIFilters":  {
+                                                                               "pxObjClass":  "Embed-ReportFilters",
+                                                                               "pyFilterLogic":  "A",
+                                                                               "pyGetDistinctRows":  "false",
+                                                                               "pyShowLabels":  "true",
+                                                                               "pyAppContextInfo":  {
+                                                                                                        "pxObjClass":  "Embed-AppContextInfo"
+                                                                                                    },
+                                                                               "pyFilter":  [
+                                                                                                {
+                                                                                                    "pxObjClass":  "Embed-ReportFilter",
+                                                                                                    "pyIsLeftOperandAFunction":  "false",
+                                                                                                    "pyLogicLabel":  "A"
+                                                                                                }
+                                                                                            ]
+                                                                           },
+                                                           "pyUIHavingFilters":  {
+                                                                                     "pxObjClass":  "Embed-ReportFilters-Having",
+                                                                                     "pyFilter":  [
+
+                                                                                                  ]
+                                                                                 }
+                                                       },
+                                            "pyChart":  {
+                                                            "pxCreateDateTime":  "2016-02-04T13:15:50.569Z",
+                                                            "pxCreateOperator":  "Admin@TGB",
+                                                            "pxCreateOpName":  "Administrator",
+                                                            "pxCreateSystemID":  "pega",
+                                                            "pxObjClass":  "Embed-ReportGraph",
+                                                            "pyChartOutputType":  "Flash",
+                                                            "pyEnable2D3D":  "false",
+                                                            "pyEnableChart":  "false",
+                                                            "pyGraphType":  "Column",
+                                                            "pyHeight":  "0",
+                                                            "pyIs3D":  "false",
+                                                            "pyLegendDirection":  "horizontal",
+                                                            "pyLegendEnable":  "true",
+                                                            "pyLegendPlacement":  "bottom",
+                                                            "pyMax":  "2",
+                                                            "pyMaxSubTypeIcons":  "1",
+                                                            "pyMin":  "1",
+                                                            "pyOptionsToEdit":  "Format",
+                                                            "pyShowAllGridLines":  "true",
+                                                            "pyShowAllLabelsMS":  "true",
+                                                            "pyShowAllLabelsSS":  "false",
+                                                            "pyShowDataTips":  "true",
+                                                            "pyShowMaxButton":  "false",
+                                                            "pyShowNewWindow":  "true",
+                                                            "pyShowSVButton":  "false",
+                                                            "pySize":  "Large",
+                                                            "pySliderEnabled":  "false",
+                                                            "pySliderGroupCount":  "0",
+                                                            "pySubChartIndex":  "1",
+                                                            "pySubType":  "clustered",
+                                                            "pyTimeOut":  "0",
+                                                            "pyTitleEnabled":  "true",
+                                                            "pyTitleFontSize":  "14",
+                                                            "pyTitleFontStyle":  "regular",
+                                                            "pyUseFusionChart":  "true",
+                                                            "pyUseSolidColorsFor2D":  "true",
+                                                            "pyUseV6Chart":  "true",
+                                                            "pyValueOfChart":  "0",
+                                                            "pyWidth":  "0",
+                                                            "pxResults":  [
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "ID*",
+                                                                                  "pyStringType":  "Text",
+                                                                                  "pyTargetProperty":  ".ID",
+                                                                                  "pzIndexCount":  "1"
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "Job title",
+                                                                                  "pyStringType":  "Text",
+                                                                                  "pyTargetProperty":  ".JobTitle",
+                                                                                  "pzIndexCount":  "2"
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "Job description",
+                                                                                  "pyStringType":  "Text",
+                                                                                  "pyTargetProperty":  ".JobDescription",
+                                                                                  "pzIndexCount":  "3"
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "Department",
+                                                                                  "pyStringType":  "Text",
+                                                                                  "pyTargetProperty":  ".Department",
+                                                                                  "pzIndexCount":  "4"
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "Recruiter",
+                                                                                  "pyStringType":  "Text",
+                                                                                  "pyTargetProperty":  ".Recruiter",
+                                                                                  "pzIndexCount":  "5"
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "Manager",
+                                                                                  "pyStringType":  "Text",
+                                                                                  "pyTargetProperty":  ".Manager",
+                                                                                  "pzIndexCount":  "6"
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "VP",
+                                                                                  "pyStringType":  "Text",
+                                                                                  "pyTargetProperty":  ".VP",
+                                                                                  "pzIndexCount":  "7"
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "Minimum salary",
+                                                                                  "pyStringType":  "Integer",
+                                                                                  "pyTargetProperty":  ".MinimumSalary",
+                                                                                  "pzIndexCount":  "8"
+                                                                              },
+                                                                              {
+                                                                                  "pxObjClass":  "Rule-Obj-Property",
+                                                                                  "pyLabel":  "Maximum salary",
+                                                                                  "pyStringType":  "Integer",
+                                                                                  "pyTargetProperty":  ".MaximumSalary",
+                                                                                  "pzIndexCount":  "9"
+                                                                              }
+                                                                          ],
+                                                            "pyBackgroundColor":  [
+                                                                                      {
+                                                                                          "pxObjClass":  "Embed-ReportGraph-BGColor"
+                                                                                      }
+                                                                                  ],
+                                                            "pyCategoryAxis":  [
+
+                                                                               ],
+                                                            "pyGauge":  {
+                                                                            "pxObjClass":  "Embed-ReportGraph-Gauge",
+                                                                            "pyBorderAlpha":  "1",
+                                                                            "pyBorderThickness":  "1",
+                                                                            "pyCoverAlpha":  "1",
+                                                                            "pyCoverRadius":  "0",
+                                                                            "pyDateTimeFormat":  "dd:hh:mm:ss",
+                                                                            "pyDateTimeInput":  "milliseconds",
+                                                                            "pyMajorTickLength":  "10",
+                                                                            "pyMajorTicks":  "0",
+                                                                            "pyMajorTickThickness":  "3",
+                                                                            "pyMinorTickLength":  "5",
+                                                                            "pyMinorTicks":  "0",
+                                                                            "pyMinorTickThickness":  "1",
+                                                                            "pyNeedleAlpha":  "1",
+                                                                            "pyNeedleBaseWidth":  "0",
+                                                                            "pyNeedleThickness":  "3",
+                                                                            "pyNeedleTopWidth":  "0",
+                                                                            "pyNumberCurrencySymbol":  "$",
+                                                                            "pyNumberFormat":  "general",
+                                                                            "pyNumberNegativeSign":  "false",
+                                                                            "pyNumberPrecision":  "2",
+                                                                            "pyNumberThouSeperator":  "true",
+                                                                            "pyShowValue":  "true",
+                                                                            "pyTickLocation":  "Inside",
+                                                                            "pyValueIndex":  "1",
+                                                                            "pyFieldHTMLParams":  {
+                                                                                                      "pyTempPlaceHolder":  "TempPlaceHolder"
+                                                                                                  }
+                                                                        },
+                                                            "pyPie":  {
+                                                                          "pxObjClass":  "Embed-ReportGraph-Pie",
+                                                                          "pyDateTimeFormat":  "dd:hh:mm:ss",
+                                                                          "pyDateTimeInput":  "milliseconds",
+                                                                          "pyExplodeRadius":  "0.1",
+                                                                          "pyInnerRadius":  "0.1",
+                                                                          "pyLabelEnabled":  "false",
+                                                                          "pyLabelField":  "false",
+                                                                          "pyLabelNameField":  "false",
+                                                                          "pyLabelPercent":  "false",
+                                                                          "pyNumberCurrencySymbol":  "$",
+                                                                          "pyNumberNegativeSign":  "false",
+                                                                          "pyNumberPrecision":  "2",
+                                                                          "pyNumberThouSeperator":  "true",
+                                                                          "pyFieldHTMLParams":  {
+                                                                                                    "pyTempPlaceHolder":  "TempPlaceHolder"
+                                                                                                },
+                                                                          "pyNameFieldHTMLParams":  {
+                                                                                                        "pyTempPlaceHolder":  "TempPlaceHolder"
+                                                                                                    }
+                                                                      },
+                                                            "pyXY":  {
+                                                                         "pxObjClass":  "Embed-ReportGraph-XY",
+                                                                         "pyInterpolateValues":  "true",
+                                                                         "pySwapSeries":  "false",
+                                                                         "pyTitleFontSize":  "8",
+                                                                         "pyTitleFontStyle":  "regular",
+                                                                         "pyUniformMinor":  "true",
+                                                                         "pyUseColorRanges":  "false",
+                                                                         "pyArea":  {
+                                                                                        "pxObjClass":  "Embed-ReportGraph-XY-Area"
+                                                                                    },
+                                                                         "pyBar":  {
+                                                                                       "pxObjClass":  "Embed-ReportGraph-XY-Bar",
+                                                                                       "pyMaxBarWidth":  "0"
+                                                                                   },
+                                                                         "pyBubble":  {
+                                                                                          "pxObjClass":  "Embed-ReportGraph-XY-Bubble"
+                                                                                      },
+                                                                         "pyColumn":  {
+                                                                                          "pxObjClass":  "Embed-ReportGraph-XY-Column",
+                                                                                          "pyMaxColWidth":  "0"
+                                                                                      },
+                                                                         "pyDataAxis":  [
+                                                                                            {
+                                                                                                "pxObjClass":  "Embed-ReportGraph-XY-DataAxis",
+                                                                                                "pyAxisCurrencySymbol":  "$",
+                                                                                                "pyAxisDateTimeFormat":  "dd:hh:mm:ss",
+                                                                                                "pyAxisDateTimeInput":  "milliseconds",
+                                                                                                "pyAxisDecimalSeperator":  "true",
+                                                                                                "pyAxisNegativeSign":  "false",
+                                                                                                "pyAxisPrecision":  "2",
+                                                                                                "pyAxisScale":  "Linear",
+                                                                                                "pyAxisThouSeperator":  "true",
+                                                                                                "pyMissingsAsZero":  "true",
+                                                                                                "pyNumberFormat":  "general",
+                                                                                                "pyShowGridLines":  "true",
+                                                                                                "pyShowLabels":  "true",
+                                                                                                "pyAxisHTMLParams":  {
+                                                                                                                         "pyTempPlaceHolder":  "TempPlaceHolder"
+                                                                                                                     },
+                                                                                                "pyDataAxisList":  [
+                                                                                                                       {
+                                                                                                                           "pxObjClass":  "Embed-ReportGraph-XY-Axis",
+                                                                                                                           "pyFieldIndex":  "0"
+                                                                                                                       }
+                                                                                                                   ]
+                                                                                            }
+                                                                                        ],
+                                                                         "pyGroupAxis":  [
+                                                                                             {
+                                                                                                 "pxObjClass":  "Embed-ReportGraph-XY-GroupAxis",
+                                                                                                 "pyAxisScale":  "Category",
+                                                                                                 "pyShowGridLines":  "false",
+                                                                                                 "pyShowLabels":  "true",
+                                                                                                 "pyAxisHTMLParams":  {
+                                                                                                                          "pyTempPlaceHolder":  "TempPlaceHolder"
+                                                                                                                      },
+                                                                                                 "pyGroupAxisList":  [
+                                                                                                                         {
+                                                                                                                             "pxObjClass":  "Embed-ReportGraph-XY-Axis",
+                                                                                                                             "pyFieldIndex":  "0"
+                                                                                                                         }
+                                                                                                                     ],
+                                                                                                 "pySubGrpAxisHTMLParams":  {
+                                                                                                                                "pyTempPlaceHolder":  "TempPlaceHolder"
+                                                                                                                            }
+                                                                                             }
+                                                                                         ],
+                                                                         "pyLine":  {
+                                                                                        "pxObjClass":  "Embed-ReportGraph-XY-Line",
+                                                                                        "pyDropShadow":  "true",
+                                                                                        "pyLineWeight":  "3"
+                                                                                    }
+                                                                     }
+                                                        },
+                                            "pyPromptSectionParams":  {
+                                                                          "pxObjClass":  "Embed-ReportPromptSection",
+                                                                          "pzDisplayFilterPrompt":  "true"
+                                                                      },
+                                            "pySecurity":  {
+                                                               "pxObjClass":  "Embed-ReportSecurity",
+                                                               "pyPrivilegeList":  [
+                                                                                       {
+                                                                                           "pxObjClass":  "Embed-Rule-PrivilegeSecurity"
+                                                                                       }
+                                                                                   ]
+                                                           },
+                                            "pySmartInfo":  {
+                                                                "pxObjClass":  "Embed-ReportSmartInfo",
+                                                                "pySingleClickSInfo":  {
+                                                                                           "pxObjClass":  "Embed-ReportSingleClickInfo",
+                                                                                           "pyEnabled":  "false",
+                                                                                           "pySmartInfoHeader":  "Additional Information"
+                                                                                       }
+                                                            },
+                                            "pySource":  {
+                                                             "pxObjClass":  "Embed-ReportSource",
+                                                             "pyAllowApproximation":  "false",
+                                                             "pyUseImplementationClass":  "false",
+                                                             "pyAssociations":  [
+
+                                                                                ],
+                                                             "pyIndexInfo":  [
+
+                                                                             ],
+                                                             "pyJoinInfo":  [
+
+                                                                            ],
+                                                             "pyRowKeyInfo":  {
+                                                                                  "pxObjClass":  "Embed-ReportRowKeyInfo",
+                                                                                  "pyGetRowKey":  "true",
+                                                                                  "pxResults":  [
+                                                                                                    {
+                                                                                                        "pyLabel":  ".pzInsKey"
+                                                                                                    }
+                                                                                                ],
+                                                                                  "pyRowKeys":  [
+                                                                                                    ".pzInsKey"
+                                                                                                ]
+                                                                              },
+                                                             "pySubReportInfo":  [
+
+                                                                                 ]
+                                                         },
+                                            "pyUserInteractions":  {
+                                                                       "pxObjClass":  "Embed-ReportUserInteractions",
+                                                                       "pyDesignModeActualResults":  "false",
+                                                                       "pyDisableDrillDown":  "false",
+                                                                       "pyDrillDownReportName":  "pyDefaultReport",
+                                                                       "pyEnableAddFilters":  "true",
+                                                                       "pyExpandAllGroupBy":  "true",
+                                                                       "pyFixedHeader":  "false",
+                                                                       "pyPromptForFilters":  "false",
+                                                                       "pyShowDataOnly":  "false",
+                                                                       "pyPagingParams":  {
+                                                                                              "pxMorePages":  "false",
+                                                                                              "pxObjClass":  "Embed-ReportPaging",
+                                                                                              "pyAlignment":  "Right",
+                                                                                              "pyPosition":  "Top",
+                                                                                              "pyReturnTotalResultCount":  "true",
+                                                                                              "pySortMode":  "dataset",
+                                                                                              "pyWindowSize":  "10"
+                                                                                          },
+                                                                       "pyReportToolbarOptions":  {
+                                                                                                      "pxObjClass":  "Embed-ReportViewerCommands",
+                                                                                                      "pyDisplayCommandMenu":  "true",
+                                                                                                      "pyDisplayCommandRibbon":  "true",
+                                                                                                      "pyDisplayReportHeader":  "true",
+                                                                                                      "pyEnableAdvancedFiltering":  "true",
+                                                                                                      "pyEnableAppendColumn":  "true",
+                                                                                                      "pyEnableConvertToList":  "true",
+                                                                                                      "pyEnableEditChart":  "true",
+                                                                                                      "pyEnableEditColumns":  "true",
+                                                                                                      "pyEnableEditing":  "true",
+                                                                                                      "pyEnableEditReportTitle":  "true",
+                                                                                                      "pyEnableExportToExcel":  "true",
+                                                                                                      "pyEnableExportToPDF":  "true",
+                                                                                                      "pyEnableFilters":  "true",
+                                                                                                      "pyEnablePrint":  "true",
+                                                                                                      "pyEnableSave":  "true",
+                                                                                                      "pyEnableSaveAs":  "true",
+                                                                                                      "pyEnableSummarize":  "true"
+                                                                                                  }
+                                                                   }
+                                        }
+                           },
+    "pyReportExecutionDetails":  {
+                                     "pxObjClass":  "Embed-Report-Execution-Details",
+                                     "pyDatabaseType":  "POSTGRESQL",
+                                     "pyDataStoreID":  "RDBMS - Pega (Local)",
+                                     "pyResolvedQueryExecutionTime":  "2.257 ms"
+                                 },
+    "pzPerformanceSettings":  [
+
+                              ]
+}

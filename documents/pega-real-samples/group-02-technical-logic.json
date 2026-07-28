@@ -1,0 +1,74 @@
+[
+  {
+    "pxObjClass": "Rule-Obj-Activity", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyActivityName": "ProcessLoanApproval", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "steps": [
+      { "pyStepId": "STEP-101", "pyStepNum": "1", "pyStepContext": "pyWorkPage.Applicant", "pyMethod": "Call", "pyMethodParameters": "PegaSample-CustomerLoan-Work.ValidateCreditScore", "pyPreCondition": { "pyWhenName": "IsCreditCheckRequired" } },
+      { "pyStepId": "STEP-102", "pyStepNum": "2", "pyStepContext": "pyWorkPage", "pyMethod": "Property-Set", "pyParamArray": [{ "pyParamName": ".pyStatusWork", "pyParamValue": "\"Pending-Approval\"" }] },
+      { "pyStepId": "STEP-103", "pyStepNum": "3", "pyStepContext": "Primary", "pyMethod": "Call", "pyMethodParameters": "@baseclass.SendNotification" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Utility-Function", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyFunctionName": "CalculateMonthlyInstallment", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyFunctionLibrary": "LoanCalculationLibrary",
+    "pyReturnType": "Double",
+    "pyParameters": [
+      { "pyParamName": "principal",    "pyParamType": "Double" },
+      { "pyParamName": "annualRate",   "pyParamType": "Double" },
+      { "pyParamName": "termMonths",   "pyParamType": "Integer" }
+    ],
+    "pyExpression": "principal * (annualRate/12) / (1 - Math.pow(1 + annualRate/12, -termMonths))"
+  },
+  {
+    "pxObjClass": "Rule-Utility-Library", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLibraryName": "LoanCalculationLibrary", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDescription": "Collection of financial calculation helper functions for loan processing",
+    "pyFunctions": ["CalculateMonthlyInstallment", "CalculateCompoundInterest", "DetermineRiskTier"]
+  },
+  {
+    "pxObjClass": "Rule-File-Text", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "LoanApplicationEmailTemplate", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyFileType": "text/html", "pyContent": "<html><body><h1>Loan Application Confirmation</h1><p>Dear {.FirstName}, your application {.pyID} has been received.</p></body></html>"
+  },
+  {
+    "pxObjClass": "Rule-File-HTML", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "LoanSummaryStaticTemplate", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyContent": "<div class=\"loan-summary\"><h2>Loan Summary</h2></div>"
+  },
+  {
+    "pxObjClass": "Rule-Obj-HTML", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "LoanCalculatorWidget", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyHtmlType": "Dynamic", "pyStreamContent": "<pega:include name=\"LoanCalculatorSection\" />"
+  },
+  {
+    "pxObjClass": "Rule-Obj-XML", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "LoanApplicationXMLExport", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyStreamContent": "<LoanApplication><LoanID>{.pyID}</LoanID><Amount>{.LoanAmount}</Amount></LoanApplication>"
+  },
+  {
+    "pxObjClass": "Rule-File-JS", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "LoanCalculatorScript", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyContent": "function recalcInstallment(p, r, n) { return p * (r/12) / (1 - Math.pow(1+r/12,-n)); }"
+  },
+  {
+    "pxObjClass": "Rule-File-CSS", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "LoanPortalCustomStyles", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyContent": ".loan-header { color: #003366; font-size: 1.5rem; } .loan-amount { font-weight: bold; color: #006600; }"
+  },
+  {
+    "pxObjClass": "Rule-File-Extract", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyExtractName": "LoanDataExtract", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyExtractType": "CSV", "pyReportDefinition": "PendingLoanApplicationsReport", "pySchedule": "Daily"
+  },
+  {
+    "pxObjClass": "Rule-Obj-Stream", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyStreamName": "LoanApprovalLetterStream", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyStreamType": "HTML", "pyStreamContent": "Congratulations! Your loan {.pyID} for {.LoanAmount} has been approved."
+  },
+  {
+    "pxObjClass": "Rule-Utility-Java", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "CreditScoreExternalCheck", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyJavaCode": "import com.bank.credit.*; CreditEngine engine = new CreditEngine(); return engine.getScore(applicantId);"
+  },
+  {
+    "pxObjClass": "Rule-Obj-PropertyAlias", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyAliasName": "MonthlyPaymentAlias", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyPropertyName": ".CalculatedMonthlyInstallment", "pyLabel": "Monthly Payment Amount"
+  },
+  {
+    "pxObjClass": "Rule-Utility-File", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "LoanDocumentHandler", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyFileHandlerType": "Upload", "pyAllowedExtensions": ["pdf","docx","jpg"], "pyMaxFileSizeMB": 10
+  },
+  {
+    "pxObjClass": "Rule-Utility-Script", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleName": "LoanMigrationScript", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyScriptType": "Groovy", "pyContent": "def loans = pega.open('Work-LoanApplication'); loans.each { it.pyStatusWork = 'Active'; pega.save(it); }"
+  }
+]

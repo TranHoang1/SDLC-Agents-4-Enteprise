@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+ArtifactType: application
+ArtifactName: CommonBase
+ArtifactVersion: 8
+
+Name: FileMetadata
+

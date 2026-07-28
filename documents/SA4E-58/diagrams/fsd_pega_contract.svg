@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+  <text x="550" y="40" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">SA4E-58: FSD 7 Pega REST Services Contract Matrix</text>
+  
+  <rect x="50" y="80" width="1000" height="400" rx="10" fill="#313244" stroke="#a6e3a1" stroke-width="2"/>
+  
+  <line x1="50" y1="130" x2="1050" y2="130" stroke="#a6e3a1" stroke-width="2"/>
+  <text x="90" y="110" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="14" font-weight="bold">ID</text>
+  <text x="160" y="110" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Service Endpoint</text>
+  <text x="440" y="110" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="14" font-weight="bold">HTTP</text>
+  <text x="520" y="110" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Pega Activity Name</text>
+  <text x="800" y="110" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Functional Purpose</text>
+
+  <text x="90" y="170" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">S1</text>
+  <text x="160" y="170" fill="#89dceb" font-family="Arial, sans-serif" font-size="13">/rules/{insKey}</text>
+  <text x="440" y="170" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="13">GET</text>
+  <text x="520" y="170" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="13">pzGetRuleInstanceByHandle</text>
+  <text x="800" y="170" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">Tải 100% Rule XML/JSON thô</text>
+
+  <text x="90" y="220" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">S2</text>
+  <text x="160" y="220" fill="#89dceb" font-family="Arial, sans-serif" font-size="13">/rules/query</text>
+  <text x="440" y="220" fill="#f9e2af" font-family="Arial, sans-serif" font-size="13">POST</text>
+  <text x="520" y="220" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="13">pzQueryRuleByTriple</text>
+  <text x="800" y="220" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">Truy vấn theo bộ 3 Class/Name</text>
+
+  <text x="90" y="270" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">S3</text>
+  <text x="160" y="270" fill="#89dceb" font-family="Arial, sans-serif" font-size="13">/rules/list</text>
+  <text x="440" y="270" fill="#f9e2af" font-family="Arial, sans-serif" font-size="13">POST</text>
+  <text x="520" y="270" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="13">QueryRuleData</text>
+  <text x="800" y="270" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">Quét danh sách Rule summaries</text>
+
+  <text x="90" y="320" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">S4</text>
+  <text x="160" y="320" fill="#89dceb" font-family="Arial, sans-serif" font-size="13">/rules/save</text>
+  <text x="440" y="320" fill="#f9e2af" font-family="Arial, sans-serif" font-size="13">POST</text>
+  <text x="520" y="320" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="13">pzSavePegaRule</text>
+  <text x="800" y="320" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">Lưu/Cập nhật Rule qua Commit</text>
+
+  <text x="90" y="370" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">S5</text>
+  <text x="160" y="370" fill="#89dceb" font-family="Arial, sans-serif" font-size="13">/rules/checkout</text>
+  <text x="440" y="370" fill="#f9e2af" font-family="Arial, sans-serif" font-size="13">POST</text>
+  <text x="520" y="370" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="13">pzCheckoutPegaRule</text>
+  <text x="800" y="370" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">Lock Control (Checkout/Checkin/Undo)</text>
+
+  <text x="90" y="420" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">S6</text>
+  <text x="160" y="420" fill="#89dceb" font-family="Arial, sans-serif" font-size="13">/rules/test</text>
+  <text x="440" y="420" fill="#f9e2af" font-family="Arial, sans-serif" font-size="13">POST</text>
+  <text x="520" y="420" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="13">pzExecuteScenarioTestSuite</text>
+  <text x="800" y="420" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">Kích hoạt QA Scenario Test Suite</text>
+
+  <text x="90" y="470" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">S7</text>
+  <text x="160" y="470" fill="#89dceb" font-family="Arial, sans-serif" font-size="13">/rules/meta/{ClassName}</text>
+  <text x="440" y="470" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="13">GET</text>
+  <text x="520" y="470" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="13">GetClassMetadata</text>
+  <text x="800" y="470" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">Tải Schema Metadata của Class</text>
+</svg>

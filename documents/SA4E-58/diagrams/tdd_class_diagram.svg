@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+  <text x="550" y="40" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">SA4E-58: TDD Technical Class Diagram</text>
+
+  <rect x="60" y="90" width="450" height="380" rx="10" fill="#313244" stroke="#89dceb" stroke-width="2"/>
+  <text x="285" y="130" fill="#89dceb" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">PegaHttpClient Class</text>
+  <line x1="60" y1="145" x2="510" y2="145" stroke="#89dceb" stroke-width="2"/>
+  <text x="80" y="175" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ getRuleByInsKey(insKey: string): Promise&lt;object&gt;</text>
+  <text x="80" y="210" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ queryRuleByTriple(class, appliesTo, name): Promise&lt;object&gt;</text>
+  <text x="80" y="245" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ listApplicationRules(class, size, page): Promise&lt;object&gt;</text>
+  <text x="80" y="280" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ savePegaRule(payload: object): Promise&lt;object&gt;</text>
+  <text x="80" y="315" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ checkoutPegaRule(insKey, action, comment): Promise&lt;object&gt;</text>
+  <text x="80" y="350" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ executeScenarioTestSuite(testSuiteID): Promise&lt;object&gt;</text>
+  <text x="80" y="385" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ getClassMetadata(className: string): Promise&lt;object&gt;</text>
+
+  <path d="M 510 280 L 590 280" stroke="#f5c2e7" stroke-width="4"/>
+
+  <rect x="590" y="90" width="450" height="380" rx="10" fill="#313244" stroke="#f5c2e7" stroke-width="2"/>
+  <text x="815" y="130" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">PegaMcpTools Class</text>
+  <line x1="590" y1="145" x2="1040" y2="145" stroke="#f5c2e7" stroke-width="2"/>
+  <text x="610" y="175" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ getRuleByInsKey(args): Promise&lt;MCPResult&gt;</text>
+  <text x="610" y="210" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ queryRule(args): Promise&lt;MCPResult&gt;</text>
+  <text x="610" y="245" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ listRules(args): Promise&lt;MCPResult&gt;</text>
+  <text x="610" y="280" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ saveRule(args): Promise&lt;MCPResult&gt;</text>
+  <text x="610" y="315" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ checkoutRule(args): Promise&lt;MCPResult&gt;</text>
+  <text x="610" y="350" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ runTests(args): Promise&lt;MCPResult&gt;</text>
+  <text x="610" y="385" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">+ getClassMetadata(args): Promise&lt;MCPResult&gt;</text>
+</svg>

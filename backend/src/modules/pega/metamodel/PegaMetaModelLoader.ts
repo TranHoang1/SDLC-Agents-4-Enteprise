@@ -72,6 +72,10 @@ export class PegaMetaModelLoader {
     }
   }
 
+  public registerClass(def: PegaClassDefinition): void {
+    this.registry.set(def.pxObjClass, def);
+  }
+
   public getClass(pxObjClass: string): PegaClassDefinition | undefined {
     return this.registry.get(pxObjClass);
   }
@@ -149,7 +153,7 @@ export class PegaMetaModelLoader {
       const type = this.inferType(val, key);
       const required = key === 'pxObjClass' || key === 'pyClassName' || key === 'pyRuleName';
 
-      if (type === 'object' || Array.isArray(val)) continue;
+      if ((type as string) === 'object' || Array.isArray(val)) continue;
 
       props.push({ name: key, type, required, isSystem, isReference, description: undefined });
     }

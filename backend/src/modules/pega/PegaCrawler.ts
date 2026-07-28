@@ -59,6 +59,17 @@ export class PegaCrawler {
     return { missing, cached };
   }
 
+  /** Rule types the Pega REST API can actually return via GET /rules/{insKey}. */
+  private static FETCHABLE_TYPES = new Set([
+    'Rule-Obj-Class',
+    'Data-Admin-Operator-ID',
+    'Rule-Obj-Flow',
+    'Rule-Obj-CaseType',
+    'Rule-Obj-Activity',
+    'Rule-Obj-FlowAction',
+    'Rule-HTML-Section',
+  ]);
+
   public computeNextBatch(
     ingestedRules: Record<string, unknown>[],
     visitedKeys: Set<string>,
@@ -70,7 +81,14 @@ export class PegaCrawler {
     for (const rule of ingestedRules) {
       const deps = this.extractRuleReferences(rule);
       for (const dep of deps) {
-        const insKey = `${dep.ruleType} ${dep.ruleName}`;
+        if (!PegaCrawler.FETCHABLE_TYPES.has(dep.ruleType)) continue;
+
+        const insKey = dep.insKey || (
+          (dep.className && dep.className !== '@baseclass')
+            ? `${dep.ruleType.toUpperCase()} ${dep.className} ${dep.ruleName}`
+            : `${dep.ruleType.toUpperCase()} ${dep.ruleName}`
+        );
+
         if (visitedKeys.has(insKey) || seen.has(insKey)) continue;
         seen.add(insKey);
         nextBatch.push({
@@ -86,24 +104,26 @@ export class PegaCrawler {
   }
 
   public parseInsKey(insKey: string): PegaCrawlKey | null {
-    // Format: "RULE-OBJ-CLASS ClassName" or "RULE-OBJ-PROPERTY PropertyName"
-    const spaceIdx = insKey.indexOf(' ');
-    if (spaceIdx === -1) return null;
-    const pxObjClass = insKey.substring(0, spaceIdx).trim();
-    const pyRuleName = insKey.substring(spaceIdx + 1).trim();
-    if (!pxObjClass || !pyRuleName) return null;
+    const cleanKey = insKey.split('#')[0].trim();
+    const tokens = cleanKey.split(/\s+/);
+    if (tokens.length < 2) return null;
 
-    let pyClassName = '@baseclass';
-    const dotIdx = pyRuleName.lastIndexOf('.');
-    if (dotIdx !== -1) {
-      pyClassName = pyRuleName.substring(0, dotIdx);
+    const pxObjClass = this.normalizeObjClass(tokens[0]);
+
+    if (tokens.length >= 3) {
+      return {
+        insKey,
+        pxObjClass,
+        pyClassName: tokens[1],
+        pyRuleName: tokens[2],
+      };
     }
 
     return {
       insKey,
-      pxObjClass: this.normalizeObjClass(pxObjClass),
-      pyClassName,
-      pyRuleName,
+      pxObjClass,
+      pyClassName: "@baseclass",
+      pyRuleName: tokens[1],
     };
   }
 
@@ -118,15 +138,24 @@ export class PegaCrawler {
     const deps: UnresolvedDependency[] = [];
     const visited = new Set<string>();
 
-    const pushDep = (ruleType: string, className: string, ruleName: string) => {
-      const key = `${ruleType}:${className}:${ruleName}`;
+    const pushDep = (ruleType: string, className: string, ruleName: string, exactInsKey?: string) => {
+      const key = exactInsKey || `${ruleType}:${className}:${ruleName}`;
       if (visited.has(key)) return;
       visited.add(key);
-      deps.push({ ruleType, className, ruleName });
+      deps.push({ insKey: exactInsKey, ruleType, className, ruleName });
     };
 
     if (json.pxObjClass) {
-      pushDep(json.pxObjClass as string, json.pyClassName as string || '@baseclass', json.pyRuleName as string || '');
+      const pzKey = (json.pzInsKey as string) || (json.pxInsId as string);
+      pushDep(json.pxObjClass as string, (json.pyClassName as string) || '@baseclass', (json.pyRuleName as string) || '', pzKey);
+    }
+
+    if (json.pyAccessGroup) {
+      pushDep('Data-Admin-Operator-AccessGroup', '@baseclass', json.pyAccessGroup as string, `DATA-ADMIN-OPERATOR-ACCESSGROUP ${json.pyAccessGroup}`);
+    }
+
+    if (json.pyApplication && json.pyApplicationVersion) {
+      pushDep('Rule-Application', '@baseclass', json.pyApplication as string, `RULE-APPLICATION ${json.pyApplication} ${json.pyApplicationVersion}`);
     }
 
     if (json.pyClassName && json.pyClassName !== '@baseclass') {
@@ -150,10 +179,16 @@ export class PegaCrawler {
       for (const ref of pxRuleReferences) {
         if (ref && typeof ref === 'object') {
           const r = ref as Record<string, unknown>;
-          const refCls = (r.pxRuleObjClass || r.pxRuleClassName) as string | undefined;
+          const refObjClass = (r.pxRuleObjClass as string) || '';
+          const refClassName = (r.pxRuleClassName as string) || '@baseclass';
           const refName = r.pyRuleName as string | undefined;
-          if (refCls && refName) {
-            pushDep(refCls, (r.pxRuleClassName as string) || '@baseclass', refName);
+          if (!refObjClass || !refName) continue;
+
+          // Rule-Obj-Class refs are always 2-token insKeys
+          if (refObjClass === 'Rule-Obj-Class') {
+            pushDep('Rule-Obj-Class', '@baseclass', refName);
+          } else {
+            pushDep(refObjClass, refClassName, refName);
           }
         }
       }

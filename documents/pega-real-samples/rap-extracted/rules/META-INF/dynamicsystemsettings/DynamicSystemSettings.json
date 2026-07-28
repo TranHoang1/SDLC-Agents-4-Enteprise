@@ -1,0 +1,1 @@
+{"dass":[{"pySetting":"http://localhost/test/wsdl/dev_server","pyPurpose":"GRS/CreditCheck/DevURL","pyOwner":"CreditCheck"},{"pySetting":"http://localhost/test/wsdl/prod_server","pyPurpose":"GRS/CreditCheck/ProdURL","pyOwner":"CreditCheck"}]}

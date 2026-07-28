@@ -57,7 +57,7 @@ describe('Lexer properties', () => {
 
   it('produces STRING tokens for string literals with preserved value', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 15 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 15 }).filter(isSimpleString),
       (s) => {
         const lexer = new PegaExpressionLexer(`"${s}"`);
         const tokens = lexer.tokenize();
@@ -70,7 +70,7 @@ describe('Lexer properties', () => {
 
   it('produces DOT and IDENTIFIER tokens for property references with correct name', () => {
     fc.assert(fc.property(
-      fc.string({ min: 1, max: 20 }).filter(isValidIdentifier),
+      fc.string({ minLength: 1, maxLength: 20 }).filter(isValidIdentifier),
       (name) => {
         const lexer = new PegaExpressionLexer(`.${name}`);
         const tokens = lexer.tokenize();
@@ -137,7 +137,7 @@ describe('Lexer properties', () => {
 
   it('tokenizes FUNCTION tokens with @ prefix preserved', () => {
     fc.assert(fc.property(
-      fc.string({ min: 1, max: 15 }).filter(isValidIdentifier),
+      fc.string({ minLength: 1, maxLength: 15 }).filter(isValidIdentifier),
       (name) => {
         const lexer = new PegaExpressionLexer(`@${name}()`);
         const tokens = lexer.tokenize();
@@ -152,7 +152,7 @@ describe('Parser properties', () => {
 
   it('parses .identifier to PropertyRefNode with correct parts', () => {
     fc.assert(fc.property(
-      fc.string({ min: 1, max: 15 }).filter(isValidIdentifier),
+      fc.string({ minLength: 1, maxLength: 15 }).filter(isValidIdentifier),
       (name) => {
         const ast = parser.parse(`.${name}`);
         expect(ast).toBeInstanceOf(PropertyRefNode);
@@ -163,7 +163,7 @@ describe('Parser properties', () => {
 
   it('parses chained property ref .a.b.c to PropertyRefNode with all parts', () => {
     fc.assert(fc.property(
-      fc.array(fc.string({ min: 1, max: 8 }).filter(isValidIdentifier), { minLength: 2, maxLength: 5 }),
+      fc.array(fc.string({ minLength: 1, maxLength: 8 }).filter(isValidIdentifier), { minLength: 2, maxLength: 5 }),
       (parts) => {
         const expr = '.' + parts.join('.');
         const ast = parser.parse(expr);
@@ -186,7 +186,7 @@ describe('Parser properties', () => {
 
   it('parses string literal to StringLiteralNode with correct value', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 10 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 10 }).filter(isSimpleString),
       (s) => {
         const ast = parser.parse(`"${s}"`);
         expect(ast).toBeInstanceOf(StringLiteralNode);
@@ -208,8 +208,8 @@ describe('Parser properties', () => {
 
   it('parses comparison .a = .b to BinaryOpNode with EQ operator', () => {
     fc.assert(fc.property(
-      fc.string({ min: 1, max: 10 }).filter(isValidIdentifier),
-      fc.string({ min: 1, max: 10 }).filter(isValidIdentifier),
+      fc.string({ minLength: 1, maxLength: 10 }).filter(isValidIdentifier),
+      fc.string({ minLength: 1, maxLength: 10 }).filter(isValidIdentifier),
       (left, right) => {
         const ast = parser.parse(`.${left} = .${right}`);
         expect(ast).toBeInstanceOf(BinaryOpNode);
@@ -251,7 +251,7 @@ describe('Parser properties', () => {
 
   it('parses function call @name(...) to FunctionCallNode with correct name', () => {
     fc.assert(fc.property(
-      fc.string({ min: 1, max: 12 }).filter(isValidIdentifier),
+      fc.string({ minLength: 1, maxLength: 12 }).filter(isValidIdentifier),
       fc.array(fc.nat({ max: 99 }), { minLength: 0, maxLength: 4 }),
       (name, args) => {
         const argStr = args.length > 0 ? args.map(String).join(', ') : '';
@@ -269,8 +269,8 @@ describe('Evaluator properties', () => {
 
   it('evaluates property reference to the value stored in clipboard', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 10 }).filter(isSimpleString),
-      fc.string({ min: 1, max: 10 }).filter(isValidIdentifier),
+      fc.string({ minLength: 0, maxLength: 10 }).filter(isSimpleString),
+      fc.string({ minLength: 1, maxLength: 10 }).filter(isValidIdentifier),
       (propValue, propName) => {
         const ctx = new PegaClipboardContext({
           pyWorkPage: {
@@ -286,7 +286,7 @@ describe('Evaluator properties', () => {
 
   it('evaluates @upper(@lower(x)) preserving length', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 20 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 20 }).filter(isSimpleString),
       (s) => {
         const ctx = new PegaClipboardContext({
           pyWorkPage: {
@@ -313,8 +313,8 @@ describe('Evaluator properties', () => {
 
   it('evaluates @If(trueCondition, valA, valB) to valA', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 10 }).filter(isSimpleString),
-      fc.string({ min: 0, max: 10 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 10 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 10 }).filter(isSimpleString),
       (a, b) => {
         const ctx = new PegaClipboardContext({ pyWorkPage: {} });
         const result = evaluator.evaluate(`@If(true, "${a}", "${b}")`, ctx);
@@ -325,8 +325,8 @@ describe('Evaluator properties', () => {
 
   it('evaluates @If(falseCondition, valA, valB) to valB', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 10 }).filter(isSimpleString),
-      fc.string({ min: 0, max: 10 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 10 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 10 }).filter(isSimpleString),
       (a, b) => {
         const ctx = new PegaClipboardContext({ pyWorkPage: {} });
         const result = evaluator.evaluate(`@If(false, "${a}", "${b}")`, ctx);
@@ -337,8 +337,8 @@ describe('Evaluator properties', () => {
 
   it('evaluates @Concat(a, b) to a + b', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 8 }).filter(isSimpleString),
-      fc.string({ min: 0, max: 8 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 8 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 8 }).filter(isSimpleString),
       (a, b) => {
         const ctx = new PegaClipboardContext({ pyWorkPage: {} });
         const result = evaluator.evaluate(`@Concat("${a}", "${b}")`, ctx);
@@ -351,7 +351,7 @@ describe('Evaluator properties', () => {
   it('evaluates .ISNULL correctly: null value returns true, non-null returns false', () => {
     fc.assert(fc.property(
       fc.boolean(),
-      fc.string({ min: 0, max: 8 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 8 }).filter(isSimpleString),
       (hasValue, propValue) => {
         const propData = hasValue
           ? { type: 'Text', value: propValue }
@@ -386,7 +386,7 @@ describe('Evaluator properties', () => {
 
   it('evaluates @Length matching string length', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 30 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 30 }).filter(isSimpleString),
       (s) => {
         const ctx = new PegaClipboardContext({
           pyWorkPage: {
@@ -425,7 +425,7 @@ describe('ClipboardContext properties', () => {
 
   it('resolves single-part property preserving value across all primitive types', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 10 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 10 }).filter(isSimpleString),
       fc.integer({ min: -999, max: 999 }),
       fc.boolean(),
       (textVal, numVal, boolVal) => {
@@ -448,10 +448,10 @@ describe('ClipboardContext properties', () => {
 
   it('resolves nested page property via chained paths', () => {
     fc.assert(fc.property(
-      fc.string({ min: 0, max: 8 }).filter(isSimpleString),
-      fc.string({ min: 0, max: 8 }).filter(isSimpleString),
-      fc.string({ min: 1, max: 8 }).filter(isValidIdentifier),
-      fc.string({ min: 1, max: 8 }).filter(isValidIdentifier),
+      fc.string({ minLength: 0, maxLength: 8 }).filter(isSimpleString),
+      fc.string({ minLength: 0, maxLength: 8 }).filter(isSimpleString),
+      fc.string({ minLength: 1, maxLength: 8 }).filter(isValidIdentifier),
+      fc.string({ minLength: 1, maxLength: 8 }).filter(isValidIdentifier),
       (innerVal, outerVal, innerProp, outerProp) => {
         const ctx = new PegaClipboardContext({
           pyWorkPage: {
@@ -472,8 +472,8 @@ describe('ClipboardContext properties', () => {
 
   it('resolves absolute vs relative paths consistently', () => {
     fc.assert(fc.property(
-      fc.string({ min: 1, max: 8 }).filter(isSimpleString),
-      fc.string({ min: 1, max: 8 }).filter(isValidIdentifier),
+      fc.string({ minLength: 1, maxLength: 8 }).filter(isSimpleString),
+      fc.string({ minLength: 1, maxLength: 8 }).filter(isValidIdentifier),
       (propValue, propName) => {
         const ctx = new PegaClipboardContext({
           pyWorkPage: {

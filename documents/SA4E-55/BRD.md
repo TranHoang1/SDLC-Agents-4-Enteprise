@@ -129,7 +129,7 @@ The security requirement flow follows this pattern for every protected API endpo
 | Field | Type | Required | Description | Example |
 |-------|------|----------|-------------|---------|
 | engine | string (enum) | Yes | Database engine | `postgresql` |
-| host | string | Yes | DB server hostname | `db.internal.fecredit.com.vn` |
+| host | string | Yes | DB server hostname | `sa4e-postgres` |
 | port | integer (1–65535) | Yes | DB server port | `5432` |
 | username | string | Yes | DB user | `sa4e_user` |
 | password | string | Yes | DB password | `***` |
@@ -296,7 +296,7 @@ The security requirement flow follows this pattern for every protected API endpo
 | Security Engineer | FE Credit Security Team | Identified and verified security findings F-01 to F-20 | Security audit (SECURITY-AUTH-AUDIT.md) |
 | Backend Developer | SA4E Dev Team | Implemented security fixes across 11 backend files | Implementation (STATUS.json) |
 | Admin User | FE Credit IT Operations | Manages system via Admin Portal — affected by auth requirement changes | Business context |
-| Regular User | duc.nguyen.10@fecredit.com.vn (example) | Uses MCP tools via IDE extension — affected by identity verification changes | Business context |
+| Regular User | abc@abc.com (example) | Uses MCP tools via IDE extension — affected by identity verification changes | Business context |
 | Technical Analyst | TA Agent | Reviews and enriches FSD with technical API contracts | SDLC pipeline |
 
 ---

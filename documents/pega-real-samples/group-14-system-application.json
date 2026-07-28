@@ -1,0 +1,95 @@
+[
+  {
+    "pxObjClass": "Rule-Application",
+    "pyClassName": "@baseclass",
+    "pyApplicationName": "PegaSampleLoan",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyApplicationDescription": "Enterprise Loan Processing Application on Pega PRPC 8.7",
+    "pyBuiltOnApplications": ["Pega Platform 8.7", "Pega Customer Service 8.7"],
+    "pyDefaultPortal": "LoanOfficerPortal",
+    "pyDefaultSkin": "LoanPortalSkin",
+    "pyRulesetStack": ["PegaSampleLoan:01-01-01", "CustomerService:08-07", "PegaRULES:08-07"]
+  },
+  {
+    "pxObjClass": "Rule-RuleSet-Name",
+    "pyClassName": "@baseclass",
+    "pyRulesetName": "PegaSampleLoan",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDescription": "Core ruleset for the PegaSampleLoan loan processing application",
+    "pyRequiresAuthentication": true,
+    "pyAllowedClassGroups": ["PegaSample-CustomerLoan-Work", "PegaSample-Data"]
+  },
+  {
+    "pxObjClass": "Rule-RuleSet-Version",
+    "pyClassName": "@baseclass",
+    "pyRulesetName": "PegaSampleLoan",
+    "pyRulesetVersion": "01-01-01",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersionField": "01-01-01",
+    "pyStatus": "Development",
+    "pyDescription": "Initial development version — includes all core loan processing rules",
+    "pyLockedFlag": false,
+    "pyCreatedBy": "AdminUser",
+    "pyCreatedDateTime": "2026-01-01T00:00:00Z"
+  },
+  {
+    "pxObjClass": "Rule-Obj-Validate",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "ValidateLoanApplicationSubmission",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyValidationRules": [
+      { "pyPropertyName": ".LoanAmount",   "pyValidationType": "Required", "pyMessage": "Loan amount is required." },
+      { "pyPropertyName": ".LoanAmount",   "pyValidationType": "Range",    "pyMinValue": 10000, "pyMaxValue": 5000000, "pyMessage": "Loan amount must be between 10,000 and 5,000,000." },
+      { "pyPropertyName": ".InterestRate", "pyValidationType": "EditValidate", "pyEditValidateName": "IsValidPercentage", "pyMessage": "Interest rate must be a valid percentage." },
+      { "pyPropertyName": ".DateOfBirth",  "pyValidationType": "When",     "pyWhenName": "IsApplicantOfLegalAge", "pyMessage": "Applicant must be at least 18 years old." }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Edit-Validate",
+    "pyClassName": "@baseclass",
+    "pyEditValidateName": "IsValidPercentage",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyType": "Range",
+    "pyMinValue": 0.0,
+    "pyMaxValue": 100.0,
+    "pyErrorMessage": "Value must be a valid percentage between 0 and 100"
+  },
+  {
+    "pxObjClass": "Rule-Obj-SystemOption",
+    "pyClassName": "@baseclass",
+    "pyOptionName": "MaxActiveLoanApplicationsPerOfficer",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyOptionValue": "50",
+    "pyOptionType": "Integer",
+    "pyDescription": "Maximum number of active loan cases an officer can manage simultaneously"
+  },
+  {
+    "pxObjClass": "Rule-Obj-SystemSetting",
+    "pyClassName": "@baseclass",
+    "pySettingName": "LoanProcessingMode",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pySettingValue": "AUTOMATED",
+    "pyAllowedValues": ["AUTOMATED", "MANUAL", "HYBRID"],
+    "pyDescription": "Controls whether loan processing flows run in automated, manual, or hybrid mode"
+  },
+  {
+    "pxObjClass": "Rule-Obj-SystemLog",
+    "pyClassName": "@baseclass",
+    "pyLogName": "LoanApplicationAuditLog",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyLogLevel": "INFO",
+    "pyLogTarget": "FILESYSTEM",
+    "pyLogFilePath": "/logs/pega/loan-audit.log",
+    "pyRetentionDays": 365,
+    "pyLogEvents": ["CaseCreated", "StatusChanged", "ApprovalDecision", "DocumentUploaded"]
+  },
+  {
+    "pxObjClass": "Rule-Obj-NodeSetting",
+    "pyClassName": "@baseclass",
+    "pySettingName": "LoanServiceMaxThreadPoolSize",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pySettingValue": "20",
+    "pyNodeType": "BackgroundProcessing",
+    "pyDescription": "Thread pool size for loan batch processing nodes",
+    "pyRequiresRestart": true
+  }
+]

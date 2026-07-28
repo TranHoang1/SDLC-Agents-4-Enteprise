@@ -1,0 +1,44 @@
+{
+  "ticket": "TECH-SCHEMA-COVERAGE",
+  "status": "DONE",
+  "phase": "DEV",
+  "epic": "100% Schema Coverage Infrastructure",
+  "summary": "Xóa gap field-specific parse coverage từ ~80% lên 100% effective qua auto-inference + KB persistence + artifact analyzer.",
+  "components": [
+    {
+      "name": "Missing base schemas",
+      "description": "Thêm 4 base-class schemas còn thiếu (HTML, Corr, Alias, Strategy) + 7 concrete schemas fix naming mismatch",
+      "files": 11,
+      "coverage": "Mọi Rule-* type đều có base class fallback, không còn fallback thẳng xuống @baseclass"
+    },
+    {
+      "name": "PegaSchemaInferrer",
+      "description": "Auto-generate PegaClassDefinition từ rule JSON runtime — infer type từ value pattern, base class từ inheritance",
+      "files": ["backend/src/modules/pega/inference/PegaSchemaInferrer.ts"],
+      "tests": 55
+    },
+    {
+      "name": "PegaFieldDocumentor",
+      "description": "Sinh human-readable field documentation cho LLM context — lookup table cho known fields + sample values",
+      "files": ["backend/src/modules/pega/inference/PegaFieldDocumentor.ts"],
+      "tests": 55
+    },
+    {
+      "name": "PegaSchemaKBService",
+      "description": "Bridge inferrer → KB persistence. ensureSchema() → auto save PEGA_SCHEMA vào knowledge_entries. Startup → load → register.",
+      "files": ["backend/src/modules/pega/inference/PegaSchemaKBService.ts"],
+      "tests": 24
+    },
+    {
+      "name": "PegaSchemaAutoLearner",
+      "description": "Orchestrator: learnSchema() + compileStrategy() một lần gọi",
+      "files": ["backend/src/modules/pega/inference/PegaSchemaAutoLearner.ts"],
+      "tests": 24
+    }
+  ],
+  "schemas_before": 228,
+  "schemas_added": 11,
+  "schemas_total": 239,
+  "tests_total": 79,
+  "result": "239 static schemas + auto-infer cho mọi rule type chưa có schema → field-specific coverage 100% effective."
+}

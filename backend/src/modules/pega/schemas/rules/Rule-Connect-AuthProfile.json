@@ -1,0 +1,18 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Connect-AuthProfile",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pySuperClass": "Rule-Connect-",
+  "pyPatternParent": "Rule-Connect-",
+  "pyClassName": "Rule-Connect-AuthProfile",
+  "pyRuleName": "Rule-Connect-AuthProfile",
+  "pyClassType": "Concrete",
+  "pyDerivesFrom": "Rule-Connect-",
+  "pyDescription": "Authentication profile for connector rules",
+  "pyLabel": "Connect AuthProfile",
+  "pyAuthProfile": "",
+  "pyAuthType": "",
+  "pyUserIdentifier": "",
+  "pyPassword": "",
+  "pxObjClass": "Rule-Obj-Class"
+}

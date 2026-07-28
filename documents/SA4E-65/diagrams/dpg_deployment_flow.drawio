@@ -1,0 +1,39 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Build" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="30" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A50;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="185" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="Configure" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8A838;strokeColor=#C88A20;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="340" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="Deploy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="495" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="Verify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A50;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="650" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="Smoke Test" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D94A4A;strokeColor=#B83030;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="805" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="compile &amp; package" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="2" target="3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d2" value="unit &amp; integration" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="3" target="4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d3" value="set env variables" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="4" target="5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d4" value="release to target" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="5" target="6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d5" value="health check" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="6" target="7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

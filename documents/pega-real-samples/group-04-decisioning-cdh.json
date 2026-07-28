@@ -1,0 +1,113 @@
+[
+  {
+    "pxObjClass": "Rule-Declare-DecisionTable", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "DetermineLoanApprovalTier", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyPropertyEvaluated": ".ApprovalTier",
+    "pyTableColumns": [
+      { "pyPropertyName": ".CreditScore", "pyHeaderLabel": "Credit Score" },
+      { "pyPropertyName": ".DebtToIncomeRatio", "pyHeaderLabel": "DTI Ratio" }
+    ],
+    "pyTableRows": [
+      { "pyRowId": "ROW-DT-1", "pyConditions": [{ "pyOperator": ">=", "pyValue": "750" }, { "pyOperator": "<=", "pyValue": "0.35" }], "pyReturnActions": [{ "pyReturnValue": "\"TIER_1_AUTO_APPROVE\"" }] },
+      { "pyRowId": "ROW-DT-2", "pyConditions": [{ "pyOperator": ">=", "pyValue": "650" }, { "pyOperator": "<=", "pyValue": "0.45" }], "pyReturnActions": [{ "pyReturnValue": "\"TIER_2_MANUAL_REVIEW\"" }] },
+      { "pyRowId": "ROW-DT-3", "pyConditions": [{ "pyOperator": "<",  "pyValue": "650" }, { "pyOperator": "ANY" }],                  "pyReturnActions": [{ "pyReturnValue": "\"TIER_3_DECLINE\"" }] }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Declare-DecisionTree", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "DetermineInterestRateTier", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyBranches": [
+      { "pyPropertyName": ".CreditScore", "pyWhenName": "CreditScoreAbove750", "pyReturnTransform": "SetPremiumRate" },
+      { "pyPropertyName": ".CreditScore", "pyWhenName": "CreditScore600to749", "pyReturnTransform": "SetStandardRate" },
+      { "pyPropertyName": ".CreditScore", "pyWhenName": "CreditScoreBelow600",  "pyReturnTransform": "SetHighRiskRate" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-When", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "IsCreditCheckRequired", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyLogicOperator": "AND",
+    "pyLogicConditions": [
+      { "pyField1": ".pyStatusWork", "pyOperator": "=",      "pyField2": "\"New\"" },
+      { "pyField1": ".LoanAmount",   "pyOperator": ">",      "pyField2": "50000" },
+      { "pyField1": "",              "pyOperator": "isTrue", "pyWhenName": "IsFirstTimeBorrower" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Decision-Strategy", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "NextBestLoanOfferStrategy", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyStrategyType": "NextBestAction", "pyTaxonomy": "LoanOfferTaxonomy", "pySegmentRule": "HighValueCustomerSegment",
+    "pyFilters": ["IsEligibleForOffer"], "pyPrioritization": "EligibilityScore * 0.6 + CustomerValue * 0.4"
+  },
+  {
+    "pxObjClass": "Rule-Decision-Scorecard", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "CreditRiskScorecard", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyOutputProperty": ".CreditRiskScore",
+    "pyScorecardComponents": [
+      { "pyPropertyName": ".CreditScore",        "pyWeight": 40, "pyBands": [{ "pyMin": 750, "pyPoints": 100 }, { "pyMin": 650, "pyPoints": 60 }, { "pyMin": 0, "pyPoints": 20 }] },
+      { "pyPropertyName": ".DebtToIncomeRatio",  "pyWeight": 30, "pyBands": [{ "pyMax": 0.30, "pyPoints": 100 }, { "pyMax": 0.45, "pyPoints": 60 }, { "pyMax": 1, "pyPoints": 10 }] },
+      { "pyPropertyName": ".EmploymentYears",    "pyWeight": 20, "pyBands": [{ "pyMin": 5, "pyPoints": 100 }, { "pyMin": 2, "pyPoints": 60 }, { "pyMin": 0, "pyPoints": 20 }] },
+      { "pyPropertyName": ".CollateralValue",    "pyWeight": 10, "pyBands": [{ "pyMin": 200000, "pyPoints": 100 }, { "pyMin": 50000, "pyPoints": 60 }, { "pyMin": 0, "pyPoints": 0 }] }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Decision-PredictiveModel", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "DefaultProbabilityModel", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyModelType": "Logistic Regression", "pyOutputProperty": ".DefaultProbability",
+    "pyPredictors": [".CreditScore", ".LoanToValueRatio", ".EmploymentYears", ".MonthlyIncome"],
+    "pyModelVersion": "2.1.0"
+  },
+  {
+    "pxObjClass": "Rule-Decision-AdaptiveModel", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "LoanApprovalAdaptiveModel", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyModelType": "Naive Bayes", "pyOutputProperty": ".PropensityToRepay",
+    "pyLearningRate": 0.1, "pyExplorationPercentage": 20,
+    "pyFeatures": [".CreditScore", ".LoanAmount", ".LoanPurpose", ".EmploymentStatus"]
+  },
+  {
+    "pxObjClass": "Rule-Decision-Proposition", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "PremiumHomeLoanOffer", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyIssue": "Loan", "pyGroup": "HomeLoan", "pyName": "PremiumHomeLoan",
+    "pyEligibilityWhen": "IsEligibleForPremiumHomeLoan",
+    "pyBenefit": "Special rate 5.5% p.a. for first 3 years",
+    "pyValue": 500000
+  },
+  {
+    "pxObjClass": "Rule-Decision-Taxonomy", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "LoanOfferTaxonomy", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyIssues": [
+      { "pyIssueName": "Loan", "pyGroups": [
+        { "pyGroupName": "HomeLoan",     "pyPropositions": ["PremiumHomeLoan", "StandardHomeLoan"] },
+        { "pyGroupName": "PersonalLoan", "pyPropositions": ["QuickPersonalLoan"] }
+      ]}
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Decision-Segment", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "HighValueCustomerSegment", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyCriterion": "CreditScoreAbove750 AND AnnualIncomeAbove100k"
+  },
+  {
+    "pxObjClass": "Rule-Decision-Criterion", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "IsEligibleForPremiumHomeLoan", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyWhenName": "IsCreditScoreAbove750", "pyPropertyFilters": [{ "pyPropertyName": ".LoanPurpose", "pyValue": "\"HOME_PURCHASE\"" }]
+  },
+  {
+    "pxObjClass": "Rule-Decision-Container", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "HomeLoanOfferContainer", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyContainerType": "InboundLoan", "pyStrategy": "NextBestLoanOfferStrategy",
+    "pyChannel": "WebPortal", "pyDirection": "Inbound"
+  },
+  {
+    "pxObjClass": "Rule-Decision-PMML", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "ExternalCreditScoringModel", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyPMMLVersion": "4.4", "pyModelName": "CreditScoringRF", "pyOutputProperty": ".CreditModelScore",
+    "pyInputMappings": [{ "pyPMMLFieldName": "credit_score", "pyPegaProperty": ".CreditScore" }]
+  },
+  {
+    "pxObjClass": "Rule-Decision-TextAnalytics", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "LoanApplicationSentimentAnalysis", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyInputProperty": ".CustomerFeedback", "pyOutputSentiment": ".FeedbackSentiment",
+    "pyCategoryOutput": ".FeedbackTopic",
+    "pyCategories": ["Approval Process", "Interest Rate", "Customer Service", "Documentation"]
+  },
+  {
+    "pxObjClass": "Rule-Decision-ChampionChallenger", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "LoanStrategyChampionChallenger", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyChampionStrategy": "NextBestLoanOfferStrategy", "pyChampionPercentage": 80,
+    "pyChallengerStrategy": "AggressiveLoanOfferStrategy", "pyChallengerPercentage": 20
+  },
+  {
+    "pxObjClass": "Rule-Decision-Interaction", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "HomeLoanApplicationInteraction", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyChannel": "WebPortal", "pyDirection": "Inbound", "pyContainer": "HomeLoanOfferContainer"
+  },
+  {
+    "pxObjClass": "Rule-Decision-Event", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "LoanApplicationSubmittedEvent", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyEventType": "Trigger", "pyTriggerActivity": "ProcessLoanApproval",
+    "pyWhenName": "IsLoanApplicationComplete"
+  }
+]

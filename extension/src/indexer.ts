@@ -20,8 +20,17 @@ function getWorkspaceRoot(): string | undefined {
     return folders[0].uri.fsPath;
 }
 
+let indexingOutputChannel: vscode.OutputChannel | undefined;
+
+function getIndexingOutputChannel(): vscode.OutputChannel {
+    if (!indexingOutputChannel) {
+        indexingOutputChannel = vscode.window.createOutputChannel("SDLC Indexing");
+    }
+    return indexingOutputChannel;
+}
+
 function createService(): IndexingService {
-    return new IndexingService(new IndexerHttpClient(getBackendUrl()));
+    return new IndexingService(new IndexerHttpClient(getBackendUrl()), getIndexingOutputChannel());
 }
 
 export async function promptIndexAfterInject(root: string, token?: string): Promise<void> {
@@ -47,9 +56,12 @@ async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.
         sync: picks.includes("sync"),
     };
 
+    const channel = getIndexingOutputChannel();
+    channel.show(true);
+
     const service = createService();
     const results = await service.indexWorkspace(root, options, token, secrets);
-    showIndexResults(results, picks, root);
+    showIndexResults(results, picks, root, channel);
 }
 
 async function showIndexOptions(): Promise<string[] | undefined> {
@@ -61,10 +73,8 @@ async function showIndexOptions(): Promise<string[] | undefined> {
     return picks?.map(p => p.id);
 }
 
-function showIndexResults(results: string[], options: string[], root: string): void {
-    const channel = vscode.window.createOutputChannel("SDLC Indexing");
-    channel.show();
-    channel.appendLine("=== Workspace Indexing Results ===\n");
+function showIndexResults(results: string[], options: string[], root: string, channel: vscode.OutputChannel): void {
+    channel.appendLine("\n=== Workspace Indexing Summary ===\n");
 
     // Auto-detect Salesforce project and show SF-specific summary
     const sfdxRoot = detectSfdxProject(root);

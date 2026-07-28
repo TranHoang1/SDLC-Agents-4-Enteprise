@@ -38,7 +38,16 @@ export class DashboardService {
 
     const servers = this.mcpOrchestrator?.getServers?.() || [];
     const onlineCount = servers.filter((s: any) => s.status === 'RUNNING').length;
-    const kbTotal = await getKbEntryCount();
+    
+    // Count ALL KB entries across all projects when no specific filter is active
+    let kbTotal = 0;
+    try {
+      const adapter = (this.db as any);
+      const row = this.db.prepare("SELECT COUNT(*) as cnt FROM knowledge_entries").get() as { cnt?: number } | undefined;
+      kbTotal = row?.cnt || 0;
+    } catch {
+      kbTotal = await getKbEntryCount();
+    }
 
     return {
       uptime: Math.floor((Date.now() - this.startTime) / 1000),

@@ -1,0 +1,81 @@
+[
+  {
+    "pxObjClass": "Rule-Obj-Property", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyPropertyName": "LoanAmount", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyPropertyType": "Double", "pyPropertyMode": "Single", "pyLabel": "Requested Loan Amount", "pyRequired": true
+  },
+  {
+    "pxObjClass": "Rule-Obj-Class", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pySuperClassName": "Work-", "pyClassGroup": "PegaSample-CustomerLoan-Work", "pyClassType": "Work"
+  },
+  {
+    "pxObjClass": "Rule-Obj-Model", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyModelName": "SetLoanDefaults", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyActions": [
+      { "pyActionId": "ACT-1", "pyActionType": "Set", "pyTarget": ".InterestRate", "pySource": "Primary.BaseRate + 0.025", "pyWhenCondition": "IsStandardApplicant" },
+      { "pyActionId": "ACT-2", "pyActionType": "Apply Data Transform", "pyTarget": "PegaSample-CustomerLoan-Work-LoanApplication.InitializeCustomerProfile" },
+      { "pyActionId": "ACT-3", "pyActionType": "ForEachPage", "pyTarget": ".CollateralList", "pySource": "pyWorkPage.CollateralDetails" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Declare-Pages", "pyPageName": "D_CustomerProfile", "pyDataPageClass": "PegaSample-Data-Customer", "pyScope": "Thread", "pyListOrSingle": "Page", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDataSources": [{ "pySourceType": "REST", "pyDataSource": "PegaSample-Data-Customer.FetchCustomerRestService", "pyDataTransform": "PegaSample-Data-Customer.MapRestCustomerResponse" }]
+  },
+  {
+    "pxObjClass": "Rule-Declare-Expressions", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "targetProperty": ".TotalRepaymentAmount", "changeHandling": "WHENEVER_INPUT_CHANGES", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "expressionLogic": [
+      { "condition": "IsShortTermLoan", "formula": ".LoanAmount * (1 + (.InterestRate * .LoanTenureMonths / 12))" },
+      { "condition": "OTHERWISE",       "formula": ".LoanAmount * (1 + .InterestRate) ^ (.LoanTenureMonths / 12)" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Declare-Trigger", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "OnLoanApprovalStatusChange", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyTriggerEvent": "After-Save", "pyWhenName": "IsLoanStatusChangedToApproved", "pyActivityName": "NotifyApplicantOnApproval", "pyRunMode": "Deferred"
+  },
+  {
+    "pxObjClass": "Rule-Declare-OnChange", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "RecalculateOnAmountChange", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyWatchProperties": [".LoanAmount", ".LoanTenureMonths", ".InterestRate"],
+    "pyActivityName": "PegaSample-CustomerLoan-Work-LoanApplication.RecalculateRepayment"
+  },
+  {
+    "pxObjClass": "Rule-Declare-Index", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyIndexName": "CollateralItemIndex", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyPageListProperty": ".CollateralList", "pyIndexedProperties": [".CollateralType", ".CollateralValue", ".pxRefObjectInsName"]
+  },
+  {
+    "pxObjClass": "Rule-Declare-Constraint", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "MaximumLoanAmountConstraint", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyPropertyName": ".LoanAmount", "pyConstraintType": "Maximum", "pyConstraintValue": "5000000",
+    "pyErrorMessage": "Loan amount cannot exceed 5,000,000."
+  },
+  {
+    "pxObjClass": "Rule-FieldValue", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyFieldName": "LoanPurpose", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyValues": [
+      { "pyValue": "HOME_PURCHASE",  "pyLabel": "Home Purchase",   "pyLabelVI": "Mua nhà" },
+      { "pyValue": "VEHICLE",        "pyLabel": "Vehicle Purchase", "pyLabelVI": "Mua xe" },
+      { "pyValue": "EDUCATION",      "pyLabel": "Education",        "pyLabelVI": "Giáo dục" },
+      { "pyValue": "BUSINESS",       "pyLabel": "Business",         "pyLabelVI": "Kinh doanh" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-ClassGroup", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyClassGroupName": "PegaSample-CustomerLoan-Work", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyTableName": "pc_work", "pyMemberClasses": ["PegaSample-CustomerLoan-Work-LoanApplication", "PegaSample-CustomerLoan-Work-CreditApplication"]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Keys", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyKeyProperties": [{ "pyPropertyName": "pyID", "pyKeyType": "Primary", "pyAutoGenerate": true }]
+  },
+  {
+    "pxObjClass": "Rule-Obj-History", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyHistoryProperties": [".pyStatusWork", ".LoanAmount", ".InterestRate", ".AssignedOfficer"],
+    "pyTableName": "pc_work_history"
+  },
+  {
+    "pxObjClass": "Rule-Declare-Strategy", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "LoanOfferStrategy", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyStrategyType": "Selection", "pyTargetDataPage": "D_LoanOffers", "pyActivityName": "BuildLoanOfferList"
+  },
+  {
+    "pxObjClass": "Rule-Declare-Target", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "CollateralValueTarget", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyTargetProperty": ".CollateralValue", "pyMinValue": 0, "pyRecomputeWhen": "OnInitialize"
+  },
+  {
+    "pxObjClass": "Rule-Declare-Collection", "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication", "pyLabel": "LoanFormFieldCollection", "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyProperties": [".LoanAmount", ".LoanPurpose", ".LoanTenureMonths", ".InterestRate", ".TotalRepaymentAmount"]
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "pxObjClass": "Rule-Obj-Parse-Structured",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "ParseFixedWidthLoanFile",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyParseType": "FixedWidth",
+    "pyFields": [
+      { "pyFieldName": ".CustomerID",  "pyStartPosition": 1,  "pyLength": 10, "pyDataType": "Text" },
+      { "pyFieldName": ".LoanAmount",  "pyStartPosition": 11, "pyLength": 12, "pyDataType": "Decimal" },
+      { "pyFieldName": ".LoanPurpose", "pyStartPosition": 23, "pyLength": 20, "pyDataType": "Text" },
+      { "pyFieldName": ".BranchCode",  "pyStartPosition": 43, "pyLength": 5,  "pyDataType": "Text" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Parse-Delimited",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "ParseCSVLoanApplication",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDelimiter": ",",
+    "pyHasHeaderRow": true,
+    "pyEnclosure": "\"",
+    "pyColumns": [
+      { "pyFieldName": ".CustomerID",        "pyColumnIndex": 1 },
+      { "pyFieldName": ".FirstName",         "pyColumnIndex": 2 },
+      { "pyFieldName": ".LastName",          "pyColumnIndex": 3 },
+      { "pyFieldName": ".LoanAmount",        "pyColumnIndex": 4 },
+      { "pyFieldName": ".LoanPurpose",       "pyColumnIndex": 5 },
+      { "pyFieldName": ".RequestedDate",     "pyColumnIndex": 6 }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Parse-XML",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "ParseLoanApplicationXML",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyRootElement": "LoanApplication",
+    "pyNamespace": "http://bank.com/loan/v1",
+    "pyMappings": [
+      { "pyXPath": "/LoanApplication/CustomerID",        "pyPropertyName": ".CustomerID" },
+      { "pyXPath": "/LoanApplication/Amount",            "pyPropertyName": ".LoanAmount" },
+      { "pyXPath": "/LoanApplication/Purpose",           "pyPropertyName": ".LoanPurpose" },
+      { "pyXPath": "/LoanApplication/Collaterals/Item",  "pyPropertyName": ".CollateralList", "pyIsPageList": true }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Parse-JSON",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "ParseLoanApplicationJSON",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyMappings": [
+      { "pyJSONPath": "$.customerId",               "pyPropertyName": ".CustomerID" },
+      { "pyJSONPath": "$.loanDetails.amount",       "pyPropertyName": ".LoanAmount" },
+      { "pyJSONPath": "$.loanDetails.purpose",      "pyPropertyName": ".LoanPurpose" },
+      { "pyJSONPath": "$.collaterals[*]",           "pyPropertyName": ".CollateralList", "pyIsPageList": true }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Map-XML",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "MapLoanResponseToXML",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDirection": "ToXML",
+    "pyRootElement": "LoanResponse",
+    "pyMappings": [
+      { "pyPropertyName": ".pyID",              "pyXPath": "/LoanResponse/CaseID" },
+      { "pyPropertyName": ".LoanAmount",        "pyXPath": "/LoanResponse/ApprovedAmount" },
+      { "pyPropertyName": ".pyStatusWork",      "pyXPath": "/LoanResponse/Status" },
+      { "pyPropertyName": ".InterestRate",      "pyXPath": "/LoanResponse/AppliedRate" }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Map-JSON",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "MapLoanResponseToJSON",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDirection": "ToJSON",
+    "pyMappings": [
+      { "pyPropertyName": ".pyID",              "pyJSONPath": "$.caseId" },
+      { "pyPropertyName": ".LoanAmount",        "pyJSONPath": "$.approvedAmount" },
+      { "pyPropertyName": ".pyStatusWork",      "pyJSONPath": "$.status" },
+      { "pyPropertyName": ".InterestRate",      "pyJSONPath": "$.appliedRate" },
+      { "pyPropertyName": ".CollateralList",    "pyJSONPath": "$.collaterals", "pyIsPageList": true }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Map-Structured",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "MapToCoreBankingFixedFormat",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyTargetFormat": "FixedWidth",
+    "pyMappings": [
+      { "pyPropertyName": ".CustomerID",   "pyStartPosition": 1,  "pyLength": 10, "pyPadding": "RIGHT", "pyPadChar": " " },
+      { "pyPropertyName": ".LoanAmount",   "pyStartPosition": 11, "pyLength": 12, "pyPadding": "LEFT",  "pyPadChar": "0" },
+      { "pyPropertyName": ".BranchCode",   "pyStartPosition": 23, "pyLength": 5,  "pyPadding": "RIGHT", "pyPadChar": " " }
+    ]
+  },
+  {
+    "pxObjClass": "Rule-Obj-Map-Delimited",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "MapLoanToCSVExport",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDirection": "ToDelimited",
+    "pyDelimiter": "|",
+    "pyIncludeHeader": true,
+    "pyColumns": [
+      { "pyPropertyName": ".pyID",              "pyHeader": "CaseID" },
+      { "pyPropertyName": ".CustomerID",        "pyHeader": "CustomerID" },
+      { "pyPropertyName": ".LoanAmount",        "pyHeader": "LoanAmount" },
+      { "pyPropertyName": ".pyStatusWork",      "pyHeader": "Status" },
+      { "pyPropertyName": ".pxCreateDateTime",  "pyHeader": "SubmittedDate", "pyDateFormat": "yyyy-MM-dd" }
+    ]
+  }
+]

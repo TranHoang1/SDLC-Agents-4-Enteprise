@@ -1,0 +1,71 @@
+﻿{
+    "applicationIsConstellationCompatible":  "true",
+    "pxObjClass":  "Pega-API-CaseManagement",
+    "caseTypes":  [
+                      {
+                          "CanCreate":  "true",
+                          "ID":  "TGB-HRApps-Work-Candidate",
+                          "name":  "Candidate",
+                          "pxObjClass":  "Pega-API-CaseManagement-CaseType",
+                          "startingProcesses":  [
+                                                    {
+                                                        "name":  "Candidate",
+                                                        "pxObjClass":  "Pega-API-CaseManagement-Process",
+                                                        "requiresFieldsToCreate":  "false"
+                                                    }
+                                                ]
+                      },
+                      {
+                          "CanCreate":  "true",
+                          "ID":  "TGB-HRApps-Work-Onboarding",
+                          "name":  "Onboarding",
+                          "pxObjClass":  "Pega-API-CaseManagement-CaseType",
+                          "startingProcesses":  [
+                                                    {
+                                                        "name":  "Onboarding",
+                                                        "pxObjClass":  "Pega-API-CaseManagement-Process",
+                                                        "requiresFieldsToCreate":  "false"
+                                                    }
+                                                ]
+                      },
+                      {
+                          "CanCreate":  "false",
+                          "ID":  "TGB-HRApps-Work-BenefitsEnrollment",
+                          "name":  "Benefits Enrollment",
+                          "pxObjClass":  "Pega-API-CaseManagement-CaseType",
+                          "startingProcesses":  [
+                                                    {
+                                                        "name":  "Benefits Enrollment",
+                                                        "pxObjClass":  "Pega-API-CaseManagement-Process",
+                                                        "requiresFieldsToCreate":  "false"
+                                                    }
+                                                ]
+                      },
+                      {
+                          "CanCreate":  "true",
+                          "ID":  "TGB-HRApps-Work-EmployeeEvaluation",
+                          "name":  "Employee Evaluation",
+                          "pxObjClass":  "Pega-API-CaseManagement-CaseType",
+                          "startingProcesses":  [
+                                                    {
+                                                        "name":  "Employee Evaluation",
+                                                        "pxObjClass":  "Pega-API-CaseManagement-Process",
+                                                        "requiresFieldsToCreate":  "false"
+                                                    }
+                                                ]
+                      },
+                      {
+                          "CanCreate":  "true",
+                          "ID":  "TGB-HRApps-Work-PayrollSetup",
+                          "name":  "Payroll Setup",
+                          "pxObjClass":  "Pega-API-CaseManagement-CaseType",
+                          "startingProcesses":  [
+                                                    {
+                                                        "name":  "Payroll Setup",
+                                                        "pxObjClass":  "Pega-API-CaseManagement-Process",
+                                                        "requiresFieldsToCreate":  "false"
+                                                    }
+                                                ]
+                      }
+                  ]
+}

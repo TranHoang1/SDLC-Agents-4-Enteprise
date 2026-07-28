@@ -21,13 +21,13 @@ function createContext(): PegaClipboardContext {
   });
 }
 
-function createMockFieldRenderer() {
+function createMockFieldRenderer(): PegaFieldRenderer {
   return {
     renderField: (field: PegaField, _context: PegaClipboardContext): string => {
       const val = field.value ?? '';
       return `<mock-field name="${field.name}">${val}</mock-field>`;
     },
-  };
+  } as unknown as PegaFieldRenderer;
 }
 
 function createMockRenderSubLayout() {

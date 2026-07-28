@@ -1,6 +1,6 @@
 import type { IPegaRuleParserStrategy, ParseResult } from '../strategies/IPegaRuleParserStrategy.js';
 import type { UnresolvedDependency } from '../models.js';
-import type { PegaConnectRule, PegaConnectHeader, PegaServiceRule, ConnectMethod, ConnectType } from './PegaConnectTypes.js';
+import type { PegaConnectRule, PegaConnectHeader, PegaServiceRule, ConnectMethod, ConnectType, AuthType } from './PegaConnectTypes.js';
 
 const CONNECT_CLASSES = new Set([
   'Rule-Connect-REST',
@@ -123,7 +123,7 @@ export class PegaConnectParser implements IPegaRuleParserStrategy {
       pxObjClass: (json.pxObjClass as string) || 'Rule-Service-REST',
       pyName: this.extractName('Rule-Service-REST', json),
       serviceType: (json.pyServiceType as string) || this.inferServiceType(json),
-      endpoint: this.resolveEndpoint(json),
+      endpoint: this.resolveEndpoint(json) || '',
       allowedMethods: methodStr.split(',').map(m => m.trim() as ConnectMethod).filter(m => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'].includes(m)),
     };
   }

@@ -1,0 +1,50 @@
+{
+  "ticket": "SA4E-67",
+  "status": "DONE",
+  "phase": "DEV",
+  "epic": "Semantic Understanding + Reference Analysis",
+  "summary": "Nâng từ parse cấu trúc lên hiểu ngữ nghĩa: semantic analyzer, rule simulator, reference extractor v2, impact analysis.",
+  "wps": [
+    {
+      "id": "SA4E-67-WP1",
+      "name": "PegaSemanticAnalyzer — Phân tích ngữ nghĩa rule (summary, intent, side effects, data flow)",
+      "files": [
+        "backend/src/modules/pega/semantic/PegaSemanticAnalyzer.ts",
+        "backend/src/modules/pega/semantic/types.ts"
+      ],
+      "tests": 26
+    },
+    {
+      "id": "SA4E-67-WP2",
+      "name": "PegaRuleSimulator — Mô phỏng thực thi rule offline (Activity, DataTransform, Flow, DecisionTable)",
+      "files": ["backend/src/modules/pega/semantic/PegaRuleSimulator.ts"],
+      "tests": 22
+    },
+    {
+      "id": "SA4E-67-WP3",
+      "name": "PegaReferenceExtractor 2.0 — 11 extraction strategies, cycle detection, dependency graph",
+      "files": ["backend/src/modules/pega/references/PegaReferenceExtractor.ts"],
+      "tests": 20
+    },
+    {
+      "id": "SA4E-67-WP4",
+      "name": "PegaImpactAnalyzer — Risk assessment, scope determination, test suggestions, DOT graph",
+      "files": ["backend/src/modules/pega/references/PegaImpactAnalyzer.ts"],
+      "tests": 17
+    }
+  ],
+  "tests_total": 85,
+  "result": "48 semantic tests + 37 reference tests. Có thể analyze + simulate + extract dependencies cho mọi rule type.",
+  "documents": [
+    "BRD.md",
+    "FSD.md",
+    "TDD.md",
+    "STP.md",
+    "STC.md",
+    "DPG.md",
+    "RLN.md",
+    "RUN-LOG.md"
+  ],
+  "createdAt": "2026-07-27",
+  "updatedAt": "2026-07-27"
+}

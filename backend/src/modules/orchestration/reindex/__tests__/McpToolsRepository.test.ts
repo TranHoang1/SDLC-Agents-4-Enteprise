@@ -41,8 +41,8 @@ describe('McpToolsRepository', () => {
   });
   afterEach(() => tmp.close());
 
-  it('UT-11: upsertScoped inserts rows with server/category/vector', () => {
-    const count = repo.upsertScoped([prepared('t1', 'S'), prepared('t2', 'S')], 'S');
+  it('UT-11: upsertScoped inserts rows with server/category/vector', async () => {
+    const count = await repo.upsertScoped([prepared('t1', 'S'), prepared('t2', 'S')], 'S');
     expect(count).toBe(2);
     const row = db.prepare('SELECT * FROM mcp_tools WHERE name = ?').get('t1') as any;
     expect(row.server).toBe('S');
@@ -50,61 +50,61 @@ describe('McpToolsRepository', () => {
     expect(row.vector).toBeInstanceOf(Buffer);
   });
 
-  it('UT-12: repeated upsert updates in place (no duplicate)', () => {
-    repo.upsertScoped([prepared('t1', 'S', 'old')], 'S');
-    repo.upsertScoped([prepared('t1', 'S', 'new')], 'S');
+  it('UT-12: repeated upsert updates in place (no duplicate)', async () => {
+    await repo.upsertScoped([prepared('t1', 'S', 'old')], 'S');
+    await repo.upsertScoped([prepared('t1', 'S', 'new')], 'S');
     const rows = db.prepare('SELECT * FROM mcp_tools WHERE name = ?').all('t1') as any[];
     expect(rows).toHaveLength(1);
     expect(rows[0].description).toBe('new');
   });
 
-  it('UT-13: pruneRemoved deletes rows not in the current set', () => {
-    repo.upsertScoped([prepared('t1', 'S'), prepared('t2', 'S'), prepared('t3', 'S')], 'S');
-    const removed = repo.pruneRemoved('S', ['t1', 't2']);
+  it('UT-13: pruneRemoved deletes rows not in the current set', async () => {
+    await repo.upsertScoped([prepared('t1', 'S'), prepared('t2', 'S'), prepared('t3', 'S')], 'S');
+    const removed = await repo.pruneRemoved('S', ['t1', 't2']);
     expect(removed).toBe(1);
     expect(names(db, 'S')).toEqual(['t1', 't2']);
   });
 
-  it('UT-14: pruneRemoved with empty set is skipped (no wipe) + warns', () => {
+  it('UT-14: pruneRemoved with empty set is skipped (no wipe) + warns', async () => {
     const warn = vi.fn();
     const r = new McpToolsRepository(new SqliteDbAdapter(db), { warn } as any);
-    r.upsertScoped([prepared('t1', 'S'), prepared('t2', 'S')], 'S');
-    const removed = r.pruneRemoved('S', []);
+    await r.upsertScoped([prepared('t1', 'S'), prepared('t2', 'S')], 'S');
+    const removed = await r.pruneRemoved('S', []);
     expect(removed).toBe(0);
     expect(names(db, 'S')).toEqual(['t1', 't2']);
     expect(warn).toHaveBeenCalled();
   });
 
-  it('UT-15: deleteByServer removes only that server (core + others untouched)', () => {
-    repo.upsertScoped([prepared('s1', 'S')], 'S');
-    repo.upsertScoped([prepared('t1', 'T')], 'T');
+  it('UT-15: deleteByServer removes only that server (core + others untouched)', async () => {
+    await repo.upsertScoped([prepared('s1', 'S')], 'S');
+    await repo.upsertScoped([prepared('t1', 'T')], 'T');
     db.prepare('INSERT INTO mcp_tools (name, description, schema_json, category, server, vector) VALUES (?,?,?,?,?,?)')
       .run('core', 'core', '{}', 'memory', null, null);
-    repo.deleteByServer('S');
+    await repo.deleteByServer('S');
     expect(names(db, 'S')).toEqual([]);
     expect(names(db, 'T')).toEqual(['t1']);
     const core = db.prepare('SELECT COUNT(*) c FROM mcp_tools WHERE server IS NULL').get() as any;
     expect(core.c).toBe(1);
   });
 
-  it('UT-16: deleteByServer for unknown server returns 0 (no error)', () => {
-    expect(repo.deleteByServer('nope')).toBe(0);
+  it('UT-16: deleteByServer for unknown server returns 0 (no error)', async () => {
+    expect(await repo.deleteByServer('nope')).toBe(0);
   });
 
-  it('UT-17: prune with >900 tools uses temp-table fallback (no bound-var error)', () => {
+  it('UT-17: prune with >900 tools uses temp-table fallback (no bound-var error)', async () => {
     const big = Array.from({ length: 1200 }, (_, i) => prepared(`t${i}`, 'S'));
-    repo.upsertScoped(big, 'S');
+    await repo.upsertScoped(big, 'S');
     const keep = big.slice(0, 1000).map((t) => t.name);
-    const removed = repo.pruneRemoved('S', keep);
+    const removed = await repo.pruneRemoved('S', keep);
     expect(removed).toBe(200);
     expect(names(db, 'S')).toHaveLength(1000);
   });
 
-  it('UT-18: scope-aware upsert does not hijack another server row (F-01)', () => {
+  it('UT-18: scope-aware upsert does not hijack another server row (F-01)', async () => {
     const warn = vi.fn();
     const r = new McpToolsRepository(new SqliteDbAdapter(db), { warn } as any);
-    r.upsertScoped([prepared('common', 'A')], 'A');
-    const upserted = r.upsertScoped([prepared('common', 'B')], 'B');
+    await r.upsertScoped([prepared('common', 'A')], 'A');
+    const upserted = await r.upsertScoped([prepared('common', 'B')], 'B');
     expect(upserted).toBe(0);
     const row = db.prepare('SELECT server FROM mcp_tools WHERE name = ?').get('common') as any;
     expect(row.server).toBe('A');

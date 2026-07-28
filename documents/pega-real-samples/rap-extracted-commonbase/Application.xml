@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<application name=" " description="" >
+	<sarfile name="CommonBase_8_20260725T194941_GMT_schema.jar" order="1"/>
+	<parfile name="CommonBase_8_20260725T194941_GMT_rules.jar" order="2"/>
+</application>

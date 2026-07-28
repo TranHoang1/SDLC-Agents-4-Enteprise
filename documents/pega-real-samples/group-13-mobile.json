@@ -1,0 +1,69 @@
+[
+  {
+    "pxObjClass": "Rule-Mobile-App",
+    "pyClassName": "@baseclass",
+    "pyAppName": "LoanApplicationMobileApp",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyDisplayName": "Bank Loan Anywhere",
+    "pyBundleId": "com.bank.loanapp",
+    "pyTargetPlatforms": ["iOS", "Android"],
+    "pyMinIOSVersion": "15.0",
+    "pyMinAndroidVersion": "10",
+    "pyPrimaryPortal": "LoanOfficerPortal",
+    "pyOfflineSupport": true,
+    "pyBiometricAuth": true,
+    "pyPushNotifications": true
+  },
+  {
+    "pxObjClass": "Rule-Mobile-OfflineData",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "LoanApplicationOfflineCache",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyCachedDataPages": [
+      { "pyDataPage": "D_CustomerProfile",    "pyScope": "Thread",   "pyMaxAgeMinutes": 60 },
+      { "pyDataPage": "D_LoanProducts",       "pyScope": "Node",     "pyMaxAgeMinutes": 1440 },
+      { "pyDataPage": "D_BranchList",         "pyScope": "Node",     "pyMaxAgeMinutes": 1440 }
+    ],
+    "pyOfflineCasesAllowed": ["LoanApplication"],
+    "pySyncOnReconnect": true,
+    "pyConflictResolution": "ServerWins"
+  },
+  {
+    "pxObjClass": "Rule-Mobile-Binary",
+    "pyClassName": "@baseclass",
+    "pyBinaryName": "LoanAppMobileIcon-1024",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyMimeType": "image/png",
+    "pyFileExtension": "png",
+    "pyFileSizeKB": 128,
+    "pyUsage": "AppIcon",
+    "pyResolution": "1024x1024",
+    "pyTargetPlatforms": ["iOS", "Android"]
+  },
+  {
+    "pxObjClass": "Rule-Mobile-PushNotification",
+    "pyClassName": "PegaSample-CustomerLoan-Work-LoanApplication",
+    "pyLabel": "LoanApprovalPushNotification",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyNotificationType": "Alert",
+    "pyTitleTemplate": "Loan Application Update",
+    "pyBodyTemplate": "Your loan application {.pyID} has been {.pyStatusWork}. Tap to view details.",
+    "pyTargetPlatforms": ["iOS", "Android"],
+    "pyPriority": "High",
+    "pyDeepLinkURL": "loanapp://cases/{.pyID}",
+    "pyTriggerActivity": "SendLoanStatusPushNotification"
+  },
+  {
+    "pxObjClass": "Rule-Mobile-Skin",
+    "pyClassName": "@baseclass",
+    "pySkinName": "LoanAppMobileSkin",
+    "pyRuleset": "PegaSampleLoan", "pyRulesetVersion": "01-01-01",
+    "pyPrimaryColor": "#003366",
+    "pySecondaryColor": "#0088CC",
+    "pyBackgroundColor": "#F5F7FA",
+    "pyFontFamily": "SF Pro Display, Roboto, sans-serif",
+    "pyButtonStyle": { "pyRadius": "8px", "pyHeight": "48px", "pyFontWeight": "600" },
+    "pyStatusBarStyle": "dark",
+    "pyTabBarStyle": { "pyActiveColor": "#003366", "pyInactiveColor": "#9BA3AF" }
+  }
+]

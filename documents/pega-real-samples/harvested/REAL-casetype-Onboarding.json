@@ -1,0 +1,698 @@
+﻿{
+    "caseTypeID":  "TGB-HRApps-Work-Onboarding",
+    "fua":  true,
+    "creation_page":  {
+                          "caseTypeID":  "TGB-HRApps-Work-Onboarding",
+                          "validationMessages":  "",
+                          "visible":  true,
+                          "name":  "New",
+                          "groups":  [
+                                         {
+                                             "layout":  {
+                                                            "visible":  true,
+                                                            "groups":  [
+                                                                           {
+                                                                               "layout":  {
+                                                                                              "view":  {
+                                                                                                           "reference":  "",
+                                                                                                           "validationMessages":  "",
+                                                                                                           "viewID":  "pxCreateCaseTopHeaderWrapper",
+                                                                                                           "visible":  true,
+                                                                                                           "titleFormat":  "",
+                                                                                                           "name":  "pxCreateCaseTopHeaderWrapper",
+                                                                                                           "appliesTo":  "TGB-HRApps-Work-Onboarding",
+                                                                                                           "containerFormat":  "",
+                                                                                                           "groups":  [
+                                                                                                                          {
+                                                                                                                              "view":  {
+                                                                                                                                           "viewID":  "pyNewCaseHeaderOuterMobile",
+                                                                                                                                           "visible":  false,
+                                                                                                                                           "name":  "pyNewCaseHeaderOuterMobile"
+                                                                                                                                       }
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "view":  {
+                                                                                                                                           "reference":  "",
+                                                                                                                                           "validationMessages":  "",
+                                                                                                                                           "viewID":  "pyNewCaseHeaderOuter",
+                                                                                                                                           "visible":  true,
+                                                                                                                                           "titleFormat":  "h2",
+                                                                                                                                           "name":  "Header of the New harness",
+                                                                                                                                           "appliesTo":  "TGB-HRApps-Work-Onboarding",
+                                                                                                                                           "containerFormat":  "NOHEADER",
+                                                                                                                                           "groups":  [
+                                                                                                                                                          {
+                                                                                                                                                              "view":  {
+                                                                                                                                                                           "viewID":  "LocaleHeaderTitle",
+                                                                                                                                                                           "visible":  false,
+                                                                                                                                                                           "name":  "LocaleHeaderTitle"
+                                                                                                                                                                       }
+                                                                                                                                                          },
+                                                                                                                                                          {
+                                                                                                                                                              "layout":  {
+                                                                                                                                                                             "visible":  true,
+                                                                                                                                                                             "titleFormat":  "h2",
+                                                                                                                                                                             "groupsVisibility":  true,
+                                                                                                                                                                             "containerFormat":  "NOHEADER",
+                                                                                                                                                                             "groups":  [
+                                                                                                                                                                                            {
+                                                                                                                                                                                                "layout":  {
+                                                                                                                                                                                                               "visible":  true,
+                                                                                                                                                                                                               "titleFormat":  "h2",
+                                                                                                                                                                                                               "groupsVisibility":  true,
+                                                                                                                                                                                                               "containerFormat":  "NOHEADER",
+                                                                                                                                                                                                               "groups":  [
+                                                                                                                                                                                                                              {
+                                                                                                                                                                                                                                  "field":  {
+                                                                                                                                                                                                                                                "validationMessages":  "",
+                                                                                                                                                                                                                                                "visible":  true,
+                                                                                                                                                                                                                                                "labelReserveSpace":  false,
+                                                                                                                                                                                                                                                "accessCondition":  "",
+                                                                                                                                                                                                                                                "readOnly":  false,
+                                                                                                                                                                                                                                                "control":  "@{modes=System.Object[]; actionSets=System.Object[]; label=; type=pxButton}",
+                                                                                                                                                                                                                                                "label":  "",
+                                                                                                                                                                                                                                                "type":  "Text",
+                                                                                                                                                                                                                                                "isMasked":  false,
+                                                                                                                                                                                                                                                "required":  false,
+                                                                                                                                                                                                                                                "showLabel":  false,
+                                                                                                                                                                                                                                                "validateAs":  "",
+                                                                                                                                                                                                                                                "reference":  "pyTemplateButton",
+                                                                                                                                                                                                                                                "labelFormat":  "Standard",
+                                                                                                                                                                                                                                                "isEncrypted":  false,
+                                                                                                                                                                                                                                                "disabled":  false,
+                                                                                                                                                                                                                                                "testID":  "201901261711080731178947",
+                                                                                                                                                                                                                                                "valueFormatting":  "",
+                                                                                                                                                                                                                                                "value":  "",
+                                                                                                                                                                                                                                                "maxLength":  0,
+                                                                                                                                                                                                                                                "expectedLength":  "",
+                                                                                                                                                                                                                                                "fieldID":  "pyTemplateButton"
+                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                          ],
+                                                                                                                                                                                                               "groupFormat":  "Inline middle",
+                                                                                                                                                                                                               "layoutFormat":  "SIMPLELAYOUT",
+                                                                                                                                                                                                               "title":  ""
+                                                                                                                                                                                                           }
+                                                                                                                                                                                            },
+                                                                                                                                                                                            {
+                                                                                                                                                                                                "layout":  {
+                                                                                                                                                                                                               "visible":  true,
+                                                                                                                                                                                                               "titleFormat":  "h2",
+                                                                                                                                                                                                               "groupsVisibility":  true,
+                                                                                                                                                                                                               "containerFormat":  "NOHEADER",
+                                                                                                                                                                                                               "groups":  [
+                                                                                                                                                                                                                              {
+                                                                                                                                                                                                                                  "field":  {
+                                                                                                                                                                                                                                                "validationMessages":  "",
+                                                                                                                                                                                                                                                "visible":  true,
+                                                                                                                                                                                                                                                "labelReserveSpace":  false,
+                                                                                                                                                                                                                                                "accessCondition":  "",
+                                                                                                                                                                                                                                                "readOnly":  false,
+                                                                                                                                                                                                                                                "control":  "@{modes=System.Object[]; actionSets=System.Object[]; label=; type=pxButton}",
+                                                                                                                                                                                                                                                "label":  "",
+                                                                                                                                                                                                                                                "type":  "Text",
+                                                                                                                                                                                                                                                "isMasked":  false,
+                                                                                                                                                                                                                                                "required":  false,
+                                                                                                                                                                                                                                                "showLabel":  false,
+                                                                                                                                                                                                                                                "validateAs":  "",
+                                                                                                                                                                                                                                                "reference":  "pyTemplateButton",
+                                                                                                                                                                                                                                                "labelFormat":  "Standard",
+                                                                                                                                                                                                                                                "isEncrypted":  false,
+                                                                                                                                                                                                                                                "disabled":  false,
+                                                                                                                                                                                                                                                "testID":  "201901261711080731178947",
+                                                                                                                                                                                                                                                "valueFormatting":  "",
+                                                                                                                                                                                                                                                "value":  "",
+                                                                                                                                                                                                                                                "maxLength":  0,
+                                                                                                                                                                                                                                                "expectedLength":  "",
+                                                                                                                                                                                                                                                "fieldID":  "pyTemplateButton"
+                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                          ],
+                                                                                                                                                                                                               "groupFormat":  "Inline middle",
+                                                                                                                                                                                                               "layoutFormat":  "SIMPLELAYOUT",
+                                                                                                                                                                                                               "title":  ""
+                                                                                                                                                                                                           }
+                                                                                                                                                                                            },
+                                                                                                                                                                                            {
+                                                                                                                                                                                                "layout":  {
+                                                                                                                                                                                                               "visible":  true,
+                                                                                                                                                                                                               "titleFormat":  "h2",
+                                                                                                                                                                                                               "groupsVisibility":  true,
+                                                                                                                                                                                                               "containerFormat":  "NOHEADER",
+                                                                                                                                                                                                               "groups":  [
+                                                                                                                                                                                                                              {
+                                                                                                                                                                                                                                  "field":  {
+                                                                                                                                                                                                                                                "visible":  false,
+                                                                                                                                                                                                                                                "validateAs":  "",
+                                                                                                                                                                                                                                                "disabled":  false,
+                                                                                                                                                                                                                                                "fieldID":  "pyTemplateButton"
+                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                              },
+                                                                                                                                                                                                                              {
+                                                                                                                                                                                                                                  "field":  {
+                                                                                                                                                                                                                                                "visible":  false,
+                                                                                                                                                                                                                                                "validateAs":  "",
+                                                                                                                                                                                                                                                "disabled":  false,
+                                                                                                                                                                                                                                                "fieldID":  "pyTemplateButton"
+                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                              }
+                                                                                                                                                                                                                          ],
+                                                                                                                                                                                                               "groupFormat":  "Inline middle",
+                                                                                                                                                                                                               "layoutFormat":  "SIMPLELAYOUT",
+                                                                                                                                                                                                               "title":  "New"
+                                                                                                                                                                                                           }
+                                                                                                                                                                                            }
+                                                                                                                                                                                        ],
+                                                                                                                                                                             "groupFormat":  "Mimic a sentence",
+                                                                                                                                                                             "layoutFormat":  "SIMPLELAYOUT",
+                                                                                                                                                                             "title":  ""
+                                                                                                                                                                         }
+                                                                                                                                                          },
+                                                                                                                                                          {
+                                                                                                                                                              "layout":  {
+                                                                                                                                                                             "visible":  false,
+                                                                                                                                                                             "titleFormat":  "h2",
+                                                                                                                                                                             "groupsVisibility":  true,
+                                                                                                                                                                             "containerFormat":  "NOHEADER",
+                                                                                                                                                                             "groups":  [
+
+                                                                                                                                                                                        ],
+                                                                                                                                                                             "groupFormat":  "Stacked",
+                                                                                                                                                                             "layoutFormat":  "SIMPLELAYOUT",
+                                                                                                                                                                             "title":  ""
+                                                                                                                                                                         }
+                                                                                                                                                          },
+                                                                                                                                                          {
+                                                                                                                                                              "view":  {
+                                                                                                                                                                           "reference":  "",
+                                                                                                                                                                           "validationMessages":  "",
+                                                                                                                                                                           "viewID":  "pyCaseErrorSection",
+                                                                                                                                                                           "visible":  true,
+                                                                                                                                                                           "titleFormat":  "h2",
+                                                                                                                                                                           "name":  "pyCaseErrorSection",
+                                                                                                                                                                           "appliesTo":  "TGB-HRApps-Work-Onboarding",
+                                                                                                                                                                           "containerFormat":  "NOHEADER",
+                                                                                                                                                                           "groups":  [
+                                                                                                                                                                                          {
+                                                                                                                                                                                              "layout":  {
+                                                                                                                                                                                                             "visible":  true,
+                                                                                                                                                                                                             "titleFormat":  "h2",
+                                                                                                                                                                                                             "groupsVisibility":  true,
+                                                                                                                                                                                                             "containerFormat":  "NOHEADER",
+                                                                                                                                                                                                             "groups":  [
+                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                "view":  {
+                                                                                                                                                                                                                                             "viewID":  "HarnessErrorList",
+                                                                                                                                                                                                                                             "visible":  false,
+                                                                                                                                                                                                                                             "name":  "ErrorsList"
+                                                                                                                                                                                                                                         }
+                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                        ],
+                                                                                                                                                                                                             "groupFormat":  "Default",
+                                                                                                                                                                                                             "layoutFormat":  "SIMPLELAYOUT",
+                                                                                                                                                                                                             "title":  ""
+                                                                                                                                                                                                         }
+                                                                                                                                                                                          }
+                                                                                                                                                                                      ],
+                                                                                                                                                                           "readOnly":  false,
+                                                                                                                                                                           "title":  ""
+                                                                                                                                                                       }
+                                                                                                                                                          },
+                                                                                                                                                          {
+                                                                                                                                                              "view":  {
+                                                                                                                                                                           "readOnly":  false
+                                                                                                                                                                       }
+                                                                                                                                                          }
+                                                                                                                                                      ],
+                                                                                                                                           "readOnly":  false,
+                                                                                                                                           "title":  ""
+                                                                                                                                       }
+                                                                                                                          }
+                                                                                                                      ],
+                                                                                                           "readOnly":  false,
+                                                                                                           "title":  ""
+                                                                                                       },
+                                                                                              "visible":  true,
+                                                                                              "groupFormat":  "TOP",
+                                                                                              "layoutFormat":  "SIMPLELAYOUT"
+                                                                                          }
+                                                                           },
+                                                                           {
+                                                                               "layout":  {
+                                                                                              "view":  {
+                                                                                                           "reference":  "",
+                                                                                                           "validationMessages":  "",
+                                                                                                           "viewID":  "pyNewCaseFooter",
+                                                                                                           "visible":  true,
+                                                                                                           "titleFormat":  "",
+                                                                                                           "name":  "pyNewCaseFooter",
+                                                                                                           "appliesTo":  "TGB-HRApps-Work-Onboarding",
+                                                                                                           "containerFormat":  "",
+                                                                                                           "groups":  [
+                                                                                                                          {
+                                                                                                                              "layout":  {
+                                                                                                                                             "visible":  true,
+                                                                                                                                             "titleFormat":  "h2",
+                                                                                                                                             "groupsVisibility":  true,
+                                                                                                                                             "containerFormat":  "NOHEADER",
+                                                                                                                                             "groups":  [
+                                                                                                                                                            {
+                                                                                                                                                                "field":  {
+                                                                                                                                                                              "validationMessages":  "",
+                                                                                                                                                                              "visible":  true,
+                                                                                                                                                                              "labelReserveSpace":  false,
+                                                                                                                                                                              "accessCondition":  "",
+                                                                                                                                                                              "readOnly":  false,
+                                                                                                                                                                              "control":  {
+                                                                                                                                                                                              "modes":  [
+                                                                                                                                                                                                            {
+                                                                                                                                                                                                                "imageSource":  "none",
+                                                                                                                                                                                                                "modeType":  "ignore",
+                                                                                                                                                                                                                "tooltip":  ""
+                                                                                                                                                                                                            },
+                                                                                                                                                                                                            {
+                                                                                                                                                                                                                "modeType":  "readOnly",
+                                                                                                                                                                                                                "imageSource":  "none",
+                                                                                                                                                                                                                "autoPrepend":  "",
+                                                                                                                                                                                                                "controlFormat":  "pzhc",
+                                                                                                                                                                                                                "tooltip":  "",
+                                                                                                                                                                                                                "showReadOnlyValidation":  "false",
+                                                                                                                                                                                                                "autoAppend":  "",
+                                                                                                                                                                                                                "formatType":  "text"
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                        ],
+                                                                                                                                                                                              "actionSets":  [
+                                                                                                                                                                                                                 {
+                                                                                                                                                                                                                     "actions":  [
+                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                         "action":  "cancel"
+                                                                                                                                                                                                                                     }
+                                                                                                                                                                                                                                 ],
+                                                                                                                                                                                                                     "events":  [
+                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                        "event":  "click"
+                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                ]
+                                                                                                                                                                                                                 }
+                                                                                                                                                                                                             ],
+                                                                                                                                                                                              "label":  "Cancel",
+                                                                                                                                                                                              "type":  "pxButton"
+                                                                                                                                                                                          },
+                                                                                                                                                                              "label":  "",
+                                                                                                                                                                              "type":  "Text",
+                                                                                                                                                                              "isMasked":  false,
+                                                                                                                                                                              "required":  false,
+                                                                                                                                                                              "showLabel":  false,
+                                                                                                                                                                              "validateAs":  "",
+                                                                                                                                                                              "reference":  "pyTemplateButton",
+                                                                                                                                                                              "labelFormat":  "Standard",
+                                                                                                                                                                              "isEncrypted":  false,
+                                                                                                                                                                              "disabled":  false,
+                                                                                                                                                                              "testID":  "20151202132606008411636",
+                                                                                                                                                                              "valueFormatting":  "",
+                                                                                                                                                                              "value":  "",
+                                                                                                                                                                              "maxLength":  0,
+                                                                                                                                                                              "expectedLength":  "",
+                                                                                                                                                                              "fieldID":  "pyTemplateButton"
+                                                                                                                                                                          }
+                                                                                                                                                            },
+                                                                                                                                                            {
+                                                                                                                                                                "field":  {
+                                                                                                                                                                              "validationMessages":  "",
+                                                                                                                                                                              "visible":  true,
+                                                                                                                                                                              "labelReserveSpace":  false,
+                                                                                                                                                                              "accessCondition":  "",
+                                                                                                                                                                              "readOnly":  false,
+                                                                                                                                                                              "control":  {
+                                                                                                                                                                                              "modes":  [
+                                                                                                                                                                                                            {
+                                                                                                                                                                                                                "imageSource":  "none",
+                                                                                                                                                                                                                "modeType":  "ignore",
+                                                                                                                                                                                                                "tooltip":  ""
+                                                                                                                                                                                                            },
+                                                                                                                                                                                                            {
+                                                                                                                                                                                                                "modeType":  "readOnly",
+                                                                                                                                                                                                                "imageSource":  "none",
+                                                                                                                                                                                                                "autoPrepend":  "",
+                                                                                                                                                                                                                "controlFormat":  "Strong",
+                                                                                                                                                                                                                "tooltip":  "Create this item",
+                                                                                                                                                                                                                "showReadOnlyValidation":  "false",
+                                                                                                                                                                                                                "autoAppend":  "",
+                                                                                                                                                                                                                "formatType":  "text"
+                                                                                                                                                                                                            }
+                                                                                                                                                                                                        ],
+                                                                                                                                                                                              "actionSets":  [
+                                                                                                                                                                                                                 {
+                                                                                                                                                                                                                     "actions":  [
+                                                                                                                                                                                                                                     {
+                                                                                                                                                                                                                                         "action":  "addWork"
+                                                                                                                                                                                                                                     }
+                                                                                                                                                                                                                                 ],
+                                                                                                                                                                                                                     "events":  [
+                                                                                                                                                                                                                                    {
+                                                                                                                                                                                                                                        "event":  "click"
+                                                                                                                                                                                                                                    }
+                                                                                                                                                                                                                                ]
+                                                                                                                                                                                                                 }
+                                                                                                                                                                                                             ],
+                                                                                                                                                                                              "label":  "Create",
+                                                                                                                                                                                              "type":  "pxButton"
+                                                                                                                                                                                          },
+                                                                                                                                                                              "label":  "",
+                                                                                                                                                                              "type":  "Text",
+                                                                                                                                                                              "isMasked":  false,
+                                                                                                                                                                              "required":  false,
+                                                                                                                                                                              "showLabel":  false,
+                                                                                                                                                                              "validateAs":  "",
+                                                                                                                                                                              "reference":  "pyTemplateButton",
+                                                                                                                                                                              "labelFormat":  "",
+                                                                                                                                                                              "isEncrypted":  false,
+                                                                                                                                                                              "disabled":  false,
+                                                                                                                                                                              "testID":  "201701061310310173111370",
+                                                                                                                                                                              "valueFormatting":  "",
+                                                                                                                                                                              "value":  "",
+                                                                                                                                                                              "maxLength":  0,
+                                                                                                                                                                              "expectedLength":  "",
+                                                                                                                                                                              "fieldID":  "pyTemplateButton"
+                                                                                                                                                                          }
+                                                                                                                                                            },
+                                                                                                                                                            {
+                                                                                                                                                                "field":  {
+                                                                                                                                                                              "visible":  false,
+                                                                                                                                                                              "validateAs":  "",
+                                                                                                                                                                              "disabled":  false,
+                                                                                                                                                                              "fieldID":  "pyTemplateButton"
+                                                                                                                                                                          }
+                                                                                                                                                            },
+                                                                                                                                                            {
+                                                                                                                                                                "field":  {
+                                                                                                                                                                              "visible":  false,
+                                                                                                                                                                              "validateAs":  "",
+                                                                                                                                                                              "disabled":  false,
+                                                                                                                                                                              "fieldID":  "pyTemplateButton"
+                                                                                                                                                                          }
+                                                                                                                                                            }
+                                                                                                                                                        ],
+                                                                                                                                             "groupFormat":  "Inline middle",
+                                                                                                                                             "layoutFormat":  "SIMPLELAYOUT",
+                                                                                                                                             "title":  ""
+                                                                                                                                         }
+                                                                                                                          }
+                                                                                                                      ],
+                                                                                                           "readOnly":  false,
+                                                                                                           "title":  ""
+                                                                                                       },
+                                                                                              "visible":  true,
+                                                                                              "groupFormat":  "BOTTOM",
+                                                                                              "layoutFormat":  "SIMPLELAYOUT"
+                                                                                          }
+                                                                           },
+                                                                           {
+                                                                               "layout":  {
+                                                                                              "view":  {
+                                                                                                           "viewID":  "pyNewCaseMain",
+                                                                                                           "visible":  true,
+                                                                                                           "name":  "pyNewCaseMain",
+                                                                                                           "appliesTo":  "TGB-HRApps-Work-Onboarding",
+                                                                                                           "groups":  [
+                                                                                                                          {
+                                                                                                                              "field":  {
+                                                                                                                                            "validationMessages":  "",
+                                                                                                                                            "visible":  true,
+                                                                                                                                            "labelReserveSpace":  false,
+                                                                                                                                            "accessCondition":  "",
+                                                                                                                                            "readOnly":  false,
+                                                                                                                                            "control":  {
+                                                                                                                                                            "modes":  [
+
+                                                                                                                                                                      ],
+                                                                                                                                                            "actionSets":  [
+
+                                                                                                                                                                           ],
+                                                                                                                                                            "label":  "CertifiedDocuments",
+                                                                                                                                                            "type":  "pxCheckbox"
+                                                                                                                                                        },
+                                                                                                                                            "label":  "CertifiedDocuments",
+                                                                                                                                            "type":  "True-False",
+                                                                                                                                            "isMasked":  false,
+                                                                                                                                            "required":  false,
+                                                                                                                                            "showLabel":  false,
+                                                                                                                                            "validateAs":  "",
+                                                                                                                                            "reference":  "CertifiedDocuments",
+                                                                                                                                            "labelFormat":  "",
+                                                                                                                                            "isEncrypted":  false,
+                                                                                                                                            "disabled":  false,
+                                                                                                                                            "testID":  "",
+                                                                                                                                            "valueFormatting":  "",
+                                                                                                                                            "value":  "",
+                                                                                                                                            "maxLength":  0,
+                                                                                                                                            "expectedLength":  "",
+                                                                                                                                            "fieldID":  "CertifiedDocuments"
+                                                                                                                                        }
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "field":  {
+                                                                                                                                            "validationMessages":  "",
+                                                                                                                                            "visible":  true,
+                                                                                                                                            "labelReserveSpace":  false,
+                                                                                                                                            "accessCondition":  "",
+                                                                                                                                            "readOnly":  false,
+                                                                                                                                            "control":  {
+                                                                                                                                                            "modes":  [
+
+                                                                                                                                                                      ],
+                                                                                                                                                            "actionSets":  [
+
+                                                                                                                                                                           ],
+                                                                                                                                                            "label":  "Eligibilty document",
+                                                                                                                                                            "type":  "pxCheckbox"
+                                                                                                                                                        },
+                                                                                                                                            "label":  "Eligibilty document",
+                                                                                                                                            "type":  "True-False",
+                                                                                                                                            "isMasked":  false,
+                                                                                                                                            "required":  false,
+                                                                                                                                            "showLabel":  false,
+                                                                                                                                            "validateAs":  "",
+                                                                                                                                            "reference":  "EligibiltyDocument",
+                                                                                                                                            "labelFormat":  "",
+                                                                                                                                            "isEncrypted":  false,
+                                                                                                                                            "disabled":  false,
+                                                                                                                                            "testID":  "",
+                                                                                                                                            "valueFormatting":  "",
+                                                                                                                                            "value":  "",
+                                                                                                                                            "maxLength":  0,
+                                                                                                                                            "expectedLength":  "",
+                                                                                                                                            "fieldID":  "EligibiltyDocument"
+                                                                                                                                        }
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "field":  {
+                                                                                                                                            "validationMessages":  "",
+                                                                                                                                            "visible":  true,
+                                                                                                                                            "labelReserveSpace":  false,
+                                                                                                                                            "accessCondition":  "",
+                                                                                                                                            "readOnly":  false,
+                                                                                                                                            "control":  {
+                                                                                                                                                            "modes":  [
+
+                                                                                                                                                                      ],
+                                                                                                                                                            "actionSets":  [
+
+                                                                                                                                                                           ],
+                                                                                                                                                            "label":  "Identity document",
+                                                                                                                                                            "type":  "pxCheckbox"
+                                                                                                                                                        },
+                                                                                                                                            "label":  "Identity document",
+                                                                                                                                            "type":  "True-False",
+                                                                                                                                            "isMasked":  false,
+                                                                                                                                            "required":  false,
+                                                                                                                                            "showLabel":  false,
+                                                                                                                                            "validateAs":  "",
+                                                                                                                                            "reference":  "IdentityDocument",
+                                                                                                                                            "labelFormat":  "",
+                                                                                                                                            "isEncrypted":  false,
+                                                                                                                                            "disabled":  false,
+                                                                                                                                            "testID":  "",
+                                                                                                                                            "valueFormatting":  "",
+                                                                                                                                            "value":  "",
+                                                                                                                                            "maxLength":  0,
+                                                                                                                                            "expectedLength":  "",
+                                                                                                                                            "fieldID":  "IdentityDocument"
+                                                                                                                                        }
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "field":  {
+                                                                                                                                            "validationMessages":  "",
+                                                                                                                                            "visible":  true,
+                                                                                                                                            "labelReserveSpace":  false,
+                                                                                                                                            "accessCondition":  "",
+                                                                                                                                            "readOnly":  false,
+                                                                                                                                            "control":  {
+                                                                                                                                                            "modes":  [
+
+                                                                                                                                                                      ],
+                                                                                                                                                            "actionSets":  [
+
+                                                                                                                                                                           ],
+                                                                                                                                                            "type":  "pxDropdown"
+                                                                                                                                                        },
+                                                                                                                                            "label":  "Location",
+                                                                                                                                            "type":  "Text",
+                                                                                                                                            "isMasked":  false,
+                                                                                                                                            "required":  false,
+                                                                                                                                            "validateAs":  "",
+                                                                                                                                            "reference":  "Location",
+                                                                                                                                            "labelFormat":  "",
+                                                                                                                                            "isEncrypted":  false,
+                                                                                                                                            "disabled":  false,
+                                                                                                                                            "testID":  "",
+                                                                                                                                            "valueFormatting":  "",
+                                                                                                                                            "value":  "",
+                                                                                                                                            "maxLength":  0,
+                                                                                                                                            "expectedLength":  "",
+                                                                                                                                            "fieldID":  "Location"
+                                                                                                                                        }
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "field":  {
+                                                                                                                                            "validationMessages":  "",
+                                                                                                                                            "visible":  true,
+                                                                                                                                            "labelReserveSpace":  false,
+                                                                                                                                            "accessCondition":  "",
+                                                                                                                                            "readOnly":  false,
+                                                                                                                                            "control":  {
+                                                                                                                                                            "modes":  [
+
+                                                                                                                                                                      ],
+                                                                                                                                                            "actionSets":  [
+
+                                                                                                                                                                           ],
+                                                                                                                                                            "type":  "pxDateTime"
+                                                                                                                                                        },
+                                                                                                                                            "label":  "New start date",
+                                                                                                                                            "type":  "Date",
+                                                                                                                                            "isMasked":  false,
+                                                                                                                                            "required":  false,
+                                                                                                                                            "validateAs":  "",
+                                                                                                                                            "reference":  "NewStartDate",
+                                                                                                                                            "labelFormat":  "",
+                                                                                                                                            "isEncrypted":  false,
+                                                                                                                                            "disabled":  false,
+                                                                                                                                            "testID":  "",
+                                                                                                                                            "valueFormatting":  "",
+                                                                                                                                            "value":  "",
+                                                                                                                                            "maxLength":  0,
+                                                                                                                                            "expectedLength":  "",
+                                                                                                                                            "fieldID":  "NewStartDate"
+                                                                                                                                        }
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "field":  {
+                                                                                                                                            "validationMessages":  "",
+                                                                                                                                            "visible":  true,
+                                                                                                                                            "labelReserveSpace":  false,
+                                                                                                                                            "accessCondition":  "",
+                                                                                                                                            "readOnly":  false,
+                                                                                                                                            "control":  {
+                                                                                                                                                            "modes":  [
+                                                                                                                                                                          {
+                                                                                                                                                                              "listSource":  "locallist",
+                                                                                                                                                                              "options":  [
+                                                                                                                                                                                              {
+                                                                                                                                                                                                  "value":  "Atlanta",
+                                                                                                                                                                                                  "key":  "Atlanta"
+                                                                                                                                                                                              },
+                                                                                                                                                                                              {
+                                                                                                                                                                                                  "value":  "Berlin",
+                                                                                                                                                                                                  "key":  "Berlin"
+                                                                                                                                                                                              },
+                                                                                                                                                                                              {
+                                                                                                                                                                                                  "value":  "London",
+                                                                                                                                                                                                  "key":  "London"
+                                                                                                                                                                                              },
+                                                                                                                                                                                              {
+                                                                                                                                                                                                  "value":  "Tokyo",
+                                                                                                                                                                                                  "key":  "Tokyo"
+                                                                                                                                                                                              },
+                                                                                                                                                                                              {
+                                                                                                                                                                                                  "value":  "Vancouver",
+                                                                                                                                                                                                  "key":  "Vancouver"
+                                                                                                                                                                                              }
+                                                                                                                                                                                          ]
+                                                                                                                                                                          }
+                                                                                                                                                                      ],
+                                                                                                                                                            "actionSets":  [
+
+                                                                                                                                                                           ],
+                                                                                                                                                            "type":  "pxDropdown"
+                                                                                                                                                        },
+                                                                                                                                            "label":  "Office",
+                                                                                                                                            "type":  "Text",
+                                                                                                                                            "isMasked":  false,
+                                                                                                                                            "required":  false,
+                                                                                                                                            "validateAs":  "",
+                                                                                                                                            "reference":  "Office",
+                                                                                                                                            "labelFormat":  "",
+                                                                                                                                            "isEncrypted":  false,
+                                                                                                                                            "disabled":  false,
+                                                                                                                                            "testID":  "",
+                                                                                                                                            "valueFormatting":  "",
+                                                                                                                                            "value":  "",
+                                                                                                                                            "maxLength":  0,
+                                                                                                                                            "expectedLength":  "",
+                                                                                                                                            "fieldID":  "Office"
+                                                                                                                                        }
+                                                                                                                          },
+                                                                                                                          {
+                                                                                                                              "field":  {
+                                                                                                                                            "validationMessages":  "",
+                                                                                                                                            "visible":  true,
+                                                                                                                                            "labelReserveSpace":  false,
+                                                                                                                                            "accessCondition":  "",
+                                                                                                                                            "readOnly":  false,
+                                                                                                                                            "control":  {
+                                                                                                                                                            "modes":  [
+
+                                                                                                                                                                      ],
+                                                                                                                                                            "actionSets":  [
+
+                                                                                                                                                                           ],
+                                                                                                                                                            "label":  "Remote employee?",
+                                                                                                                                                            "type":  "pxCheckbox"
+                                                                                                                                                        },
+                                                                                                                                            "label":  "Remote employee?",
+                                                                                                                                            "type":  "True-False",
+                                                                                                                                            "isMasked":  false,
+                                                                                                                                            "required":  false,
+                                                                                                                                            "showLabel":  false,
+                                                                                                                                            "validateAs":  "",
+                                                                                                                                            "reference":  "Remote",
+                                                                                                                                            "labelFormat":  "",
+                                                                                                                                            "isEncrypted":  false,
+                                                                                                                                            "disabled":  false,
+                                                                                                                                            "testID":  "",
+                                                                                                                                            "valueFormatting":  "",
+                                                                                                                                            "value":  "",
+                                                                                                                                            "maxLength":  0,
+                                                                                                                                            "expectedLength":  "",
+                                                                                                                                            "fieldID":  "Remote"
+                                                                                                                                        }
+                                                                                                                          }
+                                                                                                                      ]
+                                                                                                       },
+                                                                                              "visible":  true,
+                                                                                              "groupFormat":  "CENTER",
+                                                                                              "layoutFormat":  "SIMPLELAYOUT"
+                                                                                          }
+                                                                           }
+                                                                       ],
+                                                            "groupFormat":  "header_footer",
+                                                            "layoutFormat":  "SCREENLAYOUT"
+                                                        }
+                                         }
+                                     ],
+                          "appliesTo":  "TGB-HRApps-Work-Onboarding",
+                          "pageID":  "New",
+                          "fuaVersion":  "1.13"
+                      }
+}

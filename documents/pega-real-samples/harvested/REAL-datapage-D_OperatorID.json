@@ -1,0 +1,545 @@
+﻿{
+    "pxCommitDateTime":  "2026-07-25T18:29:42.638Z",
+    "pxCreateDateTime":  "2016-09-05T23:22:44.928Z",
+    "pxCreateOperator":  "Admin@TGB",
+    "pxCreateOpName":  "Administrator",
+    "pxCreateSystemID":  "pega",
+    "pxInsId":  "",
+    "pxInsName":  "SSA@TGB",
+    "pxLimitedAccess":  "Dev",
+    "pxMoveFromSystem":  "",
+    "pxMoveImportDateTime":  "2026-07-25T18:18:05.760Z",
+    "pxMoveImportOperId":  "administrator@pega.com",
+    "pxMoveImportOperName":  "External Import Utility",
+    "pxObjClass":  "Data-Admin-Operator-ID",
+    "pxSaveDateTime":  "2026-07-25T18:29:43.075Z",
+    "pxUpdateDateTime":  "2025-09-25T18:06:42.696Z",
+    "pxUpdateOperator":  "SSA@TGB",
+    "pxUpdateOpName":  "Senior System Architect",
+    "pxUpdateSystemID":  "pega",
+    "pyAccessGroup":  "HRAppsV2:Administrators",
+    "pyAllowRuleCheckOut":  "true",
+    "pyCalendar":  "USDefault",
+    "pyChangePassword":  "false",
+    "pyChangePasswordOnNextLogin":  "false",
+    "pyClassName":  "",
+    "pyDecisionTreeName":  "",
+    "pyDefaultTimeZone":  "America/New_York",
+    "pyDeletedObject":  "",
+    "pyDescription":  "Exercise account for the Senior System Architect (SSA) Essentials course",
+    "pyDisplayMode":  "",
+    "pyFirstName":  "",
+    "pyFontName":  "Arial",
+    "pyFormPost":  "",
+    "pyHistoryObject":  "false",
+    "pyImageFileName":  "",
+    "pyImageInsKey":  "",
+    "pyImportedUser":  "false",
+    "pyIsPegaSuppliedOperator":  "",
+    "pyIsTagged":  "true",
+    "pyLabel":  "Senior System Architect",
+    "pyLastName":  "",
+    "pyLastSignon":  "2026-07-25T18:29:43.068Z",
+    "pyLicenseType":  "NAMED",
+    "pyMergeWorkbaskets":  "false",
+    "pyOpAvailable":  "true",
+    "pyOperatorIsDeactivated":  "false",
+    "pyOperatorType":  "STANDARD",
+    "pyOrganization":  "TGB",
+    "pyOrgDivision":  "Div",
+    "pyOrgUnit":  "Unit",
+    "pyPosition":  "Senior System Architect",
+    "pyPwdConfirm":  "",
+    "pyPwdCurrent":  "\t{br}$2a$12$MbuEE.2sP/f3hi2MLOhvuOUH8z98LDQ5zhkJ5COiwZWrQOo.UWm.m",
+    "pyPwdNew":  "",
+    "pyPwdTemp":  "\t{br}$2a$12$MbuEE.2sP/f3hi2MLOhvuOUH8z98LDQ5zhkJ5COiwZWrQOo.UWm.m",
+    "pyReloadForm":  "true",
+    "pyReportTo":  "Manager@TGB",
+    "pyRulePrefix":  "none",
+    "pyRuleSet":  "",
+    "pyRuleSetName":  "TGB",
+    "pyRuleSetVersion":  "",
+    "pySPRuleSetName":  "",
+    "pySSLProtocolVersion":  "TLSv1",
+    "pyStartingActivity":  "Data-Portal.ShowDesktop",
+    "pyStreamName":  "",
+    "pySubstituteOperator":  "",
+    "pySubstituteType":  "Operator",
+    "pyTelephone":  "",
+    "pyTemplateDisplayText":  "",
+    "pyTitle":  "",
+    "pyUsage":  "Used to perform exercises during the SSA course.",
+    "pyUseAllWorkbasketsInWorkgroup":  "false",
+    "pyUseApplications":  "true",
+    "pyUseLocale":  "",
+    "pyUseLocaleForDateFormat":  "",
+    "pyUseLocaleForNumberFormat":  "",
+    "pyUserIdentifier":  "SSA@TGB",
+    "pyUserName":  "Senior System Architect",
+    "pyWindowTitle":  "",
+    "pyWorkbasketFirst":  "false",
+    "pyWorkGroup":  "default@TGB",
+    "pzFailedLoginAttempts":  "0",
+    "pzHasOperatorLocked":  "false",
+    "pzIndexCount":  "324",
+    "pzIndexOwnerKey":  "DATA-ADMIN-OPERATOR-ID SSA@TGB",
+    "pzInsKey":  "DATA-ADMIN-OPERATOR-ID SSA@TGB",
+    "pzIsFirstEverLogin":  "false",
+    "pzLoadTime":  "July 25, 2026, 6:29:43 PM GMT",
+    "pzLockedTime":  "1970-01-01T00:00:00.000Z",
+    "pzOriginalInstanceKey":  "DATA-ADMIN-OPERATOR-ID ADMIN@TGB",
+    "pzPageNameHash":  "",
+    "pzRequestorId":  "A3886773086B352AF1B08ADF29B821942A",
+    "pxWarnings":  [
+
+                   ],
+    "pyAccessGroupsAdditional":  [
+                                     "HRAppsV2:Administrators",
+                                     "Employee:Authors"
+                                 ],
+    "pyAddresses":  {
+                        "Email":  {
+                                      "pxObjClass":  "Data-Address-Email",
+                                      "pxSubscript":  "Email",
+                                      "pyEmailAddress":  "SSA@TGB"
+                                  }
+                    },
+    "pyCachingData":  {
+                          "pxObjClass":  "Data-Admin-Operator-ID",
+                          "pyAccessGroup":  "HRAppsV2:Administrators",
+                          "pyLastSignon":  "1970-01-01T00:00:00.000Z",
+                          "pyOrgUnit":  "Unit",
+                          "pyPosition":  "Senior System Architect",
+                          "pyUserIdentifier":  "SSA@TGB",
+                          "pyUserName":  "Senior System Architect",
+                          "pyWorkGroup":  "default@TGB"
+                      },
+    "pyCorrPreferences":  [
+                              "Email"
+                          ],
+    "pyPreferences":  {
+                          "pxObjClass":  "Embed-OperatorID-Preferences",
+                          "pyCaptionDisplay":  "NAME",
+                          "pyCurrentClassListType":  "Implementation",
+                          "pyCurrentProject":  "",
+                          "pyCurrentTaskGroup":  "",
+                          "pyDeveloperLevel":  "Expert",
+                          "pyHierarchyDisplay":  "PARENT",
+                          "pyIgnoreLocale":  "false",
+                          "pyTestCasesFromBuiltOnApplications":  "",
+                          "pzOperatorPrefHelpURL":  "https://community.pega.com/help_v823/designer-studio/v6preferences",
+                          "pyClassOptions":  [
+                                                 {
+                                                     "pxObjClass":  "Embed-OperatorID-ClassOptions",
+                                                     "pyTopLevelClassLabel":  "",
+                                                     "pyTopLevelClassName":  ""
+                                                 }
+                                             ],
+                          "pyFormPrefs":  {
+                                              "pxObjClass":  "Embed-Preferences-Forms",
+                                              "pyAlwaysExpandHeader":  "false",
+                                              "pyAutoApply":  "true",
+                                              "pyAutoCheckout":  "true",
+                                              "pyCollapseNavPane":  "false",
+                                              "pyFlowStencil":  "Standard",
+                                              "pyGridLines":  "true",
+                                              "pyMaxOpenRules":  "20",
+                                              "pyOrientation":  "Landscape",
+                                              "pyRemoveRuleAfterDelete":  "false",
+                                              "pyShowTabs":  "true",
+                                              "pyWarnBeforeDelete":  "true",
+                                              "pyWarnDeleteCheckout":  "true",
+                                              "pyWarnDVPropertyPanel":  "autoapply"
+                                          },
+                          "pyGeneralPrefs":  {
+                                                 "pxObjClass":  "Embed-Preferences-General",
+                                                 "pyDisableJSCompacting":  "false",
+                                                 "pyShowWorkSkin":  "",
+                                                 "pyKeyboardPrefs":  {
+                                                                         "pxObjClass":  "Embed-Preferences-General-KBCommands",
+                                                                         "pyUseKBPrefs":  "true",
+                                                                         "pyKBCommands":  [
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Logoff",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "General",
+                                                                                                  "pyKey":  "48"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Help",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "General",
+                                                                                                  "pyKey":  "72"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Operator",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "General",
+                                                                                                  "pyKey":  "79"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Tracer",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Debug",
+                                                                                                  "pyKey":  "84"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Clipboard",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Debug",
+                                                                                                  "pyKey":  "66"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "PAL",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Debug",
+                                                                                                  "pyKey":  "81"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "System Management",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Debug",
+                                                                                                  "pyKey":  "77"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Rule Inspector Property",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Debug",
+                                                                                                  "pyKey":  "88"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Rule Inspector Declarative",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Debug",
+                                                                                                  "pyKey":  "86"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Rule Inspector HTML",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Debug",
+                                                                                                  "pyKey":  "89"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Rule Inspector Field Value",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Debug",
+                                                                                                  "pyKey":  "87"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "New",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "78"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Save",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "83"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Save As",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "65"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Delete",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "68"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Show XML",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "90"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Run",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "82"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Launch",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "76"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Back",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "37"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Forward",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "39"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Refresh",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "85"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Close",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "69"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Preview",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "80"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Check in/out",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "67"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "true",
+                                                                                                  "pyCommand":  "Find",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "Rule",
+                                                                                                  "pyKey":  "70"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "copy",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "UI",
+                                                                                                  "pyKey":  "67"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "cut",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "UI",
+                                                                                                  "pyKey":  "88"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "paste",
+                                                                                                  "pyCTRL":  "true",
+                                                                                                  "pyKBCommandCategories":  "UI",
+                                                                                                  "pyKey":  "86"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "delete",
+                                                                                                  "pyCTRL":  "false",
+                                                                                                  "pyKBCommandCategories":  "UI",
+                                                                                                  "pyKey":  "46"
+                                                                                              },
+                                                                                              {
+                                                                                                  "pxObjClass":  "Embed-Preferences-General-KBCommands-CommandDef",
+                                                                                                  "pyALT":  "false",
+                                                                                                  "pyCommand":  "Show Property Panel",
+                                                                                                  "pyCTRL":  "false",
+                                                                                                  "pyKBCommandCategories":  "UI",
+                                                                                                  "pyKey":  "13"
+                                                                                              }
+                                                                                          ]
+                                                                     }
+                                             },
+                          "pyNavigationPrefs":  {
+                                                    "pxObjClass":  "Embed-Preferences-Navigation",
+                                                    "pyDefaultAppExplorerDisplay":  "ClassGroup",
+                                                    "pyDefaultTab":  "ProfileExplorer",
+                                                    "pyDefaultTabLabel":  "Profile Explorer",
+                                                    "pyHideNonAppliesToRules":  "true",
+                                                    "pyLastOpenSpace":  "",
+                                                    "pyLastTopRule":  "",
+                                                    "pyPrefsSetByAppExpress":  "true",
+                                                    "pyRecentRulesLimit":  "10",
+                                                    "pyRecentWorkLimit":  "10",
+                                                    "pySaveCurrentNavTab":  "true",
+                                                    "pySaveFullState":  "true",
+                                                    "pySaveLastNavTreeSelection":  "false",
+                                                    "pySaveListOpenRules":  "true",
+                                                    "pySaveOpenList":  "false",
+                                                    "pySelectorSourceString":  "",
+                                                    "pyShowAppExplorer":  "true",
+                                                    "pyShowClassExplorer":  "false",
+                                                    "pyShowFullManageRules":  "false",
+                                                    "pyShowMyRules":  "true",
+                                                    "pyShowProfileExplorer":  "true",
+                                                    "pyShowRulesByType":  "true",
+                                                    "pyShowTabs":  "true",
+                                                    "pyShowUsedByApp":  "false",
+                                                    "pyShowWelcomeScreen":  "true",
+                                                    "pyListOpenRules":  [
+                                                                            ""
+                                                                        ],
+                                                    "pyOpenRulesList":  [
+                                                                            {
+                                                                                "pxObjClass":  "Embed-Preferences-Navigation-OpenRuleData",
+                                                                                "pyFullName":  "",
+                                                                                "pyLabel":  "",
+                                                                                "pyRuleInsKey":  "",
+                                                                                "pyRuleObjClass":  "",
+                                                                                "pyRuleSet":  "",
+                                                                                "pyRuleSourceString":  "",
+                                                                                "pyRuleSourceType":  "",
+                                                                                "pyVersion":  ""
+                                                                            }
+                                                                        ]
+                                                },
+                          "pyPinnedClassList":  [
+                                                    {
+                                                        "pxObjClass":  "Embed-ExplorerNode-Class",
+                                                        "pyClass":  "Rule-UI-View"
+                                                    },
+                                                    {
+                                                        "pxObjClass":  "Embed-ExplorerNode-Class",
+                                                        "pyClass":  "Data-Tag-RelevantRecord"
+                                                    },
+                                                    {
+                                                        "pxObjClass":  "Embed-ExplorerNode-Class",
+                                                        "pyClass":  "Rule-ClassMetadata"
+                                                    }
+                                                ],
+                          "pySearchPrefs":  {
+                                                "pxObjClass":  "Embed-Preferences-Search",
+                                                "pyEnableDiagnosticFeatures":  "true",
+                                                "pyMaxDataCount":  "5000",
+                                                "pyMaxReturnCount":  "50",
+                                                "pyMaxRuleCount":  "5000",
+                                                "pySearchType":  "MostRecent"
+                                            },
+                          "pySelectedClassList":  [
+                                                      ""
+                                                  ],
+                          "pyToolsPrefs":  {
+                                               "pxObjClass":  "Embed-Preferences-Tools",
+                                               "pyLaunchClipboard":  "true",
+                                               "pyLaunchImageCatalog":  "true",
+                                               "pyLaunchPerformance":  "true",
+                                               "pyLaunchStyleViewer":  "true",
+                                               "pyPMFUserID":  "SSA@TGB",
+                                               "pyProjectUserID":  "",
+                                               "pyShowFeedbackPin":  "true"
+                                           }
+                      },
+    "pySkills":  [
+                     {
+                         "pxObjClass":  "Embed-Data-Admin-Skill",
+                         "pySkillName":  "",
+                         "pySkillRating":  "",
+                         "pzIndexOwnerKey":  "DATA-ADMIN-OPERATOR-ID SSA@TGB",
+                         "pzIndexes":  {
+                                           "Skills":  "320"
+                                       }
+                     }
+                 ],
+    "pySkillsPrimary":  [
+                            "Designer"
+                        ],
+    "pySkillsSecondary":  [
+                              "User"
+                          ],
+    "pyUnavailablePeriod":  [
+                                {
+                                    "pxObjClass":  "Embed-Data-Admin-UnavailablePeriod",
+                                    "pyUnavailableFrom":  "1970-01-01",
+                                    "pyUnavailableTo":  "1970-01-01"
+                                }
+                            ],
+    "pyWorkbasket":  [
+
+                     ],
+    "pyWorkBasketList":  [
+
+                         ],
+    "pyWorkGroupList":  [
+                            {
+                                "pxObjClass":  "Data-Admin-WorkGroup",
+                                "pyRadioButtonAG":  "true",
+                                "pyWorkGroupName":  "default@TGB",
+                                "pzIndexOwnerKey":  "DATA-ADMIN-OPERATOR-ID SSA@TGB",
+                                "pzIndexes":  {
+                                                  "pzWorkGroupsForOperator":  "323"
+                                              }
+                            }
+                        ],
+    "pzIndexes":  {
+                      "AdditionalAccessGroup":  "321"
+                  },
+    "pzPasswordHistory":  [
+                              {
+                                  "pxObjClass":  "Embed-OperatorPassword",
+                                  "pzCreateDateTime":  "2025-09-25T18:06:41.216Z",
+                                  "pzPassword":  "\t{br}$2a$12$MbuEE.2sP/f3hi2MLOhvuOUH8z98LDQ5zhkJ5COiwZWrQOo.UWm.m"
+                              },
+                              {
+                                  "pxObjClass":  "Embed-OperatorPassword",
+                                  "pzCreateDateTime":  "2025-09-25T16:38:41.716Z",
+                                  "pzPassword":  "\t{br}$2a$12$AA61T5h9/nbIpUw6j1vCW.qaNdDTlK8MlMetCTiX6xE1wsQYzEcsS"
+                              },
+                              {
+                                  "pxObjClass":  "Embed-OperatorPassword",
+                                  "pzCreateDateTime":  "2024-05-21T00:50:43.287Z",
+                                  "pzPassword":  "\t{br}$2a$12$LNvHmkE0XOQnuFU7MlwhP.r2bqGtO/uUSlMNP.lbPO5xmZfHuau6."
+                              }
+                          ]
+}

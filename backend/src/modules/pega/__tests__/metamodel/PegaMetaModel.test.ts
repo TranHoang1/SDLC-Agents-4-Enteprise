@@ -223,5 +223,22 @@ describe('PegaMetaModelLoader', () => {
       expect(def!.pxObjClass).toBe('Rule-Obj-Flow');
       expect(def!.label).toBe('Flow');
     });
+
+    it('registerClass adds a class and getParser retrieves it', async () => {
+      const registry = PegaMetaModelRegistry.getInstance();
+      const newClass = {
+        pxObjClass: 'Rule-Obj-MyCustom',
+        baseClass: 'Rule-Obj-',
+        properties: [],
+        children: [],
+        label: 'My Custom Rule',
+        description: 'A dynamically registered rule type',
+      };
+      registry.registerClass(newClass);
+      const retrieved = registry.getParser('Rule-Obj-MyCustom');
+      expect(retrieved).toBeDefined();
+      expect(retrieved!.pxObjClass).toBe('Rule-Obj-MyCustom');
+      expect(retrieved!.label).toBe('My Custom Rule');
+    });
   });
 });

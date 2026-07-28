@@ -1,4 +1,4 @@
-# Project Structure — FEC_CR_Builder
+# Project Structure — SDLC-Agents-4-Enterprise
 
 **Last Updated:** 2026-05-09T04:48:52.217668900Z
 **Project Type:** generic
