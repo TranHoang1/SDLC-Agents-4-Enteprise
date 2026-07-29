@@ -28,6 +28,8 @@ import { migrate001AddScopeColumns } from './migrations/001-add-scope-columns.js
 import { migrate002AddEvolutionColumns } from './migrations/002-add-evolution-columns.js';
 import { migrate003PendingTasks } from './migrations/003-pending-tasks.js';
 import { migrate004ResetSequences } from './migrations/004-reset-sequences.js';
+import { migrate005FixPendingTasksSerial } from './migrations/005-fix-pending-tasks-serial.js';
+import { migrate006FixFilesSchema } from './migrations/006-fix-files-schema.js';
 import { ScopePromotionService } from './promotion/index.js';
 import { TierConsolidationService } from './consolidation/service.js';
 import { startScheduler, stopScheduler } from './evolution/Scheduler.js';
@@ -95,6 +97,8 @@ export class MemoryModuleBuilder {
     await migrate002AddEvolutionColumns(this.memAdapter);
     await migrate003PendingTasks(this.memAdapter);
     await migrate004ResetSequences(this.memAdapter);
+    await migrate005FixPendingTasksSerial(this.memAdapter);
+    await migrate006FixFilesSchema(this.memAdapter);
 
     return this;
   }

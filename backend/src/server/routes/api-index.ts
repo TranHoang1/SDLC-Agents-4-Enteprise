@@ -20,11 +20,81 @@ import { validateSession } from '../../admin/db/sessions.js';
 interface SourceFile { path: string; content: string }
 interface IndexScope { projectId: string; workspace: string }
 
-/** Resolve request scope from trusted headers, falling back to boot config. */
+/**
+ * Server-controlled root directory that holds per-tenant workspaces.
+ * The client's `X-Workspace-Root` (e.g. `/Users/foo/proj` from macOS,
+ * `C:\Users\foo\proj` from Windows) is preserved as a subdirectory tree UNDER
+ * this root, so operators can still recognise the original layout when
+ * inspecting the container (`ls /app/workspaces/<projectId>/Users/foo/proj`).
+ *
+ * Configure via env var `SERVER_WORKSPACES_ROOT` (default:
+ * `<dataDir>/workspaces`, falling back to `.code-intel/workspaces`).
+ */
+function resolveServerWorkspacesRoot(): string {
+  if (process.env.SERVER_WORKSPACES_ROOT) return process.env.SERVER_WORKSPACES_ROOT;
+  const cfg = loadConfig();
+  return path.resolve(cfg.dataDir || '.code-intel', 'workspaces');
+}
+
+/**
+ * Sanitize projectId to a filesystem-safe directory name.
+ * Allows only `[a-zA-Z0-9._-]`; all other characters become `_`.
+ * Rejects the special names `.` and `..` to prevent path traversal.
+ */
+function sanitizeProjectIdForFs(projectId: string): string {
+  const clean = projectId.replace(/[^a-zA-Z0-9._-]/g, '_');
+  if (!clean || clean === '.' || clean === '..') {
+    throw new Error('PROJECT_REQUIRED: project_id contains no filesystem-safe characters');
+  }
+  return clean;
+}
+
+/**
+ * Convert the client-supplied host workspace path into a safe container path
+ * that mirrors the original hierarchy under the tenant's workspace root.
+ *
+ * Examples (assuming `SERVER_WORKSPACES_ROOT=/app/workspaces`, projectId=`p1`):
+ *   `/Users/foo/proj`      -> `/app/workspaces/p1/Users/foo/proj`
+ *   `C:\\Users\\foo\\proj` -> `/app/workspaces/p1/C/Users/foo/proj`
+ *
+ * The returned path is guaranteed to stay under
+ * `<workspacesRoot>/<projectId>/` — any `..` segments that would escape the
+ * tenant root are rejected.
+ */
+function mapClientPathToContainer(hostPath: string, projectId: string): string {
+  const projectRoot = path.resolve(resolveServerWorkspacesRoot(), sanitizeProjectIdForFs(projectId));
+
+  // Normalise slashes and strip a Windows drive letter into a plain directory
+  // segment so `C:\Users\foo` becomes `C/Users/foo` (avoids `:` on POSIX FS).
+  let rel = hostPath.replace(/\\/g, '/');
+  const drive = /^([a-zA-Z]):\/?/.exec(rel);
+  if (drive) rel = `${drive[1]}/${rel.slice(drive[0].length)}`;
+  // Drop leading slashes so path.resolve joins into projectRoot (not to /).
+  rel = rel.replace(/^\/+/, '');
+
+  const target = path.resolve(projectRoot, rel);
+  const prefix = projectRoot + path.sep;
+  if (target !== projectRoot && !target.startsWith(prefix)) {
+    throw new Error('WORKSPACE_ESCAPE: workspace path resolves outside tenant root');
+  }
+  return target;
+}
+
+/**
+ * Resolve request scope. `projectId` comes from the client; `workspace` is a
+ * server-side path derived from the client-supplied `X-Workspace-Root` — the
+ * client's hierarchy is preserved, but writes are contained under
+ * `<SERVER_WORKSPACES_ROOT>/<projectId>/`. If the header is missing, we fall
+ * back to the tenant root itself.
+ */
 function resolveRequestScope(c: Context): IndexScope {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
-  const workspace = c.req.header('X-Workspace-Root') || config.workspace;
+  const clientPath = c.req.header('X-Workspace-Root');
+  const workspace = clientPath
+    ? mapClientPathToContainer(clientPath, projectId)
+    : path.resolve(resolveServerWorkspacesRoot(), sanitizeProjectIdForFs(projectId));
+  fs.mkdirSync(workspace, { recursive: true });
   return { projectId, workspace };
 }
 
@@ -92,7 +162,8 @@ async function upsertProjectGraphNode(entryId: string, displayName: string, proj
     const graphRepo = new GraphRepository(getAdminAdapter());
     await graphRepo.upsertNode({
       entryId, label: `Project: ${displayName}`, type: 'CONTEXT',
-      tier: 'SEMANTIC', projectId, x: 0, y: 0, z: 0, level: 'macro', clusterId: '0',
+      // level=0 → macro tier (project-level node, always visible at zoom-out).
+      tier: 'SEMANTIC', projectId, x: 0, y: 0, z: 0, level: 0, clusterId: '0',
     });
   } catch (err) {
     logger.warn({ err }, '[index] graph node upsert skipped (non-fatal)');

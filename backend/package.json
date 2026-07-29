@@ -50,6 +50,7 @@
     "onnxruntime-node": "^1.18.0",
     "pg": "^8.22.0",
     "pino": "^9.2.0",
+    "playwright": "^1.60.0",
     "web-tree-sitter": "^0.26.9",
     "zod": "^3.23.0"
   },

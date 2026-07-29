@@ -25,6 +25,9 @@ services:
       - "48721:48721"
     volumes:
       - code_intel_data:/app/.code-intel
+      # Per-tenant workspaces — one subdir per projectId. Server-controlled;
+      # client-sent X-Workspace-Root is intentionally ignored for FS writes.
+      - workspaces_data:/app/workspaces
     networks:
       - sa4e-network
       - app-network
@@ -45,6 +48,7 @@ services:
 
 volumes:
   code_intel_data:
+  workspaces_data:
 
 networks:
   sa4e-network:
