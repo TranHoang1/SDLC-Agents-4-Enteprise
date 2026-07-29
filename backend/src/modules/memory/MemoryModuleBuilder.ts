@@ -30,6 +30,7 @@ import { migrate003PendingTasks } from './migrations/003-pending-tasks.js';
 import { migrate004ResetSequences } from './migrations/004-reset-sequences.js';
 import { migrate005FixPendingTasksSerial } from './migrations/005-fix-pending-tasks-serial.js';
 import { migrate006FixFilesSchema } from './migrations/006-fix-files-schema.js';
+import { recreateFtsInfrastructure } from '../../database/migration/fts-recreation.js';
 import { ScopePromotionService } from './promotion/index.js';
 import { TierConsolidationService } from './consolidation/service.js';
 import { startScheduler, stopScheduler } from './evolution/Scheduler.js';
@@ -99,6 +100,10 @@ export class MemoryModuleBuilder {
     await migrate004ResetSequences(this.memAdapter);
     await migrate005FixPendingTasksSerial(this.memAdapter);
     await migrate006FixFilesSchema(this.memAdapter);
+    // Ensure full-text-search infrastructure exists (SQLite FTS5 / PG tsvector).
+    // MemoryEngine.search relies on `ke.tsvector_content` on PostgreSQL — the
+    // helper is idempotent (`IF NOT EXISTS` / `CREATE OR REPLACE`), safe on repeat.
+    await recreateFtsInfrastructure(this.memAdapter);
 
     return this;
   }

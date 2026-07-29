@@ -46,9 +46,17 @@ export class MemoryEngine extends MemoryEngineCrud {
   }
 
   async search(query: string, limit = 10, tier?: string, type?: string, scopeCtx?: ScopeContext): Promise<SearchResult[]> {
+    // `expires_at` is stored as ISO-8601 TEXT in both SQLite and PostgreSQL.
+    // SQLite can compare TEXT >= datetime('now') directly (implicit conversion),
+    // but PostgreSQL requires an explicit cast to `timestamptz` — otherwise the
+    // comparison fails with "operator does not exist: text >= timestamp with
+    // time zone" (SQLSTATE 42883).
+    const expiresCol = this.adapter.getEngine() === 'postgresql'
+      ? 'ke.expires_at::timestamptz'
+      : 'ke.expires_at';
     const clauses: string[] = [
       'ke.archived = 0',
-      `(ke.expires_at IS NULL OR ke.expires_at >= ${this.dialect.now()})`,
+      `(ke.expires_at IS NULL OR ${expiresCol} >= ${this.dialect.now()})`,
     ];
     const params: unknown[] = [];
     if (tier) { clauses.push('ke.tier = ?'); params.push(tier); }
@@ -108,9 +116,9 @@ export class MemoryEngine extends MemoryEngineCrud {
     }
   }
 
-  private applyCompositeScoring(rows: any[]): SearchResult[] {
+  private async applyCompositeScoring(rows: any[]): Promise<SearchResult[]> {
     try {
-      const options = this.readScoringOptionsSync();
+      const options = await this.readScoringOptions();
       const scored = rows.map(row => {
         const { rank, ...entry } = row;
         const ftsRank = -rank;
@@ -138,20 +146,19 @@ export class MemoryEngine extends MemoryEngineCrud {
   }
 
   /**
-   * Sync scoring options read — only called after allAsync returns rows.
-   * SA4E-53: scoring config is read via sync path since it's called from applyCompositeScoring
-   * which is a synchronous post-processing step on already-fetched rows.
-   * TODO: convert to fully async in future if needed.
+   * Read composite scoring options from `decay_config`.
+   * Uses the async adapter API so it works on every engine — PostgresAdapter
+   * has no sync fallback (its sync `get()` throws "Use getAsync"), so the
+   * previous sync variant crashed every PG search after FTS returned rows.
    */
-  private readScoringOptionsSync(): CompositeScoreOptions {
+  private async readScoringOptions(): Promise<CompositeScoreOptions> {
     try {
-      // For SQLite: use sync path (adapter wraps sync as async, so this is safe)
-      const row = (this.adapter as any).get?.(
+      const row = await this.adapter.getAsync<{ value: string }>(
         `SELECT value FROM decay_config WHERE key = 'enable_predictive'`,
-      ) as { value: string } | undefined;
+      );
       return { enablePredictive: row?.value === 'true' };
     } catch (e) {
-      console.warn('[MemoryEngine] readScoringOptionsSync failed', e);
+      console.warn('[MemoryEngine] readScoringOptions failed', e);
       return {};
     }
   }
