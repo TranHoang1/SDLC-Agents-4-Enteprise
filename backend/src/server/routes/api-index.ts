@@ -18,7 +18,22 @@ import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 import { validateSession } from '../../admin/db/sessions.js';
 
 interface SourceFile { path: string; content: string }
-interface IndexScope { projectId: string; workspace: string }
+
+/**
+ * Per-request scope. Two path concerns, kept separate:
+ *   - `workspace`: server-side FS path used for reads/writes/indexing.
+ *   - `clientWorkspaceRoot`: the client's original host path (as sent via
+ *     `X-Workspace-Root`), used for metadata/display so operators and users
+ *     see the ORIGINAL path — never the internal `/app/workspaces/...` prefix.
+ *   - `displayName`: last path segment of the client's host path (fallback:
+ *     projectId). Used for graph node labels and KB entry summaries.
+ */
+interface IndexScope {
+  projectId: string;
+  workspace: string;
+  clientWorkspaceRoot: string;
+  displayName: string;
+}
 
 /**
  * Server-controlled root directory that holds per-tenant workspaces.
@@ -81,21 +96,38 @@ function mapClientPathToContainer(hostPath: string, projectId: string): string {
 }
 
 /**
- * Resolve request scope. `projectId` comes from the client; `workspace` is a
- * server-side path derived from the client-supplied `X-Workspace-Root` — the
- * client's hierarchy is preserved, but writes are contained under
- * `<SERVER_WORKSPACES_ROOT>/<projectId>/`. If the header is missing, we fall
- * back to the tenant root itself.
+ * Extract the trailing segment of the client's host path in a
+ * cross-platform way (handles both `/` and `\` separators).
+ */
+function basenameFromClientPath(hostPath: string): string {
+  const parts = hostPath.replace(/\\/g, '/').split('/').filter(Boolean);
+  return parts[parts.length - 1] || '';
+}
+
+/**
+ * Resolve request scope. Both paths are computed here:
+ *   1. `workspace` — server-side FS path used for indexing/writes.
+ *   2. `clientWorkspaceRoot` — original client host path, stored verbatim in
+ *      DB metadata so displays and graph labels use the user's own path (not
+ *      the internal `/app/workspaces/<projectId>/...` layout).
  */
 function resolveRequestScope(c: Context): IndexScope {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
   const clientPath = c.req.header('X-Workspace-Root');
+  const safeProjectDir = path.resolve(resolveServerWorkspacesRoot(), sanitizeProjectIdForFs(projectId));
+
   const workspace = clientPath
     ? mapClientPathToContainer(clientPath, projectId)
-    : path.resolve(resolveServerWorkspacesRoot(), sanitizeProjectIdForFs(projectId));
+    : safeProjectDir;
   fs.mkdirSync(workspace, { recursive: true });
-  return { projectId, workspace };
+
+  // `clientWorkspaceRoot` reflects what the user sent; fall back to the
+  // stable projectId marker so downstream code always has *something*.
+  const clientWorkspaceRoot = clientPath ?? projectId;
+  const displayName = (clientPath && basenameFromClientPath(clientPath)) || projectId;
+
+  return { projectId, workspace, clientWorkspaceRoot, displayName };
 }
 
 /** Extract userId from Bearer token (non-fatal — returns '' if unauthenticated). */
@@ -115,13 +147,22 @@ function writeFilesPhase(workspace: string, files: SourceFile[]): { written: num
   return { written, rejected };
 }
 
-/** Phase: register/update the project in the admin registry (non-fatal). */
-async function registerProjectPhase(projectId: string, workspace: string, logger: Logger, createdBy = ''): Promise<void> {
+/**
+ * Phase: register/update the project in the admin registry (non-fatal).
+ * We store the CLIENT-provided host path (e.g. `/Users/foo/proj`) as the
+ * display workspace_path — never the internal `/app/workspaces/...` prefix.
+ */
+async function registerProjectPhase(scope: IndexScope, logger: Logger, createdBy = ''): Promise<void> {
   try {
     const graphRepo = new GraphRepository(getAdminAdapter());
-    await graphRepo.registerProject(projectId, path.basename(workspace), workspace, createdBy);
+    await graphRepo.registerProject(
+      scope.projectId,
+      scope.displayName,
+      scope.clientWorkspaceRoot,
+      createdBy,
+    );
   } catch (err) {
-    logger.warn({ err, projectId }, '[index] project registry upsert skipped (non-fatal)');
+    logger.warn({ err, projectId: scope.projectId }, '[index] project registry upsert skipped (non-fatal)');
   }
 }
 
@@ -135,22 +176,24 @@ function triggerIndexPhase(registry: ModuleRegistry, scope: IndexScope, logger: 
   return true;
 }
 
-/** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
-/** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
+/**
+ * Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal).
+ * The KB content records the user's ORIGINAL host workspace path so semantic
+ * search / display references match what the user knows.
+ */
 async function ensureProjectKbEntry(registry: ModuleRegistry, scope: IndexScope, written: number, logger: Logger): Promise<void> {
   try {
     const mem = registry.getModule('memory') as any;
     if (mem?.status !== 'ready') return;
     const engine = mem.getEngine();
-    const displayName = path.basename(scope.workspace);
     // Use async insert — engine.insert() is now async for PostgreSQL compatibility
     const entryId = await engine.insert({
-      content: `Project "${displayName}" indexed. Workspace: ${scope.workspace}. Files: ${written}.`,
-      summary: `Project metadata for ${displayName}`,
+      content: `Project "${scope.displayName}" indexed. Workspace: ${scope.clientWorkspaceRoot}. Files: ${written}.`,
+      summary: `Project metadata for ${scope.displayName}`,
       type: 'CONTEXT', tier: 'SEMANTIC', scope: 'PROJECT',
       project_id: scope.projectId, source: 'project-metadata', tags: 'project,metadata,indexed',
     });
-    await upsertProjectGraphNode(String(entryId), displayName, scope.projectId, logger);
+    await upsertProjectGraphNode(String(entryId), scope.displayName, scope.projectId, logger);
   } catch (err) {
     logger.warn({ err }, '[index] project KB entry skipped (non-fatal)');
   }
@@ -203,7 +246,7 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const { files } = await c.req.json<{ files: SourceFile[] }>();
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c);
-    await registerProjectPhase(scope.projectId, scope.workspace, logger, userId);
+    await registerProjectPhase(scope, logger, userId);
     const { written, rejected } = writeFilesPhase(scope.workspace, files);
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
     const reindexTriggered = triggerIndexPhase(registry, scope, logger);
