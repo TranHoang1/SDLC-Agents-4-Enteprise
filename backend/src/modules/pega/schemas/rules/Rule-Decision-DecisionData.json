@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Decision-DecisionData",
+  "pyPatternParent": "",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "",
+  "pyRuleName": "Rule-Decision-DecisionData",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "",
+  "pyClassName": "Rule-Decision-DecisionData"
+}

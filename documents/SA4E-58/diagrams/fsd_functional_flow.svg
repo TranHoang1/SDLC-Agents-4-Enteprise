@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+  <text x="550" y="40" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">SA4E-58: FSD Dynamic Tool Call Execution Flow</text>
+  
+  <line x1="150" y1="90" x2="150" y2="480" stroke="#89b4fa" stroke-width="2" stroke-dasharray="6,6"/>
+  <text x="150" y="80" fill="#89b4fa" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">1. AI Agent</text>
+
+  <line x1="450" y1="90" x2="450" y2="480" stroke="#f5c2e7" stroke-width="2" stroke-dasharray="6,6"/>
+  <text x="450" y="80" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">2. Dynamic Router</text>
+
+  <line x1="750" y1="90" x2="750" y2="480" stroke="#cba6f7" stroke-width="2" stroke-dasharray="6,6"/>
+  <text x="750" y="80" fill="#cba6f7" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">3. PegaHttpClient</text>
+
+  <line x1="980" y1="90" x2="980" y2="480" stroke="#a6e3a1" stroke-width="2" stroke-dasharray="6,6"/>
+  <text x="980" y="80" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="14" font-weight="bold" text-anchor="middle">4. Pega Server</text>
+
+  <path d="M 150 140 L 450 140" stroke="#f5c2e7" stroke-width="3"/>
+  <text x="300" y="130" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">find_tools("pega checkout rule")</text>
+
+  <path d="M 450 180 L 150 180" stroke="#89b4fa" stroke-width="2" stroke-dasharray="4,4"/>
+  <text x="300" y="170" fill="#a6adc8" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">Returns Tool Schema: pega_checkout_rule</text>
+
+  <path d="M 150 240 L 450 240" stroke="#f5c2e7" stroke-width="3"/>
+  <text x="300" y="230" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">execute_dynamic_tool("pega_checkout_rule", args)</text>
+
+  <path d="M 450 300 L 750 300" stroke="#cba6f7" stroke-width="3"/>
+  <text x="600" y="290" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">checkoutPegaRule(insKey, "CHECKOUT")</text>
+
+  <path d="M 750 360 L 980 360" stroke="#a6e3a1" stroke-width="3"/>
+  <text x="865" y="350" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">POST /api/HRAppsV2Service/V1/rules/checkout</text>
+
+  <path d="M 980 420 L 150 420" stroke="#a6e3a1" stroke-width="3"/>
+  <text x="565" y="410" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">HTTP 200 OK: {"status": "SUCCESS", "action": "CHECKOUT"}</text>
+</svg>

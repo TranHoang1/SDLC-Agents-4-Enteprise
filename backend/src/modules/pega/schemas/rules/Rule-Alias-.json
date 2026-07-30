@@ -1,0 +1,12 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Alias-",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-",
+  "pyPatternParent": "Rule-",
+  "pyClassName": "Rule-Alias-",
+  "pyRuleName": "Rule-Alias-",
+  "pyClassType": "Abstract",
+  "pyDescription": "Base class for all alias rule types",
+  "pxObjClass": "Rule-Obj-Class"
+}

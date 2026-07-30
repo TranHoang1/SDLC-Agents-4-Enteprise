@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Connect-JCA",
+  "pyPatternParent": "Rule-Connect-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleName": "Rule-Connect-JCA",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Connect-",
+  "pyClassName": "Rule-Connect-JCA"
+}

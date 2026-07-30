@@ -1,0 +1,39 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Monitor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="40" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Detect Issue" style="shape=diamond;whiteSpace=wrap;html=1;fillColor=#E8A838;strokeColor=#C88A20;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="195" y="135" width="90" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="Disable Flags" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D94A4A;strokeColor=#B83030;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="330" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="Restore Build" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="490" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="Verify" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A50;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="650" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1" value="metrics &amp; alerts" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="2" target="3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2" value="yes - anomaly" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#D94A4A;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="3" target="4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3" value="feature flags off" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="4" target="5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4" value="previous version" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="5" target="6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="Resolved" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A50;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="810" y="140" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="r5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;" edge="1" parent="1" source="6" target="7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

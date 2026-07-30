@@ -1,0 +1,120 @@
+{
+  "pxCreateDateTime": "20020123T140719.636 GMT",
+  "pxCreateOperator": "vandj@pegasystems.com",
+  "pxCreateOpName": "John van der Meer",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "554ead34d653c9d1f76463c7549201e8",
+  "pxInsId": "RULE-STREAM",
+  "pxInsName": "RULE-STREAM",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxServerReqURI": "/pr3web/PRServlet/KqAFcW2fZPHStG8FxNZW0w%5B%5B*/!Developer",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20070308T234900.896 GMT",
+  "pxUpdateOperator": "berrb",
+  "pxUpdateOpName": "Bachir M Berrachedi",
+  "pxUpdateSystemID": "pega",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyApplet": "",
+  "pyAspect": "Stream",
+  "pyBaseRule": "true",
+  "pyCategory": "",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "N",
+  "pyClassGroup": "Rule-Stream",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "false",
+  "pyClassName": "Rule-Stream",
+  "pyClassType": "Abstract",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-",
+  "pyDescription": "Base class for all stream definitions.  The properties used to specify the stream are defined for this abstract class.",
+  "pyEncryptBLOB": "",
+  "pyHasInstances": "false",
+  "pyHistoryObject": "false",
+  "pyInitialVersion": "04-01-01",
+  "pyInterface": "",
+  "pyJavaGenerator": "com.pega.pegarules.engine.generator.StreamBuilderAssembler",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Rule types for HTML/XML streams",
+  "pyLabelOld": "Rule types for HTML/XML streams",
+  "pyMethodStatus": "",
+  "pyOrgDivision": "Org-ResourceDevelopment",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Stream",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-",
+  "pyUsage": "Base class for all stream definitions.  The properties used to specify the stream are defined for this abstract class.",
+  "pyValueChanged": "true",
+  "pyWorkKey": "",
+  "pzChecksum": "-1370278537",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-STREAM",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-STREAM",
+  "pzReindex": "true",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [],
+  "pyKeyDefList": [],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

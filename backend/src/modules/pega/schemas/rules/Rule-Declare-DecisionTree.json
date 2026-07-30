@@ -1,0 +1,208 @@
+{
+  "pxCreateDateTime": "20020515T205711.221 GMT",
+  "pxCreateOperator": "marik@pegasystems.com",
+  "pxCreateOpName": "Ken Marin",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "785a3270955fb023a9108ea5bf3b5440",
+  "pxInsId": "RULE-DECLARE-DECISIONTREE",
+  "pxInsName": "RULE-DECLARE-DECISIONTREE",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxSiblingCount": "",
+  "pxUpdateDateTime": "20140704T112607.874 GMT",
+  "pxUpdateOperator": "sharm007",
+  "pxUpdateOpName": "Mudit Sharma",
+  "pxUpdateSystemID": "sdev717",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "Rule-Declare-DecisionTree",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "Action",
+  "pyBaseRule": "true",
+  "pyCategory": "Decision",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Declare-DecisionTree",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Declare-DecisionTree",
+  "pyClassType": "Concrete",
+  "pyDateRangeRuleResolution": "true",
+  "pyDerivesFrom": "Rule-Declare-",
+  "pyDescription": "Rule used to evaluate a logical tree and arrive at a string result",
+  "pyDirtyModalCon": "",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormPost": "",
+  "pyFormType": "Harness",
+  "pyHasInstances": "true",
+  "pyHistoryObject": "false",
+  "pyInitialVersion": "04-01-01",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "com.pega.pegarules.engine.generator.AppRuleAssembler",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Decision Tree",
+  "pyLabelOld": "Decision Tree",
+  "pyMethodStatus": "",
+  "pyMTInstanceOverrideAndVisibility": "OVERRIDE_DISABLED",
+  "pyOrgDivision": "Engineering",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Declare-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Declare-DecisionTree",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Declare-",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyUsage": "Used from the Property-Map-DecisionTree activity method and in the Decision shape in Visio for flows.",
+  "pyValueChanged": "false",
+  "pyWindowTitle": "",
+  "pyWorkKey": "",
+  "pzAdvancedConcreteRuleFormName": "",
+  "pzAdvancedRuleSet": "",
+  "pzAvailabilityNotSet": "Set Availability",
+  "pzChecksum": "1221993306",
+  "pzClassInheritance": "",
+  "pzGeneralSetting": "",
+  "pzIndexCount": "61",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-DECLARE-DECISIONTREE",
+  "pzIsPrivateCheckOut": "",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-DECLARE-DECISIONTREE",
+  "pzRuleFormKeysAndDescription": "",
+  "pzRuleFormRuleset": "",
+  "pzRuleFormStatus": "",
+  "pzRuleFormToolbar": "",
+  "pzRuleFormToolbarDelete": "",
+  "pzRuleFormToolbarHotKeys": "",
+  "pzRuleFormToolbarSave": "",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "RuleFormSettings": "",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!DECISION",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyCategory Decision",
+      "pzIndexes": {
+        "RuleReference": "59"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Declare-",
+      "pxRuleFamilyName": "RULE-DECLARE-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Rule-Declare-",
+      "pzIndexes": {
+        "RuleReference": "60"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Decision Tree",
+      "pyKeyName": "pyDecisionTreeName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": "",
+      "pyPage": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": "",
+      "pyTemplateInputBox": ""
+    }
+  ],
+  "pzIndexes": {
+    "Foo": "12"
+  }
+}

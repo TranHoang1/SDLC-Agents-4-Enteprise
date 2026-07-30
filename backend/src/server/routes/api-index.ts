@@ -16,9 +16,14 @@ import { GraphRepository } from '../../database/repositories/GraphRepository.js'
 import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
 import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 import { validateSession } from '../../admin/db/sessions.js';
+import type { FileDependency } from '../../engine/parsers/types.js';
 
-interface SourceFile { path: string; content: string }
-
+interface SourceFile {
+  path: string;
+  content: string;
+  gitHash?: string;
+  checksum?: string;
+}
 /**
  * Per-request scope. Two path concerns, kept separate:
  *   - `workspace`: server-side FS path used for reads/writes/indexing.
@@ -243,15 +248,64 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
 
 async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: Logger, userId = '') {
   try {
-    const { files } = await c.req.json<{ files: SourceFile[] }>();
+    const body = await c.req.json() as { files: SourceFile[] };
+    const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c);
     await registerProjectPhase(scope, logger, userId);
-    const { written, rejected } = writeFilesPhase(scope.workspace, files);
+    const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
+    const indexer = codeIntel?.getIndexer() as any;
+
+    const written: string[] = [];
+    const skipped: string[] = [];
+    const rejected: string[] = [];
+    const allDeps: FileDependency[] = [];
+
+    for (const file of files) {
+      const targetPath = resolveWithinWorkspace(scope.workspace, file.path);
+      if (!targetPath) { rejected.push(file.path); continue; }
+
+      const fileHash = file.gitHash || file.checksum || '';
+
+      if (indexer && fileHash) {
+        try {
+          const existing = await indexer.adapter.getAsync(
+            'SELECT content_hash FROM files WHERE relative_path = ? AND project_id = ?',
+            [file.path, scope.projectId],
+          ) as { content_hash: string } | undefined;
+          if (existing && existing.content_hash === fileHash.slice(0, 16)) {
+            skipped.push(file.path);
+            continue;
+          }
+        } catch {
+          // Table may not exist yet — proceed with indexing
+        }
+      }
+
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      fs.writeFileSync(targetPath, file.content, 'utf-8');
+      written.push(file.path);
+
+      // Index single file and collect deps
+      if (indexer) {
+        try {
+          const result = await indexer.indexSingleFile(file.path, scope.projectId);
+          if (result && result.dependencies) {
+            for (const dep of result.dependencies) {
+              if (!allDeps.some(d => d.path === dep.path)) {
+                allDeps.push(dep);
+              }
+            }
+          }
+        } catch (err) {
+          logger.warn({ err, file: file.path }, '[index] single-file index failed (non-fatal)');
+        }
+      }
+    }
+
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
-    const reindexTriggered = triggerIndexPhase(registry, scope, logger);
-    await ensureProjectKbEntry(registry, scope, written, logger);
-    return c.json({ written, rejected, reindexTriggered, projectId: scope.projectId });
+    await ensureProjectKbEntry(registry, scope, written.length, logger);
+    return c.json({ written: written.length, skipped: skipped.length, rejected, deps: allDeps, projectId: scope.projectId });
   } catch (err: any) {
     return indexError(c, err, logger, 'Error writing source batch');
   }
@@ -259,7 +313,8 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
 
 async function handleIndexDocument(c: Context, logger: Logger) {
   try {
-    const { path: relPath, content } = await c.req.json<{ path: string; content: string }>();
+    const body = await c.req.json() as { path: string; content: string };
+    const { path: relPath, content } = body;
     if (!relPath || !content) return c.json({ error: 'path and content required' }, 400);
     const scope = resolveRequestScope(c);
     const targetPath = resolveWithinWorkspace(scope.workspace, relPath);
@@ -274,7 +329,8 @@ async function handleIndexDocument(c: Context, logger: Logger) {
 
 async function handleIndexDocuments(c: Context, logger: Logger) {
   try {
-    const { files } = await c.req.json<{ files: SourceFile[] }>();
+    const body = await c.req.json() as { files: SourceFile[] };
+    const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c);
     const { written, rejected } = writeFilesPhase(scope.workspace, files);

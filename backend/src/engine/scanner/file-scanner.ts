@@ -45,6 +45,7 @@ const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
   '.toml': 'toml',
   '.cls': 'apex',
   '.trigger': 'apex',
+  '.pega': 'pega',
 };
 
 /** Scan workspace and return list of indexable files. */

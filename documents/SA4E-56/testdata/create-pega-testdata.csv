@@ -1,0 +1,15 @@
+test_case_id,path,content,pxObjClass,expected_symbol_kind,expected_rule_name,expected_http_code,description
+UT-001,Work-Order.CreateOrder.Rule-Obj-Activity.pega,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-Order"",""pyActivityName"":""CreateOrder"",""pyRuleset"":""MyApp"",""pyRuleSetVersion"":""01-01-01"",""pyLabel"":""Creates a new work order"",""pyDescription"":""Main creation flow"",""steps"":[{""pyStepNum"":""1"",""pyMethod"":""Call"",""pyMethodParameters"":""Work-Order.ValidateAddress""}]}",Rule-Obj-Activity,pega-rule,CreateOrder,200,Valid Activity — produces pega-rule symbol + references
+UT-002,invalid.pega,"not valid json{{{",,,,200,Invalid JSON — returns parse errors
+UT-003-array,empty-array.pega,"[]",,,,200,JSON array — "Empty or non-object JSON" error
+UT-003-string,string-only.pega,"""just a string""",,,,200,JSON string — "Empty or non-object JSON" error
+UT-004-priority,priority-test.pega,"{""pxObjClass"":""Rule-Obj-Activity"",""pyRuleName"":""FromRuleName"",""pyActivityName"":""FromActivityName""}",Rule-Obj-Activity,pega-rule,FromRuleName,200,pyRuleName should win over pyActivityName
+UT-004-filename,no-name-field.pega,"{""pxObjClass"":""Rule-Obj-Activity""}",Rule-Obj-Activity,pega-rule,no-name-field,200,Filename fallback when no name field present
+IT-002,Work-Order.CreateOrder.Rule-Obj-Activity.pega,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-Order"",""pyActivityName"":""CreateOrder"",""steps"":[{""pyMethod"":""Call"",""pyMethodParameters"":""Work-Order.ValidateAddress""}]}",Rule-Obj-Activity,pega-rule,CreateOrder,200,Full API integration — .pega file through POST endpoint
+IT-010,Work-Order.MissingRef.Rule-Obj-Activity.pega,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-Order"",""pyActivityName"":""MissingRef"",""steps"":[{""pyMethod"":""Call"",""pyMethodParameters"":""MissingClass.MissingRule""}]}",Rule-Obj-Activity,pega-rule,MissingRef,200,Reference to non-existent file — sourceType should be 'remote'
+ST-002-pega,Work-Order.MyFlow.Rule-Obj-Flow.pega,"{""pxObjClass"":""Rule-Obj-Flow"",""pyClassName"":""Work-Order"",""pyFlowName"":""MyFlow""}",Rule-Obj-Flow,pega-rule,MyFlow,200,Pega file in mixed batch — Flow type
+UT-003-array,empty-array.pega,[],,,,200,Empty JSON array — "Empty or non-object JSON" error
+UT-003-string,string-only.pega,"""just a string""",,,,200,JSON string — "Empty or non-object JSON" error
+UT-003-null,null-content.pega,null,,,,200,JSON null — "Empty or non-object JSON" error
+UT-014,test.pega,"{""pxObjClass"":""Rule-Obj-Activity""}",Rule-Obj-Activity,pega-rule,test,200,Grammar registry pega mapping test
+IT-011-pega,Work-Order.TestEndpoint.Rule-Obj-Connect-REST.pega,"{""pxObjClass"":""Rule-Obj-Connect-REST""}",Rule-Obj-Connect-REST,pega-rule,TestEndpoint,200,Pega file for endpoint fallback test

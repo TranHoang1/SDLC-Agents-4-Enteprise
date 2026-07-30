@@ -1,0 +1,88 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;Rollback Flow — SA4E-56: Unified Code &amp;amp; Pega Rule Indexing Pipeline&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="150" y="10" width="700" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="start" value="&lt;b&gt;⚠ Issue Detected&lt;/b&gt;&#10;Health check fail / Error spike /&#10;Smoke test failure" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="100" y="80" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d-sev" value="&lt;b&gt;Severity?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="400" y="75" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="hotfix" value="&lt;b&gt;Minor / Hotfix&lt;/b&gt;&#10;Log ticket, fix in next&#10;release" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="640" y="75" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="step-stop" value="&lt;b&gt;1. Stop Service&lt;/b&gt;&#10;docker stop sa4e-backend&#10;kill node process" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="200" y="230" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="step-db" value="&lt;b&gt;2. Rollback DB&lt;/b&gt;&#10;No schema changes —&#10;skip (no-op)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="200" y="340" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="step-code" value="&lt;b&gt;3. Revert Code&lt;/b&gt;&#10;git revert / checkout&#10;previous tag" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="200" y="450" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="step-deploy" value="&lt;b&gt;4. Deploy Previous&lt;/b&gt;&#10;Rebuild + restart backend&#10;Install old .vsix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="200" y="560" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="step-config" value="&lt;b&gt;5. Restore Config&lt;/b&gt;&#10;Revert .env, grammar-config&#10;Restore feature flags" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="200" y="670" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="step-verify" value="&lt;b&gt;6. Verify Rollback&lt;/b&gt;&#10;Health check + smoke tests&#10;Check error logs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;" vertex="1" parent="1">
+      <mxGeometry x="200" y="780" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d-success" value="&lt;b&gt;Success?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="500" y="775" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="rb-success" value="&lt;b&gt;✅ Rollback&#10;Complete&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="100" y="880" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="rb-fail" value="&lt;b&gt;❌ Escalate&lt;/b&gt;&#10;Notify DevOps Lead&#10;Manual intervention" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="520" y="885" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-sev-critical" value="Critical" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;strokeColor=#c62828;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d-sev" target="step-stop">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-sev-minor" value="Minor" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d-sev" target="hotfix">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="start" target="d-sev">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="step-stop" target="step-db">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="step-db" target="step-code">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="step-code" target="step-deploy">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="step-deploy" target="step-config">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="step-config" target="step-verify">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="step-verify" target="d-success">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8-yes" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d-success" target="rb-success">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8-no" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;strokeColor=#c62828;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d-success" target="rb-fail">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="feedback" value="Retry" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;dashed=1;fontSize=10;strokeColor=#f57c00;labelBackgroundColor=#ffffff;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="640" y="815" as="sourcePoint"/>
+        <mxPoint x="340" y="815" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="640" y="840"/>
+          <mxPoint x="100" y="840"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

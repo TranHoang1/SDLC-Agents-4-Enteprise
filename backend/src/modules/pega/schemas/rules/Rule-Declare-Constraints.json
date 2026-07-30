@@ -1,0 +1,15 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Declare-Constraints",
+  "pyRuleAvailable": "Final",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-Declare-Constraint",
+  "pyPatternParent": "Rule-Declare-",
+  "pyClassName": "Rule-Declare-Constraints",
+  "pyRuleName": "Rule-Declare-Constraints",
+  "pyClassType": "Concrete",
+  "pyDerivesFrom": "Rule-Declare-Constraint",
+  "pyDescription": "Declare Constraints rules (plural alias for Rule-Declare-Constraint)",
+  "pyLabel": "Declare Constraints",
+  "pyCategory": "Rule-Declare-Constraint",
+  "pxObjClass": "Rule-Obj-Class"
+}

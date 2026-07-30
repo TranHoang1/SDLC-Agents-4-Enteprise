@@ -1,0 +1,180 @@
+{
+  "pxCreateDateTime": "20000302T203523.666 GMT",
+  "pxCreateOperator": "KARAF",
+  "pxCreateOpName": "Fawzi Karachi",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "3dc1699b57933efb3f55aac1f152c4c9",
+  "pxInsId": "RULE-UTILITY-FUNCTION",
+  "pxInsName": "RULE-UTILITY-FUNCTION",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "wfe",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20130730T150242.239 GMT",
+  "pxUpdateOperator": "feenrx",
+  "pxUpdateOpName": "feenr",
+  "pxUpdateSystemID": "sde",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "Rule-Utility-Function",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "",
+  "pyBaseRule": "true",
+  "pyCategory": "Technical",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Utility-Function",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "false",
+  "pyClassName": "Rule-Utility-Function",
+  "pyClassType": "Concrete",
+  "pyCreateDedicatedTable": "true",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-Utility-",
+  "pyDescription": "Defines a single static function that is part of a library",
+  "pyEncryptBLOB": "",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormType": "Harness",
+  "pyHasInstances": "true",
+  "pyHistoryObject": "",
+  "pyInitialVersion": "04-01-01",
+  "pyInsAvailable": "true",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Function",
+  "pyLabelOld": "Function",
+  "pyMethodStatus": "",
+  "pyOrgDivision": "RulesEngineering",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Utility-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyRuleAvailable": "",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Utility-Function",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Utility-",
+  "pyTemplateInputBox": "",
+  "pyUsage": "Defines a single static function that is part of a library.\nFunctions are callable from Activities and other dynamically \nassembled Java classes that are stored in the Rule Base.\nThird party developers and customers may use them be specifying Library name directly.",
+  "pyUseCache": "true",
+  "pyValueChanged": "true",
+  "pyWorkKey": "",
+  "pzChecksum": "-2118118582",
+  "pzIndexCount": "35",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-UTILITY-FUNCTION",
+  "pzIsPrivateCheckOut": "",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-UTILITY-FUNCTION",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pzTenantId": "",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!TECHNICAL",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyRuleName": "pyCategory Technical",
+      "pzIndexes": {
+        "RuleReference": "33"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Utility-",
+      "pxRuleFamilyName": "RULE-UTILITY-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyRuleName": "Rule-Utility-",
+      "pzIndexes": {
+        "RuleReference": "34"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Library Name",
+      "pyKeyName": "pyLibraryName"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Function Name",
+      "pyKeyName": "pyFunctionName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": "",
+      "pyPage": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": "",
+      "pyTemplateInputBox": ""
+    }
+  ]
+}

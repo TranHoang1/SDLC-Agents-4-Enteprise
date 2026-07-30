@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Define-Hierarchy",
+  "pyPatternParent": "Rule-Define-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Define-Hierarchy",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Define-",
+  "pyClassName": "Rule-Define-Hierarchy"
+}

@@ -11,12 +11,15 @@ export type SymbolKind =
   | 'function' | 'class' | 'method' | 'interface'
   | 'type' | 'enum' | 'variable' | 'namespace'
   | 'constructor' | 'property' | 'module'
-  | 'trait' | 'struct' | 'constant';
+  | 'trait' | 'struct' | 'constant'
+  | 'pega-rule';
 
 export type RelationshipKind =
   | 'calls' | 'imports' | 'inherits'
   | 'implements' | 'uses' | 'decorates'
-  | 'dml' | 'soql' | 'trigger-on' | 'wire' | 'apex-import';
+  | 'dml' | 'soql' | 'trigger-on' | 'wire' | 'apex-import'
+  | 'references';
+
 
 export interface ExtractedSymbol {
   name: string;
@@ -45,6 +48,15 @@ export interface ExtractedRelationship {
   metadata?: Record<string, unknown>;
 }
 
+export type DependencySourceType = 'local' | 'remote';
+
+export interface FileDependency {
+  path: string;
+  expectedHash: string;
+  sourceType: DependencySourceType;
+  sourceUrl?: string;
+}
+
 export interface ParseResult {
   symbols: ExtractedSymbol[];
   relationships: ExtractedRelationship[];
@@ -70,6 +82,7 @@ export interface IndexResult {
   parseErrors: number;
   duration: number;
   method: 'tree-sitter' | 'regex-fallback';
+  dependencies: FileDependency[];
 }
 
 export interface NodeVisitor {

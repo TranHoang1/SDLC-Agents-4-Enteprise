@@ -1,0 +1,17 @@
+﻿{
+    "dependencyFields":  [
+                             "pyTargetProperty",
+                             "pyExpression",
+                             "pySteps",
+                             "pyResourcePath"
+                         ],
+    "description":  "Metadata schema for RULE-OBJ-PROPERTY extracted from Pega RAP catalog",
+    "sampleInstanceCount":  2119,
+    "targetClass":  "RULE-OBJ-PROPERTY",
+    "requiredFields":  [
+                           "pxObjClass",
+                           "pyClassName",
+                           "pyRuleset"
+                       ],
+    "schemaVersion":  "1.0.0"
+}

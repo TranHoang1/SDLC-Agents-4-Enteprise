@@ -1,0 +1,66 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="SA4E-68 Layered Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontFamily=Helvetica;fontSize=18;fontColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="200" y="10" width="460" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Quality Layer (WP1-3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#2C6FBB;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="760" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="PegaGoldenDataset" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2C6FBB;fontColor=#333333;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="70" y="80" width="210" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="PegaRoundTripValidator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2C6FBB;fontColor=#333333;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="315" y="80" width="210" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="PegaMutationTester" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#2C6FBB;fontColor=#333333;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="560" y="80" width="210" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="Inference Layer (WP4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8A838;strokeColor=#C88A2A;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="160" width="760" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="8" value="PegaSchema&#xa;Inferrer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C88A2A;fontColor=#333333;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="65" y="180" width="160" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="9" value="PegaField&#xa;Documentor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C88A2A;fontColor=#333333;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="240" y="180" width="160" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="10" value="PegaSchema&#xa;KBService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C88A2A;fontColor=#333333;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="415" y="180" width="160" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="PegaSchema&#xa;AutoLearner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C88A2A;fontColor=#333333;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="590" y="180" width="160" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value="Understanding Layer (WP4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A52;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="270" width="760" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="13" value="PegaRuleUnderstandingService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#3A9A52;fontColor=#333333;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="280" y="288" width="240" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="14" value="Artifact Analyzer Layer (WP4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#8E44AD;strokeColor=#6C2E8A;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;fontStyle=1;arcSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="360" width="760" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="Artifact&#xa;Detector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C2E8A;fontColor=#333333;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="65" y="380" width="140" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="16" value="ArtifactAnalyzer&#xa;Registry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C2E8A;fontColor=#333333;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="220" y="380" width="140" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="17" value="4 Analyzers&#xa;(Rule/Flow/DP/SOAP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C2E8A;fontColor=#333333;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="375" y="380" width="160" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="18" value="analyze_artifact&#xa;MCP Tool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#6C2E8A;fontColor=#333333;fontFamily=Helvetica;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="550" y="380" width="170" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="19" style="html=1;rounded=0;strokeColor=#999999;strokeWidth=1;endArrow=open;dashed=1;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="3" target="7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="20" style="html=1;rounded=0;strokeColor=#999999;strokeWidth=1;endArrow=open;dashed=1;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="7" target="12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="21" style="html=1;rounded=0;strokeColor=#999999;strokeWidth=1;endArrow=open;dashed=1;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="12" target="14">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

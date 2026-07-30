@@ -1,0 +1,17 @@
+﻿{
+    "dependencyFields":  [
+                             "pyTargetProperty",
+                             "pyExpression",
+                             "pySteps",
+                             "pyResourcePath"
+                         ],
+    "description":  "Metadata schema for RULE-MESSAGE extracted from Pega RAP catalog",
+    "sampleInstanceCount":  49,
+    "targetClass":  "RULE-MESSAGE",
+    "requiredFields":  [
+                           "pxObjClass",
+                           "pyClassName",
+                           "pyRuleset"
+                       ],
+    "schemaVersion":  "1.0.0"
+}

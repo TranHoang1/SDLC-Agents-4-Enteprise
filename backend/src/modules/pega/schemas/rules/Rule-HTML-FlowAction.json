@@ -1,0 +1,14 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-HTML-FlowAction",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-HTML-",
+  "pyPatternParent": "Rule-HTML-",
+  "pyClassName": "Rule-HTML-FlowAction",
+  "pyRuleName": "Rule-HTML-FlowAction",
+  "pyClassType": "Concrete",
+  "pyDerivesFrom": "Rule-HTML-",
+  "pyDescription": "HTML Flow Action rule for user interaction forms in flow actions",
+  "pyLabel": "HTML FlowAction",
+  "pxObjClass": "Rule-Obj-Class"
+}

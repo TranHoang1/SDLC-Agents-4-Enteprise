@@ -1,0 +1,261 @@
+{
+  "pxCreateDateTime": "20120704T131303.606 GMT",
+  "pxCreateOperator": "sammp",
+  "pxCreateOpName": "Prashant Sammeta",
+  "pxCreateSystemID": "PRPCDevelopment",
+  "pxHostId": "7d655b14b1311bd34319ba3e6fadc643",
+  "pxInsId": "RULE-OBJ-REPORT-DEFINITION",
+  "pxInsName": "RULE-OBJ-REPORT-DEFINITION",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "",
+  "pxMoveImportDateTime": "20100107T210748.644 GMT",
+  "pxMoveImportOperId": "administrator@pega.com",
+  "pxMoveImportOperName": "External Import Utility",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxOriginalCreateDateTime": "",
+  "pxOriginalCreateOperator": "",
+  "pxOriginalCreateOpName": "",
+  "pxOriginalCreateSystemID": "",
+  "pxSaveDateTime": "20150115T160218.507 GMT",
+  "pxUpdateDateTime": "20150115T160218.507 GMT",
+  "pxUpdateOperator": "gaude",
+  "pxUpdateOpName": "Emilio Gaudette",
+  "pxUpdateSystemID": "sdev718",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyApplet": "",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "Action",
+  "pyBaseRule": "false",
+  "pyCategory": "Reports",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Obj-Report-Definition",
+  "pyClassGroup_Old": "Rule-Obj-Report-Definition",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassGroupIndicator_Old": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Obj-Report-Definition",
+  "pyClassType": "Concrete",
+  "pyCreateDedicatedTable": "true",
+  "pyDateRangeRuleResolution": "true",
+  "pyDerivesFrom": "Rule-Obj-Report-",
+  "pyDescription": "Report Definition Class",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormPost": "",
+  "pyFormType": "Harness",
+  "pyHasCustomFields": "",
+  "pyHasInstances": "true",
+  "pyHistoryObject": "false",
+  "pyInitialVersion": "05-05-13",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "com.pega.pegarules.engine.generator.AppRuleAssembler",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Report Definition",
+  "pyLabelOld": "Report Definition",
+  "pyMethodStatus": "",
+  "pyMTInstanceOverrideAndVisibility": "OVERRIDE_DISABLED",
+  "pyOrgDivision": "Engineering",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Obj-Report-",
+  "pyPreventSubClassing": "false",
+  "pyProjectID": "",
+  "pyProjectIDLabel": "",
+  "pyQualifiedRuleResolution": "true",
+  "pyReloadForm": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Obj-Report-Definition",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-Reporting",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Obj-Report-",
+  "pyTaskID": "",
+  "pyTemplate": "",
+  "pyTemplateCheckbox": "false",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTemporaryObject": "",
+  "pyUsage": "Report Definition Class",
+  "pyValueChanged": "false",
+  "pyWindowTitle": "",
+  "pyWorkKey": "",
+  "pzChecksum": "-1140303477",
+  "pzIndexCount": "144",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-DEFINITION",
+  "pzIsPrivateCheckOut": "",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-DEFINITION",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "pxIsSummary",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ".pyReportMetaData.pxIsSummary"
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxResults": [
+    {
+      "pxObjClass": "Embed-CustomFields",
+      "pyColumnName": "pxIsSummary",
+      "pyPropertyName": "pyReportMetaData.pxIsSummary"
+    }
+  ],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Embed-ReportMetaDataInfo",
+      "pxRuleFamilyName": "EMBED-REPORTMETADATAINFO",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Embed-ReportMetaDataInfo",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-DEFINITION",
+      "pzIndexes": {
+        "RuleReference": "138"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Report-",
+      "pxRuleFamilyName": "RULE-OBJ-REPORT-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Rule-Obj-Report-",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-DEFINITION",
+      "pzIndexes": {
+        "RuleReference": "139"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Report-Definition",
+      "pxRuleFamilyName": "PYREPORTMETADATA",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "Extension",
+      "pyRuleName": "pyReportMetaData",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-DEFINITION",
+      "pzIndexes": {
+        "RuleReference": "140"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!REPORTS",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyCategory Reports",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-DEFINITION",
+      "pzIndexes": {
+        "RuleReference": "141"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Embed-ReportMetaDataInfo",
+      "pxRuleFamilyName": "PXISSUMMARY",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyMethodStatus": "",
+      "pyRuleName": "pxIsSummary",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-DEFINITION",
+      "pzIndexes": {
+        "RuleReference": "142"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Report-Definition",
+      "pxRuleFamilyName": "RULE-OBJ-REPORT-DEFINITION",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Rule-Obj-Report-Definition",
+      "pzIndexOwnerKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-DEFINITION",
+      "pzIndexes": {
+        "RuleReference": "143"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxCreateDateTime": "20090423T145857.365 GMT",
+      "pxCreateOperator": "nataa",
+      "pxCreateOpName": "Abirami Natarajan",
+      "pxCreateSystemID": "PRPCDevelopment",
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Report Name",
+      "pyKeyName": "pyStreamName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

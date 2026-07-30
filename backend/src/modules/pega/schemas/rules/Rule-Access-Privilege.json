@@ -1,0 +1,181 @@
+{
+  "pxCreateDateTime": "20020405T215540.933 GMT",
+  "pxCreateOperator": "zelek@pegasystems.com",
+  "pxCreateOpName": "Karen T. Zelevinsky",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "673b5ef5082e447221f5541717704583",
+  "pxInsId": "RULE-ACCESS-PRIVILEGE",
+  "pxInsName": "RULE-ACCESS-PRIVILEGE",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20121016T134301.410 GMT",
+  "pxUpdateOperator": "sharm007",
+  "pxUpdateOpName": "Mudit Sharma",
+  "pxUpdateSystemID": "sde",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "Rule-Access-Privilege",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "",
+  "pyBaseRule": "true",
+  "pyCategory": "Security",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Access-Privilege",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Access-Privilege",
+  "pyClassType": "Concrete",
+  "pyCreateDedicatedTable": "true",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-Access-",
+  "pyDescription": "Security Privelege",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormType": "Harness",
+  "pyHasCustomFields": "",
+  "pyHasInstances": "true",
+  "pyHistoryObject": "false",
+  "pyInitialVersion": "04-01-01",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Privilege",
+  "pyLabelOld": "Privilege",
+  "pyMethodStatus": "",
+  "pyNamespace": "",
+  "pyOrgDivision": "",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Access-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Access-Privilege",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Access-",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTemporaryObject": "",
+  "pyUsage": "Class to define privileges -\nUses class inherticance, but none of the RR qualifing properties. ",
+  "pyValueChanged": "true",
+  "pyWorkKey": "",
+  "pzChecksum": "1080448916",
+  "pzIndexCount": "29",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-ACCESS-PRIVILEGE",
+  "pzIsPrivateCheckOut": "",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-ACCESS-PRIVILEGE",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Access-Privilege",
+      "pxRuleFamilyName": "PYCLASSNAME",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyRuleName": "pyClassName",
+      "pzIndexes": {
+        "RuleReference": "25"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Access-",
+      "pxRuleFamilyName": "RULE-ACCESS-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyRuleName": "Rule-Access-",
+      "pzIndexes": {
+        "RuleReference": "26"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Access-Privilege",
+      "pxRuleFamilyName": "PYPRIVILEGENAME",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyRuleName": "pyPrivilegeName",
+      "pzIndexes": {
+        "RuleReference": "27"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!SECURITY",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyRuleName": "pyCategory Security",
+      "pzIndexes": {
+        "RuleReference": "28"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Privilege Name",
+      "pyKeyName": "pyPrivilegeName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

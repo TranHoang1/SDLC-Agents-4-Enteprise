@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Navigation",
+  "pyPatternParent": "Rule-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-UIEngine",
+  "pyRuleName": "Rule-Navigation",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-",
+  "pyClassName": "Rule-Navigation"
+}

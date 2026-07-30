@@ -1,0 +1,17 @@
+﻿{
+    "dependencyFields":  [
+                             "pyTargetProperty",
+                             "pyExpression",
+                             "pySteps",
+                             "pyResourcePath"
+                         ],
+    "description":  "Metadata schema for RULE-SERVICE-FILE extracted from Pega RAP catalog",
+    "sampleInstanceCount":  30,
+    "targetClass":  "RULE-SERVICE-FILE",
+    "requiredFields":  [
+                           "pxObjClass",
+                           "pyClassName",
+                           "pyRuleset"
+                       ],
+    "schemaVersion":  "1.0.0"
+}

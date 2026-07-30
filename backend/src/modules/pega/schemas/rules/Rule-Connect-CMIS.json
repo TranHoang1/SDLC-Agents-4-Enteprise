@@ -1,0 +1,221 @@
+{
+  "pxCreateDateTime": "20100628T180851.988 GMT",
+  "pxCreateOperator": "tandp",
+  "pxCreateOpName": "Peter Tandara-Kuhns",
+  "pxCreateSystemID": "sde",
+  "pxHostId": "84544038c146937282054e50166facd2",
+  "pxInsId": "RULE-CONNECT-CMIS",
+  "pxInsName": "RULE-CONNECT-CMIS",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxMoveFromSystem": "",
+  "pxMoveImportDateTime": "",
+  "pxMoveImportOperId": "",
+  "pxMoveImportOperName": "",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxReportVersion": "6.2",
+  "pxUpdateDateTime": "20100713T141113.293 GMT",
+  "pxUpdateOperator": "keata",
+  "pxUpdateOpName": "Andrew Keating",
+  "pxUpdateSystemID": "sde",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyApplet": "Rule-Connect-CMIS",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "",
+  "pyBaseRule": "true",
+  "pyCategory": "Integration-Connectors",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Connect-CMIS",
+  "pyClassGroup_Old": "Rule-Connect-CMIS",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassGroupIndicator_Old": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Connect-CMIS",
+  "pyClassType": "Concrete",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-Connect-",
+  "pyDescription": "class for configuring CMIS service clients",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormType": "Harness",
+  "pyHasCustomFields": "",
+  "pyHasInstances": "true",
+  "pyInitialVersion": "01-01-01",
+  "pyInterface": "",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Connect CMIS",
+  "pyLabelOld": "Connect CMIS",
+  "pyMethodStatus": "",
+  "pyOrgDivision": "Engineering",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Connect-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyReloadForm": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Connect-CMIS",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-Content",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Connect-",
+  "pyTemplate": "",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTemporaryObject": "",
+  "pyUsage": "class for configuring CMIS service clients",
+  "pyValueChanged": "false",
+  "pyWorkKey": "",
+  "pzChecksum": "252995796",
+  "pzIndexCount": "26",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-CONNECT-CMIS",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-CONNECT-CMIS",
+  "pzReindex": "true",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Connect-CMIS",
+      "pxRuleFamilyName": "RULEFORM",
+      "pxRuleObjClass": "Rule-HTML-Harness",
+      "pyRuleName": "RuleForm",
+      "pzIndexes": {
+        "RuleReference": "21"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!INTEGRATION-CONNECTORS",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyRuleName": "pyCategory Integration-Connectors",
+      "pzIndexes": {
+        "RuleReference": "22"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Connect-CMIS",
+      "pxRuleFamilyName": "PYSERVICENAME",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyRuleName": "pyServiceName",
+      "pzIndexes": {
+        "RuleReference": "23"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Connect-",
+      "pxRuleFamilyName": "RULE-CONNECT-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyRuleName": "Rule-Connect-",
+      "pzIndexes": {
+        "RuleReference": "24"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Connect-CMIS",
+      "pxRuleFamilyName": "PYCLASSNAME",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyRuleName": "pyClassName",
+      "pzIndexes": {
+        "RuleReference": "25"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxCreateDateTime": "20100628T181444.748 GMT",
+      "pxCreateOperator": "tandp",
+      "pxCreateOpName": "Peter Tandara-Kuhns",
+      "pxCreateSystemID": "sde",
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Service Name",
+      "pyKeyName": "pyServiceName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

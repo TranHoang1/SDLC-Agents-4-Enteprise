@@ -42,9 +42,10 @@ describe('ScopePromotionService', () => {
   let db: Database.Database;
   let svc: ScopePromotionService;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     db = createTestDb();
     svc = new ScopePromotionService(new SqliteDbAdapter(db), logger);
+    await svc.ensurePromotionQueueTable();
   });
 
   describe('scanForPromotionCandidates', () => {
@@ -95,13 +96,13 @@ describe('ScopePromotionService', () => {
       addCitation(db, id, 'a1');
       addCitation(db, id, 'a2');
       await svc.queueCandidates(await svc.scanForPromotionCandidates());
-      expect(svc.approve(id, 'admin-001', 'Good')).toBe(true);
+      expect(await svc.approve(id, 'admin-001', 'Good')).toBe(true);
       const e = db.prepare('SELECT scope FROM knowledge_entries WHERE id = ?').get(id) as any;
       expect(e.scope).toBe('PROJECT');
     });
 
-    it('returns false for non-pending', () => {
-      expect(svc.approve(999, 'admin', 'x')).toBe(false);
+    it('returns false for non-pending', async () => {
+      expect(await svc.approve(999, 'admin', 'x')).toBe(false);
     });
   });
 
@@ -111,7 +112,7 @@ describe('ScopePromotionService', () => {
       addCitation(db, id, 'a1');
       addCitation(db, id, 'a2');
       await svc.queueCandidates(await svc.scanForPromotionCandidates());
-      expect(svc.reject(id, 'admin', 'Not ready')).toBe(true);
+      expect(await svc.reject(id, 'admin', 'Not ready')).toBe(true);
       const e = db.prepare('SELECT scope FROM knowledge_entries WHERE id = ?').get(id) as any;
       expect(e.scope).toBe('USER');
       const q = db.prepare('SELECT cooldown_until FROM kb_promotion_queue WHERE entry_id = ?').get(id) as any;
@@ -139,23 +140,23 @@ describe('ScopePromotionService', () => {
   });
 
   describe('requestSharedPromotion', () => {
-    it('creates PENDING for PROJECT entry', () => {
+    it('creates PENDING for PROJECT entry', async () => {
       const id = seedEntry(db, { scope: 'PROJECT' });
-      expect(svc.requestSharedPromotion(id, 'Cross-project')).toBe(true);
+      expect(await svc.requestSharedPromotion(id, 'Cross-project')).toBe(true);
       const q = db.prepare('SELECT * FROM kb_promotion_queue WHERE entry_id=?').get(id) as any;
       expect(q.target_tier).toBe('SHARED');
       expect(q.status).toBe('PENDING');
     });
 
-    it('returns false for USER entry', () => {
+    it('returns false for USER entry', async () => {
       const id = seedEntry(db, { scope: 'USER' });
-      expect(svc.requestSharedPromotion(id, 'x')).toBe(false);
+      expect(await svc.requestSharedPromotion(id, 'x')).toBe(false);
     });
 
-    it('blocks duplicate', () => {
+    it('blocks duplicate', async () => {
       const id = seedEntry(db, { scope: 'PROJECT' });
-      svc.requestSharedPromotion(id, 'first');
-      expect(svc.requestSharedPromotion(id, 'second')).toBe(false);
+      await svc.requestSharedPromotion(id, 'first');
+      expect(await svc.requestSharedPromotion(id, 'second')).toBe(false);
     });
   });
 });

@@ -60,6 +60,16 @@
   const restartMcpBtn = document.getElementById("restart-mcp-btn");
   const wrapperResult = document.getElementById("wrapper-result");
 
+  // DOM elements - Pega Platform Connection
+  const pegaEndpointInput = document.getElementById("pega-endpoint-input");
+  const pegaUsernameInput = document.getElementById("pega-username-input");
+  const pegaPasswordInput = document.getElementById("pega-password-input");
+  const togglePegaPasswordBtn = document.getElementById("toggle-pega-password-visibility");
+  const savePegaBtn = document.getElementById("save-pega-btn");
+  const testPegaBtn = document.getElementById("test-pega-btn");
+  const fetchPegaBtn = document.getElementById("fetch-pega-btn");
+  const pegaTestResult = document.getElementById("pega-test-result");
+
   // Models list currentProvider = "anthropic";
   let currentProvider = "anthropic";
   let savedState = { hasAnthropicKey: false, hasOpenaiKey: false };
@@ -414,6 +424,51 @@
     vscode.postMessage({ type: "restartMcpServer" });
   });
 
+  // ─── Pega Platform Connection Events ─────────────────────────────────────
+
+  if (togglePegaPasswordBtn && pegaPasswordInput) {
+    togglePegaPasswordBtn.addEventListener("click", () => {
+      const isHidden = pegaPasswordInput.type === "password";
+      pegaPasswordInput.type = isHidden ? "text" : "password";
+      togglePegaPasswordBtn.textContent = isHidden ? "\uD83D\uDE48" : "\uD83D\uDC41";
+    });
+  }
+
+  if (savePegaBtn) {
+    savePegaBtn.addEventListener("click", () => {
+      const endpoint = pegaEndpointInput ? pegaEndpointInput.value.trim() : "";
+      const username = pegaUsernameInput ? pegaUsernameInput.value.trim() : "";
+      const password = pegaPasswordInput ? pegaPasswordInput.value : "";
+      if (!endpoint) {
+        showStatus(pegaTestResult, "\u274C Pega Endpoint URL is required", "error");
+        return;
+      }
+      savePegaBtn.classList.add("loading");
+      savePegaBtn.disabled = true;
+      vscode.postMessage({ type: "savePegaConfig", endpoint, username, password });
+    });
+  }
+
+  if (testPegaBtn) {
+    testPegaBtn.addEventListener("click", () => {
+      pegaTestResult.textContent = "Testing connection...";
+      pegaTestResult.className = "status-indicator";
+      testPegaBtn.classList.add("loading");
+      testPegaBtn.disabled = true;
+      vscode.postMessage({ type: "testPegaConnection" });
+    });
+  }
+
+  if (fetchPegaBtn) {
+    fetchPegaBtn.addEventListener("click", () => {
+      pegaTestResult.textContent = "Fetching Pega App Context...";
+      pegaTestResult.className = "status-indicator";
+      fetchPegaBtn.classList.add("loading");
+      fetchPegaBtn.disabled = true;
+      vscode.postMessage({ type: "fetchPegaContext" });
+    });
+  }
+
   // ─── Post Message Handler ──────────────────────────────────────────────────────
 
   window.addEventListener("message", function (event) {
@@ -431,6 +486,18 @@
         break;
       case "mcpServerRestarted":
         showStatus(wrapperResult, (msg.success ? "\u2705 " : "\u274c ") + msg.message, msg.success ? "success" : "error");
+        break;
+      case "pegaSaved":
+        if (savePegaBtn) { savePegaBtn.classList.remove("loading"); savePegaBtn.disabled = false; }
+        showStatus(pegaTestResult, msg.success ? "\u2705 Pega config saved" : ("\u274C Save failed: " + (msg.error || "")), msg.success ? "success" : "error");
+        break;
+      case "pegaTestResult":
+        if (testPegaBtn) { testPegaBtn.classList.remove("loading"); testPegaBtn.disabled = false; }
+        showStatus(pegaTestResult, (msg.success ? "\u2705 " : "\u274C ") + msg.message, msg.success ? "success" : "error");
+        break;
+      case "pegaContextFetched":
+        if (fetchPegaBtn) { fetchPegaBtn.classList.remove("loading"); fetchPegaBtn.disabled = false; }
+        showStatus(pegaTestResult, (msg.success ? "\u2705 " : "\u274C ") + msg.message, msg.success ? "success" : "error");
         break;
     }
   });
@@ -474,6 +541,16 @@
     }
     if (msg.enableMcpServer !== undefined) {
       enableMcpChk.checked = msg.enableMcpServer;
+    }
+    // Load Pega config
+    if (msg.pegaEndpoint !== undefined && pegaEndpointInput) {
+      pegaEndpointInput.value = msg.pegaEndpoint;
+    }
+    if (msg.pegaUsername !== undefined && pegaUsernameInput) {
+      pegaUsernameInput.value = msg.pegaUsername;
+    }
+    if (msg.hasPegaPassword && pegaPasswordInput) {
+      pegaPasswordInput.placeholder = "•••••••• (Saved)";
     }
 
     updateSections(msg.provider);

@@ -1,0 +1,14 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Utility-Script",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-Utility-",
+  "pyPatternParent": "Rule-Utility-",
+  "pyClassName": "Rule-Utility-Script",
+  "pyRuleName": "Rule-Utility-Script",
+  "pyClassType": "Concrete",
+  "pyDerivesFrom": "Rule-Utility-",
+  "pyDescription": "Utility script rule for reusable script snippets",
+  "pyLabel": "Utility Script",
+  "pxObjClass": "Rule-Obj-Class"
+}

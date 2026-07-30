@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="400" viewBox="0 0 1100 400">
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+  <text x="550" y="40" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">SA4E-58: Pega REST Bridge Architecture</text>
+  <rect x="80" y="140" width="380" height="180" rx="12" fill="#313244" stroke="#cba6f7" stroke-width="2"/>
+  <text x="270" y="180" fill="#cba6f7" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">VSCode Extension / MCP Layer</text>
+  <text x="270" y="210" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• PegaHttpClient.ts (7 Typed Methods)</text>
+  <text x="270" y="235" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• PegaMcpTools.ts (7 Dynamic Handlers)</text>
+  <text x="270" y="260" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• CORE_TOOLS Allowlist Registered</text>
+
+  <path d="M 460 230 L 620 230" stroke="#a6e3a1" stroke-width="4"/>
+
+  <rect x="620" y="140" width="400" height="180" rx="12" fill="#313244" stroke="#a6e3a1" stroke-width="2"/>
+  <text x="820" y="180" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">Pega Server (KiroAgents Package)</text>
+  <text x="820" y="210" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• GET /rules/{insKey} &amp; POST /rules/query</text>
+  <text x="820" y="235" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• POST /rules/save &amp; POST /rules/checkout</text>
+  <text x="820" y="260" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• Response Mapping: .ResponseBody &amp; .pyHTTPResponseCode</text>
+</svg>

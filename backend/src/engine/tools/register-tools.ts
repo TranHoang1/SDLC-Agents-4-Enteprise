@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Tool registration and dispatch for Code Intelligence and Graph Analysis.
  * OCP fix: replaced 28-case switch with a Map-based handler registry.
  * Adding a new code-intel tool requires only: add definition + add registry entry.
@@ -25,6 +25,41 @@ import {
   handleCodeSearch, handleCodeSymbols, handleCodeContext, handleCodeModules,
   handleCodeIndexStatus, handleStreamWriteFile, handleCodeKbExport,
 } from './code-intel-handlers.js';
+import { ArtifactAnalyzerRegistry } from './artifact-analyzer/ArtifactAnalyzerRegistry.js';
+
+// Singleton registry for artifact analysis
+const artifactAnalyzerRegistry = new ArtifactAnalyzerRegistry();
+
+export const ANALYZE_ARTIFACT_TOOL_DEFINITION = {
+  name: 'analyze_artifact',
+  description: 'Analyze any code artifact (Pega rules, source code, structured data) and return structured understanding: type detection, summary, structure, and LLM-ready prompt context.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      content: { type: 'string', description: 'The artifact content to analyze' },
+      type: { type: 'string', description: 'Optional type hint (pega_rule, code, structured_data, unknown). Auto-detected if omitted.' },
+      simulate: { type: 'boolean', description: 'Whether to simulate execution (only supported for Pega rules)' },
+    },
+    required: ['content'],
+  },
+};
+
+export async function handleAnalyzeArtifact(args: Record<string, unknown>, _ctx: unknown): Promise<string> {
+  const content = args.content as string;
+  if (!content) return JSON.stringify({ error: 'content is required' });
+
+  const options: Record<string, unknown> = {};
+  if (args.type) options.type = args.type;
+  if (args.simulate) options.simulate = args.simulate;
+
+  try {
+    const analysis = await artifactAnalyzerRegistry.analyze(content, options);
+    return JSON.stringify(analysis, null, 2);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return JSON.stringify({ error: `Analysis failed: ${message}` });
+  }
+}
 
 export const CODE_INTEL_TOOL_DEFINITIONS = [
   { name: 'code_search', description: 'Full-text search across indexed code symbols (functions, classes, interfaces). Uses SQLite FTS5 with porter stemming.', inputSchema: { type: 'object', properties: { query: { type: 'string', description: 'Search query' }, limit: { type: 'number', description: 'Max results (default 20)' } }, required: ['query'] } },
@@ -45,6 +80,7 @@ export const CODE_INTEL_TOOL_DEFINITIONS = [
   ...GRAPH_ANALYSIS_TOOL_DEFINITIONS,
   ...AI_CONTEXT_TOOL_DEFINITIONS,
   ...SIMILARITY_TOOL_DEFINITIONS,
+  ANALYZE_ARTIFACT_TOOL_DEFINITION,
 ];
 
 /** Context bag injected into every code-intel tool handler. */
@@ -101,6 +137,7 @@ const TOOL_HANDLER_REGISTRY: Record<string, CodeIntelHandlerFn> = {
   find_dead_code:     (a, ctx) => p(handleSimilarityTool('find_dead_code', a, ctx.adapter, ctx.workspace, ctx.projectId), 'Unknown tool: find_dead_code'),
   git_search:         (a, ctx) => p(handleSimilarityTool('git_search', a, ctx.adapter, ctx.workspace, ctx.projectId), 'Unknown tool: git_search'),
   git_index:          (a, ctx) => p(handleSimilarityTool('git_index', a, ctx.adapter, ctx.workspace, ctx.projectId), 'Unknown tool: git_index'),
+  analyze_artifact:    (a, _ctx) => handleAnalyzeArtifact(a, _ctx),
 };
 
 /**

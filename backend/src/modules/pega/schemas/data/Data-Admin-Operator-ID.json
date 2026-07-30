@@ -1,0 +1,25 @@
+{
+  "targetClass": "Data-Admin-Operator-ID",
+  "displayName": "Operator ID",
+  "description": "System user account instance defining credentials, access groups, work groups, and org structure context.",
+  "exactStructure": {
+    "rootProperties": {
+      "pxObjClass": { "type": "string", "exactValue": "Data-Admin-Operator-ID", "required": true },
+      "pyUserIdentifier": { "type": "string", "required": true },
+      "pyUserName": { "type": "string", "required": true },
+      "pyAccessGroup": { "type": "string", "required": true },
+      "pyOrganization": { "type": "string", "required": false },
+      "pyDivision": { "type": "string", "required": false },
+      "pyUnit": { "type": "string", "required": false }
+    }
+  },
+  "uiSelectors": {
+    "operatorForm": "form#operatorIdForm",
+    "accessGroupInput": "input#pyAccessGroup"
+  },
+  "dependencyPaths": [
+    "pyAccessGroup",
+    "pyWorkGroup",
+    "pyOrganization"
+  ]
+}

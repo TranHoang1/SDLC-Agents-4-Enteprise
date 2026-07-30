@@ -243,6 +243,10 @@ MIT
 
 ## Changelog
 
+### v1.17.0 (2026-07-30)
+
+- **SA4E-77: Pega Knowledge Graph Enhancement** — Pega rules categorized by pxObjClass type (PROCESS, DECISION, DATA_MODEL, UI, TECHNICAL, etc.) with config-driven mapping (`pega-categories.json`). Graph legend auto-switches to Pega mode with 16 category colors. Code/KB split uses entry_id prefix (`code:*`/`pega:*`). Dashboard codeSymbols includes Pega rules.
+
 ### v1.16.0 (2026-07-25)
 
 - **Memory Evolution Levels L4-L6** — Replaced stub tools with database-backed services and graph algorithms:

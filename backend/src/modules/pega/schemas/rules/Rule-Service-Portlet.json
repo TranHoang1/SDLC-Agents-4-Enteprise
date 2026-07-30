@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Service-Portlet",
+  "pyPatternParent": "Rule-Service-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleName": "Rule-Service-Portlet",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Service-",
+  "pyClassName": "Rule-Service-Portlet"
+}

@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Obj-List",
+  "pyPatternParent": "Rule-Obj-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Obj-List",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Obj-",
+  "pyClassName": "Rule-Obj-List"
+}

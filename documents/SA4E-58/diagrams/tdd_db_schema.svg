@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="480" viewBox="0 0 1100 480">
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+  <text x="550" y="40" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">SA4E-58: TDD Knowledge Base Database ERD Schema</text>
+
+  <rect x="80" y="100" width="420" height="340" rx="10" fill="#313244" stroke="#89dceb" stroke-width="2"/>
+  <text x="290" y="140" fill="#89dceb" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">Table: knowledge_entries</text>
+  <line x1="80" y1="155" x2="500" y2="155" stroke="#89dceb" stroke-width="2"/>
+  <text x="100" y="190" fill="#f9e2af" font-family="Arial, sans-serif" font-size="13">PK: id (TEXT — "pega:rule:&lt;insKey&gt;")</text>
+  <text x="100" y="225" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">type: TEXT ("PEGA_RULE" | "PEGA_AST")</text>
+  <text x="100" y="260" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">content: JSONB / TEXT (Full Rule AST JSON)</text>
+  <text x="100" y="295" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">metadata: JSONB (pxObjClass, pyRuleName...)</text>
+  <text x="100" y="330" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">project_id: TEXT ("SDLC_PEGA_APP")</text>
+  <text x="100" y="365" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">updated_at: TIMESTAMP</text>
+
+  <path d="M 500 270 L 590 270" stroke="#f5c2e7" stroke-width="4"/>
+
+  <rect x="590" y="100" width="430" height="340" rx="10" fill="#313244" stroke="#f5c2e7" stroke-width="2"/>
+  <text x="805" y="140" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">Table: graph_nodes</text>
+  <line x1="590" y1="155" x2="1020" y2="155" stroke="#f5c2e7" stroke-width="2"/>
+  <text x="610" y="190" fill="#f9e2af" font-family="Arial, sans-serif" font-size="13">PK: node_id (UUID)</text>
+  <text x="610" y="225" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">label: TEXT ("Rule-Obj-Activity" | "Rule-Obj-Flow")</text>
+  <text x="610" y="260" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">properties: JSONB (Caller &amp; Dependent Graph)</text>
+  <text x="610" y="295" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">upstream_nodes: TEXT[] (UI Sections, Flow Actions)</text>
+  <text x="610" y="330" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">downstream_nodes: TEXT[] (Decision Tables, Activities)</text>
+  <text x="610" y="365" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13">created_at: TIMESTAMP</text>
+</svg>

@@ -1,0 +1,162 @@
+{
+  "pxCreateDateTime": "20080708T180829.932 GMT",
+  "pxCreateOperator": "nataa",
+  "pxCreateOpName": "Abirami Natarajan",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "ed3d462358e52d133c4d805bcaf1dc40",
+  "pxInsId": "RULE-OBJ-REPORT-",
+  "pxInsName": "RULE-OBJ-REPORT-",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxOriginalCreateDateTime": "",
+  "pxOriginalCreateOperator": "",
+  "pxOriginalCreateOpName": "",
+  "pxOriginalCreateSystemID": "",
+  "pxSiblingCount": "",
+  "pxUpdateDateTime": "20080723T040543.008 GMT",
+  "pxUpdateOperator": "arnabd_54_28",
+  "pxUpdateOpName": "Arnab Dey 5.4.28",
+  "pxUpdateSystemID": "pega",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "",
+  "pyAspect": "",
+  "pyBaseRule": "false",
+  "pyCategory": "",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Obj-Report-",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Obj-Report-",
+  "pyClassType": "Abstract",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-Obj-HTML",
+  "pyDescription": "Report definition class",
+  "pyEncryptBLOB": "",
+  "pyHasInstances": "false",
+  "pyHistoryObject": "false",
+  "pyInitialVersion": "05-04-28",
+  "pyInterface": "",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Rule-Obj-Report-",
+  "pyLabelOld": "Rule-Obj-Report-",
+  "pyMethodStatus": "",
+  "pyOrgDivision": "Engineering",
+  "pyPatternInheritance": "false",
+  "pyPatternParent": "Rule-Obj-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Obj-Report-",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Obj-HTML",
+  "pyUsage": "Report definition class",
+  "pyValueChanged": "false",
+  "pyWorkKey": "",
+  "pzChecksum": "-1606237393",
+  "pzIndexCount": "60",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-OBJ-REPORT-",
+  "pzReindex": "true",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-HTML",
+      "pxRuleFamilyName": "RULE-OBJ-HTML",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyRuleName": "Rule-Obj-HTML",
+      "pzIndexes": {
+        "RuleReference": "59"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

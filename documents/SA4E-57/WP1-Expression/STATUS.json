@@ -1,0 +1,28 @@
+{
+  "epic": "SA4E-57",
+  "workPackage": "WP1",
+  "title": "Expression Language Parser",
+  "currentPhase": "requirements",
+  "phases": {
+    "requirements": {
+      "status": "completed",
+      "completedAt": "2026-07-27",
+      "artifacts": ["BRD.md"]
+    },
+    "design": {
+      "status": "not_started",
+      "artifacts": []
+    },
+    "implementation": {
+      "status": "not_started",
+      "artifacts": []
+    },
+    "testing": {
+      "status": "not_started",
+      "artifacts": []
+    }
+  },
+  "effortPersonWeeks": 8,
+  "dependencies": ["Pega expression sample corpus (external)"],
+  "downstreamDependents": ["WP2", "WP3", "WP4"]
+}

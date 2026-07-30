@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Obj-AttachmentCategory",
+  "pyPatternParent": "Rule-Obj-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Obj-AttachmentCategory",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Obj-",
+  "pyClassName": "Rule-Obj-AttachmentCategory"
+}

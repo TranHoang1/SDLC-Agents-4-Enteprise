@@ -1,0 +1,51 @@
+<mxfile host="Electron" modified="2026-07-27T00:38:00.000Z" agent="Mozilla/5.0" version="21.6.8" type="device">
+  <diagram id="brd-seq" name="End-to-End SDLC Agent Sequence Flow">
+    <mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Lifelines -->
+        <mxCell id="l-sm" value="Scrum Master (SM)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="60" y="40" width="140" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="l-ext" value="VS Code Extension" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="250" y="40" width="140" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="l-backend" value="Backend (Hono Server)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="440" y="40" width="140" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="l-pega" value="Pega Platform Server" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="630" y="40" width="140" height="500" as="geometry" />
+        </mxCell>
+
+        <!-- Messages -->
+        <mxCell id="m1" value="1. Trigger Ticket Indexing" style="html=1;verticalAlign=bottom;endArrow=block;" edge="1" parent="1" source="l-sm" target="l-ext">
+          <mxGeometry width="80" relative="1" as="geometry"><mxPoint x="130" y="100" as="sourcePoint"/><mxPoint x="320" y="100" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m2" value="2. POST /pega/fetch-rule" style="html=1;verticalAlign=bottom;endArrow=block;" edge="1" parent="1" source="l-ext" target="l-backend">
+          <mxGeometry width="80" relative="1" as="geometry"><mxPoint x="320" y="150" as="sourcePoint"/><mxPoint x="510" y="150" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m3" value="3. POST /api/v1/rules/query" style="html=1;verticalAlign=bottom;endArrow=block;" edge="1" parent="1" source="l-backend" target="l-pega">
+          <mxGeometry width="80" relative="1" as="geometry"><mxPoint x="510" y="200" as="sourcePoint"/><mxPoint x="700" y="200" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m4" value="4. Return 27KB+ Full Rule JSON" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;" edge="1" parent="1" source="l-pega" target="l-backend">
+          <mxGeometry width="80" relative="1" as="geometry"><mxPoint x="700" y="250" as="sourcePoint"/><mxPoint x="510" y="250" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m5" value="5. Store PostgreSQL &amp; Return AST" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;" edge="1" parent="1" source="l-backend" target="l-ext">
+          <mxGeometry width="80" relative="1" as="geometry"><mxPoint x="510" y="300" as="sourcePoint"/><mxPoint x="320" y="300" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m6" value="6. Create rules/&lt;Type&gt;/&lt;Name&gt;.pega.json" style="html=1;verticalAlign=bottom;endArrow=block;" edge="1" parent="1" source="l-ext" target="l-ext">
+          <mxGeometry width="80" relative="1" as="geometry"><mxPoint x="320" y="350" as="sourcePoint"/><mxPoint x="370" y="380" as="targetPoint"/><Array as="points"><mxPoint x="360" y="350"/><mxPoint x="360" y="380"/></Array></mxGeometry>
+        </mxCell>
+        <mxCell id="m7" value="7. DEV Agent: POST /api/v1/rules/save" style="html=1;verticalAlign=bottom;endArrow=block;" edge="1" parent="1" source="l-backend" target="l-pega">
+          <mxGeometry width="80" relative="1" as="geometry"><mxPoint x="510" y="420" as="sourcePoint"/><mxPoint x="700" y="420" as="targetPoint"/></mxGeometry>
+        </mxCell>
+        <mxCell id="m8" value="8. QA Agent: POST /api/v1/rules/test" style="html=1;verticalAlign=bottom;endArrow=block;" edge="1" parent="1" source="l-backend" target="l-pega">
+          <mxGeometry width="80" relative="1" as="geometry"><mxPoint x="510" y="470" as="sourcePoint"/><mxPoint x="700" y="470" as="targetPoint"/></mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

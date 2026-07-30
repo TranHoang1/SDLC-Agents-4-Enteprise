@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Corr-Fragment",
+  "pyPatternParent": "Rule-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Corr-Fragment",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Stream",
+  "pyClassName": "Rule-Corr-Fragment"
+}

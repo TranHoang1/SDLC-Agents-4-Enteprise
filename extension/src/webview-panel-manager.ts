@@ -53,6 +53,7 @@ export class WebviewPanelManager implements IPanelManager, vscode.Disposable {
 
   /**
    * Open a panel by type. If already open, reveals it. Otherwise creates new.
+   * If not authenticated, prompts login via refreshToken command first.
    */
   openPanel(type: PanelType): void {
     const existing = this.panels.get(type);
@@ -61,7 +62,20 @@ export class WebviewPanelManager implements IPanelManager, vscode.Disposable {
       return;
     }
 
+    const token = BasePanel.authTokenProvider ? BasePanel.authTokenProvider() : "";
+    if (!token) {
+      vscode.commands.executeCommand('kiroSdlc.refreshToken').then(() => {
+        this.createAndTrack(type);
+      });
+      return;
+    }
+
+    this.createAndTrack(type);
+  }
+
+  private createAndTrack(type: PanelType): void {
     // Remove stale reference if panel was disposed externally
+    const existing = this.panels.get(type);
     if (existing) {
       this.panels.delete(type);
     }
@@ -69,12 +83,10 @@ export class WebviewPanelManager implements IPanelManager, vscode.Disposable {
     const panel = this.createPanel(type);
     this.panels.set(type, panel);
 
-    // Auto-remove from map when panel is disposed
     panel.onDispose(() => {
       this.panels.delete(type);
     });
 
-    // Load initial data
     panel.loadData().catch((err) => {
       panel.sendMessage({
         type: "error",

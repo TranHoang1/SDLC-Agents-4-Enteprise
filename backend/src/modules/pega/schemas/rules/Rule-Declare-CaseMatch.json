@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Declare-CaseMatch",
+  "pyPatternParent": "Rule-Declare-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Declare-CaseMatch",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Declare-",
+  "pyClassName": "Rule-Declare-CaseMatch"
+}

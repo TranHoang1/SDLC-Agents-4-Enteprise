@@ -1,0 +1,186 @@
+{
+  "pxCreateDateTime": "20010727T211035.803 GMT",
+  "pxCreateOperator": "vandj@pegasystems.com",
+  "pxCreateOpName": "John van der Meer",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "99565f8c054dbb06608cc2db80cd07a8",
+  "pxInsId": "RULE-OBJ-MAPVALUE",
+  "pxInsName": "RULE-OBJ-MAPVALUE",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "wfe",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxRuleOpenedInPopUp": "false",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20140627T113324.537 GMT",
+  "pxUpdateOperator": "raman1",
+  "pxUpdateOpName": "raman1",
+  "pxUpdateSystemID": "sdev717",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyApplet": "Rule-Obj-MapValue",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "Action",
+  "pyBaseRule": "true",
+  "pyCategory": "Decision",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Obj-MapValue",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Obj-MapValue",
+  "pyClassType": "Concrete",
+  "pyCreateDedicatedTable": "true",
+  "pyDateRangeRuleResolution": "true",
+  "pyDerivesFrom": "Rule-Declare-",
+  "pyDescription": "1 or 2 dimensional table used to arrive at a string result",
+  "pyDirtyModalCon": "",
+  "pyEncryptBLOB": "",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormPost": "",
+  "pyFormType": "Harness",
+  "pyHasInstances": "true",
+  "pyInitialVersion": "04-01-01",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "com.pega.pegarules.engine.generator.AppRuleAssembler",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Map Value ",
+  "pyLabelOld": "Map Value ",
+  "pyMethodStatus": "",
+  "pyMTInstanceOverrideAndVisibility": "OVERRIDE_DISABLED",
+  "pyOrgDivision": "RulesEngineering",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Obj-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Obj-MapValue",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Declare-",
+  "pyTemplateInputBox": "",
+  "pyUsage": "Property-Map-Value is 1-dimensional activity method\nProperty-Map-ValuePair is 2-dimensional activity method\nAlso used in Decision shape in Visio for flows.",
+  "pyValueChanged": "false",
+  "pyWindowTitle": "",
+  "pyWorkKey": "",
+  "pzAdvancedConcreteRuleFormName": "",
+  "pzAdvancedRuleSet": "",
+  "pzAvailabilityNotSet": "Set Availability",
+  "pzChecksum": "-1929296494",
+  "pzClassInheritance": "",
+  "pzGeneralSetting": "",
+  "pzIndexCount": "56",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-OBJ-MAPVALUE",
+  "pzIsPrivateCheckOut": "",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-OBJ-MAPVALUE",
+  "pzRuleFormKeysAndDescription": "",
+  "pzRuleFormRuleset": "",
+  "pzRuleFormStatus": "",
+  "pzRuleFormToolbar": "",
+  "pzRuleFormToolbarDelete": "",
+  "pzRuleFormToolbarHotKeys": "",
+  "pzRuleFormToolbarSave": "",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pzTenantId": "",
+  "RuleFormSettings": "",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!DECISION",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyCategory Decision",
+      "pzIndexes": {
+        "RuleReference": "54"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Declare-",
+      "pxRuleFamilyName": "RULE-DECLARE-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Rule-Declare-",
+      "pzIndexes": {
+        "RuleReference": "55"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Map Name",
+      "pyKeyName": "pyMapName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": "",
+      "pyPage": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": "",
+      "pyTemplateInputBox": ""
+    }
+  ]
+}

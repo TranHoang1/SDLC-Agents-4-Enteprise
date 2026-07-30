@@ -20,7 +20,7 @@ const DEFAULT_EXTENSIONS = [
   '.go', '.rs', '.c', '.cpp', '.h', '.hpp', '.cs',
   '.rb', '.php', '.swift', '.scala', '.sql', '.sh',
   '.yaml', '.yml', '.json', '.toml', '.gradle.kts',
-  '.cls', '.trigger',
+  '.cls', '.trigger', '.pega',
 ];
 
 const UnifiedConfigSchema = z.object({

@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Obj-Property-Qualifier",
+  "pyPatternParent": "Rule-Obj-Property",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Obj-Property-Qualifier",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Obj-Property",
+  "pyClassName": "Rule-Obj-Property-Qualifier"
+}

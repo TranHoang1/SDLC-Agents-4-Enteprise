@@ -1,0 +1,97 @@
+<mxGraphModel>
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Backend Core" style="swimlane;startSize=30;fillColor=#1a1a2e;fontColor=#ffffff;strokeColor=#0f3460;" vertex="1" parent="1">
+      <mxGeometry x="20" y="20" width="260" height="440" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="api-index.ts&#10;Index Source Route" style="rounded=1;whiteSpace=wrap;fillColor=#16213e;fontColor=#e94560;strokeColor=#e94560;" vertex="1" parent="2">
+      <mxGeometry x="20" y="40" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="indexing-engine.ts&#10;IndexingEngine" style="rounded=1;whiteSpace=wrap;fillColor=#16213e;fontColor=#e94560;strokeColor=#e94560;" vertex="1" parent="2">
+      <mxGeometry x="20" y="110" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="file-scanner.ts&#10;scanWorkspace/scanSingleFile" style="rounded=1;whiteSpace=wrap;fillColor=#16213e;fontColor=#e94560;strokeColor=#e94560;" vertex="1" parent="2">
+      <mxGeometry x="20" y="180" width="220" height="50" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="10" value="Backend Parsers" style="swimlane;startSize=30;fillColor=#0f3460;fontColor=#ffffff;strokeColor=#533483;" vertex="1" parent="1">
+      <mxGeometry x="320" y="20" width="300" height="440" as="geometry"/>
+    </mxCell>
+    <mxCell id="11" value="tree-sitter-indexer.ts&#10;TreeSitterIndexer" style="rounded=1;whiteSpace=wrap;fillColor=#533483;fontColor=#ffffff;strokeColor=#e94560;" vertex="1" parent="10">
+      <mxGeometry x="20" y="40" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="12" value="grammar-registry.ts&#10;GrammarRegistry" style="rounded=1;whiteSpace=wrap;fillColor=#533483;fontColor=#ffffff;strokeColor=#e94560;" vertex="1" parent="10">
+      <mxGeometry x="20" y="110" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="13" value="grammar-config.json&#10;(10 languages including pega)" style="rounded=1;whiteSpace=wrap;fillColor=#533483;fontColor=#ffffff;strokeColor=#e94560;" vertex="1" parent="10">
+      <mxGeometry x="20" y="180" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="14" value="dependency-resolver.ts&#10;DependencyResolver" style="rounded=1;whiteSpace=wrap;fillColor=#533483;fontColor=#ffffff;strokeColor=#e94560;" vertex="1" parent="10">
+      <mxGeometry x="20" y="250" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="15" value="pega-parser.ts&#10;PegaFileParser" style="rounded=1;whiteSpace=wrap;fillColor=#533483;fontColor=#ffffff;strokeColor=#e94560;" vertex="1" parent="10">
+      <mxGeometry x="20" y="320" width="260" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="16" value="PegaRuleAstParser&#10;(20+ rule type builders)" style="rounded=1;whiteSpace=wrap;fillColor=#533483;fontColor=#ffffff;strokeColor=#e94560;" vertex="1" parent="10">
+      <mxGeometry x="20" y="390" width="260" height="50" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="20" value="Extension Services" style="swimlane;startSize=30;fillColor=#2d4059;fontColor=#ffffff;strokeColor=#ea5455;" vertex="1" parent="1">
+      <mxGeometry x="660" y="20" width="260" height="440" as="geometry"/>
+    </mxCell>
+    <mxCell id="21" value="PegaHttpClient.ts&#10;Pega REST Client" style="rounded=1;whiteSpace=wrap;fillColor=#2d4059;fontColor=#ffffff;strokeColor=#ea5455;" vertex="1" parent="20">
+      <mxGeometry x="20" y="40" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="22" value="IndexingService.ts&#10;BFS Crawl Orchestrator" style="rounded=1;whiteSpace=wrap;fillColor=#2d4059;fontColor=#ffffff;strokeColor=#ea5455;" vertex="1" parent="20">
+      <mxGeometry x="20" y="110" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="23" value="ProviderConfigService.ts&#10;Config + SecretStorage" style="rounded=1;whiteSpace=wrap;fillColor=#2d4059;fontColor=#ffffff;strokeColor=#ea5455;" vertex="1" parent="20">
+      <mxGeometry x="20" y="180" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="24" value="AuthManager.ts&#10;Auth + LastUsername" style="rounded=1;whiteSpace=wrap;fillColor=#2d4059;fontColor=#ffffff;strokeColor=#ea5455;" vertex="1" parent="20">
+      <mxGeometry x="20" y="250" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="25" value="IndexerHttpClient.ts&#10;Backend Index Client" style="rounded=1;whiteSpace=wrap;fillColor=#2d4059;fontColor=#ffffff;strokeColor=#ea5455;" vertex="1" parent="20">
+      <mxGeometry x="20" y="320" width="220" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- Connectors -->
+    <mxCell id="30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="3" target="4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="4" target="5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="4" target="11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="11" target="12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="12" target="13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="11" target="14">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="36" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="11" target="15">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="15" target="16">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="22" target="21">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="39" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="23" target="24">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="22" target="25">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="41" style="edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=none;html=1;" edge="1" source="25" target="3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

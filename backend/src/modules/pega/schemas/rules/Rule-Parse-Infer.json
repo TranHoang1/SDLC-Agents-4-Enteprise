@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Parse-Infer",
+  "pyPatternParent": "Rule-Parse-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Parse-Infer",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Parse-",
+  "pyClassName": "Rule-Parse-Infer"
+}

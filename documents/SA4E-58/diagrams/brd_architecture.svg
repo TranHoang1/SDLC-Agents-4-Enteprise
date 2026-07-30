@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="420" viewBox="0 0 1100 420">
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+  <text x="550" y="45" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">SA4E-58: BRD System Architecture Overview</text>
+  <rect x="60" y="130" width="400" height="210" rx="12" fill="#313244" stroke="#cba6f7" stroke-width="2"/>
+  <text x="260" y="175" fill="#cba6f7" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">VSCode Extension / MCP Layer</text>
+  <text x="260" y="205" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• PegaHttpClient.ts (7 Typed SDK Methods)</text>
+  <text x="260" y="235" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• PegaMcpTools.ts (7 Dynamic Handlers)</text>
+  <text x="260" y="265" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• CORE_TOOLS Allowlist Registration</text>
+
+  <path d="M 460 235 L 640 235" stroke="#a6e3a1" stroke-width="4"/>
+
+  <rect x="640" y="130" width="400" height="210" rx="12" fill="#313244" stroke="#a6e3a1" stroke-width="2"/>
+  <text x="840" y="175" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">Pega Platform Server (HRAppsV2)</text>
+  <text x="840" y="205" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• Service Package: KiroAgents V1</text>
+  <text x="840" y="235" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• Endpoints under /rules/ prefix</text>
+  <text x="840" y="265" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• Outbound Mapping: .ResponseBody &amp; .pyHTTPResponseCode</text>
+</svg>

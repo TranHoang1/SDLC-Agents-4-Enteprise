@@ -1,0 +1,223 @@
+{
+  "pxCreateDateTime": "20010727T210629.619 GMT",
+  "pxCreateOperator": "vandj@pegasystems.com",
+  "pxCreateOpName": "John van der Meer",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "c4cc8d40cf2beb4ee082ceed8b036fb8",
+  "pxInsId": "RULE-OBJ-FLOW",
+  "pxInsName": "RULE-OBJ-FLOW",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "wfe",
+  "pxMoveOriginalKey": "RULE-OBJ-CLASS RULE-OBJ-FLOW",
+  "pxMoveOriginalRuleSet": "Pega-ProCom",
+  "pxMoveOriginalRuleSetVersion": "01-01-01",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxSiblingCount": "",
+  "pxUpdateDateTime": "20110404T205746.575 GMT",
+  "pxUpdateOperator": "cantt",
+  "pxUpdateOpName": "Todd Cantalupo",
+  "pxUpdateSystemID": "sde",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "Rule-Obj-Flow",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "Action",
+  "pyBaseRule": "true",
+  "pyCategory": "Process",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Obj-Flow",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Obj-Flow",
+  "pyClassType": "Concrete",
+  "pyCreateDedicatedTable": "true",
+  "pyDateRangeRuleResolution": "true",
+  "pyDerivesFrom": "Rule-Obj-",
+  "pyDescription": "Definition of Flow",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormType": "Harness",
+  "pyHasCustomFields": "",
+  "pyHasInstances": "true",
+  "pyInitialVersion": "04-01-01",
+  "pyInsAvailable": "true",
+  "pyInterface": "",
+  "pyJavaGenerator": "com.pega.pegarules.engine.generator.AppRuleAssembler",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Flow",
+  "pyLabelOld": "Flow",
+  "pyMethodStatus": "",
+  "pyNamespace": "",
+  "pyOrgDivision": "Administration",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Obj-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Obj-Flow",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-ProCom",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Obj-",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTemporaryObject": "",
+  "pyUsage": "Flows are  rules that represent Business Process ",
+  "pyUseCache": "false",
+  "pyValueChanged": "false",
+  "pyWorkKey": "",
+  "pzChecksum": "59592697",
+  "pzIndexCount": "65",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-OBJ-FLOW",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-OBJ-FLOW",
+  "pzReindex": "true",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxListSubscript": "1",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxListSubscript": "1",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Flow",
+      "pxRuleFamilyName": "PYFLOWTYPE",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyRuleName": "pyFlowType",
+      "pzIndexes": {
+        "RuleReference": "61"
+      }
+    },
+    {
+      "pxListSubscript": "2",
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Flow",
+      "pxRuleFamilyName": "PYCLASSNAME",
+      "pxRuleObjClass": "Rule-Obj-Property",
+      "pyRuleName": "pyClassName",
+      "pzIndexes": {
+        "RuleReference": "62"
+      }
+    },
+    {
+      "pxListSubscript": "3",
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!PROCESS",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyRuleName": "pyCategory Process",
+      "pzIndexes": {
+        "RuleReference": "63"
+      }
+    },
+    {
+      "pxListSubscript": "4",
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-",
+      "pxRuleFamilyName": "RULE-OBJ-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyRuleName": "Rule-Obj-",
+      "pzIndexes": {
+        "RuleReference": "64"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxListSubscript": "2",
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Flow Name",
+      "pyKeyName": "pyFlowType"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": ""
+    }
+  ]
+}

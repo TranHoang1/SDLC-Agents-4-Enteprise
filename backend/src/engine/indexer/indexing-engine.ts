@@ -15,11 +15,13 @@ import { runGraphMigrations, isGraphSchemaReady } from '../database/migrator.js'
 import { detectSfdxProject, getSfdxStats as getSfdxStatsImpl, logSfdxStats } from './sfdx-helper.js';
 import { detectModule, updateModules, detectAndStorePatterns } from './module-helper.js';
 import { isFileUnchanged, indexFileSymbolsRegex, upsertFileInDb, upsertFileRegexFallback } from './index-helper.js';
+import { DependencyResolver } from '../parsers/dependency-resolver.js';
 import { FileWatcher } from './file-watcher.js';
 import { IndexScope, resolveScope } from './index-scope.js';
 import { GraphSyncService } from '../graph/graph-sync-service.js';
 import { GraphRepository as AdminGraphRepository } from '../../database/repositories/GraphRepository.js';
 import { getAdminAdapter } from '../../admin/db/core.js';
+import type { IndexResult } from '../parsers/types.js';
 
 
 const logger = pino({ name: 'indexing-engine' });
@@ -55,7 +57,7 @@ export class IndexingEngine {
       if (configPath) {
         const grammarConfig = loadGrammarConfig(configPath);
         this.grammarRegistry = new GrammarRegistry(grammarConfig);
-        this.treeSitterIndexer = new TreeSitterIndexer(this.grammarRegistry, this.adapter, this.config.maxFileSize);
+        this.treeSitterIndexer = new TreeSitterIndexer(this.grammarRegistry, this.adapter, this.config.maxFileSize, this.config.workspace);
         this.treeSitterReady = true;
         logger.error(`[indexer] Tree-sitter initialized (${grammarConfig.languages.length} langs)` + (detectSfdxProject(this.config.workspace) ? ' [SFDX]' : ''));
       } else {
@@ -142,13 +144,14 @@ export class IndexingEngine {
     return this.config.projectId;
   }
 
-  async indexSingleFile(filePath: string): Promise<void> {
-    const projectId = this.bootProjectId(); // SEC-06: boot-tenant scope only
+  async indexSingleFile(filePath: string, projectId?: string): Promise<IndexResult | null> {
+    const pid = projectId || this.bootProjectId();
     const file = scanSingleFile(filePath, this.config.workspace);
-    // SA4E-53: isFileUnchanged is now async
-    if (!file || await isFileUnchanged(this.adapter, file, projectId)) return;
-    await this.upsertFile(file, projectId);
+    if (!file) return null;
+    return this.upsertFile(file, pid);
   }
+
+  public getAdapter(): DatabaseAdapter { return this.adapter; }
 
   removeFile(filePath: string): void {
     const relativePath = filePath.replace(/\\/g, '/');
@@ -259,12 +262,27 @@ export class IndexingEngine {
     return { treeSitterCount: 0, regexCount };
   }
 
-  private async upsertFile(file: ScannedFile, projectId: string): Promise<void> {
+  private async upsertFile(file: ScannedFile, projectId: string): Promise<IndexResult | null> {
     await upsertFileInDb(this.adapter, file, projectId);
     if (this.treeSitterReady && this.treeSitterIndexer) {
-      await this.treeSitterIndexer.indexFile(file.absolutePath, file.relativePath, projectId);
-    } else {
-      await upsertFileRegexFallback(this.adapter, file, projectId, logger);
+      return await this.treeSitterIndexer.indexFile(file.absolutePath, file.relativePath, projectId);
+    }
+    await upsertFileRegexFallback(this.adapter, file, projectId, logger);
+    try {
+      const source = fs.readFileSync(file.absolutePath, 'utf-8');
+      const depResolver = new DependencyResolver();
+      const dependencies = depResolver.resolve(source, file.relativePath, this.config.workspace);
+      return {
+        filePath: file.relativePath,
+        symbolCount: 0,
+        relationshipCount: 0,
+        parseErrors: 0,
+        duration: 0,
+        method: 'regex-fallback',
+        dependencies,
+      };
+    } catch {
+      return null;
     }
   }
 

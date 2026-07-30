@@ -1,0 +1,178 @@
+{
+  "pxCreateDateTime": "20010530T114037.559 GMT",
+  "pxCreateOperator": "madds@pegasystems.com",
+  "pxCreateOpName": "Steve Madden",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "785a3270955fb023a9108ea5bf3b5440",
+  "pxInsId": "RULE-SERVICE-SOAP",
+  "pxInsName": "RULE-SERVICE-SOAP",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "wfe",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxUpdateDateTime": "20140708T072207.215 GMT",
+  "pxUpdateOperator": "konak",
+  "pxUpdateOpName": "Komali Konakanchi",
+  "pxUpdateSystemID": "sdev717",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "Rule-Service-SOAP",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "",
+  "pyBaseRule": "false",
+  "pyCategory": "Integration-Services",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "N",
+  "pyClassGroup": "Rule-Service-SOAP",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "false",
+  "pyClassName": "Rule-Service-SOAP",
+  "pyClassType": "Concrete",
+  "pyDateRangeRuleResolution": "",
+  "pyDerivesFrom": "Rule-Service-",
+  "pyDescription": "Service for a SOAP client outside PegaRULES",
+  "pyDirtyModalCon": "",
+  "pyEncryptBLOB": "",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormPost": "",
+  "pyFormType": "Harness",
+  "pyHasInstances": "true",
+  "pyInitialVersion": "04-01-01",
+  "pyInsAvailable": "true",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Service SOAP",
+  "pyLabelOld": "Service SOAP",
+  "pyMethodStatus": "",
+  "pyMTInstanceOverrideAndVisibility": "OVERRIDE_DISABLED",
+  "pyOrgDivision": "",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Service-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Service-SOAP",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Service-",
+  "pyTemplateInputBox": "",
+  "pyUsage": "Service for a SOAP client outside PegaRULES",
+  "pyUseCache": "true",
+  "pyValueChanged": "false",
+  "pyWindowTitle": "",
+  "pyWorkKey": "",
+  "pzAdvancedConcreteRuleFormName": "",
+  "pzAdvancedRuleSet": "",
+  "pzAvailabilityNotSet": "Set Availability",
+  "pzChecksum": "1268951639",
+  "pzClassInheritance": "",
+  "pzGeneralSetting": "",
+  "pzIndexCount": "33",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-SERVICE-SOAP",
+  "pzRuleFormKeysAndDescription": "",
+  "pzRuleFormRuleset": "",
+  "pzRuleFormStatus": "",
+  "pzRuleFormToolbar": "",
+  "pzRuleFormToolbarDelete": "",
+  "pzRuleFormToolbarHotKeys": "",
+  "pzRuleFormToolbarSave": "",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "RuleFormSettings": "",
+  "pxAPIMethodReferences": [],
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Service-",
+      "pxRuleFamilyName": "RULE-SERVICE-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Rule-Service-",
+      "pzIndexes": {
+        "RuleReference": "31"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!INTEGRATION-SERVICES",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyCategory Integration-Services",
+      "pzIndexes": {
+        "RuleReference": "32"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Customer Package Name",
+      "pyKeyName": "pyCusPackage"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Customer Class Name",
+      "pyKeyName": "pyCusClass"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Customer Method Name",
+      "pyKeyName": "pyCusMethod"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": "",
+      "pyTemplateInputBox": ""
+    }
+  ]
+}

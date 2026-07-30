@@ -1,0 +1,198 @@
+{
+  "pxCreateDateTime": "20021126T201127.465 GMT",
+  "pxCreateOperator": "marik@pegasystems.com",
+  "pxCreateOpName": "Ken Marin",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "6dd3b27a6c81c3b018e7de9253bd7f37",
+  "pxInsId": "RULE-ADMIN-PRODUCT",
+  "pxInsName": "RULE-ADMIN-PRODUCT",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20130731T150846.768 GMT",
+  "pxUpdateOperator": "feenrx",
+  "pxUpdateOpName": "feenr",
+  "pxUpdateSystemID": "sde",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "true",
+  "pyApplet": "Rule-Admin-Product",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "",
+  "pyBaseRule": "true",
+  "pyCategory": "SysAdmin",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Admin-Product",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "false",
+  "pyClassName": "Rule-Admin-Product",
+  "pyClassType": "Concrete",
+  "pyCreateDedicatedTable": "true",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-Admin-",
+  "pyDescription": "Products are a collection of rulesets, as well as data, bundled together.",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormType": "Harness",
+  "pyHasCustomFields": "",
+  "pyHasInstances": "true",
+  "pyInitialVersion": "04-01-01",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Product",
+  "pyLabelOld": "Product",
+  "pyMethodStatus": "",
+  "pyOrgDivision": "Administration",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Admin-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Admin-Product",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Admin-",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTemporaryObject": "",
+  "pyUsage": "Define a shipping Product (rulesets + data). Instances of this class are used to create zip files which we ship.",
+  "pyValueChanged": "false",
+  "pyWorkKey": "",
+  "pzChecksum": "-548300132",
+  "pzIndexCount": "39",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-ADMIN-PRODUCT",
+  "pzIsPrivateCheckOut": "",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-ADMIN-PRODUCT",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pzTenantId": "",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxListSubscript": "1",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxListSubscript": "1",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": ""
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!SYSADMIN",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyRuleName": "pyCategory SysAdmin",
+      "pzIndexes": {
+        "RuleReference": "37"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Admin-",
+      "pxRuleFamilyName": "RULE-ADMIN-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyRuleName": "Rule-Admin-",
+      "pzIndexes": {
+        "RuleReference": "38"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Product Name",
+      "pyKeyName": "pyProductName"
+    },
+    {
+      "pxListSubscript": "2",
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "Product Version",
+      "pyKeyName": "pyProductVersion"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassLinks",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassKeys",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-JavaGenerator",
+      "pyAspect": "",
+      "pyJavaClass": "",
+      "pyPage": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pyRuleSetName": "",
+      "pyTemplateInputBox": ""
+    }
+  ]
+}

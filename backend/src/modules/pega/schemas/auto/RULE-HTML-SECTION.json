@@ -1,0 +1,17 @@
+﻿{
+    "dependencyFields":  [
+                             "pyTargetProperty",
+                             "pyExpression",
+                             "pySteps",
+                             "pyResourcePath"
+                         ],
+    "description":  "Metadata schema for RULE-HTML-SECTION extracted from Pega RAP catalog",
+    "sampleInstanceCount":  24,
+    "targetClass":  "RULE-HTML-SECTION",
+    "requiredFields":  [
+                           "pxObjClass",
+                           "pyClassName",
+                           "pyRuleset"
+                       ],
+    "schemaVersion":  "1.0.0"
+}

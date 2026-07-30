@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Circumstance-Template",
+  "pyPatternParent": "Rule-Circumstance-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-Circumstance-Template",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Circumstance-",
+  "pyClassName": "Rule-Circumstance-Template"
+}

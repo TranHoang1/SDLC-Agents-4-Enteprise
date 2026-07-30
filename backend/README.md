@@ -233,6 +233,7 @@ The embedding model is expected at `.code-intel/models/model.onnx`. Download it:
 
 | Version | Date | Ticket | Changes |
 |---------|------|--------|---------|
+| 1.17.0 | 2026-07-30 | SA4E-77 | Pega Knowledge Graph: categorized node types (PROCESS, DECISION, DATA_MODEL, UI, etc.), config-driven mapping (`pega-categories.json`), Pega-mode color switching in graph legend. Code/KB split uses entry_id prefix. Dashboard includes Pega rules in codeSymbols. isPega flag in /positions API. |
 | 1.16.0 | 2026-07-25 | — | Memory Evolution Levels L4-L6 (Collective Graph, Skill/Procedural Memory, Reflective Consolidation) implemented with real backend services and graph algorithms. Admin configuration checks resilience for Zen Upstream, TaskWorker endpoints, user management, and dynamic Admin Web UI. |
 | 1.15.0 | 2026-07-24 | SA4E-49/50/51 | PostgreSQL adapter with async DatabaseAdapter. KB tag scope fix (USER→PROJECT, now 4k+ tags visible). JWT auth, RBAC tools, config tracking. DI Container, ModuleFactory, EventBus. Agent sync to kiro/claude-code/codex-openai/github-copilot. |
 | 1.14.0 | 2026-07-19 | SA4E-48 | Extension `WrapperServer` MCP Streamable HTTP compliance: `initialize` handshake, `ping`, `notifications/initialized`, `GET /mcp` SSE — fixes VS Code `-32601` stop/restart loop + OpenCode SSE `endpoint` event fix |

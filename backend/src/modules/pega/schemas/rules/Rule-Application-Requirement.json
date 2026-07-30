@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Application-Requirement",
+  "pyPatternParent": "Rule-Application",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-ProCom",
+  "pyRuleName": "Rule-Application-Requirement",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Application-UseCase",
+  "pyClassName": "Rule-Application-Requirement"
+}

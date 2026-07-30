@@ -1,0 +1,69 @@
+{
+  "ticket": "SA4E-66",
+  "status": "DONE",
+  "phase": "DEV",
+  "epic": "Rule Type Coverage",
+  "summary": "Mở rộng parser coverage từ ~15% lên ~70% rule types (explicit parsers) + 100% effective qua DefaultPegaParserStrategy fallback.",
+  "wps": [
+    {
+      "id": "SA4E-66-WP2",
+      "name": "Integration Rules (Connect REST/SOAP/SQL/File/Service)",
+      "files": ["backend/src/modules/pega/connect/"],
+      "tests": 20
+    },
+    {
+      "id": "SA4E-66-WP3",
+      "name": "Declarative Rules (Expression/OnChange/Trigger/Pages/Constraint/Index/Decision)",
+      "files": ["backend/src/modules/pega/declare/"],
+      "tests": 30
+    },
+    {
+      "id": "SA4E-66-WP4",
+      "name": "Security/Admin Rules (AccessGroup/Role/Privilege/OperatorID)",
+      "files": ["backend/src/modules/pega/access/"],
+      "tests": 33
+    },
+    {
+      "id": "SA4E-66-WP5",
+      "name": "UI/Portal Rules (Section/Harness/FlowAction/Portal/Skin/Navigation)",
+      "files": ["backend/src/modules/pega/portal/"],
+      "tests": 23
+    },
+    {
+      "id": "SA4E-66-WP6",
+      "name": "Decisioning/Strategy Rules (Strategy/NBA/Offer/Proposition/Scorecard)",
+      "files": ["backend/src/modules/pega/decisioning/"],
+      "tests": 37
+    },
+    {
+      "id": "SA4E-66-WP7",
+      "name": "Misc/Remaining Rules (MapValue/FieldValue/CaseType/Stage/Agent/Report/Correspondence/File/Edit/Test/Utility/Shortcut/Stream/Message)",
+      "files": ["backend/src/modules/pega/misc/"],
+      "tests": 29
+    },
+  ],
+  "tests_total": 172,
+  "parsers_created": 6,
+  "result": "172 tests cho 6 parser modules. Coverage từ ~15% → ~70% explicit + DefaultPegaParserStrategy effective 100%.",
+  "documents": [
+    "documents/SA4E-66/BRD.md",
+    "documents/SA4E-66/FSD.md",
+    "documents/SA4E-66/TDD.md",
+    "documents/SA4E-66/STP.md",
+    "documents/SA4E-66/STC.md",
+    "documents/SA4E-66/DPG.md",
+    "documents/SA4E-66/RLN.md",
+    "documents/SA4E-66/RUN-LOG.md",
+    "documents/SA4E-66/STATUS.json"
+  ],
+  "links": {
+    "brd": "BRD.md",
+    "fsd": "FSD.md",
+    "tdd": "TDD.md",
+    "stp": "STP.md",
+    "stc": "STC.md",
+    "dpg": "DPG.md",
+    "rln": "RLN.md",
+    "run-log": "RUN-LOG.md"
+  }
+}

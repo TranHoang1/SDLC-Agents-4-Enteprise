@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-HTML-Fragment",
+  "pyPatternParent": "Rule-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-HTML-Fragment",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Stream",
+  "pyClassName": "Rule-HTML-Fragment"
+}

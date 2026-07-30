@@ -1,0 +1,14 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Obj-Section",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-HTML-Section",
+  "pyPatternParent": "Rule-HTML-",
+  "pyClassName": "Rule-Obj-Section",
+  "pyRuleName": "Rule-Obj-Section",
+  "pyClassType": "Concrete",
+  "pyDerivesFrom": "Rule-HTML-Section",
+  "pyDescription": "Object-oriented Section representation",
+  "pyLabel": "Obj Section",
+  "pxObjClass": "Rule-Obj-Class"
+}

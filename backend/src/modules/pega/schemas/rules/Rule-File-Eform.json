@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-File-Eform",
+  "pyPatternParent": "Rule-File-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleName": "Rule-File-Eform",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-File-Binary",
+  "pyClassName": "Rule-File-Eform"
+}

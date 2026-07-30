@@ -1,0 +1,75 @@
+{
+  "pxCreateDateTime": "20000119T131847.846 GMT",
+  "pxCreateOperator": "MADDS",
+  "pxCreateOpName": "Steve Madden",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "554ead34d653c9d1f76463c7549201e8",
+  "pxInsId": "RULE-ACCESS-ROLE-",
+  "pxInsName": "RULE-ACCESS-ROLE-",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "wfe",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxServerReqURI": "/pr3web/PRServlet",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20040901T143321.987 GMT",
+  "pxUpdateOperator": "byrn42@pegasystems.com",
+  "pxUpdateOpName": "Bill Byrn",
+  "pxUpdateSystemID": "pega",
+  "pyAllowLocking": "false",
+  "pyApplet": "",
+  "pyCategory": "",
+  "pyClassGroup": "Rule-Access-Role-",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "false",
+  "pyClassName": "Rule-Access-Role-",
+  "pyClassType": "Abstract",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-Access-",
+  "pyDescription": "Class for Rule-Access-Role-Name",
+  "pyInitialVersion": "04-01-01",
+  "pyInsAvailable": "true",
+  "pyLabel": "Rules for access roles",
+  "pyOrgDivision": "Org-ResourceDevelopment",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Access-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyRuleName": "Rule-Access-Role-",
+  "pyRuleResolution": "false",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-Access-",
+  "pyUsage": "Class for Rule-Access-Role-Name",
+  "pzChecksum": "-451048825",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-ACCESS-ROLE-",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-ACCESS-ROLE-",
+  "pzReindex": "true",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [],
+  "pyKeyDefList": [],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks"
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys"
+    }
+  ],
+  "pyOtherJavaGenerators": [],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses"
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets"
+    }
+  ]
+}

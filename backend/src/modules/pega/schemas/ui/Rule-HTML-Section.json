@@ -1,0 +1,20 @@
+{
+  "targetClass": "Rule-HTML-Section",
+  "displayName": "Section",
+  "description": "Reusable UI layout rule defining form controls, fields, nested sections, and event actions.",
+  "exactStructure": {
+    "rootProperties": {
+      "pxObjClass": { "type": "string", "exactValue": "Rule-HTML-Section", "required": true },
+      "pyClassName": { "type": "string", "required": true },
+      "pySectionName": { "type": "string", "required": true },
+      "pyRuleset": { "type": "string", "required": true },
+      "pyRulesetVersion": { "type": "string", "required": true }
+    }
+  },
+  "dependencyPaths": [
+    "pyIncludedSections[].pySectionName",
+    "pyControls[].pyPropertyName",
+    "pyEvents[].pyActivityName",
+    "pyEvents[].pyDataTransform"
+  ]
+}

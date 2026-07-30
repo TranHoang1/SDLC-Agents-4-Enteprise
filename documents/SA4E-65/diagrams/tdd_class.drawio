@@ -1,0 +1,45 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="&lt;b&gt;&amp;lt;&amp;lt;interface&amp;gt;&amp;gt;&lt;/b&gt;&lt;br&gt;IPegaRuleParserStrategy&lt;br&gt;&lt;hr&gt;&lt;br&gt;+ parse(context): Result" style="whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontColor=#333333;fontFamily=Helvetica;fontSize=11;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="320" y="240" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="&lt;b&gt;PegaClassDefinition&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;br&gt;+ className: string&lt;br&gt;+ parentClass: string&lt;br&gt;+ properties: Map" style="whiteSpace=wrap;html=1;fillColor=#E8A838;strokeColor=#C88A20;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=11;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="160" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="&lt;b&gt;PegaMetaModelLoader&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;br&gt;+ loadDirectory(path): Map&lt;br&gt;+ loadSchema(path): PegaClassDefinition" style="whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=11;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="320" y="40" width="160" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="&lt;b&gt;PegaMetaModelRegistry&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;br&gt;+ getInstance(): Registry&lt;br&gt;+ register(def): void&lt;br&gt;+ get(name): PegaClassDefinition" style="whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A50;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=11;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="40" y="240" width="160" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="&lt;b&gt;PegaMetaModelCompiler&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;br&gt;+ compileAll(): IPegaRuleParserStrategy[]&lt;br&gt;+ resolveInheritance(def): def" style="whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=11;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="320" y="380" width="160" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="&lt;b&gt;PegaMetaModelService&lt;/b&gt;&lt;br&gt;&lt;hr&gt;&lt;br&gt;+ initialize(): void&lt;br&gt;+ getStrategy(name): IPegaRuleParserStrategy" style="whiteSpace=wrap;html=1;fillColor=#D94A4A;strokeColor=#B83030;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=11;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="40" y="380" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=openThin;strokeColor=#666666;strokeWidth=1;fontFamily=Helvetica;fontSize=11;dashed=1;" edge="1" parent="1" source="4" target="3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2" value="registers into" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=openThin;strokeColor=#666666;strokeWidth=1;fontFamily=Helvetica;fontSize=11;dashed=1;" edge="1" parent="1" source="4" target="5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=openThin;strokeColor=#666666;strokeWidth=1;fontFamily=Helvetica;fontSize=11;dashed=1;" edge="1" parent="1" source="6" target="5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4" value="implements" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=1;fontFamily=Helvetica;fontSize=11;" edge="1" parent="1" source="6" target="2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r5" value="orchestrates" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=openThin;strokeColor=#666666;strokeWidth=1;fontFamily=Helvetica;fontSize=11;dashed=1;" edge="1" parent="1" source="7" target="4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r6" value="orchestrates" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=openThin;strokeColor=#666666;strokeWidth=1;fontFamily=Helvetica;fontSize=11;dashed=1;" edge="1" parent="1" source="7" target="5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r7" value="orchestrates" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=openThin;strokeColor=#666666;strokeWidth=1;fontFamily=Helvetica;fontSize=11;dashed=1;" edge="1" parent="1" source="7" target="6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

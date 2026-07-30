@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="520" viewBox="0 0 1100 520">
+  <rect width="100%" height="100%" fill="#1e1e2e"/>
+  <text x="550" y="40" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="20" font-weight="bold" text-anchor="middle">SA4E-58: FSD System Context &amp; Boundary Diagram</text>
+  
+  <rect x="50" y="100" width="280" height="350" rx="12" fill="#313244" stroke="#89b4fa" stroke-width="2"/>
+  <text x="190" y="140" fill="#89b4fa" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">AI SDLC Agents Layer</text>
+  <text x="190" y="180" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• BA Agent (Meta &amp; Glossary)</text>
+  <text x="190" y="215" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• SA Agent (AST &amp; Call Graph)</text>
+  <text x="190" y="250" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• DEV Agent (Lock &amp; Save Rule)</text>
+  <text x="190" y="285" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• QA Agent (Execute Test Suite)</text>
+  <text x="190" y="320" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• DevOps Agent (Release &amp; Version)</text>
+
+  <path d="M 330 275 L 410 275" stroke="#f5c2e7" stroke-width="4"/>
+
+  <rect x="410" y="100" width="300" height="350" rx="12" fill="#313244" stroke="#f5c2e7" stroke-width="2"/>
+  <text x="560" y="140" fill="#f5c2e7" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle">MCP Proxy &amp; Dynamic Router</text>
+  <text x="560" y="180" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• find_tools(query) Engine</text>
+  <text x="560" y="215" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• execute_dynamic_tool Router</text>
+  <text x="560" y="250" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• PegaHttpClient Typed SDK</text>
+  <text x="560" y="285" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="13" text-anchor="middle">• PegaMcpTools Handlers</text>
+
+  <path d="M 710 200 L 790 150" stroke="#a6e3a1" stroke-width="4"/>
+  <path d="M 710 350 L 790 380" stroke="#89dceb" stroke-width="4"/>
+
+  <rect x="790" y="90" width="260" height="170" rx="12" fill="#313244" stroke="#a6e3a1" stroke-width="2"/>
+  <text x="920" y="130" fill="#a6e3a1" font-family="Arial, sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Remote Pega Server</text>
+  <text x="920" y="160" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">Package: KiroAgents (V1)</text>
+  <text x="920" y="185" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">7 Custom REST Services</text>
+
+  <rect x="790" y="300" width="260" height="170" rx="12" fill="#313244" stroke="#89dceb" stroke-width="2"/>
+  <text x="920" y="340" fill="#89dceb" font-family="Arial, sans-serif" font-size="15" font-weight="bold" text-anchor="middle">Local KB Engine</text>
+  <text x="920" y="370" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">PostgreSQL / SQLite</text>
+  <text x="920" y="395" fill="#cdd6f4" font-family="Arial, sans-serif" font-size="12" text-anchor="middle">knowledge_entries &amp; graph_nodes</text>
+</svg>

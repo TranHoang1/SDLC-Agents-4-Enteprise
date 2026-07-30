@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Service-Email",
+  "pyPatternParent": "Rule-Service-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleName": "Rule-Service-Email",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Service-",
+  "pyClassName": "Rule-Service-Email"
+}

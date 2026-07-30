@@ -23,6 +23,7 @@ import { securityHeaders } from './middleware/security-headers.js';
 import { apiKeyAuth } from './middleware/api-key-auth.js';
 import { validateJwtConfig, jwtAuth } from './middleware/jwt-auth.js';
 import { createKbApiRoutes, createToolsApiRoutes } from './routes/kb-api.js';
+import { createPegaApiRoutes } from './routes/pega-api.js';
 import { bodyLimit } from 'hono/body-limit';
 import { getMcpServer, registerTransport } from './mcpServer.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
@@ -78,6 +79,9 @@ export class HttpServer {
 
     const kbApiRoutes = createKbApiRoutes(this.options.registry, this.logger);
     app.route('/api/v1', kbApiRoutes);
+
+    const pegaApiRoutes = createPegaApiRoutes(this.options.registry, this.logger);
+    app.route('/api/v1', pegaApiRoutes);
 
     const toolsApiRoutes = createToolsApiRoutes(this.options.registry, this.logger);
     app.route('/api/tools', toolsApiRoutes);

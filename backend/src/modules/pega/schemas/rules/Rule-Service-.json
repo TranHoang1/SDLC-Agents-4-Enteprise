@@ -1,0 +1,76 @@
+{
+  "pxCreateDateTime": "20000408T185829.919 GMT",
+  "pxCreateOperator": "tandp@pegasystems.com",
+  "pxCreateOpName": "Peter Tandara-Kuhns",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "926dbceec667ab5d8e54b8bacd2582ea",
+  "pxInsId": "RULE-SERVICE-",
+  "pxInsName": "RULE-SERVICE-",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "wfe",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxServerReqURI": "/pr3web/PRServlet",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20040819T133031.714 GMT",
+  "pxUpdateOperator": "byrn42@pegasystems.com",
+  "pxUpdateOpName": "Bill Byrn",
+  "pxUpdateSystemID": "pega",
+  "pyAllowLocking": "false",
+  "pyApplet": "",
+  "pyCategory": "",
+  "pyClassGroup": "Rule-Service-",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "false",
+  "pyClassName": "Rule-Service-",
+  "pyClassType": "Abstract",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-",
+  "pyDescription": "Rule for Service",
+  "pyInitialVersion": "04-01-01",
+  "pyInsAvailable": "true",
+  "pyLabel": "Rule types for services",
+  "pyOrgDivision": "Org-ResourceDevelopment",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyRuleAvailable": "Yes",
+  "pyRuleName": "Rule-Service-",
+  "pyRuleResolution": "false",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pySuperClass": "Rule-",
+  "pyUsage": "Rule for Service",
+  "pzChecksum": "-125013080",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-SERVICE-",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-SERVICE-",
+  "pzReindex": "true",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAllChangeList": [],
+  "pxAPIMethodReferences": [],
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [],
+  "pyKeyDefList": [],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks"
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys"
+    }
+  ],
+  "pyOtherJavaGenerators": [],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses"
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets"
+    }
+  ]
+}

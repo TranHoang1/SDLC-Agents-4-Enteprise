@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Service-JSR94",
+  "pyPatternParent": "Rule-Service-",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleName": "Rule-Service-JSR94",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-Service-",
+  "pyClassName": "Rule-Service-JSR94"
+}

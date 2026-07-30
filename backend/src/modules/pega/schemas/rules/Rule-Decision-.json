@@ -1,0 +1,185 @@
+{
+  "pxCreateDateTime": "20100727T100340.369 GMT",
+  "pxCreateOperator": "Administrator@MyCorp.com",
+  "pxCreateOpName": "Administrator",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "e7ba04211902d64b3026bb6f9f3967af",
+  "pxInsId": "RULE-DECISION-",
+  "pxInsName": "RULE-DECISION-",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxMoveFromSystem": "",
+  "pxMoveImportDateTime": "20120511T132600.573 GMT",
+  "pxMoveImportOperId": "administrator@pega.com",
+  "pxMoveImportOperName": "External Import Utility",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxUpdateDateTime": "20101126T105727.756 GMT",
+  "pxUpdateOperator": "krzep",
+  "pxUpdateOpName": "Piotr Krzepczak",
+  "pxUpdateSystemID": "sde",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyApplet": "",
+  "pyAppletHarness": "",
+  "pyAspect": "",
+  "pyBaseRule": "true",
+  "pyCategory": "",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Decision-",
+  "pyClassGroup_Old": "Rule-Decision-",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassGroupIndicator_Old": "NOCLASSGROUP",
+  "pyClassInheritance": "false",
+  "pyClassName": "Rule-Decision-",
+  "pyClassType": "Abstract",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-",
+  "pyDescription": "initial revision",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormType": "Form",
+  "pyHasCustomFields": "",
+  "pyHasInstances": "false",
+  "pyInitialVersion": "01-01-02",
+  "pyInterface": "",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Rule-Decision-",
+  "pyLabelOld": "Rule-Decision-",
+  "pyMethodStatus": "",
+  "pyOrgDivision": "MyCorpDiv",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyReloadForm": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Decision-",
+  "pyRuleResolution": "false",
+  "pyRuleSet": "Pega-DecisionEngine",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-",
+  "pyTemplate": "",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTemporaryObject": "",
+  "pyUsage": "initial revision",
+  "pyValueChanged": "false",
+  "pyWorkKey": "",
+  "pzChecksum": "181416984",
+  "pzIndexCount": "5",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-DECISION-",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-DECISION-",
+  "pzReindex": "true",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": "",
+        "pxSubscript": "1"
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": "",
+        "pxSubscript": "1"
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-",
+      "pxRuleFamilyName": "RULE-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pxSubscript": "1",
+      "pyRuleName": "Rule-",
+      "pzIndexes": {
+        "RuleReference": "4"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassKeys",
+      "pxSubscript": "1"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassLinks",
+      "pxSubscript": "1",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassKeys",
+      "pxSubscript": "1",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-JavaGenerator",
+      "pxSubscript": "1",
+      "pyAspect": "",
+      "pyJavaClass": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pxSubscript": "1",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxListSubscript": "1",
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pxSubscript": "1",
+      "pyRuleSetName": ""
+    }
+  ]
+}

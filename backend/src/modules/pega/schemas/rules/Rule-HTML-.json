@@ -1,0 +1,12 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-HTML-",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-",
+  "pyPatternParent": "Rule-",
+  "pyClassName": "Rule-HTML-",
+  "pyRuleName": "Rule-HTML-",
+  "pyClassType": "Abstract",
+  "pyDescription": "Base class for all HTML rule types",
+  "pxObjClass": "Rule-Obj-Class"
+}

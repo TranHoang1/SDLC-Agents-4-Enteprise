@@ -19,6 +19,7 @@ export class AuthError extends Error {
 }
 
 const SECRET_ACCESS_TOKEN = "kiroSdlc.accessToken";
+const SECRET_LAST_USERNAME = "kiroSdlc.lastUsername";
 
 export class AuthManager implements vscode.Disposable {
   private state: AuthState = "UNAUTHENTICATED";
@@ -102,6 +103,7 @@ export class AuthManager implements vscode.Disposable {
       }
       const data = await response.json() as { token: string; user: unknown; expiresAt: string };
       await this.secrets.store(SECRET_ACCESS_TOKEN, data.token);
+      await this.secrets.store(SECRET_LAST_USERNAME, username);
       this.cachedToken = data.token;
       this.tokenAcquiredAt = Date.now();
       // expiresAt is ISO string — store as epoch ms (null if backend omits it)
@@ -113,6 +115,13 @@ export class AuthManager implements vscode.Disposable {
       if (err instanceof AuthError) { throw err; }
       throw new AuthError(`Cannot reach backend: ${(err as Error).message}`);
     }
+  }
+
+  /**
+   * Get the username from the last successful login.
+   */
+  async getLastUsername(): Promise<string> {
+    return (await this.secrets.get(SECRET_LAST_USERNAME)) || "";
   }
 
   /**

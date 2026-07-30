@@ -1,0 +1,120 @@
+[
+  {
+    "test_case_id": "UT-005-activity",
+    "ruleType": "Rule-Obj-Activity",
+    "json": {
+      "pxObjClass": "Rule-Obj-Activity",
+      "pyClassName": "Work-Order",
+      "pyActivityName": "TestActivity",
+      "steps": [
+        {"pyStepNum": "1", "pyMethod": "Call", "pyMethodParameters": "Work-Order.Helper"}
+      ]
+    }
+  },
+  {
+    "test_case_id": "UT-005-dt",
+    "ruleType": "Rule-Obj-Model",
+    "json": {
+      "pxObjClass": "Rule-Obj-Model",
+      "pyClassName": "Work-Order",
+      "pyModelName": "TestDataTransform",
+      "pyActions": [
+        {"pyActionType": "Set", "pyTarget": ".pyStatus", "pySource": "New"}
+      ]
+    }
+  },
+  {
+    "test_case_id": "UT-005-flow",
+    "ruleType": "Rule-Obj-Flow",
+    "json": {
+      "pxObjClass": "Rule-Obj-Flow",
+      "pyClassName": "Work-Order",
+      "pyFlowName": "TestFlow",
+      "pyShapes": [
+        {"pyShapeType": "Start", "pyName": "Begin"},
+        {"pyShapeType": "End", "pyName": "Done"}
+      ]
+    }
+  },
+  {
+    "test_case_id": "UT-005-flowaction",
+    "ruleType": "Rule-Obj-FlowAction",
+    "json": {
+      "pxObjClass": "Rule-Obj-FlowAction",
+      "pyClassName": "Work-Order",
+      "pyRuleName": "TestFlowAction"
+    }
+  },
+  {
+    "test_case_id": "UT-005-class",
+    "ruleType": "Rule-Obj-Class",
+    "json": {
+      "pxObjClass": "Rule-Obj-Class",
+      "pyClassName": "Work-Order",
+      "pyRuleName": "Work-Order",
+      "pySuperClass": "Work-"
+    }
+  },
+  {
+    "test_case_id": "UT-005-property",
+    "ruleType": "Rule-Obj-Property",
+    "json": {
+      "pxObjClass": "Rule-Obj-Property",
+      "pyClassName": "Work-Order",
+      "pyRuleName": "pyStatus",
+      "pyPropertyType": "Text"
+    }
+  },
+  {
+    "test_case_id": "UT-005-when",
+    "ruleType": "Rule-Obj-When",
+    "json": {
+      "pxObjClass": "Rule-Obj-When",
+      "pyClassName": "Work-Order",
+      "pyRuleName": "IsHighPriority",
+      "pyWhenExpression": ".pyPriority = ""Critical"""
+    }
+  },
+  {
+    "test_case_id": "UT-005-decision",
+    "ruleType": "Rule-Declare-DecisionTable",
+    "json": {
+      "pxObjClass": "Rule-Declare-DecisionTable",
+      "pyClassName": "Work-Order",
+      "pyLabel": "PriorityDecision",
+      "pyDecisionTableRows": [
+        {"pyCondition": "pyUrgency > 80", "pyResult": "Critical"}
+      ]
+    }
+  },
+  {
+    "test_case_id": "UT-005-declare",
+    "ruleType": "Rule-Declare-Expressions",
+    "json": {
+      "pxObjClass": "Rule-Declare-Expressions",
+      "pyClassName": "Work-Order",
+      "pyRuleName": "TotalAmount",
+      "pyExpression": ".pyQuantity * .pyUnitPrice"
+    }
+  },
+  {
+    "test_case_id": "UT-005-connector",
+    "ruleType": "Rule-Connect-REST",
+    "json": {
+      "pxObjClass": "Rule-Connect-REST",
+      "pyClassName": "Work-Order",
+      "pyRuleName": "GetJiraIssue",
+      "pyBaseURL": "https://jira.example.com/rest/api/2",
+      "pyHTTPMethod": "GET"
+    }
+  },
+  {
+    "test_case_id": "UT-005-generic",
+    "ruleType": "Rule-Admin-Product",
+    "json": {
+      "pxObjClass": "Rule-Admin-Product",
+      "pyClassName": "MyApp",
+      "pyRuleName": "MyAppProduct"
+    }
+  }
+]

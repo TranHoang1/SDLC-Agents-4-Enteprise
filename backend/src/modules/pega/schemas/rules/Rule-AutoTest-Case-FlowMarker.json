@@ -1,0 +1,11 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-AutoTest-Case-FlowMarker",
+  "pyPatternParent": "Rule-AutoTest-Case",
+  "pyRuleAvailable": "Yes",
+  "pyDescription": "",
+  "pyRuleSet": "Pega-RULES",
+  "pyRuleName": "Rule-AutoTest-Case-FlowMarker",
+  "pxObjClass": "Rule-Obj-Class",
+  "pySuperClass": "Rule-AutoTest-Case",
+  "pyClassName": "Rule-AutoTest-Case-FlowMarker"
+}

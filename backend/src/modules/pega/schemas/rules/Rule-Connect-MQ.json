@@ -1,0 +1,216 @@
+{
+  "pxCreateDateTime": "20011207T162941.316 GMT",
+  "pxCreateOperator": "tandp@pegasystems.com",
+  "pxCreateOpName": "Peter Tandara-Kuhns",
+  "pxCreateSystemID": "pega",
+  "pxHostId": "785a3270955fb023a9108ea5bf3b5440",
+  "pxInsId": "RULE-CONNECT-MQ",
+  "pxInsName": "RULE-CONNECT-MQ",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "wfe",
+  "pxObjClass": "Rule-Obj-Class",
+  "pxSiblingCount": "1",
+  "pxUpdateDateTime": "20140708T072157.034 GMT",
+  "pxUpdateOperator": "konak",
+  "pxUpdateOpName": "Komali Konakanchi",
+  "pxUpdateSystemID": "sdev717",
+  "pyAdminProduct": "",
+  "pyAdminProductVersion": "",
+  "pyAllowLocking": "false",
+  "pyAllowSubClassing": "",
+  "pyApplet": "Rule-Connect-MQ",
+  "pyAppletHarness": "RuleForm",
+  "pyAspect": "",
+  "pyBaseRule": "true",
+  "pyCategory": "Integration-Connectors",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassAllowState": "",
+  "pyClassGroup": "Rule-Connect-MQ",
+  "pyClassGroupIndicator": "NOCLASSGROUP",
+  "pyClassInheritance": "true",
+  "pyClassName": "Rule-Connect-MQ",
+  "pyClassType": "Concrete",
+  "pyDateRangeRuleResolution": "false",
+  "pyDerivesFrom": "Rule-Connect-",
+  "pyDescription": "class for configuring MQSeries  clients",
+  "pyDirtyModalCon": "",
+  "pyEncryptBLOB": "false",
+  "pyExcludeFromFTIndex": "false",
+  "pyFormPost": "",
+  "pyFormType": "Harness",
+  "pyHasCustomFields": "",
+  "pyHasInstances": "true",
+  "pyHistoryObject": "",
+  "pyInitialVersion": "04-01-01",
+  "pyInterface": "",
+  "pyIsRemote": "false",
+  "pyJavaGenerator": "",
+  "pyJavaStream": "",
+  "pyJavaWrapperClassName": "",
+  "pyLabel": "Connect MQ",
+  "pyLabelOld": "Connect MQ",
+  "pyMethodStatus": "",
+  "pyMTInstanceOverrideAndVisibility": "OVERRIDE_DISABLED",
+  "pyOrgDivision": "Administration",
+  "pyPatternInheritance": "true",
+  "pyPatternParent": "Rule-Connect-",
+  "pyPreventSubClassing": "false",
+  "pyQualifiedRuleResolution": "false",
+  "pyReloadForm": "true",
+  "pyRuleAvailable": "Yes",
+  "pyRuleEnds": "",
+  "pyRuleName": "Rule-Connect-MQ",
+  "pyRuleParamsStreamName": "",
+  "pyRuleResolution": "true",
+  "pyRuleSet": "Pega-IntSvcs",
+  "pyRuleSetVersion": "",
+  "pyRuleStarts": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pyStrategicProcessName": "",
+  "pySuperClass": "Rule-Connect-",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTemporaryObject": "",
+  "pyUsage": "class for configuring MQSeries service clients",
+  "pyValueChanged": "false",
+  "pyWindowTitle": "",
+  "pyWorkKey": "",
+  "pzAdvancedConcreteRuleFormName": "",
+  "pzAdvancedRuleSet": "",
+  "pzAvailabilityNotSet": "Set Availability",
+  "pzChecksum": "346556698",
+  "pzClassInheritance": "",
+  "pzGeneralSetting": "",
+  "pzIndexCount": "37",
+  "pzInsKey": "RULE-OBJ-CLASS RULE-CONNECT-MQ",
+  "pzOriginalInstanceKey": "RULE-OBJ-CLASS RULE-CONNECT-MQ",
+  "pzRuleFormKeysAndDescription": "",
+  "pzRuleFormRuleset": "",
+  "pzRuleFormStatus": "",
+  "pzRuleFormToolbar": "",
+  "pzRuleFormToolbarDelete": "",
+  "pzRuleFormToolbarHotKeys": "",
+  "pzRuleFormToolbarSave": "",
+  "pzRuleSetVersionMajor": "-1",
+  "pzRuleSetVersionMinor": "-1",
+  "pzRuleSetVersionPatch": "-1",
+  "RuleFormSettings": "",
+  "pxAPIMethodReferences": [],
+  "pxClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": "",
+        "pxSubscript": "1"
+      }
+    ]
+  },
+  "pxInternalClassSQL": {
+    "pxObjClass": "Embed-ClassSQL",
+    "pxColumnMap": [
+      {
+        "pxColumnName": "",
+        "pxObjClass": "Embed-ColumnMapping",
+        "pxPropertyName": "",
+        "pxSubscript": "1"
+      }
+    ]
+  },
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Obj-Class",
+      "pxRuleFamilyName": "PYCATEGORY!INTEGRATION-CONNECTORS",
+      "pxRuleObjClass": "Rule-Obj-FieldValue",
+      "pyMethodStatus": "",
+      "pyRuleName": "pyCategory Integration-Connectors",
+      "pzIndexes": {
+        "RuleReference": "35"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Connect-",
+      "pxRuleFamilyName": "RULE-CONNECT-",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyMethodStatus": "",
+      "pyRuleName": "Rule-Connect-",
+      "pzIndexes": {
+        "RuleReference": "36"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyKeyDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pxSubscript": "1",
+      "pyKeyCaption": "Applies To",
+      "pyKeyName": "pyClassName"
+    },
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pxSubscript": "2",
+      "pyKeyCaption": "Service Name",
+      "pyKeyName": "pyServiceName"
+    }
+  ],
+  "pyLinks": [
+    {
+      "pxObjClass": "Embed-ClassLinks",
+      "pxSubscript": "1",
+      "pyLinkLinkToClass": "",
+      "pyLinkLinkToName": "",
+      "pyLinkMaxCount": "",
+      "pyLinkName": "",
+      "pyLinkRequired": ""
+    }
+  ],
+  "pyLockDefList": [
+    {
+      "pxObjClass": "Embed-ClassKeys",
+      "pxSubscript": "1",
+      "pyKeyCaption": "",
+      "pyKeyName": ""
+    }
+  ],
+  "pyOtherJavaGenerators": [
+    {
+      "pxObjClass": "Embed-JavaGenerator",
+      "pxSubscript": "1",
+      "pyAspect": "",
+      "pyJavaClass": "",
+      "pyPage": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pxSubscript": "1",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyValidRuleSets": [
+    {
+      "pxObjClass": "Embed-ClassRuleSets",
+      "pxSubscript": "1",
+      "pyRuleSetName": "",
+      "pyTemplateInputBox": ""
+    }
+  ]
+}

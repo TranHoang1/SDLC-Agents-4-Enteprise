@@ -272,7 +272,7 @@ execute_dynamic_tool(
 ```
 
 **Rules:**
-1. MUST use **absolute path** (e.g., `c:/projects/kiro/FEC_CR_Builder/documents/KSA-120/diagrams/use-case.drawio`)
+1. MUST use **absolute path** (e.g., `c:/projects/kiro/SDLC-Agents-4-Enterprise/documents/{TICKET}/diagrams/use-case.drawio`)
 2. Relative paths resolve to orchestrator workspace (may be WRONG workspace)
 3. Output: same directory, same name with `.png` extension
 4. Verify: `bytes_written` > 1000 in response
@@ -283,7 +283,7 @@ execute_dynamic_tool(
 {
   "tool_name": "export_drawio",
   "arguments": {
-    "file_path": "c:/projects/kiro/FEC_CR_Builder/documents/KSA-120/diagrams/architecture.drawio",
+    "file_path": "c:/projects/kiro/SDLC-Agents-4-Enterprise/documents/{TICKET}/diagrams/architecture.drawio",
     "format": "png"
   }
 }

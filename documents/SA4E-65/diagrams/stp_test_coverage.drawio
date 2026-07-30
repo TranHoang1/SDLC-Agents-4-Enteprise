@@ -1,0 +1,33 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="Test Coverage Matrix" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=#4A90D9;strokeWidth=3;fontColor=#4A90D9;fontFamily=Helvetica;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="30" width="580" height="340" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Schema Loading Tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="60" y="70" width="230" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="Inheritance Tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8A838;strokeColor=#C88A20;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="330" y="70" width="250" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="Compilation Tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A50;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="60" y="190" width="230" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="Edge Case Tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#D94A4A;strokeColor=#B83030;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="330" y="190" width="250" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="Validates 239 schema loading, JSON parsing, error handling" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#666666;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="155" width="230" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="8" value="Chain resolution, parent merging, @baseclass wildcard" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#666666;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="330" y="155" width="250" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="9" value="Strategy output, specificity ordering, interface contract" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#666666;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="275" width="230" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="10" value="Empty dirs, cycles, missing parents, invalid JSON, duplicates" style="whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#666666;fontFamily=Helvetica;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="330" y="275" width="250" height="30" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

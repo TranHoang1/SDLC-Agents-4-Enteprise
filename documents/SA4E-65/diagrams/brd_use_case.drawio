@@ -1,0 +1,45 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="2" value="SA4E-65 MetaModel Engine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#4A90D9;strokeWidth=3;fontColor=#4A90D9;fontFamily=Helvetica;fontSize=14;fontStyle=1;dashed=0;arcSize=20;" vertex="1" parent="1">
+      <mxGeometry x="30" y="80" width="400" height="340" as="geometry"/>
+    </mxCell>
+    <mxCell id="3" value="Load Schemas" style="ellipse;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="100" y="110" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="4" value="Resolve Inheritance" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E8A838;strokeColor=#C88A20;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="240" y="110" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="5" value="Compile Strategies" style="ellipse;whiteSpace=wrap;html=1;fillColor=#50B86C;strokeColor=#3A9A50;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="100" y="200" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="6" value="Register Parsers" style="ellipse;whiteSpace=wrap;html=1;fillColor=#4A90D9;strokeColor=#3570B0;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="240" y="200" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="7" value="Extend with New Schema" style="ellipse;whiteSpace=wrap;html=1;fillColor=#D94A4A;strokeColor=#B83030;fontColor=#FFFFFF;fontFamily=Helvetica;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="160" y="290" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="8" value="Developer" style="whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontColor=#333333;fontFamily=Helvetica;fontSize=13;shape=umlActor;" vertex="1" parent="1">
+      <mxGeometry x="-30" y="130" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="9" value="LLM / Agents" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;fontColor=#333333;fontFamily=Helvetica;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="-40" y="240" width="60" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="u1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;dashed=1;" edge="1" parent="1" source="8" target="3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="u2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;dashed=1;" edge="1" parent="1" source="8" target="4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="u3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;dashed=1;" edge="1" parent="1" source="8" target="5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="u4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;dashed=1;" edge="1" parent="1" source="8" target="6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="u5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=blockThin;strokeColor=#666666;strokeWidth=2;dashed=1;" edge="1" parent="1" source="9" target="7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

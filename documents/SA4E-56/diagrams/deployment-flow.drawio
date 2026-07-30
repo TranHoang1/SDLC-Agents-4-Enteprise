@@ -1,0 +1,150 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;Deployment Flow — SA4E-56: Unified Code &amp;amp; Pega Rule Indexing Pipeline&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="10" width="600" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend-auto" value="&lt;b&gt;Automated&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;" vertex="1" parent="1">
+      <mxGeometry x="870" y="60" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend-manual" value="&lt;b&gt;Manual&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="870" y="100" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend-rollback" value="&lt;b&gt;Rollback Path&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="870" y="140" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend-diamond" value="&lt;b&gt;Decision Gate&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="870" y="180" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="p1" value="&lt;b&gt;Pre-Deploy Checklist&lt;/b&gt;&#10;Code merged, tests pass,&#10;backup complete" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="90" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="&lt;b&gt;All Ready?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="310" y="85" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="rb1" value="&lt;b&gt;Rollback ➜&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="540" y="90" width="120" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="p2" value="&lt;b&gt;DB Migration&lt;/b&gt;&#10;No migration required&#10;(existing tables used)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;" vertex="1" parent="1">
+      <mxGeometry x="80" y="250" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="p3a" value="&lt;b&gt;Build Backend&lt;/b&gt;&#10;npm run build" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="410" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="p3b" value="&lt;b&gt;Build Extension&lt;/b&gt;&#10;npm run package:prod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="290" y="410" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d2" value="&lt;b&gt;Build&#10;OK?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="520" y="405" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="rb2" value="&lt;b&gt;Rollback ➜&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="740" y="410" width="120" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="p4a" value="&lt;b&gt;Deploy Backend&lt;/b&gt;&#10;Docker / npm start" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;" vertex="1" parent="1">
+      <mxGeometry x="80" y="570" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="p4b" value="&lt;b&gt;Install Extension&lt;/b&gt;&#10;code --install-extension&#10;*.vsix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="290" y="570" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d3" value="&lt;b&gt;Deploy&#10;OK?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="520" y="565" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="rb3" value="&lt;b&gt;Rollback ➜&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="740" y="570" width="120" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="p5a" value="&lt;b&gt;Health Check&lt;/b&gt;&#10;GET /health → 200" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;" vertex="1" parent="1">
+      <mxGeometry x="80" y="730" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="p5b" value="&lt;b&gt;Smoke Tests&lt;/b&gt;&#10;Index API, dedup,&#10;path safety" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="290" y="730" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d4" value="&lt;b&gt;All Pass?&lt;/b&gt;" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="520" y="725" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="rb4" value="&lt;b&gt;Rollback ➜&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="740" y="730" width="120" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="done" value="&lt;b&gt;✅ DEPLOYED&lt;/b&gt;&#10;Version 1.16.0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="80" y="880" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="env-dev" value="&lt;b&gt;DEV&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#388e3c;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="960" y="730" width="70" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="env-sit" value="&lt;b&gt;SIT&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="960" y="770" width="70" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="env-uat" value="&lt;b&gt;UAT&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="960" y="810" width="70" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="env-prod" value="&lt;b&gt;PROD&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="960" y="850" width="70" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="env-title" value="&lt;b&gt;Env Pipeline&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="950" y="690" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="env-e1" value="sequential deploy" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="995" y="760" as="sourcePoint"/>
+        <mxPoint x="995" y="770" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="env-e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="995" y="800" as="sourcePoint"/>
+        <mxPoint x="995" y="810" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="env-e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="995" y="840" as="sourcePoint"/>
+        <mxPoint x="995" y="850" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e1" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d1" target="p2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1-no" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;strokeColor=#c62828;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d1" target="rb1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="p2" target="p3a">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="p3a" target="p3b">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="p3b" target="d2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4-yes" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d2" target="p4a">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4-no" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;strokeColor=#c62828;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d2" target="rb2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="p4a" target="p4b">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="p4b" target="d3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6-yes" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d3" target="p5a">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6-no" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;strokeColor=#c62828;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d3" target="rb3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="p5a" target="p5b">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="p5b" target="d4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8-yes" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d4" target="done">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8-no" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;fontSize=10;strokeColor=#c62828;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="d4" target="rb4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

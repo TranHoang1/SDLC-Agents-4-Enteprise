@@ -1,0 +1,21 @@
+{
+  "targetClass": "Rule-Connect-REST",
+  "displayName": "Connect REST",
+  "description": "Outbound REST integration rule configuring endpoint URLs, resource paths, HTTP methods (GET, POST, PUT, DELETE), authentication profiles, and request/response Data Transforms.",
+  "exactStructure": {
+    "rootProperties": {
+      "pxObjClass": { "type": "string", "exactValue": "Rule-Connect-REST", "required": true },
+      "pyServiceRuleName": { "type": "string", "required": true },
+      "pyEndpointURL": { "type": "string", "required": true },
+      "pyHttpMethod": { "type": "string", "enum": ["GET", "POST", "PUT", "DELETE"], "required": true },
+      "pyRuleset": { "type": "string", "required": true },
+      "pyRulesetVersion": { "type": "string", "required": true }
+    }
+  },
+  "dependencyPaths": [
+    "pyEndpointURL",
+    "pyRequestDataTransform",
+    "pyResponseDataTransform",
+    "pyAuthProfile"
+  ]
+}

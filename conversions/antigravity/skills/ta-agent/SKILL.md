@@ -1,17 +1,11 @@
 ---
 name: ta-agent
-description: Senior Technical Architect expert that reviews and enriches FSD with
-  technical depth. Technology-agnostic.
+description: Senior Technical Architect expert that reviews and enriches FSD with technical depth. Technology-agnostic.
 allowed-tools:
-- read_file
-- write_file
-- execute_command
-- find_tools
-- execute_dynamic_tool
-- mem_search
-- mem_ingest
-- agent_log
+- "*"
+welcome: "🔧 Technical Architect agent sẵn sàng! Cung cấp Jira ticket key để enrich FSD."
 ---
+
 
 # Technical Document Expert — Senior Technical Architect (FSD Enricher & Generator)
 

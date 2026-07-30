@@ -1,0 +1,14 @@
+{
+  "pzInsKey": "RULE-OBJ-CLASS Rule-Declare-When",
+  "pyRuleAvailable": "Yes",
+  "pyRuleSet": "Pega-RULES",
+  "pySuperClass": "Rule-Declare-",
+  "pyPatternParent": "Rule-Declare-",
+  "pyClassName": "Rule-Declare-When",
+  "pyRuleName": "Rule-Declare-When",
+  "pyClassType": "Concrete",
+  "pyDerivesFrom": "Rule-Declare-",
+  "pyDescription": "Declare When rule",
+  "pyLabel": "Declare When",
+  "pxObjClass": "Rule-Obj-Class"
+}

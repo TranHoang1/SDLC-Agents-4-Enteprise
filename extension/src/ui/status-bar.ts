@@ -32,20 +32,20 @@ export class StatusBarManager implements vscode.Disposable {
   private update(): void {
     if (this.connectionState === "CONNECTED" && this.authState === "AUTHENTICATED") {
       this.item.text = "$(check) SDLC Agents";
-      this.item.tooltip = "Connected to backend (authenticated)";
+      this.item.tooltip = "SDLC Agents: Connected & Authenticated";
       this.item.backgroundColor = undefined;
     } else if (this.connectionState === "CONNECTED") {
-      this.item.text = "$(key) SDLC Agents";
-      this.item.tooltip = "Connected — login required";
-      this.item.backgroundColor = new vscode.ThemeColor("statusBarItem.warningBackground");
+      this.item.text = "$(check) SDLC Agents";
+      this.item.tooltip = "SDLC Agents: Connected (Local / Standby)";
+      this.item.backgroundColor = undefined;
     } else if (this.connectionState === "CONNECTING") {
       this.item.text = "$(sync~spin) SDLC Agents";
-      this.item.tooltip = "Connecting to backend...";
+      this.item.tooltip = "SDLC Agents: Connecting...";
       this.item.backgroundColor = undefined;
     } else {
-      this.item.text = "$(circle-slash) SDLC Agents";
-      this.item.tooltip = "Disconnected from backend";
-      this.item.backgroundColor = new vscode.ThemeColor("statusBarItem.errorBackground");
+      this.item.text = "$(zap) SDLC Agents";
+      this.item.tooltip = "SDLC Agents: Local Standalone Mode";
+      this.item.backgroundColor = undefined;
     }
   }
 

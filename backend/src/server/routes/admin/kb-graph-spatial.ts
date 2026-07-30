@@ -20,18 +20,20 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
     let kbCount = 0;
     let codeCount = 0;
     // SA4E-49/50: Use repository for graph_nodes counts (authoritative source).
+    let isPega = false;
     try {
       const pid = ctx.getRequestProjectId(c);
       const counts = await ctx.db.graph.getNodeCounts(pid);
       codeCount = counts.code;
       kbCount = counts.kb;
+      isPega = await ctx.db.graph.isPegaProject(pid);
     } catch { ctx.logger.warn({ context: 'kb-graph' }, 'Failed to count graph nodes'); }
     const graphService = (globalThis as Record<string, unknown>).__sqliteGraphService as { ready?: boolean; getAllPositions?: (projectId?: string) => any } | undefined;
     if (graphService && graphService.ready) {
       try {
         const result = await graphService.getAllPositions!(ctx.getRequestProjectId(c));
         if (Array.isArray(allowedTiers)) result.nodes = result.nodes.filter((n: any) => n.tier === 'CODE' || allowedTiers.includes(n.tier));
-        result.kbCount = kbCount; result.codeCount = codeCount;
+        result.kbCount = kbCount; result.codeCount = codeCount; result.isPega = isPega;
         return c.json(result);
       } catch (err: any) { ctx.logger.warn({ error: err.message }, 'getAllPositions failed'); }
     }
@@ -59,7 +61,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
         label: ((e.summary || e.tags || '').substring(0, 50)) || (e.source || '').split('/').pop() || `Entry ${i + 1}`,
       };
     });
-    return c.json({ nodes, total: nodes.length });
+    return c.json({ nodes, total: nodes.length, isPega });
   });
 
   app.get('/api/admin/kb/graph/spatial', async (c) => {
