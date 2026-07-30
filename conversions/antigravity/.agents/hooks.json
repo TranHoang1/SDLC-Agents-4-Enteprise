@@ -1,58 +1,142 @@
 {
-  "kb-lookup-drawio": {
-    "PreToolUse": [
-      {
-        "matcher": "write_to_file|create_file|edit_file",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'If writing .drawio: call mem_search(drawio procedure) first.'",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  },
-  "code-index-incremental": {
-    "PostToolUse": [
-      {
-        "matcher": "write_to_file|edit_file|create_file",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'If source file modified, run incremental indexer.'",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  },
-  "stream-user-prompt": {
-    "PreInvocation": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Log prompt via mem_ingest: type=CONTEXT, source=/chat-prompt'",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  },
-  "stream-agent-response": {
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo 'Log response via mem_ingest: type=CONTEXT, source=chat-response'",
-            "timeout": 5
-          }
-        ]
-      }
-    ]
-  }
+    "check-drawio-layout":  {
+                                "PreInvocation":  [
+                                                      {
+                                                          "hooks":  [
+                                                                        {
+                                                                            "timeout":  10,
+                                                                            "prompt":  "You just created/modified a .drawio file. MANDATORY: Call drawio_auto_layout(file_path=\u0026quot;{filePath}\u0026quot;) to check for overlapping nodes and edge crossings. If issues found, fix them using waypoints on edges (not by restructuring layout). Then export to PNG using export_drawio tool with absolute path.",
+                                                                            "type":  "prompt"
+                                                                        }
+                                                                    ],
+                                                          "matcher":  "*"
+                                                      }
+                                                  ]
+                            },
+    "drawio-kb-lookup":  {
+                             "PreToolUse":  [
+                                                {
+                                                    "hooks":  [
+                                                                  {
+                                                                      "timeout":  10,
+                                                                      "prompt":  "BEFORE writing any .drawio file, you MUST first call mem_search(\"drawio procedure\", detail=true) to retrieve the correct draw.io patterns from KB. Apply the styles, colors, edge routing rules, and naming conventions from KB results. If the file being written is NOT a .drawio file, ignore this instruction and proceed normally.",
+                                                                      "type":  "prompt"
+                                                                  }
+                                                              ],
+                                                    "matcher":  "*"
+                                                }
+                                            ]
+                         },
+    "kb-search-first":  {
+                            "PreInvocation":  [
+                                                  {
+                                                      "hooks":  [
+                                                                    {
+                                                                        "timeout":  10,
+                                                                        "prompt":  "BEFORE responding to the user\u0027s message, you MUST first call mem_search with a query relevant to the user\u0027s request (extract key topic/ticket/concept from their message). Use the KB results to inform your response. If the user mentions a ticket key (e.g. SA4E-xx), search for that ticket\u0027s documents. If the user asks about a concept, search for related decisions/patterns. Only AFTER reviewing KB results should you proceed with your response. If KB returns nothing relevant, proceed normally.",
+                                                                        "type":  "prompt"
+                                                                    }
+                                                                ],
+                                                      "matcher":  "*"
+                                                  }
+                                              ]
+                        },
+    "run-log-reminder":  {
+                             "Stop":  [
+                                          {
+                                              "hooks":  [
+                                                            {
+                                                                "timeout":  10,
+                                                                "prompt":  "Check: if you just completed work on a Jira ticket (SA4E-xx pattern), verify that documents/{TICKET}/RUN-LOG.md exists and has an entry for this action. If missing, create or append it now. Format: | # | Timestamp | Agent | Phase | Action | Result | Tokens | Duration |",
+                                                                "type":  "prompt"
+                                                            }
+                                                        ],
+                                              "matcher":  "*"
+                                          }
+                                      ]
+                         },
+    "stream-agent-response":  {
+                                  "Stop":  [
+                                               {
+                                                   "hooks":  [
+                                                                 {
+                                                                     "timeout":  10,
+                                                                     "prompt":  "Agent just finished responding. Use the mem_ingest MCP tool to log a 1-sentence summary (max 150 chars) of what you just did. Parameters: content=\u003csummary\u003e, type=CONTEXT, source=chat-response, tags=chat,stream,agent. Do NOT add commentary.",
+                                                                     "type":  "prompt"
+                                                                 }
+                                                             ],
+                                                   "matcher":  "*"
+                                               }
+                                           ]
+                              },
+    "stream-user-prompt":  {
+                               "PreInvocation":  [
+                                                     {
+                                                         "hooks":  [
+                                                                       {
+                                                                           "timeout":  10,
+                                                                           "prompt":  "A user prompt was submitted. Use the mem_ingest MCP tool to log a summary of the user message (max 200 chars). Parameters: content=\u003cuser message summarized\u003e, type=CONTEXT, source=/chat-prompt, tags=chat,stream,user. Do NOT add commentary.",
+                                                                           "type":  "prompt"
+                                                                       }
+                                                                   ],
+                                                         "matcher":  "*"
+                                                     }
+                                                 ]
+                           },
+    "validate-drawio-docs":  {
+                                 "PreInvocation":  [
+                                                       {
+                                                           "hooks":  [
+                                                                         {
+                                                                             "timeout":  10,
+                                                                             "prompt":  "IMPORTANT RULE: All diagrams in documents/ MUST use draw.io format. Check if the file you just edited contains any ```mermaid code blocks or inline ```xml diagram blocks. If found, you MUST: 1) Create a proper .drawio file in the diagrams/ subfolder, 2) Export it to .png using export_drawio tool, 3) Replace the mermaid/xml block with ![alt](diagrams/filename.png) + *[Edit in draw.io](diagrams/filename.drawio)* reference. NEVER leave mermaid or inline XML diagrams in document files.",
+                                                                             "type":  "prompt"
+                                                                         }
+                                                                     ],
+                                                           "matcher":  "*"
+                                                       }
+                                                   ]
+                             },
+    "validate-drawio-edit":  {
+                                 "PreInvocation":  [
+                                                       {
+                                                           "hooks":  [
+                                                                         {
+                                                                             "timeout":  10,
+                                                                             "prompt":  "A .drawio file was just edited. Validate it for common errors:\n\n1. **Self-call 3-waypoint bug**: Search for edges with sourcePoint and targetPoint at same X (self-calls) that have 3 mxPoint elements inside Array. The 3rd point going back to lifeline is WRONG. Fix: remove 3rd waypoint, set targetPoint X = sourcePoint X, targetPoint Y = 2nd waypoint Y.\n\n2. **Self-closing edges**: Any `edge=\"1\"` cell ending with `/\u003e` (no mxGeometry child). Fix: add child element.\n\n3. **mxfile wrapper**: File starts with `\u003cmxfile\u003e`. Fix: strip wrapper, keep bare `\u003cmxGraphModel\u003e`.\n\nIf ANY issue found: fix immediately, then re-export PNG.\nIf no issues: do nothing silently.",
+                                                                             "type":  "prompt"
+                                                                         }
+                                                                     ],
+                                                           "matcher":  "*"
+                                                       }
+                                                   ]
+                             },
+    "validate-drawio-xml":  {
+                                "PreInvocation":  [
+                                                      {
+                                                          "hooks":  [
+                                                                        {
+                                                                            "timeout":  10,
+                                                                            "prompt":  "A .drawio file was just created. Validate it for common errors:\n\n1. **Self-call 3-waypoint bug**: Search for edges where source and target are the same (or sourcePoint.x == targetPoint.x for self-calls) that have 3 mxPoint elements inside Array. Fix: remove the 3rd waypoint, set targetPoint to lifeline position (same X as sourcePoint, Y = 2nd waypoint Y).\n\n2. **Self-closing edges**: Search for `edge=\"1\"` cells that are self-closing (end with `/\u003e` without mxGeometry child). Fix: add `\u003cmxGeometry relative=\"1\" as=\"geometry\"/\u003e` child.\n\n3. **mxfile wrapper**: Check if file starts with `\u003cmxfile\u003e` instead of `\u003cmxGraphModel\u003e`. Fix: strip the wrapper.\n\n4. **Alt box without arrow**: If there\u0027s a rectangle with \"alt\" in its value but no edge cell with sourcePoint/targetPoint within the alt box bounds, add a dashed return arrow.\n\nIf ANY issue is found: fix the .drawio file immediately, then re-export to PNG using: \u0026 \"C:\\Program Files\\draw.io\\draw.io.exe\" -x -f png -b 10 -o \"{same-path}.png\" \"{file-path}\"\n\nIf no issues found: do nothing (don\u0027t report).",
+                                                                            "type":  "prompt"
+                                                                        }
+                                                                    ],
+                                                          "matcher":  "*"
+                                                      }
+                                                  ]
+                            },
+    "version-sync-check":  {
+                               "PreInvocation":  [
+                                                     {
+                                                         "hooks":  [
+                                                                       {
+                                                                           "timeout":  10,
+                                                                           "prompt":  "A package.json was edited. Check if the version field changed. If yes, grep all README.md files for version badges (pattern: version-X.Y.Z-blue) and verify they match the new version in package.json. If ANY mismatch found, fix the badges immediately. Files to check: README.md, extension/README.md, backend/README.md.",
+                                                                           "type":  "prompt"
+                                                                       }
+                                                                   ],
+                                                         "matcher":  "*"
+                                                     }
+                                                 ]
+                           }
 }

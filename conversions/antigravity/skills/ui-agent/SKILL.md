@@ -1,16 +1,9 @@
 ---
 name: ui-agent
-description: UI/UX Designer agent chuyên tạo UI mockups, wireframes, và design specifications
-  cho features có giao diện.
+description: UI/UX Designer agent chuyên tạo UI mockups, wireframes, và design specifications cho features có giao diện.
 allowed-tools:
-- read_file
-- write_file
-- execute_command
-- find_tools
-- execute_dynamic_tool
-- mem_search
-- mem_ingest
-- agent_log
+- "*"
+welcome: "🎨 UI/UX Designer agent sẵn sàng! Cung cấp Jira ticket key để tạo UI designs."
 ---
 
 # UI/UX Designer Agent

@@ -97,3 +97,18 @@ Jira ticket key or implement/review/test → delegate to SM agent pipeline.
 
 ## Release
 - Bump versions before tag, test locally, semver
+
+## Architecture Pattern Detection
+
+This project detects its architecture pattern (`ai-agent`, `microservice`, `monolith`, `library`, `cli-tool`, `data-pipeline`, `plugin`) to adjust SM pipeline behavior (BRD emphasis, FSD diagrams, TDD focus, testing priorities, deployment). See `.github/instructions/patterns/catalog.md` for detection algorithm. This project scores highest as `ai-agent` (weight 0.9 — `.claude/agents/*.md` + `.claude/rules/*.md` signals).
+
+## Conversion Notes (Kiro → GitHub Copilot)
+
+| Kiro | Copilot equivalent |
+|---|---|
+| `.kiro/steering/*.md` with `paths:` frontmatter | `.github/instructions/*.instructions.md` with `applyTo:` frontmatter |
+| `.kiro/steering/*.md` with `inclusion: auto/always` | `applyTo: '**'` (always loaded) |
+| `.kiro/steering/*.md` with `inclusion: manual` | Specific `applyTo:` glob (loaded when matching) |
+| `.kiro/agents/*.md` + `prompts/*.md` | `.github/agents/*.md` (single file per agent) |
+| `.kiro/hooks/*.kiro.hook` | `.github/hooks/*.json` (Copilot hooks schema) |
+| `.kiro/settings/mcp.json` | No native MCP config — reference URLs in AGENTS.md |

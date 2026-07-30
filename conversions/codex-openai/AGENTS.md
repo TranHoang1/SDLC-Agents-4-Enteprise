@@ -110,6 +110,26 @@ After each sub-agent completes:
 - Never auto-merge to main/master
 - Never force push
 
+## Detailed Instructions (Steering Rules)
+
+See `instructions/` subdirectory for detailed rules converted from `.kiro/steering/`:
+
+- `instructions/agent-self-learning.md` — KB search + tool discovery
+- `instructions/file-writing-standards.md` — Large file chunking + DOCX export
+- `instructions/code-intelligence.md` — Code/document indexing
+- `instructions/jira-rules.md` — Jira transitions + attachments
+- `instructions/manual-web-test.md` — Web testing procedure
+- `instructions/mcp-fallback-http.md` — HTTP fallback when MCP disabled
+- `instructions/no-workaround-rule.md` — Fix root cause, no hacks
+- `instructions/release-versioning.md` — Version bump + tag process
+- `instructions/role-boundaries.md` — Agent responsibility matrix
+- `instructions/shared-quality-gates.md` — Post-phase verification checklists
+- `instructions/tool-usage-dynamic.md` — Dynamic tool execution pattern
+
+## Architecture Pattern Detection
+
+See `instructions/patterns/` for architecture pattern catalog (ai-agent, microservice, monolith, library, cli-tool, data-pipeline, plugin). The `catalog.md` defines the detection algorithm; this project scores highest as `ai-agent` (0.9 weight).
+
 ## MCP Configuration
 
 See `codex-config.md` for MCP server setup instructions.
