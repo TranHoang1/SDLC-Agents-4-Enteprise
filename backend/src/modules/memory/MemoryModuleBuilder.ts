@@ -105,6 +105,12 @@ export class MemoryModuleBuilder {
     const engine = injectd.engine ?? new MemoryEngine(this.memAdapter!);
     await engine.startSession(this.config.sessionName);
     this.mod.setEngine(engine);
+    // Backfill existing knowledge_entries into graph_nodes (non-blocking)
+    engine.syncExistingEntriesToGraph().then(n => {
+      this.logger.info({ count: n }, '[MemoryModuleBuilder] Backfilled KB entries into graph_nodes');
+    }).catch((err: unknown) => {
+      this.logger.warn({ err }, '[MemoryModuleBuilder] Backfill KB → graph skipped');
+    });
     return this;
   }
 

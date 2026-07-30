@@ -20,6 +20,56 @@ import { PegaRuleAstParser } from './PegaRuleAstParser.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+function extractTagValueCsv(tags: string, key: string): string | null {
+  for (const tag of tags.split(',')) {
+    const trimmed = tag.trim();
+    if (trimmed.startsWith(key + ':')) return trimmed.slice(key.length + 1);
+  }
+  return null;
+}
+
+type CategoryRule = { keywords: string[]; category: string };
+
+const CATEGORY_RULES_PATH = path.resolve(__dirname, '../../../.code-intel/pega-categories.json');
+
+function loadCategoryRules(): CategoryRule[] {
+  try {
+    if (fs.existsSync(CATEGORY_RULES_PATH)) {
+      const raw = JSON.parse(fs.readFileSync(CATEGORY_RULES_PATH, 'utf-8'));
+      if (Array.isArray(raw.rules) && raw.rules.length > 0) return raw.rules;
+    }
+  } catch { /* ignore */ }
+  return [];
+}
+
+function autoCategory(shortName: string): string {
+  const segment = shortName.replace(/^Rule-Obj-/i, '').split('-')[0];
+  if (!segment) return 'OTHER';
+  const normalized = segment
+    .replace(/([A-Z])/g, '_$1')
+    .replace(/^_/, '')
+    .toUpperCase();
+  return normalized;
+}
+
+let _categoryRules: CategoryRule[] | null = null;
+function getCategoryRules(): CategoryRule[] {
+  if (_categoryRules === null) _categoryRules = loadCategoryRules();
+  return _categoryRules;
+}
+
+function pxObjClassToGraphType(pxObjClass: string): string {
+  // 1. Try config rules
+  const rules = getCategoryRules();
+  for (const rule of rules) {
+    for (const kw of rule.keywords) {
+      if (pxObjClass.includes(kw)) return rule.category;
+    }
+  }
+  // 2. Auto: extract first segment after Rule-Obj-
+  return autoCategory(pxObjClass);
+}
+
 export class PegaService {
   private parser: PegaParser;
   private declarativeEngine: PegaDeclarativeEngine;
@@ -75,6 +125,27 @@ export class PegaService {
     });
   }
 
+  public async checkRuleWithChecksum(
+    projectId: string,
+    source: string,
+    checksum?: string,
+  ): Promise<{ exists: boolean; checksumMatch: boolean }> {
+    const adapter = this.memoryEngine.getAdapter();
+    const row = await adapter.getAsync<{ content: string; tags: string }>(
+      "SELECT content, tags FROM knowledge_entries WHERE project_id = $1 AND source = $2 AND (type = 'PEGA_RULE' OR type = 'PEGA_DATA') LIMIT 1",
+      [projectId, source],
+    );
+    if (!row) return { exists: false, checksumMatch: false };
+    if (!checksum) return { exists: true, checksumMatch: false };
+    // Check __checksum in content JSON (new format), fallback to tags (legacy)
+    try {
+      const parsed = JSON.parse(row.content);
+      if (parsed.__checksum) return { exists: true, checksumMatch: parsed.__checksum === checksum };
+    } catch { /* not JSON or no __checksum field */ }
+    const dbChecksum = extractTagValueCsv(row.tags, 'checksum');
+    return { exists: true, checksumMatch: dbChecksum === checksum };
+  }
+
   public async checkRule(req: PegaCheckRuleRequest): Promise<PegaCheckRuleResponse> {
     const fqn = `${req.ruleType}:${req.className}:${req.ruleName}`;
     const adapter = this.memoryEngine.getAdapter();
@@ -86,6 +157,14 @@ export class PegaService {
     let content = {};
     try { content = JSON.parse(row.content); } catch { content = {}; }
     return { cached: true, ruleId: row.id, updatedAt: row.updated_at, content };
+  }
+
+  public parseRuleToSymbol(ruleJson: Record<string, unknown>): { fqn: string; isRule: boolean } | null {
+    try {
+      return this.parser.parseSymbol(ruleJson);
+    } catch {
+      return null;
+    }
   }
 
   public getAstParser(): PegaRuleAstParser {
@@ -101,9 +180,43 @@ export class PegaService {
     return this.astParser.toPromptContext(ast);
   }
 
+  public async reclassifyExistingGraphNodes(): Promise<number> {
+    const adapter = this.memoryEngine.getAdapter();
+    const rows = await adapter.allAsync<{ source: string; content: string }>(
+      `SELECT source, content FROM knowledge_entries
+       WHERE type = 'PEGA_RULE' AND source IN (
+         SELECT REPLACE(entry_id, 'pega:', '') FROM graph_nodes
+         WHERE entry_id LIKE 'pega:%' AND type = 'CODE_ENTITY'
+       )`,
+    );
+    let count = 0;
+    for (const row of rows) {
+      try {
+        const json = JSON.parse(row.content) as Record<string, unknown>;
+        const pxObjClass = (json as any)?.pxObjClass || '';
+        const graphType = pxObjClassToGraphType(pxObjClass);
+        if (row.source) {
+          await adapter.runAsync(
+            `UPDATE graph_nodes SET type = ? WHERE entry_id = ?`,
+            [graphType, `pega:${row.source}`],
+          );
+          count++;
+        }
+      } catch { /* skip */ }
+    }
+    return count;
+  }
+
   public async ingestRule(req: PegaIngestRuleRequest): Promise<PegaIngestRuleResponse> {
     const symbol = this.parser.parseSymbol(req.ruleJson);
     const deps = this.parser.extractDependencies(req.ruleJson);
+
+    if (req.checksum) {
+      const { exists, checksumMatch } = await this.checkRuleWithChecksum(req.projectId, symbol.fqn, req.checksum);
+      if (exists && checksumMatch) {
+        return { status: 'success', ruleId: -1, unresolvedDependencies: deps };
+      }
+    }
 
     // Auto-register Declare Expressions into Declarative Engine
     const pxObjClass = (req.ruleJson as any)?.pxObjClass || '';
@@ -124,12 +237,14 @@ export class PegaService {
     const summaryText = symbol.logicSummary
       ? `${symbol.fqn}\n${symbol.logicSummary}`
       : `${symbol.isRule ? 'Rule' : 'Data'}: ${symbol.fqn}`;
+    // Tags: only meaningful categories — checksum/version stored in content, not as tags
+    const baseTags = symbol.isRule ? 'pega,rule' : 'pega,data';
     const id = await this.memoryEngine.insert({
-      content: JSON.stringify(req.ruleJson),
+      content: JSON.stringify({ ...req.ruleJson, __checksum: req.checksum, __version: req.version }),
       summary: summaryText,
       type: symbol.isRule ? 'PEGA_RULE' : 'PEGA_DATA',
       tier: 'SEMANTIC', scope: 'PROJECT', project_id: req.projectId,
-      source: symbol.fqn, tags: symbol.isRule ? 'pega,rule' : 'pega,data',
+      source: symbol.fqn, tags: baseTags,
     });
 
     // Index AST as a separate knowledge entry for LLM querying
@@ -147,6 +262,7 @@ export class PegaService {
     });
 
     // Project into graph_nodes for KB Graph visualization
+    const graphType = pxObjClassToGraphType(pxObjClass);
     try {
       const graphNodeId = `pega:${symbol.fqn}`;
       const engine = adapter.getEngine();
@@ -155,13 +271,13 @@ export class PegaService {
           `INSERT INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
            ON CONFLICT (entry_id) DO UPDATE SET label = EXCLUDED.label, type = EXCLUDED.type`,
-          [graphNodeId, symbol.fqn, 'CODE_ENTITY', 'SEMANTIC', req.projectId, Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 0, 'pega-cluster']
+          [graphNodeId, symbol.fqn, graphType, 'SEMANTIC', req.projectId, Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 0, 'pega-cluster']
         );
       } else {
         await adapter.runAsync(
           `INSERT OR REPLACE INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [graphNodeId, symbol.fqn, 'CODE_ENTITY', 'SEMANTIC', req.projectId, Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 0, 'pega-cluster']
+          [graphNodeId, symbol.fqn, graphType, 'SEMANTIC', req.projectId, Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 0, 'pega-cluster']
         );
       }
     } catch { /* non-fatal graph projection */ }

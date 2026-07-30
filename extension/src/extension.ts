@@ -32,6 +32,7 @@ let statusBarManager: StatusBarManager | undefined;
 /** Project ID for multi-tenant isolation — derived from git remote or user+folder hash. */
 let _projectId = "default";
 export function getProjectId(): string { return _projectId; }
+export function setProjectId(id: string): void { _projectId = id; }
 
 export async function activate(context: vscode.ExtensionContext) {
   const statusBar = createStatusBar();
@@ -64,16 +65,18 @@ export function deactivate() {
  * Priority: .code-intel/project.json -> git remote hash -> user+folder hash.
  * SRP: Extracted from initializeWorkspace to keep the main function focused.
  */
-async function deriveProjectId(workspaceRoot: string): Promise<string> {
+export async function deriveProjectId(workspaceRoot: string): Promise<string> {
   const pathModule = await import("path");
   const fs = await import("fs");
   const crypto = await import("crypto");
   const os = await import("os");
   const cp = await import("child_process");
 
+  const codeIntelDir = pathModule.resolve(workspaceRoot, ".code-intel");
+  const pjPath = pathModule.resolve(codeIntelDir, "project.json");
+
   // 1. Explicit config
   try {
-    const pjPath = pathModule.resolve(workspaceRoot, ".code-intel", "project.json");
     if (fs.existsSync(pjPath)) {
       const pj = JSON.parse(fs.readFileSync(pjPath, "utf-8"));
       if (pj.projectId) { return pj.projectId as string; }
@@ -81,18 +84,32 @@ async function deriveProjectId(workspaceRoot: string): Promise<string> {
   } catch (err) {
     console.warn(`[Kiro] Could not read .code-intel/project.json: ${(err as Error).message}`);
   }
+
   // 2. Git remote hash
+  let projectId: string;
   try {
     const remote = cp.execSync("git remote get-url origin", { cwd: workspaceRoot, encoding: "utf-8", timeout: 3000 }).trim();
-    if (remote) { return crypto.createHash("sha256").update(remote).digest("hex").slice(0, 12); }
-  } catch (err) {
-    console.debug(`[extension] git remote lookup failed (non-fatal): ${(err as Error).message}`);
-    /* no git remote - use user+folder hash */
+    if (remote) { projectId = crypto.createHash("sha256").update(remote).digest("hex").slice(0, 12); }
+    else { projectId = ""; }
+  } catch {
+    projectId = "";
   }
   // 3. User + folder hash (always succeeds)
-  const userId = os.userInfo().username || "unknown";
-  const folderName = pathModule.basename(workspaceRoot) || "default";
-  return crypto.createHash("sha256").update(`${userId}:${folderName}`).digest("hex").slice(0, 12);
+  if (!projectId) {
+    const userId = os.userInfo().username || "unknown";
+    const folderName = pathModule.basename(workspaceRoot) || "default";
+    projectId = crypto.createHash("sha256").update(`${userId}:${folderName}`).digest("hex").slice(0, 12);
+  }
+
+  // Persist derived project ID for stability across reloads
+  try {
+    if (!fs.existsSync(codeIntelDir)) { fs.mkdirSync(codeIntelDir, { recursive: true }); }
+    fs.writeFileSync(pjPath, JSON.stringify({ projectId }, null, 2), "utf-8");
+  } catch (err) {
+    console.warn(`[Kiro] Could not write .code-intel/project.json: ${(err as Error).message}`);
+  }
+
+  return projectId;
 }
 
 async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRoot: string, statusBar: vscode.StatusBarItem): Promise<void> {

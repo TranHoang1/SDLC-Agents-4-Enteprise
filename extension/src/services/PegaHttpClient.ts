@@ -3,7 +3,9 @@
  */
 
 import * as vscode from "vscode";
+import { createHash } from "crypto";
 import { SECRET_KEYS } from "../models";
+import { setProjectId } from "../extension";
 
 export interface PegaOperatorContext {
   operatorId: string;
@@ -570,6 +572,7 @@ export class PegaHttpClient {
     projectId: string;
     ruleKeys: string[];
     visitedKeys: string[];
+    ruleChecksums?: Record<string, string>;
   }): Promise<{ missing: Array<{ insKey: string; pxObjClass: string; pyClassName: string; pyRuleName: string }>; cached: string[] }> {
     const endpoint = `${this.getBackendUrl()}/api/v1/pega/crawl-plan`;
     const res = await fetch(endpoint, {
@@ -586,6 +589,8 @@ export class PegaHttpClient {
     projectId: string;
     rules: Record<string, unknown>[];
     visitedKeys: string[];
+    rulesChecksums?: Record<string, string>;
+    rulesVersions?: Record<string, string>;
   }): Promise<{ stored: number; totalRulesInDb?: number; totalKbEntriesInDb?: number; totalGraphNodesInDb?: number; nextBatch: Array<{ insKey: string; pxObjClass: string; pyClassName: string; pyRuleName: string }> }> {
     const endpoint = `${this.getBackendUrl()}/api/v1/pega/crawl-batch`;
     const res = await fetch(endpoint, {
@@ -730,6 +735,15 @@ export class PegaHttpClient {
 
     await vscode.workspace.fs.writeFile(jsonPath, Buffer.from(JSON.stringify(projectData, null, 2), "utf-8"));
     await vscode.workspace.fs.writeFile(xmlPath, Buffer.from(xmlContent, "utf-8"));
+
+    // Derive and persist project ID from Pega application name
+    const codeIntelDir = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), ".code-intel");
+    await vscode.workspace.fs.createDirectory(codeIntelDir);
+    const pjPath = vscode.Uri.joinPath(codeIntelDir, "project.json");
+    const projectId = createHash("sha256").update("pega:" + applicationName).digest("hex").slice(0, 12);
+    await vscode.workspace.fs.writeFile(pjPath, Buffer.from(JSON.stringify({ projectId }, null, 2), "utf-8"));
+    // Update extension runtime project_id immediately
+    setProjectId(projectId);
 
     return {
       applicationName,

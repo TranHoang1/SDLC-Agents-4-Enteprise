@@ -204,7 +204,7 @@ export class PegaMcpTools {
     const pageSize = (args.pageSize as number) || 50;
     const pageIndex = (args.pageIndex as number) || 1;
     try {
-      const data = await this.client.listApplicationRules(pxObjClass, pageSize, pageIndex);
+      const data = await this.client.listApplicationRules(pxObjClass, "", pageSize, pageIndex);
       return { success: true, data };
     } catch (err: any) {
       return { success: false, error: err.message };

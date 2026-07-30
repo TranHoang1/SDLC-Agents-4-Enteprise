@@ -6,26 +6,38 @@
 import type { DatabaseAdapter } from '../adapters/DatabaseAdapter.js';
 import type { IGraphRepository } from './interfaces.js';
 import type { GraphNodeCounts, UpsertNodeParams } from './types.js';
-import { CODE_TYPES_SQL } from '../constants.js';
 import { translateError } from '../errors/index.js';
+
+const CODE_ENTRY_PREFIXES = ["'code:%'", "'pega:%'"];
 
 export class GraphRepository implements IGraphRepository {
   constructor(private readonly adapter: DatabaseAdapter) {}
 
   async getNodeCounts(projectId: string): Promise<GraphNodeCounts> {
     try {
+      const prefixes = CODE_ENTRY_PREFIXES.map(p => `entry_id LIKE ${p}`).join(' OR ');
       let total = await this.countByWhere('project_id = $1', [projectId]);
-      let code = await this.countCodeByWhere('project_id = $1', [projectId]);
+      let code = await this.countByWhere(`project_id = $1 AND (${prefixes})`, [projectId]);
 
       if (total === 0) {
         total = await this.countByWhere('project_id = $1 OR project_id IS NULL', [projectId]);
-        code = await this.countCodeByWhere('(project_id = $1 OR project_id IS NULL)', [projectId]);
+        code = await this.countByWhere(`(project_id = $1 OR project_id IS NULL) AND (${prefixes})`, [projectId]);
       }
 
       return { total, code, kb: total - code };
     } catch (err) {
       throw translateError(err);
     }
+  }
+
+  async isPegaProject(projectId: string): Promise<boolean> {
+    try {
+      const row = await this.adapter.getAsync<{ cnt: number }>(
+        "SELECT COUNT(*) as cnt FROM graph_nodes WHERE project_id = ? AND entry_id LIKE 'pega:%'",
+        [projectId],
+      );
+      return (row?.cnt ?? 0) > 0;
+    } catch { return false; }
   }
 
   async resetGraph(): Promise<void> {
@@ -96,14 +108,6 @@ export class GraphRepository implements IGraphRepository {
   private async countByWhere(where: string, params: unknown[]): Promise<number> {
     const row = await this.adapter.getAsync<{ cnt: number }>(
       `SELECT COUNT(*) as cnt FROM graph_nodes WHERE ${where}`, params,
-    );
-    return row?.cnt ?? 0;
-  }
-
-  private async countCodeByWhere(where: string, params: unknown[]): Promise<number> {
-    const row = await this.adapter.getAsync<{ cnt: number }>(
-      `SELECT COUNT(*) as cnt FROM graph_nodes WHERE ${where} AND type IN (${CODE_TYPES_SQL})`,
-      params,
     );
     return row?.cnt ?? 0;
   }

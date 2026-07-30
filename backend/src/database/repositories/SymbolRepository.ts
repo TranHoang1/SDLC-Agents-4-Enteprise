@@ -12,11 +12,16 @@ import { translateError } from '../errors/index.js';
 export class SymbolRepository implements ISymbolRepository {
   constructor(private readonly adapter: DatabaseAdapter) {}
 
-  async getSymbolCount(): Promise<number> {
+  async getSymbolCount(projectId?: string): Promise<number> {
     try {
-      const row = await this.adapter.getAsync<{ cnt: number }>(
-        `SELECT COUNT(*) as cnt FROM symbols WHERE kind IN (${SYMBOL_KINDS_SQL})`,
-      );
+      const row = projectId
+        ? await this.adapter.getAsync<{ cnt: number }>(
+            `SELECT COUNT(*) as cnt FROM symbols WHERE project_id = $1 AND kind IN (${SYMBOL_KINDS_SQL})`,
+            [projectId],
+          )
+        : await this.adapter.getAsync<{ cnt: number }>(
+            `SELECT COUNT(*) as cnt FROM symbols WHERE kind IN (${SYMBOL_KINDS_SQL})`,
+          );
       return row?.cnt ?? 0;
     } catch (err) {
       throw translateError(err);

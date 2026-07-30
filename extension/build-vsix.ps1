@@ -9,7 +9,7 @@ $pkg = Get-Content "$extDir\package.json" | ConvertFrom-Json
 $version = $pkg.version
 $name = $pkg.name
 $publisher = $pkg.publisher
-$vsixName = "$publisher.$name-$version.vsix"
+$vsixName = "$name-$version.vsix"
 $vsixPath = Join-Path $extDir $vsixName
 
 Write-Host "Building $vsixName..."

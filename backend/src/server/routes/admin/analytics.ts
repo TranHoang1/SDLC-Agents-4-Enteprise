@@ -13,6 +13,7 @@ import {
 } from '../../../admin/admin-db.js';
 import { formatUptime, formatBytes } from './utils.js';
 import type { AdminContext } from './context.js';
+import { getIndexAdapter } from '../../../admin/db/core.js';
 
 export function createAnalyticsRoutes(ctx: AdminContext): Hono {
   const app = new Hono();
@@ -37,17 +38,26 @@ export function createAnalyticsRoutes(ctx: AdminContext): Hono {
     if (Array.isArray(allowedTiers) && kbPerm.has) {
       const allEntries = await getKbEntries(1, 100000, 'created_at', 'desc', currentProjectId, user.userId);
       kbEntries = allEntries.items.filter((e: any) => { const t = e.tier || e.scope || 'SHARED'; return allowedTiers.includes(t); }).length;
-    } else kbEntries = await getKbEntryCount(currentProjectId, user.userId);
+    } else kbEntries = Number(await getKbEntryCount(currentProjectId, user.userId));
     const uptimeMs = Date.now() - ctx.SERVER_START_TIME;
     const mem = process.memoryUsage();
     const recentActivity = await getRecentActivity(10);
     let codeSymbols = 0;
-    try { codeSymbols = await ctx.db.symbol.getSymbolCount(); }
+    try { codeSymbols = Number(await ctx.db.symbol.getSymbolCount(currentProjectId)); }
     catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to read code symbols count from index.db'); }
+    // Include Pega rules as code symbols (Pega rules ARE code)
+    try {
+      const adapter = getIndexAdapter();
+      const row = await adapter.getAsync<{ cnt: number }>(
+        `SELECT COUNT(DISTINCT source) as cnt FROM knowledge_entries WHERE project_id = ? AND type IN ('PEGA_RULE', 'PEGA_DATA')`,
+        [currentProjectId],
+      );
+      codeSymbols += Number(row?.cnt ?? 0);
+    } catch { ctx.logger.debug({ context: 'dashboard' }, 'Failed to count Pega rules as code symbols'); }
     let graphTotalNodes = 0, graphKbNodes = 0, graphCodeNodes = 0;
     try {
       const counts = await ctx.db.graph.getNodeCounts(currentProjectId);
-      graphTotalNodes = counts.total; graphCodeNodes = counts.code; graphKbNodes = counts.kb;
+      graphTotalNodes = Number(counts.total); graphCodeNodes = Number(counts.code); graphKbNodes = Number(counts.kb);
     } catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to query graph node counts from database'); }
     return c.json({
       kbEntries, codeSymbols,

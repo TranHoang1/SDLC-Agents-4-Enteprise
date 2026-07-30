@@ -37,6 +37,8 @@ export interface PegaIngestRuleRequest {
   projectId: string;
   ruleJson: Record<string, unknown>;
   rulesetStack?: RulesetVersion[];
+  checksum?: string;
+  version?: string;
 }
 
 export interface PegaIngestRuleResponse {
@@ -57,6 +59,7 @@ export interface PegaCrawlPlanRequest {
   projectId: string;
   ruleKeys: string[];
   visitedKeys?: string[];
+  ruleChecksums?: Record<string, string>;
 }
 
 export interface PegaCrawlPlanResponse {
@@ -68,6 +71,8 @@ export interface PegaCrawlBatchRequest {
   projectId: string;
   rules: Record<string, unknown>[];
   visitedKeys: string[];
+  rulesChecksums?: Record<string, string>;
+  rulesVersions?: Record<string, string>;
 }
 
 export interface PegaCrawlBatchResponse {

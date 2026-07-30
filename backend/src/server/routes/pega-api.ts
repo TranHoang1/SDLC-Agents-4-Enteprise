@@ -10,6 +10,7 @@ import type {
   PegaIngestRuleRequest,
   PegaCrawlPlanRequest,
   PegaCrawlBatchRequest,
+  PegaCrawlKey,
   PegaDetectProjectRequest,
 } from '../../modules/pega/models.js';
 import { PegaService } from '../../modules/pega/PegaService.js';
@@ -33,13 +34,30 @@ import { PegaHarnessAssembler } from '../../modules/pega/ui/PegaHarnessAssembler
 import type { PegaDecisionTableRow, DecisionTreeNode } from '../../modules/pega/decision/PegaEvaluationResult.js';
 import type { PegaSection, PegaLayout, PegaField } from '../../modules/pega/ui/PegaUITypes.js';
 
+function extractTagValue(tags: string, key: string): string | null {
+  for (const tag of tags.split(',')) {
+    const trimmed = tag.trim();
+    if (trimmed.startsWith(key + ':')) return trimmed.slice(key.length + 1);
+  }
+  return null;
+}
+
 export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): Hono {
   const app = new Hono();
 
+  let pegaService: PegaService | null = null;
+  let reclassified = false;
   const getPegaService = (): PegaService | null => {
     const memModule = registry.getModule('memory') as any;
     if (!memModule || memModule.status !== 'ready') return null;
-    return new PegaService(memModule.getEngine());
+    if (!pegaService) pegaService = new PegaService(memModule.getEngine());
+    if (!reclassified) {
+      reclassified = true;
+      pegaService.reclassifyExistingGraphNodes().then(n => {
+        if (n > 0) logger.info({ count: n }, '[pega] Reclassified existing graph nodes');
+      }).catch(() => {});
+    }
+    return pegaService;
   };
 
   app.post('/pega/check-rule', async (c) => {
@@ -130,7 +148,32 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
       const crawler = new PegaCrawler();
       const visitedKeys = new Set(body.visitedKeys || []);
       const plan = crawler.plan(body.ruleKeys, visitedKeys);
-      return c.json({ data: plan, error: null });
+      const adapter = (service as any).memoryEngine.getAdapter();
+      const ruleChecksums = body.ruleChecksums || {};
+      const stillMissing: PegaCrawlKey[] = [];
+      const cachedFromDb: string[] = [...plan.cached];
+      for (const key of plan.missing) {
+        const fqn = `${key.pxObjClass}:${key.pyClassName}:${key.pyRuleName}`;
+        const row = await adapter.getAsync(
+          "SELECT tags FROM knowledge_entries WHERE project_id = $1 AND source = $2 AND (type = 'PEGA_RULE' OR type = 'PEGA_DATA') LIMIT 1",
+          [body.projectId, fqn],
+        ) as { tags?: string } | undefined;
+        if (row) {
+          const extChecksum = ruleChecksums[key.insKey];
+          if (extChecksum) {
+            const dbChecksum = extractTagValue(row.tags || '', 'checksum');
+            if (dbChecksum === extChecksum) {
+              cachedFromDb.push(key.insKey);
+              continue;
+            }
+          } else {
+            cachedFromDb.push(key.insKey);
+            continue;
+          }
+        }
+        stillMissing.push(key);
+      }
+      return c.json({ data: { missing: stillMissing, cached: cachedFromDb }, error: null });
     } catch (err: any) {
       logger.error({ err }, 'pega/crawl-plan failed');
       return c.json({ data: null, error: { code: 'INTERNAL_ERROR', message: err.message } }, 500);
@@ -145,14 +188,21 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
       const crawler = new PegaCrawler();
       const visitedKeys = new Set(body.visitedKeys || []);
 
+      const rulesChecksums = body.rulesChecksums || {};
+      const rulesVersions = body.rulesVersions || {};
       let stored = 0;
       for (const rule of body.rules) {
         try {
-          await service.ingestRule({
+          const sym = service.parseRuleToSymbol(rule);
+          const chk = sym ? rulesChecksums[sym.fqn] : undefined;
+          const ver = sym ? rulesVersions[sym.fqn] : undefined;
+          const result = await service.ingestRule({
             projectId: body.projectId,
             ruleJson: rule,
+            checksum: chk,
+            version: ver,
           });
-          stored++;
+          if (result.status === 'success' && result.ruleId !== -1 && result.ruleId !== undefined) stored++;
         } catch { /* skip individual failures */ }
       }
 
@@ -179,6 +229,18 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
         )) as { cnt?: number } | undefined;
         if (rowGraph && typeof rowGraph.cnt === 'number') { totalGraphNodesInDb = Number(rowGraph.cnt); }
       } catch { /* fallback */ }
+
+      try {
+        const adapter = (service as any).memoryEngine.getAdapter();
+        const eng = adapter.getEngine();
+        const ts = eng === 'sqlite' ? `datetime('now')` : 'current_timestamp';
+        await adapter.runAsync(
+          `INSERT INTO project_registry (project_id, display_name, workspace_path, created_by, last_seen)
+           VALUES ($1, $2, $3, $4, ${ts})
+           ON CONFLICT (project_id) DO UPDATE SET last_seen = ${ts}`,
+          [body.projectId, 'Pega: ' + ((body.rules[0] as any)?.pyApplication || body.projectId), '', 'pega-crawler'],
+        );
+      } catch { /* non-fatal */ }
 
       const nextBatch = crawler.computeNextBatch(body.rules, visitedKeys, body.projectId);
       return c.json({ data: { stored, totalRulesInDb, totalKbEntriesInDb, totalGraphNodesInDb, nextBatch }, error: null });

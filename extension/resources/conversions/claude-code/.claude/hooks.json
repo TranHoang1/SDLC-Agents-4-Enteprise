@@ -1,38 +1,148 @@
 {
-  "_comment": "Converted from .kiro/hooks/. fileEdited/fileCreated/fileDeleted events NOT supported — see GAPS.md",
+  "_comment": "Converted from .kiro/hooks/. Claude Code hook events: PreToolUse, PostToolUse, userPromptSubmitted, Stop, SubagentStop, Notification, PreCompact, SessionStart. fileEdited/fileCreated/fileDeleted not supported.",
   "hooks": {
-    "PreToolUse": [
-      {
-        "_name": "KB Lookup Before Drawio Write",
-        "type": "command",
-        "matcher": "Write|Edit|Create",
-        "bash": "echo 'REMINDER: If writing .drawio file, first call mem_search(drawio procedure) for patterns.'",
-        "timeoutSec": 5
-      }
-    ],
     "PostToolUse": [
       {
-        "_name": "Code Index Incremental (approximates fileEdited)",
-        "type": "command",
+        "_name": "Drawio XML Validate After Write",
         "matcher": "Write|Edit",
-        "bash": "echo 'If source file modified (.kt,.ts,.py,.go,.rs,.cs), run: npx ts-node .analysis/code-intelligence/scripts/src/incremental-indexer.ts --files <file>'",
-        "timeoutSec": 5
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'If wrote .drawio: validate no self-closing edges (edge=1 must have <mxGeometry> child), no <mxfile> wrapper, starts with <mxGraphModel>. Then run drawio_export_png.'"
+          }
+        ]
+      },
+      {
+        "_name": "Drawio Layout Check After Write",
+        "matcher": "Write|Edit",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'If wrote .drawio: call drawio_auto_layout(file_path), fix issues until 0, then export PNG.'"
+          }
+        ]
+      },
+      {
+        "_name": "Code Index Incremental",
+        "matcher": "Write|Edit",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'If source file modified (.kt,.ts,.py,.go,.rs,.cs): run incremental indexer — npx tsx .analysis/code-intelligence/scripts/src/incremental-indexer.ts --files <file>'"
+          }
+        ]
       }
     ],
-    "userPromptSubmitted": [
+    "PreToolUse": [
       {
-        "_name": "Stream User Prompt",
+        "_name": "KB Search Before Drawio Write",
+        "matcher": "Write|Edit",
         "type": "command",
-        "bash": "echo 'Log user prompt summary via mem_ingest: type=CONTEXT, source=/chat-prompt, tags=chat,stream,user'",
-        "timeoutSec": 5
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: Before writing .drawio, run mem_search(drawio layout pattern proven, detail=true) for proven patterns.'"
+          }
+        ]
+      },
+      {
+        "_name": "KB Search First (General)",
+        "matcher": "Write",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: KB-search-before-action rule — run mem_search for existing solutions before writing code/docs.'"
+          }
+        ]
+      },
+      {
+        "_name": "Version Sync Check",
+        "matcher": "Write",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: If editing build.gradle.kts/package.json/pyproject.toml version, ensure version bump + tests pass before tag.'"
+          }
+        ]
       }
     ],
     "Stop": [
       {
         "_name": "Stream Agent Response",
         "type": "command",
-        "bash": "echo 'Log agent response summary via mem_ingest: type=CONTEXT, source=chat-response, tags=chat,stream,agent'",
-        "timeoutSec": 5
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Log response summary via mem_ingest: type=CONTEXT, source=chat-response, tags=chat,stream,agent'"
+          }
+        ]
+      },
+      {
+        "_name": "Ingest Lesson Learned",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: After task, if new method discovered, mem_ingest as LESSON_LEARNED. If doc created, mem_ingest_file with full content.'"
+          }
+        ]
+      },
+      {
+        "_name": "Attach Docs to Jira Reminder",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: After each SDLC phase, SM must attach {DOC}-v{version}-{TICKET}.docx + all .drawio files to Jira.'"
+          }
+        ]
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "_name": "Stream User Prompt",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Log prompt summary via mem_ingest: type=CONTEXT, source=chat-prompt, tags=chat,stream,user'"
+          }
+        ]
+      },
+      {
+        "_name": "Run-Log Reminder",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: If running SM pipeline, append row to documents/{TICKET}/RUN-LOG.md after each agent invocation.'"
+          }
+        ]
+      },
+      {
+        "_name": "Circuit Breaker Pre-Check",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: SM should read STATUS.json.circuitBreaker before each phase — state=open = HARD STOP, do NOT retry.'"
+          }
+        ]
+      },
+      {
+        "_name": "Budget Pre-Check",
+        "type": "command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'REMINDER: SM should check tokenBudget before invoke — 80percent=report-only, 100percent=hard stop.'"
+          }
+        ]
       }
     ]
   }

@@ -13,6 +13,8 @@ import type { GraphNodeCounts, UpsertNodeParams, AuditEntry, PaginatedResult, Sy
 export interface IGraphRepository {
   /** Get node counts with NULL project_id fallback. [BR-04] */
   getNodeCounts(projectId: string): Promise<GraphNodeCounts>;
+  /** Check if project has Pega graph nodes (entry_id LIKE 'pega:%'). */
+  isPegaProject(projectId: string): Promise<boolean>;
   /** Delete all graph_nodes and graph_edges in a transaction. [UC-06] */
   resetGraph(): Promise<void>;
   /** INSERT OR REPLACE a graph node. */
@@ -39,8 +41,8 @@ export interface IUserRepository {
  * Implements: UC-02, BR-02
  */
 export interface ISymbolRepository {
-  /** Count of code symbols matching SYMBOL_KINDS. */
-  getSymbolCount(): Promise<number>;
+  /** Count of code symbols matching SYMBOL_KINDS, optionally scoped to a project. */
+  getSymbolCount(projectId?: string): Promise<number>;
   /** Get detail of a single symbol by ID (for KB Graph node click). */
   getSymbolDetail(symbolId: string): Promise<SymbolDetail | null>;
 }

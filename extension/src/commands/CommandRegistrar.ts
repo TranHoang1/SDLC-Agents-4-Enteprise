@@ -57,6 +57,19 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     vscode.commands.registerCommand("kiroSdlc.openKbBrowser", () => handleOpenKbBrowser(mcpManager)),
     vscode.commands.registerCommand("kiroSdlc.editConfig", () => handleEditConfig()),
     vscode.commands.registerCommand("kiroSdlc.changeConfig", () => handleChangeConfig(mcpManager)),
+    vscode.commands.registerCommand("kiroSdlc.refreshToken", () => {
+      if (!authManager) return Promise.resolve();
+      const token = authManager.getTokenSync();
+      if (!token) {
+        handleLogin(context, authManager, treeProvider);
+        return new Promise<void>((resolve) => {
+          const d = authManager!.onStateChange((state) => {
+            if (state === "AUTHENTICATED") { d.dispose(); resolve(); }
+          });
+        });
+      }
+      return authManager.refreshToken();
+    }),
     vscode.commands.registerCommand("kiroSdlc.openSettings", () => SettingsPanel.open(context.extensionUri, context.secrets)),
     vscode.commands.registerCommand("kiroSdlc.fetchPegaContext", async () => {
       const root = workspaceRoot || getWorkspaceRoot();
@@ -64,7 +77,10 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
       try {
         const client = new (await import("../services/PegaHttpClient")).PegaHttpClient(context.secrets);
         const res = await client.fetchAndSavePegaContext(root);
-        vscode.window.showInformationMessage(`✅ Fetched Pega Context: App "${res.applicationName}" (${res.caseTypesCount} CaseTypes) saved to ${res.filePath}`);
+        const { setProjectId, deriveProjectId } = await import("../extension");
+        const pid = await deriveProjectId(root);
+        setProjectId(pid);
+        vscode.window.showInformationMessage(`✅ Fetched Pega Context: App "${res.applicationName}" (${res.caseTypesCount} CaseTypes) → projectId=${pid}`);
       } catch (err: any) {
         vscode.window.showErrorMessage(`Failed to fetch Pega Context: ${err.message}`);
       }

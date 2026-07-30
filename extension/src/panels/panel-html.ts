@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import { PanelType, PANEL_TITLES } from "../types";
 import { BasePanel } from "./base-panel";
 import { getProjectId } from "../extension";
+import { getNonce } from "../mcp-server-manager";
 
 /**
  * Generates an iframe that embeds the backend server's UI.
@@ -27,13 +28,15 @@ export function getIframeHtml(panelType: PanelType, authTokenProvider?: () => st
 
   const src = `${backendUrl}/admin?embed=true&page=${page}&token=${encodedToken}&projectId=${encodeURIComponent(projectId)}`;
 
+  const nonce = getNonce();
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="referrer" content="no-referrer">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; frame-src ${backendOrigin}; style-src 'unsafe-inline';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; frame-src ${backendOrigin}; style-src 'unsafe-inline';">     
     <title>${PANEL_TITLES[panelType]}</title>
     <style>
       body { padding: 0; margin: 0; height: 100vh; width: 100vw; overflow: hidden; background-color: var(--vscode-editor-background); }
@@ -46,7 +49,7 @@ export function getIframeHtml(panelType: PanelType, authTokenProvider?: () => st
         <p style="font-size: 0.8em; opacity: 0.7;">If this message persists, the backend server may be down.</p>
     </div>
     <iframe src="${src}" allow="clipboard-read; clipboard-write"></iframe>
-    <script>
+    <script nonce="${nonce}">
       const vscode = acquireVsCodeApi();
       window.addEventListener('message', (event) => {
         if (event.data && (event.data.type === 'auth_error' || event.data.status === 401)) {

@@ -4,9 +4,14 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
+import * as crypto from "crypto";
 import { IndexerHttpClient } from "./IndexerHttpClient";
+
+function computeRuleChecksum(rule: Record<string, unknown>): string {
+    return crypto.createHash('sha256').update(JSON.stringify(rule)).digest('hex');
+}
 import { discoverDocuments } from "../indexer-discovery";
-import { getProjectId } from "../extension";
+import { getProjectId, setProjectId } from "../extension";
 
 export interface IndexOptions {
     code: boolean;
@@ -21,6 +26,19 @@ export class IndexingService {
         private readonly httpClient: IndexerHttpClient,
         private readonly outputChannel?: vscode.OutputChannel
     ) {}
+
+    private walkDir(dir: string): string[] {
+        const results: string[] = [];
+        try {
+            const entries = fs.readdirSync(dir, { withFileTypes: true });
+            for (const e of entries) {
+                const fp = path.join(dir, e.name);
+                if (e.isDirectory()) results.push(...this.walkDir(fp));
+                else results.push(fp);
+            }
+        } catch { /* ignore */ }
+        return results;
+    }
 
     private log(msg: string): void {
         if (this.outputChannel) {
@@ -104,12 +122,12 @@ export class IndexingService {
 
         if (!appName) { return null; }
 
-        this.log(`[Pega Indexer] 🏛️ Pega Project Detected (App: "${appName}")`);
-        report.report({ message: `🏛️ Pega Project Detected (${appName}) — Crawling Pega rules...` });
+        this.log(`[Pega Indexer] 🏛️ Pega Project Detected: "pega:${appName}"`);
+        report.report({ message: `🏛️ Pega Project Detected: pega:${appName} — Crawling Pega rules...` });
 
         if (!secrets) {
             this.log(`[Pega Indexer] ⚠️ Credentials not available in SecretStorage. Skipping live fetch.`);
-            return `🏛️ Pega Project Detected (App: "${appName}", ${caseTypes.length} CaseTypes) — Metadata in pega-project.json`;
+            return `🏛️ Pega Project Detected: pega:${appName} (${caseTypes.length} CaseTypes) — Metadata in pega-project.json`;
         }
 
         try {
@@ -132,13 +150,15 @@ export class IndexingService {
                 this.log(`  - ${s}`);
             }
 
-            const projectId = appName || hierarchy.appName;
-            if (!projectId) {
+            const rawProjectId = appName || hierarchy.appName;
+            if (!rawProjectId) {
                 this.log(`[Pega Indexer] ⚠️ Could not resolve Pega Application Name for Project ID. Aborting Pega index.`);
                 return null;
             }
-            this.log(`[Pega Indexer] 📌 Target Pega Project ID (Pega App): "${projectId}"`);
-            const visitedKeys = new Set<string>();
+            const projectId = crypto.createHash('sha256').update('pega:' + rawProjectId).digest('hex').slice(0, 12);
+            this.log(`[Pega Indexer] 📌 Project ID: "pega:${rawProjectId}" → "${projectId}"`);
+            // Update extension runtime project_id so admin panels use correct scope
+            setProjectId(projectId);            const visitedKeys = new Set<string>();
             let currentQueue = seeds;
             let totalStored = 0;
             let totalFetchedInRun = 0;
@@ -148,15 +168,44 @@ export class IndexingService {
             let iterations = 0;
             const MAX_ITERATIONS = 1000;
 
+            const localChecksums = new Map<string, { checksum: string; fqn: string }>();
+            try {
+                const rulesDir = path.join(root, 'rules');
+                if (fs.existsSync(rulesDir)) {
+                    const files = this.walkDir(rulesDir);
+                    for (const fp of files) {
+                        if (!fp.endsWith('.pega.json')) continue;
+                        try {
+                            const content = fs.readFileSync(fp, 'utf-8');
+                            const rule = JSON.parse(content);
+                            const objClass = rule.pxObjClass || '';
+                            const className = rule.pyClassName || '';
+                            const ruleName = rule.pyRuleName || rule.pyPropertyName || rule.pyActivityName || rule.pyFlowName || rule.pyModelName || '';
+                            const insKey = `${objClass.toUpperCase().replace(/^RULE-/i, 'RULE-')} ${className} ${ruleName}`.replace(/\s+/g, ' ').trim();
+                            const fqn = `${objClass}:${className}:${ruleName}`;
+                            const checksum = crypto.createHash('sha256').update(JSON.stringify(rule)).digest('hex');
+                            localChecksums.set(insKey, { checksum, fqn });
+                        } catch { /* skip unparseable file */ }
+                    }
+                    this.log(`[Pega Indexer] 📂 Loaded ${localChecksums.size} local rule checksums from ${rulesDir}`);
+                }
+            } catch { /* rules dir not available */ }
+
             while (currentQueue.length > 0 && iterations < MAX_ITERATIONS) {
                 iterations++;
                 this.log(`[Pega Indexer] Iteration ${iterations}: processing queue (${currentQueue.length} items, visited: ${visitedKeys.size})...`);
                 report.report({ message: `Crawling Pega rules (unique rules: ${visitedKeys.size}, queue: ${currentQueue.length})...` });
 
+                const ruleChecksums: Record<string, string> = {};
+                for (const key of currentQueue) {
+                    const local = localChecksums.get(key);
+                    if (local) ruleChecksums[key] = local.checksum;
+                }
                 const plan = await pegaClient.crawlPlan({
                     projectId,
                     ruleKeys: currentQueue,
                     visitedKeys: Array.from(visitedKeys),
+                    ruleChecksums: Object.keys(ruleChecksums).length > 0 ? ruleChecksums : undefined,
                 });
 
                 if (!plan.missing || plan.missing.length === 0) {
@@ -255,8 +304,12 @@ export class IndexingService {
                                     if (subRules.length > 0) {
                                         this.log(`[Pega Indexer] 📌 Class "${targetClassName}": Loaded ${subRules.length} rules of type "${rt}". Saving files & ingesting...`);
                                         for (const sr of subRules) {
-                                            saveRuleFile(sr, rt);
-                                            fetchedRules.push(sr);
+                                            const srInsKey = (sr as any).insKey || `${rt}:${targetClassName}:${(sr as any).pyRuleName || (sr as any).pyPropertyName || ''}`;
+                                            if (!visitedKeys.has(srInsKey)) {
+                                                visitedKeys.add(srInsKey);
+                                                saveRuleFile(sr, rt);
+                                                fetchedRules.push(sr);
+                                            }
                                         }
                                     }
                                 } catch { /* ignore rule type fetch notice */ }
@@ -282,12 +335,27 @@ export class IndexingService {
                         const subChunk = fetchedRules.slice(i, i + BATCH_SIZE);
                         const chunkNum = Math.floor(i / BATCH_SIZE) + 1;
                         this.log(`[Pega Indexer] 📤 Ingesting chunk ${chunkNum}/${totalChunks} (${subChunk.length} rules) into Backend DB...`);
-                        
+
+                        const batchChecksums: Record<string, string> = {};
+                        const batchVersions: Record<string, string> = {};
+                        for (const rule of subChunk) {
+                            const objClass = (rule as any).pxObjClass || '';
+                            const className = (rule as any).pyClassName || '';
+                            const rName = (rule as any).pyRuleName || (rule as any).pyPropertyName || (rule as any).pyActivityName || (rule as any).pyFlowName || (rule as any).pyModelName || '';
+                            const fqn = `${objClass}:${className}:${rName}`;
+                            const chk = computeRuleChecksum(rule as Record<string, unknown>);
+                            if (chk) batchChecksums[fqn] = chk;
+                            const ver = (rule as any).pyRuleVersion || (rule as any).pyVersion || '';
+                            if (ver) batchVersions[fqn] = ver;
+                        }
+
                         try {
                             const res = await pegaClient.crawlBatch({
                                 projectId,
                                 rules: subChunk,
                                 visitedKeys: Array.from(visitedKeys),
+                                rulesChecksums: batchChecksums,
+                                rulesVersions: batchVersions,
                             });
                             lastBatchRes = res;
                         } catch (subErr: any) {
@@ -322,7 +390,7 @@ export class IndexingService {
             }
 
             this.log(`[Pega Indexer] Crawl finished. Total fetched in run: ${totalFetchedInRun}`);
-            return `🏛️ Pega Project Detected (App: "${appName}") — Ingested ${totalFetchedInRun} rules in this run (Total in KB Database: ${totalStoredInDb} Pega Rules, ${totalKbInDb} KB Entries, ${totalGraphInDb} Graph Nodes)`;
+            return `🏛️ Pega Project Detected: "pega:${rawProjectId}" → "${projectId}" — Ingested ${totalFetchedInRun} rules in this run (Total in KB Database: ${totalStoredInDb} Pega Rules, ${totalKbInDb} KB Entries, ${totalGraphInDb} Graph Nodes)`;
         } catch (err: any) {
             this.log(`[Pega Indexer] ❌ Fatal indexing error: ${err.message}`);
             return `❌ Pega Server Connection Failed: ${err.message}. Indexing ABORTED.`;
