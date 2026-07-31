@@ -1,10 +1,12 @@
 ﻿/**
  * HttpClient — Auth-injecting HTTP wrapper for backend communication.
- * Handles token injection, 401 retry, timeouts, and streaming.
+ * Handles token injection, 401 retry, timeouts, streaming, and proxy routing.
  */
 
+import type { Dispatcher } from "undici";
 import type { IAuthManager } from "../types/server-types";
 import { getProjectId } from "../extension";
+import { ProxyAgentFactory } from "./ProxyAgentFactory";
 
 export class HttpError extends Error {
   constructor(public readonly statusCode: number, message: string) {
@@ -50,11 +52,13 @@ export class HttpClient {
       throw new HttpError(401, "Not authenticated — please login to use this feature.");
     }
     const url = this._baseUrl + path;
+    const dispatcher = await this.getProxyDispatcher(url);
     const response = await fetch(url, {
       method: "GET",
       headers,
       signal: AbortSignal.timeout(timeout || 10000),
-    });
+      ...(dispatcher ? { dispatcher } : {}),
+    } as RequestInit);
     if (response.status === 401 && !_retried) {
       await this.authManager.refreshToken();
       return this.get(path, timeout, true);
@@ -71,12 +75,14 @@ export class HttpClient {
       throw new HttpError(401, "Not authenticated — please login to use this feature.");
     }
     const url = this._baseUrl + path;
+    const dispatcher = await this.getProxyDispatcher(url);
     const response = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(timeout || 10000),
-    });
+      ...(dispatcher ? { dispatcher } : {}),
+    } as RequestInit);
     if (response.status === 401 && !_retried) {
       await this.authManager.refreshToken();
       return this.post(path, body, timeout, true);
@@ -97,12 +103,14 @@ export class HttpClient {
       throw new HttpError(401, "Not authenticated — please login to use this feature.");
     }
     const url = this._baseUrl + path;
+    const dispatcher = await this.getProxyDispatcher(url);
     const response = await fetch(url, {
       method: "POST",
       headers,
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(timeout || 120000),
-    });
+      ...(dispatcher ? { dispatcher } : {}),
+    } as RequestInit);
     if (response.status === 401 && !_retried) {
       await this.authManager.refreshToken();
       return this.stream(path, body, timeout, true);
@@ -122,14 +130,35 @@ export class HttpClient {
   async healthCheck(timeout?: number): Promise<boolean> {
     try {
       const url = this._baseUrl + "/health";
+      const dispatcher = await this.getProxyDispatcher(url);
       const response = await fetch(url, {
         method: "GET",
         signal: AbortSignal.timeout(timeout || 5000),
-      });
+        ...(dispatcher ? { dispatcher } : {}),
+      } as RequestInit);
       return response.ok;
     } catch (err) {
       console.debug("[HttpClient] healthCheck failed: " + (err as Error).message);
       return false;
+    }
+  }
+
+  /**
+   * Get proxy dispatcher for a target URL.
+   * Returns undefined (direct connection) if proxy not configured or target is bypassed.
+   */
+  private async getProxyDispatcher(targetUrl: string): Promise<Dispatcher | undefined> {
+    try {
+      const factory = ProxyAgentFactory.getInstance();
+      const config = factory.getConfig();
+      // Check bypass list before returning dispatcher
+      if (factory.shouldBypass(targetUrl, config.bypass)) {
+        return undefined;
+      }
+      return await factory.getDispatcher();
+    } catch {
+      // ProxyAgentFactory not initialized or error — fall back to direct
+      return undefined;
     }
   }
 }
