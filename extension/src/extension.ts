@@ -62,10 +62,16 @@ export async function activate(context: vscode.ExtensionContext) {
   checkForUpgrade(context);
 }
 
-export function deactivate() {
+export async function deactivate(): Promise<void> {
   configWatcher?.dispose();
-  mcpManager?.kill().catch((err) => console.error("[Kiro] Deactivate kill failed:", (err as Error).message));
   panelManager?.disposeAll();
+  // Must await kill() so VS Code waits for the HTTP server to release its port
+  // before reloading — prevents EADDRINUSE on reload window.
+  try {
+    await mcpManager?.kill();
+  } catch (err) {
+    console.error("[Kiro] Deactivate kill failed:", (err as Error).message);
+  }
 }
 
 /**

@@ -9,6 +9,11 @@ const buildOptions = {
   bundle: true,
   outfile: 'out/extension.js',
   external: ['vscode', 'onnxruntime-node'],
+  alias: {
+    // Native optional module from @vscode/proxy-agent — unused by us (CA cert
+    // loading disabled). Stubbed so the bundle stays self-contained at runtime.
+    '@vscode/windows-ca-certs': './src/proxy/stubs/windows-ca-certs.ts',
+  },
   format: 'cjs',
   platform: 'node',
   target: 'node18',

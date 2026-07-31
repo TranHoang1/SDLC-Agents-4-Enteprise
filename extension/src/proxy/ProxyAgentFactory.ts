@@ -9,6 +9,7 @@ import type { Dispatcher } from "undici";
 import type { ProxyConfig, ProxyCredentials } from "../models/ProxyModels";
 import type { ProxyConfigService } from "./ProxyConfigService";
 import type { ProxyDetectionService } from "./ProxyDetectionService";
+import { VscodeProxyResolverService } from "./VscodeProxyResolverService";
 
 /** Module-level singleton instance */
 let instance: ProxyAgentFactory | null = null;
@@ -16,15 +17,20 @@ let instance: ProxyAgentFactory | null = null;
 /**
  * Manages undici ProxyAgent lifecycle. Ensures all HttpClient instances
  * share the same agent and supports instant reconfiguration.
+ * Proxy resolution is per-URL (supports PAC/WPAD routing via VS Code).
  */
 export class ProxyAgentFactory {
+  private readonly resolver: VscodeProxyResolverService;
+  private readonly agentCache = new Map<string, ProxyAgent>();
   private currentAgent: ProxyAgent | null = null;
   private currentUri: string | null = null;
 
   private constructor(
     private readonly configService: ProxyConfigService,
     private readonly detectionService: ProxyDetectionService
-  ) {}
+  ) {
+    this.resolver = new VscodeProxyResolverService(detectionService);
+  }
 
   /** Initialize singleton (called at extension activation) */
   static initialize(
@@ -49,20 +55,35 @@ export class ProxyAgentFactory {
 
   /**
    * Get the current dispatcher for fetch() calls.
-   * Returns ProxyAgent if proxy configured, undefined for direct connection.
+   * Resolves proxy per-URL (system mode) to support PAC/WPAD routing.
+   * Returns ProxyAgent if proxied, undefined for direct connection.
+   * @param targetUrl - Absolute URL the request is going to
    */
-  async getDispatcher(): Promise<Dispatcher | undefined> {
+  async getDispatcher(targetUrl: string): Promise<Dispatcher | undefined> {
     const config = this.configService.getConfig();
     if (config.mode === "none") { return undefined; }
 
-    const proxyUrl = this.resolveProxyUrl(config);
+    let proxyUrl: string | null;
+    if (config.mode === "manual") {
+      if (!config.host) { return undefined; }
+      proxyUrl = `http://${config.host}:${config.port}`;
+    } else {
+      // mode === "system" — resolve via VS Code's own proxy resolution (per-URL)
+      const resolved = await this.resolver.resolveByUrl(targetUrl);
+      proxyUrl = resolved.url ?? null;
+    }
     if (!proxyUrl) { return undefined; }
 
-    // Rebuild agent if URL changed or agent doesn't exist
-    if (!this.currentAgent || this.currentUri !== proxyUrl) {
-      await this.rebuildAgent(proxyUrl);
+    // Cache one agent per resolved proxy URL (PAC/WPAD may return different
+    // proxies for different targets).
+    let agent = this.agentCache.get(proxyUrl);
+    if (!agent) {
+      agent = await this.buildAgent(proxyUrl);
+      this.agentCache.set(proxyUrl, agent);
     }
-    return this.currentAgent ?? undefined;
+    this.currentAgent = agent;
+    this.currentUri = proxyUrl;
+    return agent;
   }
 
   /**
@@ -80,8 +101,12 @@ export class ProxyAgentFactory {
     }
   }
 
-  /** Invalidate cached agent (called after config save) */
+  /** Invalidate cached agents (called after config save) */
   invalidate(): void {
+    for (const agent of this.agentCache.values()) {
+      agent.close();
+    }
+    this.agentCache.clear();
     this.currentAgent?.close();
     this.currentAgent = null;
     this.currentUri = null;
@@ -105,27 +130,15 @@ export class ProxyAgentFactory {
     instance = null;
   }
 
-  private resolveProxyUrl(config: ProxyConfig): string | null {
-    if (config.mode === "manual") {
-      if (!config.host) { return null; }
-      return `http://${config.host}:${config.port}`;
-    }
-    // mode === "system"
-    const detected = this.detectionService.detect();
-    return detected.url;
-  }
-
-  private async rebuildAgent(proxyUrl: string): Promise<void> {
-    this.currentAgent?.close();
+  private async buildAgent(proxyUrl: string): Promise<ProxyAgent> {
     const creds = await this.configService.getCredentials();
     const opts: Record<string, unknown> = { uri: proxyUrl };
     if (creds) {
       opts.token = this.buildBasicToken(creds);
     }
-    this.currentAgent = new ProxyAgent(
+    return new ProxyAgent(
       opts as unknown as ConstructorParameters<typeof ProxyAgent>[0]
     );
-    this.currentUri = proxyUrl;
   }
 
   private buildBasicToken(creds: ProxyCredentials): string {

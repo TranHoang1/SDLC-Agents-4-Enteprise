@@ -7,6 +7,7 @@
 import { ProxyAgent } from "undici";
 import type { ProxyTestInput, ProxyTestResult, ProxyCredentials } from "../models/ProxyModels";
 import type { ProxyDetectionService } from "./ProxyDetectionService";
+import { VscodeProxyResolverService } from "./VscodeProxyResolverService";
 
 const TEST_URL = "https://httpbin.org/get";
 const TEST_TIMEOUT_MS = 10_000;
@@ -16,7 +17,11 @@ const TEST_TIMEOUT_MS = 10_000;
  * Creates a temporary ProxyAgent, sends GET request, measures latency.
  */
 export class ProxyTestService {
-  constructor(private readonly detectionService: ProxyDetectionService) {}
+  private readonly resolver: VscodeProxyResolverService;
+
+  constructor(private readonly detectionService: ProxyDetectionService) {
+    this.resolver = new VscodeProxyResolverService(detectionService);
+  }
 
   /**
    * Test proxy connectivity using form values.
@@ -24,12 +29,12 @@ export class ProxyTestService {
    * @returns Result with success status, message, and optional latency
    */
   async testConnection(input: ProxyTestInput): Promise<ProxyTestResult> {
-    const proxyUrl = this.resolveTestProxyUrl(input);
+    const targetUrl = input.testUrl || TEST_URL;
+    const proxyUrl = await this.resolveTestProxyUrl(input);
     if (!proxyUrl) {
       return { success: false, message: "No proxy URL to test" };
     }
 
-    const targetUrl = input.testUrl || TEST_URL;
     let agent: ProxyAgent | null = null;
     try {
       agent = this.buildTemporaryAgent(proxyUrl, input);
@@ -42,14 +47,15 @@ export class ProxyTestService {
     }
   }
 
-  private resolveTestProxyUrl(input: ProxyTestInput): string | null {
+  private async resolveTestProxyUrl(input: ProxyTestInput): Promise<string | null> {
     if (input.mode === "manual") {
       if (!input.host) { return null; }
       return `http://${input.host}:${input.port}`;
     }
-    // mode === "system"
-    const detected = this.detectionService.detect();
-    return detected.url;
+    // mode === "system" — resolve per-URL through VS Code's proxy resolution
+    const targetUrl = input.testUrl || TEST_URL;
+    const resolved = await this.resolver.resolveByUrl(targetUrl);
+    return resolved.url ?? null;
   }
 
   private buildTemporaryAgent(

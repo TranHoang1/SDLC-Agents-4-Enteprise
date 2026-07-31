@@ -11,3 +11,4 @@
 | 7 | 2026-07-31 11:40 | SM | jira | Created Jira ticket SA4E-81 + renamed docs folder | ✅ success | ~5k | 15s |
 | 8 | 2026-07-31 11:45 | SM | deployment | Built VSIX v1.18.0 + installed into Kiro IDE | ✅ success | ~5k | 30s |
 | 9 | 2026-07-31 11:50 | dev-agent | bugfix | Fix acquireVsCodeApi double-call crash — proxy tab sections now show on Manual mode | ✅ success | ~10k | 60s |
+| 10 | 2026-07-31 12:00 | SM | deployment | Bump v1.19.0, commit 27 files, tag v1.19.0, push to GitHub | ✅ success | ~5k | 30s |

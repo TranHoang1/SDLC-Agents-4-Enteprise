@@ -243,6 +243,10 @@ MIT
 
 ## Changelog
 
+### v1.19.1 (2026-07-31)
+
+- **Proxy: leverage VS Code resolution (`@vscode/proxy-agent`)** — System mode now resolves proxy per-URL through VS Code's own proxy stack, reading `http.proxy`, `http.proxySupport`, `http.noProxy` and `HTTPS_PROXY`/`HTTP_PROXY`/`NO_PROXY` env vars, auto-bypassing localhost, with per-URL caching and OS-native fallback (netsh/scutil/gsettings). Proxy connectivity test uses the same resolution path. Fixes unreliable system proxy detection in enterprise networks (esp. PAC/WPAD setups).
+
 ### v1.19.0 (2026-07-31)
 
 - **SA4E-81: Proxy Configuration Page** — Enterprise network proxy settings UI. Added Proxy tab to Settings Panel with: manual proxy config (host, port, bypass list), system proxy auto-detection, proxy authentication (SecretStorage), custom URL connectivity testing, and automatic proxy routing for all outbound HttpClient requests via undici ProxyAgent.
