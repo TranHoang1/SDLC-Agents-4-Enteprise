@@ -86,6 +86,7 @@ export class MemoryModule implements IModule {
 
       await builder.withDatabase();
       await builder.withEngine();
+      await builder.withFtsRebuild();
       builder.withDispatcher(this.registry);
       builder.withTaskWorker();
       builder.withPromotion();

@@ -1,0 +1,9 @@
+id,scenario,num_pending_in_db,num_done_in_db,query,scope_project_id,expected_pending_count,expected_has_delimiter,test_case
+S-01,Normal search with pending,3,5,"memory module",project-A,3,true,IT-03/E2E-API-05
+S-02,Search with more than 3 pending,10,2,"test",project-A,3,true,PBT-05/UT-SRC-02
+S-03,No pending entries,0,10,"test",project-A,0,false,UT-SRC-03/E2E-API-06
+S-04,Cross-project filter,3,0,"test",project-A,2,true,IT-04 (only 2 in project-A)
+S-05,All entries pending,5,0,"test",project-A,3,true,Cap at 3 even when all pending
+S-06,Post-migration search,0,5,"test",project-A,0,false,E2E-API-09 (old entries = done)
+S-07,Single pending entry,1,5,"auth",project-A,1,true,Normal case with 1 pending
+S-08,Full lifecycle after enrich,0,6,"memory",project-A,0,false,E2E-API-10 step 4

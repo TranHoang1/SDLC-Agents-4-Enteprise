@@ -243,6 +243,10 @@ MIT
 
 ## Changelog
 
+### v1.18.0 (2026-07-31)
+
+- **SA4E-79: Client-Side LLM Knowledge Enrichment — bug fixes & hardening** — Client enrichment fallback now works end-to-end: `handleIngestFile` marks entries `pending` + enqueues TAG_ENRICHMENT (NEW-01/NEW-06/NEW-10), TaskWorker race guards (NEW-03), USER-scoped entries can be enriched without projectId (NEW-07), pending section limit raised 3→10 (NEW-09). **FTS fix**: `knowledge_fts` index auto-rebuilds at startup when empty — restores `mem_search` results for all 12,737 pre-existing KB entries.
+
 ### v1.17.0 (2026-07-30)
 
 - **SA4E-77: Pega Knowledge Graph Enhancement** — Pega rules categorized by pxObjClass type (PROCESS, DECISION, DATA_MODEL, UI, TECHNICAL, etc.) with config-driven mapping (`pega-categories.json`). Graph legend auto-switches to Pega mode with 16 category colors. Code/KB split uses entry_id prefix (`code:*`/`pega:*`). Dashboard codeSymbols includes Pega rules.

@@ -186,6 +186,15 @@ export class TaskWorker {
   private async processTagEnrichment(task: PendingTask, payload: any): Promise<void> {
     if (!this.tagAnalyzer) { this.repo.resetForRetry(task.id); return; }
 
+    // SA4E-79: Check if already enriched by client (BR-12, BR-13)
+    const entry = await this.engine.findById(task.entry_id);
+    if (!entry) { await this.repo.markFailed(task.id, 'entry_not_found'); return; }
+    if ((entry as any).enrichment_status === 'done') {
+      this.logger.info({ entry_id: task.entry_id }, 'Skipping TAG_ENRICHMENT — already enriched');
+      await this.repo.markCompleted(task.id);
+      return;
+    }
+
     const context = this.config.enableContextChain
       ? await this.loadPreviousContext(task.entry_id, payload.source)
       : null;
@@ -197,15 +206,42 @@ export class TaskWorker {
 
     const result = await this.tagAnalyzer.analyzeTags(payload.content, payload.options, context);
 
+    // TA-08: Re-check status after LLM call — client may have enriched during processing
+    const currentEntry = await this.engine.findById(task.entry_id);
+    if (!currentEntry || (currentEntry as any).enrichment_status === 'done') {
+      this.logger.info({ entry_id: task.entry_id }, 'Client enriched during LLM processing — discarding result');
+      await this.repo.markCompleted(task.id);
+      return;
+    }
+
     if (result.appliedTags.length > 0) {
       const existing = payload.existing_tags
         ? payload.existing_tags.split(',').map((t: string) => t.trim()).filter(Boolean)
         : [];
       const merged = [...new Set([...existing, ...result.appliedTags])];
-      await this.engine.updateTags(task.entry_id, merged.join(','));
+      // NEW-03: Conditional update — only apply if still pending (race guard)
+      await this.engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET tags = ? WHERE id = ? AND enrichment_status = 'pending'`,
+        [merged.join(','), task.entry_id],
+      );
     }
 
-    await this.updateEntryStructuredMap(task.entry_id, result, context);
+    // NEW-03: Conditional structured_map update — only if still pending
+    await this.updateEntryStructuredMapConditional(task.entry_id, result, context);
+
+    // SA4E-79: Mark entry as enriched by backend LLM (atomic — changes=0 if client won)
+    const now = new Date().toISOString();
+    const updateResult = await this.engine.getAdapter().runAsync(
+      `UPDATE knowledge_entries
+       SET enrichment_status = 'done', enriched_by = 'backend_llm', enriched_at = ?
+       WHERE id = ? AND enrichment_status = 'pending'`,
+      [now, task.entry_id],
+    );
+
+    if (updateResult.changes === 0) {
+      this.logger.info({ entry_id: task.entry_id }, 'Client enriched during tag/map update — discarding');
+    }
+
     await this.repo.markCompleted(task.id);
   }
 
@@ -285,6 +321,53 @@ export class TaskWorker {
     } catch (err) {
       this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
         'structured_map update failed');
+    }
+  }
+
+  /** NEW-03: Conditional structured_map update — only applies if entry still pending. */
+  private async updateEntryStructuredMapConditional(
+    entryId: number,
+    result: TagAnalysisResult,
+    context?: ContextChainInput | null,
+  ): Promise<void> {
+    try {
+      const entry = await this.engine.findById(entryId);
+      if (!entry) return;
+      if ((entry as any).enrichment_status === 'done') return;
+      const existing = safeParseStructuredMap(entry.structured_map);
+      const structuredMap: StructuredMapData = {
+        tags: result.appliedTags,
+        summary: result.summary || existing.summary || '',
+        business_entities: result.business_entities || [],
+        actors: result.actors || [],
+        business_rules: result.business_rules || [],
+        fileCreatedAt: existing.fileCreatedAt,
+        fileAuthor: existing.fileAuthor,
+        fileVersion: existing.fileVersion,
+        context_chain: context ? {
+          previous_section_id: context.previous_section_id,
+          previous_summary: context.summary,
+        } : undefined,
+        extraction_meta: {
+          model: this.llmService?.getConfig()?.model || 'unknown',
+          timestamp: new Date().toISOString(),
+          fallback_used: result.fallbackUsed,
+          context_chain_enabled: this.config.enableContextChain,
+        },
+      };
+      let jsonStr = JSON.stringify(structuredMap);
+      if (jsonStr.length > (this.config.structuredMapMaxSize ?? 102400)) {
+        structuredMap.business_rules = (structuredMap.business_rules || []).slice(0, 5);
+        structuredMap.actors = (structuredMap.actors || []).slice(0, 3);
+        jsonStr = JSON.stringify(structuredMap);
+      }
+      await this.engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET structured_map = ? WHERE id = ? AND enrichment_status = 'pending'`,
+        [jsonStr, entryId],
+      );
+    } catch (err) {
+      this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
+        'structured_map conditional update failed');
     }
   }
 

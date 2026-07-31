@@ -18,6 +18,7 @@ import { MemoryEngineCrud } from './crud.js';
 export class MemoryEngine extends MemoryEngineCrud {
   private currentSessionId: string | null = null;
   private compositeScorer: CompositeScorer;
+  private cachedScoringOptions: CompositeScoreOptions | null = null;
 
   constructor(adapter: DatabaseAdapter) {
     super(adapter);
@@ -46,9 +47,10 @@ export class MemoryEngine extends MemoryEngineCrud {
   }
 
   async search(query: string, limit = 10, tier?: string, type?: string, scopeCtx?: ScopeContext): Promise<SearchResult[]> {
+    const engine = this.adapter.getEngine();
     const clauses: string[] = [
       'ke.archived = 0',
-      `(ke.expires_at IS NULL OR ke.expires_at >= ${this.dialect.now()})`,
+      this.dialect.expiryCheck('ke.expires_at'),
     ];
     const params: unknown[] = [];
     if (tier) { clauses.push('ke.tier = ?'); params.push(tier); }
@@ -57,8 +59,6 @@ export class MemoryEngine extends MemoryEngineCrud {
       clauses.push(this.buildScopeClause(scopeCtx, 'ke'));
       params.push(...this.buildScopeParams(scopeCtx));
     }
-
-    const engine = this.adapter.getEngine();
 
     if (engine === 'sqlite') {
       const ftsQuery = query.replace(/[^\w\s*":.]/g, ' ').trim() || '*';
@@ -145,14 +145,18 @@ export class MemoryEngine extends MemoryEngineCrud {
    */
   private readScoringOptionsSync(): CompositeScoreOptions {
     try {
-      // For SQLite: use sync path (adapter wraps sync as async, so this is safe)
+      // PostgreSQL only supports async — return defaults (non-fatal)
+      if (this.adapter.getEngine() === 'postgresql') {
+        return this.cachedScoringOptions ?? {};
+      }
       const row = (this.adapter as any).get?.(
         `SELECT value FROM decay_config WHERE key = 'enable_predictive'`,
       ) as { value: string } | undefined;
-      return { enablePredictive: row?.value === 'true' };
+      const opts = { enablePredictive: row?.value === 'true' };
+      this.cachedScoringOptions = opts;
+      return opts;
     } catch (e) {
-      console.warn('[MemoryEngine] readScoringOptionsSync failed', e);
-      return {};
+      return this.cachedScoringOptions ?? {};
     }
   }
 

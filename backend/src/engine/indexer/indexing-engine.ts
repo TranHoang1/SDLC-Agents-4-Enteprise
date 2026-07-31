@@ -1,13 +1,15 @@
-﻿/** Indexing Engine — Full scan and incremental indexing. KSA-145. SA4E-53: async refactor. */
+﻿/** Indexing Engine — Full scan and incremental indexing. KSA-145. SA4E-53: async. SA4E-78: decoupled. */
 
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../database/dialect/DialectHelper.js';
+import { EventEmitter } from 'events';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import pino from 'pino';
 import { AppConfig } from '../config.js';
-import { scanWorkspace, scanSingleFile, ScannedFile } from '../scanner/file-scanner.js';
+import { scanWorkspaceAsync } from './async-file-scanner.js';
+import { scanSingleFile, ScannedFile } from '../scanner/file-scanner.js';
 import { TreeSitterIndexer } from '../parsers/tree-sitter-indexer.js';
 import { GrammarRegistry, loadGrammarConfig } from '../parsers/grammar-registry.js';
 import { GraphRepository } from '../database/graph-repository.js';
@@ -22,6 +24,7 @@ import { GraphSyncService } from '../graph/graph-sync-service.js';
 import { GraphRepository as AdminGraphRepository } from '../../database/repositories/GraphRepository.js';
 import { getAdminAdapter } from '../../admin/db/core.js';
 import type { IndexResult } from '../parsers/types.js';
+import type { ProgressPhase } from './types.js';
 
 
 const logger = pino({ name: 'indexing-engine' });
@@ -38,12 +41,26 @@ export class IndexingEngine {
   private grammarRegistry: GrammarRegistry | null = null;
   private graphRepo: GraphRepository | null = null;
   private treeSitterReady = false;
+  /** SA4E-78: Progress event emitter for Observer pattern. */
+  private readonly progressEmitter = new EventEmitter();
+  /** SA4E-78: Cached instance avoids repeated instantiation (AD-6). */
+  private readonly graphSyncService: GraphSyncService;
 
   constructor(adapter: DatabaseAdapter, config: AppConfig) {
     this.adapter = adapter;
     this.dialect = new DialectHelper(adapter.getEngine());
     this.config = config;
+    this.graphSyncService = new GraphSyncService(this.adapter, this.adapter, logger);
     this.initTreeSitter();
+  }
+
+  /**
+   * Subscribe to progress events emitted during index operations.
+   * @param event - Event name ('progress')
+   * @param handler - Callback receiving phase, current, total
+   */
+  on(event: string, handler: (...args: unknown[]) => void): void {
+    this.progressEmitter.on(event, handler);
   }
 
   private initTreeSitter(): void {
@@ -80,7 +97,7 @@ export class IndexingEngine {
     return;
   }
 
-  async runFullIndex(scope?: Partial<IndexScope>): Promise<void> {
+  async runFullIndex(scope?: Partial<IndexScope>, signal?: AbortSignal): Promise<void> {
     const { projectId, workspace } = resolveScope(scope, {
       projectId: this.config.projectId,
       workspace: this.config.workspace,
@@ -90,9 +107,19 @@ export class IndexingEngine {
     logger.error(`[indexer] Starting full index (project=${projectId})...`);
     await new Promise<void>(resolve => setImmediate(resolve));
     try {
-      const files = scanWorkspace({ ...this.config, workspace });
+      // Phase: scanning (SA4E-78: async scan, non-blocking)
+      this.emitProgress(projectId, 'scanning', 0, 0);
+      const files = await scanWorkspaceAsync({ ...this.config, workspace });
+      if (signal?.aborted) { this.emitProgress(projectId, 'cancelled', 0, 0); return; }
+
       logger.error(`[indexer] Found ${files.length} files to index`);
-      await this.indexFiles(files, projectId);
+      // Phase: indexing
+      this.emitProgress(projectId, 'indexing', 0, files.length);
+      await this.indexFiles(files, projectId, signal);
+      if (signal?.aborted) { this.emitProgress(projectId, 'cancelled', 0, 0); return; }
+
+      // Phase: resolving
+      this.emitProgress(projectId, 'resolving', 0, 0);
       await new Promise<void>(resolve => setImmediate(resolve));
       await updateModules(this.adapter, projectId);
       await new Promise<void>(resolve => setImmediate(resolve));
@@ -106,18 +133,24 @@ export class IndexingEngine {
       await this.syncGraphNodes(projectId);
       await new Promise<void>(resolve => setImmediate(resolve));
       logSfdxStats(this.adapter, this.config, logger);
-      // Register workspace in project_registry so admin UI can show it in dropdown
       this.registerWorkspace(projectId, workspace);
+
+      this.emitProgress(projectId, 'complete', files.length, files.length);
       logger.error('[indexer] Full index complete');
     } finally {
       this.indexing.delete(projectId);
     }
   }
 
-  /** Project this tenant's code symbols into graph_nodes in index DB (non-fatal). SA4E-53: async. */
+  /** SA4E-78: Emit progress event via EventEmitter (Observer pattern). */
+  private emitProgress(projectId: string, phase: ProgressPhase, current: number, total: number): void {
+    this.progressEmitter.emit('progress', { projectId, phase, current, total });
+  }
+
+  /** Project this tenant's code symbols into graph_nodes in index DB (non-fatal). SA4E-53: async. SA4E-78: cached. */
   private async syncGraphNodes(projectId: string): Promise<void> {
     try {
-      await new GraphSyncService(this.adapter, this.adapter, logger).syncProjectSymbols(projectId);
+      await this.graphSyncService.syncProjectSymbols(projectId);
     } catch (err) {
       logger.error({ err }, '[indexer] Graph node sync skipped');
     }
@@ -183,21 +216,23 @@ export class IndexingEngine {
 
   /**
    * SA4E-53: replaced prepare() calls with inline runAsync/allAsync.
-   * Uses transactionAsync batches for PostgreSQL compatibility.
+   * SA4E-78: added signal for cooperative cancellation at batch boundaries.
    */
-  private async indexFiles(files: ScannedFile[], projectId: string): Promise<void> {
-    const { filesToIndex, skippedCount } = await this.registerFilesForIndex(files, projectId);
+  private async indexFiles(files: ScannedFile[], projectId: string, signal?: AbortSignal): Promise<void> {
+    const { filesToIndex, skippedCount } = await this.registerFilesForIndex(files, projectId, signal);
+    if (signal?.aborted) return;
     const counts = this.treeSitterReady && this.treeSitterIndexer
-      ? await this.indexFileSymbolsTreeSitter(filesToIndex, projectId)
-      : await this.indexFileSymbolsRegexFallback(filesToIndex, projectId);
+      ? await this.indexFileSymbolsTreeSitter(filesToIndex, projectId, signal)
+      : await this.indexFileSymbolsRegexFallback(filesToIndex, projectId, signal);
     logger.error(`[indexer] Indexed ${counts.treeSitterCount} files via tree-sitter, ${counts.regexCount} via regex fallback, ${skippedCount} unchanged`);
   }
 
   /**
    * Register files into DB and collect those needing symbol indexing.
    * SA4E-53: replaces prepare()+transaction() with runAsync()+transactionAsync().
+   * SA4E-78: abort check at batch boundaries.
    */
-  private async registerFilesForIndex(files: ScannedFile[], projectId: string) {
+  private async registerFilesForIndex(files: ScannedFile[], projectId: string, signal?: AbortSignal) {
     const filesToIndex: ScannedFile[] = [];
     let skippedCount = 0;
     const BATCH = 200;
@@ -205,6 +240,7 @@ export class IndexingEngine {
       ? `INSERT OR REPLACE INTO files (project_id,path,relative_path,language,module,content_hash,size_bytes,line_count,last_indexed,file_created_at,file_author,file_version) VALUES (?,?,?,?,?,?,?,?,${this.dialect.now()},?,?,?)`
       : `INSERT INTO files (project_id,path,relative_path,language,module,content_hash,size_bytes,line_count,last_indexed,file_created_at,file_author,file_version) VALUES (?,?,?,?,?,?,?,?,${this.dialect.now()},?,?,?) ON CONFLICT (project_id, path) DO UPDATE SET content_hash=EXCLUDED.content_hash, size_bytes=EXCLUDED.size_bytes, line_count=EXCLUDED.line_count, last_indexed=EXCLUDED.last_indexed, file_created_at=EXCLUDED.file_created_at, file_author=EXCLUDED.file_author, file_version=EXCLUDED.file_version`;
     for (let i = 0; i < files.length; i += BATCH) {
+      if (signal?.aborted) break; // SA4E-78: cooperative cancellation
       const batch = files.slice(i, i + BATCH);
       await this.adapter.transactionAsync(async () => {
         for (const file of batch) {
@@ -217,15 +253,17 @@ export class IndexingEngine {
           ]);
         }
       });
+      this.emitProgress(projectId, 'indexing', Math.min(i + BATCH, files.length), files.length);
       await new Promise<void>(resolve => setImmediate(resolve));
     }
     return { filesToIndex, skippedCount };
   }
 
-  private async indexFileSymbolsTreeSitter(filesToIndex: ScannedFile[], projectId: string) {
+  private async indexFileSymbolsTreeSitter(filesToIndex: ScannedFile[], projectId: string, signal?: AbortSignal) {
     let treeSitterCount = 0;
     let regexCount = 0;
     for (let i = 0; i < filesToIndex.length; i += 50) {
+      if (signal?.aborted) break; // SA4E-78: cooperative cancellation
       const batch = filesToIndex.slice(i, i + 50).map(f => ({ absolutePath: f.absolutePath, relativePath: f.relativePath }));
       for (const result of await this.treeSitterIndexer!.indexFiles(batch, projectId)) {
         if (result.method === 'tree-sitter') treeSitterCount++; else regexCount++;
@@ -236,14 +274,14 @@ export class IndexingEngine {
 
   /**
    * SA4E-53: replaced prepare()+transaction() with transactionAsync()+runAsync().
-   * indexFileSymbolsRegex uses PreparedStatement internally (SQLite-only path).
+   * SA4E-78: abort check at batch boundaries.
    */
-  private async indexFileSymbolsRegexFallback(filesToIndex: ScannedFile[], projectId: string) {
+  private async indexFileSymbolsRegexFallback(filesToIndex: ScannedFile[], projectId: string, signal?: AbortSignal) {
     logger.error('[indexer] Tree-sitter not available, using regex extraction');
     let regexCount = 0;
     const BATCH = 25;
-    const insertSymbolSql = `INSERT INTO symbols (project_id,file_id,name,kind,signature,start_line,end_line,parent_symbol,visibility,doc_comment) VALUES (?,?,?,?,?,?,?,?,?,?)`;
     for (let i = 0; i < filesToIndex.length; i += BATCH) {
+      if (signal?.aborted) break; // SA4E-78: cooperative cancellation
       const batch = filesToIndex.slice(i, i + BATCH);
       await this.adapter.transactionAsync(async () => {
         for (const file of batch) {

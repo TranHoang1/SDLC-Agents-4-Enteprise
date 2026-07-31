@@ -41,6 +41,11 @@ function createTestDb(): Database.Database {
   db.pragma('foreign_keys = ON');
   db.exec(MEMORY_SCHEMA);
   db.exec(PENDING_TASKS_SCHEMA);
+  // SA4E-79: Apply enrichment status columns (migration 007)
+  // Default to 'pending' in test context so TaskWorker processes them
+  db.exec(`ALTER TABLE knowledge_entries ADD COLUMN enrichment_status TEXT NOT NULL DEFAULT 'pending'`);
+  db.exec(`ALTER TABLE knowledge_entries ADD COLUMN enriched_by TEXT DEFAULT NULL`);
+  db.exec(`ALTER TABLE knowledge_entries ADD COLUMN enriched_at TEXT DEFAULT NULL`);
   return db;
 }
 
@@ -69,6 +74,11 @@ describe('TaskWorker Integration Tests', () => {
   let llm: LLMService;
   let analyzer: TagAnalyzerService;
   let worker: TaskWorker;
+
+  /** Mark entry as pending so TaskWorker can process it (SA4E-79). */
+  function markPending(entryId: number): void {
+    db.prepare(`UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE id = ?`).run(entryId);
+  }
 
   beforeEach(() => {
     db = createTestDb();

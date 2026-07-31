@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.18.0] - 2026-07-31
+
+### Fixed
+- **SA4E-79: Client-Side LLM Knowledge Enrichment** — enrichment pipeline hardening:
+  - `handleIngestFile`/`handleIngest` always mark entries `pending` + enqueue TAG_ENRICHMENT (removes `done`+task contradiction, NEW-01/NEW-06/NEW-10)
+  - TaskWorker tag/structured_map updates guarded by `WHERE enrichment_status='pending'` (race fix, NEW-03)
+  - USER-scoped entries can now be enriched without projectId (NEW-07)
+  - Pending entries section limit raised 3→10 (NEW-09)
+- **mem_search returning empty for all queries** — `knowledge_fts` FTS5 index auto-rebuilds at startup when empty, restoring search results for all 12,737 pre-existing KB entries
+
 ## [1.14.0] - 2026-07-19
 
 ### Added

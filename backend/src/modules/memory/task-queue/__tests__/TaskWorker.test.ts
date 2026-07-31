@@ -14,14 +14,25 @@ function createMockDb(): DatabaseAdapter {
     get: vi.fn(),
     all: vi.fn(),
     transaction: vi.fn((fn: any) => fn()),
+    getEngine: vi.fn(() => 'sqlite'),
+    getAsync: vi.fn(),
+    allAsync: vi.fn(() => Promise.resolve([])),
+    runAsync: vi.fn(() => Promise.resolve({ changes: 0, lastInsertRowid: 0 })),
   } as unknown as DatabaseAdapter;
 }
 
 function createMockEngine(entries: Map<number, any>): MemoryEngine {
+  const mockAdapter = {
+    getAsync: vi.fn(),
+    allAsync: vi.fn(() => Promise.resolve([])),
+    runAsync: vi.fn(() => Promise.resolve({ changes: 0, lastInsertRowid: 0 })),
+    getEngine: vi.fn(() => 'sqlite'),
+  };
   const engine = {
     findById: vi.fn((id: number) => entries.get(id)),
     updateTags: vi.fn(),
     updateStructuredMap: vi.fn(),
+    getAdapter: vi.fn(() => mockAdapter),
     getDb: vi.fn(() => ({
       prepare: vi.fn(() => ({
         get: vi.fn(),
@@ -64,10 +75,9 @@ describe('UT-12: loadPreviousContext', () => {
         actors: ['Admin'],
       }),
     });
-    // Mock getDb().prepare().get() to return entry 1
-    const mockGet = vi.fn().mockReturnValue({ id: 1, structured_map: entries.get(1).structured_map });
-    const mockPrepare = vi.fn().mockReturnValue({ get: mockGet });
-    (engine as any).getDb.mockReturnValue({ prepare: mockPrepare });
+    // Mock getAdapter().getAsync() to return entry 1
+    const adapter = (engine as any).getAdapter();
+    adapter.getAsync.mockResolvedValue({ id: 1, structured_map: entries.get(1).structured_map });
 
     const worker = createWorker();
     const result = await (worker as any).loadPreviousContext(2, '/doc.md');

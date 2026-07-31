@@ -96,6 +96,23 @@ export class MemoryModuleBuilder {
     await migrate003PendingTasks(this.memAdapter);
     await migrate004ResetSequences(this.memAdapter);
 
+    // SA4E-79: Add enrichment_status tracking columns
+    const { migrate007Up } = await import('./schema/migrations/007_enrichment_status.js');
+    await migrate007Up(this.memAdapter).catch(err => {
+      // Column already exists — safe to ignore
+      if (!String(err).includes('duplicate column') && !String(err).includes('already exists')) {
+        this.logger.warn({ err }, '[MemoryModuleBuilder] Migration 007 issue (non-fatal)');
+      }
+    });
+
+    // SA4E-45: Ensure PostgreSQL FTS infrastructure exists (tsvector_content + GIN index)
+    if (this.memAdapter.getEngine() === 'postgresql') {
+      const { recreateFtsInfrastructure } = await import('../../database/migration/fts-recreation.js');
+      await recreateFtsInfrastructure(this.memAdapter).catch(err => {
+        this.logger.warn({ err }, '[MemoryModuleBuilder] FTS recreation failed (non-fatal)');
+      });
+    }
+
     return this;
   }
 
@@ -111,6 +128,28 @@ export class MemoryModuleBuilder {
     }).catch((err: unknown) => {
       this.logger.warn({ err }, '[MemoryModuleBuilder] Backfill KB → graph skipped');
     });
+    return this;
+  }
+
+  /** Step 2b: Rebuild FTS index if empty (SA4E-79 FTS bug fix). */
+  async withFtsRebuild(): Promise<this> {
+    if (!this.memAdapter || this.memAdapter.getEngine() !== 'sqlite') return this;
+    try {
+      const count = await this.memAdapter.getAsync<{ cnt: number }>(
+        'SELECT COUNT(*) as cnt FROM knowledge_fts',
+      );
+      if (count && count.cnt > 0) return this;
+      this.logger.info('[FTS] knowledge_fts is empty — triggering rebuild from knowledge_entries');
+      await this.memAdapter.runAsync(
+        "INSERT INTO knowledge_fts(knowledge_fts) VALUES('rebuild')",
+      );
+      const rebuilt = await this.memAdapter.getAsync<{ cnt: number }>(
+        'SELECT COUNT(*) as cnt FROM knowledge_fts',
+      );
+      this.logger.info({ rebuilt: rebuilt?.cnt ?? 0 }, '[FTS] Rebuild complete');
+    } catch (err) {
+      this.logger.warn({ err }, '[FTS] Rebuild failed (non-fatal)');
+    }
     return this;
   }
 

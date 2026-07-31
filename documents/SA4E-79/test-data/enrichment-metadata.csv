@@ -1,0 +1,11 @@
+id,entry_id,summary,tags,structured_map_json,is_valid,expected_error,test_case
+M-01,1,"SQLite WAL mode configuration for concurrent KB access","sqlite,wal,memory,concurrent","{""summary"":""WAL mode config"",""business_entities"":[""MemoryEngine"",""SQLite""],""actors"":[""Backend""],""business_rules"":[""Single writer""],""tags"":[""sqlite""]}",true,,UT-ENR-06/IT-05/E2E-API-01
+M-02,1,"","","{}",false,summary required,UT-ENR-02
+M-03,1,"x]repeated 501 times","tag1",null,false,summary too long,UT-ENR-03/PBT-01
+M-04,1,"Valid summary","x]repeated 501 times",null,false,tags too long,PBT-02
+M-05,999,"Valid summary","tag1",null,false,Entry #999 not found,UT-ENR-04
+M-06,1,"Valid summary","tag1",null,false,already enriched,UT-ENR-05 (entry already done)
+M-07,-1,"Valid summary","tag1",null,false,Invalid entry_id,UT-ENR-01/PBT-04
+M-08,0,"Valid summary","tag1",null,false,Invalid entry_id,PBT-04
+M-09,1,"<script>alert(1)</script>","<img onerror=x>",null,true or sanitized,,UT-SEC-01
+M-10,1,"Valid","tag1","{""summary"":""ok"",""unknown_evil_key"":""payload""}",false,schema validation,UT-SEC-02

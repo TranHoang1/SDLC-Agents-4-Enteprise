@@ -1,4 +1,8 @@
 /**
+ * @deprecated SA4E-78: File watching moved to Extension side (VS Code FileSystemWatcher).
+ * This class is retained for backward compatibility with co-located deployments.
+ * For decoupled deployments, use POST /api/index/file-events instead.
+ *
  * File Watcher — chokidar-based file system watcher with debounce.
  * Gracefully degrades if chokidar is not installed.
  */

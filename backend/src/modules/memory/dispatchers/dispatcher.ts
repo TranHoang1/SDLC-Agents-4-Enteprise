@@ -14,6 +14,7 @@ import type { ClassifyService } from '../llm/classify-service.js';
 import type { ConvertToolResolver } from '../ingest/ConvertToolResolver.js';
 import { handleSearch, handleDiscover, handleTags, handleCitations } from './search.js';
 import { handleIngest, handleIngestFile, handlePin, handleMap, handleCrud } from './crud.js';
+import { handleEnrich } from './enrich.js';
 import {
   handleAdmin, handleGraph, handleConsolidate, handleLifecycle,
   handleTemplates, handleAttachments, handleConversation,
@@ -69,7 +70,7 @@ const HANDLER_REGISTRY: Record<string, ToolHandlerFn> = {
   mem_search:               (ctx, a) => p(handleSearch(ctx.engine, ctx.scopeCtx, a)),
   mem_ingest:               (ctx, a) => p(handleIngest(ctx.engine, ctx.scopeCtx, ctx.tagAnalyzer, a, ctx.dbAdapter, ctx.embeddingAvailable)),
   mem_ingest_file:          (ctx, a) => p(handleIngestFile(ctx.engine, ctx.scopeCtx, ctx.workspace, a, ctx.convertResolver, ctx.dbAdapter, ctx.embeddingAvailable)),
-  mem_pin:                  (_ctx, a) => p(handlePin(a)),
+  mem_pin:                  (ctx, a) => p(handlePin(a, ctx.engine)),
   mem_map:                  (_ctx, a) => p(handleMap(a)),
   mem_crud:                 (ctx, a) => p(handleCrud(ctx.engine, ctx.scopeCtx, a)),
   mem_graph:                (ctx, a) => p(handleGraph(ctx.engine, a)),
@@ -89,6 +90,7 @@ const HANDLER_REGISTRY: Record<string, ToolHandlerFn> = {
   mem_configure_decay:      (ctx, a) => p(handleConfigureDecay(ctx.engine, a)),
   mem_smart_ingest:         (ctx, a) => p(handleSmartIngest(ctx.engine, ctx.scopeCtx, ctx.classifyService, a)),
   mem_smart_ingest_cleanup: (ctx, a) => p(handleSmartIngestCleanup(ctx.engine, ctx.scopeCtx, ctx.classifyService, a)),
+  mem_enrich:               (ctx, a) => p(handleEnrich(ctx.engine, ctx.scopeCtx, a, ctx.dbAdapter!)),
   mem_procedure:            (ctx, a) => p(handleProcedure(ctx.engine, ctx.scopeCtx, a)),
   mem_skill_capture:        (ctx, a) => p(handleSkillCapture(ctx.engine, ctx.scopeCtx, a)),
   mem_skill_execute:        (ctx, a) => p(handleSkillExecute(ctx.engine, ctx.scopeCtx, a, ctx.dispatch)),

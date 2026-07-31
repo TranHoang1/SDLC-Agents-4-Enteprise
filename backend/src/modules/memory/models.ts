@@ -40,6 +40,12 @@ export interface KnowledgeEntry {
   needs_verification?: number;
   epoch_id?: string | null;
   superseded_by?: number | null;
+  /** SA4E-79: Enrichment lifecycle status — 'pending' or 'done'. Default 'done'. */
+  enrichment_status?: 'pending' | 'done';
+  /** SA4E-79: Source that performed enrichment (e.g. 'client_llm', 'backend_llm'). */
+  enriched_by?: string | null;
+  /** SA4E-79: ISO timestamp when enrichment completed. */
+  enriched_at?: string | null;
 }
 
 export interface SearchResult {
