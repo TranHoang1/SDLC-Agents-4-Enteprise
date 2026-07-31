@@ -98,6 +98,9 @@ export class SettingsPanel {
     const jsUri = webview.asWebviewUri(
       vscode.Uri.joinPath(this.extensionUri, "webview-assets", "settings", "settings.js")
     );
+    const proxyJsUri = webview.asWebviewUri(
+      vscode.Uri.joinPath(this.extensionUri, "webview-assets", "settings", "proxy-tab.js")
+    );
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -117,6 +120,7 @@ export class SettingsPanel {
         <div class="tab-bar" role="tablist">
             <button class="tab-btn active" id="tab-llm" data-tab="pane-llm" role="tab" aria-selected="true">&#129302; LLM Provider</button>
             <button class="tab-btn" id="tab-server" data-tab="pane-server" role="tab" aria-selected="false">&#127760; Server Settings</button>
+            <button class="tab-btn" id="tab-proxy" data-tab="pane-proxy" role="tab" aria-selected="false">&#128274; Proxy</button>
         </div>
         <div class="tab-pane active" id="pane-llm" role="tabpanel">
             <section class="card" id="provider-section"><h2>&#129302; LLM Provider</h2><div class="provider-select-group"><label for="provider-select">Choose provider</label><select id="provider-select">${this.buildProviderOptions()}</select></div></section>
@@ -129,8 +133,15 @@ export class SettingsPanel {
             <section class="card" id="backend-mcp-section"><h2>&#127760; Backend MCP Server</h2><p class="card-desc">Configure the remote backend server URL.</p><div class="form-group"><label for="backend-url-input">Backend URL</label><input type="text" id="backend-url-input" placeholder="http://127.0.0.1:48721"></div><div class="btn-row"><button id="save-backend-url-btn" class="btn primary">Save URL</button><button id="test-backend-btn" class="btn secondary">Test Connection</button></div><div id="backend-test-result" class="status-indicator"></div></section>
             <section class="card" id="wrapper-mcp-section"><h2>&#9881; MCP Wrapper Server (Local)</h2><p class="card-desc">Configure the local MCP wrapper server port.</p><div class="form-group"><label for="mcp-port-input">Wrapper Server Port</label><input type="number" id="mcp-port-input" min="1" max="65535" placeholder="9181"></div><div class="form-group checkbox-group"><label><input type="checkbox" id="enable-mcp-server-chk"> Enable MCP wrapper server on startup</label></div><div class="btn-row"><button id="save-wrapper-btn" class="btn primary">Save</button><button id="restart-mcp-btn" class="btn secondary">Restart Wrapper Server</button></div><div id="wrapper-result" class="status-indicator"></div></section>
         </div>
+        <div class="tab-pane" id="pane-proxy" role="tabpanel">
+            <section class="card" id="proxy-mode-section"><h2>&#128274; Proxy Mode</h2><p class="card-desc">Choose how the extension connects to the internet.</p><div class="radio-group" id="proxy-mode-group"><label class="radio-label"><input type="radio" name="proxy-mode" value="none"> <strong>No Proxy</strong> &mdash; Direct connection</label><label class="radio-label"><input type="radio" name="proxy-mode" value="system" checked> <strong>System Proxy</strong> &mdash; Auto-detect from environment</label><label class="radio-label"><input type="radio" name="proxy-mode" value="manual"> <strong>Manual</strong> &mdash; Configure proxy server</label></div><div id="proxy-detected-info" class="status-indicator" style="display:none;"></div></section>
+            <section class="card" id="proxy-manual-section" style="display:none;"><h2>&#9881; Manual Configuration</h2><div class="form-group"><label for="proxy-host-input">Proxy Host</label><input type="text" id="proxy-host-input" placeholder="proxy.company.com"></div><div class="form-group"><label for="proxy-port-input">Port</label><input type="number" id="proxy-port-input" min="1" max="65535" value="8080"></div><div class="form-group"><label for="proxy-bypass-input">Bypass List <span style="opacity:0.6">(comma-separated, supports *.domain.com)</span></label><input type="text" id="proxy-bypass-input" placeholder="localhost,127.0.0.1,::1"></div><div id="proxy-url-preview" class="proxy-url-preview"></div><div class="btn-row"><button id="save-proxy-btn" class="btn primary">Save Proxy</button></div><div id="proxy-save-result" class="status-indicator"></div></section>
+            <section class="card" id="proxy-auth-section" style="display:none;"><h2>&#128273; Proxy Authentication</h2><p class="card-desc">Credentials are stored securely in VS Code SecretStorage.</p><div class="form-group"><label for="proxy-username-input">Username</label><input type="text" id="proxy-username-input" placeholder="proxy-user"></div><div class="form-group"><label for="proxy-password-input">Password</label><div class="input-with-toggle"><input type="password" id="proxy-password-input" placeholder="Enter password..." autocomplete="off"><button class="icon-btn" id="toggle-proxy-password" title="Show/Hide" aria-label="Toggle proxy password visibility">&#128065;</button></div></div><div class="btn-row"><button id="save-proxy-creds-btn" class="btn primary">Save Credentials</button><button id="clear-proxy-creds-btn" class="btn danger-outline">Clear Credentials</button></div><div id="proxy-creds-result" class="status-indicator"></div></section>
+            <section class="card" id="proxy-test-section"><h2>&#129514; Test Connection</h2><p class="card-desc">Test proxy connectivity by connecting to an external URL.</p><div class="form-group"><label for="proxy-test-url-input">Test URL</label><input type="text" id="proxy-test-url-input" placeholder="https://httpbin.org/get" value="https://httpbin.org/get"></div><div class="btn-row"><button id="test-proxy-btn" class="btn primary">Test Proxy</button><button id="detect-proxy-btn" class="btn secondary">Detect System Proxy</button></div><div id="proxy-test-result" class="status-indicator"></div></section>
+        </div>
     </div>
     <script nonce="${nonce}" src="${jsUri}"></script>
+    <script nonce="${nonce}" src="${proxyJsUri}"></script>
 </body>
 </html>`;
   }

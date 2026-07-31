@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.19.0] - 2026-07-31
+
+### Added
+- **SA4E-81: Proxy Configuration Page** — New "Proxy" tab in Settings Panel
+  - Manual proxy configuration (host, port, bypass list with wildcard support)
+  - System proxy auto-detection (HTTPS_PROXY, HTTP_PROXY, VS Code http.proxy)
+  - Proxy authentication with secure credential storage (VS Code SecretStorage)
+  - Custom URL connectivity testing through configured proxy
+  - Automatic proxy routing for all outbound requests (undici ProxyAgent dispatcher)
+  - Three modes: No Proxy / System / Manual
+  - Bypass list with wildcard matching (*.domain.com)
+
+### Fixed
+- Fixed acquireVsCodeApi double-call crash in proxy-tab.js (shared window.__vscodeApi pattern)
 ## [1.18.0] - 2026-07-31
 
 ### Fixed

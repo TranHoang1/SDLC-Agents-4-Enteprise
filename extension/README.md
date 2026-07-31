@@ -243,6 +243,9 @@ MIT
 
 ## Changelog
 
+### v1.19.0 (2026-07-31)
+
+- **SA4E-81: Proxy Configuration Page** — Enterprise network proxy settings UI. Added Proxy tab to Settings Panel with: manual proxy config (host, port, bypass list), system proxy auto-detection, proxy authentication (SecretStorage), custom URL connectivity testing, and automatic proxy routing for all outbound HttpClient requests via undici ProxyAgent.
 ### v1.18.0 (2026-07-31)
 
 - **SA4E-79: Client-Side LLM Knowledge Enrichment — bug fixes & hardening** — Client enrichment fallback now works end-to-end: `handleIngestFile` marks entries `pending` + enqueues TAG_ENRICHMENT (NEW-01/NEW-06/NEW-10), TaskWorker race guards (NEW-03), USER-scoped entries can be enriched without projectId (NEW-07), pending section limit raised 3→10 (NEW-09). **FTS fix**: `knowledge_fts` index auto-rebuilds at startup when empty — restores `mem_search` results for all 12,737 pre-existing KB entries.

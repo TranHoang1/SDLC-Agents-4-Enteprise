@@ -6,8 +6,8 @@
 (function () {
   "use strict";
 
-  // Acquire VS Code API
-  const vscode = acquireVsCodeApi();
+  // Acquire VS Code API (store globally so proxy-tab.js can reuse)
+  const vscode = (window.__vscodeApi) || (window.__vscodeApi = acquireVsCodeApi());
 
   // ── Tab switching ──────────────────────────────
   document.querySelectorAll('.tab-btn').forEach(function(btn) {

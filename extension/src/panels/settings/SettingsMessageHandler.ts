@@ -7,10 +7,12 @@ import * as vscode from "vscode";
 import { SECRET_KEYS } from "../../models";
 import { LlmTestService } from "../../services/LlmTestService";
 import { ProviderConfigService } from "../../services/ProviderConfigService";
+import { ProxyMessageHandler, PROXY_MESSAGE_TYPES } from "../../proxy/ProxyMessageHandler";
 
 export class SettingsMessageHandler {
   private readonly llmTestService: LlmTestService;
   private readonly configService: ProviderConfigService;
+  private readonly proxyHandler: ProxyMessageHandler;
 
   constructor(
     private readonly secrets: vscode.SecretStorage,
@@ -18,9 +20,16 @@ export class SettingsMessageHandler {
   ) {
     this.llmTestService = new LlmTestService(secrets);
     this.configService = new ProviderConfigService(secrets);
+    this.proxyHandler = new ProxyMessageHandler(secrets, postMessage);
   }
 
   async handle(msg: any): Promise<void> {
+    // Delegate proxy messages to ProxyMessageHandler
+    if (PROXY_MESSAGE_TYPES.includes(msg.type)) {
+      await this.proxyHandler.handle(msg);
+      return;
+    }
+
     switch (msg.type) {
       case "ready":
       case "getState":

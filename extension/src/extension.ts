@@ -20,6 +20,9 @@ import { registerLlmCommands } from "./commands/LlmCommands";
 import { initPlatformSwap } from "./platform-swap";
 import { StatusBarManager } from "./ui/status-bar";
 import { SettingsPanel } from "./panels/settings/SettingsPanel";
+import { ProxyAgentFactory } from "./proxy/ProxyAgentFactory";
+import { ProxyConfigService } from "./proxy/ProxyConfigService";
+import { ProxyDetectionService } from "./proxy/ProxyDetectionService";
 
 let mcpManager: McpServerManager | undefined;
 let panelManager: WebviewPanelManager | undefined;
@@ -44,6 +47,11 @@ export async function activate(context: vscode.ExtensionContext) {
       SettingsPanel.open(context.extensionUri, context.secrets)
     )
   );
+
+  // Initialize proxy support (machine-specific, works without workspace)
+  const proxyConfigService = new ProxyConfigService(context.secrets);
+  const proxyDetectionService = new ProxyDetectionService();
+  ProxyAgentFactory.initialize(proxyConfigService, proxyDetectionService);
 
   const workspaceRoot = getWorkspaceRoot();
   if (workspaceRoot) {
