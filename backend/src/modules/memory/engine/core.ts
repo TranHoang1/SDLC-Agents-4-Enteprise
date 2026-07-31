@@ -18,6 +18,7 @@ import { MemoryEngineCrud } from './crud.js';
 export class MemoryEngine extends MemoryEngineCrud {
   private currentSessionId: string | null = null;
   private compositeScorer: CompositeScorer;
+  private cachedScoringOptions: CompositeScoreOptions | null = null;
 
   constructor(adapter: DatabaseAdapter) {
     super(adapter);
@@ -46,17 +47,10 @@ export class MemoryEngine extends MemoryEngineCrud {
   }
 
   async search(query: string, limit = 10, tier?: string, type?: string, scopeCtx?: ScopeContext): Promise<SearchResult[]> {
-    // `expires_at` is stored as ISO-8601 TEXT in both SQLite and PostgreSQL.
-    // SQLite can compare TEXT >= datetime('now') directly (implicit conversion),
-    // but PostgreSQL requires an explicit cast to `timestamptz` — otherwise the
-    // comparison fails with "operator does not exist: text >= timestamp with
-    // time zone" (SQLSTATE 42883).
-    const expiresCol = this.adapter.getEngine() === 'postgresql'
-      ? 'ke.expires_at::timestamptz'
-      : 'ke.expires_at';
+    const engine = this.adapter.getEngine();
     const clauses: string[] = [
       'ke.archived = 0',
-      `(ke.expires_at IS NULL OR ${expiresCol} >= ${this.dialect.now()})`,
+      this.dialect.expiryCheck('ke.expires_at'),
     ];
     const params: unknown[] = [];
     if (tier) { clauses.push('ke.tier = ?'); params.push(tier); }
@@ -65,8 +59,6 @@ export class MemoryEngine extends MemoryEngineCrud {
       clauses.push(this.buildScopeClause(scopeCtx, 'ke'));
       params.push(...this.buildScopeParams(scopeCtx));
     }
-
-    const engine = this.adapter.getEngine();
 
     if (engine === 'sqlite') {
       const ftsQuery = query.replace(/[^\w\s*":.]/g, ' ').trim() || '*';
@@ -153,13 +145,18 @@ export class MemoryEngine extends MemoryEngineCrud {
    */
   private async readScoringOptions(): Promise<CompositeScoreOptions> {
     try {
-      const row = await this.adapter.getAsync<{ value: string }>(
+      // PostgreSQL only supports async — return defaults (non-fatal)
+      if (this.adapter.getEngine() === 'postgresql') {
+        return this.cachedScoringOptions ?? {};
+      }
+      const row = (this.adapter as any).get?.(
         `SELECT value FROM decay_config WHERE key = 'enable_predictive'`,
-      );
-      return { enablePredictive: row?.value === 'true' };
+      ) as { value: string } | undefined;
+      const opts = { enablePredictive: row?.value === 'true' };
+      this.cachedScoringOptions = opts;
+      return opts;
     } catch (e) {
-      console.warn('[MemoryEngine] readScoringOptions failed', e);
-      return {};
+      return this.cachedScoringOptions ?? {};
     }
   }
 

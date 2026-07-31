@@ -27,5 +27,6 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   { name: 'mem_status', description: 'Get memory status (alias for mem_admin status).', inputSchema: { type: 'object', properties: {} }, category: 'memory' },
   { name: 'mem_audit', description: 'Get memory audit log (alias for mem_admin audit).', inputSchema: { type: 'object', properties: { limit: { type: 'number' }, operation: { type: 'string' } } }, category: 'memory' },
   { name: 'mem_sessions', description: 'List memory sessions (alias for mem_admin sessions).', inputSchema: { type: 'object', properties: {} }, category: 'memory' },
+  { name: 'mem_enrich', description: 'Accept client-generated enrichment metadata for a pending KB entry.', inputSchema: { type: 'object', properties: { entry_id: { type: 'number' }, summary: { type: 'string' }, tags: { type: 'string' }, structured_map: { type: 'object' } }, required: ['entry_id', 'summary', 'tags'] }, category: 'memory' },
 ];
 

@@ -1,9 +1,13 @@
+/**
+ * SA4E-78 — DependencyResolver (static-only, no filesystem access).
+ * Resolves import/require statements to candidate file paths.
+ * Hash verification is deferred to when content is available via the indexer.
+ */
+
 import type { FileDependency } from './types.js';
 import * as path from 'path';
-import * as crypto from 'crypto';
 import { PegaRuleAstParser } from '../../modules/pega/PegaRuleAstParser.js';
 
-const EXTENSION_PRIORITY = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.d.ts'];
 const AST_PARSER = new PegaRuleAstParser();
 
 export class DependencyResolver {
@@ -24,7 +28,11 @@ export class DependencyResolver {
     return [];
   }
 
-  private resolveTsJs(source: string, filePath: string, workspace: string): FileDependency[] {
+  /**
+   * Static TS/JS import resolution — compute candidate path without reading files.
+   * Hash verification deferred to indexer (SA4E-78: AD-7).
+   */
+  private resolveTsJs(source: string, filePath: string, _workspace: string): FileDependency[] {
     const deps: FileDependency[] = [];
     const dir = path.posix.dirname(filePath);
     const importRe = /from\s+['"]([^'"]+)['"]|require\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
@@ -35,11 +43,9 @@ export class DependencyResolver {
       if (!modulePath || seen.has(modulePath)) continue;
       seen.add(modulePath);
       if (modulePath.startsWith('.')) {
+        // Static resolution: compute candidate path, no file read
         const candidate = path.posix.resolve(dir, modulePath);
-        const resolved = this.resolveLocalFile(candidate, workspace);
-        if (resolved) {
-          deps.push(resolved);
-        }
+        deps.push({ path: candidate, expectedHash: '', sourceType: 'local' });
       }
     }
     return deps;
@@ -95,21 +101,18 @@ export class DependencyResolver {
     return deps;
   }
 
-  private resolvePega(source: string, filePath: string, workspace: string): FileDependency[] {
+  /**
+   * Static Pega reference resolution — parse AST references without file reads.
+   * SA4E-78: hash deferred, no filesystem coupling.
+   */
+  private resolvePega(source: string, _filePath: string, _workspace: string): FileDependency[] {
     const deps: FileDependency[] = [];
     try {
       const json = JSON.parse(source);
       const ast = AST_PARSER.parse(json);
       for (const ref of ast.references) {
         const targetFile = this.pegaRefToFilePath(ref);
-        const fullPath = path.resolve(workspace, targetFile);
-        try {
-          const content = require('fs').readFileSync(fullPath, 'utf-8');
-          const hash = crypto.createHash('sha256').update(content).digest('hex').slice(0, 16);
-          deps.push({ path: targetFile, expectedHash: hash, sourceType: 'local' });
-        } catch {
-          deps.push({ path: targetFile, expectedHash: '', sourceType: 'remote' });
-        }
+        deps.push({ path: targetFile, expectedHash: '', sourceType: 'local' });
       }
     } catch {
       // JSON parse failed — skip
@@ -121,32 +124,5 @@ export class DependencyResolver {
     const typePart = ref.ruleType.replace(/-/g, '-');
     const cls = ref.className.replace(/^@/, '');
     return cls ? `${cls}.${ref.ruleName}.${typePart}.pega` : `${ref.ruleName}.${typePart}.pega`;
-  }
-
-  private resolveLocalFile(candidate: string, workspace: string): FileDependency | null {
-    for (const ext of EXTENSION_PRIORITY) {
-      const p = candidate + ext;
-      try {
-        const fullPath = path.resolve(workspace, p);
-        const content = require('fs').readFileSync(fullPath, 'utf-8');
-        const hash = crypto.createHash('sha256').update(content).digest('hex').slice(0, 16);
-        return { path: p, expectedHash: hash, sourceType: 'local' };
-      } catch {
-        // try next extension
-      }
-    }
-    const indexVariants = ['/index.ts', '/index.tsx', '/index.js', '/index.jsx', '/index.mjs', '/index.cjs'];
-    for (const variant of indexVariants) {
-      const p = candidate + variant;
-      try {
-        const fullPath = path.resolve(workspace, p);
-        const content = require('fs').readFileSync(fullPath, 'utf-8');
-        const hash = crypto.createHash('sha256').update(content).digest('hex').slice(0, 16);
-        return { path: p, expectedHash: hash, sourceType: 'local' };
-      } catch {
-        // try next variant
-      }
-    }
-    return null;
   }
 }

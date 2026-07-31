@@ -17,6 +17,9 @@ import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
 import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 import { validateSession } from '../../admin/db/sessions.js';
 import type { FileDependency } from '../../engine/parsers/types.js';
+import {
+  handleFullIndex, handleFileEvents, handleCancel, handleProgress,
+} from './api-index-decoupled.js';
 
 interface SourceFile {
   path: string;
@@ -243,6 +246,28 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
     return handleIndexDocuments(c, logger);
+  });
+
+  // SA4E-78: Decoupled indexer endpoints
+  app.post('/api/index/full', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleFullIndex(c, registry, logger);
+  });
+  app.post('/api/index/file-events', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleFileEvents(c, registry, logger);
+  });
+  app.post('/api/index/cancel', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleCancel(c, registry, logger);
+  });
+  app.get('/api/index/progress', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleProgress(c, registry, logger);
   });
 }
 

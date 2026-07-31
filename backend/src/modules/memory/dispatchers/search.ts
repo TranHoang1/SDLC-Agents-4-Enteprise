@@ -24,7 +24,45 @@ export async function handleSearch(engine: MemoryEngine, scopeCtx: ScopeContext 
     if (a.detail) lines.push(`  Content: ${r.entry.content.slice(0, 500)}`);
     lines.push('');
   }
+
+  // SA4E-79: Append pending entries that need client-side enrichment (max 3)
+  const pendingHits = await queryPendingEntries(engine, scopeCtxResolved);
+  if (pendingHits.length > 0) {
+    lines.push('--- Pending Entries (need enrichment) ---\n');
+    pendingHits.forEach((pe, idx) => {
+      const src = pe.source || 'unknown';
+      const preview = pe.content.slice(0, 300).replace(/\n/g, ' ');
+      lines.push(`[PENDING #${idx + 1}] ID: ${pe.id} | Source: ${src}`);
+      lines.push(`  Content: ${preview}`);
+      lines.push('');
+    });
+  }
+
   return lines.join('\n');
+}
+
+/** SA4E-79: Query up to 10 pending entries for client-side enrichment (NEW-09). */
+async function queryPendingEntries(
+  engine: MemoryEngine,
+  scopeCtx: ScopeContext | undefined,
+): Promise<Array<{ id: number; source: string | null; content: string }>> {
+  try {
+    const params: unknown[] = [];
+    let sql = `SELECT id, source, content FROM knowledge_entries
+       WHERE enrichment_status = 'pending' AND archived = 0`;
+    if (scopeCtx?.projectId) {
+      sql += ` AND (project_id = ? OR scope = 'SHARED')`;
+      params.push(scopeCtx.projectId);
+    }
+    sql += ` ORDER BY created_at DESC LIMIT 10`;
+    return await engine.getAdapter().allAsync<{
+      id: number; source: string | null; content: string;
+    }>(sql, params);
+  } catch (err) {
+    // Graceful degradation: return normal results without pending section
+    logger.warn({ err }, '[mem_search] Pending query failed (non-fatal)');
+    return [];
+  }
 }
 
 export function handleDiscover(a: Args): string {

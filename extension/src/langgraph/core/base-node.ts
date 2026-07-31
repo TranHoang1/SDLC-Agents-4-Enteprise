@@ -23,12 +23,15 @@ import {
 } from "../helpers/hook-helpers";
 import { estimateTokens } from "./context-budget";
 import { loadSteeringRules, injectSteering } from "../steering/steering-loader";
+import { EnrichmentObserver } from "../enrichment/EnrichmentObserver";
 
 const NODE_TIMEOUT_MS = 300_000;
 const TOOL_CALL_TIMEOUT_MS = 60_000;
 
 export abstract class BaseNode {
   private static readonly MAX_RETRIES = 2;
+  /** SA4E-79: Singleton observer for detecting and enriching pending KB entries. */
+  private enrichmentObserver: EnrichmentObserver | null = null;
 
   constructor(
     protected readonly nodeId: string,
@@ -175,7 +178,31 @@ export abstract class BaseNode {
   protected readCodeIntelligence(m?: string) { return readCodeIntelligence(m); }
 
   // === Knowledge Base Delegates ===
-  protected kbSearch(query: string, limit = 10, scope?: string) { return this.callMcp("mem_search", { query, limit, ...(scope ? { scope } : {}) }); }
+  protected kbSearch(query: string, limit = 10, scope?: string) {
+    // SA4E-79: Hook EnrichmentObserver into search responses (fire-and-forget)
+    const resultPromise = this.callMcp("mem_search", { query, limit, ...(scope ? { scope } : {}) });
+    resultPromise.then(response => {
+      this.getEnrichmentObserver()?.onSearchResponse(response);
+    }).catch(() => { /* non-fatal — search still returns normally */ });
+    return resultPromise;
+  }
+
+  /** SA4E-79: mem_pin get_context also triggers enrichment for pending pinned entries. */
+  protected kbPinContext() {
+    const resultPromise = this.callMcp("mem_pin", { action: "get_context" });
+    resultPromise.then(response => {
+      this.getEnrichmentObserver()?.onSearchResponse(response);
+    }).catch(() => { /* non-fatal */ });
+    return resultPromise;
+  }
+
+  /** SA4E-79: Lazy-init enrichment observer singleton. */
+  private getEnrichmentObserver(): EnrichmentObserver | null {
+    if (!this.enrichmentObserver) {
+      this.enrichmentObserver = new EnrichmentObserver(this.mcpBridge, this.llmProvider);
+    }
+    return this.enrichmentObserver;
+  }
   protected async kbIngest(content: string, type: string, source: string, tags: string[], scope: string = 'USER') {
     try { await this.callMcp("mem_ingest", { content, type, source, tags, scope }); } catch (err) {
       console.warn(`[BaseNode:${this.nodeId}] kbIngest failed (non-fatal): ${(err as Error).message}`);

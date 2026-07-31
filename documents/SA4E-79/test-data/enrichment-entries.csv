@@ -1,0 +1,9 @@
+id,content,type,source,tags,enrichment_status,enriched_by,project_id,description
+1,"Memory module uses SQLite WAL mode for concurrent read access and single-writer pattern.",CONTEXT,agent-output/SA4E-79,"sqlite,wal,memory",pending,,project-A,Standard pending entry for enrichment tests
+2,"Authentication flow uses JWT with 15-minute access token and 7-day refresh token rotation.",DECISION,agent-output/SA4E-79,"auth,jwt,security",pending,,project-A,Auth-related pending entry
+3,"TaskWorker processes TAG_ENRICHMENT tasks using exponential backoff with max 5 retries.",CONTEXT,agent-output/SA4E-79,"taskworker,queue,retry",pending,,project-A,TaskWorker docs entry
+4,"API rate limiting implemented at 100 requests per minute per API key using sliding window.",CONTEXT,manual-input,"rate-limit,api,security",done,backend_llm,project-A,Already enriched entry
+5,"Database migration strategy uses sequential numbered files with up/down support.",CONTEXT,agent-output/SA4E-79,"migration,database,schema",pending,,project-B,Different project pending entry
+6,"Short content",CONTEXT,manual-input,"test",pending,,project-A,Minimal content entry
+7,"x]repeated 1000 times - simulates large content entry for truncation testing scenarios with extended text",CONTEXT,agent-output/SA4E-79,"large,content",pending,,project-A,Large content entry for 300-char truncation test
+8,"Entry with <script>alert(1)</script> in content for XSS testing",CONTEXT,manual-input,"security,xss",pending,,project-A,XSS test entry

@@ -90,4 +90,16 @@ export class DialectHelper {
     }
     return `datetime(${column}) <= datetime('now')`;
   }
+
+  /** Cross-engine LEAST/MIN — returns smallest of two numeric expressions. */
+  least(a: string, b: string): string {
+    if (this.engine === 'postgresql') return `LEAST(${a}, ${b}::double precision)`;
+    return `MIN(${a}, ${b})`;
+  }
+
+  /** Cross-engine expiry check — compares TEXT date column against now. */
+  expiryCheck(column: string): string {
+    if (this.engine === 'postgresql') return `(${column} IS NULL OR ${column}::timestamp >= NOW())`;
+    return `(${column} IS NULL OR ${column} >= datetime('now'))`;
+  }
 }

@@ -115,11 +115,17 @@ After parsing input, confirm:
 ### Step 0: Reconnaissance & Scope Definition
 
 1. Parse user input to determine audit scope.
-2. Read project structure to understand the application layout:
+2. **Search Knowledge Base FIRST (MANDATORY):**
+   - Use the discovered **KB "search" tool** with query `"{TICKET-KEY} security"` — find previous security findings for this ticket
+   - Use the discovered **KB "search" tool** with query `"security patterns decisions {PROJECT}"` — find project-wide security decisions/patterns
+   - Use the discovered **KB "search" tool** with query `"security vulnerability lessons learned"` — find known vulnerability patterns from past reviews
+   - If KB has previous findings → reference them, check if issues were fixed
+   - If KB has security decisions (e.g., "always use argon2 for password hashing") → verify compliance
+3. Read project structure to understand the application layout:
    - Read `.analysis/code-intelligence/project-structure.md` if available.
    - Read relevant `.analysis/code-intelligence/modules/*.md` for module details.
    - Read `build.gradle.kts` to identify dependencies and their versions.
-3. Identify key areas to audit:
+4. Identify key areas to audit:
    - Authentication/Authorization modules
    - API route definitions
    - Database access layers

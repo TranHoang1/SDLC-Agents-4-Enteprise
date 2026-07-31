@@ -108,7 +108,7 @@ export class OutcomeService {
 
   private async boostConfidence(entryId: number): Promise<void> {
     await this.adapter.runAsync(
-      `UPDATE knowledge_entries SET confidence = MIN(confidence * 1.1, 1.0), updated_at = ${this.dialect.now()} WHERE id = ?`,
+      `UPDATE knowledge_entries SET confidence = ${this.dialect.least('confidence * 1.1', '1.0')}, updated_at = ${this.dialect.now()} WHERE id = ?`,
       [entryId],
     );
   }

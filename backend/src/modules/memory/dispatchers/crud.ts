@@ -81,10 +81,14 @@ export async function handleIngest(
         source, tags, agent_name: agentName,
         owner: inferOwner(source),
       });
+      // NEW-06/NEW-10: Always set 'pending' — TaskWorker handles enrichment
+      // This removes the contradiction of 'done' + TAG_ENRICHMENT coexisting
+      await dbAdapter.runAsync(
+        `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE id = ?`,
+        [id],
+      );
       const taskRepo = new PendingTaskRepository(dbAdapter);
-      if (tagAnalyzer) {
-        await taskRepo.create({ task_type: TaskType.TAG_ENRICHMENT, entry_id: id, payload: { entry_id: id, content, existing_tags: tags, options: { threshold: 0.6, autoApply: true } } });
-      }
+      await taskRepo.create({ task_type: TaskType.TAG_ENRICHMENT, entry_id: id, payload: { entry_id: id, content, existing_tags: tags, options: { threshold: 0.6, autoApply: true } } });
       if (embeddingAvailable) {
         await taskRepo.create({ task_type: TaskType.VECTOR_EMBEDDING, entry_id: id, payload: { entry_id: id, text: `${summary} ${content}`.slice(0, 4000) } });
       }
@@ -97,6 +101,15 @@ export async function handleIngest(
       source, tags, agent_name: agentName,
       owner: inferOwner(source),
     });
+    // TA-11: Set enrichment_status in no-adapter path (non-atomic but best effort)
+    if (!tagAnalyzer) {
+      try {
+        await engine.getAdapter().runAsync(
+          `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE id = ?`,
+          [id],
+        );
+      } catch { /* non-fatal — graceful degradation */ }
+    }
     if (tagAnalyzer) {
       tagAnalyzer.analyzeTags(content).then(async result => {
         if (result.appliedTags.length > 0) {
@@ -217,6 +230,13 @@ export async function handleIngestFile(
   for (const sec of (sections.length > 0 ? sections : [text])) {
     const summary = sec.split('\n')[0]?.trim().slice(0, 120) || filePath;
     const id = await engine.insert({ content: sec.trim(), summary, type, tier: tierForType(type), scope, user_id: userId, project_id: scopeCtx?.projectId ?? null, source: filePath, tags: '' });
+    // NEW-01: Mark as pending — TAG_ENRICHMENT task will process later
+    try {
+      await engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE id = ?`,
+        [id],
+      );
+    } catch { /* non-fatal — column may not exist pre-migration */ }
     if (structuredMap) {
       await engine.updateStructuredMap(id, structuredMap);
     }
@@ -240,16 +260,76 @@ export async function handleIngestFile(
   return JSON.stringify({ status: 'ingested', entries: created, file: filePath } satisfies IngestFileResponse);
 }
 
-export function handlePin(a: Args): string {
+export async function handlePin(a: Args, engine?: MemoryEngine): Promise<string> {
   const action = (a.action as string) || 'list';
   const id = a.entry_id as number;
-  const PIN_ACTIONS: Record<string, () => string> = {
-    pin:         () => id ? `Pinned #${id}` : 'Error: entry_id required',
-    unpin:       () => id ? `Unpinned #${id}` : 'Error: entry_id required',
-    list:        () => '[]',
-    get_context: () => '(no pinned entries)',
-  };
-  return (PIN_ACTIONS[action] ?? (() => `Unknown pin action: ${action}`))();
+
+  if (!engine) return 'Error: engine not available';
+
+  switch (action) {
+    case 'pin': {
+      if (!id) return 'Error: entry_id required';
+      const adapter = engine.getAdapter();
+      const dialect = new (await import('../../../database/dialect/DialectHelper.js')).DialectHelper(adapter.getEngine());
+      await adapter.runAsync(
+        `UPDATE knowledge_entries SET pinned = 1, updated_at = ${dialect.now()} WHERE id = ?`,
+        [id],
+      );
+      return `Pinned #${id}`;
+    }
+    case 'unpin': {
+      if (!id) return 'Error: entry_id required';
+      const adapter = engine.getAdapter();
+      const dialect = new (await import('../../../database/dialect/DialectHelper.js')).DialectHelper(adapter.getEngine());
+      await adapter.runAsync(
+        `UPDATE knowledge_entries SET pinned = 0, updated_at = ${dialect.now()} WHERE id = ?`,
+        [id],
+      );
+      return `Unpinned #${id}`;
+    }
+    case 'list': {
+      const rows = await engine.getAdapter().allAsync<{ id: number; summary: string; pin_order: number }>(
+        `SELECT id, summary, pin_order FROM knowledge_entries WHERE pinned = 1 AND archived = 0 ORDER BY pin_order ASC, id DESC LIMIT 50`,
+        [],
+      );
+      const total = await engine.getAdapter().getAsync<{ cnt: number }>(
+        `SELECT COUNT(*) as cnt FROM knowledge_entries WHERE pinned = 1 AND archived = 0`, [],
+      );
+      return JSON.stringify({
+        count: total?.cnt ?? rows.length,
+        showing: rows.length,
+        entries: rows.map(r => ({ id: r.id, summary: (r.summary || '').slice(0, 100), order: r.pin_order })),
+      });
+    }
+    case 'get_context': {
+      const rows = await engine.getAdapter().allAsync<{ id: number; summary: string; content: string; enrichment_status: string }>(
+        `SELECT id, summary, content, enrichment_status FROM knowledge_entries WHERE pinned = 1 AND archived = 0 ORDER BY pin_order ASC, id DESC LIMIT 10`,
+        [],
+      );
+      if (rows.length === 0) return '(no pinned entries)';
+      const lines = rows.map(r => `[#${r.id}] ${(r.summary || '').slice(0, 80)}\n${(r.content || '').slice(0, 200)}`);
+      // SA4E-79: Include pending pinned entries for client-side enrichment
+      const pending = rows.filter(r => r.enrichment_status === 'pending');
+      if (pending.length > 0) {
+        lines.push('\n--- Pending Entries (need enrichment) ---\n');
+        pending.slice(0, 3).forEach((pe, idx) => {
+          lines.push(`[PENDING #${idx + 1}] ID: ${pe.id} | Source: pinned`);
+          lines.push(`  Content: ${(pe.content || '').slice(0, 300)}`);
+          lines.push('');
+        });
+      }
+      return lines.join('\n\n');
+    }
+    case 'budget': {
+      const row = await engine.getAdapter().getAsync<{ cnt: number; total_len: number }>(
+        `SELECT COUNT(*) as cnt, COALESCE(SUM(LENGTH(content)), 0) as total_len FROM knowledge_entries WHERE pinned = 1 AND archived = 0`, [],
+      );
+      const totalTokens = Math.ceil((row?.total_len ?? 0) / 4);
+      return JSON.stringify({ pinned_count: row?.cnt ?? 0, estimated_tokens: totalTokens, budget: 2000 });
+    }
+    default:
+      return `Unknown pin action: ${action}`;
+  }
 }
 
 export function handleMap(a: Args): string {
