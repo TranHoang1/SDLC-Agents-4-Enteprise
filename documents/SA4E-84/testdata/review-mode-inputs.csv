@@ -1,0 +1,6 @@
+id,description,mode_param,content_type,expected_status,has_content_base64,test_case
+1,XML with edge crossing - mode=review,review,crossing_xml,needs_fix,false,PBT-02
+2,XML with edge crossing - no mode param,,crossing_xml,needs_fix,false,PBT-03
+3,Clean XML - mode=review,review,clean_xml,already_good,false,PBT-07
+4,XML with node overlap - mode=review,review,overlap_xml,needs_fix,false,PBT-02
+5,XML with diagonal edge - mode=review,review,diagonal_xml,needs_fix,false,PBT-02

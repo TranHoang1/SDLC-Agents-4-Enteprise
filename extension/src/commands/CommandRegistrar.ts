@@ -70,7 +70,6 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
       }
       return authManager.refreshToken();
     }),
-    vscode.commands.registerCommand("kiroSdlc.openSettings", () => SettingsPanel.open(context.extensionUri, context.secrets)),
     vscode.commands.registerCommand("kiroSdlc.fetchPegaContext", async () => {
       const root = workspaceRoot || getWorkspaceRoot();
       if (!root) { vscode.window.showErrorMessage("No workspace folder open."); return; }

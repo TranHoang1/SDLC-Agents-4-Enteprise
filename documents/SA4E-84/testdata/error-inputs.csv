@@ -1,0 +1,8 @@
+id,description,input_type,expected_error_contains,test_case
+1,Missing content_base64,empty_args,content_base64 is required,UT-08
+2,Invalid base64 string,invalid_base64,Analysis failed,ERR-01
+3,Valid base64 of broken XML,malformed_xml,Analysis failed,ERR-02
+4,Empty diagram no nodes,empty_diagram,No nodes found in diagram,ERR-03
+5,Oversized diagram 501 nodes,large_diagram,node limit,ERR-05
+6,ELK timeout simulation,timeout_mock,timed out,ERR-04
+7,ELK invalid output NaN,nan_mock,invalid coordinates,ERR-06

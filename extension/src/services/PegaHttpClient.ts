@@ -453,10 +453,21 @@ export class PegaHttpClient {
   /**
    * Service 4: POST /rules/save
    * Tạo mới hoặc cập nhật Rule Instance qua Transactional Commit.
+   * @param target - RuleSet version đích (inject pyRuleSet/pyRuleSetVersion vào ruleJson).
    */
-  public async savePegaRule(rulePayload: string | Record<string, unknown>): Promise<Record<string, unknown>> {
+  public async savePegaRule(
+    rulePayload: string | Record<string, unknown>,
+    target?: { pyRuleSet?: string; pyRuleSetVersion?: string }
+  ): Promise<Record<string, unknown>> {
     const authHeader = await this.getAuthHeader();
-    const payloadStr = typeof rulePayload === "object" ? JSON.stringify(rulePayload) : rulePayload;
+    const payloadObj = typeof rulePayload === "object" ? { ...rulePayload } : JSON.parse(rulePayload);
+    if (target?.pyRuleSet) {
+      payloadObj.pyRuleSet = target.pyRuleSet;
+    }
+    if (target?.pyRuleSetVersion) {
+      payloadObj.pyRuleSetVersion = target.pyRuleSetVersion;
+    }
+    const payloadStr = JSON.stringify(payloadObj);
     for (const prefix of this.getCustomRestPrefixes()) {
       try {
         const url = `${prefix}/rules/save`;
@@ -479,12 +490,21 @@ export class PegaHttpClient {
   /**
    * Service 5: POST /rules/checkout
    * Thực thi quy trình Lock Control (Checkout / Checkin / UndoCheckout).
+   * @param branch - Branch context (branchName/branchVersion) xác định trước khi checkout.
    */
-  public async checkoutPegaRule(insKey: string, action: "CHECKOUT" | "CHECKIN" | "UNDOCHECKOUT", comment?: string): Promise<Record<string, unknown>> {
+  public async checkoutPegaRule(
+    insKey: string,
+    action: "CHECKOUT" | "CHECKIN" | "UNDOCHECKOUT",
+    comment?: string,
+    branch?: { branchName: string; branchVersion: string }
+  ): Promise<Record<string, unknown>> {
     const authHeader = await this.getAuthHeader();
     for (const prefix of this.getCustomRestPrefixes()) {
       try {
-        const queryParams = `insKey=${encodeURIComponent(insKey)}&action=${encodeURIComponent(action)}&comment=${encodeURIComponent(comment || "")}&RequestPZInsKey=${encodeURIComponent(insKey)}&RequestAction=${encodeURIComponent(action)}&RequestComment=${encodeURIComponent(comment || "")}`;
+        const branchParams = branch
+          ? `&branchName=${encodeURIComponent(branch.branchName)}&branchVersion=${encodeURIComponent(branch.branchVersion)}&RequestBranchName=${encodeURIComponent(branch.branchName)}&RequestBranchVersion=${encodeURIComponent(branch.branchVersion)}`
+          : "";
+        const queryParams = `insKey=${encodeURIComponent(insKey)}&action=${encodeURIComponent(action)}&comment=${encodeURIComponent(comment || "")}&RequestPZInsKey=${encodeURIComponent(insKey)}&RequestAction=${encodeURIComponent(action)}&RequestComment=${encodeURIComponent(comment || "")}${branchParams}`;
         const url = `${prefix}/rules/checkout?${queryParams}`;
         const bodyObj = {
           insKey,
@@ -542,6 +562,49 @@ export class PegaHttpClient {
       } catch { /* try next prefix */ }
     }
     throw new Error(`POST /rules/test failed on all custom REST prefixes`);
+  }
+
+  /**
+   * Service 7: POST /rules/branch
+   * Tạo branch version mới trong Pega: clone `{baseVersion}` thành `{baseVersion}:{branchName}`
+   * (vd 01-01-01:ssa_SA4E-58) và mở để edit. Idempotent — nếu branch đã tồn tại trả về EXISTS.
+   */
+  public async createPegaBranch(
+    rulesetName: string,
+    baseVersion = "01-01-01",
+    branchName: string
+  ): Promise<Record<string, unknown>> {
+    const authHeader = await this.getAuthHeader();
+    const branchVersion = `${baseVersion}:${branchName}`;
+    for (const prefix of this.getCustomRestPrefixes()) {
+      try {
+        const queryParams = `rulesetName=${encodeURIComponent(rulesetName)}&baseVersion=${encodeURIComponent(baseVersion)}&branchName=${encodeURIComponent(branchName)}&branchVersion=${encodeURIComponent(branchVersion)}&RequestRuleSetName=${encodeURIComponent(rulesetName)}&RequestBaseVersion=${encodeURIComponent(baseVersion)}&RequestBranchName=${encodeURIComponent(branchName)}&RequestBranchVersion=${encodeURIComponent(branchVersion)}`;
+        const url = `${prefix}/rules/branch?${queryParams}`;
+        const bodyObj = {
+          rulesetName,
+          baseVersion,
+          branchName,
+          branchVersion,
+          RequestRuleSetName: rulesetName,
+          RequestBaseVersion: baseVersion,
+          RequestBranchName: branchName,
+          RequestBranchVersion: branchVersion,
+          ruleJson: JSON.stringify({ rulesetName, baseVersion, branchName, branchVersion }),
+        };
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(bodyObj),
+        });
+        if (res.ok) {
+          const json = (await res.json()) as Record<string, unknown>;
+          if (json && !json.error) {
+            return json;
+          }
+        }
+      } catch { /* try next prefix */ }
+    }
+    throw new Error(`POST /rules/branch failed on all custom REST prefixes`);
   }
 
   public async checkBackendCache(body: Record<string, unknown>): Promise<any> {

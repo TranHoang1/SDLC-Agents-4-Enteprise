@@ -10,14 +10,27 @@
  */
 import * as http from "http";
 import * as vscode from "vscode";
-import { executeLocalTool } from "../backend-local-tools";
+import { executeLocalTool, getLocalToolDefinitions, isLocalTool } from "../backend-local-tools";
 import { Base64ProxyService } from "./Base64ProxyService";
 
 /** Maximum body size (1MB) */
 const MAX_BODY_SIZE = 1024 * 1024;
 
-/** Tools that execute locally without forwarding to backend */
-const LOCAL_TOOLS = new Set(["stream_write_file", "embed_image"]);
+/**
+ * Registry of live WrapperServer instances keyed by port, stored on globalThis.
+ * Survives in-process extension reloads (which re-evaluate this module and would
+ * otherwise reset a module-level Map) so a stale instance still listening on its
+ * port is stopped before a new instance binds — prevents EADDRINUSE on reload.
+ */
+const ACTIVE_SERVERS_KEY = "__kiroWrapperActiveServers__";
+
+function getActiveServers(): Map<number, WrapperServer> {
+  const g = globalThis as Record<string, unknown>;
+  if (!g[ACTIVE_SERVERS_KEY]) {
+    g[ACTIVE_SERVERS_KEY] = new Map<number, WrapperServer>();
+  }
+  return g[ACTIVE_SERVERS_KEY] as Map<number, WrapperServer>;
+}
 
 export interface WrapperServerDeps {
   outputChannel: vscode.OutputChannel;
@@ -37,7 +50,39 @@ export class WrapperServer {
 
   get listeningPort(): number | null { return this.port; }
 
+  /** Number of attempts to bind before giving up. */
+  private static readonly START_MAX_ATTEMPTS = 10;
+  /** Delay between EADDRINUSE retries (ms) — lets a stale extension-host process release the port. */
+  private static readonly START_RETRY_DELAY_MS = 400;
+
   async start(requestedPort: number): Promise<void> {
+    // Stop a stale instance left over from a previous extension load that still
+    // holds this port — otherwise reload fails with EADDRINUSE.
+    const stale = getActiveServers().get(requestedPort);
+    if (stale && stale !== this) {
+      await stale.stop();
+    }
+    let lastErr: Error | undefined;
+    for (let attempt = 1; attempt <= WrapperServer.START_MAX_ATTEMPTS; attempt++) {
+      try {
+        await this.tryListen(requestedPort);
+        return;
+      } catch (err) {
+        lastErr = err as Error;
+        // EADDRINUSE on reload is expected to clear once the previous extension-host
+        // process finishes shutting down, so retry briefly instead of failing outright.
+        if (attempt < WrapperServer.START_MAX_ATTEMPTS) {
+          this.deps.outputChannel.appendLine(
+            `[WrapperServer] Port ${requestedPort} busy (attempt ${attempt}/${WrapperServer.START_MAX_ATTEMPTS}), retrying...`
+          );
+          await new Promise((r) => setTimeout(r, WrapperServer.START_RETRY_DELAY_MS));
+        }
+      }
+    }
+    throw lastErr;
+  }
+
+  private async tryListen(requestedPort: number): Promise<void> {
     return new Promise((resolve, reject) => {
       const srv = http.createServer((req, res) => this.handleRequest(req, res));
       // Track connections so stop() can force-destroy them (avoids port hang on reload)
@@ -52,6 +97,7 @@ export class WrapperServer {
       srv.listen(requestedPort, "127.0.0.1", () => {
         this.port = (srv.address() as import("net").AddressInfo).port;
         this.server = srv;
+        getActiveServers().set(this.port, this);
         this.deps.outputChannel.appendLine(`[WrapperServer] Listening on port ${this.port}`);
         resolve();
       });
@@ -67,6 +113,9 @@ export class WrapperServer {
     }
     this.activeSockets.clear();
     await new Promise<void>((resolve) => this.server!.close(() => resolve()));
+    if (this.port !== null && getActiveServers().get(this.port) === this) {
+      getActiveServers().delete(this.port);
+    }
     this.server = null;
     this.port = null;
   }
@@ -183,9 +232,15 @@ export class WrapperServer {
   async routeToolCall(params: any): Promise<any> {
     const name = params.name as string;
     const args = (params.arguments || {}) as Record<string, unknown>;
-    if (LOCAL_TOOLS.has(name)) return executeLocalTool(name, args);
+    if (isLocalTool(name)) return executeLocalTool(name, args);
+    if (name === "find_tools") return this.handleFindTools(args);
     if (name === "execute_dynamic_tool") return this.handleDynamic(args);
     return this.callWithProxy(name, args);
+  }
+
+  private async handleFindTools(args: Record<string, unknown>): Promise<any> {
+    const result = await this.deps.restCallTool("find_tools", args);
+    return this.rewriteFindToolsResponse(result);
   }
 
   private async handleDynamic(args: Record<string, unknown>): Promise<any> {
@@ -196,6 +251,7 @@ export class WrapperServer {
       const result = await this.deps.restCallTool("execute_dynamic_tool", args);
       return this.rewriteFindToolsResponse(result);
     }
+    if (isLocalTool(toolName)) return executeLocalTool(toolName, innerArgs);
     const proxied = this.deps.base64Proxy.proxyInput(toolName, innerArgs);
     const finalArgs = this.deps.base64Proxy.wrapDynamicTool(args, proxied);
     let result = await this.deps.restCallTool("execute_dynamic_tool", finalArgs);
@@ -203,14 +259,18 @@ export class WrapperServer {
     return result;
   }
 
-  /** Rewrite find_tools response: hide content_base64, add output_path. */
+  /**
+   * Rewrite find_tools response: merge local tool definitions (stream_write_file,
+   * embed_image, pega_*) so LLM can discover them, then rewrite base64 schemas.
+   */
   private rewriteFindToolsResponse(result: any): any {
     if (!result?.content?.[0]?.text) return result;
     try {
       const parsed = JSON.parse(result.content[0].text);
       const tools = parsed.tools || parsed;
       if (!Array.isArray(tools)) return result;
-      const rewritten = this.deps.base64Proxy.rewriteSchemasForLlm(tools);
+      const merged = this.mergeLocalToolDefinitions(tools);
+      const rewritten = this.deps.base64Proxy.rewriteSchemasForLlm(merged);
       const output = parsed.tools ? { ...parsed, tools: rewritten } : rewritten;
       return { ...result, content: [{ type: "text", text: JSON.stringify(output) }] };
     } catch (err) {
@@ -218,6 +278,15 @@ export class WrapperServer {
       console.warn(`[WrapperServer] rewriteFindToolsResponse parse failed: ${(err as Error).message}`);
       return result;
     }
+  }
+
+  /** Append local tool definitions to a tool list, skipping duplicates by name. */
+  private mergeLocalToolDefinitions(tools: any[]): any[] {
+    const localDefs = getLocalToolDefinitions();
+    const existing = new Set(tools.map((t) => t?.name));
+    const added = localDefs.filter((d) => !existing.has(d.name));
+    if (added.length === 0) return tools;
+    return [...tools, ...added];
   }
 
   private async callWithProxy(name: string, args: Record<string, unknown>): Promise<any> {

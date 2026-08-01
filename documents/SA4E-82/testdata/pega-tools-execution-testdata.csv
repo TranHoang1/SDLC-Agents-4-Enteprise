@@ -1,0 +1,10 @@
+test_case_id,tool_name,pega_method,args,expected_http_code,expected_result,description
+TC-12,pega_get_session_context,getSessionContext,"{}",200,isError=false; content[0].type=text; parsed context.operatorId=SSA@TGB,"Direct tools/call pega_get_session_context executes locally"
+TC-20,pega_create_branch,createBranch,"{""rulesetName"":""HRAppsV2""}",200,isError=true; parsed error=branchName required,"success:false maps to isError:true"
+TC-21,pega_get_rule,getRuleByInsKey,"{""insKey"":""x""}",200,isError=true; text contains boom; no propagation,"Thrown handler errors captured"
+TC-22,unknown_tool,N/A,"{}",200,isError=true; text=Local tool 'unknown_tool' not implemented.,"Unknown local tool returns not implemented message"
+TC-23,pega_unique_check_tool,probe,"{}",200,isLocalTool=true; existing pega_* still registered; no duplicates,"Registration is additive/idempotent (OCP)"
+TC-19,pega_save_rule,saveRule,"{""ruleJson"":{""pyRuleName"":""MyRule""}}",200,schema required contains ruleJson,"Schema declares ruleJson required (data dictionary)"
+TC-19,pega_create_branch,createBranch,"{""rulesetName"":""HRAppsV2""}",200,schema required contains rulesetName; baseVersion default 01-01-01,"Schema declares rulesetName required (data dictionary)"
+TC-19,pega_get_rule,getRuleByInsKey,"{""insKey"":""RULE-OBJ-ACTIVITY MyClass!MyRule""}",200,schema required contains insKey,"Schema declares insKey required (data dictionary)"
+TC-19,pega_query_rule,queryRule,"{""pxObjClass"":""Rule-Obj-Activity"",""pyRuleName"":""MyRule""}",200,schema required contains pxObjClass+pyRuleName,"Schema declares pxObjClass+pyRuleName required (data dictionary)"

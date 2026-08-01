@@ -1,0 +1,6 @@
+id,description,xml_type,mode,expected_status,validates_export,test_case
+1,Standard crossing diagram for E2E,crossing_4node,apply,fixed,yes,E2E-API-01/03/04/05 E2E-UI-01/02/03
+2,Invalid mode test,crossing_4node,bogus,needs_fix(fallback review),no,E2E-API-02
+3,Clean diagram for already_good,clean_3node,review,already_good,no,E2E-API-06
+4,Container diagram with children,container_3child,apply,fixed,yes,E2E-UI-05
+5,Styled labeled nodes,styled_5node,apply,fixed,yes,E2E-UI-04

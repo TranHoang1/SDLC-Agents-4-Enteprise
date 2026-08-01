@@ -142,7 +142,7 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
   statusBarManager.setAuthState(authManager.currentState);
   context.subscriptions.push(statusBarManager);
 
-  mcpManager = new McpServerManager(workspaceRoot, outputChannel, authManager, backendUrl);
+  mcpManager = new McpServerManager(workspaceRoot, outputChannel, authManager, backendUrl, context.secrets);
   context.subscriptions.push(mcpManager);
 
   kbEventBus = new KbEventBus(outputChannel, mcpManager);

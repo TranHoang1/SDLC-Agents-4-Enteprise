@@ -1,0 +1,10 @@
+id,algorithm,spacing,direction,expected_elk_algorithm,valid,test_case
+1,layered,80,DOWN,org.eclipse.elk.layered,true,UT-09
+2,force,80,DOWN,org.eclipse.elk.force,true,UT-09
+3,mrtree,80,LEFT,org.eclipse.elk.mrtree,true,UT-09/E2E-UI-06
+4,radial,80,DOWN,org.eclipse.elk.radial,true,UT-09
+5,bogus,80,DOWN,org.eclipse.elk.layered,true(fallback),UT-09
+6,layered,120,RIGHT,org.eclipse.elk.layered,true,IT-06
+7,layered,40,DOWN,org.eclipse.elk.layered,true,IT-06
+8,layered,-10,DOWN,org.eclipse.elk.layered,true(clamp to 80),PBT-08
+9,layered,0,DIAGONAL,org.eclipse.elk.layered,true(fallback DOWN),PBT-08

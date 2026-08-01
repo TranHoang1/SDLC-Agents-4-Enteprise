@@ -24,9 +24,26 @@ export function mapAlgorithm(algorithm: string): string {
 export function buildElkGraph(graph: DiagramGraph, args: NormalizedArgs): ElkNode {
   const root: ElkNode = { id: 'root', width: 0, height: 0, children: [], edges: [], layoutOptions: {} };
   const nodeMap = new Map<string, ElkNode>();
+  const containerIds = new Set(graph.containers.map(c => c.id));
+
+  // Build ELK nodes — containers get layoutOptions + padding for compound layout
   for (const n of [...graph.nodes, ...graph.containers]) {
-    nodeMap.set(n.id, { id: n.id, width: n.width, height: n.height });
+    const elkNode: ElkNode = { id: n.id, width: n.width, height: n.height };
+    if (containerIds.has(n.id)) {
+      // Compound node: ELK must layout children INSIDE this node
+      elkNode.layoutOptions = {
+        'elk.algorithm': mapAlgorithm(args.algorithm),
+        'elk.direction': args.direction,
+        'elk.spacing.nodeNode': Math.max(args.spacing * 0.6, 30),
+        'elk.padding': '[top=40,left=20,bottom=20,right=20]',
+      };
+      elkNode.children = [];
+      elkNode.edges = [];
+    }
+    nodeMap.set(n.id, elkNode);
   }
+
+  // Build hierarchy — children into their parent container
   for (const n of [...graph.nodes, ...graph.containers]) {
     const elkNode = nodeMap.get(n.id)!;
     if (n.parentId && n.parentId !== '1' && nodeMap.has(n.parentId)) {
@@ -37,6 +54,8 @@ export function buildElkGraph(graph: DiagramGraph, args: NormalizedArgs): ElkNod
       root.children!.push(elkNode);
     }
   }
+
+  // Build edges — internal (same container) vs cross-container (root)
   for (const e of graph.edges) {
     if (!nodeMap.has(e.sourceId) || !nodeMap.has(e.targetId)) continue;
     const edge: ElkEdge = { id: e.id, sources: [e.sourceId], targets: [e.targetId] };
@@ -51,11 +70,13 @@ export function buildElkGraph(graph: DiagramGraph, args: NormalizedArgs): ElkNod
       root.edges!.push(edge);
     }
   }
+
   root.layoutOptions = {
     'elk.algorithm': mapAlgorithm(args.algorithm),
     'elk.direction': args.direction,
     'elk.spacing.nodeNode': args.spacing,
     'elk.layered.spacing.nodeNodeBetweenLayers': args.spacing * 2,
+    'elk.hierarchyHandling': 'INCLUDE_CHILDREN',
   };
   return root;
 }

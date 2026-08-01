@@ -6,6 +6,7 @@
  */
 
 import * as fs from 'fs';
+import * as path from 'path';
 import { parseDrawio, DiagramGraph, DiagramNode } from './drawio-parser.js';
 import { handleApply } from './drawio-apply.js';
 
@@ -33,14 +34,14 @@ export const DRAWIO_TOOL_DEFINITION = {
 export async function handleDrawioLayout(args: Record<string, unknown>, workspace: string): Promise<string> {
   const filePath = resolveFilePath(args.file_path, workspace);
   if (!filePath) return error('file_path is required');
-  if (!fs.existsSync(filePath)) return error(`File not found: ${filePath}`);
+  if (!fs.existsSync(filePath)) return error('File not found or not accessible');
   try {
     const { raw, graph } = parseDrawio(filePath);
     const nodeCount = graph.nodes.length + graph.containers.length;
     if (nodeCount === 0) return error('No nodes found in diagram');
     const issues = detectAllIssues(graph);
     // No issues → already_good, don't modify file
-    if (issues.length === 0) return alreadyGood(nodeCount, graph.edges.length);
+    if (issues.length === 0) return alreadyGood();
     // Issues found → always fix (no mode parameter)
     return handleApply(raw, graph, issues, nodeCount, args, filePath);
   } catch (e: any) {
@@ -48,21 +49,31 @@ export async function handleDrawioLayout(args: Record<string, unknown>, workspac
   }
 }
 
-/** Resolve file_path: absolute or relative to workspace. */
-function resolveFilePath(filePath: unknown, workspace: string): string | null {
+/**
+ * Resolve file_path: canonicalize and verify within workspace boundary.
+ * Prevents path traversal attacks (SEC-01: CWE-22).
+ * @param filePath - Raw file_path from tool input
+ * @param workspace - Trusted workspace root
+ * @returns Canonical path within workspace, or null if invalid/escaping
+ */
+export function resolveFilePath(filePath: unknown, workspace: string): string | null {
   if (typeof filePath !== 'string' || filePath.trim() === '') return null;
   const trimmed = filePath.trim();
-  // Already absolute
-  if (trimmed.startsWith('/') || /^[A-Z]:\\/i.test(trimmed)) return trimmed;
-  // Relative to workspace
-  return `${workspace}/${trimmed}`;
+  // Resolve to absolute, then canonicalize to eliminate ../ sequences
+  const resolved = path.isAbsolute(trimmed) ? trimmed : path.resolve(workspace, trimmed);
+  const canonical = path.resolve(resolved);
+  // Verify canonical path stays within workspace boundary
+  const normalizedWorkspace = path.resolve(workspace);
+  const sep = path.sep;
+  const isWithin = canonical.startsWith(normalizedWorkspace + sep) || canonical === normalizedWorkspace;
+  if (!isWithin) return null;
+  return canonical;
 }
 
-function alreadyGood(nodes: number, edges: number): string {
+function alreadyGood(): string {
   return JSON.stringify({
     status: 'already_good',
     message: 'Diagram looks good — no overlapping nodes or edge crossings detected.',
-    nodes, edges, issues: [],
   });
 }
 
@@ -81,7 +92,11 @@ function detectNodeOverlaps(graph: DiagramGraph): object[] {
     for (let j = i + 1; j < nodes.length; j++) {
       if (nodes[i].parentId !== nodes[j].parentId) continue;
       if (overlapRatio(nodes[i], nodes[j]) > 0.50) {
-        issues.push({ type: 'node_overlap', severity: 'high', node_a: nodes[i].id, node_b: nodes[j].id, fix_hint: `Move '${nodes[j].id}' away from '${nodes[i].id}'.` });
+        issues.push({
+          type: 'node_overlap', severity: 'high',
+          node_a: nodes[i].id, node_b: nodes[j].id,
+          fix_hint: `Move '${nodes[j].id}' away from '${nodes[i].id}'.`,
+        });
       }
     }
   }
@@ -90,7 +105,9 @@ function detectNodeOverlaps(graph: DiagramGraph): object[] {
 
 export function detectEdgeCrossings(graph: DiagramGraph): object[] {
   const issues: object[] = [];
-  const nodeMap = new Map([...graph.nodes, ...graph.containers].map(n => [n.id, n]));
+  const nodeMap = new Map(
+    [...graph.nodes, ...graph.containers].map(n => [n.id, n]),
+  );
   for (const edge of graph.edges) {
     const src = nodeMap.get(edge.sourceId);
     const tgt = nodeMap.get(edge.targetId);
@@ -100,7 +117,12 @@ export function detectEdgeCrossings(graph: DiagramGraph): object[] {
     for (const node of graph.nodes) {
       if (node.id === edge.sourceId || node.id === edge.targetId) continue;
       if (lineCrossesRect(sx, sy, tx, ty, node)) {
-        issues.push({ type: 'edge_crossing', severity: 'medium', edge_id: edge.id, edge_source: edge.sourceId, edge_target: edge.targetId, crosses_node: node.id, fix_hint: `Edge '${edge.id}' (${edge.sourceId}→${edge.targetId}) crosses '${node.id}'.` });
+        issues.push({
+          type: 'edge_crossing', severity: 'medium',
+          edge_id: edge.id, edge_source: edge.sourceId,
+          edge_target: edge.targetId, crosses_node: node.id,
+          fix_hint: `Edge '${edge.id}' (${edge.sourceId}→${edge.targetId}) crosses '${node.id}'.`,
+        });
         break; // One crossing per edge is enough
       }
     }
@@ -110,7 +132,9 @@ export function detectEdgeCrossings(graph: DiagramGraph): object[] {
 
 function detectDiagonalEdges(graph: DiagramGraph): object[] {
   const issues: object[] = [];
-  const nodeMap = new Map([...graph.nodes, ...graph.containers].map(n => [n.id, n]));
+  const nodeMap = new Map(
+    [...graph.nodes, ...graph.containers].map(n => [n.id, n]),
+  );
   const tolerance = 20; // px threshold for "diagonal"
   for (const edge of graph.edges) {
     const src = nodeMap.get(edge.sourceId);
@@ -119,7 +143,12 @@ function detectDiagonalEdges(graph: DiagramGraph): object[] {
     const dx = Math.abs((src.x + src.width / 2) - (tgt.x + tgt.width / 2));
     const dy = Math.abs((src.y + src.height / 2) - (tgt.y + tgt.height / 2));
     if (dx > tolerance && dy > tolerance) {
-      issues.push({ type: 'diagonal_edge', severity: 'low', edge_id: edge.id, edge_source: edge.sourceId, edge_target: edge.targetId, fix_hint: `Edge '${edge.id}' is diagonal — ELK will align.` });
+      issues.push({
+        type: 'diagonal_edge', severity: 'low',
+        edge_id: edge.id, edge_source: edge.sourceId,
+        edge_target: edge.targetId,
+        fix_hint: `Edge '${edge.id}' is diagonal — ELK will align.`,
+      });
     }
   }
   return issues;
@@ -134,7 +163,9 @@ function overlapRatio(a: DiagramNode, b: DiagramNode): number {
   return smaller > 0 ? area / smaller : 0;
 }
 
-function lineCrossesRect(x1: number, y1: number, x2: number, y2: number, node: DiagramNode): boolean {
+function lineCrossesRect(
+  x1: number, y1: number, x2: number, y2: number, node: DiagramNode,
+): boolean {
   const m = 5;
   const l = node.x - m, r = node.x + node.width + m;
   const t = node.y - m, b = node.y + node.height + m;
@@ -147,7 +178,9 @@ function lineCrossesRect(x1: number, y1: number, x2: number, y2: number, node: D
   return true;
 }
 
-function outCode(x: number, y: number, l: number, t: number, r: number, b: number): number {
+function outCode(
+  x: number, y: number, l: number, t: number, r: number, b: number,
+): number {
   let c = 0;
   if (x < l) c |= 1; if (x > r) c |= 2;
   if (y < t) c |= 4; if (y > b) c |= 8;

@@ -91,13 +91,13 @@ describe('detectAllIssues', () => {
 
 describe('handleDrawioLayout — input validation', () => {
   it('returns error when file_path missing', async () => {
-    const result = await handleDrawioLayout({}, '/tmp');
+    const result = await handleDrawioLayout({}, os.tmpdir());
     const parsed = JSON.parse(result);
     expect(parsed.error).toContain('file_path is required');
   });
 
   it('returns error when file does not exist', async () => {
-    const result = await handleDrawioLayout({ file_path: '/nonexistent/x.drawio' }, '/tmp');
+    const result = await handleDrawioLayout({ file_path: path.join(os.tmpdir(), 'nonexistent-xyz.drawio') }, os.tmpdir());
     const parsed = JSON.parse(result);
     expect(parsed.error).toContain('File not found');
   });
@@ -106,11 +106,15 @@ describe('handleDrawioLayout — input validation', () => {
 describe('handleDrawioLayout — already_good', () => {
   it('returns already_good for clean diagram', async () => {
     const tmp = writeTmp(SIMPLE_DIAGRAM);
-    const result = await handleDrawioLayout({ file_path: tmp }, '/tmp');
+    const workspace = path.dirname(path.dirname(tmp)); // parent of temp dir
+    const result = await handleDrawioLayout({ file_path: tmp }, workspace);
     const parsed = JSON.parse(result);
     expect(parsed.status).toBe('already_good');
-    expect(parsed.nodes).toBe(2);
-    expect(parsed.edges).toBe(1);
+    expect(parsed.message).toBeDefined();
+    // No extra fields (token saving)
+    expect(parsed.nodes).toBeUndefined();
+    expect(parsed.edges).toBeUndefined();
+    expect(parsed.issues).toBeUndefined();
     // File should NOT be modified
     const after = fs.readFileSync(tmp, 'utf-8');
     expect(after).toBe(SIMPLE_DIAGRAM);
@@ -121,33 +125,20 @@ describe('handleDrawioLayout — already_good', () => {
 describe('handleDrawioLayout — auto-fix', () => {
   it('fixes overlapping diagram and writes to file', async () => {
     const tmp = writeTmp(BAD_LAYOUT_DIAGRAM);
-    const result = await handleDrawioLayout({ file_path: tmp, algorithm: 'layered', direction: 'DOWN' }, '/tmp');
+    const workspace = path.dirname(path.dirname(tmp));
+    const result = await handleDrawioLayout({ file_path: tmp, algorithm: 'layered', direction: 'DOWN' }, workspace);
     const parsed = JSON.parse(result);
     if (parsed.error) throw new Error(`Unexpected error: ${parsed.error}`);
     expect(parsed.status).toBe('fixed');
-    expect(parsed.repositioned_nodes).toBeDefined();
-    expect(parsed.repositioned_nodes.length).toBeGreaterThan(0);
-    // No content_base64 in response (token saving)
+    expect(parsed.message).toContain('nodes repositioned');
+    // Minimal response — no extra fields
+    expect(parsed.repositioned_nodes).toBeUndefined();
     expect(parsed.content_base64).toBeUndefined();
+    expect(parsed.issues).toBeUndefined();
     // File should be modified
     const after = fs.readFileSync(tmp, 'utf-8');
     expect(after).not.toBe(BAD_LAYOUT_DIAGRAM);
     expect(after).toContain('<mxCell');
-    cleanup(tmp);
-  });
-
-  it('repositioned_nodes have correct shape', async () => {
-    const tmp = writeTmp(BAD_LAYOUT_DIAGRAM);
-    const result = await handleDrawioLayout({ file_path: tmp }, '/tmp');
-    const parsed = JSON.parse(result);
-    if (parsed.status === 'fixed') {
-      const node = parsed.repositioned_nodes[0];
-      expect(node.id).toBeDefined();
-      expect(typeof node.x_old).toBe('number');
-      expect(typeof node.y_old).toBe('number');
-      expect(typeof node.x_new).toBe('number');
-      expect(typeof node.y_new).toBe('number');
-    }
     cleanup(tmp);
   });
 });

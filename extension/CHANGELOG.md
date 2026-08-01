@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.20.0] - 2026-08-01
+
+### Added
+- **SA4E-84: [drawio] ELK Auto-Layout Fix Mode** — `drawio_auto_layout` tool now detects + auto-fixes layout issues using ELK.js. Takes `file_path` only, writes fixed XML directly to file. For container/swimlane diagrams: edge-only fix (port distribution without moving nodes). Minimal response. Path traversal protection. Spacing capped.
+- `elk-layout.ts`, `drawio-writer.ts`, `drawio-apply.ts`, `drawio-layout-models.ts` — new modules for ELK pipeline.
+- `elkjs` dependency added to backend.
+- Updated `shared-diagrams.md` steering with comprehensive XML authoring rules.
+
+### Fixed
+- 16 bug fixes: SQL parameter mismatch (graph/memory), tag normalization false matches, async test issues.
+- Security: path traversal protection (SEC-01), spacing cap (SEC-03), env var validation (SEC-02).
+
 ## [1.19.1] - 2026-07-31
 
 ### Fixed

@@ -1,0 +1,42 @@
+<mxGraphModel dx="900" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="650" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="h1" value="Data Model — Local Tool Registry &amp; Envelopes (in-memory, no SQL)" style="text;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="150" y="10" width="600" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="spec" value="PegaToolSpec (pega-local-tools.ts)&#10;name: string&#10;description: string&#10;handler: (tools, args) =&gt; Promise&#10;inputSchema: Record&lt;string, unknown&gt;" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="240" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="def" value="LocalToolDefinition&#10;(backend-local-tools.ts)&#10;name: string&#10;description: string&#10;inputSchema: Record&lt;string, unknown&gt;&#10;hidden?: boolean" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="380" y="60" width="250" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="entry" value="LocalToolEntry&#10;handler: LocalToolHandler&#10;definition: LocalToolDefinition" style="swimlane;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="700" y="60" width="170" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="registry" value="LOCAL_TOOL_REGISTRY&#10;Map&lt;string, LocalToolEntry&gt;&#10;10 entries: stream_write_file, embed_image,&#10;8 x pega_* (hidden: true)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="260" y="240" width="400" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="res" value="Result Envelope (PegaMcpTools)&#10;{ success: boolean, data?: object,&#10;  context?: object, error?: string }" style="swimlane;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="60" y="400" width="260" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="mcp" value="MCP Text-Result Envelope (Wrapper)&#10;{ isError: boolean,&#10;  content: [{ type: &quot;text&quot;,&#10;             text: JSON.stringify(result) }] }" style="swimlane;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="420" y="400" width="300" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="r1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="spec" target="def">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="r2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="def" target="entry">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="r3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="entry" target="registry">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="r4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="def" target="res">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="r5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="res" target="mcp">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

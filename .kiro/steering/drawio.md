@@ -32,7 +32,7 @@ Generate `.drawio` files (native mxGraphModel XML). Export to PNG/SVG/PDF with e
    - No duplicate IDs
    - No overlapping shapes (min 80px gap)
    - Correct wrapper (`<mxGraphModel>` or `<mxfile><diagram>` for Use Case)
-4. **Auto-layout** — Call `drawio_auto_layout(file_path="<path>")` → fix issues until 0
+4. **Auto-layout** — Call `drawio_auto_layout` tool with `mode="apply"` → if `status="fixed"`, decode `content_base64` and overwrite the `.drawio` file; if `needs_fix` or retry exceed, call without `mode` (review) and fix issues until 0
 5. **Export PNG** — Call `drawio_export_png(file_path="<absolute_path>")` 
 6. **Vision Self-Check** (MANDATORY for quality):
    - Read the exported PNG using vision capability
