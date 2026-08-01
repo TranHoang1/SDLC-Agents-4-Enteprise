@@ -362,9 +362,13 @@ describe('TaskWorker Integration Tests', () => {
   // IT-07: structured_map update fails — Tags still updated
   describe('IT-07: structured_map fail -> tags still update', () => {
     it('updates tags even when structured_map update fails', async () => {
-      // Make engine.updateStructuredMap throw
-      vi.spyOn(engine, 'updateStructuredMap').mockImplementation(() => {
-        throw new Error('DB write error');
+      // Mock adapter.runAsync to throw only for structured_map updates
+      const origRunAsync = adapter.runAsync.bind(adapter);
+      vi.spyOn(adapter, 'runAsync').mockImplementation(async (sql: string, params?: unknown[]) => {
+        if (sql.includes('structured_map = ?') && sql.includes('WHERE id')) {
+          throw new Error('DB write error');
+        }
+        return origRunAsync(sql, params);
       });
 
       const id = await engine.insert({

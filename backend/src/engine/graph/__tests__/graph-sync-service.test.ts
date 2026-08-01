@@ -50,35 +50,35 @@ describe('SA4E-41 GraphSyncService', () => {
 
   afterEach(() => { indexDb.close(); adminDb.close(); });
 
-  it('projects only the target tenant code nodes', () => {
-    new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols(PID_B);
+  it('projects only the target tenant code nodes', async () => {
+    await new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols(PID_B);
     const codeNodes = adminDb.prepare("SELECT project_id FROM graph_nodes WHERE entry_id LIKE 'code:%'").all() as { project_id: string }[];
     expect(codeNodes.length).toBe(1);
     expect(codeNodes.every(n => n.project_id === PID_B)).toBe(true);
   });
 
-  it('does not create code nodes for other tenants', () => {
-    new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols(PID_B);
+  it('does not create code nodes for other tenants', async () => {
+    await new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols(PID_B);
     const aCode = adminDb.prepare("SELECT COUNT(*) c FROM graph_nodes WHERE entry_id LIKE 'code:%' AND project_id = ?").get(PID_A) as any;
     expect(aCode.c).toBe(0);
   });
 
-  it('leaves KB (non-code) nodes untouched', () => {
-    new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols(PID_B);
+  it('leaves KB (non-code) nodes untouched', async () => {
+    await new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols(PID_B);
     const kb = adminDb.prepare("SELECT COUNT(*) c FROM graph_nodes WHERE entry_id = 'doc-1'").get() as any;
     expect(kb.c).toBe(1);
   });
 
-  it('is idempotent (re-sync replaces, does not duplicate)', () => {
+  it('is idempotent (re-sync replaces, does not duplicate)', async () => {
     const svc = new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log);
-    svc.syncProjectSymbols(PID_B);
-    svc.syncProjectSymbols(PID_B);
+    await svc.syncProjectSymbols(PID_B);
+    await svc.syncProjectSymbols(PID_B);
     const count = adminDb.prepare("SELECT COUNT(*) c FROM graph_nodes WHERE entry_id LIKE 'code:%' AND project_id = ?").get(PID_B) as any;
     expect(count.c).toBe(1);
   });
 
-  it('fail-closed: empty projectId is a no-op', () => {
-    new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols('');
+  it('fail-closed: empty projectId is a no-op', async () => {
+    await new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols('');
     const count = adminDb.prepare("SELECT COUNT(*) c FROM graph_nodes WHERE entry_id LIKE 'code:%'").get() as any;
     expect(count.c).toBe(0);
   });
