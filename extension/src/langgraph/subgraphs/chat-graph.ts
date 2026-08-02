@@ -25,6 +25,7 @@ import {
   createRetrieveEvaluatorNode, createHallucinationGraderNode,
   routeAfterHallucinationGrade, getDefaultRagGraderConfig,
 } from "./rag-grader-nodes";
+import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
 
 const MAX_AGENT_ITERATIONS = 25;
 
@@ -90,7 +91,8 @@ export async function buildChatSubgraph(
   llmProvider?: LlmProvider,
   mcpBridge?: McpBridge,
   workspaceRoot?: string,
-  hookEngine?: HookEngine
+  hookEngine?: HookEngine,
+  approvalGate?: ToolApprovalGate
 ) {
   const toolRegistry = mcpBridge ? new ToolRegistry(mcpBridge) : null;
   const wsRoot = workspaceRoot || require("vscode").workspace.workspaceFolders?.[0]?.uri.fsPath || "";
@@ -147,7 +149,7 @@ export async function buildChatSubgraph(
     const graph = new StateGraph(PipelineAnnotation)
       .addNode("fetch_tools", fetchToolsWithBudget)
       .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, enrichedSystemPrompt))
-      .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot))
+      .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate))
       .addNode("verify_response", verifyNode)
       .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, enrichedSystemPrompt))
       .addNode("hallucination_grader", createHallucinationGraderNode(llmProvider, streamHandler, ragConfig))
@@ -166,7 +168,7 @@ export async function buildChatSubgraph(
   const graph = new StateGraph(PipelineAnnotation)
     .addNode("fetch_tools", fetchToolsWithBudget)
     .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, enrichedSystemPrompt))
-    .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot))
+    .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate))
     .addNode("verify_response", verifyNode)
     .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, enrichedSystemPrompt))
     .addEdge("__start__", "fetch_tools")
