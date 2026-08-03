@@ -1,0 +1,122 @@
+<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-85 Module Dependency Diagram" style="text;html=1;fontSize=14;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="350" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="mr" value="MessageRouter.ts&#xa;(Central Dispatcher)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="380" y="60" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ar" value="KiroAgentRegistry.ts&#xa;(Agent Discovery + Hot-Reload)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="180" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="th" value="OpenCodeToolHandler.ts&#xa;(WorkspaceEdit + Hash + Terminal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="180" width="210" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ib" value="IpcBridge.ts&#xa;(WebSocket + JSON-RPC + Reconnect)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="180" width="210" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="cm" value="IdeContextManager.ts&#xa;(Token Budget + Pruning + LSP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="310" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ts" value="TelemetryService.ts&#xa;(Local JSONL Logging)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="310" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ad" value="ArtifactDetector.ts&#xa;(Regex Parsing Shell Output)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="310" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="dr" value="DiagramRenderer.ts&#xa;(PlantUML/BPMN &#x2192; SVG)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="780" y="180" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext_fs" value="FileSystemWatcher&#xa;(.code-intel/agents/)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="440" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext_ws" value="VSCode WorkspaceEdit&#xa;API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="240" y="440" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext_lsp" value="VSCode LSP Client&#xa;(Diagnostics)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="440" y="440" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext_puml" value="PlantUML Server&#xa;(HTTP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="640" y="440" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext_kiro" value="Kiro / AntiGravity&#xa;(WebSocket)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="840" y="440" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="registers" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=8;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="ar" target="mr">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="registers" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=8;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="th" target="mr">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="registers" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=8;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="ib" target="mr">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="registers" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=8;exitX=0.25;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="1" source="cm" target="mr">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="90" y="150"/>
+          <mxPoint x="470" y="150"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e5" value="logs to" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;fontSize=8;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="th" target="ts">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="logs to" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;fontSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="ib" target="ts">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="635" y="280"/>
+          <mxPoint x="380" y="280"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e7" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=8;" edge="1" parent="1" source="th" target="ad">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="490" y="280"/>
+          <mxPoint x="630" y="280"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e8" value="renders" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="mr" target="dr">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;fontSize=8;" edge="1" parent="1" source="ar" target="ext_fs">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;fontSize=8;" edge="1" parent="1" source="th" target="ext_ws">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;fontSize=8;" edge="1" parent="1" source="cm" target="ext_lsp">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;fontSize=8;" edge="1" parent="1" source="dr" target="ext_puml">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;fontSize=8;" edge="1" parent="1" source="ib" target="ext_kiro">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="635" y="400"/>
+          <mxPoint x="920" y="400"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="legend_title" value="Legend" style="text;html=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="780" y="60" width="60" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg1" value="Core Module" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;" vertex="1" parent="1">
+      <mxGeometry x="780" y="80" width="90" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="New Module" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" vertex="1" parent="1">
+      <mxGeometry x="880" y="80" width="90" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="Data/Parser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=8;" vertex="1" parent="1">
+      <mxGeometry x="780" y="110" width="90" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="External Dep" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="1">
+      <mxGeometry x="880" y="110" width="90" height="25" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

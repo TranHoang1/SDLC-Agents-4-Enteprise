@@ -3,7 +3,12 @@ export type { LlmProvider, LlmMessage, LlmOptions, LlmProviderType } from "./cor
 export { createLlmProvider, createProviderByType } from "./providers";
 export { McpBridge, McpToolTimeoutError } from "./core/mcp-bridge";
 export { StreamHandler } from "./core/stream-handler";
-export { WorkspaceCheckpointer } from "./core/checkpointer";
+export { RemoteCheckpointer } from "./core/remote-checkpointer";
+export type { RemoteCheckpointerOptions } from "./core/remote-checkpointer";
+export { KnowledgeClient, resolveKbBaseUrl, isUuidV4, validateThreadJson, parseThreadJson, KbUnreachableError, UUID_V4_REGEX } from "../knowledge-client";
+export type {
+  KbThread, KbMessage, KbCheckpoint, KbPendingWrite, KbCreateThreadInput, KbSaveCheckpointInput, KbMessageInput, KbMessageRole,
+} from "../knowledge-client";
 export { buildPipelineGraph } from "./subgraphs/graph-builder";
 export { buildRouterGraph } from "./router/router-graph";
 export { classifyIntent } from "./router/intent-classifier";

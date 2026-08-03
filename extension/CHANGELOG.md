@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.21.0] - 2026-08-02
+
+### Added
+- **ToolApprovalGate** — Promise-based human-in-the-loop gate for dangerous tool execution
+  - Idempotency guard, 2-phase escalation, retry (max 3), JSONL audit log, metrics
+- **ApprovalEventLog** — Append-only JSONL event log for tool approval auditing
+- **Chat UI Agentic Module** — Svelte webview + LangGraph ReAct agent loop
+- **Knowledge Module** (backend) — SQLite-backed hybrid search, REST API
+- **Steering: Reference Analysis** — Step 2.5 for complex features
+
+### Changed
+- `executeSingleTool` awaits approval gate before executing dangerous tools
+- Timeout rejections emit `retryable: true` signal to webview
+
+## [1.20.0] - 2026-08-01
+
+### Added
+- **SA4E-84: [drawio] ELK Auto-Layout Fix Mode** — `drawio_auto_layout` tool now detects + auto-fixes layout issues using ELK.js. Takes `file_path` only, writes fixed XML directly to file. For container/swimlane diagrams: edge-only fix (port distribution without moving nodes). Minimal response. Path traversal protection. Spacing capped.
+- `elk-layout.ts`, `drawio-writer.ts`, `drawio-apply.ts`, `drawio-layout-models.ts` — new modules for ELK pipeline.
+- `elkjs` dependency added to backend.
+- Updated `shared-diagrams.md` steering with comprehensive XML authoring rules.
+
+### Fixed
+- 16 bug fixes: SQL parameter mismatch (graph/memory), tag normalization false matches, async test issues.
+- Security: path traversal protection (SEC-01), spacing cap (SEC-03), env var validation (SEC-02).
+
 ## [1.19.1] - 2026-07-31
 
 ### Fixed

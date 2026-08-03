@@ -11,9 +11,14 @@ const WORKSPACE_ROOT = path.resolve(__dirname, "..", "..");
 const RESOURCES_DIR = path.resolve(__dirname, "..", "resources");
 
 const MAPPINGS = [
+    { src: ".code-intel/AGENTS.md", dst: ".code-intel/AGENTS.md" },
     { src: ".kiro/agents", dst: ".kiro/agents" },
+    { src: ".code-intel/agents", dst: ".code-intel/agents" },
     { src: ".kiro/hooks", dst: ".kiro/hooks" },
     { src: ".kiro/steering", dst: ".kiro/steering" },
+    { src: ".opencode/skills", dst: ".code-intel/skills" },
+    { src: ".code-intel/hooks", dst: ".code-intel/hooks" },
+    { src: ".code-intel/steering", dst: ".code-intel/steering" },
     { src: "documents/templates", dst: "documents/templates" },
     { src: "kiro-sdlc-agents/webview-assets/chat", dst: "webview-assets/chat" },
     { src: "kiro-sdlc-agents/webview-assets/settings", dst: "webview-assets/settings" },

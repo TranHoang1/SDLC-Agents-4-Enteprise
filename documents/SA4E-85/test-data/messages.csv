@@ -1,0 +1,13 @@
+seq,type,messageId,agentId,token,errorCode,recoverable,scenario
+1,STREAM_START,m001,ba-agent,,,normal-flow
+2,STREAM_TOKEN,m001,,Hello,,,normal-flow
+3,STREAM_TOKEN,m001,, World,,,normal-flow
+4,STREAM_END,m001,,,,normal-flow
+5,STREAM_START,m002,sa-agent,,,error-recoverable
+6,STREAM_TOKEN,m002,,Partial,,,error-recoverable
+7,STREAM_ERROR,m002,,,LLM_TIMEOUT,true,error-recoverable
+8,STREAM_START,m003,qa-agent,,,error-non-recoverable
+9,STREAM_ERROR,m003,,,CONTEXT_OVERFLOW,false,error-non-recoverable
+10,STREAM_START,m004,dev-agent,,,connection-lost
+11,STREAM_TOKEN,m004,,Building,,,connection-lost
+12,STREAM_ERROR,m004,,,CONNECTION_LOST,true,connection-lost

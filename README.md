@@ -66,6 +66,19 @@ MIT
 
 ## Changelog
 
+### v1.21.0 (2026-08-02)
+
+- **SA4E-85: ToolApprovalGate — Human-in-the-Loop for Dangerous Tools** — Graph execution pauses and awaits user approval before executing dangerous tools (write_file, shell_execute, git_*). Promise-based gate with idempotency guard, 2-phase escalation (warning + hard reject), retry mechanism (max 3), JSONL audit log, durable state callback, and real-time metrics. 100% open-design compliance. 40 tests.
+- **SA4E-85: Chat UI Agentic (Svelte + LangGraph)** — Full chat module: Svelte webview components (ChatPanel, ActionableDiff, PermissionGuard, ToolSpinner, DiagramBlock), LangGraph ReAct agent loop with context-budget-aware messages, Corrective RAG grading for small models, agent registry with YAML parser, IPC bridge with service discovery, telemetry hooks.
+- **Knowledge Module** — Backend knowledge service with SQLite-backed vector/BM25 hybrid search, REST API routes, schema management.
+- **Steering: Reference Analysis** — Added mandatory Step 2.5 in Phase 1 (Requirements) for complex features: scan open-source reference projects before writing BRD.
+
+### v1.20.0 (2026-08-01)
+
+- **SA4E-84: [drawio] ELK Auto-Layout Fix Mode** — `drawio_auto_layout` tool upgraded to detect + auto-fix layout issues (node overlaps, edge crossings, diagonal edges) using ELK.js layout engine. Takes `file_path` only, writes fixed XML directly to file. For container/swimlane diagrams: edge-only fix (distributes ports without moving nodes). Minimal response (`{ status, message }`). Path traversal protection (SEC-01). Spacing capped at 500px. Env var bounds validation.
+- **Steering update** — `shared-diagrams.md` rewritten with comprehensive XML authoring rules, edge routing best practices, port distribution, 7-color palette, container rules, self-check checklist (based on drawio-skill patterns).
+- **16 bug fixes** — SQL parameter mismatch in graph/memory modules, tag normalization false matches, async test issues resolved.
+
 ### v1.19.1 (2026-07-31)
 
 - **Proxy: leverage VS Code resolution (`@vscode/proxy-agent`)** — System mode now resolves proxy per-URL through VS Code's own proxy stack, reading `http.proxy`, `http.proxySupport`, `http.noProxy` and `HTTPS_PROXY`/`HTTP_PROXY`/`NO_PROXY` env vars, auto-bypassing localhost, with per-URL caching and OS-native fallback (netsh/scutil/gsettings). Proxy connectivity test uses the same resolution path. Fixes unreliable system proxy detection in enterprise networks (esp. PAC/WPAD setups).

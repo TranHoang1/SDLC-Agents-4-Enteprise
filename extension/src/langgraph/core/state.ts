@@ -62,6 +62,7 @@ export const PipelineAnnotation = Annotation.Root({
   analyzedIntent: Annotation<IntentAnalysis | null>({ reducer: (_e, u) => u, default: () => null }),
   currentPhaseIndex: Annotation<number>({ reducer: (_e, u) => u, default: () => 0 }),
   pipelineDefinition: Annotation<PipelineDefState | null>({ reducer: (_e, u) => u, default: () => null }),
+  kbContext: Annotation<string>({ reducer: (_e, u) => u, default: () => "" }),
 });
 
 export type PipelineState = typeof PipelineAnnotation.State;

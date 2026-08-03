@@ -1,6 +1,6 @@
 /**
  * Default verify prompt — evaluates if agent response satisfies user request.
- * Can be overridden by .kiro/steering/verify-criteria.md
+ * Can be overridden by .code-intel/steering/verify-criteria.md
  */
 
 export const DEFAULT_VERIFY_PROMPT = `You are a strict QA reviewer for an AI coding assistant.

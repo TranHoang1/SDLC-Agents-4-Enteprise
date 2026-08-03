@@ -1,0 +1,118 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="Architecture — drawio_auto_layout (ELK Fix Mode)" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="320" y="20" width="440" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="agent" value="Agent (LLM)" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="160" width="60" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="boundary" value="Backend MCP Server — backend/src/engine/tools/" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="180" y="60" width="940" height="420" as="geometry"/>
+    </mxCell>
+    <mxCell id="reg" value="register-tools.ts&#10;(unchanged)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="50" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="tool" value="drawio-tool.ts&#10;handleDrawioLayout&#10;resolveFilePath" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="190" y="50" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="parser" value="drawio-parser.ts&#10;parseDrawio&#10;(unchanged)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="370" y="50" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="detect" value="detectAllIssues&#10;overlaps/crossings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="540" y="50" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="apply" value="drawio-apply.ts&#10;handleApply" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="190" y="170" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="elk" value="elk-layout.ts&#10;buildElkGraph&#10;runElkLayout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="370" y="170" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="elkjs" value="elkjs (npm)&#10;lazy-load" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="540" y="170" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="writer" value="drawio-writer.ts&#10;applyLayoutToXml" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="710" y="170" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="validate" value="validateReparse&#10;rollback if fail" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="370" y="290" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="writefile" value="fs.writeFileSync&#10;write to disk" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="540" y="290" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="png" value="drawio-export-png.ts&#10;(unchanged)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="710" y="290" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="models" value="drawio-layout-models.ts&#10;types" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="710" y="50" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="file" value=".drawio file (disk)" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;whiteSpace=wrap;html=1;size=10;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="290" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="resp" value="{ status, message }" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;fontSize=9;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="340" width="100" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="agent" target="reg">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="reg" target="tool">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="tool" target="parser">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="parser" target="detect">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="detect" target="apply">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="605" y="130"/>
+          <mxPoint x="260" y="130"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="apply" target="elk">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;" edge="1" parent="boundary" source="elk" target="elkjs">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="elkjs" target="writer">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="writer" target="validate">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="775" y="250"/>
+          <mxPoint x="435" y="250"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="validate" target="writefile">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="boundary" source="writefile" target="file">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;" edge="1" parent="boundary" source="file" target="parser">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="70" y="130"/>
+          <mxPoint x="70" y="75"/>
+          <mxPoint x="370" y="75"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;" edge="1" parent="1" source="tool" target="resp">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="440" y="145"/>
+          <mxPoint x="155" y="145"/>
+          <mxPoint x="155" y="360"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

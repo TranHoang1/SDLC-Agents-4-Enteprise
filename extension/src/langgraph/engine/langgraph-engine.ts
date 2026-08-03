@@ -7,7 +7,7 @@ import { IServerManager } from "../../types/server-types";
 import { ChatExtToWebviewMessage } from "../../chat-panel/message-protocol";
 import { McpBridge } from "../core/mcp-bridge";
 import { StreamHandler } from "../core/stream-handler";
-import { WorkspaceCheckpointer } from "../core/checkpointer";
+import { RemoteCheckpointer } from "../core/remote-checkpointer";
 import { buildPipelineGraph } from "../subgraphs/graph-builder";
 import { HookEngine } from "../hooks/hook-engine";
 import type { LlmProvider } from "../core/llm-provider";
@@ -31,7 +31,7 @@ type CompiledGraph = Awaited<ReturnType<typeof buildPipelineGraph>>;
 
 export class LangGraphEngine {
   private graph: CompiledGraph | null = null;
-  private checkpointer: WorkspaceCheckpointer;
+  private checkpointer: RemoteCheckpointer;
   private streamHandler: StreamHandler;
   private mcpBridge: McpBridge;
   private llmProvider: LlmProvider | undefined;
@@ -47,14 +47,15 @@ export class LangGraphEngine {
     private readonly onEvent: (msg: ChatExtToWebviewMessage) => void,
     llmProvider?: LlmProvider
   ) {
-    this.checkpointer = new WorkspaceCheckpointer(workspaceRoot);
+    // [v3.1] Persistence is backend-driven: RemoteCheckpointer talks to the
+    // Backend Knowledge Service over HTTP (no local state files).
+    this.checkpointer = new RemoteCheckpointer();
     this.streamHandler = new StreamHandler(onEvent);
     this.mcpBridge = new McpBridge(mcpManager);
     this.llmProvider = llmProvider;
     this.hookEngine = new HookEngine(workspaceRoot);
 
     agentRegistry.load(workspaceRoot);
-    this.checkpointer.cleanup();
   }
   /** Set or replace the LLM provider at runtime (e.g., after settings change). */
   setLlmProvider(provider: LlmProvider | undefined): void {
@@ -269,18 +270,35 @@ export class LangGraphEngine {
 
     if (!this.activeTabId) this.activeTabId = "default";
 
+    // SA4E-85 v3.1: Pre-search Backend KB for relevant context (OpenCode style)
+    const kbContext = await this.searchKb(chatInput);
+
     const { activeThread } = await executeChat(
       chatInput,
       this.activeTabId,
       this.chatHistoryByTab,
       graph,
       this.streamHandler,
-      this.onEvent
+      this.onEvent,
+      kbContext,
     );
     this.activeThread = activeThread;
   }
-  /** List persisted pipelines for resume prompt */
-  listPersistedPipelines(): PersistedPipelineInfo[] {
+  /**
+   * SA4E-85 v3.1: Search Backend Knowledge Base via MCP before each chat.
+   * Returns top results as context string for injection (OpenCode-style KB-first).
+   */
+  async searchKb(query: string): Promise<string> {
+    try {
+      const raw = await this.mcpBridge.callTool("mem_search", { query, limit: 6 });
+      if (!raw || raw.trim().length === 0) return "";
+      return `## Knowledge Base Context\n\n${raw.slice(0, 2000)}`;
+    } catch {
+      return "";
+    }
+  }
+  /** List persisted pipelines for resume prompt (async — KB query). */
+  async listPersistedPipelines(): Promise<PersistedPipelineInfo[]> {
     return this.checkpointer.listPersistedPipelines();
   }
   /** Get all SDLC pipeline node states for visualization */

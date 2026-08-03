@@ -93,20 +93,26 @@ describe('SA4E-41 SEC-01 graph tool isolation (two tenants)', () => {
     expect(res.results.some(r => r.symbol === 'callerBravo')).toBe(true);
   });
 
-  it('FileResolver only sees its own tenant files', () => {
+  it('FileResolver only sees its own tenant files', async () => {
     // Both tenants use the same relative path; each resolver resolves it, but the
     // underlying set is scoped (fail-closed variant proven to return null).
-    expect(new FileResolver(new SqliteDbAdapter(db), '/w', PID_B).resolveFile('src/app.ts')).toBe('src/app.ts');
-    expect(new FileResolver(new SqliteDbAdapter(db), '/w', undefined).resolveFile('src/app.ts')).toBeNull();
+    const frB = new FileResolver(new SqliteDbAdapter(db), '/w', PID_B);
+    await frB.ready();
+    expect(frB.resolveFile('src/app.ts')).toBe('src/app.ts');
+    const frNone = new FileResolver(new SqliteDbAdapter(db), '/w', undefined);
+    await frNone.ready();
+    expect(frNone.resolveFile('src/app.ts')).toBeNull();
   });
 
-  it('DependencyGraphService outgoing deps are tenant-scoped', () => {
+  it('DependencyGraphService outgoing deps are tenant-scoped', async () => {
     const fr = new FileResolver(new SqliteDbAdapter(db), '/w', PID_B);
+    await fr.ready();
     const dep = new DependencyGraphService(new SqliteDbAdapter(db), fr, PID_B);
     const res = dep.query('src/app.ts', 'outgoing', 1, true, 50);
     expect(res.root).toBe('src/app.ts');
     // Fail-closed variant returns nothing.
     const frNone = new FileResolver(new SqliteDbAdapter(db), '/w', undefined);
+    await frNone.ready();
     const depNone = new DependencyGraphService(new SqliteDbAdapter(db), frNone, undefined);
     expect(depNone.query('src/app.ts', 'outgoing', 1, true, 50).results.length).toBe(0);
   });

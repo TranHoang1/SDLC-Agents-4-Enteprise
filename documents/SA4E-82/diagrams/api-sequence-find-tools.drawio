@@ -1,0 +1,60 @@
+<mxGraphModel dx="900" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="h1" value="find_tools — Discovery with local merge" style="text;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="200" y="10" width="400" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="llm" value="LLM" style="shape=umlActor;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="60" height="120" as="geometry" />
+    </mxCell>
+    <mxCell id="ws" value="WrapperServer&#10;routeToolCall&#10;handleFindTools" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="280" y="60" width="150" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="bk" value="Remote Backend&#10;find_tools" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="560" y="60" width="150" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="reg" value="Local Registry&#10;getLocalToolDefinitions()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="760" y="60" width="130" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="s1" value="1. tools/call { name: &quot;find_tools&quot; }" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="140" y="200" width="200" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="s2" value="2. isLocalTool(name)? false" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="260" width="160" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="s3" value="3. restCallTool(&quot;find_tools&quot;, args)&#10;POST /api/tools/execute" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="320" width="220" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s4" value="4. backend tool list result" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+      <mxGeometry x="420" y="400" width="200" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="s5" value="5. rewriteFindToolsResponse:&#10;parse content[0].text, tools[]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="280" y="470" width="230" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s6" value="6. mergeLocalToolDefinitions(tools):&#10;append ALL local defs (incl. hidden pega_*)&#10;skip duplicates by name" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="280" y="550" width="260" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="s7" value="7. rewriteSchemasForLlm(merged)&#10;8. return { isError:false, content:[text JSON.tools] }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="180" y="640" width="320" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="x1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="s1" target="s2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="x2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="s2" target="s3">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="x3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="s3" target="s4">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="x4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="s4" target="s5">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="x5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="s5" target="s6">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="x6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="s6" target="s7">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

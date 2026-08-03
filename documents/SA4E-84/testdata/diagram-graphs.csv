@@ -1,0 +1,6 @@
+id,description,node_count,edge_count,container_count,has_crossing,has_overlap,has_diagonal,test_case
+1,Crossing graph: 4 nodes 3 edges with crossing,4,3,0,true,false,false,UT-02
+2,Clean graph: 3 nodes in column no issues,3,2,0,false,false,false,UT-03
+3,Container graph: 1 container 3 children 2 edges,3,2,1,false,false,false,UT-05
+4,Overlap graph: 2 nodes overlapping,2,1,0,false,true,false,UT-02
+5,Diagonal graph: 2 nodes with diagonal edge,2,1,0,false,false,true,UT-02

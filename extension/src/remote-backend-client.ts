@@ -7,11 +7,13 @@
 import * as vscode from "vscode";
 import { ServerStatus } from "./types";
 import { AuthManager } from "./auth/AuthManager";
-import { getLocalToolDefinitions } from "./backend-local-tools";
+import { getVisibleLocalToolDefinitions } from "./backend-local-tools";
 import { Base64ProxyService } from "./services/Base64ProxyService";
 import { WrapperServer } from "./services/WrapperServer";
 import { httpGetJson, httpPostJson } from "./utils/http-client-utils";
 import { buildBackendAuthHeaders } from "./utils/backend-auth-headers";
+import { PegaMcpTools } from "./mcp/PegaMcpTools";
+import { registerPegaLocalTools } from "./mcp/pega-local-tools";
 
 /** Health check timeout in milliseconds */
 const HEALTH_TIMEOUT_MS = 5000;
@@ -46,8 +48,18 @@ export class RemoteBackendClient implements vscode.Disposable {
     private readonly workspaceFolder: string,
     private readonly outputChannel: vscode.OutputChannel,
     private readonly authManager: AuthManager | undefined,
-    private readonly backendUrl: string
-  ) { this._port = extractPort(backendUrl); }
+    private readonly backendUrl: string,
+    secrets?: vscode.SecretStorage
+  ) {
+    this._port = extractPort(backendUrl);
+    if (secrets) {
+      try {
+        registerPegaLocalTools(new PegaMcpTools(secrets));
+      } catch (err) {
+        console.warn(`[RemoteBackendClient] Pega tools registration failed: ${(err as Error).message}`);
+      }
+    }
+  }
 
   get status(): ServerStatus { return this._status; }
   get pid(): number | null { return null; }
@@ -109,13 +121,13 @@ export class RemoteBackendClient implements vscode.Disposable {
       );
       const tools = json.tools || [];
       const existing = new Set(tools.map((t: any) => t.name));
-      for (const def of getLocalToolDefinitions()) {
+      for (const def of getVisibleLocalToolDefinitions()) {
         if (!existing.has(def.name)) tools.push(def);
       }
       return tools;
     } catch (err) {
       console.debug(`[RemoteBackendClient] restGetTools failed, using local tools: ${(err as Error).message}`);
-      return getLocalToolDefinitions();
+      return getVisibleLocalToolDefinitions();
     }
   }
 

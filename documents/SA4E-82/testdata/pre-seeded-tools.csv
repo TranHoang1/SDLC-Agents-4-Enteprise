@@ -1,0 +1,11 @@
+name,description,hidden,registered_via,test_case_id,expected_result,description
+stream_write_file,Write or append content to a local workspace file (creates parent dirs),false,backend-local-tools.ts pre-seed,TC-09,visible,Pre-seeded visible local tool - must remain in tools/list
+embed_image,Replace local image refs in markdown with base64 data URIs,false,backend-local-tools.ts pre-seed,TC-09,visible,Pre-seeded visible local tool - must remain in tools/list
+pega_get_session_context,Get current Pega operator session context (operator, access group, application, ruleset stack).,true,registerPegaLocalTools,TC-01,hidden,Registered hidden - excluded from tools/list kept in find_tools
+pega_get_rule,Fetch a Pega rule by its insKey (Service 1).,true,registerPegaLocalTools,TC-02,hidden,Registered hidden - required param insKey
+pega_query_rule,Query a Pega rule by class/name triple (Service 2).,true,registerPegaLocalTools,TC-03,hidden,Registered hidden - required params pxObjClass pyRuleName
+pega_list_rules,List Pega rules of a class, paginated (Service 3).,true,registerPegaLocalTools,TC-04,hidden,Registered hidden - defaults pxObjClass=Rule-Obj-Activity pageSize=50 pageIndex=1
+pega_save_rule,Save a Pega rule with automatic RuleSet/branch context resolution (Service 4).,true,registerPegaLocalTools,TC-05,hidden,Registered hidden - required param ruleJson
+pega_checkout_rule,Checkout/checkin/undo-checkout a Pega rule with branch context (Service 5).,true,registerPegaLocalTools,TC-06,hidden,Registered hidden - required param insKey action enum
+pega_run_tests,Execute a scenario test suite in Pega (Service 6).,true,registerPegaLocalTools,TC-07,hidden,Registered hidden - aliases testSuiteID/suiteId/insKey
+pega_create_branch,Create a Pega ruleset branch version when no open version exists (Service 7).,true,registerPegaLocalTools,TC-08,hidden,Registered hidden - required param rulesetName

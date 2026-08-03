@@ -1,0 +1,4 @@
+id,description,node_id,original_x,original_y,elk_new_x,elk_new_y,width,height,test_case
+1,Node repositioned by ELK,n1,10,20,100,200,120,60,UT-06/UT-07
+2,Node stays same position,n2,100,200,100,200,120,60,UT-07
+3,Node shifted from negative,n3,-50,-30,0,0,120,60,UT-06

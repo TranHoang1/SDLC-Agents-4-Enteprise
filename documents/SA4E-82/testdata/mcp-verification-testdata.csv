@@ -1,0 +1,10 @@
+test_case_id,mcp_method,tool_name,arguments_json,expected_http_code,expected_result,description
+TC-13,tools/list,,,200,tools_count=12; no pega_* tools; stream_write_file+embed_image present,"Live tools/list on port 9181 returns exactly 12 visible tools (Pega hidden)"
+TC-14,tools/call,find_tools,"{""query"":""pega create branch"",""top_k"":20}",200,tools_count=60; all 8 pega_* present; no duplicates,"Live find_tools merges 8 Pega definitions into backend result"
+TC-15,tools/call,execute_dynamic_tool,"{""tool_name"":""pega_get_session_context"",""arguments"":{}}",200,isError=false; success=true; operatorId=SSA@TGB; app=HRAppsV2,"Live session context returns real operator and application"
+TC-16,tools/call,execute_dynamic_tool,"{""tool_name"":""pega_list_rules"",""arguments"":{""pxObjClass"":""Rule-Obj-Activity"",""pageSize"":50,""pageIndex"":1}}",200,isError=false; success=true; data.total defined; live rule items,"Live list rules returns paginated Pega rules"
+TC-11,tools/call,execute_dynamic_tool,"{""toolName"":""stream_write_file"",""arguments"":{""file_path"":""<tmp>/dyn-local.txt"",""content"":""y""}}",200,restCallToolMock calls=0; text contains Wrote file:,"IT: local dynamic routing does not forward to backend"
+TC-17,tools/call,execute_dynamic_tool,"{""toolName"":""<backend-tool>"",""arguments"":{}}",200,restCallToolMock called once; backend result returned,"IT: non-local dynamic tool still forwarded to backend"
+TC-26,tools/call,find_tools,"{}",-32603,jsonrpc error -32603; backend error text; local tools unaffected,"Backend find_tools failure propagates JSON-RPC error"
+TC-24,tools/list,,,200,fallback list with stream_write_file+embed_image; no pega_*; console.debug logged,"Backend /api/tools down - tools/list falls back to visible local defs"
+TC-25,initialize,,,200,tools.listChanged=false; serverInfo.name=sdlc-agents-4-enterprise; protocol 2025-06-18/2025-03-26/2024-11-05,MCP protocol handshake unaffected

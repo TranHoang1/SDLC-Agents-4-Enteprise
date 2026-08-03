@@ -1,63 +1,83 @@
 /**
- * drawio_auto_layout MCP tool — REVIEW mode: detect issues, report for AI to fix.
- * Accepts content_base64 (drawio XML). Does NOT modify the file. Returns issue list.
+ * SA4E-84 — drawio_auto_layout tool handler (FIX mode).
+ * Analyzes draw.io layout and auto-fixes issues using ELK.js.
+ * Input: file_path (reads content automatically). No mode param — always fixes.
+ * Output: metadata only (no content_base64). Fixed XML written directly to file.
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
-import * as os from 'os';
 import { parseDrawio, DiagramGraph, DiagramNode } from './drawio-parser.js';
+import { handleApply } from './drawio-apply.js';
 
 export const DRAWIO_TOOL_DEFINITION = {
   name: 'drawio_auto_layout',
-  description: 'Analyze draw.io diagram layout from base64 XML content. Detects overlaps, crossings, diagonal edges.',
+  description: 'Analyze and auto-fix draw.io diagram layout. Detects overlaps, crossings, diagonal edges — fixes automatically with ELK layout engine if issues found.',
   inputSchema: {
     type: 'object',
     properties: {
-      content_base64: { type: 'string', description: 'Base64-encoded .drawio XML content' },
-      file_path: { type: 'string', description: 'Original file path (reference only)' },
-      algorithm: { type: 'string', description: 'Layout algorithm: layered|force|mrtree|radial (default: layered)' },
+      file_path: { type: 'string', description: 'Path to .drawio file (relative to workspace or absolute)' },
+      algorithm: { type: 'string', enum: ['layered', 'force', 'mrtree', 'radial'], description: 'Layout algorithm (default: layered)' },
       spacing: { type: 'number', description: 'Node spacing in pixels (default: 80)' },
-      direction: { type: 'string', description: 'Layout direction: DOWN|RIGHT|LEFT|UP (default: DOWN)' },
+      direction: { type: 'string', enum: ['DOWN', 'RIGHT', 'LEFT', 'UP'], description: 'Layout direction (default: DOWN)' },
     },
-    required: ['content_base64'],
+    required: ['file_path'],
   },
 };
 
-export function handleDrawioLayout(args: Record<string, unknown>, workspace: string): string {
-  const b64 = args.content_base64 as string | undefined;
-  if (!b64) return error('content_base64 is required');
-
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'drawio-layout-'));
-  const tmpFile = path.join(tmpDir, 'input.drawio');
+/**
+ * Entry point: detect issues → fix with ELK if needed → write file → return metadata.
+ * @param args - Tool arguments (file_path, algorithm, spacing, direction)
+ * @param workspace - Workspace root path for resolving relative file_path
+ * @returns JSON string with status, message, nodes, edges, issues, repositioned_nodes
+ */
+export async function handleDrawioLayout(args: Record<string, unknown>, workspace: string): Promise<string> {
+  const filePath = resolveFilePath(args.file_path, workspace);
+  if (!filePath) return error('file_path is required');
+  if (!fs.existsSync(filePath)) return error('File not found or not accessible');
   try {
-    const content = Buffer.from(b64, 'base64').toString('utf-8');
-    fs.writeFileSync(tmpFile, content, 'utf-8');
-    const { graph } = parseDrawio(tmpFile);
+    const { raw, graph } = parseDrawio(filePath);
     const nodeCount = graph.nodes.length + graph.containers.length;
     if (nodeCount === 0) return error('No nodes found in diagram');
-
     const issues = detectAllIssues(graph);
-    if (issues.length === 0) {
-      return JSON.stringify({
-        status: 'already_good',
-        message: 'Diagram looks good — no overlapping nodes or edge crossings detected.',
-        nodes: nodeCount, edges: graph.edges.length, issues: [],
-      });
-    }
-    return JSON.stringify({
-      status: 'needs_fix',
-      message: `Found ${issues.length} issues. Fix the drawio XML and call this tool again to verify.`,
-      nodes: nodeCount, edges: graph.edges.length, issues,
-    });
+    // No issues → already_good, don't modify file
+    if (issues.length === 0) return alreadyGood();
+    // Issues found → always fix (no mode parameter)
+    return handleApply(raw, graph, issues, nodeCount, args, filePath);
   } catch (e: any) {
     return error(`Analysis failed: ${e.message ?? e}`);
-  } finally {
-    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch { /* best-effort */ }
   }
 }
 
-function detectAllIssues(graph: DiagramGraph): object[] {
+/**
+ * Resolve file_path: canonicalize and verify within workspace boundary.
+ * Prevents path traversal attacks (SEC-01: CWE-22).
+ * @param filePath - Raw file_path from tool input
+ * @param workspace - Trusted workspace root
+ * @returns Canonical path within workspace, or null if invalid/escaping
+ */
+export function resolveFilePath(filePath: unknown, workspace: string): string | null {
+  if (typeof filePath !== 'string' || filePath.trim() === '') return null;
+  const trimmed = filePath.trim();
+  // Resolve to absolute, then canonicalize to eliminate ../ sequences
+  const resolved = path.isAbsolute(trimmed) ? trimmed : path.resolve(workspace, trimmed);
+  const canonical = path.resolve(resolved);
+  // Verify canonical path stays within workspace boundary
+  const normalizedWorkspace = path.resolve(workspace);
+  const sep = path.sep;
+  const isWithin = canonical.startsWith(normalizedWorkspace + sep) || canonical === normalizedWorkspace;
+  if (!isWithin) return null;
+  return canonical;
+}
+
+function alreadyGood(): string {
+  return JSON.stringify({
+    status: 'already_good',
+    message: 'Diagram looks good — no overlapping nodes or edge crossings detected.',
+  });
+}
+
+export function detectAllIssues(graph: DiagramGraph): object[] {
   return [
     ...detectNodeOverlaps(graph),
     ...detectEdgeCrossings(graph),
@@ -71,12 +91,10 @@ function detectNodeOverlaps(graph: DiagramGraph): object[] {
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
       if (nodes[i].parentId !== nodes[j].parentId) continue;
-      const overlap = overlapRatio(nodes[i], nodes[j]);
-      if (overlap > 0.50) {
+      if (overlapRatio(nodes[i], nodes[j]) > 0.50) {
         issues.push({
           type: 'node_overlap', severity: 'high',
           node_a: nodes[i].id, node_b: nodes[j].id,
-          overlap_pct: Math.round(overlap * 100),
           fix_hint: `Move '${nodes[j].id}' away from '${nodes[i].id}'.`,
         });
       }
@@ -85,10 +103,11 @@ function detectNodeOverlaps(graph: DiagramGraph): object[] {
   return issues;
 }
 
-function detectEdgeCrossings(graph: DiagramGraph): object[] {
+export function detectEdgeCrossings(graph: DiagramGraph): object[] {
   const issues: object[] = [];
-  const allNodes = [...graph.nodes, ...graph.containers];
-  const nodeMap = new Map(allNodes.map(n => [n.id, n]));
+  const nodeMap = new Map(
+    [...graph.nodes, ...graph.containers].map(n => [n.id, n]),
+  );
   for (const edge of graph.edges) {
     const src = nodeMap.get(edge.sourceId);
     const tgt = nodeMap.get(edge.targetId);
@@ -100,11 +119,11 @@ function detectEdgeCrossings(graph: DiagramGraph): object[] {
       if (lineCrossesRect(sx, sy, tx, ty, node)) {
         issues.push({
           type: 'edge_crossing', severity: 'medium',
-          edge_id: edge.id, edge_source: edge.sourceId, edge_target: edge.targetId,
-          crosses_node: node.id,
-          fix_hint: `Edge '${edge.id}' (${edge.sourceId}→${edge.targetId}) crosses '${node.id}'. Rearrange nodes.`,
+          edge_id: edge.id, edge_source: edge.sourceId,
+          edge_target: edge.targetId, crosses_node: node.id,
+          fix_hint: `Edge '${edge.id}' (${edge.sourceId}→${edge.targetId}) crosses '${node.id}'.`,
         });
-        break;
+        break; // One crossing per edge is enough
       }
     }
   }
@@ -113,8 +132,10 @@ function detectEdgeCrossings(graph: DiagramGraph): object[] {
 
 function detectDiagonalEdges(graph: DiagramGraph): object[] {
   const issues: object[] = [];
-  const nodeMap = new Map([...graph.nodes, ...graph.containers].map(n => [n.id, n]));
-  const tolerance = 20;
+  const nodeMap = new Map(
+    [...graph.nodes, ...graph.containers].map(n => [n.id, n]),
+  );
+  const tolerance = 20; // px threshold for "diagonal"
   for (const edge of graph.edges) {
     const src = nodeMap.get(edge.sourceId);
     const tgt = nodeMap.get(edge.targetId);
@@ -122,13 +143,11 @@ function detectDiagonalEdges(graph: DiagramGraph): object[] {
     const dx = Math.abs((src.x + src.width / 2) - (tgt.x + tgt.width / 2));
     const dy = Math.abs((src.y + src.height / 2) - (tgt.y + tgt.height / 2));
     if (dx > tolerance && dy > tolerance) {
-      const fix = dx < dy
-        ? `Align horizontally: set '${edge.targetId}' x=${Math.round(src.x)} (same column)`
-        : `Align vertically: set '${edge.targetId}' y=${Math.round(src.y)} (same row)`;
       issues.push({
         type: 'diagonal_edge', severity: 'low',
-        edge_id: edge.id, edge_source: edge.sourceId, edge_target: edge.targetId,
-        fix_hint: fix,
+        edge_id: edge.id, edge_source: edge.sourceId,
+        edge_target: edge.targetId,
+        fix_hint: `Edge '${edge.id}' is diagonal — ELK will align.`,
       });
     }
   }
@@ -144,7 +163,9 @@ function overlapRatio(a: DiagramNode, b: DiagramNode): number {
   return smaller > 0 ? area / smaller : 0;
 }
 
-function lineCrossesRect(x1: number, y1: number, x2: number, y2: number, node: DiagramNode): boolean {
+function lineCrossesRect(
+  x1: number, y1: number, x2: number, y2: number, node: DiagramNode,
+): boolean {
   const m = 5;
   const l = node.x - m, r = node.x + node.width + m;
   const t = node.y - m, b = node.y + node.height + m;
@@ -157,7 +178,9 @@ function lineCrossesRect(x1: number, y1: number, x2: number, y2: number, node: D
   return true;
 }
 
-function outCode(x: number, y: number, l: number, t: number, r: number, b: number): number {
+function outCode(
+  x: number, y: number, l: number, t: number, r: number, b: number,
+): number {
   let c = 0;
   if (x < l) c |= 1; if (x > r) c |= 2;
   if (y < t) c |= 4; if (y > b) c |= 8;

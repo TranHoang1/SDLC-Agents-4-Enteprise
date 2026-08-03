@@ -1,0 +1,90 @@
+<mxGraphModel dx="712" dy="1163" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="720" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="h1" value="execute_dynamic_tool — Local execution of pega_*" style="text;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+      <mxGeometry y="120" width="500" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="llm" value="LLM" style="shape=umlActor;whiteSpace=wrap;html=1;verticalAlign=top;" parent="1" vertex="1">
+      <mxGeometry y="210" width="60" height="120" as="geometry" />
+    </mxCell>
+    <mxCell id="ws" value="WrapperServer&#10;routeToolCall&#10;handleDynamic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+      <mxGeometry y="390" width="150" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="reg" value="Local Registry&#10;executeLocalTool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+      <mxGeometry y="560" width="150" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="pmt" value="PegaMcpTools&#10;handler (e.g. listRules)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+      <mxGeometry y="700" width="140" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="s1" value="1. tools/call { name: &quot;execute_dynamic_tool&quot;,&#10;arguments: { tool_name: &quot;pega_*&quot;, arguments } }" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+      <mxGeometry y="5" width="250" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s2" value="2. isLocalTool(&quot;execute_dynamic_tool&quot;)? false&#10;3. handleDynamic(args)" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+      <mxGeometry x="361" y="5" width="180" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s3" value="4. unwrapDynamicTool(args)&#10;→ { toolName, innerArgs }" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+      <mxGeometry x="652" y="5" width="200" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s4" value="5. isLocalTool(toolName)? true&#10;→ executeLocalTool(toolName, innerArgs)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" parent="1" vertex="1">
+      <mxGeometry x="952" y="5" width="220" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s5" value="6. invoke bound handler(args)&#10;→ PegaMcpTools method" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+      <mxGeometry x="1272" y="5" width="220" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="s6" value="7. toMcpResult(result):&#10;isError = success !== false&#10;content = [text JSON.stringify(result)]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+      <mxGeometry x="1592" width="220" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="s7" value="8. return { isError, content } to LLM" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+      <mxGeometry x="1912" y="10" width="220" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="y1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;noEdgeStyle=1;orthogonal=1;" parent="1" source="s1" target="s2" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="262" y="30" />
+          <mxPoint x="338" y="30" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="y2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;noEdgeStyle=1;orthogonal=1;" parent="1" source="s2" target="s3" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="564" y="30" />
+          <mxPoint x="640" y="30" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="y3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;noEdgeStyle=1;orthogonal=1;" parent="1" source="s3" target="s4" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="864" y="30" />
+          <mxPoint x="940" y="30" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="y4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;noEdgeStyle=1;orthogonal=1;" parent="1" source="s4" target="s5" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1184" y="30" />
+          <mxPoint x="1260" y="30" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="y5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;noEdgeStyle=1;orthogonal=1;" parent="1" source="s5" target="s6" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1504" y="30" />
+          <mxPoint x="1580" y="30" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="y6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;noEdgeStyle=1;orthogonal=1;" parent="1" source="s6" target="s7" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1824" y="30" />
+          <mxPoint x="1900" y="30" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

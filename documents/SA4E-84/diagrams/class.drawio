@@ -1,0 +1,66 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="Class / Type — drawio_auto_layout FIX mode (elkjs)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="10" width="560" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="graph" value="«interface» DiagramGraph (drawio-parser.ts)&#10;—&#10;nodes: DiagramNode[]&#10;edges: DiagramEdge[]&#10;containers: DiagramNode[]" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="220" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="node" value="«interface» DiagramNode&#10;—&#10;id: string&#10;parentId: string&#10;x, y, width, height: number&#10;style: string&#10;isContainer: boolean" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="300" y="50" width="200" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="edge" value="«interface» DiagramEdge&#10;—&#10;id: string&#10;sourceId: string&#10;targetId: string&#10;style: string" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="300" y="190" width="200" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="elknode" value="«interface» ElkNode (drawio-layout-models.ts MỚI)&#10;—&#10;id: string&#10;x?, y?: number&#10;width, height: number&#10;children?: ElkNode[]&#10;edges?: ElkEdge[]&#10;layoutOptions?: Record" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="560" y="50" width="230" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="elkedge" value="«interface» ElkEdge&#10;—&#10;id: string&#10;sources: string[]&#10;targets: string[]&#10;sections?: { bendPoints?: {x,y}[] }[]" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="560" y="210" width="230" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="repo" value="«interface» RepositionedNode&#10;—&#10;id: string&#10;x_old, y_old: number&#10;x_new, y_new: number" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="560" y="350" width="230" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="fix" value="«interface» LayoutFixResult&#10;—&#10;status: fixed|already_good&#10;message: string&#10;nodes, edges: number&#10;issues: Issue[]&#10;content_base64?: string&#10;repositioned_nodes?: RepositionedNode[]" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="560" y="480" width="230" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="engine" value="ElkLayoutEngine (elk-layout.ts MỚI)&#10;—&#10;loadElk(): Promise&lt;ELK&gt; (singleton)&#10;buildElkGraph(graph, args): ElkNode&#10;runElkLayout(elkNode, timeoutMs): ElkNode&#10;flattenNodes(root): ElkNode[]" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="210" width="220" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="writer" value="DrawioWriter (drawio-writer.ts MỚI)&#10;—&#10;applyLayoutToXml(rawXml, laidOut):&#10;  { xml, repositionedNodes }&#10;replaceGeometryXY(cell, x, y)&#10;replaceEdgePoints(xml, id, bends)&#10;shiftXmlToOrigin(xml, newPos)" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="360" width="220" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="applyorchest" value="ApplyOrchestrator (drawio-apply.ts MỚI)&#10;—&#10;handleApply(rawXml, graph, args):&#10;  Promise&lt;string&gt;&#10;normalizeLayoutArgs(args)&#10;validateNodeCount(graph)&#10;buildFixedResponse(...)" style="shape=umlClass;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="540" width="220" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=block;endFill=0;fontSize=9;" edge="1" parent="1" source="graph" target="node">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="260" y="120" as="sourcePoint"/><mxPoint x="300" y="100" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="d2" value="" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=block;endFill=0;fontSize=9;" edge="1" parent="1" source="graph" target="edge">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="260" y="150" as="sourcePoint"/><mxPoint x="300" y="230" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="d3" value="contains (hierarchical)" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=block;endFill=0;fontSize=9;" edge="1" parent="1" source="elknode" target="elkedge">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="675" y="180" as="sourcePoint"/><mxPoint x="675" y="210" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="d4" value="consumes" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1" source="engine" target="elknode">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="260" y="250" as="sourcePoint"/><mxPoint x="560" y="130" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="d5" value="consumes" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1" source="engine" target="graph">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="150" y="210" as="sourcePoint"/><mxPoint x="150" y="170" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="d6" value="produces RepositionedNode[]" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1" source="writer" target="repo">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="260" y="420" as="sourcePoint"/><mxPoint x="560" y="400" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="d7" value="delegates" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1" source="applyorchest" target="engine">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="140" y="540" as="sourcePoint"/><mxPoint x="140" y="330" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="d8" value="delegates" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1" source="applyorchest" target="writer">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="220" y="580" as="sourcePoint"/><mxPoint x="260" y="510" as="targetPoint"/></mxGeometry>
+    </mxCell>
+    <mxCell id="d9" value="returns" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=open;dashed=1;fontSize=9;" edge="1" parent="1" source="applyorchest" target="fix">
+      <mxGeometry relative="1" as="geometry"><mxPoint x="260" y="630" as="sourcePoint"/><mxPoint x="560" y="560" as="targetPoint"/></mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

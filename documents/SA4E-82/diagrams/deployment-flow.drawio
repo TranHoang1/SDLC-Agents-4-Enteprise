@@ -1,0 +1,111 @@
+<mxGraphModel adaptiveColors="auto" dx="1000" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="780" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="stage1" value="BUILD (Automated)" style="swimlane;html=1;startSize=30;horizontal=1;fillColor=#dae8fc;strokeColor=#6c8ebf;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="20" y="20" width="1060" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="b1" value="npm install&#10;(npm install)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="stage1">
+      <mxGeometry x="30" y="50" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b2" value="npm run compile&#10;(tsc -p ./)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="stage1">
+      <mxGeometry x="240" y="50" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b3" value="npm run esbuild-production&#10;(node esbuild.js --production)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="stage1">
+      <mxGeometry x="450" y="50" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b4" value="copy-resources +&#10;gen-checksums" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="stage1">
+      <mxGeometry x="680" y="50" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b5" value="npx vsce package&#10;(1.19.1.vsix, 5.03 MB)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="stage1">
+      <mxGeometry x="880" y="50" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage1" source="b1" target="b2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage1" source="b2" target="b3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage1" source="b3" target="b4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage1" source="b4" target="b5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage2" value="INSTALL (Manual / DevOps)" style="swimlane;html=1;startSize=30;horizontal=1;fillColor=#fff2cc;strokeColor=#d6b656;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="20" y="160" width="1060" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="i1" value="code --install-extension&#10;1.19.1.vsix --force" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="stage2">
+      <mxGeometry x="30" y="50" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="i2" value="Reload VS Code window&#10;(Developer: Reload Window)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="stage2">
+      <mxGeometry x="290" y="50" width="230" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="i3" value="Extension host starts&#10;MCP server on :9181" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="stage2">
+      <mxGeometry x="560" y="50" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="i4" value="Pega tools registered&#10;(8 hidden local tools)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="stage2">
+      <mxGeometry x="820" y="50" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage2" source="i1" target="i2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage2" source="i2" target="i3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage2" source="i3" target="i4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage3" value="VERIFICATION (QA / DevOps)" style="swimlane;html=1;startSize=30;horizontal=1;fillColor=#e1d5e7;strokeColor=#9673a6;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="20" y="310" width="1060" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="v1" value="Health check&#10;curl :9181/health" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="stage3">
+      <mxGeometry x="30" y="50" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="v2" value="tools/list&#10;expect 12 (no pega)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="stage3">
+      <mxGeometry x="230" y="50" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="v3" value="find_tools&#10;expect 8 pega_*" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="stage3">
+      <mxGeometry x="440" y="50" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="v4" value="execute_dynamic_tool&#10;live Pega (SSA@TGB)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="stage3">
+      <mxGeometry x="640" y="50" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="g1" value="All checks pass?" style="rhombus;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="stage3">
+      <mxGeometry x="870" y="40" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="ok1" value="DEPLOYED&#10;(Release v1.19.1)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="stage3">
+      <mxGeometry x="870" y="130" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="rb1" value="ROLLBACK&#10;(see rollback flow)" style="rounded=1;html=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="stage3">
+      <mxGeometry x="660" y="130" width="170" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage3" source="v1" target="v2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage3" source="v2" target="v3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="stage3" source="v3" target="v4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="stage3" source="v4" target="g1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="stage3" source="g1" target="ok1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;dashed=1;strokeColor=#b85450;" edge="1" parent="stage3" source="g1" target="rb1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;strokeColor=#b85450;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="b5" target="i1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="i4" target="v1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend1" value="LEGEND&#10;Green = automated&#10;Yellow/Blue = manual&#10;Red dashed = rollback path" style="text;html=1;whiteSpace=wrap;align=left;" vertex="1" parent="1">
+      <mxGeometry x="20" y="520" width="260" height="70" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

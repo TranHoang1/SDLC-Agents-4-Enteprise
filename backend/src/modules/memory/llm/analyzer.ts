@@ -175,15 +175,16 @@ export class TagAnalyzerService {
       if (this.allValidTags.has(s.tag)) return s;
       const keywordMatch = KNOWN_KEYWORDS[s.tag] ?? KNOWN_KEYWORDS[s.tag.replace(/-/g, ' ')];
       if (keywordMatch) return { ...s, tag: keywordMatch };
+      // Fuzzy match: only consider valid tags ≥5 chars to avoid false positives
+      // from short taxonomy entries (e.g. 'low' matching 'auth-flow-login')
       for (const validTag of this.allValidTags) {
+        if (validTag.length < 5) continue;
         if (s.tag.includes(validTag) || validTag.includes(s.tag)) {
           return { ...s, tag: validTag, confidence: Math.min(s.confidence, 0.7) };
         }
       }
-      return { ...s, confidence: Math.min(s.confidence, 0.3) };
-    }).filter(s => {
-      if (this.allValidTags.has(s.tag)) return true;
-      return s.confidence >= 0.6;
+      // Unknown tags retain original confidence — LLM-assigned confidence is authoritative
+      return s;
     });
   }
 

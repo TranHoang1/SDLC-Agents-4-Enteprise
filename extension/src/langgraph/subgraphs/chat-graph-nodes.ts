@@ -13,6 +13,8 @@ import { VSCODE_TOOL_DEFINITIONS, isVscodeTool, executeVscodeTool } from "../vsc
 import { HookEngine } from "../hooks/hook-engine";
 import { debugLog, debugError } from "../../debug-logger";
 import { buildBudgetAwareMessages, estimateMessagesTokens, getDynamicToolResultLimits } from "../core/context-budget";
+import { requiresApproval } from "../../chat/engine/ToolApprovalClassifier";
+import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
 
 const LLM_CALL_TIMEOUT_MS = 300_000;
 
@@ -92,7 +94,8 @@ export function createFetchToolsNode(toolRegistry: ToolRegistry | null) {
 }
 
 export function createAgentStepNode(
-  llmProvider: LlmProvider | undefined, streamHandler: StreamHandler, enrichedSystemPrompt: string
+  llmProvider: LlmProvider | undefined, streamHandler: StreamHandler,
+  getSystemPrompt: (state: PipelineState) => string,
 ) {
   return async (state: PipelineState) => {
     if (!llmProvider) {
@@ -101,6 +104,7 @@ export function createAgentStepNode(
         pipelineStatus: "completed" as const, toolCalls: null, lastUpdatedAt: new Date().toISOString(),
       };
     }
+    const sysPrompt = getSystemPrompt(state);
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
     let tools: McpToolDefinition[] = [];
     try { tools = JSON.parse(state.parallelResults?.toolsJson || "[]"); }
@@ -110,9 +114,9 @@ export function createAgentStepNode(
     }
 
     if (llmProvider.chatWithTools && tools.length > 0) {
-      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, 10), enrichedSystemPrompt);
+      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, 10), sysPrompt);
     }
-    return await agentStepStreaming(state, llmProvider, streamHandler, streamId, enrichedSystemPrompt, tools);
+    return await agentStepStreaming(state, llmProvider, streamHandler, streamId, sysPrompt, tools);
   };
 }
 
@@ -191,7 +195,7 @@ async function agentStepStreaming(
 }
 
 export function createExecuteToolsNode(
-  mcpBridge: McpBridge | undefined, sh: StreamHandler, hookEngine: HookEngine | undefined, wsRoot: string
+  mcpBridge: McpBridge | undefined, sh: StreamHandler, hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate
 ) {
   return async (state: PipelineState) => {
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
@@ -200,7 +204,7 @@ export function createExecuteToolsNode(
     sh.emitComplete("chat", 0, streamId);
 
     for (const call of calls) {
-      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot);
+      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate);
       results.push(r);
     }
 
@@ -232,7 +236,7 @@ export function createExecuteToolsNode(
 async function executeSingleTool(
   call: { id: string; name: string; arguments: Record<string, unknown> },
   mcpBridge: McpBridge | undefined, sh: StreamHandler, streamId: string,
-  hookEngine: HookEngine | undefined, wsRoot: string
+  hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate
 ): Promise<{ toolCallId: string; name: string; content: string }> {
   const tcId = call.id || `tc-${Date.now()}`;
 
@@ -243,7 +247,22 @@ async function executeSingleTool(
     } catch (e) { debugError(`preToolUse hook error`, e as Error); }
   }
 
-  sh.emitDirect({ type: "chat:toolCall", toolCall: { id: tcId, name: call.name, args: call.arguments, status: "running" } } as any);
+  // SA4E-85: Signal dangerous tool to webview and AWAIT approval before execution
+  const needsApproval = requiresApproval(call.name);
+  sh.emitDirect({ type: "chat:toolCall", toolCall: { id: tcId, name: call.name, args: call.arguments, status: "running" }, requiresApproval: needsApproval } as any);
+
+  if (needsApproval && approvalGate) {
+    const result = await approvalGate.requestApproval(tcId);
+    if (result.decision === 'reject') {
+      // SA4E-85: Emit retry-available signal on timeout (not user_reject)
+      const isTimeout = result.reason === 'timeout';
+      const status = isTimeout ? 'timeout' : 'rejected';
+      const msg = isTimeout ? 'Auto-rejected. Retry available.' : 'Tool execution denied by user.';
+      sh.emitDirect({ type: "chat:toolCallUpdate", id: tcId, status, result: msg, duration: 0, retryable: isTimeout } as any);
+      return { toolCallId: call.id, name: call.name, content: msg };
+    }
+  }
+
   const start = Date.now();
 
   try {
@@ -274,8 +293,12 @@ async function executeSingleTool(
   }
 }
 
-export function createSynthesizeNode(llm: LlmProvider | undefined, sh: StreamHandler, sysPrompt: string) {
+export function createSynthesizeNode(
+  llm: LlmProvider | undefined, sh: StreamHandler,
+  getSystemPrompt: (state: PipelineState) => string,
+) {
   return async (state: PipelineState) => {
+    const sysPrompt = getSystemPrompt(state);
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
     if (!llm) return { pipelineStatus: "completed" as const, lastUpdatedAt: new Date().toISOString() };
     try {

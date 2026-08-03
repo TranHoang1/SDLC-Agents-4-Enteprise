@@ -2,7 +2,7 @@ import { StateGraph, END } from "@langchain/langgraph";
 import { PipelineAnnotation, PipelineState, SDLCPhase, PipelineStatus, ChatMessage } from "../core/state";
 import { McpBridge } from "../core/mcp-bridge";
 import { StreamHandler } from "../core/stream-handler";
-import { WorkspaceCheckpointer } from "../core/checkpointer";
+import { RemoteCheckpointer } from "../core/remote-checkpointer";
 import type { LlmProvider } from "../core/llm-provider";
 import { getAlternateStrategy } from "../config/alternate-strategies";
 import { createSdlcNodes, SdlcNodes } from "./sdlc-node-factory";
@@ -43,7 +43,7 @@ function nodeRunner(n: SdlcNodes, id: string, advanceFn?: (s: PipelineState) => 
 
 export async function buildSdlcSubgraph(
   mcpBridge: McpBridge, streamHandler: StreamHandler,
-  checkpointer: WorkspaceCheckpointer, llmProvider?: LlmProvider
+  checkpointer: RemoteCheckpointer, llmProvider?: LlmProvider
 ) {
   _mcpBridge = mcpBridge;
   _streamHandler = streamHandler;
