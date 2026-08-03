@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.19.1] - 2026-07-31
+
+### Fixed
+- **Proxy: leverage VS Code resolution (`@vscode/proxy-agent`)** — System mode now resolves proxy per-URL through VS Code's own proxy stack (reads `http.proxy`, `http.proxySupport`, `http.noProxy`, `HTTPS_PROXY`/`HTTP_PROXY`/`NO_PROXY`, auto-bypasses localhost, per-URL caching, OS-native fallback). Fixes unreliable system proxy detection in enterprise networks (esp. PAC/WPAD setups); proxy connectivity test uses the same resolution path. Self-contained bundle via esbuild alias for the native `@vscode/windows-ca-certs` (Windows-only, unused) — no runtime install needed on any OS.
+
 ## [1.19.0] - 2026-07-31
 
 ### Added

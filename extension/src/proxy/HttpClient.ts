@@ -155,7 +155,7 @@ export class HttpClient {
       if (factory.shouldBypass(targetUrl, config.bypass)) {
         return undefined;
       }
-      return await factory.getDispatcher();
+      return await factory.getDispatcher(targetUrl);
     } catch {
       // ProxyAgentFactory not initialized or error — fall back to direct
       return undefined;

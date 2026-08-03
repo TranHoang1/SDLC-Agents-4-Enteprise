@@ -30,6 +30,8 @@ export class WrapperServer {
   private server: http.Server | null = null;
   private requestId = 0;
   private port: number | null = null;
+  /** Track active sockets to force-close on stop (prevents port hang on reload). */
+  private readonly activeSockets = new Set<import("net").Socket>();
 
   constructor(private readonly deps: WrapperServerDeps) {}
 
@@ -38,6 +40,11 @@ export class WrapperServer {
   async start(requestedPort: number): Promise<void> {
     return new Promise((resolve, reject) => {
       const srv = http.createServer((req, res) => this.handleRequest(req, res));
+      // Track connections so stop() can force-destroy them (avoids port hang on reload)
+      srv.on("connection", (socket) => {
+        this.activeSockets.add(socket);
+        socket.once("close", () => this.activeSockets.delete(socket));
+      });
       srv.on("error", (err) => {
         this.deps.outputChannel.appendLine(`[WrapperServer] Error: ${err.message}`);
         if (!this.server) reject(err);
@@ -53,6 +60,12 @@ export class WrapperServer {
 
   async stop(): Promise<void> {
     if (!this.server) return;
+    // Destroy all active sockets first — prevents server.close() from hanging
+    // when SSE streams or keep-alive connections are open (root cause of port conflict on reload)
+    for (const socket of this.activeSockets) {
+      socket.destroy();
+    }
+    this.activeSockets.clear();
     await new Promise<void>((resolve) => this.server!.close(() => resolve()));
     this.server = null;
     this.port = null;
