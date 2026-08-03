@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.21.0] - 2026-08-02
+
+### Added
+- **ToolApprovalGate** — Promise-based human-in-the-loop gate for dangerous tool execution
+  - Idempotency guard, 2-phase escalation, retry (max 3), JSONL audit log, metrics
+- **ApprovalEventLog** — Append-only JSONL event log for tool approval auditing
+- **Chat UI Agentic Module** — Svelte webview + LangGraph ReAct agent loop
+- **Knowledge Module** (backend) — SQLite-backed hybrid search, REST API
+- **Steering: Reference Analysis** — Step 2.5 for complex features
+
+### Changed
+- `executeSingleTool` awaits approval gate before executing dangerous tools
+- Timeout rejections emit `retryable: true` signal to webview
+
 ## [1.20.0] - 2026-08-01
 
 ### Added

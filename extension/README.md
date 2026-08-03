@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.16.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.21.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -242,6 +242,12 @@ MIT
 ---
 
 ## Changelog
+
+### v1.21.0 (2026-08-02)
+
+- **SA4E-85: ToolApprovalGate — Human-in-the-Loop for Dangerous Tools** — Graph execution pauses and awaits user approval before executing dangerous tools (write_file, shell_execute, git_*). Promise-based gate with idempotency guard, 2-phase escalation, retry mechanism, JSONL audit log, metrics. 100% open-design compliance. 40 tests.
+- **SA4E-85: Chat UI Agentic (Svelte + LangGraph)** — Full chat module with Svelte webview, LangGraph ReAct agent loop, context-budget-aware messages, Corrective RAG, agent registry, IPC bridge, telemetry hooks.
+- **Knowledge Module** — Backend knowledge service with hybrid search, REST API.
 
 ### v1.20.0 (2026-08-01)
 
