@@ -11,7 +11,7 @@ export { StreamProtocolAdapter } from './StreamProtocolAdapter';
 export type { IStreamProtocolAdapter, EngineStreamEvent, StreamChunkEvent, StreamCompleteEvent, ToolCallEvent } from './IStreamProtocolAdapter';
 
 export { SessionManager } from './SessionManager';
-export type { ISessionManager, SessionData } from './ISessionManager';
+export type { ISessionManager, SessionData, HydratedMessage } from './ISessionManager';
 
 export { requiresApproval, getDangerousTools, getSafeTools } from './ToolApprovalClassifier';
 

@@ -12,6 +12,12 @@ import { writeBundledMcpConfig } from "./mcp-injector";
 import { ConfigWatcher } from "./config-watcher";
 import { KbEventBus } from "./kb-event-bus";
 import { ChatPanelProvider } from "./chat-panel/chat-panel-provider";
+import { ChatEngineAdapter, StreamProtocolAdapter, SessionManager } from "./chat";
+import { MessageRouter } from "./chat/router/MessageRouter";
+import { PostMessageBridge } from "./chat/bridge/PostMessageBridge";
+import { ChatWebviewProvider } from "./chat/webview/ChatWebviewProvider";
+import { IdeContextManager } from "./chat/context/IdeContextManager";
+import { OpenCodeToolHandler } from "./chat/tools/OpenCodeToolHandler";
 import { BasePanel } from "./panels/base-panel";
 import { AuthManager } from "./auth/AuthManager";
 import { mapServerStatusToWebview } from "./types";
@@ -23,6 +29,7 @@ import { SettingsPanel } from "./panels/settings/SettingsPanel";
 import { ProxyAgentFactory } from "./proxy/ProxyAgentFactory";
 import { ProxyConfigService } from "./proxy/ProxyConfigService";
 import { ProxyDetectionService } from "./proxy/ProxyDetectionService";
+import { KnowledgeClient } from "./knowledge-client";
 
 let mcpManager: McpServerManager | undefined;
 let panelManager: WebviewPanelManager | undefined;
@@ -31,6 +38,8 @@ let kbEventBus: KbEventBus | undefined;
 let treeProvider: KiroTreeViewProvider | undefined;
 let authManager: AuthManager | undefined;
 let statusBarManager: StatusBarManager | undefined;
+let sessionManager: SessionManager | undefined;
+let chatEngineAdapter: ChatEngineAdapter | undefined;
 
 /** Project ID for multi-tenant isolation — derived from git remote or user+folder hash. */
 let _projectId = "default";
@@ -65,6 +74,8 @@ export async function activate(context: vscode.ExtensionContext) {
 export async function deactivate(): Promise<void> {
   configWatcher?.dispose();
   panelManager?.disposeAll();
+  chatEngineAdapter?.dispose();
+  await sessionManager?.cleanup();
   // Must await kill() so VS Code waits for the HTTP server to release its port
   // before reloading — prevents EADDRINUSE on reload window.
   try {
@@ -165,6 +176,23 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
   registerLlmCommands(context, chatPanelProvider);
   registerCommands(context, { mcpManager, panelManager, authManager, treeProvider, workspaceRoot });
 
+  // SA4E-85: Register new Agentic Chat command (keeps old chat-panel for backward compat)
+  // v3.1: SessionManager resolves thread_id from Backend KB (stateless, multi-IDE hydrate).
+  const kbClient = new KnowledgeClient(backendUrl, {
+    getHeaders: () => {
+      const headers: Record<string, string> = { "X-Project-Id": getProjectId() };
+      const token = authManager?.getTokenSync();
+      if (token) { headers["Authorization"] = `Bearer ${token}`; }
+      return headers;
+    },
+  });
+  sessionManager = new SessionManager(workspaceRoot, kbClient);
+  context.subscriptions.push(
+    vscode.commands.registerCommand("kiroSdlc.openAgenticChat", () => {
+      openAgenticChat(context, workspaceRoot, chatPanelProvider);
+    })
+  );
+
   setupConfigWatcher(context, workspaceRoot, outputChannel);
   setupMcpStatusBroadcast(statusBar, workspaceRoot);
   await autoSpawnServer(mcpConfig, outputChannel);
@@ -257,5 +285,63 @@ async function autoSpawnServer(config: vscode.WorkspaceConfiguration, outputChan
     }
   } else {
     outputChannel.appendLine("[MCP] Server disabled by setting");
+  }
+}
+
+
+/**
+ * SA4E-85: Open the new Agentic Chat panel.
+ * Creates MessageRouter → PostMessageBridge → ChatWebviewProvider → ChatEngineAdapter pipeline.
+ * Keeps old chat-panel working for backward compatibility.
+ */
+function openAgenticChat(context: vscode.ExtensionContext, workspaceRoot: string, chatPanel: ChatPanelProvider): void {
+  // Lazy-create the adapter and webview on first invocation
+  if (!chatEngineAdapter) {
+    const router = new MessageRouter(undefined);
+    const bridge = new PostMessageBridge(undefined);
+    const webviewProvider = new ChatWebviewProvider(context.extensionUri, router);
+    const streamAdapter = new StreamProtocolAdapter();
+    const contextManager = new IdeContextManager(200000, () => new vscode.EventEmitter());
+    const toolHandler = new OpenCodeToolHandler(async () => ({ diffId: '', filePath: '', patch: '', fileHashAtGeneration: '', generatedAt: 0, status: 'pending' as const }));
+
+    // Access engine from chatPanel (it exposes getEngine internally)
+    const engine = (chatPanel as any).getEngine?.() ?? (chatPanel as any).engine;
+    if (!engine) {
+      vscode.window.showWarningMessage("Agentic Chat requires an active LLM connection. Please configure an LLM provider first.");
+      return;
+    }
+
+    chatEngineAdapter = new ChatEngineAdapter({
+      router,
+      bridge,
+      engine,
+      streamAdapter,
+      contextManager,
+      toolHandler,
+      sessionManager: sessionManager!,
+    });
+
+    chatEngineAdapter.initialize();
+
+    // Wire bridge to router (incoming webview messages)
+    bridge.onMessage((msg) => router.dispatch(msg));
+
+    // Show the webview panel
+    webviewProvider.show(vscode.ViewColumn.Beside);
+
+    // Wire the panel to the bridge after creation
+    const panel = webviewProvider.getPanel();
+    if (panel) {
+      bridge.attachPanel(panel);
+      router.setPanel(panel);
+    }
+
+    context.subscriptions.push(chatEngineAdapter);
+    context.subscriptions.push({ dispose: () => router.dispose() });
+    context.subscriptions.push({ dispose: () => bridge.dispose() });
+    context.subscriptions.push(webviewProvider);
+  } else {
+    // Already initialized — just show
+    vscode.commands.executeCommand("workbench.action.focusPanel");
   }
 }

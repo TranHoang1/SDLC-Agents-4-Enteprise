@@ -1,0 +1,69 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="n1" value="idle" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="480" y="40" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="streaming" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="480" y="180" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="thinking" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="180" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="tool-calling" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="480" y="340" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="awaiting-&#10;approval" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="340" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="error" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="180" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="STREAM_START" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="THINKING_START" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="THINKING_END" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n3" target="n2">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="250" y="150"/><mxPoint x="530" y="150"/></Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e4" value="TOOL_CALL_REQUEST" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n2" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="requiresApproval" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="APPROVE" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n5" target="n4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="660" y="420"/><mxPoint x="660" y="420"/></Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e7" value="REJECT" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="n5" target="n2">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="870" y="200"/><mxPoint x="870" y="130"/><mxPoint x="530" y="130"/></Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e8" value="MCP_TOOL_RESULT" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n4" target="n2">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="430" y="280"/><mxPoint x="430" y="280"/></Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e9" value="STREAM_END" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n2" target="n1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="620" y="110"/><mxPoint x="620" y="110"/></Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e10" value="STREAM_ERROR" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="n2" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="retry / /clear" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;dashed=1;" edge="1" parent="1" source="n6" target="n1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points"><mxPoint x="810" y="40"/><mxPoint x="580" y="40"/></Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

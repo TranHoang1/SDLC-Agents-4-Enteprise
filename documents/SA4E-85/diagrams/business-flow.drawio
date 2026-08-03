@@ -1,0 +1,111 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="swim_user" value="Developer (Webview)" style="swimlane;startSize=30;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;horizontal=0;" vertex="1" parent="1">
+      <mxGeometry x="20" y="20" width="1540" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="swim_ext" value="Extension Host" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=11;horizontal=0;" vertex="1" parent="1">
+      <mxGeometry x="20" y="240" width="1540" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="swim_backend" value="Backend (LangGraph + MCP)" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;horizontal=0;" vertex="1" parent="1">
+      <mxGeometry x="20" y="460" width="1540" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="swim_ipc" value="IPC Bridge (Kiro/AntiGravity)" style="swimlane;startSize=30;fillColor=#f3e5f5;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=11;horizontal=0;" vertex="1" parent="1">
+      <mxGeometry x="20" y="660" width="1540" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="n1" value="Type Prompt&#xa;/ Slash Command" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim_user">
+      <mxGeometry x="60" y="60" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="Select Agent&#xa;(Dropdown)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim_user">
+      <mxGeometry x="230" y="60" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="View Spinner&#xa;+ Progress" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim_user">
+      <mxGeometry x="590" y="60" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="Permission&#xa;Guard UI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="swim_user">
+      <mxGeometry x="750" y="60" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="ActionableDiff&#xa;Accept/Reject" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_user">
+      <mxGeometry x="910" y="60" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="Context Badge&#xa;+ Thinking Block" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim_user">
+      <mxGeometry x="1080" y="60" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="Service Offline&#xa;Warning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="swim_user">
+      <mxGeometry x="1250" y="60" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n10" value="Route to&#xa;Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="230" y="70" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n11" value="Stream&#xa;Tokens" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="430" y="70" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n12" value="Tool Call&#xa;Request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="590" y="70" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n13" value="Apply&#xa;WorkspaceEdit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="910" y="70" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n14" value="Agent Registry&#xa;(FileWatcher)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="60" y="70" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n15" value="IDE Context&#xa;Manager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="1080" y="70" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n20" value="LangGraph&#xa;Process" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_backend">
+      <mxGeometry x="430" y="60" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n21" value="MCP Tool&#xa;Execute" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_backend">
+      <mxGeometry x="700" y="60" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n30" value="Kiro MCP&#xa;(mcp.execute_tool)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="swim_ipc">
+      <mxGeometry x="700" y="50" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n31" value="AntiGravity&#xa;(workflow.start)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="swim_ipc">
+      <mxGeometry x="910" y="50" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n32" value="Service&#xa;Discovery" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="swim_ipc">
+      <mxGeometry x="1150" y="50" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="swim_user" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n2" target="n10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="swim_ext" source="n10" target="n11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n11" target="n20">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="swim_ext" source="n11" target="n12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n12" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n12" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n20" target="n21">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n21" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n5" target="n13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n15" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef12" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=classic;" edge="1" parent="1" source="n21" target="n30">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef13" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=classic;" edge="1" parent="1" source="n32" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

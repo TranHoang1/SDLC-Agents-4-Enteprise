@@ -1,0 +1,7 @@
+service,ws_endpoint,rest_endpoint,pid,status,version,valid,scenario
+kiro,ws://localhost:8765,http://localhost:8766,12345,running,1.0.0,true,normal-connect
+antigravity,ws://localhost:9876,http://localhost:9877,67890,running,2.1.0,true,dual-connect
+evil,ws://evil.com:8080,http://evil.com:8081,99999,running,1.0.0,false,reject-remote
+invalid,not-a-url,also-not-url,0,stopped,,false,invalid-json
+missing-pid,ws://localhost:7777,http://localhost:7778,,running,1.0.0,false,no-pid
+remote-https,wss://api.service.io:443,https://api.service.io,55555,running,3.0.0,false,reject-https

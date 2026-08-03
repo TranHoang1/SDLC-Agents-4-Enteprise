@@ -3,7 +3,7 @@ import { StateGraph, END } from "@langchain/langgraph";
 import { PipelineAnnotation, PipelineState, PipelineIntent } from "../core/state";
 import { McpBridge } from "../core/mcp-bridge";
 import { StreamHandler } from "../core/stream-handler";
-import { WorkspaceCheckpointer } from "../core/checkpointer";
+import { RemoteCheckpointer } from "../core/remote-checkpointer";
 import type { LlmProvider } from "../core/llm-provider";
 import type { HookEngine } from "../hooks/hook-engine";
 import { classifyIntent } from "./intent-classifier";
@@ -11,7 +11,7 @@ import { classifyIntent } from "./intent-classifier";
 export async function buildRouterGraph(
   mcpBridge: McpBridge,
   streamHandler: StreamHandler,
-  checkpointer: WorkspaceCheckpointer,
+  checkpointer: RemoteCheckpointer,
   llmProvider?: LlmProvider,
   hookEngine?: HookEngine
 ) {

@@ -43,6 +43,66 @@ Every document with diagrams MUST have:
 
 ---
 
+## ⛔ UML Sequence Diagram Rules (CRITICAL)
+
+**KHÔNG dùng `shape=umlLifeline`** — drawio-cli renderer KHÔNG hỗ trợ UML-specific shapes, export sẽ ra 0-byte PNG.
+
+### Sequence Diagram Format (CLI-compatible)
+
+Dùng **participant boxes ở top** + **dashed vertical lifelines** + **horizontal message arrows**:
+
+```xml
+<!-- Participant header box -->
+<mxCell id="h1" value="Actor Name" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+  <mxGeometry x="60" y="20" width="120" height="40" as="geometry"/>
+</mxCell>
+
+<!-- Vertical lifeline (dashed line below participant) -->
+<mxCell id="l1" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry">
+    <mxPoint x="120" y="60" as="sourcePoint"/>
+    <mxPoint x="120" y="800" as="targetPoint"/>
+  </mxGeometry>
+</mxCell>
+
+<!-- Synchronous message (solid arrow, left-to-right) -->
+<mxCell id="m1" value="1. Message label" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry">
+    <mxPoint x="120" y="100" as="sourcePoint"/>
+    <mxPoint x="350" y="100" as="targetPoint"/>
+  </mxGeometry>
+</mxCell>
+
+<!-- Return/async message (dashed arrow, right-to-left) -->
+<mxCell id="m2" value="2. Response" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+  <mxGeometry relative="1" as="geometry">
+    <mxPoint x="350" y="140" as="sourcePoint"/>
+    <mxPoint x="120" y="140" as="targetPoint"/>
+  </mxGeometry>
+</mxCell>
+```
+
+### Sequence Layout Rules
+
+| Rule | Value |
+|------|-------|
+| Participant spacing | 200-250px apart horizontally |
+| Message Y increment | 40-50px per message (time flows DOWN) |
+| Lifeline start Y | participant.y + participant.height (e.g., 60) |
+| Lifeline end Y | Total height (match last message Y + 40) |
+| Solid arrow (→) | Synchronous call: `endArrow=block;endFill=1` |
+| Dashed arrow (⇢) | Return/async: `endArrow=open;endFill=0;dashed=1` |
+| Error arrow | Add `strokeColor=#b85450` |
+| Messages use sourcePoint/targetPoint | NOT source/target cell IDs |
+
+### ⛔ FORBIDDEN for Sequence Diagrams
+
+- ❌ `shape=umlLifeline` — NOT supported by drawio-cli renderer
+- ❌ `source="p1" target="p2"` on message edges — use sourcePoint/targetPoint instead
+- ❌ Routing messages through nodes — messages are purely positional
+
+---
+
 ## ⛔ XML Authoring Rules (CRITICAL)
 
 ### File Structure

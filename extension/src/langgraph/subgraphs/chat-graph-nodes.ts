@@ -94,7 +94,8 @@ export function createFetchToolsNode(toolRegistry: ToolRegistry | null) {
 }
 
 export function createAgentStepNode(
-  llmProvider: LlmProvider | undefined, streamHandler: StreamHandler, enrichedSystemPrompt: string
+  llmProvider: LlmProvider | undefined, streamHandler: StreamHandler,
+  getSystemPrompt: (state: PipelineState) => string,
 ) {
   return async (state: PipelineState) => {
     if (!llmProvider) {
@@ -103,6 +104,7 @@ export function createAgentStepNode(
         pipelineStatus: "completed" as const, toolCalls: null, lastUpdatedAt: new Date().toISOString(),
       };
     }
+    const sysPrompt = getSystemPrompt(state);
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
     let tools: McpToolDefinition[] = [];
     try { tools = JSON.parse(state.parallelResults?.toolsJson || "[]"); }
@@ -112,9 +114,9 @@ export function createAgentStepNode(
     }
 
     if (llmProvider.chatWithTools && tools.length > 0) {
-      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, 10), enrichedSystemPrompt);
+      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, 10), sysPrompt);
     }
-    return await agentStepStreaming(state, llmProvider, streamHandler, streamId, enrichedSystemPrompt, tools);
+    return await agentStepStreaming(state, llmProvider, streamHandler, streamId, sysPrompt, tools);
   };
 }
 
@@ -291,8 +293,12 @@ async function executeSingleTool(
   }
 }
 
-export function createSynthesizeNode(llm: LlmProvider | undefined, sh: StreamHandler, sysPrompt: string) {
+export function createSynthesizeNode(
+  llm: LlmProvider | undefined, sh: StreamHandler,
+  getSystemPrompt: (state: PipelineState) => string,
+) {
   return async (state: PipelineState) => {
+    const sysPrompt = getSystemPrompt(state);
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
     if (!llm) return { pipelineStatus: "completed" as const, lastUpdatedAt: new Date().toISOString() };
     try {

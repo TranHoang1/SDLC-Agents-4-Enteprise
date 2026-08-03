@@ -17,7 +17,8 @@ export async function executeChat(
   chatHistoryByTab: Map<string, ChatMessage[]>,
   graph: { invoke: (state: any, config: any) => Promise<any> },
   streamHandler: StreamHandler,
-  onEvent: (msg: ChatExtToWebviewMessage) => void
+  onEvent: (msg: ChatExtToWebviewMessage) => void,
+  kbContext?: string,
 ): Promise<{ activeThread: string }> {
   const threadId = crypto.randomUUID();
   const streamId = `stream-${threadId}-${Date.now()}`;
@@ -35,6 +36,7 @@ export async function executeChat(
     pendingApprovals: [], chatHistory: [...tabHistory], errors: [],
     retryCount: {}, createdAt: new Date().toISOString(),
     lastUpdatedAt: new Date().toISOString(), lastCheckpointAt: null,
+    kbContext: kbContext || "",
   };
 
   try {

@@ -82,7 +82,7 @@ export class MessageHandler {
   }
 
   private async handleReady(): Promise<void> {
-    const pipelines = this.getEngine().listPersistedPipelines();
+    const pipelines = await this.getEngine().listPersistedPipelines();
     const paused = pipelines.find(p => p.status === "paused" || p.status === "running");
     if (paused) {
       this.sendToWebview({ type: "chat:resumePrompt", threadId: paused.threadId, ticketKey: paused.ticketKey, phase: paused.phase, pausedAt: paused.lastUpdatedAt });

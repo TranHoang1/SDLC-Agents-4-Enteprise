@@ -65,6 +65,13 @@ export const CORE_COMPONENTS: Component[] = [
         description: "Templates for all SDLC documents",
         sourcePath: "documents/templates",
         targetPath: "documents/templates"
+    },
+    {
+        id: "code-intel-agents",
+        label: "Agent Instructions (.code-intel/agents/)",
+        description: "Agent instruction files for the Agentic Chat panel",
+        sourcePath: ".code-intel/agents",
+        targetPath: ".code-intel/agents"
     }
 ];
 

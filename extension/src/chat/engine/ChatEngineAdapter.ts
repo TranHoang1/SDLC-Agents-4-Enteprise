@@ -77,6 +77,8 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
     router.registerHandler('CONTEXT_CLEAR', () => this.handleClearContext());
     router.registerHandler('RUN_TERMINAL_COMMAND', (msg) => this.handleRunTerminal(msg));
     router.registerHandler('REGENERATE_PATCH', (msg) => this.handleRegenerate(msg));
+    // SA4E-85 v3.1: webview mounts → request state hydration from Backend KB
+    router.registerHandler('REQUEST_SYNC_STATE', () => this.handleRequestSyncState());
   }
 
   /** Forward translated ExtensionMessages to webview via bridge */
@@ -103,8 +105,51 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
 
   private async handleSendPrompt(payload: unknown): Promise<void> {
     const msg = payload as Extract<WebviewMessage, { type: 'SEND_PROMPT' }>;
-    await this.deps.sessionManager.ensureSession();
+    try {
+      await this.deps.sessionManager.ensureSession();
+    } catch (err) {
+      // Backend KB unreachable — surface a recoverable stream error
+      this.sendToWebview([{
+        type: 'STREAM_ERROR',
+        messageId: 'session',
+        error: { code: 'KB_UNREACHABLE', message: `Cannot resolve session: ${(err as Error).message}`, retryable: true },
+      }]);
+      return;
+    }
     await this.deps.engine.invokeChat(msg.text);
+  }
+
+  /**
+   * SA4E-85 v3.1: Webview mount hydration.
+   * Resolves the current Backend KB thread + message history and pushes
+   * SYNC_CHAT_HISTORY so the webview chatStore rehydrates (multi-IDE hydrate).
+   */
+  private async handleRequestSyncState(): Promise<void> {
+    try {
+      const hydrated = await this.deps.sessionManager.getSessionMessages();
+      // STC API-HYD-02 step 7: empty history still hydrates with messages=[] (never undefined)
+      if (!hydrated) { return; }
+      // TDD §4.1 / STC API-HYD-02: SYNC_CHAT_HISTORY carries context snapshot
+      const state = this.deps.contextManager.getState();
+      const context = {
+        tokenCount: state.tokenCount,
+        maxTokens: state.maxTokens,
+        files: state.files.map((f) => ({ path: f.filePath, tokenCount: f.tokenCount, pinned: true })),
+      };
+      this.deps.bridge.postToWebview({
+        type: 'SYNC_CHAT_HISTORY',
+        threadId: hydrated.threadId,
+        messages: hydrated.messages,
+        context,
+      });
+    } catch (err) {
+      // Non-fatal: webview keeps an empty state, user can retry by sending a message
+      this.sendToWebview([{
+        type: 'STREAM_ERROR',
+        messageId: 'sync',
+        error: { code: 'SYNC_STATE_FAILED', message: `Failed to hydrate chat state: ${(err as Error).message}`, retryable: true },
+      }]);
+    }
   }
 
   private async handleToolCallResponse(payload: unknown): Promise<void> {

@@ -14,6 +14,7 @@ import { AnalyticsModule } from './analytics/AnalyticsModule.js';
 import { KBGraphModule } from './kb-graph/KBGraphModule.js';
 import { UtilityModule } from './utility/UtilityModule.js';
 import { WebModule } from './web/WebModule.js';
+import { KnowledgeModule } from '../knowledge/KnowledgeModule.js';
 import { HttpServer } from '../server/HttpServer.js';
 import { MemoryToolSearchService } from './orchestration/MemoryToolSearchService.js';
 import { ToolRouter } from '../tool-router/ToolRouter.js';
@@ -42,6 +43,8 @@ export class ModuleFactory {
     this.registry.register(new AnalyticsModule(this.logger));
     this.registry.register(new KBGraphModule(this.logger));
     this.registry.register(new UtilityModule(this.logger));
+    // SA4E-85 Phase 0: Backend-Driven Knowledge — SSOT for threads/checkpoints/events
+    this.registry.register(new KnowledgeModule(this.logger));
   }
 
   createToolRouter(): ToolRouter {

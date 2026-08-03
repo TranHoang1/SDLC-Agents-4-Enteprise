@@ -41,3 +41,5 @@
 - **[UAT — drawio_auto_layout tool test]** User tested tool via MCP on architecture.drawio. Result: "Fixed 10 issues with ELK layered layout. 16 nodes repositioned." Tool works correctly. Note: workspace=backend/ so documents/ files needed copy workaround.
 
 - **[Bug fix — container layout]** Implemented edge-only fix for container diagrams. When swimlane/container detected: skip ELK node repositioning, only distribute edge ports (exitX/entryX) to prevent stacking. Flat diagrams still get full ELK layout. TSC OK, 14/14 tests pass. VSIX rebuilt.
+
+- **[Phase 7 — Release]** Bumped version to 1.20.0 (root + backend + extension package.json). Updated README.md, extension/README.md, CHANGELOG.md. Committed all SA4E-84 work. Created git tag v1.20.0. Pushed branch SA4E-84 + tag to GitHub remote.

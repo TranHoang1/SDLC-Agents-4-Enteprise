@@ -24,6 +24,7 @@ import { apiKeyAuth } from './middleware/api-key-auth.js';
 import { validateJwtConfig, jwtAuth } from './middleware/jwt-auth.js';
 import { createKbApiRoutes, createToolsApiRoutes } from './routes/kb-api.js';
 import { createPegaApiRoutes } from './routes/pega-api.js';
+import { createKnowledgeApiRoutes } from '../knowledge/routes.js';
 import { bodyLimit } from 'hono/body-limit';
 import { getMcpServer, registerTransport } from './mcpServer.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
@@ -82,6 +83,13 @@ export class HttpServer {
 
     const pegaApiRoutes = createPegaApiRoutes(this.options.registry, this.logger);
     app.route('/api/v1', pegaApiRoutes);
+
+    // SA4E-85 Phase 0: Backend-Driven Knowledge REST API (threads/messages/checkpoint/events/artifacts/agents)
+    const knowledgeModule = this.options.registry.getModule('knowledge') as any;
+    if (knowledgeModule?.getService) {
+      const knowledgeRoutes = createKnowledgeApiRoutes(knowledgeModule.getService(), this.logger);
+      app.route('/api/v1', knowledgeRoutes);
+    }
 
     const toolsApiRoutes = createToolsApiRoutes(this.options.registry, this.logger);
     app.route('/api/tools', toolsApiRoutes);

@@ -1,0 +1,6 @@
+diagramId,type,source,expectSvg,scenario
+dgr001,plantuml,@startuml Alice -> Bob: hello @enduml,true,simple-sequence
+dgr002,plantuml,@startuml class A @enduml,true,simple-class
+dgr003,plantuml,invalid plantuml content,false,fallback-source-display
+dgr004,bpmn,<definitions>unsupported</definitions>,false,unsupported-type
+dgr005,plantuml,@startuml A->B B->C C->A @enduml,true,cache-test

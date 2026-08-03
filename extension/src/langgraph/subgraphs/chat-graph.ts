@@ -7,6 +7,8 @@
  *                              -> [TOOL_NEEDED] -> execute_tools
  */
 
+import * as fs from "fs";
+import * as path from "path";
 import { StateGraph, END } from "@langchain/langgraph";
 import { PipelineAnnotation, PipelineState } from "../core/state";
 import { StreamHandler } from "../core/stream-handler";
@@ -30,6 +32,13 @@ import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
 const MAX_AGENT_ITERATIONS = 25;
 
 const AGENT_SYSTEM_PROMPT = `You are a coding assistant with access to workspace tools. You can read files, search code, and list directories.
+
+## PROJECT OVERVIEW:
+- **SDLC-Agents-4-Enterprise** — multi-agent SDLC pipeline (agents: SM, BA, TA, SA, QA, DEV, DevOps, Security, UI).
+- **Backend** (backend/): TypeScript + Hono + MCP SDK. Storage: SQLite (better-sqlite3) / PostgreSQL (pg). Local embeddings (ONNX Runtime + Xenova Transformers). Zod validation, Pino logging.
+- **Extension** (extension/): VS Code/Kiro extension — TypeScript + LangGraph/LangChain orchestration, MCP SDK client, WebSocket (ws) / undici. Webview UI: Svelte 4 + Vite + TypeScript.
+- **Orchestration**: LangGraph workflows (TypeScript) drive the pipeline; Python FastAPI servers (backend/servers/fastapi) provide presentation-generation MCP services.
+- Use draw.io for diagrams (NEVER Mermaid).
 
 ## CRITICAL RULES:
 1. ALWAYS use tools FIRST before answering questions about code or the project
@@ -65,6 +74,39 @@ const AGENT_SYSTEM_PROMPT = `You are a coding assistant with access to workspace
 - Respond in same language as user
 - After reading code: give specific feedback with line references`;
 
+/**
+ * SA4E-85 v3.1: Load agent instruction bodies from all .md files in
+ * .code-intel/agents/ (no front-matter — use full body).
+ * Returns concatenated instruction block for system prompt.
+ */
+function loadAgentInstructions(workspaceRoot: string): string {
+  const agentsDir = path.join(workspaceRoot, ".code-intel", "agents");
+
+  let mdFiles: string[] = [];
+  try {
+    mdFiles = fs.readdirSync(agentsDir).filter(f => f.endsWith(".md")).map(f => path.join(agentsDir, f));
+  } catch { /* ignore */ }
+
+  if (mdFiles.length === 0) return "";
+
+  const instructions: string[] = [];
+  for (const file of mdFiles) {
+    try {
+      const content = fs.readFileSync(file, "utf-8");
+      const afterFm = content.replace(/^---[\s\S]*?---\r?\n?/, "").trim();
+      const name = path.basename(file, ".md");
+      instructions.push(`### Agent: ${name}\n\n${afterFm}`);
+    } catch { /* skip unreadable */ }
+  }
+  // Budget: limit to ~6000 chars
+  let block = "";
+  for (const ins of instructions) {
+    if (block.length + ins.length > 6000) break;
+    block += "\n\n---\n\n" + ins;
+  }
+  return block;
+}
+
 function routeAgentStep(state: PipelineState): string {
   // Circuit breaker: if pipeline already failed (e.g., LLM crash/context exceeded), stop immediately
   if (state.pipelineStatus === "failed") {
@@ -97,7 +139,6 @@ export async function buildChatSubgraph(
   const toolRegistry = mcpBridge ? new ToolRegistry(mcpBridge) : null;
   const wsRoot = workspaceRoot || require("vscode").workspace.workspaceFolders?.[0]?.uri.fsPath || "";
 
-  // Detect context window for budget-aware message building
   const contextWindow = llmProvider?.getContextWindow?.() || 0;
   if (contextWindow > 0) {
     debugLog(`[chat-graph] Context window detected: ${contextWindow} tokens`);
@@ -122,7 +163,21 @@ export async function buildChatSubgraph(
     }
   } catch (err) {
     console.debug(`[chat-graph] steering injection failed (non-fatal): ${(err as Error).message}`);
-    /* fallback to base prompt */
+  }
+
+  // SA4E-85 v3.1: Load agent instructions from .code-intel/agents/*.md
+  const agentInstructions = loadAgentInstructions(wsRoot);
+  if (agentInstructions) {
+    enrichedSystemPrompt = `${enrichedSystemPrompt}\n\n# Agent Instructions\n${agentInstructions}`;
+  }
+
+  // SA4E-85 v3.1: Factory-supplied function that builds final LLM-ready system prompt
+  // from base + steering + KB context + user prompt (kbContext from state).
+  function buildFinalSystemPrompt(state: PipelineState): string {
+    if (state.kbContext) {
+      return `${enrichedSystemPrompt}\n\n---\n${state.kbContext}\n---`;
+    }
+    return enrichedSystemPrompt;
   }
 
   const verifyNode = createVerifyResponseNode(llmProvider, streamHandler);
@@ -148,10 +203,10 @@ export async function buildChatSubgraph(
     // Graph with Corrective RAG nodes for small models
     const graph = new StateGraph(PipelineAnnotation)
       .addNode("fetch_tools", fetchToolsWithBudget)
-      .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, enrichedSystemPrompt))
+      .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt))
       .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate))
       .addNode("verify_response", verifyNode)
-      .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, enrichedSystemPrompt))
+      .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, buildFinalSystemPrompt))
       .addNode("hallucination_grader", createHallucinationGraderNode(llmProvider, streamHandler, ragConfig))
       .addEdge("__start__", "fetch_tools")
       .addEdge("fetch_tools", "agent_step")
@@ -167,10 +222,10 @@ export async function buildChatSubgraph(
   // Standard graph without RAG grading (large models)
   const graph = new StateGraph(PipelineAnnotation)
     .addNode("fetch_tools", fetchToolsWithBudget)
-    .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, enrichedSystemPrompt))
+    .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt))
     .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate))
     .addNode("verify_response", verifyNode)
-    .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, enrichedSystemPrompt))
+    .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, buildFinalSystemPrompt))
     .addEdge("__start__", "fetch_tools")
     .addEdge("fetch_tools", "agent_step")
     .addConditionalEdges("agent_step", routeAgentStep, { execute_tools: "execute_tools", verify_response: "verify_response" })

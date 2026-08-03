@@ -1,4 +1,4 @@
-// SteeringLoader --- KSA-217, KSA-242 --- Parses .kiro/steering/ files recursively
+// SteeringLoader --- KSA-217, KSA-242 --- Parses .code-intel/steering/ files recursively
 import * as vscode from "vscode";
 import * as path from "path";
 
@@ -27,7 +27,7 @@ export async function loadSteeringRules(
   workspaceRoot: string,
   target: "kiro" | "langgraph" = "langgraph"
 ): Promise<SteeringRule[]> {
-  const steeringDir = path.join(workspaceRoot, ".kiro", "steering");
+  const steeringDir = path.join(workspaceRoot, ".code-intel", "steering");
 
   try {
     const rules: SteeringRule[] = [];
@@ -70,12 +70,12 @@ async function scanDirectoryRecursive(
       const content = await readFileContent(fullPath);
       if (!content) continue;
 
-      // Build relative path from .kiro/steering/ root
+      // Build relative path from .code-intel/steering/ root
       const relativePath = path.relative(
-        path.join(rootSteeringDir, ".."), // parent of steering = .kiro
+        path.join(rootSteeringDir, ".."), // parent of steering = .code-intel
         fullPath
       ).replace(/\\/g, "/");
-      const filePath = `.kiro/${relativePath}`;
+      const filePath = `.code-intel/${relativePath}`;
 
       const parsed = parseSteeringFile(content, filePath);
       if (!parsed) continue;
