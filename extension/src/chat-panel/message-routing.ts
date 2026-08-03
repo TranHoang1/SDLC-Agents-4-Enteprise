@@ -101,7 +101,7 @@ async function handleDirectCommand(command: string, getEngine: () => LangGraphEn
       break;
     }
     case "resume": {
-      const pipelines = getEngine().listPersistedPipelines();
+      const pipelines = await getEngine().listPersistedPipelines();
       const paused = pipelines.find(p => p.status === "paused");
       if (paused) { await getEngine().resume(paused.threadId); }
       else { sendToWebview({ type: "chat:error", code: "NO_PIPELINE", message: "No paused pipeline to resume.", retryable: false }); }

@@ -1,0 +1,100 @@
+<mxGraphModel dx="712" dy="739" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="boundary1" value="Chat UI Agentic System" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+      <mxGeometry x="200" y="40" width="760" height="740" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc1" value="UC-01: Send Prompt" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="40" y="50" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc2" value="UC-02: Accept/Reject Diff" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="40" y="140" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc3" value="UC-03: Approve/Deny Tool" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="40" y="230" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc4" value="UC-04: Switch Agent" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="40" y="320" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc5" value="UC-05: Monitor Context" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="40" y="410" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc6" value="UC-06: Start Offline Service" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="40" y="500" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc7" value="UC-07: Stream Response" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="400" y="50" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc8" value="UC-08: Execute Tool" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="400" y="140" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc9" value="UC-09: Sync Agent Registry" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="400" y="230" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc10" value="UC-10: IPC Communication" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="400" y="420" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc11" value="UC-11: Permission Check" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="400" y="320" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc12" value="UC-12: Service Discovery" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" parent="boundary1" vertex="1">
+      <mxGeometry x="400" y="510" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="&lt;&lt;include&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" parent="boundary1" source="uc3" target="uc11" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" value="&lt;&lt;include&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" parent="boundary1" source="uc8" target="uc11" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" value="&lt;&lt;include&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" parent="boundary1" source="uc10" target="uc12" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor1" value="Developer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#e1f5fe;strokeColor=#0288d1;" parent="1" vertex="1">
+      <mxGeometry x="60" y="300" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor2" value="Extension Host" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f5f5f5;strokeColor=#666666;" parent="1" vertex="1">
+      <mxGeometry x="1060" y="200" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor3" value="IPC Bridge" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#f3e5f5;strokeColor=#9673a6;" parent="1" vertex="1">
+      <mxGeometry x="1060" y="500" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor1" target="uc1" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor1" target="uc2" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor1" target="uc3" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor1" target="uc4" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor1" target="uc5" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor1" target="uc6" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="80" y="560"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor2" target="uc7" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor2" target="uc8" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor2" target="uc9" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor3" target="uc10" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;" parent="1" source="actor3" target="uc12" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

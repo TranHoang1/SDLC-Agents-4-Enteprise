@@ -1,0 +1,5 @@
+id,description,xml_type,node_count,edge_count,expected_issues,test_case
+1,4-node diagram with edge crossing,crossing,4,4,>=1 edge_crossing,IT-01/IT-02/IT-03
+2,Styled nodes with labels,styled_crossing,5,4,>=1 edge_crossing,IT-04
+3,Clean layered diagram no issues,clean,3,2,0,IT-05
+4,Diagram with overlapping nodes,overlap,4,3,>=1 node_overlap,IT-01

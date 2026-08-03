@@ -1,0 +1,75 @@
+<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-84 Test Execution Flow" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="20" width="400" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="start" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="480" y="80" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt" value="Level 1: PBT&#xa;Package Based Testing&#xa;(8 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="440" y="160" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut" value="Level 2: UT&#xa;Unit Testing&#xa;(9 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="440" y="260" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="it" value="Level 3: IT&#xa;Integration Testing&#xa;(6 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="440" y="360" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2eapi" value="Level 4: E2E-API&#xa;End-to-End API&#xa;(7 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="440" y="460" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2eui" value="Level 5: E2E-UI&#xa;Visual Testing&#xa;(6 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="440" y="560" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit" value="Level 6: SIT&#xa;System Integration&#xa;(7 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="440" y="660" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="end" value="Done&#xa;52 Total" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="480" y="760" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="err" value="Error/Edge Cases&#xa;(7 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="700" y="360" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="perf" value="Performance Tests&#xa;(2 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="700" y="460" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_start_pbt" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="start" target="pbt">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pbt_ut" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="pbt" target="ut">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ut_it" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="ut" target="it">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_it_e2eapi" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="it" target="e2eapi">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_e2eapi_e2eui" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="e2eapi" target="e2eui">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_e2eui_sit" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="e2eui" target="sit">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_sit_end" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="sit" target="end">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_it_err" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;" edge="1" parent="1" source="it" target="err">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_e2eapi_perf" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;" edge="1" parent="1" source="e2eapi" target="perf">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate1" value="Gate: PBT Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="240" y="170" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate2" value="Gate: UT Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="240" y="270" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate3" value="Gate: IT Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="240" y="370" width="120" height="40" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

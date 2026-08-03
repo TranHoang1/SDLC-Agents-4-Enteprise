@@ -1,0 +1,5 @@
+id,description,mode_param,content_type,expected_status,has_content_base64,has_repositioned_nodes,test_case
+1,XML with edge crossing - mode=apply,apply,crossing_xml,fixed,true,true,PBT-04
+2,Clean XML - mode=apply,apply,clean_xml,already_good,false,false,IT-05
+3,XML with overlap - mode=apply,apply,overlap_xml,fixed,true,true,PBT-04
+4,XML with container + crossings - apply,apply,container_xml,fixed,true,true,E2E-UI-05

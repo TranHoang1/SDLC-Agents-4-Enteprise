@@ -20,13 +20,65 @@ transition_issue(issue_key: "{TICKET}", transition_name: "Review Docs")
 { "requirements": { "status": "in_progress" } }
 ```
 
+### Step 2.5: Reference Analysis (MANDATORY for complex features)
+
+**BEFORE BA writes BRD, SM MUST conduct a brief competitive/reference analysis.**
+
+**Trigger:** Feature involves non-trivial patterns (human-in-the-loop, state machines, real-time sync, security gates, plugin systems, distributed coordination, etc.)
+
+**Process:**
+1. Identify 2-3 open-source projects that implement similar patterns
+2. Web search: `"{pattern name}" site:github.com open source implementation`
+3. Extract key architectural decisions from reference projects:
+   - What state management approach? (in-memory vs durable)
+   - What edge cases handled? (timeout, crash recovery, idempotency)
+   - What escalation/fallback patterns?
+   - What observability/metrics?
+4. Summarize findings in `documents/{TICKET}/REFERENCE-ANALYSIS.md`:
+
+```markdown
+# Reference Analysis — {TICKET}
+
+## Pattern: {e.g., "Tool Approval / Human-in-the-Loop"}
+
+### Reference 1: {project name} ({url})
+- Architecture: {brief}
+- Key patterns: {list}
+- Strengths: {list}
+
+### Reference 2: {project name} ({url})
+- Architecture: {brief}
+- Key patterns: {list}
+- Strengths: {list}
+
+### Patterns to adopt in our BRD/TDD:
+- [ ] {pattern 1}
+- [ ] {pattern 2}
+- [ ] {pattern 3}
+```
+
+5. Ingest into KB:
+```
+mem_ingest(
+  content: "REFERENCE-ANALYSIS | ticket={TICKET} | pattern={pattern} | refs={project1, project2} | key_patterns={list}",
+  type: "ARCHITECTURE",
+  source: "reference-analysis/{TICKET}",
+  tags: "reference,prior-art,{pattern}",
+  scope: "PROJECT"
+)
+```
+
+6. Pass REFERENCE-ANALYSIS.md to BA as contextFile when invoking BRD creation.
+
+**Skip condition:** Ticket là CRUD đơn giản, UI tweak, hoặc bug fix nhỏ — không cần reference analysis.
+
 ### Step 3: Invoke BA Agent
 
 ```
 invokeSubAgent(
   name: "ba-agent",
-  prompt: "Tạo BRD cho {TICKET}. PHẢI tạo draw.io diagrams (use-case.drawio + business-flow.drawio) và export PNG. Không được bỏ qua Step 7 (Generate Diagrams).",
-  contextFiles: [{ "path": ".kiro/steering/drawio.md" }]
+  prompt: "Tạo BRD cho {TICKET}. Đọc REFERENCE-ANALYSIS.md nếu có. PHẢI tạo draw.io diagrams (use-case.drawio + business-flow.drawio) và export PNG. Không được bỏ qua Step 7 (Generate Diagrams).",
+  contextFiles: [{ "path": ".kiro/steering/drawio.md" }, { "path": "documents/{TICKET}/REFERENCE-ANALYSIS.md" }]
 )
 ```
 
@@ -76,6 +128,7 @@ Wait for user confirmation.
 | 4 | Use Case Diagram (.drawio + .png) | Invoke BA for diagrams |
 | 5 | Dependencies section | Ask BA to add |
 | 6 | Non-Functional Requirements | Ask BA to add |
+| 7 | REFERENCE-ANALYSIS.md exists (if complex feature) | SM creates before re-invoking BA |
 
 ## Step 7.5: Domain Glossary Extraction (MANDATORY)
 

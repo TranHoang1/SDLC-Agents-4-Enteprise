@@ -1,0 +1,4 @@
+id,dependency,section,expected_version,required
+1,elkjs,dependencies,^0.9.x,yes
+2,vitest,devDependencies,^4.1.9,yes
+3,@modelcontextprotocol/sdk,dependencies,^1.29.0,yes

@@ -1,0 +1,87 @@
+<mxGraphModel adaptiveColors="auto" dx="1200" dy="840" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="840" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-84: drawio_auto_layout FIX Mode — Business Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="600" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_agent" value="Agent (LLM)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#dae8fc;html=1;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="40" y="50" width="520" height="750" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_sys" value="drawio_auto_layout (Backend)" style="swimlane;startSize=30;fillColor=#f5f5f5;strokeColor=#666666;swimlaneFillColor=#f5f5f5;html=1;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="640" y="50" width="520" height="750" as="geometry"/>
+    </mxCell>
+    <mxCell id="gen" value="1. Generate diagram&#10;(draw.io XML)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_agent">
+      <mxGeometry x="190" y="40" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="call_review" value="2. Call drawio_auto_layout&#10;mode=review" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_agent">
+      <mxGeometry x="190" y="140" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="call_apply" value="5. Call drawio_auto_layout&#10;mode=apply (ELK)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_agent">
+      <mxGeometry x="190" y="350" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="write_xml" value="8. Write new XML to file" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_agent">
+      <mxGeometry x="190" y="450" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="export" value="9. Export PNG (re-verify)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="lane_agent">
+      <mxGeometry x="190" y="550" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="done" value="Done" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane_agent">
+      <mxGeometry x="240" y="660" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="parse" value="3. Parse XML + detect issues&#10;(overlaps / crossings / diagonal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="lane_sys">
+      <mxGeometry x="770" y="40" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="decision" value="4. Issues&#10;found?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="lane_sys">
+      <mxGeometry x="770" y="150" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="no_issues" value="6a. Return already_good" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="lane_sys">
+      <mxGeometry x="770" y="270" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="yes_issues" value="6b. Return issues + fix_hint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;" vertex="1" parent="lane_sys">
+      <mxGeometry x="770" y="380" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="elk" value="7. Run ELK layered layout&#10;(reposition nodes + edge routing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="lane_sys">
+      <mxGeometry x="770" y="470" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="return_xml" value="8. Return content_base64&#10;(fixed XML) + repositioned nodes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="lane_sys">
+      <mxGeometry x="770" y="570" width="220" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="gen" target="call_review">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="call_review" target="parse">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="parse" target="decision">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="decision" target="no_issues">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=10;" edge="1" parent="1" source="no_issues" target="export">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=10;labelBackgroundColor=#ffffff;" edge="1" parent="1" source="decision" target="yes_issues">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="yes_issues" target="call_apply">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="call_apply" target="elk">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="elk" target="return_xml">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="return_xml" target="write_xml">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="write_xml" target="export">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="export" target="done">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

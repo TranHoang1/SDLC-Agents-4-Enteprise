@@ -21,21 +21,24 @@ class AgentRegistry {
   private initialized = false;
 
   load(workspaceRoot: string): void {
-    const agentsDir = path.join(workspaceRoot, ".kiro", "agents");
-
-    if (fs.existsSync(agentsDir)) {
-      const mdFiles = fs.readdirSync(agentsDir)
-        .filter(f => f.endsWith(".md") && !f.startsWith("prompts"))
-        .map(f => path.join(agentsDir, f));
-
-      for (const file of mdFiles) {
-        const cfg = this.parseAgentFile(file);
-        if (cfg) this.register(cfg);
-      }
-    }
+    this.loadFromDir(path.join(workspaceRoot, ".code-intel", "agents"));
+    this.loadFromDir(path.join(workspaceRoot, ".kiro", "agents"));
 
     this.generateDefaultInfraNodes();
     this.initialized = true;
+  }
+
+  private loadFromDir(agentsDir: string): void {
+    if (!fs.existsSync(agentsDir)) return;
+
+    const mdFiles = fs.readdirSync(agentsDir)
+      .filter(f => f.endsWith(".md") && !f.startsWith("prompts"))
+      .map(f => path.join(agentsDir, f));
+
+    for (const file of mdFiles) {
+      const cfg = this.parseAgentFile(file);
+      if (cfg) this.register(cfg);
+    }
   }
 
   private generateDefaultInfraNodes(): void {
@@ -63,21 +66,27 @@ class AgentRegistry {
   }
 
   async loadPipeline(workspaceRoot: string, llm: LlmProvider): Promise<void> {
-    const agentsDir = path.join(workspaceRoot, ".kiro", "agents");
-    if (!fs.existsSync(agentsDir)) {
+    const codeIntelDir = path.join(workspaceRoot, ".code-intel", "agents");
+    const kiroDir = path.join(workspaceRoot, ".kiro", "agents");
+
+    const agentDirs = [codeIntelDir, kiroDir].filter(d => fs.existsSync(d));
+    if (agentDirs.length === 0) {
       this.pipeline = null;
       return;
     }
 
-    const mdFiles = fs.readdirSync(agentsDir)
-      .filter(f => f.endsWith(".md") && !f.startsWith("prompts"))
-      .map(f => path.join(agentsDir, f));
+    const agentContents: { id: string; content: string }[] = [];
+    for (const dir of agentDirs) {
+      const mdFiles = fs.readdirSync(dir)
+        .filter(f => f.endsWith(".md") && !f.startsWith("prompts"))
+        .map(f => path.join(dir, f));
 
-    const agentContents = mdFiles.map(file => {
-      const id = path.basename(file, ".md");
-      const content = fs.readFileSync(file, "utf-8");
-      return { id, content };
-    });
+      for (const file of mdFiles) {
+        const id = path.basename(file, ".md");
+        const content = fs.readFileSync(file, "utf-8");
+        agentContents.push({ id, content });
+      }
+    }
 
     if (agentContents.length === 0) return;
 

@@ -86,8 +86,8 @@ function decodeBase64Content(b64: string): string {
 
 function wrapXmlIfNeeded(content: string): string {
   const trimmed = content.trim();
-  if (trimmed.startsWith('<mxfile') || trimmed.startsWith('<?xml')) return content;
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<mxfile host="app.diagrams.net">\n${content}\n</mxfile>`;
+  if (trimmed.startsWith('<mxfile') || trimmed.startsWith('<?xml') || trimmed.startsWith('<mxGraphModel')) return content;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<mxfile host="app.diagrams.net">\n<diagram name="Page-1">\n${content}\n</diagram>\n</mxfile>`;
 }
 
 async function renderWithEngine(

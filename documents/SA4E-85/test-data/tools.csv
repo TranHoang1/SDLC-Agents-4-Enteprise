@@ -1,0 +1,8 @@
+toolId,name,type,requiresApproval,args,scenario
+t001,read_file,read,false,{path:src/a.ts},safe-auto-approve
+t002,write_file,write,true,{path:src/b.ts content:hello},dangerous-needs-approval
+t003,shell_execute,shell,true,{command:npm test},dangerous-shell
+t004,search_code,search,false,{query:function},safe-search
+t005,delete_file,delete,true,{path:tmp/old.ts},dangerous-delete
+t006,git_commit,git,true,{message:fix},dangerous-git
+t007,list_files,list,false,{dir:src},safe-list

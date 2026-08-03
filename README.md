@@ -66,6 +66,12 @@ MIT
 
 ## Changelog
 
+### v1.20.0 (2026-08-01)
+
+- **SA4E-84: [drawio] ELK Auto-Layout Fix Mode** — `drawio_auto_layout` tool upgraded to detect + auto-fix layout issues (node overlaps, edge crossings, diagonal edges) using ELK.js layout engine. Takes `file_path` only, writes fixed XML directly to file. For container/swimlane diagrams: edge-only fix (distributes ports without moving nodes). Minimal response (`{ status, message }`). Path traversal protection (SEC-01). Spacing capped at 500px. Env var bounds validation.
+- **Steering update** — `shared-diagrams.md` rewritten with comprehensive XML authoring rules, edge routing best practices, port distribution, 7-color palette, container rules, self-check checklist (based on drawio-skill patterns).
+- **16 bug fixes** — SQL parameter mismatch in graph/memory modules, tag normalization false matches, async test issues resolved.
+
 ### v1.19.1 (2026-07-31)
 
 - **Proxy: leverage VS Code resolution (`@vscode/proxy-agent`)** — System mode now resolves proxy per-URL through VS Code's own proxy stack, reading `http.proxy`, `http.proxySupport`, `http.noProxy` and `HTTPS_PROXY`/`HTTP_PROXY`/`NO_PROXY` env vars, auto-bypassing localhost, with per-URL caching and OS-native fallback (netsh/scutil/gsettings). Proxy connectivity test uses the same resolution path. Fixes unreliable system proxy detection in enterprise networks (esp. PAC/WPAD setups).

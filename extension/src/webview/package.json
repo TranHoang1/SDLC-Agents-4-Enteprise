@@ -1,0 +1,19 @@
+{
+  "name": "sa4e-85-webview",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "check": "svelte-check --tsconfig ./tsconfig.json"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^3.1.0",
+    "svelte": "^4.2.0",
+    "svelte-check": "^3.8.0",
+    "typescript": "^5.4.0",
+    "vite": "^5.4.0",
+    "terser": "^5.31.0"
+  }
+}

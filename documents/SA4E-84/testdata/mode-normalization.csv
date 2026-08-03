@@ -1,0 +1,9 @@
+id,input_mode,expected_output,description,test_case
+1,REVIEW,review,uppercase to lowercase,UT-04
+2,Apply,apply,mixed case to lowercase,UT-04
+3,apply,apply,already lowercase,UT-04
+4,review,review,already lowercase,UT-04
+5,bogus,review,invalid falls back to review,UT-04
+6,,review,undefined falls back to review,UT-04
+7,"",review,empty string falls back to review,UT-04
+8,AUTO,review,non-standard falls back to review,UT-04

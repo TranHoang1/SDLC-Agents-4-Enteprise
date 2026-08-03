@@ -1,0 +1,7 @@
+id,name,description,tools,mcp_servers,auto_approve,filePath,valid
+ba-agent,Business Analyst,Creates BRD and FSD,mem_search;mem_ingest,orchestrator,mem_search,.code-intel/agents/ba-agent.md,true
+sa-agent,Solution Architect,Creates TDD,code_search;mem_search,orchestrator,code_search,.code-intel/agents/sa-agent.md,true
+qa-agent,QA Engineer,Creates STP/STC and tests,mem_search;code_search,orchestrator,mem_search,.code-intel/agents/qa-agent.md,true
+dev-agent,Developer,Implements code,code_search;mem_search;write_file,orchestrator,code_search,.code-intel/agents/dev-agent.md,true
+invalid-agent,,,,,,.code-intel/agents/invalid.md,false
+empty-yaml,,No frontmatter,,,,.code-intel/agents/empty.md,false

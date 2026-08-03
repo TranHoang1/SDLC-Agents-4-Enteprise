@@ -1,0 +1,6 @@
+diffId,filePath,patch,fileHashAtGeneration,generatedAt,scenario
+d001,src/utils.ts,+export function add(a b){return a+b},abc123def456,2026-08-01T10:00:00Z,clean-apply
+d002,src/app.ts,+import {add} from ./utils,111222333444,2026-08-01T09:50:00Z,stale-5min
+d003,src/config.ts,+const PORT=3000,aaa000bbb111,2026-08-01T10:00:00Z,concurrent-mod
+d004,src/deleted.ts,+// new code,xxx999yyy888,2026-08-01T10:00:00Z,file-deleted
+d005,src/multi.ts,+line1\n+line2\n+line3,fff000eee111,2026-08-01T10:01:00Z,multi-line

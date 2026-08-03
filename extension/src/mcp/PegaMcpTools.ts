@@ -1,11 +1,14 @@
 import * as vscode from "vscode";
 import { PegaHttpClient } from "../services/PegaHttpClient";
+import { PegaRuleSetResolverService, SaveRuleOptions } from "../services/PegaRuleSetResolverService";
 
 export class PegaMcpTools {
   private client: PegaHttpClient;
+  private ruleSetResolver: PegaRuleSetResolverService;
 
   constructor(secrets: vscode.SecretStorage) {
     this.client = new PegaHttpClient(secrets);
+    this.ruleSetResolver = new PegaRuleSetResolverService(this.client);
   }
 
   public async getSessionContext(): Promise<any> {
@@ -213,13 +216,47 @@ export class PegaMcpTools {
 
   /**
    * Service 4 MCP Handler: pega_save_rule
+   * Trước khi save: resolve RuleSet context (open version / branch) để xác định đích.
    */
   public async saveRule(args: Record<string, unknown>): Promise<any> {
     const ruleJson = args.ruleJson || args.payload;
     if (!ruleJson) return { success: false, error: "ruleJson payload required" };
+
+    const options: SaveRuleOptions = {
+      ticketId: (args.ticketId as string) || (args.crId as string) || "",
+      crId: args.crId as string,
+      developerShortName: args.developerShortName as string,
+      preferBranch: !!args.preferBranch,
+    };
+
     try {
-      const data = await this.client.savePegaRule(ruleJson as any);
-      return { success: true, data };
+      const payloadObj: Record<string, unknown> =
+        typeof ruleJson === "object" ? (ruleJson as Record<string, unknown>) : JSON.parse(String(ruleJson));
+      const context = await this.ruleSetResolver.resolveRuleWriteContext(payloadObj);
+
+      let target: { pyRuleSet: string; pyRuleSetVersion: string } = {
+        pyRuleSet: context.suggestedTarget.pyRuleSet,
+        pyRuleSetVersion: context.suggestedTarget.pyRuleSetVersion,
+      };
+
+      // Dùng branch version làm đích khi: user yêu cầu (preferBranch), hoặc
+      // không có open ruleset version nào (suggested không phải direct/open-stack hợp lệ).
+      const branch = await this.ruleSetResolver.resolveBranchContext(options, target.pyRuleSetVersion);
+      if (branch && (options.preferBranch || context.suggestedTarget.source !== "direct")) {
+        target = { pyRuleSet: target.pyRuleSet, pyRuleSetVersion: branch.branchVersion };
+      }
+
+      const data = await this.client.savePegaRule(payloadObj, target);
+      return {
+        success: true,
+        data,
+        context: {
+          ruleType: context.ruleType,
+          suggestedTarget: context.suggestedTarget,
+          branch,
+          warnings: context.warnings,
+        },
+      };
     } catch (err: any) {
       return { success: false, error: err.message };
     }
@@ -227,15 +264,25 @@ export class PegaMcpTools {
 
   /**
    * Service 5 MCP Handler: pega_checkout_rule
+   * Xác định branch trước khi checkout (checkout vào branch version tương ứng).
    */
   public async checkoutRule(args: Record<string, unknown>): Promise<any> {
     const insKey = (args.insKey as string) || "";
     const action = ((args.action as string) || "CHECKOUT").toUpperCase() as "CHECKOUT" | "CHECKIN" | "UNDOCHECKOUT";
     const comment = args.comment as string;
     if (!insKey) return { success: false, error: "insKey parameter required" };
+
+    const options: SaveRuleOptions = {
+      ticketId: (args.ticketId as string) || (args.crId as string) || "",
+      crId: args.crId as string,
+      developerShortName: args.developerShortName as string,
+    };
+
     try {
-      const data = await this.client.checkoutPegaRule(insKey, action, comment);
-      return { success: true, data };
+      // Xác định branch trước khi checkout (theo CR/ticket nếu có).
+      const branch = await this.ruleSetResolver.resolveBranchContext(options);
+      const data = await this.client.checkoutPegaRule(insKey, action, comment, branch || undefined);
+      return { success: true, data, branch: branch || null };
     } catch (err: any) {
       return { success: false, error: err.message };
     }
@@ -251,6 +298,44 @@ export class PegaMcpTools {
     try {
       const data = await this.client.executeScenarioTestSuite(testSuiteID, insKey);
       return { success: true, data };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+
+  /**
+   * Service 7 MCP Handler: pega_create_branch
+   * Tạo branch version Pega khi không có RuleSet version open (rule base closed).
+   * branchName nếu bỏ trống sẽ tự suy ra từ ticketId/crId + developerShortName.
+   */
+  public async createBranch(args: Record<string, unknown>): Promise<any> {
+    const rulesetName = (args.rulesetName as string) || "";
+    const baseVersion = (args.baseVersion as string) || "01-01-01";
+    if (!rulesetName) return { success: false, error: "rulesetName parameter required" };
+
+    const options: SaveRuleOptions = {
+      ticketId: (args.ticketId as string) || (args.crId as string) || "",
+      crId: args.crId as string,
+      developerShortName: args.developerShortName as string,
+    };
+
+    try {
+      let branchName = (args.branchName as string) || "";
+      if (!branchName) {
+        const branch = await this.ruleSetResolver.resolveBranchContext(options, baseVersion);
+        if (!branch) {
+          return { success: false, error: "branchName required (or provide ticketId/crId to auto-derive)" };
+        }
+        branchName = branch.branchName;
+      }
+
+      const data = await this.client.createPegaBranch(rulesetName, baseVersion, branchName);
+      const branchVersion = `${baseVersion}:${branchName}`;
+      return {
+        success: true,
+        data,
+        context: { rulesetName, baseVersion, branchName, branchVersion },
+      };
     } catch (err: any) {
       return { success: false, error: err.message };
     }

@@ -22,6 +22,7 @@ import {
   FakeToolSource,
 } from '../../src/modules/orchestration/reindex/__tests__/reindex-fakes.js';
 import type { IEmbedder } from '../../src/modules/orchestration/reindex/models/ports.js';
+import { SqliteDbAdapter } from '../../src/modules/memory/task-queue/SqliteDbAdapter.js';
 
 const silent = pino({ level: 'silent' });
 
@@ -49,7 +50,7 @@ function harness(): Harness {
   const db = tmp.dbManager.getDb();
   const src = new FakeToolSource();
   const source = new FakeEventSource();
-  const service = new ReindexService(() => db, new FakeEmbedder(), src, silent);
+  const service = new ReindexService(() => new SqliteDbAdapter(db), new FakeEmbedder(), src, silent);
   const sub = new ReindexSubscriber(source, service, new PerServerTaskQueue(silent, 0), new ReindexActionMapper(), silent, 0);
   sub.start();
   return { tmp, db, src, source, sub };
@@ -141,7 +142,7 @@ describe('SA4E-42 re-index integration', () => {
 
   it('IT-07: non-blocking read during in-flight refresh (BR-09)', async () => {
     seed(h.db, 'markdown-exporter', 'export_docx'); // pre-existing index stays readable
-    const svc = new ReindexService(() => h.db, new SlowEmbedder(100), h.src, silent);
+    const svc = new ReindexService(() => new SqliteDbAdapter(h.db), new SlowEmbedder(100), h.src, silent);
     const source = new FakeEventSource();
     const sub = new ReindexSubscriber(source, svc, new PerServerTaskQueue(silent, 0), new ReindexActionMapper(), silent, 0);
     sub.start();
@@ -164,7 +165,7 @@ describe('SA4E-42 re-index integration', () => {
     seed(h.db, 'atlassian', 'jira_old');
     const embedder = new FakeEmbedder();
     embedder.failFor('jira_new');
-    const svc = new ReindexService(() => h.db, embedder, h.src, silent);
+    const svc = new ReindexService(() => new SqliteDbAdapter(h.db), embedder, h.src, silent);
     const source = new FakeEventSource();
     const sub = new ReindexSubscriber(source, svc, new PerServerTaskQueue(silent, 0), new ReindexActionMapper(), silent, 0);
     sub.start();
@@ -221,7 +222,7 @@ describe('SA4E-42 re-index integration', () => {
   it('IT-12: cross-server name collision is not silently hijacked (F-01)', async () => {
     const warn = vi.fn();
     seed(h.db, 'A', 'common_tool');
-    const svc = new ReindexService(() => h.db, new FakeEmbedder(), h.src, { info: vi.fn(), warn } as any);
+    const svc = new ReindexService(() => new SqliteDbAdapter(h.db), new FakeEmbedder(), h.src, { info: vi.fn(), warn } as any);
     const source = new FakeEventSource();
     const sub = new ReindexSubscriber(source, svc, new PerServerTaskQueue(silent, 0), new ReindexActionMapper(), silent, 0);
     sub.start();

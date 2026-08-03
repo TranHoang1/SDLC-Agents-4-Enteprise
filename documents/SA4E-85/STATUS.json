@@ -1,0 +1,96 @@
+{
+  "ticket": "SA4E-85",
+  "title": "Nâng cấp Chat UI Agentic - Svelte Webview với Actionable Diff, Context Engineering, Dynamic Agent Registry, IPC Bridge",
+  "revision": "v3.1 (Backend-Driven Knowledge)",
+  "currentPhase": "implementation",
+  "architecturePattern": "plugin",
+  "autonomyLevel": "L2",
+  "phases": {
+    "requirements": {
+      "status": "done",
+      "file": "BRD.md",
+      "version": 3,
+      "revisionNote": "v3.1: BR-30 (Backend KB SSOT), BR-31 (stateless session) added via BRD-Review/Review-05. BRD.md synced v3.1.",
+      "completedAt": "2026-08-02T12:00:00Z"
+    },
+    "specification": {
+      "completedAt": "2026-08-02T23:00:00Z",
+      "version": 3.1,
+      "revisionNote": "v3.1: FSD.md fully synced — §2.2 Architecture (ASCII diagram + RemoteCheckpointer), §3.11 UC-11 (6-step hydration table + workspace binding), §3.12 UC-12 (RemoteCheckpointer persistence via BaseCheckpointSaver), §6.2 stores (isHydrated+threadId mirrors), §7.1/7.2 protocol (SYNC_CHAT_HISTORY{threadId,messages[],context}+REQUEST_SYNC_STATE{}), §7.3 error codes (+KB_UNREACHABLE/KB_AUTH_FAILED/KB_PAYLOAD_TOO_LARGE), §8 error handling (KB unreachable/auth/mismatch/413), §10.1 NFR (KB REST performance targets), §11 diagrams (hydration-flow slot).",
+      "status": "done",
+      "file": "FSD.md"
+    },
+    "design": {
+      "completedAt": "2026-08-02T13:30:00Z",
+      "version": 3,
+      "revisionNote": "v3.1: TDD.md synced. New sections 2.4b RemoteCheckpointer, 2.4c BackendKnowledgeService. Phase 0 (7 tasks) added. SQLite Checkpointer removed as primary source.",
+      "status": "done",
+      "file": "TDD.md"
+    },
+    "feedback_loop": {
+      "status": "not_started",
+      "iterations": 0,
+      "maxIterations": 5
+    },
+    "security_design_review": {
+      "note": "v3.1: 0 Critical, 0 High, 2 Medium (#18 IDOR workspace binding, #19 RemoteCheckpointer auth/localhost bind), 3 Low, 2 Info. Gate: PROCEED to Phase 0. #18/#19 are pre-implementation requirements for TDD 2.4c. SECURITY-REVIEW.md v3.1 addendum.",
+      "status": "done",
+      "completedAt": "2026-08-02T14:00:00Z"
+    },
+    "test_planning": {
+      "file": "STP.md",
+      "review": "approved",
+      "status": "done",
+      "completedAt": "2026-08-02T14:30:00Z",
+      "version": 2,
+      "revisionNote": "v3.1: STP v2.1 (142 tests). STC updated: IT-HYD-03 (RemoteCheckpointer HTTP), UT-HYD-03, PBT-HYD-01, SIT-SYNC-01."
+    },
+    "devops_pipeline_setup": {
+      "note": "Existing CI infrastructure sufficient. Vite build + vitest config added as Phase 5 task 1.1",
+      "status": "done",
+      "completedAt": "2026-08-02T10:00:00Z"
+    },
+    "implementation": {
+      "status": "done",
+      "startedAt": "2026-08-02T19:00:00Z",
+      "completedAt": "2026-08-02T23:00:00Z",
+      "tasks_completed": "7/7 (Phase 0 v3.1)",
+      "details": {
+        "0.1-0.3_backend_kb": "done — backend/src/knowledge/ (KnowledgeDb, KnowledgeService, routes, schema, models) — 33 tests pass, typecheck clean",
+        "0.4-0.5_remote_checkpointer": "done — extension/src/langgraph/core/remote-checkpointer.ts (BaseCheckpointSaver → HTTP GET/PUT), WorkspaceCheckpointer deprecated",
+        "0.6-0.7_sessionmanager_hydration": "done — SessionManager stateless, ChatEngineAdapter hydration flow (SYNC_CHAT_HISTORY + HydrationContext), 805 tests pass",
+        "svelte_tsconfig_fix": "done — extension/tsconfig.json exclude 'src/webview/**' (webview built by Vite standalone), npm run compile + npm test clean"
+      },
+      "note": "Phase 0 complete. Backend KB registered in ModuleFactory, routes wired in HttpServer L88-91. Security #18/#19/#23 enforced. Next: QA testing, Security code review, DevOps."
+    },
+    "security_code_review": {
+      "status": "done",
+      "note": "POST-IMPLEMENTATION re-verified: #18 workspace binding (KnowledgeService.ts:52), #19 jwtAuth+localhostOnly+rateLimiter (routes.ts:41-43), #23 bodyLimit 10MB (routes.ts:84). No Critical/High. 2 operational notes for Deployment Guide (CODE_INTEL_HOST=0.0.0.0 escape hatch; REQUIRE_AUTH for prod). SECURITY-REVIEW.md v3.1 post-impl addendum.",
+      "completedAt": "2026-08-02T23:30:00Z"
+    },
+    "testing": {
+      "status": "in_progress",
+      "note": "TER.md created: 838 automated tests pass (805 extension + 33 backend KB). 0 failed. 10 todo. SIT-SYNC-01 (multi-IDE 2 real IDEs) + E2E-UI Playwright (UI-HYD-01) pending manual execution. DEF-001 pre-existing (mcp-tools.test.ts missing auth header, out of scope).",
+      "file": "TER.md"
+    },
+    "pentest": {
+      "status": "not_started",
+      "note": "To be re-run for new KB HTTP surface"
+    },
+    "security_deploy_review": {
+      "status": "not_started"
+    },
+    "deployment": {
+      "status": "not_started"
+    }
+  },
+  "circuitBreaker": {},
+  "tokenBudget": {
+    "dailyCap": 500000,
+    "usedToday": 0,
+    "lastReset": "2026-08-02T00:00:00Z",
+    "warningThreshold": 0.8,
+    "mode": "normal"
+  },
+  "lastUpdated": "2026-08-02T23:30:00Z"
+}

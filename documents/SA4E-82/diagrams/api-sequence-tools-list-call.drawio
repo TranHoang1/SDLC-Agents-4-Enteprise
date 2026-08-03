@@ -1,0 +1,45 @@
+<mxGraphModel dx="900" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="620" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="h1" value="tools/list (F3) &amp; direct tools/call (F4) flows" style="text;html=1;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="240" y="10" width="420" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="llm" value="LLM" style="shape=umlActor;whiteSpace=wrap;html=1;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="60" height="120" as="geometry" />
+    </mxCell>
+    <mxCell id="ws" value="WrapperServer&#10;getToolsRewritten&#10;routeToolCall" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="280" y="60" width="160" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="rbc" value="RemoteBackendClient&#10;restGetTools" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="560" y="60" width="170" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="bk" value="Backend /api/tools" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="800" y="60" width="100" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="s1" value="F3 — tools/list&#10;1. GET /api/tools (5s timeout)&#10;2. merge getVisibleLocalToolDefinitions()&#10;&#10;pega_* EXCLUDED (hidden: true)&#10;3. detectFromToolList + rewriteSchemasForLlm&#10;4. return { tools }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="140" y="210" width="330" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="s2" value="fallback: backend down &#8594; return visible-only local defs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="500" y="220" width="280" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="s3" value="F4 — tools/call { name: &quot;pega_*&quot; }&#10;1. isLocalTool(name)? TRUE (checked FIRST)&#10;2. executeLocalTool(name, args)&#10;3. handler &#8594; PegaMcpTools method&#10;4. toMcpResult &#8594; { isError, content }&#10;No backend round-trip" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="140" y="390" width="330" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="s4" value="non-local name: fall through&#10;find_tools &#8594; execute_dynamic_tool&#10;&#8594; callWithProxy (backend)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="520" y="400" width="260" height="70" as="geometry" />
+    </mxCell>
+    <mxCell id="z1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ws" target="s1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="z2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="rbc" target="s2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="z3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ws" target="s3">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="z4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="s3" target="s4">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

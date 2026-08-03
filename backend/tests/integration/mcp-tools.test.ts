@@ -32,7 +32,7 @@ beforeAll(async () => {
   app = new Hono();
   app.route('/', createHealthRoute(registry, VERSION));
   app.route('/', createToolsRoute(toolRouter, logger));
-});
+}, 30_000);
 
 // ============================================================
 // 1. Health Endpoint

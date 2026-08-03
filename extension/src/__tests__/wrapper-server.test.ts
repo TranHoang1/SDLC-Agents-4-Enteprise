@@ -115,6 +115,44 @@ describe('WrapperServer IT + E2E-API (TC-22 to TC-31)', () => {
     expect(drawio.inputSchema.properties.output_path).toBeDefined();
   });
 
+  it('TC-37: find_tools response merges local tool definitions', async () => {
+    deps.restCallToolMock.result = {
+      content: [{ type: 'text', text: JSON.stringify({ tools: deps.restGetToolsMock.tools }) }],
+    };
+
+    const res = await postMcp(port, {
+      jsonrpc: '2.0', id: 12, method: 'tools/call',
+      params: { name: 'find_tools', arguments: { query: 'pega', top_k: 20 } },
+    });
+
+    expect(res.status).toBe(200);
+    const parsed = JSON.parse(res.body.result.content[0].text);
+    const names = parsed.tools.map((t: any) => t.name);
+    expect(names).toContain('stream_write_file');
+    expect(names).toContain('embed_image');
+    expect(parsed.tools.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('TC-38: execute_dynamic_tool routes local tools (pega) without backend forward', async () => {
+    const { server: s2, deps: d2 } = createTestServer();
+    await s2.start(0);
+    const p2 = s2.listeningPort!;
+
+    const res = await postMcp(p2, {
+      jsonrpc: '2.0', id: 13, method: 'tools/call',
+      params: {
+        name: 'execute_dynamic_tool',
+        arguments: { toolName: 'stream_write_file', arguments: { file_path: path.join(TMP_DIR, 'dyn-local.txt'), content: 'y' } },
+      },
+    });
+
+    await s2.stop();
+    expect(res.status).toBe(200);
+    expect(d2.restCallToolMock.calls).toHaveLength(0);
+    const text = res.body.result.content[0].text;
+    expect(text).toContain('Wrote file:');
+  });
+
   it('TC-26: Non-file tool passes through without proxy', async () => {
     deps.restCallToolMock.result = { content: [{ type: 'text', text: '{"results":[]}' }] };
 
@@ -259,5 +297,36 @@ describe('WrapperServer IT + E2E-API (TC-22 to TC-31)', () => {
     expect(out.status).toBe(200);
     expect(out.contentType).toContain('text/event-stream');
     expect(out.chunk).toContain('event: message');
+  });
+
+  it('TC-40: starting on an occupied port stops the stale instance (reload safety)', async () => {
+    const { server: first } = createTestServer();
+    await first.start(0);
+    const busyPort = first.listeningPort!;
+
+    const { server: second } = createTestServer();
+    await second.start(busyPort);
+
+    expect(second.listeningPort).toBe(busyPort);
+    expect(first.listeningPort).toBeNull();
+
+    await second.stop();
+  });
+
+  it('TC-41: starting on a port held by an external process retries until it is freed (EADDRINUSE recovery)', async () => {
+    const http = await import('node:http');
+    // Simulate a stale process (from a previous extension host) still holding the port.
+    const blocker = http.createServer(() => {});
+    await new Promise<void>((resolve) => blocker.listen(0, '127.0.0.1', resolve));
+    const busyPort = (blocker.address() as import('node:net').AddressInfo).port;
+
+    const { server } = createTestServer();
+    // Release the port shortly after the first EADDRINUSE attempt so the retry can succeed.
+    setTimeout(() => blocker.close(), 250);
+
+    await server.start(busyPort);
+    expect(server.listeningPort).toBe(busyPort);
+
+    await server.stop();
   });
 });
