@@ -6,10 +6,11 @@
 import * as path from "path";
 import * as fs from "fs";
 import { parallelBatch } from "./parallel-utils";
+import { computeOptimalConcurrency, measureLatency } from "./concurrency-tuner";
 import type { PegaHttpClient } from "./PegaHttpClient";
 
-/** Concurrency limit: max parallel requests to Pega server */
-const FETCH_CONCURRENCY = 5;
+/** Computed at runtime — see computeFetchConcurrency() */
+let FETCH_CONCURRENCY = 10; // default until measured
 
 /** Rule types to crawl when a Class rule is encountered */
 const RULE_TYPES_TO_CRAWL = [
@@ -196,4 +197,32 @@ function classifyFetchError(errMsg: string): "server" | "not_found" | "other" {
     ];
     const isServer = serverPatterns.some((p) => lower.includes(p));
     return isServer ? "server" : "other";
+}
+
+/**
+ * Calibrate fetch concurrency by measuring latency to the Pega server.
+ * Call once before starting the crawl loop.
+ */
+export async function calibrateFetchConcurrency(
+    pegaClient: PegaHttpClient,
+    totalItems: number,
+    log: LogFn,
+): Promise<number> {
+    try {
+        const latency = await measureLatency(
+            () => pegaClient.getObject("DATA-ADMIN-OPERATOR-ID", "SSA@TGB", "@baseclass").catch(() => null),
+            2,
+        );
+        FETCH_CONCURRENCY = computeOptimalConcurrency({
+            measuredLatencyMs: latency,
+            totalItems,
+            isRemote: true,
+            targetDurationMs: 15_000,
+            maxServerConnections: 15,
+        });
+        log(`[Pega Indexer] 🎯 Auto-tuned: latency=${Math.round(latency)}ms → FETCH_CONCURRENCY=${FETCH_CONCURRENCY}`);
+    } catch {
+        log(`[Pega Indexer] ⚠️ Latency probe failed — using default FETCH_CONCURRENCY=${FETCH_CONCURRENCY}`);
+    }
+    return FETCH_CONCURRENCY;
 }

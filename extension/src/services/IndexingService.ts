@@ -265,9 +265,8 @@ export class IndexingService {
                 if (fetchedRules.length > 0) {
                     totalFetchedInRun += fetchedRules.length;
                     const BATCH_SIZE = 1000;
-                    const INGEST_CONCURRENCY = 3;
                     const totalChunks = Math.ceil(fetchedRules.length / BATCH_SIZE);
-                    this.log(`[Pega Indexer] Ingesting ${fetchedRules.length} rules into Backend DB (${totalChunks} chunks × ${BATCH_SIZE}, concurrency=${INGEST_CONCURRENCY})...`);
+                    this.log(`[Pega Indexer] Ingesting ${fetchedRules.length} rules into Backend DB (${totalChunks} chunks × ${BATCH_SIZE}, all-at-once)...`);
 
                     let lastBatchRes: any = null;
                     const allChunks: Array<{ subChunk: Record<string, unknown>[]; chunkNum: number }> = [];
@@ -275,9 +274,8 @@ export class IndexingService {
                         allChunks.push({ subChunk: fetchedRules.slice(i, i + BATCH_SIZE), chunkNum: Math.floor(i / BATCH_SIZE) + 1 });
                     }
 
-                    // Parallel ingestion: 3 concurrent HTTP calls to backend
-                    const { parallelBatch } = await import("./parallel-utils");
-                    await parallelBatch(allChunks, INGEST_CONCURRENCY, async ({ subChunk, chunkNum }) => {
+                    // All-at-once ingestion: localhost backend handles its own queueing
+                    const ingestResults = await Promise.all(allChunks.map(async ({ subChunk, chunkNum }) => {
                         this.log(`[Pega Indexer] 📤 Ingesting chunk ${chunkNum}/${totalChunks} (${subChunk.length} rules)...`);
 
                         const batchChecksums: Record<string, string> = {};
@@ -306,7 +304,10 @@ export class IndexingService {
                             this.log(`[Pega Indexer] ⚠️ Batch chunk ${chunkNum} notice: ${subErr.message}`);
                         }
                         return lastBatchRes;
-                    });
+                    }));
+
+                    // Use last non-null result from parallel ingest
+                    lastBatchRes = ingestResults.filter(Boolean).pop() ?? null;
 
                     if (lastBatchRes) {
                         if (lastBatchRes.totalRulesInDb) {
