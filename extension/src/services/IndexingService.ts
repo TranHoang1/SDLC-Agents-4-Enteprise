@@ -264,68 +264,40 @@ export class IndexingService {
 
                 if (fetchedRules.length > 0) {
                     totalFetchedInRun += fetchedRules.length;
-                    const BATCH_SIZE = 1000;
-                    const totalChunks = Math.ceil(fetchedRules.length / BATCH_SIZE);
-                    this.log(`[Pega Indexer] Ingesting ${fetchedRules.length} rules into Backend DB (${totalChunks} chunks × ${BATCH_SIZE}, all-at-once)...`);
+                    this.log(`[Pega Indexer] Ingesting ${fetchedRules.length} rules via NDJSON stream (single request, O(1) memory)...`);
 
-                    let lastBatchRes: any = null;
-                    const allChunks: Array<{ subChunk: Record<string, unknown>[]; chunkNum: number }> = [];
-                    for (let i = 0; i < fetchedRules.length; i += BATCH_SIZE) {
-                        allChunks.push({ subChunk: fetchedRules.slice(i, i + BATCH_SIZE), chunkNum: Math.floor(i / BATCH_SIZE) + 1 });
+                    // Compute checksums and versions for dedup
+                    const batchChecksums: Record<string, string> = {};
+                    const batchVersions: Record<string, string> = {};
+                    for (const rule of fetchedRules) {
+                        const objClass = (rule as any).pxObjClass || '';
+                        const className = (rule as any).pyClassName || '';
+                        const rName = (rule as any).pyRuleName || (rule as any).pyPropertyName || (rule as any).pyActivityName || (rule as any).pyFlowName || (rule as any).pyModelName || '';
+                        const fqn = `${objClass}:${className}:${rName}`;
+                        const chk = computeRuleChecksum(rule as Record<string, unknown>);
+                        if (chk) batchChecksums[fqn] = chk;
+                        const ver = (rule as any).pyRuleVersion || (rule as any).pyVersion || '';
+                        if (ver) batchVersions[fqn] = ver;
                     }
 
-                    // All-at-once ingestion: localhost backend handles its own queueing
-                    const ingestResults = await Promise.all(allChunks.map(async ({ subChunk, chunkNum }) => {
-                        this.log(`[Pega Indexer] 📤 Ingesting chunk ${chunkNum}/${totalChunks} (${subChunk.length} rules)...`);
-
-                        const batchChecksums: Record<string, string> = {};
-                        const batchVersions: Record<string, string> = {};
-                        for (const rule of subChunk) {
-                            const objClass = (rule as any).pxObjClass || '';
-                            const className = (rule as any).pyClassName || '';
-                            const rName = (rule as any).pyRuleName || (rule as any).pyPropertyName || (rule as any).pyActivityName || (rule as any).pyFlowName || (rule as any).pyModelName || '';
-                            const fqn = `${objClass}:${className}:${rName}`;
-                            const chk = computeRuleChecksum(rule as Record<string, unknown>);
-                            if (chk) batchChecksums[fqn] = chk;
-                            const ver = (rule as any).pyRuleVersion || (rule as any).pyVersion || '';
-                            if (ver) batchVersions[fqn] = ver;
-                        }
-
-                        try {
-                            const res = await pegaClient.crawlBatch({
-                                projectId,
-                                rules: subChunk,
-                                visitedKeys: Array.from(visitedKeys),
-                                rulesChecksums: batchChecksums,
-                                rulesVersions: batchVersions,
-                            });
-                            lastBatchRes = res;
-                        } catch (subErr: any) {
-                            this.log(`[Pega Indexer] ⚠️ Batch chunk ${chunkNum} notice: ${subErr.message}`);
-                        }
-                        return lastBatchRes;
-                    }));
-
-                    // Use last non-null result from parallel ingest
-                    lastBatchRes = ingestResults.filter(Boolean).pop() ?? null;
-
-                    if (lastBatchRes) {
-                        if (lastBatchRes.totalRulesInDb) {
-                            totalStoredInDb = lastBatchRes.totalRulesInDb;
+                    // SA4E-92: Stream all rules in one NDJSON request — no OOM
+                    const { PegaStreamIngester } = await import("./PegaStreamIngester");
+                    const ingester = new PegaStreamIngester(pegaClient.getBackendUrlPublic());
+                    try {
+                        const streamRes = await ingester.streamIngest(
+                            fetchedRules, projectId, batchChecksums, batchVersions,
+                            Array.from(visitedKeys), this.log.bind(this),
+                        );
+                        if (streamRes.totalRulesInDb) {
+                            totalStoredInDb = streamRes.totalRulesInDb;
                         } else {
-                            totalStoredInDb += lastBatchRes.stored || fetchedRules.length;
+                            totalStoredInDb += streamRes.stored || fetchedRules.length;
                         }
-
-                        if (lastBatchRes.totalKbEntriesInDb) {
-                            totalKbInDb = lastBatchRes.totalKbEntriesInDb;
-                        }
-
-                        if (lastBatchRes.totalGraphNodesInDb) {
-                            totalGraphInDb = lastBatchRes.totalGraphNodesInDb;
-                        }
-
-                        currentQueue = lastBatchRes.nextBatch ? lastBatchRes.nextBatch.map((k: any) => k.insKey) : [];
-                    } else {
+                        if (streamRes.totalKbEntriesInDb) totalKbInDb = streamRes.totalKbEntriesInDb;
+                        if (streamRes.totalGraphNodesInDb) totalGraphInDb = streamRes.totalGraphNodesInDb;
+                        currentQueue = streamRes.nextBatch ? streamRes.nextBatch.map((k: any) => k.insKey) : [];
+                    } catch (streamErr: any) {
+                        this.log(`[Pega Indexer] ⚠️ Stream ingest failed: ${streamErr.message}`);
                         currentQueue = [];
                     }
                     this.log(`[Pega Indexer] Ingestion complete. Total DB Rules: ${totalStoredInDb}`);

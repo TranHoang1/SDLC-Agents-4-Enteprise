@@ -24,6 +24,7 @@ import { apiKeyAuth } from './middleware/api-key-auth.js';
 import { validateJwtConfig, jwtAuth } from './middleware/jwt-auth.js';
 import { createKbApiRoutes, createToolsApiRoutes } from './routes/kb-api.js';
 import { createPegaApiRoutes } from './routes/pega-api.js';
+import { createPegaStreamRoutes } from './routes/pega-stream.js';
 import { createKnowledgeApiRoutes } from '../knowledge/routes.js';
 import { bodyLimit } from 'hono/body-limit';
 import { getMcpServer, registerTransport } from './mcpServer.js';
@@ -83,6 +84,10 @@ export class HttpServer {
 
     const pegaApiRoutes = createPegaApiRoutes(this.options.registry, this.logger);
     app.route('/api/v1', pegaApiRoutes);
+
+    // SA4E-92: NDJSON streaming ingest — constant memory regardless of batch size
+    const pegaStreamRoutes = createPegaStreamRoutes(this.options.registry, this.logger);
+    app.route('/api/v1', pegaStreamRoutes);
 
     // SA4E-85 Phase 0: Backend-Driven Knowledge REST API (threads/messages/checkpoint/events/artifacts/agents)
     const knowledgeModule = this.options.registry.getModule('knowledge') as any;

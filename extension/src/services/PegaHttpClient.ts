@@ -50,6 +50,11 @@ export class PegaHttpClient {
     return config.get<string>("backendUrl", "http://localhost:48721").replace(/\/$/, "");
   }
 
+  /** Public accessor for backend URL — used by PegaStreamIngester (SA4E-92) */
+  public getBackendUrlPublic(): string {
+    return this.getBackendUrl();
+  }
+
   public async getOperatorContext(): Promise<PegaOperatorContext> {
     const base = this.getPegaEndpoint();
     const authHeader = await this.getAuthHeader();
