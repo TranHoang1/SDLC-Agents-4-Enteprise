@@ -26,7 +26,7 @@ export async function fetchAccessGroupsForApp(
 
   for (const ep of endpoints) {
     try {
-      log(`[PegaHierarchy] Fetching D_pzAccessGroupsByApplication: ${normalizedAppName} v${normalizedVersion}`);
+      log(`[PegaHierarchy] Fetching D_pzAccessGroupsByApplication: ${normalizedAppName} ${normalizedVersion}`);
       const res = await fetch(ep, { headers: { Authorization: authHeader } });
       if (res.ok) {
         const data = (await res.json()) as any;
