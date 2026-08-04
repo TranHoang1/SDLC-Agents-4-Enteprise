@@ -6,6 +6,7 @@ import * as vscode from "vscode";
 import { createHash } from "crypto";
 import { SECRET_KEYS } from "../models";
 import { setProjectId } from "../extension";
+import { resolvePegaHierarchy, type HierarchyResult } from "./PegaHierarchyResolver";
 
 export interface PegaOperatorContext {
   operatorId: string;
@@ -32,7 +33,7 @@ export class PegaHttpClient {
     }
   }
 
-  private async getAuthHeader(): Promise<string> {
+  public async getAuthHeader(): Promise<string> {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     const username = config.get<string>("pegaUsername", "").trim();
     const password = (await this.secrets.get(SECRET_KEYS.pega)) || "";
@@ -40,7 +41,7 @@ export class PegaHttpClient {
     return `Basic ${credentials}`;
   }
 
-  private getPegaEndpoint(): string {
+  public getPegaEndpoint(): string {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     return config.get<string>("pegaEndpoint", "http://localhost:8080/prweb").replace(/\/$/, "");
   }
@@ -105,118 +106,21 @@ export class PegaHttpClient {
   }
 
   /**
-   * Deterministic 4-Step Hierarchy Resolution:
-   * Account (Operator ID) => Access Group => Application Rule => All RuleSets + Rules/Data
+   * Deterministic 5-Step Hierarchy Resolution:
+   * Operator → Access Group → Application → Dependencies → Merged RuleSets.
+   * Delegates to PegaHierarchyResolver for the full logic.
    */
-  public async resolveDeterministicPegaHierarchy(operatorIdHint?: string): Promise<{
-    seeds: string[];
-    operatorId: string;
-    accessGroup: string;
-    appName: string;
-    ruleSets: string[];
-  }> {
+  public async resolveDeterministicPegaHierarchy(operatorIdHint?: string): Promise<HierarchyResult> {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     const opId = (operatorIdHint || config.get<string>("pegaUsername", "") || "SSA@TGB").trim();
-    const seedSet = new Set<string>();
-    let accessGroup = "";
-    let appName = "";
-    let appVersion = "";
-    const ruleSets: string[] = [];
+    const root = this.getWorkspaceRoot();
+    return resolvePegaHierarchy(this, opId, root, this.log.bind(this));
+  }
 
-    // Step 1: Account Context (DATA-ADMIN-OPERATOR-ID)
-    const opInsKey = `DATA-ADMIN-OPERATOR-ID ${opId.toUpperCase()}`;
-    seedSet.add(opInsKey);
-    this.log(`[PegaHttpClient] 🔍 Step 1 (Account): Resolving Operator "${opId}"...`);
-    try {
-      const opObj = await this.getRuleByInsKey(opInsKey);
-      accessGroup = (opObj.pyDefaultAccessGroup as string) || (opObj.pyAccessGroup as string) || "";
-      this.log(`[PegaHttpClient] ✅ Step 1 Success: Default Access Group = "${accessGroup}"`);
-    } catch (err: any) {
-      this.log(`[PegaHttpClient] ⚠️ Step 1 Warning: Could not fetch Operator ${opInsKey}: ${err.message}`);
-    }
-
-    // Step 2: Access Group => Application Rule
-    if (accessGroup) {
-      const agInsKey = `DATA-ADMIN-OPERATOR-ACCESSGROUP ${accessGroup}`;
-      seedSet.add(agInsKey);
-      this.log(`[PegaHttpClient] 🔍 Step 2 (Access Group): Resolving "${accessGroup}"...`);
-      try {
-        const agObj = await this.getRuleByInsKey(agInsKey);
-        appName = (agObj.pyApplication as string) || (agObj.pyAppName as string) || (agObj.pyApplicationName as string) || (agObj.pyAccessGroupAppName as string) || (agObj.pyDefaultAppName as string) || "";
-        appVersion = (agObj.pyApplicationVersion as string) || (agObj.pyAppVersion as string) || (agObj.pyAccessGroupAppVersion as string) || (agObj.pyDefaultAppVersion as string) || "";
-        if (!appName && accessGroup.includes(":")) {
-          appName = accessGroup.split(":")[0];
-        }
-        this.log(`[PegaHttpClient] ✅ Step 2 Success: Application = "${appName}" (Version: "${appVersion || "Auto"}")`);
-      } catch (err: any) {
-        if (accessGroup.includes(":")) {
-          appName = accessGroup.split(":")[0];
-        }
-        this.log(`[PegaHttpClient] ⚠️ Step 2 Warning: Could not fetch Access Group ${agInsKey}: ${err.message}`);
-      }
-    }
-
-    // Step 3: Application Rule => All RuleSets
-    if (appName) {
-      // "Auto" is not a valid version for insKey lookup — treat as unknown
-      const validVersion = appVersion && appVersion.toLowerCase() !== "auto" ? appVersion : null;
-      const appKeysToTry = [
-        validVersion ? `RULE-APPLICATION ${appName.toUpperCase()} ${validVersion}` : null,
-        // Try common version patterns if version unknown
-        !validVersion ? `RULE-APPLICATION ${appName.toUpperCase()} 01.01` : null,
-        !validVersion ? `RULE-APPLICATION ${appName.toUpperCase()} 01-01-01` : null,
-        `RULE-APPLICATION ${appName.toUpperCase()}`,
-        `RULE-APPLICATION ${appName}`,
-      ].filter(Boolean) as string[];
-
-      let appObj: Record<string, unknown> | null = null;
-      for (const appKey of appKeysToTry) {
-        try {
-          this.log(`[PegaHttpClient] 🔍 Step 3 (Application Rule): Fetching "${appKey}"...`);
-          appObj = await this.getRuleByInsKey(appKey);
-          seedSet.add(appKey);
-          this.log(`[PegaHttpClient] ✅ Step 3 Success: Loaded Application Rule "${appKey}"`);
-          break;
-        } catch {
-          // try next variation
-        }
-      }
-
-      if (appObj) {
-        // Read pyRuleSetList
-        const rawRuleSets = (appObj.pyRuleSetList || appObj.pyRuleSets) as any[];
-        if (Array.isArray(rawRuleSets)) {
-          for (const rs of rawRuleSets) {
-            const rsName = typeof rs === "string" ? rs : (rs.pyRuleSet || rs.pyRuleSetName || rs.pxSubRuleSet);
-            const rsVer = typeof rs === "object" ? (rs.pyRuleSetVersion || rs.pyVersion) : "";
-            if (rsName) {
-              const fullRsKey = rsVer ? `${rsName}:${rsVer}` : rsName;
-              ruleSets.push(fullRsKey);
-              seedSet.add(`RULE-RULESET-NAME ${rsName.toUpperCase()}`);
-            }
-          }
-        }
-        // Read pyWorkTypes / pyDataClasses
-        const workTypes = (appObj.pyWorkTypes || appObj.pyCaseTypes) as any[];
-        if (Array.isArray(workTypes)) {
-          for (const wt of workTypes) {
-            const className = typeof wt === "string" ? wt : (wt.pyWorkTypeClass || wt.pyClassName || wt.pxObjClass);
-            if (className) {
-              seedSet.add(`RULE-OBJ-CLASS ${className}`);
-            }
-          }
-        }
-      }
-    }
-
-    const seeds = Array.from(seedSet);
-    return {
-      seeds,
-      operatorId: opId,
-      accessGroup,
-      appName: appName || "PegaApp",
-      ruleSets,
-    };
+  /** Resolve workspace root path for saving rules to disk */
+  private getWorkspaceRoot(): string {
+    const folder = vscode.workspace.workspaceFolders?.[0];
+    return folder ? folder.uri.fsPath : process.cwd();
   }
 
   private activePrefix: string | null = null;
@@ -700,129 +604,76 @@ export class PegaHttpClient {
     caseTypesCount: number;
     filePath: string;
   }> {
-    const base = this.getPegaEndpoint();
-    const authHeader = await this.getAuthHeader();
-    const headers = { Authorization: authHeader };
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     const username = config.get<string>("pegaUsername", "").trim();
 
-    let operatorId = username;
-    let operatorName = "";
-    let accessGroup = "";
-    let applicationName = "";
-    let organization = "";
-    let division = "";
-    let unit = "";
+    // Delegate to the correct hierarchy resolver
+    this.log(`[PegaHttpClient] 🔍 fetchAndSavePegaContext: Starting hierarchy resolution...`);
+    const result = await this.resolveDeterministicPegaHierarchy(username);
 
-    // 1. Fetch exact Operator & Access Group from D_OperatorID data page
-    for (const ep of [`${base}/api/v1/data/D_OperatorID`, `${base}/PRRestService/api/v1/data/D_OperatorID`]) {
-      try {
-        const res = await fetch(ep, { headers });
-        if (res.ok) {
-          const data = (await res.json().catch(() => ({}))) as any;
-          operatorId = data.pyUserIdentifier || username;
-          operatorName = data.pyUserName || "";
-          accessGroup = data.pyAccessGroup || "";
-          organization = data.pyOrganization || "";
-          division = data.pyOrgDivision || "";
-          unit = data.pyOrgUnit || "";
-          if (accessGroup) {
-            applicationName = accessGroup.split(":")[0];
-          }
-          break;
-        }
-      } catch { /* skip fallback */ }
-    }
+    // Fetch case types (optional, for display)
+    const caseTypes = await this.fetchCaseTypes();
 
-    // 2. Fetch CaseTypes list
-    let caseTypes: Array<{ name: string; caseTypeID: string }> = [];
-    for (const ep of [`${base}/api/v1/casetypes`, `${base}/PRRestService/api/v1/casetypes`]) {
-      try {
-        const res = await fetch(ep, { headers });
-        if (res.ok) {
-          const data = (await res.json().catch(() => ({}))) as any;
-          if (Array.isArray(data.caseTypes)) {
-            caseTypes = data.caseTypes.map((c: any) => ({
-              name: c.name || c.caseTypeName || "CaseType",
-              caseTypeID: c.caseTypeID || c.ID || "",
-            }));
-            break;
-          }
-        }
-      } catch { /* skip */ }
-    }
+    // Build correct applicationInsKey WITH version
+    const appInsKey = result.appVersion
+      ? `RULE-APPLICATION ${result.appName.toUpperCase()} ${result.appVersion}`
+      : `RULE-APPLICATION ${result.appName.toUpperCase()}`;
 
-    // 3. Fallbacks if D_OperatorID wasn't accessible
-    if (!applicationName) {
-      for (const ep of [`${base}/api/v1/applications`, `${base}/PRRestService/api/v1/applications`]) {
-        try {
-          const res = await fetch(ep, { headers });
-          if (res.ok) {
-            const data = (await res.json().catch(() => ({}))) as any;
-            const apps = data.applications || data.applicationList;
-            if (Array.isArray(apps) && apps.length > 0) {
-              applicationName = apps[0].name || apps[0].applicationName || "";
-              break;
-            }
-          }
-        } catch { /* skip */ }
-      }
-    }
-
-    if (!applicationName) {
-      applicationName = caseTypes.length > 0 ? caseTypes[0].caseTypeID.split("-")[1] || "PegaApp" : "PegaApp";
-    }
-
-    const applicationInsKey = `RULE-APPLICATION ${applicationName.toUpperCase()}`;
-    const accessGroupInsKey = accessGroup ? `RULE-OBJ-ACCESSGROUP ${accessGroup.toUpperCase()}` : "";
-    const operatorInsKey = `DATA-ADMIN-OPERATOR-ID ${operatorId.toUpperCase()}`;
-
-    const jsonPath = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), "pega-project.json");
-    const xmlPath = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), "Application.xml");
-
+    // Save pega-project.json with CORRECT data
     const projectData = {
       isPegaProject: true,
-      pegaEndpoint: base,
-      operatorId,
-      operatorName,
-      operatorInsKey,
-      accessGroup,
-      accessGroupInsKey,
-      applicationName,
-      applicationInsKey,
-      pzInsKey: applicationInsKey,
-      organization,
-      division,
-      unit,
+      pegaEndpoint: this.getPegaEndpoint(),
+      operatorId: result.operatorId,
+      accessGroup: result.accessGroup,
+      applicationName: result.appName,
+      applicationVersion: result.appVersion,
+      applicationInsKey: appInsKey,
+      pzInsKey: appInsKey,
+      ruleSets: result.ruleSets,
+      dependedApps: result.dependedApps,
+      accessGroups: result.accessGroups,
       caseTypes,
       fetchedAt: new Date().toISOString(),
     };
 
-    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<application name="${applicationName}" accessGroup="${accessGroup}" pzInsKey="${applicationInsKey}">
-  <operator id="${operatorId}" name="${operatorName}" pzInsKey="${operatorInsKey}"/>
-  <accessGroup name="${accessGroup}" pzInsKey="${accessGroupInsKey}"/>
-  <organization name="${organization}" division="${division}" unit="${unit}"/>
-  <endpoint url="${base}"/>
-</application>`;
-
+    const jsonPath = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), "pega-project.json");
     await vscode.workspace.fs.writeFile(jsonPath, Buffer.from(JSON.stringify(projectData, null, 2), "utf-8"));
-    await vscode.workspace.fs.writeFile(xmlPath, Buffer.from(xmlContent, "utf-8"));
 
     // Derive and persist project ID from Pega application name
     const codeIntelDir = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), ".code-intel");
     await vscode.workspace.fs.createDirectory(codeIntelDir);
     const pjPath = vscode.Uri.joinPath(codeIntelDir, "project.json");
-    const projectId = createHash("sha256").update("pega:" + applicationName).digest("hex").slice(0, 12);
+    const projectId = createHash("sha256").update("pega:" + result.appName).digest("hex").slice(0, 12);
     await vscode.workspace.fs.writeFile(pjPath, Buffer.from(JSON.stringify({ projectId }, null, 2), "utf-8"));
-    // Update extension runtime project_id immediately
     setProjectId(projectId);
 
+    this.log(`[PegaHttpClient] ✅ fetchAndSavePegaContext complete: app="${result.appName}" v${result.appVersion}, ${caseTypes.length} caseTypes`);
+
     return {
-      applicationName,
-      accessGroup,
+      applicationName: result.appName,
+      accessGroup: result.accessGroup,
       caseTypesCount: caseTypes.length,
-      filePath: "pega-project.json",
+      filePath: jsonPath.fsPath,
     };
+  }
+
+  /** Fetch case types from Pega API (non-fatal) */
+  private async fetchCaseTypes(): Promise<Array<{ name: string; caseTypeID: string }>> {
+    const base = this.getPegaEndpoint();
+    const authHeader = await this.getAuthHeader();
+    const endpoints = [`${base}/api/v1/casetypes`, `${base}/PRRestService/api/v1/casetypes`];
+
+    for (const ep of endpoints) {
+      try {
+        const res = await fetch(ep, { headers: { Authorization: authHeader } });
+        if (res.ok) {
+          const data = (await res.json()) as any;
+          if (Array.isArray(data.caseTypes)) {
+            return data.caseTypes.map((c: any) => ({ name: c.name || "", caseTypeID: c.caseTypeID || "" }));
+          }
+        }
+      } catch { /* non-fatal */ }
+    }
+    return [];
   }
 }
