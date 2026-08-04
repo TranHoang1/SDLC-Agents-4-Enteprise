@@ -1,4 +1,4 @@
-# Hướng Dẫn Kỹ Thuật Pega: Master Guide 7 REST Bridge Services (Pega Platform)
+# Hướng Dẫn Kỹ Thuật Pega: Master Guide 8 REST Bridge Services (Pega Platform)
 
 **Tài liệu**: PEGA_IMPLEMENTATION_GUIDE.md  
 **Hệ thống**: Pega Platform 7.x / 8.x / Infinity  
@@ -602,7 +602,108 @@ if (rulesetName == null || rulesetName.trim().isEmpty() || branchName == null ||
 
 ---
 
-## 4. Bảng Tổng Hợp 7 Core Services Trong Service Package `CodeIntelligence` (Version `v1`)
+### 🔹 SERVICE 8: Generic Data Page Query (`POST /api/v1/datapage`)
+
+> **Mục đích**: Gọi bất kỳ Pega Data Page (D_xxx) nào qua generic endpoint. Parameters truyền trong body dạng JSON object. Hỗ trợ cả Data Pages hệ thống (D_pzAccessGroupsByApplication, D_OperatorID, etc.) và custom Data Pages của ứng dụng.
+
+#### 1. Cấu Hình Service REST Rule (`pzGetDataPage` / `/datapage`):
+- **Service Package**: `CodeIntelligence` (Service Version: `v1`)
+- **URL Mapping**: `/datapage`
+- **Method**: `POST`
+
+##### a. Inbound Request Data Mapping (Tab Methods ➔ Request):
+- **dataPageName** ➔ Mapping vào **`.RequestDataPageName`**
+- **parameters** ➔ Mapping vào **`.RequestParameters`** *(JSON object string chứa key-value pairs)*
+
+##### b. Outbound Response Data Mapping (Tab Methods ➔ Response):
+- **HTTP status code**: `Clipboard Property` ➔ **`.pyHTTPResponseCode`**
+- **Message Data / Map from**: `Clipboard`
+- **Map from key**: **`.ResponseBody`**
+
+---
+
+#### 2. Mã Nguồn Java Activity `pzGetDataPage`:
+```java
+// 1. Đọc tham số: dataPageName, parameters (JSON object)
+String dataPageName = tools.getPrimaryPage().getString(".RequestDataPageName");
+if (dataPageName == null || dataPageName.trim().isEmpty()) {
+    dataPageName = tools.getParamValue("dataPageName");
+}
+
+String parametersJson = tools.getPrimaryPage().getString(".RequestParameters");
+if (parametersJson == null || parametersJson.trim().isEmpty()) {
+    parametersJson = tools.getParamValue("parameters");
+}
+
+if (dataPageName == null || dataPageName.trim().isEmpty()) {
+    tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Missing mandatory parameter: dataPageName\"}");
+    tools.getPrimaryPage().putString(".pyHTTPResponseCode", "400");
+} else {
+    try {
+        // 2. Build parameter page from JSON parameters
+        ClipboardPage paramPage = tools.createPage("Code-Pega-List", "dpParams");
+        if (parametersJson != null && !parametersJson.trim().isEmpty() && !parametersJson.equals("{}")) {
+            paramPage.adoptJSONObject(parametersJson);
+        }
+
+        // 3. Load Data Page via Pega Engine (thread-level, respects caching)
+        ClipboardPage dataPage = tools.getThread().getDataPage(dataPageName, paramPage);
+
+        if (dataPage == null) {
+            tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Data Page not found or returned null: " + dataPageName + "\"}");
+            tools.getPrimaryPage().putString(".pyHTTPResponseCode", "404");
+        } else {
+            // 4. Serialize Data Page to JSON response
+            String jsonOutput = dataPage.getJSON(false);
+            tools.getPrimaryPage().putString(".ResponseBody", jsonOutput);
+            tools.getPrimaryPage().putString(".pyHTTPResponseCode", "200");
+        }
+    } catch (Exception e) {
+        tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"DataPage Load Failed: " + e.getMessage() + "\"}");
+        tools.getPrimaryPage().putString(".pyHTTPResponseCode", "500");
+    }
+}
+```
+
+#### 3. Ví Dụ Sử Dụng:
+
+**Lấy Access Groups cho Application:**
+```json
+POST /api/CodeIntelligence/v1/datapage
+{
+  "dataPageName": "D_pzAccessGroupsByApplication",
+  "parameters": {
+    "ApplicationName": "HRAppsV2",
+    "ApplicationVersion": "01.01"
+  }
+}
+```
+
+**Lấy Operator Context:**
+```json
+POST /api/CodeIntelligence/v1/datapage
+{
+  "dataPageName": "D_OperatorID",
+  "parameters": {}
+}
+```
+
+**Lấy Case Types:**
+```json
+POST /api/CodeIntelligence/v1/datapage
+{
+  "dataPageName": "D_pyCaseTypeList",
+  "parameters": {
+    "ApplicationName": "HRAppsV2"
+  }
+}
+```
+
+> **Lưu ý**: `tools.getThread().getDataPage(name, paramPage)` load Data Page trong context của operator đang authenticated. Data Page caching rules của Pega vẫn áp dụng (Node/Requestor/Thread scope). Nếu cần force reload, thêm parameter `_forceReload=true` và handle trong Activity.
+
+---
+
+## 4. Bảng Tổng Hợp 8 Core Services Trong Service Package `CodeIntelligence` (Version `v1`)
 
 | STT | Endpoint | Method | Activity Name | Inbound Property Mapping | Outbound Response Property |
 | :---: | :--- | :---: | :--- | :--- | :--- |
@@ -613,6 +714,7 @@ if (rulesetName == null || rulesetName.trim().isEmpty() || branchName == null ||
 | **5** | `/rules/checkout` | `POST` | `pzCheckoutPegaRule` | `insKey` ➔ `.RequestPZInsKey`<br>`action` ➔ `.RequestAction`<br>`comment` ➔ `.RequestComment`<br>`branchName`/`branchVersion` ➔ branch context | `.ResponseBody`, `.pyHTTPResponseCode` |
 | **6** | `/rules/test` | `POST` | `pzExecuteScenarioTestSuite` | `testSuiteID` ➔ `.RequestTestSuiteID`<br>`insKey` ➔ `.RequestPZInsKey` | `.ResponseBody`, `.pyHTTPResponseCode` |
 | **7** | `/rules/branch` | `POST` | `pzCreatePegaBranch` | `rulesetName` ➔ `.RequestRuleSetName`<br>`baseVersion` ➔ `.RequestBaseVersion`<br>`branchName` ➔ `.RequestBranchName` | `.ResponseBody`, `.pyHTTPResponseCode` |
+| **8** | `/datapage` | `POST` | `pzGetDataPage` | `dataPageName` ➔ `.RequestDataPageName`<br>`parameters` ➔ `.RequestParameters` (JSON object) | `.ResponseBody`, `.pyHTTPResponseCode` |
 
 ---
 
