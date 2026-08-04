@@ -158,8 +158,13 @@ export class PegaHttpClient {
 
     // Step 3: Application Rule => All RuleSets
     if (appName) {
+      // "Auto" is not a valid version for insKey lookup — treat as unknown
+      const validVersion = appVersion && appVersion.toLowerCase() !== "auto" ? appVersion : null;
       const appKeysToTry = [
-        appVersion ? `RULE-APPLICATION ${appName.toUpperCase()} ${appVersion}` : null,
+        validVersion ? `RULE-APPLICATION ${appName.toUpperCase()} ${validVersion}` : null,
+        // Try common version patterns if version unknown
+        !validVersion ? `RULE-APPLICATION ${appName.toUpperCase()} 01.01` : null,
+        !validVersion ? `RULE-APPLICATION ${appName.toUpperCase()} 01-01-01` : null,
         `RULE-APPLICATION ${appName.toUpperCase()}`,
         `RULE-APPLICATION ${appName}`,
       ].filter(Boolean) as string[];
