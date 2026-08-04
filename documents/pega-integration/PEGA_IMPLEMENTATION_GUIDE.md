@@ -602,104 +602,146 @@ if (rulesetName == null || rulesetName.trim().isEmpty() || branchName == null ||
 
 ---
 
-### 🔹 SERVICE 8: Generic Data Page Query (`POST /api/v1/datapage`)
+### 🔹 SERVICE 8a: Data Page — List Results (`POST /api/v1/datapage/list`)
 
-> **Mục đích**: Gọi bất kỳ Pega Data Page (D_xxx) nào qua generic endpoint. Parameters truyền trong body dạng JSON object. Hỗ trợ cả Data Pages hệ thống (D_pzAccessGroupsByApplication, D_OperatorID, etc.) và custom Data Pages của ứng dụng.
+> **Mục đích**: Gọi Pega Data Page trả về **danh sách records** (có `pxResults` page list). Dùng cho: `D_pzAccessGroupsByApplication`, `D_pyCaseTypeList`, `D_pzRuleSetsInApplication`, v.v.
 
-#### 1. Cấu Hình Service REST Rule (`pzGetDataPage` / `/datapage`):
+#### 1. Cấu Hình Service REST Rule (`pzGetDataPageList` / `/datapage/list`):
 - **Service Package**: `CodeIntelligence` (Service Version: `v1`)
-- **URL Mapping**: `/datapage`
+- **URL Mapping**: `/datapage/list`
 - **Method**: `POST`
 
-##### a. Inbound Request Data Mapping (Tab Methods ➔ Request):
+##### a. Inbound Request Data Mapping:
 - **dataPageName** ➔ Mapping vào **`.RequestDataPageName`**
-- **parameters** ➔ Mapping vào **`.RequestParameters`** *(JSON object string chứa key-value pairs)*
+- **parameters** ➔ Mapping vào **`.RequestParameters`** *(JSON object string)*
 
-##### b. Outbound Response Data Mapping (Tab Methods ➔ Response):
+##### b. Outbound Response Data Mapping:
 - **HTTP status code**: `Clipboard Property` ➔ **`.pyHTTPResponseCode`**
-- **Message Data / Map from**: `Clipboard`
-- **Map from key**: **`.ResponseBody`**
+- **Message Data**: `Clipboard` ➔ **`.ResponseBody`**
 
----
-
-#### 2. Mã Nguồn Java Activity `pzGetDataPage`:
+#### 2. Mã Nguồn Java Activity `pzGetDataPageList`:
 ```java
-// 1. Đọc tham số: dataPageName, parameters (JSON object)
 String dataPageName = tools.getPrimaryPage().getString(".RequestDataPageName");
 if (dataPageName == null || dataPageName.trim().isEmpty()) {
     dataPageName = tools.getParamValue("dataPageName");
 }
-
 String parametersJson = tools.getPrimaryPage().getString(".RequestParameters");
 if (parametersJson == null || parametersJson.trim().isEmpty()) {
     parametersJson = tools.getParamValue("parameters");
 }
 
 if (dataPageName == null || dataPageName.trim().isEmpty()) {
-    tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Missing mandatory parameter: dataPageName\"}");
+    tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Missing: dataPageName\"}");
     tools.getPrimaryPage().putString(".pyHTTPResponseCode", "400");
 } else {
     try {
-        // 2. Build parameter page from JSON parameters
         ClipboardPage paramPage = tools.createPage("Code-Pega-List", "dpParams");
         if (parametersJson != null && !parametersJson.trim().isEmpty() && !parametersJson.equals("{}")) {
             paramPage.adoptJSONObject(parametersJson);
         }
-
-        // 3. Load Data Page via Pega Engine (thread-level, respects caching)
         ClipboardPage dataPage = tools.getThread().getDataPage(dataPageName, paramPage);
-
         if (dataPage == null) {
-            tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Data Page not found or returned null: " + dataPageName + "\"}");
+            tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Data Page not found: " + dataPageName + "\", \"pxResults\": [], \"totalCount\": 0}");
             tools.getPrimaryPage().putString(".pyHTTPResponseCode", "404");
         } else {
-            // 4. Serialize Data Page to JSON response
-            String jsonOutput = dataPage.getJSON(false);
-            tools.getPrimaryPage().putString(".ResponseBody", jsonOutput);
+            ClipboardProperty resultsProp = dataPage.getIfPresent("pxResults");
+            if (resultsProp != null && resultsProp.isList()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("{\"pxResults\": [");
+                java.util.Iterator iter = resultsProp.iterator();
+                boolean first = true;
+                int count = 0;
+                while (iter.hasNext()) {
+                    ClipboardPage itemPage = (ClipboardPage) iter.next();
+                    if (!first) sb.append(",");
+                    sb.append(itemPage.getJSON(false));
+                    first = false;
+                    count++;
+                }
+                sb.append("], \"totalCount\": " + count + "}");
+                tools.getPrimaryPage().putString(".ResponseBody", sb.toString());
+            } else {
+                tools.getPrimaryPage().putString(".ResponseBody", "{\"pxResults\": [], \"totalCount\": 0, \"rawPage\": " + dataPage.getJSON(false) + "}");
+            }
             tools.getPrimaryPage().putString(".pyHTTPResponseCode", "200");
         }
     } catch (Exception e) {
-        tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"DataPage Load Failed: " + e.getMessage() + "\"}");
+        tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"" + e.getMessage() + "\"}");
         tools.getPrimaryPage().putString(".pyHTTPResponseCode", "500");
     }
 }
 ```
 
-#### 3. Ví Dụ Sử Dụng:
-
-**Lấy Access Groups cho Application:**
+#### 3. Ví Dụ:
 ```json
-POST /api/CodeIntelligence/v1/datapage
-{
-  "dataPageName": "D_pzAccessGroupsByApplication",
-  "parameters": {
-    "ApplicationName": "HRAppsV2",
-    "ApplicationVersion": "01.01"
-  }
+POST /api/CodeIntelligence/v1/datapage/list
+{ "dataPageName": "D_pzAccessGroupsByApplication", "parameters": { "ApplicationName": "HRAppsV2", "ApplicationVersion": "01.01" } }
+```
+**Response:** `{ "pxResults": [{ "pyAccessGroup": "HRAppsV2:Administrators", ... }, ...], "totalCount": 5 }`
+
+---
+
+### 🔹 SERVICE 8b: Data Page — Single Page (`POST /api/v1/datapage/single`)
+
+> **Mục đích**: Gọi Pega Data Page trả về **1 page duy nhất** (không có pxResults). Dùng cho: `D_OperatorID`, `D_pyUserProfile`, `D_pzApplicationInfo`, v.v.
+
+#### 1. Cấu Hình Service REST Rule (`pzGetDataPageSingle` / `/datapage/single`):
+- **Service Package**: `CodeIntelligence` (Service Version: `v1`)
+- **URL Mapping**: `/datapage/single`
+- **Method**: `POST`
+
+##### a. Inbound Request Data Mapping:
+- **dataPageName** ➔ Mapping vào **`.RequestDataPageName`**
+- **parameters** ➔ Mapping vào **`.RequestParameters`** *(JSON object string)*
+
+##### b. Outbound Response Data Mapping:
+- **HTTP status code**: `Clipboard Property` ➔ **`.pyHTTPResponseCode`**
+- **Message Data**: `Clipboard` ➔ **`.ResponseBody`**
+
+#### 2. Mã Nguồn Java Activity `pzGetDataPageSingle`:
+```java
+String dataPageName = tools.getPrimaryPage().getString(".RequestDataPageName");
+if (dataPageName == null || dataPageName.trim().isEmpty()) {
+    dataPageName = tools.getParamValue("dataPageName");
+}
+String parametersJson = tools.getPrimaryPage().getString(".RequestParameters");
+if (parametersJson == null || parametersJson.trim().isEmpty()) {
+    parametersJson = tools.getParamValue("parameters");
+}
+
+if (dataPageName == null || dataPageName.trim().isEmpty()) {
+    tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Missing: dataPageName\"}");
+    tools.getPrimaryPage().putString(".pyHTTPResponseCode", "400");
+} else {
+    try {
+        ClipboardPage paramPage = tools.createPage("Code-Pega-List", "dpParams");
+        if (parametersJson != null && !parametersJson.trim().isEmpty() && !parametersJson.equals("{}")) {
+            paramPage.adoptJSONObject(parametersJson);
+        }
+        ClipboardPage dataPage = tools.getThread().getDataPage(dataPageName, paramPage);
+        if (dataPage == null) {
+            tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Data Page not found: " + dataPageName + "\"}");
+            tools.getPrimaryPage().putString(".pyHTTPResponseCode", "404");
+        } else {
+            String jsonOutput = dataPage.getJSON(false);
+            tools.getPrimaryPage().putString(".ResponseBody", jsonOutput);
+            tools.getPrimaryPage().putString(".pyHTTPResponseCode", "200");
+        }
+    } catch (Exception e) {
+        tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"" + e.getMessage() + "\"}");
+        tools.getPrimaryPage().putString(".pyHTTPResponseCode", "500");
+    }
 }
 ```
 
-**Lấy Operator Context:**
+#### 3. Ví Dụ:
 ```json
-POST /api/CodeIntelligence/v1/datapage
-{
-  "dataPageName": "D_OperatorID",
-  "parameters": {}
-}
+POST /api/CodeIntelligence/v1/datapage/single
+{ "dataPageName": "D_OperatorID", "parameters": {} }
 ```
+**Response:** `{ "pyUserIdentifier": "SSA@TGB", "pyUserName": "Senior System Architect", "pyAccessGroup": "HRAppsV2:Administrators", ... }`
 
-**Lấy Case Types:**
-```json
-POST /api/CodeIntelligence/v1/datapage
-{
-  "dataPageName": "D_pyCaseTypeList",
-  "parameters": {
-    "ApplicationName": "HRAppsV2"
-  }
-}
-```
-
-> **Lưu ý**: `tools.getThread().getDataPage(name, paramPage)` load Data Page trong context của operator đang authenticated. Data Page caching rules của Pega vẫn áp dụng (Node/Requestor/Thread scope). Nếu cần force reload, thêm parameter `_forceReload=true` và handle trong Activity.
+> **Lưu ý**: Cả 2 endpoints dùng `tools.getThread().getDataPage(name, paramPage)`. Sự khác biệt: `list` trích `pxResults` → JSON array; `single` serialize toàn bộ page → JSON object.
 
 ---
 
@@ -714,7 +756,8 @@ POST /api/CodeIntelligence/v1/datapage
 | **5** | `/rules/checkout` | `POST` | `pzCheckoutPegaRule` | `insKey` ➔ `.RequestPZInsKey`<br>`action` ➔ `.RequestAction`<br>`comment` ➔ `.RequestComment`<br>`branchName`/`branchVersion` ➔ branch context | `.ResponseBody`, `.pyHTTPResponseCode` |
 | **6** | `/rules/test` | `POST` | `pzExecuteScenarioTestSuite` | `testSuiteID` ➔ `.RequestTestSuiteID`<br>`insKey` ➔ `.RequestPZInsKey` | `.ResponseBody`, `.pyHTTPResponseCode` |
 | **7** | `/rules/branch` | `POST` | `pzCreatePegaBranch` | `rulesetName` ➔ `.RequestRuleSetName`<br>`baseVersion` ➔ `.RequestBaseVersion`<br>`branchName` ➔ `.RequestBranchName` | `.ResponseBody`, `.pyHTTPResponseCode` |
-| **8** | `/datapage` | `POST` | `pzGetDataPage` | `dataPageName` ➔ `.RequestDataPageName`<br>`parameters` ➔ `.RequestParameters` (JSON object) | `.ResponseBody`, `.pyHTTPResponseCode` |
+| **8a** | `/datapage/list` | `POST` | `pzGetDataPageList` | `dataPageName` ➔ `.RequestDataPageName`<br>`parameters` ➔ `.RequestParameters` (JSON object) | `.ResponseBody` (pxResults array), `.pyHTTPResponseCode` |
+| **8b** | `/datapage/single` | `POST` | `pzGetDataPageSingle` | `dataPageName` ➔ `.RequestDataPageName`<br>`parameters` ➔ `.RequestParameters` (JSON object) | `.ResponseBody` (single page JSON), `.pyHTTPResponseCode` |
 
 ---
 
