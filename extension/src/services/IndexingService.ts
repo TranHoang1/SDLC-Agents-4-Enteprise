@@ -264,16 +264,21 @@ export class IndexingService {
 
                 if (fetchedRules.length > 0) {
                     totalFetchedInRun += fetchedRules.length;
-                    this.log(`[Pega Indexer] Ingesting total of ${fetchedRules.length} rules into Backend DB (in 200-rule sub-batches)...`);
-
-                    const BATCH_SIZE = 200;
-                    let lastBatchRes: any = null;
+                    const BATCH_SIZE = 1000;
+                    const INGEST_CONCURRENCY = 3;
                     const totalChunks = Math.ceil(fetchedRules.length / BATCH_SIZE);
-                    
+                    this.log(`[Pega Indexer] Ingesting ${fetchedRules.length} rules into Backend DB (${totalChunks} chunks × ${BATCH_SIZE}, concurrency=${INGEST_CONCURRENCY})...`);
+
+                    let lastBatchRes: any = null;
+                    const allChunks: Array<{ subChunk: Record<string, unknown>[]; chunkNum: number }> = [];
                     for (let i = 0; i < fetchedRules.length; i += BATCH_SIZE) {
-                        const subChunk = fetchedRules.slice(i, i + BATCH_SIZE);
-                        const chunkNum = Math.floor(i / BATCH_SIZE) + 1;
-                        this.log(`[Pega Indexer] 📤 Ingesting chunk ${chunkNum}/${totalChunks} (${subChunk.length} rules) into Backend DB...`);
+                        allChunks.push({ subChunk: fetchedRules.slice(i, i + BATCH_SIZE), chunkNum: Math.floor(i / BATCH_SIZE) + 1 });
+                    }
+
+                    // Parallel ingestion: 3 concurrent HTTP calls to backend
+                    const { parallelBatch } = await import("./parallel-utils");
+                    await parallelBatch(allChunks, INGEST_CONCURRENCY, async ({ subChunk, chunkNum }) => {
+                        this.log(`[Pega Indexer] 📤 Ingesting chunk ${chunkNum}/${totalChunks} (${subChunk.length} rules)...`);
 
                         const batchChecksums: Record<string, string> = {};
                         const batchVersions: Record<string, string> = {};
@@ -300,7 +305,8 @@ export class IndexingService {
                         } catch (subErr: any) {
                             this.log(`[Pega Indexer] ⚠️ Batch chunk ${chunkNum} notice: ${subErr.message}`);
                         }
-                    }
+                        return lastBatchRes;
+                    });
 
                     if (lastBatchRes) {
                         if (lastBatchRes.totalRulesInDb) {
