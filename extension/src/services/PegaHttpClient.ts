@@ -142,8 +142,8 @@ export class PegaHttpClient {
       this.log(`[PegaHttpClient] 🔍 Step 2 (Access Group): Resolving "${accessGroup}"...`);
       try {
         const agObj = await this.getRuleByInsKey(agInsKey);
-        appName = (agObj.pyApplication as string) || (agObj.pyAppName as string) || (agObj.pyApplicationName as string) || (agObj.pyAccessGroupAppName as string) || "";
-        appVersion = (agObj.pyApplicationVersion as string) || (agObj.pyAppVersion as string) || (agObj.pyAccessGroupAppVersion as string) || "";
+        appName = (agObj.pyApplication as string) || (agObj.pyAppName as string) || (agObj.pyApplicationName as string) || (agObj.pyAccessGroupAppName as string) || (agObj.pyDefaultAppName as string) || "";
+        appVersion = (agObj.pyApplicationVersion as string) || (agObj.pyAppVersion as string) || (agObj.pyAccessGroupAppVersion as string) || (agObj.pyDefaultAppVersion as string) || "";
         if (!appName && accessGroup.includes(":")) {
           appName = accessGroup.split(":")[0];
         }
