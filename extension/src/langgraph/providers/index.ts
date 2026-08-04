@@ -57,7 +57,8 @@ export function createProviderByType(
       const baseUrl = anthropicBaseUrl || config.get<string>("anthropicBaseUrl", "");
       return new AnthropicProvider(
         secrets ? () => secrets.get(getSecretKey("anthropic")) : () => Promise.resolve(undefined),
-        baseUrl || undefined
+        baseUrl || undefined,
+        customModel || undefined
       );
     }
     case "ollama": {
@@ -75,7 +76,8 @@ export function createProviderByType(
       const { AnthropicProvider } = require("./anthropic-provider");
       return new AnthropicProvider(
         secrets ? () => secrets.get(getSecretKey("anthropic")) : () => Promise.resolve(undefined),
-        gatewayUrl
+        gatewayUrl,
+        customModel || undefined
       );
     }
   }
@@ -90,14 +92,14 @@ export function createProviderByType(
     const apiKeyFn = providerDef.requiresApiKey && secrets
       ? () => secrets.get(getSecretKey(type))
       : () => Promise.resolve(providerDef.requiresApiKey ? undefined : "not-needed");
-    return new OpenAIProvider(apiKeyFn, baseUrl);
+    return new OpenAIProvider(apiKeyFn, baseUrl, customModel || undefined);
   }
 
   // Fallback: try as OpenAI-compatible with custom base URL
   if (openaiBaseUrl) {
     const { OpenAIProvider } = require("./openai-provider");
     const apiKeyFn = secrets ? () => secrets.get(getSecretKey(type)) : () => Promise.resolve(undefined);
-    return new OpenAIProvider(apiKeyFn, openaiBaseUrl);
+    return new OpenAIProvider(apiKeyFn, openaiBaseUrl, customModel || undefined);
   }
 
   throw new Error(`Unknown LLM provider type: ${type}. Add it to provider-registry.ts or provide a base URL.`);

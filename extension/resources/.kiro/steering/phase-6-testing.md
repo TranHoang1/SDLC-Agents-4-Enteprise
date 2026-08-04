@@ -47,7 +47,7 @@ invokeSubAgent(
   5. Model/processing separation: DTOs in models/, logic in services/?
   6. Design patterns: Strategy/Factory/Observer used where appropriate?
   7. Exception handling: no swallowed exceptions? User notified on errors?
-  8. Serialization: encodeDefaults=true for protocol communication?
+  8. Serialization: validate protocol communication bằng zod schemas (safeParse)?
 
   Output format:
   ## Standards Review — {TICKET}
@@ -130,7 +130,7 @@ Invoke QA agent for test execution:
 ```
 invokeSubAgent(
   name: "qa-agent",
-  prompt: "Chạy automated tests cho {TICKET}. Run ./gradlew test. Báo cáo pass/fail."
+  prompt: "Chạy automated tests cho {TICKET}. Run npm test (Vitest) trong backend/ và extension/. Báo cáo pass/fail."
 )
 ```
 
@@ -140,7 +140,7 @@ invokeSubAgent(
 
 **Review process:**
 1. Read STC.md — identify IT-level test cases and specified techniques
-2. Read actual IT test source files (`*IntegrationTest.kt`)
+2. Read actual IT test source files (`*.test.ts` integration tests)
 3. Compare: does test code use the technique STC specified?
 
 **Red Flags:**

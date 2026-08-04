@@ -6,7 +6,7 @@ When user requests "test manual", "QA test", "test web", "test UI".
 
 ## Step 1: DevOps — Build & Start Server
 
-1. Detect build system (package.json → npm, build.gradle.kts → gradlew, pom.xml → mvn)
+1. Detect build system (package.json → npm, pyproject.toml → Python, Makefile → make)
 2. Run build — verify exit code 0
 3. Start server — background process, ready within 30s
 4. Verify accessible — navigate to URL, confirm page loads

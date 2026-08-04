@@ -6,6 +6,7 @@
 import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../../database/dialect/DialectHelper.js';
 import type { KnowledgeEntry, GraphEdge } from '../models.js';
+import { extractAndInsertIngestEdges } from './edge-on-ingest.js';
 
 export class MemoryEngineCrud {
   protected readonly adapter: DatabaseAdapter;
@@ -89,6 +90,21 @@ export class MemoryEngineCrud {
         }
       } catch {
         // graph_nodes table may not exist in test environments — non-fatal
+      }
+    }
+
+    // SA4E-91: Extract and insert edges for the new entry (non-blocking)
+    if (id > 0 && entry.content) {
+      try {
+        await extractAndInsertIngestEdges(this.adapter, {
+          entryId: `kb-entry:${id}`,
+          content: entry.content,
+          source: entry.source ?? null,
+          tags: entry.tags ?? '',
+          type: entry.type ?? '',
+        });
+      } catch {
+        // Edge extraction is best-effort — never block ingest
       }
     }
 

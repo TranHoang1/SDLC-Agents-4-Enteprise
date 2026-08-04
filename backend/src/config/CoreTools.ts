@@ -19,7 +19,7 @@ export const CORE_TOOLS: readonly string[] = [
   'pega_get_rule', 'pega_get_session_context',
   'pega_query_rule', 'pega_list_rules', 'pega_save_rule',
   'pega_checkout_rule', 'pega_run_tests', 'pega_get_class_metadata',
-  'pega_create_branch',
+  'pega_create_branch', 'pega_index_workspace',
 ] as const;
 
 /**

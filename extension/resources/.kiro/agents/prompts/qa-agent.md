@@ -116,11 +116,11 @@ Create `documents/{TICKET-KEY}/STP.md` with these sections:
 ```markdown
 | Level | Scope | Automation | Tools |
 |-------|-------|------------|-------|
-| PBT | Correctness properties (random inputs) | Automated | kotest-property |
-| UT | Unit/edge case tests | Automated | kotest |
-| IT | API integration (Ktor testApplication) | Automated | Ktor test engine |
-| E2E-API | REST endpoint E2E (real server) | Automated | Ktor client + JUnit 5 |
-| E2E-UI | Browser UI E2E (Cucumber scenarios) | Automated | Cucumber + Serenity + WebDriver |
+| PBT | Correctness properties (random inputs) | Automated | fast-check |
+| UT | Unit/edge case tests | Automated | Vitest |
+| IT | API integration (Hono app via supertest) | Automated | Vitest + supertest |
+| E2E-API | REST endpoint E2E (real server) | Automated | fetch/undici + Vitest |
+| E2E-UI | Browser UI E2E (Playwright scenarios) | Automated | Playwright |
 | SIT | Manual exploratory / edge cases only | Manual | Browser |
 ```
 
@@ -224,11 +224,11 @@ Create `documents/{TICKET-KEY}/STC.md` with detailed test cases.
 
 | Prefix | Level | Automation | Tools |
 |--------|-------|------------|-------|
-| PBT-XX | Property-Based Test | ✅ Automated | kotest-property |
-| UT-XX | Unit Test | ✅ Automated | kotest |
-| IT-XX | Integration Test (Ktor testApplication) | ✅ Automated | Ktor test engine |
-| E2E-API-XX | REST endpoint E2E (real server) | ✅ Automated | Ktor client + JUnit 5 |
-| E2E-UI-XX | Browser UI E2E (Cucumber scenarios) | ✅ Automated | Cucumber + Serenity + WebDriver |
+| PBT-XX | Property-Based Test | ✅ Automated | fast-check |
+| UT-XX | Unit Test | ✅ Automated | Vitest |
+| IT-XX | Integration Test (Hono app via supertest) | ✅ Automated | Vitest + supertest |
+| E2E-API-XX | REST endpoint E2E (real server) | ✅ Automated | fetch/undici + Vitest |
+| E2E-UI-XX | Browser UI E2E (Playwright scenarios) | ✅ Automated | Playwright |
 | SIT-XX | Manual exploratory / edge cases only | ❌ Manual | Browser (Playwright/manual) |
 
 ### ⛔ E2E Test Classification — MANDATORY
@@ -259,8 +259,8 @@ Khi tạo STC, PHẢI phân loại test cases vào **6 levels** (không phải 4
 |-----------|-------|
 | **ID** | E2E-API-01 |
 | **Priority** | {High/Medium/Low} |
-| **Type** | Automated (Ktor client + JUnit 5) |
-| **File** | e2e-tests/src/test/kotlin/com/assistant/e2e/api/{Feature}ApiTest.kt |
+| **Type** | Automated (fetch/undici + Vitest) |
+| **File** | backend/tests/api/{Feature}ApiTest.ts |
 | **Traces To** | BRD Req {N} (AC {N}) |
 ```
 
@@ -273,10 +273,9 @@ Khi tạo STC, PHẢI phân loại test cases vào **6 levels** (không phải 4
 |-----------|-------|
 | **ID** | E2E-UI-01 |
 | **Priority** | {High/Medium/Low} |
-| **Type** | Automated (Cucumber + Serenity) |
-| **Feature File** | e2e-tests/src/test/resources/features/{capability}/{NNN}-{Feature}.feature |
-| **Steps File** | e2e-tests/src/test/kotlin/com/assistant/e2e/steps/{Feature}Steps.kt |
-| **Scenario** | {Gherkin scenario name} |
+| **Type** | Automated (Playwright) |
+| **File** | backend/tests/e2e/{capability}/{NNN}-{Feature}.spec.ts |
+| **Scenario** | {Playwright test name} |
 | **Traces To** | BRD Req {N} (AC {N}) |
 
 **Gherkin:**
@@ -292,20 +291,19 @@ Scenario: {title}
 
 ### ⛔ E2E Test Framework Language Note
 
-**E2E automation framework (Cucumber + Serenity + WebDriver) chạy trên JVM với Java/Kotlin.** Tùy thuộc vào ngôn ngữ lập trình chính của dự án, cần lưu ý:
+**E2E automation framework (Playwright) chạy trên Node.js với TypeScript.** Tùy thuộc vào ngôn ngữ lập trình chính của dự án, cần lưu ý:
 
-| Dự án viết bằng | E2E module viết bằng | Step class | Lý do |
-|-----------------|---------------------|------------|-------|
-| **Kotlin** (như dự án hiện tại) | **Kotlin** | `{Feature}Steps.kt` | Cùng ngôn ngữ, dễ share models |
-| **Java** | **Java** | `{Feature}Steps.java` | Standard Cucumber-JVM |
-| **Kotlin + Java mixed** | **Kotlin** preferred | `{Feature}Steps.kt` | Kotlin interop tốt với Java |
+| Dự án viết bằng | E2E module viết bằng | Test file | Lý do |
+|-----------------|---------------------|-----------|-------|
+| **TypeScript** (như dự án hiện tại) | **TypeScript** | `{Feature}.spec.ts` | Cùng ngôn ngữ, dễ share models |
 
 **Quy tắc:**
-- E2E module (`e2e-tests/`) là module **độc lập**, có `build.gradle.kts` riêng
-- Step classes PHẢI dùng cùng ngôn ngữ với dự án chính (hoặc Kotlin nếu dự án dùng KMP)
-- API test base class (`ApiTestBase`) dùng Ktor HTTP client (Kotlin) hoặc RestAssured (Java) tùy dự án
-- Runner class luôn dùng `@RunWith(CucumberWithSerenity::class)` (Kotlin) hoặc `@RunWith(CucumberWithSerenity.class)` (Java)
-- Khi viết Gherkin scenarios trong STC, ghi rõ ngôn ngữ step class: `Steps File: ...Steps.kt` hoặc `...Steps.java`
+- Dự án TypeScript → test files viết bằng TypeScript (.ts), dùng Vitest + supertest/undici
+- E2E module (`backend/tests/`) là module **độc lập**, có `package.json` riêng
+- Test files PHẢI dùng cùng ngôn ngữ với dự án chính (TypeScript)
+- API test helper (`testUtils.ts`) dùng fetch/undici để gọi HTTP endpoints
+- Playwright tests dùng test runner riêng (`@playwright/test`)
+- Khi viết test scenarios trong STC, ghi rõ ngôn ngữ test file: `File: ...spec.ts`
 
 ### Step 3.5: Generate CSV Test Data Files (MANDATORY)
 
@@ -528,7 +526,7 @@ TC_ID,Title,Priority,Type,Requirement,Preconditions,Test_Data,Steps_Summary,Expe
 #### What to Generate
 
 Read TDD.md to identify:
-1. **Tech stack** — test framework (kotest, JUnit, etc.), HTTP client (Ktor testApplication, RestAssured, etc.)
+1. **Tech stack** — test framework (Vitest, etc.), HTTP client (supertest, fetch/undici, etc.)
 2. **Existing test patterns** — read 1-2 existing test files in the project to match conventions
 3. **API endpoints** — all endpoints from TDD Section 3
 
@@ -545,9 +543,9 @@ Generate integration test files that cover:
 #### Output Location
 
 Place test files in the project's test directory following existing conventions:
-- Read project structure to find test source root (e.g., `server/*/src/jvmTest/kotlin/...`)
-- Match existing package naming
-- File naming: `{Feature}IntegrationTest.kt` or `{Feature}ApiTest.kt`
+- Read project structure to find test source root (e.g., `backend/src/**/__tests__/`)
+- Match existing naming conventions
+- File naming: `{Feature}.integration.test.ts` or `{Feature}.api.test.ts`
 
 #### Test Code Rules
 
@@ -556,27 +554,28 @@ Place test files in the project's test directory following existing conventions:
 3. **Test file ≤ 200 lines** — split into multiple files if needed
 4. **Use test data from CSV files** — reference the same test data defined in `testdata/*.csv`
 5. **Include comments** — `// Feature: {feature-name}, TC-{NNN}: {title}` for traceability
-6. **Run tests after generation** — execute `./gradlew test` (or equivalent) and verify all tests pass
+6. **Run tests after generation** — execute `npm test` (Vitest) and verify all tests pass
 7. **If tests fail** — fix the test code, do NOT modify production code
 
-#### Example (Ktor + kotest)
+#### Example (Vitest + supertest)
 
-```kotlin
+```typescript
 // Feature: user-crud-profile, IT-01: Full CRUD lifecycle
-@Test
-fun `full lifecycle - create, get, update, delete`() = testApplication {
-    configureTestApp()
-    val token = generateAdminToken()
+describe('User CRUD profile', () => {
+  it('full lifecycle - create, get, update, delete', async () => {
+    await configureTestApp()
+    const token = await generateAdminToken()
 
     // Create
-    val createResp = client.post("/api/users") {
-        header(HttpHeaders.Authorization, "Bearer $token")
-        contentType(ContentType.Application.Json)
-        setBody("""{"name":"Test","email":"test@example.com","role":"READER"}""")
-    }
-    assertEquals(HttpStatusCode.Created, createResp.status)
+    const createResp = await request(app)
+      .post('/api/users')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ name: 'Test', email: 'test@example.com', role: 'READER' })
+
+    expect(createResp.status).toBe(201)
     // ... continue lifecycle
-}
+  })
+})
 ```
 
 ### Step 10: Execute Manual SIT Tests (when requested)
@@ -653,7 +652,7 @@ After manual execution, update `TEST-REPORT-{TICKET-KEY}.csv`:
 
 - **⛔ MANDATORY: Use `stream_write_file` for large documents**: When creating STP.md, STC.md, or any file > 50 lines, use the MCP tool `stream_write_file` with `mode="write"` for the first section, then `mode="append"` for subsequent sections. Writes directly to disk without RAM buffering. **NEVER use fsWrite/fsAppend for documents > 50 lines.**
 - **MANDATORY UG VERIFICATION (when invoked by SM for Phase 5.5c)**: QA agent PHẢI thực sự chạy server theo User Guide instructions để verify tài liệu có thể sử dụng được. KHÔNG chỉ đọc text — phải execute commands và verify output. Checklist:
-  1. Follow Quick Start: chạy `java -jar`, verify log output match UG
+  1. Follow Quick Start: chạy `npm start`, verify log output match UG
   2. Copy config examples từ UG vào file, verify YAML/JSON syntax hợp lệ
   3. Send MCP requests (tools/list, find_tools), verify response format match UG
   4. Verify error codes match actual server behavior
@@ -661,25 +660,25 @@ After manual execution, update `TEST-REPORT-{TICKET-KEY}.csv`:
   6. Báo cáo PASS/FAIL cho mỗi step với evidence (actual output)
 - **MANDATORY E2E TEST CLASSIFICATION**: When creating STP and STC, you MUST classify test cases into 6 levels (PBT, UT, IT, E2E-API, E2E-UI, SIT). Prioritize automation — only keep SIT manual for visual/UX/timing tests that cannot be automated. Reference `.kiro/steering/e2e-testing.md` for E2E file structure and conventions.
 - **MANDATORY E2E STEP REUSE**: When writing E2E-UI Gherkin scenarios, you MUST maximize reuse of existing step definitions. Before creating new steps:
-  1. Read `e2e-tests/src/test/kotlin/com/assistant/e2e/steps/CommonSteps.kt` to see all shared steps (auth, navigation, clicks, waits, assertions)
-  2. Read existing `{Feature}Steps.kt` files to see domain-specific steps already available
-  3. Compose scenarios using existing steps as much as possible — only create new steps when no existing step can express the action/assertion
-  4. When a new step IS needed, write it generically enough to be reusable by future features (e.g., `When the admin clicks the "{button}" button` instead of `When the admin clicks the Add User button`)
-  5. In STC, annotate each E2E-UI scenario with `Reuses: CommonSteps.{step}, {Feature}Steps.{step}` to show which existing steps are used
+  1. Read `backend/tests/e2e/helpers/common.ts` to see all shared helpers (auth, navigation, clicks, waits, assertions)
+  2. Read existing `{Feature}.spec.ts` files to see domain-specific tests already available
+  3. Compose scenarios reusing existing helpers as much as possible — only create new helpers when no existing one can express the action/assertion
+  4. When a new helper IS needed, write it generically enough to be reusable by future features (e.g., `clickButton(page, "{button}")` instead of hardcoding `#add-user-btn`)
+  5. In STC, annotate each E2E-UI scenario with `Reuses: common.ts.{helper}, {Feature}.spec.{test}` to show which existing helpers are used
   6. **Goal: minimize new step definitions per feature** — a well-designed E2E suite should have 80%+ step reuse across features
 - **MANDATORY CSV TEST DATA**: When creating STC (Test Cases), you MUST also generate CSV test data files at `documents/{TICKET}/testdata/`. STC without test data CSVs is INCOMPLETE. Every test case in STC must have corresponding test data in at least one CSV file.
 - **MANDATORY INTEGRATION TEST CODE**: When TDD.md exists with API specifications, you MUST generate executable integration test code (not just documentation). Tests must compile and pass. Match existing project test patterns.
-- **MANDATORY TEST IMPLEMENTATION REVIEW (Phase 6)**: When executing Phase 6 (Testing), QA MUST NOT only run `./gradlew test` and check pass/fail. QA MUST also:
+- **MANDATORY TEST IMPLEMENTATION REVIEW (Phase 6)**: When executing Phase 6 (Testing), QA MUST NOT only run `npm test` and check pass/fail. QA MUST also:
   1. **Read actual test source code** for IT-level tests (integration tests)
   2. **Compare test implementation with STC spec** — verify the test technique matches what STC defined:
-     - If STC says "Ktor testApplication" → test code MUST use `testApplication { }`, NOT direct service method calls
-     - If STC says "Testcontainers" or "real database" → test code MUST use Testcontainers, NOT `mockk<DbClient>()`
-     - If STC says "mock upstream server process" → test code MUST spawn a real mock process, NOT `mockk<Connection>()`
+     - If STC says "Hono app via supertest" → test code MUST use the real Hono app via supertest, NOT direct service method calls
+     - If STC says "real database" → test code MUST use a real SQLite/PostgreSQL instance, NOT `vi.mock()` for the DB client
+     - If STC says "mock upstream server process" → test code MUST spawn a real mock process, NOT `vi.mock()` for the connection
   3. **Report discrepancies** between STC plan and actual test code as defects:
      - Severity: **Major** — "IT test uses mocks instead of real dependencies as specified in STC"
      - Action: Send back to DEV with specific instructions on what to fix
-  4. **Quality gate**: Integration tests that only use mocks (mockk/Mockito) for ALL dependencies are actually unit tests. They MUST be reclassified or rewritten.
-  5. **Acceptable mock usage in IT tests**: Only mock external services that cannot run locally (e.g., paid APIs, cloud services). Local infrastructure (DB, message queue, HTTP server) MUST use real instances or Testcontainers.
+  4. **Quality gate**: Integration tests that only use mocks (`vi.mock`) for ALL dependencies are actually unit tests. They MUST be reclassified or rewritten.
+  5. **Acceptable mock usage in IT tests**: Only mock external services that cannot run locally (e.g., paid APIs, cloud services). Local infrastructure (DB, message queue, HTTP server) MUST use real instances or SQLite/PostgreSQL.
 - **MANDATORY TEST REPORT TEMPLATE**: Use `documents/templates/TEST-REPORT-TEMPLATE.md` for test execution reports. Sections 1-7 show FINAL results only. Re-test history goes in Appendix A.
 - **MANDATORY DOCUMENT EXPORT & JIRA ATTACHMENT**: After creating STP/STC/TEST-REPORT, you MUST export and prepare files for SM to attach to Jira:
   - **STP.md** → Export DOCX: `discovered_docx_export_tool(file_name: "STP-v{VERSION}-{TICKET}.docx")` → Copy to `documents/{TICKET}/STP-v{VERSION}-{TICKET}.docx`

@@ -6,7 +6,7 @@ Traditional monolithic application — single deployable unit, single codebase, 
 
 ## Signals
 
-- Single build file (build.gradle.kts, pom.xml, package.json)
+- Single build file (package.json, pyproject.toml)
 - Single `src/` directory
 - No service separation (no docker-compose with multiple services)
 - Standard MVC/layered architecture

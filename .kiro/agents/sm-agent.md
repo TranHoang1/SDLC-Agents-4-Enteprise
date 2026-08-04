@@ -86,8 +86,8 @@ After discovery, log:
 
 ### What SM CANNOT do (FORBIDDEN — violation triggers immediate stop):
 - ❌ Write BRD.md, FSD.md, TDD.md, STP.md, STC.md, UG.md, DPG.md, RLN.md
-- ❌ Write source code (*.kt, *.ts, *.py, *.java, etc.)
-- ❌ Write test code (*.test.ts, *Test.kt, etc.)
+- ❌ Write source code (*.ts, *.py, *.java, etc.)
+- ❌ Write test code (*.test.ts, etc.)
 - ❌ Write draw.io XML or any diagram content
 - ❌ Write CSV test data files
 - ❌ Perform code reviews (that's dev-agent or qa-agent's job)
@@ -955,7 +955,7 @@ If review found issues:
    ```
    invokeSubAgent(
      name: "dev-agent",
-     prompt: "Viết User Guide cho {TICKET}. Đọc BRD, FSD, TDD từ KB. Đọc source code (application.yml, config classes, API schemas). Template: documents/templates/UG-TEMPLATE.md. Output: documents/{TICKET}/UG.md. Nội dung cần có: Installation, Configuration Reference (tất cả properties), Usage (mỗi tool/API), Administration, Troubleshooting, Error Codes, FAQ."
+     prompt: "Viết User Guide cho {TICKET}. Đọc BRD, FSD, TDD từ KB. Đọc source code (.env, config, API schemas). Template: documents/templates/UG-TEMPLATE.md. Output: documents/{TICKET}/UG.md. Nội dung cần có: Installation, Configuration Reference (tất cả properties), Usage (mỗi tool/API), Administration, Troubleshooting, Error Codes, FAQ."
    )
    ```
 3. Verify `documents/{TICKET}/UG.md` exists
@@ -981,8 +981,8 @@ If review found issues:
      prompt: "Verify User Guide cho {TICKET} bằng cách thực hiện theo instructions trong documents/{TICKET}/UG.md.
 
      PHẢI thực hiện các bước sau (không chỉ đọc text):
-     1. Follow Quick Start (§2.1): chạy server bằng java -jar, verify log output đúng
-     2. Copy minimal config example (§3.4) vào application.yml, verify server start không lỗi
+     1. Follow Quick Start (§2.1): chạy server bằng npm start, verify log output đúng
+     2. Copy minimal config example (§3.4) vào .env, verify server start không lỗi
      3. Copy full config example (§3.4), verify YAML syntax hợp lệ
      4. Send tools/list request, verify response trả về đúng danh sách tools như documented trong UG
      5. Gọi thử từng tool được list trong UG, verify response format đúng
@@ -1014,23 +1014,23 @@ If review found issues:
 2. Update STATUS: `testing.status = "in_progress"`
 
 #### Step 6a: QA runs automated tests
-3. Invoke QA agent for test execution — run `./gradlew test` and report pass/fail
+3. Invoke QA agent for test execution — run `npm test` and report pass/fail
 
 #### Step 6b: SM reviews test code quality (MANDATORY)
 4. **SM MUST verify test implementation matches STC spec.** This is a quality gate that prevents "all-mock integration tests" from passing as real integration tests.
 
    **Review process:**
-   - Read STC.md to identify IT-level test cases and their specified techniques (Testcontainers, Ktor testApplication, mock servers, etc.)
-   - Read actual IT test source files (e.g., `*IntegrationTest.kt`)
+   - Read STC.md to identify IT-level test cases and their specified techniques (Vitest, supertest, mock servers, etc.)
+   - Read actual IT test source files (e.g., `*.test.ts`)
    - Compare: does the test code use the technique STC specified?
    
    **Check for these red flags:**
    
    | Red Flag | Meaning | Action |
    |----------|---------|--------|
-   | IT test uses `mockk()` for ALL dependencies | Not a real integration test | ❌ Send back to DEV |
+   | IT test uses `vi.mock()` for ALL dependencies | Not a real integration test | ❌ Send back to DEV |
    | IT test calls service methods directly (no HTTP) | Missing API layer testing | ❌ Send back to DEV |
-   | IT test has no Testcontainers when STC requires it | Missing real DB/infra testing | ❌ Send back to DEV |
+   | IT test has no real DB when STC requires it | Missing real DB/infra testing | ❌ Send back to DEV |
    | IT test mocks Connection/Transport | Missing real process interaction | ❌ Send back to DEV |
    | Config reload test only parses YAML | Missing actual file watcher test | ⚠️ Flag as degraded |
    
@@ -1205,7 +1205,7 @@ When user requests: `index source code`, `index code`, `cập nhật code index`
 
 The indexing uses a **hybrid approach**:
 - **TypeScript script** generates: `index-metadata.json`, `kb-payloads.json`, `modules/*.md`
-- **Agent writes manually**: `project-structure.md` (because the script's language/purpose detection is inaccurate for Kotlin projects)
+- **Agent writes manually**: `project-structure.md` (because the script's language/purpose detection can be inaccurate)
 
 ### Step 1: Run TypeScript script for metadata & KB payloads
 
@@ -1227,19 +1227,19 @@ The script creates/updates:
 ### Step 2: Agent writes project-structure.md manually
 
 After the script runs, the agent MUST overwrite `project-structure.md` by:
-1. Reading `build.gradle.kts` files, source directories, and key files using file tools
+1. Reading `package.json` files, source directories, and key files using file tools
 2. Reading existing `.kiro/specs/*.md` master requirement docs for accurate module descriptions
 3. Writing a comprehensive `project-structure.md` that includes:
    - Project name, type, tech stack table
-   - Module table with **correct** language (Kotlin, not javascript), purpose, platform (JVM/JS/KMP)
-   - Inter-module dependency graph (from build.gradle.kts `dependencies {}` blocks)
-   - Database schema summary (from Flyway migrations)
+   - Module table with **correct** language (TypeScript, not plain javascript), purpose, platform (Node.js / webview)
+   - Inter-module dependency graph (from package.json workspaces and import graph)
+   - Database schema summary (from .sql migrations)
    - API endpoints summary (from route files)
    - Frontend pages & routes
    - Key architecture patterns
    - Build & run commands
 
-**CRITICAL**: The script detects language as "javascript" for Kotlin projects — this is WRONG. Agent must use accurate data.
+**CRITICAL**: The script's language detection may be inaccurate — agent must verify with accurate data.
 
 ### Step 3: If script fails completely
 
@@ -1271,8 +1271,8 @@ After successful indexing, report summary:
 
 The file `.analysis/code-intelligence/index-config.json` contains indexer configuration. If this file doesn't exist or is outdated:
 - Create it with sensible defaults for the detected project type
-- For Kotlin/JVM projects, ensure `.kt`, `.java`, `.gradle.kts`, `.sql`, `.properties`, `.yml` are included
-- Exclude `build/`, `dist/`, `.gradle/`, `node_modules/`, `.git/`, `.idea/`
+- For TypeScript/Node.js projects, ensure `.ts`, `.js`, `.svelte`, `.sql`, `.json`, `.yml` are included
+- Exclude `dist/`, `node_modules/`, `.git/`, `.idea/`
 
 ## ⛔ Anti-Loop Rules (CRITICAL)
 

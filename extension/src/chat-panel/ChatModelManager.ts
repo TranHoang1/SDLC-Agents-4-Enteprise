@@ -30,11 +30,20 @@ export class ChatModelManager {
       if (gatewayModels && gatewayModels.length > 0) {
         models = gatewayModels;
       }
+    } else if (provider === "lmstudio") {
+      const lmstudioBaseUrl = config.get<string>("lmstudioBaseUrl", "")
+        || "http://localhost:1234/v1";
+      const lmModels = await fetchGatewayModels(lmstudioBaseUrl);
+      if (lmModels && lmModels.length > 0) {
+        models = lmModels;
+      }
     }
 
     const llmModel = config.get<string>("llmModel", "");
     let selected = llmModel;
-    if (!selected || !models.some((m) => m.id === selected)) {
+    if (selected && !models.some((m) => m.id === selected)) {
+      models = [...models, { id: selected, name: selected }];
+    } else if (!selected) {
       selected = models.length > 0 ? models[0].id : getDefaultModel(provider);
     }
 

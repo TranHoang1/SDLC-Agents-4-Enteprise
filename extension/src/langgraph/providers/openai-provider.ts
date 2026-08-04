@@ -16,13 +16,48 @@ export class OpenAIProvider extends BaseLlmProvider {
   readonly type = "openai" as const;
   private readonly getApiKey: () => Promise<string | undefined>;
   private readonly apiBase: string;
+  private readonly defaultModel: string;
+  private detectedModel: string | undefined;
 
-  constructor(getApiKey: () => Promise<string | undefined>, baseUrl?: string) {
+  constructor(getApiKey: () => Promise<string | undefined>, baseUrl?: string, defaultModel?: string) {
     super();
     this.getApiKey = getApiKey;
     this.apiBase = (baseUrl || DEFAULT_API_BASE).replace(/\/$/, "");
+    this.defaultModel = defaultModel || DEFAULT_MODEL;
     // Set context window based on whether this is a local server (LM Studio) or cloud
     this.contextWindowTokens = this.isLocalServer() ? 8192 : 128000;
+  }
+
+  /** Resolve the effective model: prefer explicit override, then configured default,
+   *  then auto-detect the first loaded model from the local server (LM Studio). */
+  private async resolveModel(modelOverride?: string): Promise<string> {
+    if (modelOverride) { return modelOverride; }
+    const explicit = this.defaultModel;
+    if (explicit && explicit !== "local-model") { return explicit; }
+    if (this.isLocalServer()) {
+      const detected = await this.detectFirstModel();
+      if (detected) { return detected; }
+    }
+    return explicit || DEFAULT_MODEL;
+  }
+
+  /** Detect the first loaded model id from the local server /v1/models endpoint. */
+  private async detectFirstModel(): Promise<string | undefined> {
+    if (this.detectedModel) { return this.detectedModel; }
+    try {
+      const response = await fetch(`${this.apiBase}/models`, {
+        method: "GET",
+        signal: AbortSignal.timeout(5000),
+      });
+      if (response.ok) {
+        const data = await response.json() as { data?: Array<{ id: string }> };
+        const id = data.data?.[0]?.id;
+        if (id) { this.detectedModel = id; return id; }
+      }
+    } catch (err) {
+      console.debug(`[OpenAIProvider] model detection failed (non-fatal): ${(err as Error).message}`);
+    }
+    return undefined;
   }
 
   /** Detect context window from /v1/models endpoint (LM Studio / local servers) */
@@ -48,7 +83,7 @@ export class OpenAIProvider extends BaseLlmProvider {
 
   async chat(messages: LlmMessage[], options?: LlmOptions): Promise<string> {
     const apiKey = await this.requireApiKey();
-    const body = this.buildChatBody(messages, options, false);
+    const body = await this.buildChatBody(messages, options, false);
     const response = await fetch(`${this.apiBase}/chat/completions`, {
       method: "POST", headers: buildHeaders(apiKey),
       body: JSON.stringify(body), signal: options?.signal,
@@ -62,7 +97,7 @@ export class OpenAIProvider extends BaseLlmProvider {
 
   async *chatStream(messages: LlmMessage[], options?: LlmOptions): AsyncGenerator<string> {
     const apiKey = await this.requireApiKey();
-    const body = this.buildChatBody(messages, options, true);
+    const body = await this.buildChatBody(messages, options, true);
     const response = await fetch(`${this.apiBase}/chat/completions`, {
       method: "POST", headers: buildHeaders(apiKey),
       body: JSON.stringify(body), signal: options?.signal,
@@ -82,7 +117,7 @@ export class OpenAIProvider extends BaseLlmProvider {
       function: { name: t.name, description: t.description, parameters: t.inputSchema },
     }));
     const body: Record<string, unknown> = {
-      model: options?.model || DEFAULT_MODEL,
+      model: await this.resolveModel(options?.model),
       messages: formatMessagesForTools(messages),
       max_tokens: options?.maxTokens || DEFAULT_MAX_TOKENS,
       tools: openaiTools,
@@ -155,9 +190,9 @@ export class OpenAIProvider extends BaseLlmProvider {
     return this.apiBase !== DEFAULT_API_BASE;
   }
 
-  private buildChatBody(messages: LlmMessage[], options: LlmOptions | undefined, stream: boolean): Record<string, unknown> {
+  private async buildChatBody(messages: LlmMessage[], options: LlmOptions | undefined, stream: boolean): Promise<Record<string, unknown>> {
     const body: Record<string, unknown> = {
-      model: options?.model || DEFAULT_MODEL,
+      model: await this.resolveModel(options?.model),
       messages: formatMessages(messages),
       max_tokens: options?.maxTokens || DEFAULT_MAX_TOKENS,
       stream,

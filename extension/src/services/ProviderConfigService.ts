@@ -60,16 +60,25 @@ export class ProviderConfigService {
   }> {
     let models = getStaticModels(provider);
     const gatewayBaseUrl = this.getGatewayBaseUrl(provider);
+    const config = vscode.workspace.getConfiguration("kiroSdlc");
+    const lmstudioBaseUrl = config.get<string>("lmstudioBaseUrl", "")
+      || "http://localhost:1234/v1";
 
-    if (gatewayBaseUrl) {
-      const gatewayModels = await fetchGatewayModels(gatewayBaseUrl);
+    const fetchUrl = provider === "lmstudio"
+      ? lmstudioBaseUrl
+      : gatewayBaseUrl;
+
+    if (fetchUrl) {
+      const gatewayModels = await fetchGatewayModels(fetchUrl);
       if (gatewayModels && gatewayModels.length > 0) {
         models = gatewayModels;
       }
     }
 
     let selected = currentModel;
-    if (!selected || !models.some((m: any) => m.id === selected)) {
+    if (selected && !models.some((m: any) => m.id === selected)) {
+      models = [...models, { id: selected, name: selected }];
+    } else if (!selected) {
       selected = models.length > 0 ? models[0].id : getDefaultModel(provider);
     }
 

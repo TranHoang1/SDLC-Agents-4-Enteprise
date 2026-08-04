@@ -49,7 +49,7 @@ invokeSubAgent(
   1. Merge branch {TICKET} vào master (--no-ff)
   2. Bump version — tạo git tag (semver: minor cho feature, patch cho bugfix)
   3. ⛔ SYNC ALL VERSION REFERENCES (MANDATORY — đây là trách nhiệm của bạn):
-     a. Scan project để tìm TẤT CẢ version sources (package.json, build.gradle.kts, pom.xml, Cargo.toml, pyproject.toml, version.txt, *.csproj, v.v.)
+     a. Scan project để tìm TẤT CẢ version sources (package.json, pyproject.toml, version.txt, v.v.)
      b. Scan README/docs tìm hardcoded version strings (badges, install commands, download links)
      c. Update TẤT CẢ sources tìm được thành version mới
      d. Thêm changelog entry (README, CHANGELOG.md, hoặc equivalent)

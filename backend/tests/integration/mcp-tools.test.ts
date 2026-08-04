@@ -18,6 +18,9 @@ import { createToolsRoute } from '../../src/server/routes/tools.js';
 const logger = pino({ level: 'silent' });
 const VERSION = '1.0.0-test';
 
+// SA4E-41: /mcp/tools/list requires auth. Use the API key seeded in vitest.setup.ts.
+const AUTH_HEADERS = { 'X-API-Key': process.env.CODE_INTEL_API_KEY || 'test-api-key-01' };
+
 let app: Hono;
 let registry: ModuleRegistry;
 
@@ -59,7 +62,7 @@ describe('MCP Integration — Health Endpoint', () => {
 
 describe('MCP Integration — Tools List', () => {
   it('GET /mcp/tools/list returns all registered tools', async () => {
-    const res = await app.request('/mcp/tools/list');
+    const res = await app.request('/mcp/tools/list', { headers: AUTH_HEADERS });
     expect(res.status).toBe(200);
     const data = (await res.json()) as any;
     expect(data.tools).toBeInstanceOf(Array);
@@ -73,7 +76,7 @@ describe('MCP Integration — Tools List', () => {
   });
 
   it('tools list includes memory tools', async () => {
-    const res = await app.request('/mcp/tools/list');
+    const res = await app.request('/mcp/tools/list', { headers: AUTH_HEADERS });
     const data = (await res.json()) as any;
     const toolNames = data.tools.map((t: any) => t.name);
     expect(toolNames).toContain('mem_search');
@@ -82,7 +85,7 @@ describe('MCP Integration — Tools List', () => {
   });
 
   it('tools list includes orchestration tools', async () => {
-    const res = await app.request('/mcp/tools/list');
+    const res = await app.request('/mcp/tools/list', { headers: AUTH_HEADERS });
     const data = (await res.json()) as any;
     const toolNames = data.tools.map((t: any) => t.name);
     expect(toolNames).toContain('find_tools');
@@ -91,7 +94,7 @@ describe('MCP Integration — Tools List', () => {
   });
 
   it('tools list includes utility tools', async () => {
-    const res = await app.request('/mcp/tools/list');
+    const res = await app.request('/mcp/tools/list', { headers: AUTH_HEADERS });
     const data = (await res.json()) as any;
     const toolNames = data.tools.map((t: any) => t.name);
     expect(toolNames).toContain('agent_log');
@@ -136,12 +139,29 @@ describe('MCP Integration — Core Memory Tools', () => {
   });
 
   it('mem_delete accepts id', async () => {
+    // Seed an entry first so we can delete a real numeric id.
+    const seedRes = await app.request('/mcp/tools/call', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tool_name: 'mem_ingest',
+        arguments: { title: 'Delete Me', content: 'Entry to delete' },
+      }),
+    });
+    expect(seedRes.status).toBe(200);
+    const seedData = (await seedRes.json()) as any;
+    expect(seedData.isError).toBe(false);
+    const seedText: string = seedData.content?.[0]?.text || '';
+    const idMatch = seedText.match(/id=(\d+)/);
+    expect(idMatch).toBeTruthy();
+    const seededId = Number(idMatch![1]);
+
     const res = await app.request('/mcp/tools/call', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'mem_delete',
-        arguments: { id: 'test-entry-id' },
+        arguments: { id: seededId },
       }),
     });
     expect(res.status).toBe(200);

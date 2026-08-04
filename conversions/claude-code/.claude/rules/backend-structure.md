@@ -1,42 +1,43 @@
 ---
-paths: "shared/**,server/**"
+paths: "backend/src/**"
 ---
 
 # Backend Code Structure Standard
 
 ## Architecture
-- `shared/` — Business logic (interfaces, models, implementations KMP-compatible)
-- `server/` — Ktor REST API (JVM-only, routes, middleware, DI)
+- `backend/src/server/` — Hono HTTP + MCP layer (routes, middleware, mcpServer)
+- `backend/src/modules/` — Business logic per domain (code-intel, kb-graph, memory, orchestration, pega, analytics, web)
+- `backend/src/di/` — Dependency Injection container
+- `backend/src/shared/` — Shared types, schemas, utilities
 
 ## Code Placement
 
-### shared/src/commonMain/
-- Interfaces, @Serializable data classes, enums, sealed classes
-- Business logic implementations (if no JVM deps)
-- Koin modules
+### backend/src/server/
+- Routes, Middleware, MCP handlers (no business logic)
 
-### shared/src/jvmMain/
-- SQLDelight implementations (need JDBC)
-- Code using java.*, javax.*
+### backend/src/modules/{domain}/
+- Interfaces, zod schemas, types, enums
+- Business logic implementations
+- Services (validation, formatting, state)
 
-### server/src/jvmMain/
-- Routes, Middleware, DI, JVM-only implementations
+### backend/src/shared/
+- Shared DTOs, types, utility functions
 
 ## Package Convention
 ```
-com.assistant.{domain}/
-├── {Domain}Interface.kt
-├── {Domain}Impl.kt
-├── {Domain}Models.kt
-└── {Domain}Module.kt
+backend/src/modules/{domain}/
+├── {Domain}Types.ts
+├── {Domain}Schema.ts
+├── {Domain}Service.ts
+└── index.ts
 ```
 
 ## Rules
-- Each domain: Interface + Models + Implementation in SEPARATE files
-- Route groups: 1 file per resource
-- DI: Always inject via Koin, never create instances in routes
-- Data classes: `@Serializable`, use `JsonConfig.instance`
-- Error handling: Throw `IllegalArgumentException` for validation (StatusPages → 400)
+- Each domain: Types + Schema + Service in SEPARATE files
+- Route groups: 1 file per resource in `server/routes/`
+- DI: Always inject via container, never create instances in routes
+- Data: Validate with zod schemas, use `safeParse` for external sources
+- Error handling: Throw validation errors (Hono error handler → 400), use Pino logger
 
 ## ⛔ Backend API UX Rules
 - NEVER return empty result without explanation

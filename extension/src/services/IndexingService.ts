@@ -6,6 +6,7 @@ import * as path from "path";
 import * as fs from "fs";
 import * as crypto from "crypto";
 import { IndexerHttpClient } from "./IndexerHttpClient";
+import { fetchRulesInParallel, fetchRuleTypesInParallel, saveRuleFile } from "./PegaCrawlHelper";
 
 function computeRuleChecksum(rule: Record<string, unknown>): string {
     return crypto.createHash('sha256').update(JSON.stringify(rule)).digest('hex');
@@ -217,102 +218,40 @@ export class IndexingService {
 
                 const fetchedRules: Record<string, unknown>[] = [];
                 const chunk = plan.missing.slice(0, 50);
+
+                // Mark all items as visited BEFORE parallel fetch to prevent duplicates
                 for (const item of chunk) {
                     visitedKeys.add(item.insKey);
-                    let ruleObj: Record<string, unknown>;
-                    try {
-                        this.log(`[Pega Indexer] ⬇️ Fetching rule: ${item.pxObjClass} | ${item.pyClassName} | ${item.pyRuleName} (${item.insKey})`);
-                        ruleObj = await pegaClient.getObject(item.pxObjClass, item.pyRuleName, item.pyClassName);
-                        if (ruleObj && (ruleObj.error || ruleObj.pyHTTPResponseCode === "404" || ruleObj.pyHTTPResponseCode === 404)) {
-                            throw new Error(String(ruleObj.error || "Rule not found on Pega Server"));
-                        }
-                        fetchedRules.push(ruleObj);
-                        const ruleName = (ruleObj.pyRuleName as string) || (ruleObj.pyLabel as string) || item.pyRuleName;
-                        const jsonStr = JSON.stringify(ruleObj);
-                        this.log(`[Pega Indexer] ✅ Downloaded ${ruleObj.pxObjClass || item.pxObjClass} "${ruleName}" (${jsonStr.length} bytes)`);
-                    } catch (err: any) {
-                        const errMsg = String(err.message || err);
-                        const lowerMsg = errMsg.toLowerCase();
-                        const isNotFound = lowerMsg.includes("not found") || lowerMsg.includes("rule not found") || lowerMsg.includes("record not found");
-                        const isServerError = !isNotFound && (
-                            lowerMsg.includes("503") ||
-                            lowerMsg.includes("502") ||
-                            lowerMsg.includes("504") ||
-                            lowerMsg.includes("500") ||
-                            lowerMsg.includes("401") ||
-                            lowerMsg.includes("403") ||
-                            lowerMsg.includes("econnrefused") ||
-                            lowerMsg.includes("enotfound") ||
-                            lowerMsg.includes("etimedout") ||
-                            lowerMsg.includes("fetch failed") ||
-                            lowerMsg.includes("network error") ||
-                            lowerMsg.includes("failed to connect") ||
-                            lowerMsg.includes("service temporarily unavailable")
-                        );
+                }
 
-                        if (isServerError) {
-                            this.log(`[Pega Indexer] ⛔ Server Error Detected: ${errMsg.substring(0, 150)}. Aborting crawl immediately.`);
-                            throw new Error(`Pega Server Connection Failed: ${errMsg.split("\n")[0]}`);
-                        }
+                // Parallel rule fetches with concurrency=5 to avoid overwhelming Pega server
+                const fetchResult = await fetchRulesInParallel(
+                    chunk, pegaClient, this.log.bind(this),
+                );
 
-                        this.log(`[Pega Indexer] ❌ Failed to fetch ${item.pxObjClass} ${item.pyClassName} ${item.pyRuleName}: ${errMsg}`);
-                        continue;
-                    }
+                // Abort immediately if a server error was detected
+                if (fetchResult.serverError) {
+                    throw new Error(fetchResult.serverError);
+                }
 
-                    // Helper to save physical .pega.json file into workspace rules/ directory
-                    const saveRuleFile = (rObj: Record<string, unknown>, fallbackClass?: string, fallbackName?: string) => {
-                        try {
-                            const objClass = (rObj.pxObjClass as string) || fallbackClass || "Rule";
-                            const ruleName = (rObj.pyRuleName as string) || (rObj.pyPropertyName as string) || (rObj.pyActivityName as string) || (rObj.pyFlowName as string) || (rObj.pyModelName as string) || (rObj.pyLabel as string) || fallbackName || "Rule";
-                            const safeClass = objClass.replace(/[^a-zA-Z0-9_-]/g, "_");
-                            const safeName = ruleName.replace(/[^a-zA-Z0-9_.-]/g, "_");
+                // Save fetched rules to disk + collect for ingestion
+                for (const { ruleObj, item } of fetchResult.fetched) {
+                    fetchedRules.push(ruleObj);
+                    saveRuleFile(ruleObj, root, this.log.bind(this), item.pxObjClass, item.pyRuleName);
 
-                            const targetDir = path.join(root, "rules", safeClass);
-                            if (!fs.existsSync(targetDir)) {
-                                fs.mkdirSync(targetDir, { recursive: true });
-                            }
-                            const filePath = path.join(targetDir, `${safeName}.pega.json`);
-                            if (!fs.existsSync(filePath)) {
-                                fs.writeFileSync(filePath, JSON.stringify(rObj, null, 2), "utf-8");
-                                this.log(`[Pega Indexer] 💾 Saved ${safeClass}/${safeName}.pega.json`);
-                            }
-                        } catch (fileErr: any) {
-                            this.log(`[Pega Indexer] ⚠️ File save error: ${fileErr.message}`);
-                        }
-                    };
-
-                    saveRuleFile(ruleObj, item.pxObjClass, item.pyRuleName);
-
-                    // Class => Full Rules Resolution: Auto-fetch ALL Rule types (Activities, Flows, Data Transforms, Sections, Properties, Expressions, FieldValues, Reports)
-                    if (item.pxObjClass === "Rule-OBJ-CLASS" || item.pxObjClass === "Rule-Obj-Class" || (ruleObj && ruleObj.pxObjClass === "Rule-Obj-Class")) {
+                    // Class => Full Rules Resolution: fetch ALL rule types in parallel
+                    const isClassRule = item.pxObjClass === "Rule-OBJ-CLASS"
+                        || item.pxObjClass === "Rule-Obj-Class"
+                        || ruleObj.pxObjClass === "Rule-Obj-Class";
+                    if (isClassRule) {
                         const targetClassName = (ruleObj.pyClassName as string) || item.pyClassName;
                         if (targetClassName) {
-                            const RULE_TYPES_TO_CRAWL = [
-                                "Rule-Obj-Property",
-                                "Rule-Obj-Activity",
-                                "Rule-Obj-Flow",
-                                "Rule-Obj-Model",
-                                "Rule-HTML-Section",
-                                "Rule-Declare-Expressions",
-                                "Rule-Obj-FieldValue",
-                                "Rule-Obj-Report-Definition",
-                                "Rule-Service-REST",
-                            ];
-                            for (const rt of RULE_TYPES_TO_CRAWL) {
-                                try {
-                                    const subRules = await pegaClient.getClassRules(targetClassName, rt);
-                                    if (subRules.length > 0) {
-                                        this.log(`[Pega Indexer] 📌 Class "${targetClassName}": Loaded ${subRules.length} rules of type "${rt}". Saving files & ingesting...`);
-                                        for (const sr of subRules) {
-                                            const srInsKey = (sr as any).insKey || `${rt}:${targetClassName}:${(sr as any).pyRuleName || (sr as any).pyPropertyName || ''}`;
-                                            if (!visitedKeys.has(srInsKey)) {
-                                                visitedKeys.add(srInsKey);
-                                                saveRuleFile(sr, rt);
-                                                fetchedRules.push(sr);
-                                            }
-                                        }
-                                    }
-                                } catch { /* ignore rule type fetch notice */ }
+                            const subRules = await fetchRuleTypesInParallel(
+                                targetClassName, pegaClient, visitedKeys, this.log.bind(this),
+                            );
+                            for (const sr of subRules) {
+                                saveRuleFile(sr.rule, root, this.log.bind(this), sr.ruleType);
+                                fetchedRules.push(sr.rule);
                             }
                         }
                     }

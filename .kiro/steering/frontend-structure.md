@@ -1,35 +1,35 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: "frontend/**"
+fileMatchPattern: "extension/src/webview/**"
 ---
 
-# Frontend Architecture — Kotlin/JS + HTML Templates
+# Frontend Architecture — Svelte 4 + Vite + TypeScript
 
 ## Tech Stack
 
-- **Kotlin/JS** — Frontend logic, compile sang JavaScript
-- **HTML Templates** — Tách biệt khỏi Kotlin code, `src/jsMain/resources/templates/`
-- **CSS Files** — Obsidian Kinetic design system, `src/jsMain/resources/styles/`
-- **Vite** — Bundler + dev server, `publicDir: 'src/jsMain/resources'`
-- **Kotlin Multiplatform shared module** — Shared data models, DTOs
+- **Svelte 4** — Webview UI, components + reactive state
+- **Vite** — Bundler + dev server
+- **TypeScript** — Strong typing, tách biệt logic khỏi DOM
+- **HTML/CSS** — Obsidian Kinetic design system, `resources/styles/`
 
 ## Core Rules (chi tiết xem #[[file:documents/frontend-rules-detail.md]])
 
-### 1. TÁCH BIỆT HTML VÀ LOGIC
-- **KHÔNG BAO GIỜ** tạo HTML string trong Kotlin code (no innerHTML with HTML, no kotlinx.html DSL)
-- **LUÔN** dùng HTML template files từ `resources/templates/`
-- Kotlin code chỉ thao tác DOM qua `getElementById()`, `querySelector()`, `textContent`, `classList`
-- Dynamic repeated elements dùng `<template>` clone pattern
+### 1. TÁCH BIỆT MARKUP VÀ LOGIC
+- **KHÔNG BAO GIỜ** tạo HTML string trong code (no innerHTML with HTML, no template literal HTML)
+- **LUÔN** dùng Svelte component files `.svelte` + logic trong `<script>` block
+- Logic thuần tách vào `.ts` modules (stores, actions, services)
+- Dynamic repeated elements dùng `{#each}` block
 
 ### 2. VIEW / CONTROLLER Pattern
 | Layer | Nơi đặt | Chứa gì |
 |-------|---------|---------|
-| **VIEW** | `resources/templates/*.html` + `resources/*.css` | HTML structure, CSS classes, placeholders |
-| **CONTROLLER** | `kotlin/.../pages/*.kt` | Event binding, API calls, DOM manipulation |
+| **VIEW** | `extension/src/webview/**/*.svelte` + `resources/styles/*.css` | HTML structure, CSS classes, placeholders |
+| **CONTROLLER** | `extension/src/webview/**/*.ts` (stores, actions) | Event binding, API calls, DOM manipulation |
 
 ### 3. KHÔNG TẠO FILE LEGACY
-- Không tạo thư mục con HTML/CSS/JS trong `frontend/` (e.g., `frontend/dashboard/index.html`)
-- Root `frontend/` chỉ chứa: `build.gradle.kts`, `index.html`, `package.json`, `vite.config.js`, `src/`, `build/`
+- Không tạo thư mục con HTML/CSS/JS tách rời UI
+- Root `extension/src/webview/` chứa: components, stores, styles — theo component tree
+- Webview asset bundle build bằng Vite (`extension/webview/`)
 
 ### 4. UX BẮT BUỘC
 - Mọi thao tác PHẢI có feedback: Loading spinner, Empty state + action, Error message + fix action, Success confirmation
@@ -37,8 +37,8 @@ fileMatchPattern: "frontend/**"
 - Mọi API call PHẢI handle 3 trạng thái: loading, success, error
 
 ### 5. BLOCKING OVERLAY
-- Mọi async operation (SAVE, TEST, DELETE, START, STOP, SCAN...) PHẢI dùng `BlockingOverlay`
-- `BlockingOverlay.show()` TRƯỚC `scope.launch`, `BlockingOverlay.remove()` trong `finally`
+- Mọi async operation (SAVE, TEST, DELETE, START, STOP, SCAN...) PHẢI dùng `BlockingOverlay` component
+- Show overlay TRƯỚC `await`, remove trong `finally`
 - Message mô tả cụ thể: "Saving...", "Testing connection...", KHÔNG dùng "Please wait"
 
 ### 6. BROWSER MEMORY MANAGEMENT
@@ -51,10 +51,10 @@ fileMatchPattern: "frontend/**"
 - `-webkit-appearance: none; appearance: none;` cho custom styling
 
 ## API & Routing
-- `ktor-client-js`, JWT trong `sessionStorage`
+- Svelte stores + MCP client (WebSocket/undici), JWT trong `sessionStorage`
 - Hash-based routing: `#dashboard`, `#analysis`, etc.
-- `ApiClient.loadTemplate(name)` — fetch `/templates/$name.html`
+- `apiClient.loadTemplate(name)` — fetch `/templates/$name.html`
 
 ## Build Commands
-- Dev: `./gradlew :frontend:jsBrowserDevelopmentRun` hoặc `npx vite`
-- Build: `./gradlew :frontend:jsBrowserProductionWebpack`
+- Dev: `npm run esbuild-watch` hoặc `npm run watch` (Vite trong extension webview)
+- Build: `npm run esbuild` / `npm run esbuild-production`

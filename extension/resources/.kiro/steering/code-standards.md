@@ -17,8 +17,8 @@ Mọi code PHẢI có comment rõ ràng, hữu ích. Comment giải thích **WHY
 | Vị trí | Yêu cầu | Ví dụ |
 |--------|----------|-------|
 | **File header** | Mô tả mục đích file (1-3 dòng) | `/** SA4E-41 — GraphSyncService. Projects code symbols into graph_nodes. */` |
-| **Class/Interface** | TSDoc/JSDoc/KDoc mô tả trách nhiệm | `/** Manages provider lifecycle: connect, scan, disconnect. */` |
-| **Public function/method** | TSDoc/JSDoc/KDoc với @param, @returns, @throws | `/** Sync symbols to graph. @param projectId - tenant ID */` |
+| **Class/Interface** | TSDoc/JSDoc mô tả trách nhiệm | `/** Manages provider lifecycle: connect, scan, disconnect. */` |
+| **Public function/method** | TSDoc/JSDoc với @param, @returns, @throws | `/** Sync symbols to graph. @param projectId - tenant ID */` |
 | **Complex logic** | Inline comment giải thích WHY | `// Fibonacci sphere: distributes nodes evenly on 3D surface` |
 | **Business rules** | Reference tới BR-ID hoặc UC-ID | `// BR-03: Rate limit 100 req/min per API key` |
 | **Workarounds/Hacks** | Giải thích tại sao cần hack + TODO fix | `// HACK: SQLite doesn't support SKIP LOCKED, use busy timeout instead` |
@@ -45,22 +45,22 @@ Mọi code PHẢI có comment rõ ràng, hữu ích. Comment giải thích **WHY
 export async function resolveTools(projectId: string): Promise<ToolDef[]> {
 ```
 
-**Kotlin:**
-```kotlin
+**TypeScript:**
+```typescript
 /**
  * Validate provider configuration before connection attempt.
  * Checks transport compatibility, required fields, and URL format.
  * @param config Provider configuration to validate
- * @return ValidationResult with errors list (empty = valid)
- * @throws IllegalArgumentException if config is null
+ * @returns ValidationResult with errors list (empty = valid)
+ * @throws Error if config is null
  */
-fun validateProviderConfig(config: ProviderConfig): ValidationResult {
+export function validateProviderConfig(config: ProviderConfig): ValidationResult {
 ```
 
 ### Checklist code review (thêm vào checklist hiện có)
 
 - [ ] File header comment mô tả mục đích?
-- [ ] Tất cả public classes/interfaces có TSDoc/JSDoc/KDoc?
+- [ ] Tất cả public classes/interfaces có TSDoc/JSDoc?
 - [ ] Tất cả public methods có doc comment với @param/@returns?
 - [ ] Complex logic có inline comment giải thích WHY?
 - [ ] Magic numbers có comment giải thích?
@@ -81,7 +81,7 @@ fun validateProviderConfig(config: ProviderConfig): ValidationResult {
 
 ## ⛔ Tách biệt Model và Processing
 
-### Model classes (data classes, DTOs, enums, interfaces) phải ở module/folder riêng
+### Model classes (interfaces, DTOs, enums, zod schemas) phải ở module/folder riêng
 
 ```
 # ❌ CẤM — Model và logic chung file
@@ -103,7 +103,7 @@ export function render() { ... }
 ```
 
 ### Quy tắc cấu trúc folder
-- `models/` — Data classes, DTOs, enums, interfaces, types
+- `models/` — Interfaces, types, DTOs, enums, zod schemas
 - `pages/` hoặc `views/` — Page controllers (UI logic, event binding, DOM manipulation)
 - `components/` — Reusable UI components
 - `api/` hoặc `clients/` — HTTP client, API calls
@@ -207,6 +207,35 @@ interface Pollable { startPolling(): void; stopPolling(): void; }
 - Page controllers depend on interfaces, not implementations
 - Dễ dàng mock cho testing
 
+## ⛔ Serialization — zod schemas
+
+### LUÔN validate dữ liệu truyền qua protocol/API communication bằng zod
+
+```typescript
+// ❌ CẤM — Không validate, dữ liệu lỗi lọt qua
+const data = JSON.parse(raw);
+// Kết quả: field thiếu/không đúng type → runtime error
+
+// ✅ ĐÚNG — Validate bằng zod schema
+const result = ProviderInfoSchema.safeParse(JSON.parse(raw));
+if (!result.success) throw new Error(result.error.message);
+```
+
+### Quy tắc cụ thể
+
+1. **Protocol communication** (JSON-RPC, MCP, WebSocket): PHẢI có zod schema — protocol specs yêu cầu tất cả fields phải có mặt
+2. **API responses** (REST endpoints): NÊN validate response trước khi dùng — frontend cần biết đúng shape
+3. **Internal data** (DB, cache): Có thể bỏ validate nếu muốn tiết kiệm overhead
+4. **Types có default values**: Dùng `z.optional()` / `z.default()` cho fields có default
+5. **Shared schemas**: Ưu tiên export schema từ 1 module dùng chung thay vì khai báo rải rác
+
+### Checklist khi tạo zod schema
+
+- [ ] Schema cho protocol/API payload?
+- [ ] `safeParse` thay vì `parse` khi dữ liệu từ external source?
+- [ ] Fields bắt buộc rõ ràng (không dùng `z.any()` tràn lan)?
+- [ ] Không khai báo schema inline trong function — đặt top-level export?
+
 ## ⛔ Serialization / JSON Handling
 
 ### Quy tắc chung
@@ -218,10 +247,8 @@ interface Pollable { startPolling(): void; stopPolling(): void; }
 
 ### Language-specific notes
 
-- **Kotlin** (`kotlinx.serialization`): Dùng `encodeDefaults = true` cho protocol/API communication
-- **TypeScript/JavaScript**: Dùng explicit serialization functions, tránh `JSON.stringify` trực tiếp cho protocol messages
+- **TypeScript/JavaScript**: Dùng zod schemas + explicit serialization functions, tránh `JSON.stringify` trực tiếp cho protocol messages
 - **Python** (`pydantic`, `dataclasses`): Dùng `model_dump(exclude_none=False)` cho protocol communication
-- **Java** (`Jackson`): Dùng `@JsonInclude(Include.ALWAYS)` cho protocol/API DTOs
 
 ### Checklist khi xử lý serialization
 
@@ -288,8 +315,18 @@ try {
 - [ ] Error handling đúng cách (không swallow errors)?
 - [ ] Mọi exception đều được thông báo cho user?
 - [ ] File header comment mô tả mục đích?
-- [ ] Public classes/interfaces có TSDoc/JSDoc/KDoc?
+- [ ] Public classes/interfaces có TSDoc/JSDoc?
 - [ ] Public methods có doc comment (@param/@returns)?
 - [ ] Complex logic có inline comment giải thích WHY?
 - [ ] Magic numbers có comment giải thích?
 - [ ] Workarounds có TODO + giải thích?
+
+## Checklist khi viết/review TypeScript code
+
+- [ ] File ≤ 200 dòng?
+- [ ] Mỗi hàm ≤ 20 dòng?
+- [ ] Model types ở folder `models/` riêng?
+- [ ] Không có business logic trong page controllers?
+- [ ] Sử dụng design pattern phù hợp?
+- [ ] Tuân thủ SOLID?
+- [ ] Interfaces cho dependencies?

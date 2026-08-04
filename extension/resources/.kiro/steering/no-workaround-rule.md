@@ -1,6 +1,6 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: "**/*.kt"
+fileMatchPattern: "**/*.ts"
 ---
 
 # No Workaround Rule — Fix Root Cause, Not Symptoms
@@ -38,33 +38,36 @@ Khi phát hiện vấn đề thiết kế (architecture mismatch, data inconsist
 
 ## ⛔ Ví dụ CẤM
 
-```kotlin
+```typescript
 // ❌ WORKAROUND — bypass khi UserService không tìm thấy user
-val user = userService.getUserByEmail(email)
-if (user == null) {
-    // Fallback: trust JWT role directly
-    val roles = extractRolesFromJwt(headers)
-    if (roles.any { it == "admin" }) return email  // ← BUG TIỀM ẨN
+const user = userService.getUserByEmail(email);
+if (!user) {
+  // Fallback: trust JWT role directly
+  const roles = extractRolesFromJwt(headers);
+  if (roles.includes("admin")) return email;  // ← BUG TIỀM ẨN
 }
 
 // ❌ WORKAROUND — query 2 tables vì không biết data ở đâu
-val result = tableA.find(id) ?: tableB.find(id)  // ← DESIGN FLAW
+const result = (await tableA.findById(id)) ?? (await tableB.findById(id));  // ← DESIGN FLAW
 ```
 
 ## ✅ Ví dụ ĐÚNG
 
-```kotlin
+```typescript
 // ✅ FIX ROOT CAUSE — thống nhất 1 UserRepository cho cả auth và user management
 // Cả AuthLoginHandler và AdminAuthMiddleware dùng CÙNG repository
-class AdminAuthMiddleware(
-    private val userRepository: UserRepository  // ← CÙNG instance với auth module
-) {
-    suspend fun validateAdmin(headers: Map<String, String>): String {
-        val email = extractEmail(headers)
-        val user = userRepository.findByEmail(email)  // ← Single source of truth
-            ?: throw PermissionDeniedException("User not found")
-        // ...
-    }
+class AdminAuthMiddleware {
+  constructor(
+    private readonly userRepository: UserRepository,  // ← CÙNG instance với auth module
+  ) {}
+
+  async validateAdmin(headers: Map<string, string>): Promise<string> {
+    const email = extractEmail(headers);
+    const user = await this.userRepository.findByEmail(email);  // ← Single source of truth
+    if (!user) throw new PermissionDeniedException("User not found");
+    return email;
+    // ...
+  }
 }
 ```
 

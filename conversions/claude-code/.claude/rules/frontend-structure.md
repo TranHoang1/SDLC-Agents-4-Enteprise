@@ -1,28 +1,27 @@
 ---
-paths: "frontend/**"
+paths: "extension/src/webview/**"
 ---
 
-# Frontend Architecture — Kotlin/JS + HTML Templates
+# Frontend Architecture — Svelte 4 + Vite + TypeScript
 
 ## Tech Stack
-- **Kotlin/JS** — Frontend logic, compiles to JavaScript
-- **HTML Templates** — Separate from Kotlin code, `src/jsMain/resources/templates/`
-- **CSS Files** — Obsidian Kinetic design system, `src/jsMain/resources/styles/`
+- **Svelte 4** — Webview UI components
 - **Vite** — Bundler + dev server
-- **Kotlin Multiplatform shared module** — Shared data models, DTOs
+- **TypeScript** — Strong typing, logic separated from DOM
+- **CSS Files** — Obsidian Kinetic design system, `resources/styles/`
 
 ## Core Rules
 
-### 1. SEPARATE HTML AND LOGIC
-- **NEVER** create HTML strings in Kotlin code (no innerHTML with HTML, no kotlinx.html DSL)
-- **ALWAYS** use HTML template files from `resources/templates/`
-- Kotlin code only manipulates DOM via `getElementById()`, `querySelector()`, `textContent`, `classList`
+### 1. SEPARATE MARKUP AND LOGIC
+- **NEVER** create HTML strings in code (no innerHTML with HTML, no template-literal HTML)
+- **ALWAYS** use Svelte component files + logic in `<script>` block or `.ts` modules
+- DOM manipulation only via Svelte bindings and actions
 
 ### 2. VIEW / CONTROLLER Pattern
 | Layer | Location | Contains |
 |-------|----------|----------|
-| VIEW | `resources/templates/*.html` + `resources/*.css` | HTML structure, CSS classes |
-| CONTROLLER | `kotlin/.../pages/*.kt` | Event binding, API calls, DOM manipulation |
+| VIEW | `extension/src/webview/**/*.svelte` + `resources/styles/*.css` | HTML structure, CSS classes |
+| CONTROLLER | `extension/src/webview/**/*.ts` (stores, actions) | Event binding, API calls, state |
 
 ### 3. UX MANDATORY
 - Every action MUST have feedback: Loading spinner, Empty state, Error message, Success
@@ -30,8 +29,8 @@ paths: "frontend/**"
 - Every API call MUST handle: loading, success, error
 
 ### 4. BLOCKING OVERLAY
-- Every async operation MUST use `BlockingOverlay`
-- Show BEFORE launch, remove in `finally`
+- Every async operation MUST use `BlockingOverlay` component
+- Show BEFORE await, remove in `finally`
 
 ### 5. NATIVE FORM ELEMENTS ON DARK THEME
 - `<select>`: `background: rgba(12,14,22,0.95)` + `color: var(--primary)`
@@ -39,5 +38,5 @@ paths: "frontend/**"
 - `-webkit-appearance: none; appearance: none;`
 
 ## Build
-- Dev: `./gradlew :frontend:jsBrowserDevelopmentRun` or `npx vite`
-- Build: `./gradlew :frontend:jsBrowserProductionWebpack`
+- Dev: `npm run esbuild-watch` or `npm run watch`
+- Build: `npm run esbuild` / `npm run esbuild-production`
