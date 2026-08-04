@@ -52,14 +52,12 @@ export class PegaStreamIngester {
     const endpoint = `${this.backendUrl}/api/v1/pega/ingest-stream`;
     log(`[Pega Ingester] 🌊 Streaming ${rules.length} rules via NDJSON to ${endpoint}`);
 
-    const body = this.buildNdjsonStream(rules, projectId, checksums, versions, visitedKeys);
+    const body = this.buildNdjsonBody(rules, projectId, checksums, versions, visitedKeys);
 
     const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/x-ndjson" },
       body,
-      // @ts-expect-error — duplex required for streaming body in Node 18+
-      duplex: "half",
     });
 
     if (!res.ok) {
@@ -72,32 +70,19 @@ export class PegaStreamIngester {
     return json.data ?? { stored: 0 };
   }
 
-  /** Build a ReadableStream that emits NDJSON lines without buffering all at once */
-  private buildNdjsonStream(
+  /** Build NDJSON string body — one JSON line per rule. Backend processes line-by-line. */
+  private buildNdjsonBody(
     rules: Record<string, unknown>[],
     projectId: string,
     checksums: Record<string, string>,
     versions: Record<string, string>,
     visitedKeys: string[],
-  ): ReadableStream<Uint8Array> {
-    const encoder = new TextEncoder();
+  ): string {
     const meta: StreamMetadata = { __meta: true, projectId, checksums, versions, visitedKeys };
-    let index = 0;
-
-    return new ReadableStream<Uint8Array>({
-      start(controller) {
-        // Emit metadata as first line
-        controller.enqueue(encoder.encode(JSON.stringify(meta) + "\n"));
-      },
-      pull(controller) {
-        // Emit rules one at a time on each pull
-        if (index < rules.length) {
-          controller.enqueue(encoder.encode(JSON.stringify(rules[index]) + "\n"));
-          index++;
-        } else {
-          controller.close();
-        }
-      },
-    });
+    const lines: string[] = [JSON.stringify(meta)];
+    for (const rule of rules) {
+      lines.push(JSON.stringify(rule));
+    }
+    return lines.join("\n") + "\n";
   }
 }
