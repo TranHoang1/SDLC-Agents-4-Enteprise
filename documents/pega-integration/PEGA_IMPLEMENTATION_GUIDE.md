@@ -602,17 +602,17 @@ if (rulesetName == null || rulesetName.trim().isEmpty() || branchName == null ||
 
 ---
 
-### 🔹 SERVICE 8a: Data Page — List Results (`POST /api/v1/datapage/list/{dataPageName}`)
+### 🔹 SERVICE 8a: Data Page — List Results (`POST /api/v1/datapage/list`)
 
 > **Mục đích**: Gọi Pega Data Page trả về **danh sách records** (có `pxResults` page list). Dùng cho: `D_pzAccessGroupsByApplication`, `D_pyCaseTypeList`, `D_pzRuleSetsInApplication`, v.v.
 
-#### 1. Cấu Hình Service REST Rule (`pzGetDataPageList` / `/datapage/list/{dataPageName}`):
+#### 1. Cấu Hình Service REST Rule (`pzGetDataPageList` / `/datapage/list`):
 - **Service Package**: `CodeIntelligence` (Service Version: `v1`)
-- **URL Mapping**: `/datapage/list/{dataPageName}`
+- **URL Mapping**: `/datapage/list`
 - **Method**: `POST`
 
 ##### a. Inbound Request Data Mapping:
-- **dataPageName** ➔ URL path parameter (resource path) ➔ **`.RequestDataPageName`**
+- **dataPageName** ➔ Query string parameter ➔ **`.RequestDataPageName`**
 - **Request Body** ➔ Parameters JSON object ➔ **`.RequestParameters`** *(body chứa key-value pairs trực tiếp)*
 
 ##### b. Outbound Response Data Mapping:
@@ -695,7 +695,7 @@ if (dataPageName == null || dataPageName.trim().isEmpty()) {
 
 #### 3. Ví Dụ:
 ```json
-POST /api/CodeIntelligence/v1/datapage/list/D_pzAccessGroupsByApplication
+POST /api/CodeIntelligence/v1/datapage/list?dataPageName=D_pzAccessGroupsByApplication
 Content-Type: application/json
 
 { "ApplicationName": "HRAppsV2", "ApplicationVersion": "01.01" }
@@ -704,17 +704,17 @@ Content-Type: application/json
 
 ---
 
-### 🔹 SERVICE 8b: Data Page — Single Page (`POST /api/v1/datapage/single/{dataPageName}`)
+### 🔹 SERVICE 8b: Data Page — Single Page (`POST /api/v1/datapage/single`)
 
 > **Mục đích**: Gọi Pega Data Page trả về **1 page duy nhất** (không có pxResults). Dùng cho: `D_OperatorID`, `D_pyUserProfile`, `D_pzApplicationInfo`, v.v.
 
-#### 1. Cấu Hình Service REST Rule (`pzGetDataPageSingle` / `/datapage/single/{dataPageName}`):
+#### 1. Cấu Hình Service REST Rule (`pzGetDataPageSingle` / `/datapage/single`):
 - **Service Package**: `CodeIntelligence` (Service Version: `v1`)
-- **URL Mapping**: `/datapage/single/{dataPageName}`
+- **URL Mapping**: `/datapage/single`
 - **Method**: `POST`
 
 ##### a. Inbound Request Data Mapping:
-- **dataPageName** ➔ URL path parameter (resource path) ➔ **`.RequestDataPageName`**
+- **dataPageName** ➔ Query string parameter ➔ **`.RequestDataPageName`**
 - **Request Body** ➔ Parameters JSON object ➔ **`.RequestParameters`** *(body chứa key-value pairs trực tiếp)*
 
 ##### b. Outbound Response Data Mapping:
@@ -778,7 +778,7 @@ if (dataPageName == null || dataPageName.trim().isEmpty()) {
 
 #### 3. Ví Dụ:
 ```json
-POST /api/CodeIntelligence/v1/datapage/single/D_OperatorID
+POST /api/CodeIntelligence/v1/datapage/single?dataPageName=D_OperatorID
 Content-Type: application/json
 
 {}
@@ -800,8 +800,8 @@ Content-Type: application/json
 | **5** | `/rules/checkout` | `POST` | `pzCheckoutPegaRule` | `insKey` ➔ `.RequestPZInsKey`<br>`action` ➔ `.RequestAction`<br>`comment` ➔ `.RequestComment`<br>`branchName`/`branchVersion` ➔ branch context | `.ResponseBody`, `.pyHTTPResponseCode` |
 | **6** | `/rules/test` | `POST` | `pzExecuteScenarioTestSuite` | `testSuiteID` ➔ `.RequestTestSuiteID`<br>`insKey` ➔ `.RequestPZInsKey` | `.ResponseBody`, `.pyHTTPResponseCode` |
 | **7** | `/rules/branch` | `POST` | `pzCreatePegaBranch` | `rulesetName` ➔ `.RequestRuleSetName`<br>`baseVersion` ➔ `.RequestBaseVersion`<br>`branchName` ➔ `.RequestBranchName` | `.ResponseBody`, `.pyHTTPResponseCode` |
-| **8a** | `/datapage/list/{dataPageName}` | `POST` | `pzGetDataPageList` | `dataPageName` ➔ URL path param ➔ `.RequestDataPageName`<br>Body ➔ `.RequestParameters` (JSON params) | `.ResponseBody` (pxResults array), `.pyHTTPResponseCode` |
-| **8b** | `/datapage/single/{dataPageName}` | `POST` | `pzGetDataPageSingle` | `dataPageName` ➔ URL path param ➔ `.RequestDataPageName`<br>Body ➔ `.RequestParameters` (JSON params) | `.ResponseBody` (single page JSON), `.pyHTTPResponseCode` |
+| **8a** | `/datapage/list` | `POST` | `pzGetDataPageList` | `dataPageName` ➔ Query string param ➔ `.RequestDataPageName`<br>Body ➔ `.RequestParameters` (JSON params) | `.ResponseBody` (pxResults array), `.pyHTTPResponseCode` |
+| **8b** | `/datapage/single` | `POST` | `pzGetDataPageSingle` | `dataPageName` ➔ Query string param ➔ `.RequestDataPageName`<br>Body ➔ `.RequestParameters` (JSON params) | `.ResponseBody` (single page JSON), `.pyHTTPResponseCode` |
 
 ---
 
