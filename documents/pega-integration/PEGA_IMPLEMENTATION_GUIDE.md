@@ -613,7 +613,7 @@ if (rulesetName == null || rulesetName.trim().isEmpty() || branchName == null ||
 
 ##### a. Inbound Request Data Mapping:
 - **dataPageName** ➔ Query string parameter ➔ **`.RequestDataPageName`**
-- **Request Body** ➔ Parameters JSON object ➔ **`.RequestParameters`** *(body chứa key-value pairs trực tiếp)*
+- **Request Body** ➔ Parameters JSON object ➔ **`.ruleJson`** *(body chứa key-value pairs trực tiếp)*
 
 ##### b. Outbound Response Data Mapping:
 - **HTTP status code**: `Clipboard Property` ➔ **`.pyHTTPResponseCode`**
@@ -625,7 +625,7 @@ String dataPageName = tools.getPrimaryPage().getString(".RequestDataPageName");
 if (dataPageName == null || dataPageName.trim().isEmpty()) {
     dataPageName = tools.getParamValue("dataPageName");
 }
-String parametersJson = tools.getPrimaryPage().getString(".RequestParameters");
+String parametersJson = tools.getPrimaryPage().getString(".ruleJson");
 if (parametersJson == null || parametersJson.trim().isEmpty()) {
     parametersJson = tools.getParamValue("parameters");
 }
@@ -715,7 +715,7 @@ Content-Type: application/json
 
 ##### a. Inbound Request Data Mapping:
 - **dataPageName** ➔ Query string parameter ➔ **`.RequestDataPageName`**
-- **Request Body** ➔ Parameters JSON object ➔ **`.RequestParameters`** *(body chứa key-value pairs trực tiếp)*
+- **Request Body** ➔ Parameters JSON object ➔ **`.ruleJson`** *(body chứa key-value pairs trực tiếp)*
 
 ##### b. Outbound Response Data Mapping:
 - **HTTP status code**: `Clipboard Property` ➔ **`.pyHTTPResponseCode`**
@@ -727,7 +727,7 @@ String dataPageName = tools.getPrimaryPage().getString(".RequestDataPageName");
 if (dataPageName == null || dataPageName.trim().isEmpty()) {
     dataPageName = tools.getParamValue("dataPageName");
 }
-String parametersJson = tools.getPrimaryPage().getString(".RequestParameters");
+String parametersJson = tools.getPrimaryPage().getString(".ruleJson");
 if (parametersJson == null || parametersJson.trim().isEmpty()) {
     parametersJson = tools.getParamValue("parameters");
 }
@@ -800,8 +800,8 @@ Content-Type: application/json
 | **5** | `/rules/checkout` | `POST` | `pzCheckoutPegaRule` | `insKey` ➔ `.RequestPZInsKey`<br>`action` ➔ `.RequestAction`<br>`comment` ➔ `.RequestComment`<br>`branchName`/`branchVersion` ➔ branch context | `.ResponseBody`, `.pyHTTPResponseCode` |
 | **6** | `/rules/test` | `POST` | `pzExecuteScenarioTestSuite` | `testSuiteID` ➔ `.RequestTestSuiteID`<br>`insKey` ➔ `.RequestPZInsKey` | `.ResponseBody`, `.pyHTTPResponseCode` |
 | **7** | `/rules/branch` | `POST` | `pzCreatePegaBranch` | `rulesetName` ➔ `.RequestRuleSetName`<br>`baseVersion` ➔ `.RequestBaseVersion`<br>`branchName` ➔ `.RequestBranchName` | `.ResponseBody`, `.pyHTTPResponseCode` |
-| **8a** | `/datapage/list` | `POST` | `pzGetDataPageList` | `dataPageName` ➔ Query string param ➔ `.RequestDataPageName`<br>Body ➔ `.RequestParameters` (JSON params) | `.ResponseBody` (pxResults array), `.pyHTTPResponseCode` |
-| **8b** | `/datapage/single` | `POST` | `pzGetDataPageSingle` | `dataPageName` ➔ Query string param ➔ `.RequestDataPageName`<br>Body ➔ `.RequestParameters` (JSON params) | `.ResponseBody` (single page JSON), `.pyHTTPResponseCode` |
+| **8a** | `/datapage/list` | `POST` | `pzGetDataPageList` | `dataPageName` ➔ Query string param ➔ `.RequestDataPageName`<br>Body ➔ `.ruleJson` (JSON params) | `.ResponseBody` (pxResults array), `.pyHTTPResponseCode` |
+| **8b** | `/datapage/single` | `POST` | `pzGetDataPageSingle` | `dataPageName` ➔ Query string param ➔ `.RequestDataPageName`<br>Body ➔ `.ruleJson` (JSON params) | `.ResponseBody` (single page JSON), `.pyHTTPResponseCode` |
 
 ---
 
