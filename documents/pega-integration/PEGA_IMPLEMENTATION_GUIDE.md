@@ -635,15 +635,36 @@ if (dataPageName == null || dataPageName.trim().isEmpty()) {
     tools.getPrimaryPage().putString(".pyHTTPResponseCode", "400");
 } else {
     try {
-        ClipboardPage paramPage = tools.createPage("Code-Pega-List", "dpParams");
+        // 1. Convert JSON parameters to String[] varargs for findDataPage
+        // Input: {"AppName":"HRAppsV2","AppVersion":"01.01"}
+        // Output: ["AppName","HRAppsV2","AppVersion","01.01"]
+        java.util.List<String> paramPairs = new java.util.ArrayList<String>();
         if (parametersJson != null && !parametersJson.trim().isEmpty() && !parametersJson.equals("{}")) {
-            paramPage.adoptJSONObject(parametersJson);
+            String cleaned = parametersJson.trim();
+            if (cleaned.startsWith("{")) cleaned = cleaned.substring(1);
+            if (cleaned.endsWith("}")) cleaned = cleaned.substring(0, cleaned.length() - 1);
+            String[] entries = cleaned.split(",");
+            for (String entry : entries) {
+                String[] kv = entry.split(":", 2);
+                if (kv.length == 2) {
+                    String key = kv[0].trim().replace("\"", "");
+                    String val = kv[1].trim().replace("\"", "");
+                    paramPairs.add(key);
+                    paramPairs.add(val);
+                }
+            }
         }
-        ClipboardPage dataPage = tools.getThread().getDataPage(dataPageName, paramPage);
+
+        // 2. Call pega.findDataPage with dynamic varargs
+        com.pega.pegarules.priv.PegaAPI pega = (com.pega.pegarules.priv.PegaAPI) tools;
+        String[] args = paramPairs.toArray(new String[0]);
+        ClipboardPage dataPage = pega.findDataPage(dataPageName, false, args);
+
         if (dataPage == null) {
             tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Data Page not found: " + dataPageName + "\", \"pxResults\": [], \"totalCount\": 0}");
             tools.getPrimaryPage().putString(".pyHTTPResponseCode", "404");
         } else {
+            // 3. Extract pxResults list and serialize
             ClipboardProperty resultsProp = dataPage.getIfPresent("pxResults");
             if (resultsProp != null && resultsProp.isList()) {
                 StringBuilder sb = new StringBuilder();
@@ -716,15 +737,34 @@ if (dataPageName == null || dataPageName.trim().isEmpty()) {
     tools.getPrimaryPage().putString(".pyHTTPResponseCode", "400");
 } else {
     try {
-        ClipboardPage paramPage = tools.createPage("Code-Pega-List", "dpParams");
+        // 1. Convert JSON parameters to String[] varargs
+        java.util.List<String> paramPairs = new java.util.ArrayList<String>();
         if (parametersJson != null && !parametersJson.trim().isEmpty() && !parametersJson.equals("{}")) {
-            paramPage.adoptJSONObject(parametersJson);
+            String cleaned = parametersJson.trim();
+            if (cleaned.startsWith("{")) cleaned = cleaned.substring(1);
+            if (cleaned.endsWith("}")) cleaned = cleaned.substring(0, cleaned.length() - 1);
+            String[] entries = cleaned.split(",");
+            for (String entry : entries) {
+                String[] kv = entry.split(":", 2);
+                if (kv.length == 2) {
+                    String key = kv[0].trim().replace("\"", "");
+                    String val = kv[1].trim().replace("\"", "");
+                    paramPairs.add(key);
+                    paramPairs.add(val);
+                }
+            }
         }
-        ClipboardPage dataPage = tools.getThread().getDataPage(dataPageName, paramPage);
+
+        // 2. Call pega.findDataPage with dynamic varargs
+        com.pega.pegarules.priv.PegaAPI pega = (com.pega.pegarules.priv.PegaAPI) tools;
+        String[] args = paramPairs.toArray(new String[0]);
+        ClipboardPage dataPage = pega.findDataPage(dataPageName, false, args);
+
         if (dataPage == null) {
             tools.getPrimaryPage().putString(".ResponseBody", "{\"error\": \"Data Page not found: " + dataPageName + "\"}");
             tools.getPrimaryPage().putString(".pyHTTPResponseCode", "404");
         } else {
+            // 3. Serialize entire page as single JSON object
             String jsonOutput = dataPage.getJSON(false);
             tools.getPrimaryPage().putString(".ResponseBody", jsonOutput);
             tools.getPrimaryPage().putString(".pyHTTPResponseCode", "200");
