@@ -242,7 +242,8 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
         );
       } catch { /* non-fatal */ }
 
-      const nextBatch = crawler.computeNextBatch(body.rules, visitedKeys, body.projectId);
+      // SA4E-94: computeNextBatch removed — enumeration handled by extension
+      const nextBatch: Array<{ insKey: string; pxObjClass: string; pyClassName: string; pyRuleName: string }> = [];
       return c.json({ data: { stored, totalRulesInDb, totalKbEntriesInDb, totalGraphNodesInDb, nextBatch }, error: null });
     } catch (err: any) {
       logger.error({ err }, 'pega/crawl-batch failed');

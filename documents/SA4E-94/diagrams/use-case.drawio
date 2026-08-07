@@ -1,0 +1,90 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-94: Use Case Diagram — RuleSet-Scoped Crawler" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor1" value="Developer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="280" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor2" value="Pega Server" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1020" y="280" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="system" value="Pega Crawler (VS Code Extension)" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="200" y="50" width="700" height="620" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc1" value="UC-1: Trigger&#xa;Pega Indexing" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="system">
+      <mxGeometry x="40" y="50" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc2" value="UC-2: Resolve&#xa;Application Hierarchy" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="system">
+      <mxGeometry x="260" y="50" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc3" value="UC-3: Enumerate Rules&#xa;by RuleSet (NEW)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="system">
+      <mxGeometry x="260" y="170" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc4" value="UC-4: Fetch&#xa;Rule Content" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="system">
+      <mxGeometry x="260" y="290" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc5" value="UC-5: Ingest Rules&#xa;to KB + Graph" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="system">
+      <mxGeometry x="260" y="410" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc6" value="UC-6: Skip&#xa;Platform Rules" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="system">
+      <mxGeometry x="500" y="170" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc7" value="UC-7: Report&#xa;Crawl Progress" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="system">
+      <mxGeometry x="40" y="410" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc8" value="UC-8: Paginate&#xa;RuleSet Query" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="system">
+      <mxGeometry x="500" y="290" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_inc1" value="&amp;laquo;include&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="system" source="uc1" target="uc2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_inc2" value="&amp;laquo;include&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="system" source="uc2" target="uc3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_inc3" value="&amp;laquo;include&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="system" source="uc3" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_inc4" value="&amp;laquo;include&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="system" source="uc4" target="uc5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ext1" value="&amp;laquo;extend&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;strokeColor=#82b366;" edge="1" parent="system" source="uc6" target="uc3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ext2" value="&amp;laquo;extend&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="system" source="uc8" target="uc3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_inc5" value="&amp;laquo;include&amp;raquo;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="system" source="uc1" target="uc7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea1" style="html=1;endArrow=none;fontSize=9;" edge="1" parent="1" source="actor1" target="uc1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="100" y="310" as="sourcePoint"/>
+        <mxPoint x="240" y="135" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ea2" style="html=1;endArrow=none;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1020" y="310" as="sourcePoint"/>
+        <mxPoint x="640" y="260" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ea3" style="html=1;endArrow=none;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1020" y="310" as="sourcePoint"/>
+        <mxPoint x="640" y="375" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ea4" style="html=1;endArrow=none;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1020" y="310" as="sourcePoint"/>
+        <mxPoint x="640" y="140" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="legend" value="Legend:&#xa;Green = NEW (SA4E-94)&#xa;Gray = Existing (unchanged)&#xa;Blue = Primary flow" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="700" width="160" height="70" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

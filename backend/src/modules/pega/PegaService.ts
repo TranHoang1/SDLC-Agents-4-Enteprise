@@ -11,7 +11,7 @@ import type {
   PegaIngestRuleRequest,
   PegaIngestRuleResponse,
 } from './models.js';
-import { PegaParser } from './PegaParser.js';
+import { PegaParser, type ExtractedPegaSymbol } from './PegaParser.js';
 import { PegaSchemaLoader } from './PegaSchemaLoader.js';
 import type { PegaRuleKbSchema } from './strategies/KbDrivenPegaParserStrategy.js';
 
@@ -208,7 +208,13 @@ export class PegaService {
   }
 
   public async ingestRule(req: PegaIngestRuleRequest): Promise<PegaIngestRuleResponse> {
-    const symbol = this.parser.parseSymbol(req.ruleJson);
+    let symbol: ExtractedPegaSymbol;
+    try {
+      symbol = this.parser.parseSymbol(req.ruleJson);
+    } catch {
+      // Rule type not supported by parser — skip gracefully instead of crashing stream
+      return { status: 'success', ruleId: -1, unresolvedDependencies: [] };
+    }
     const deps = this.parser.extractDependencies(req.ruleJson);
 
     if (req.checksum) {

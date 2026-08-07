@@ -6,7 +6,9 @@ import * as path from "path";
 import * as fs from "fs";
 import * as crypto from "crypto";
 import { IndexerHttpClient } from "./IndexerHttpClient";
-import { fetchRulesInParallel, fetchRuleTypesInParallel, saveRuleFile } from "./PegaCrawlHelper";
+import { fetchRulesInParallel, fetchRuleTypesInParallel, saveRuleFile, calibrateFetchConcurrency } from "./PegaCrawlHelper";
+import { enumerateAllRuleSets } from "./PegaRuleSetEnumerator";
+import { summaryToCrawlItem } from "../models";
 
 function computeRuleChecksum(rule: Record<string, unknown>): string {
     return crypto.createHash('sha256').update(JSON.stringify(rule)).digest('hex');
@@ -175,156 +177,117 @@ export class IndexingService {
             const projectId = crypto.createHash('sha256').update('pega:' + rawProjectId).digest('hex').slice(0, 12);
             this.log(`[Pega Indexer] 📌 Project ID: "pega:${rawProjectId}" → "${projectId}"`);
             // Update extension runtime project_id so admin panels use correct scope
-            setProjectId(projectId);            const visitedKeys = new Set<string>();
-            let currentQueue = seeds;
-            let totalStored = 0;
+            setProjectId(projectId);
+
+            // SA4E-94: Enumerate-then-fetch pipeline (replaces iterative blind dependency crawl)
+            const visitedKeys = new Set<string>();
             let totalFetchedInRun = 0;
             let totalStoredInDb = 0;
             let totalKbInDb = 0;
             let totalGraphInDb = 0;
-            let iterations = 0;
-            const MAX_ITERATIONS = 1000;
 
-            const localChecksums = new Map<string, { checksum: string; fqn: string }>();
-            try {
-                const rulesDir = path.join(root, 'rules');
-                if (fs.existsSync(rulesDir)) {
-                    const files = this.walkDir(rulesDir);
-                    for (const fp of files) {
-                        if (!fp.endsWith('.pega.json')) continue;
-                        try {
-                            const content = fs.readFileSync(fp, 'utf-8');
-                            const rule = JSON.parse(content);
-                            const objClass = rule.pxObjClass || '';
-                            const className = rule.pyClassName || '';
-                            const ruleName = rule.pyRuleName || rule.pyPropertyName || rule.pyActivityName || rule.pyFlowName || rule.pyModelName || '';
-                            const insKey = `${objClass.toUpperCase().replace(/^RULE-/i, 'RULE-')} ${className} ${ruleName}`.replace(/\s+/g, ' ').trim();
-                            const fqn = `${objClass}:${className}:${ruleName}`;
-                            const checksum = crypto.createHash('sha256').update(JSON.stringify(rule)).digest('hex');
-                            localChecksums.set(insKey, { checksum, fqn });
-                        } catch { /* skip unparseable file */ }
-                    }
-                    this.log(`[Pega Indexer] 📂 Loaded ${localChecksums.size} local rule checksums from ${rulesDir}`);
-                }
-            } catch { /* rules dir not available */ }
+            // Phase 2: RuleSet Enumeration — discover ALL rules upfront
+            report.report({ message: `Enumerating rules from ${hierarchy.ruleSets.length} RuleSets...` });
+            const enumeratedMap = await enumerateAllRuleSets(
+              hierarchy.ruleSets, pegaClient, this.log.bind(this),
+            );
 
-            while (currentQueue.length > 0 && iterations < MAX_ITERATIONS) {
-                iterations++;
-                this.log(`[Pega Indexer] Iteration ${iterations}: processing queue (${currentQueue.length} items, visited: ${visitedKeys.size})...`);
-                report.report({ message: `Crawling Pega rules (unique rules: ${visitedKeys.size}, queue: ${currentQueue.length})...` });
-
-                const ruleChecksums: Record<string, string> = {};
-                for (const key of currentQueue) {
-                    const local = localChecksums.get(key);
-                    if (local) ruleChecksums[key] = local.checksum;
-                }
-                const plan = await pegaClient.crawlPlan({
-                    projectId,
-                    ruleKeys: currentQueue,
-                    visitedKeys: Array.from(visitedKeys),
-                    ruleChecksums: Object.keys(ruleChecksums).length > 0 ? ruleChecksums : undefined,
+            // Fallback (AF-03): if enumeration returns 0 rules, use seeds as minimal crawl set
+            if (enumeratedMap.size === 0 && seeds.length > 0) {
+              this.log(`[Pega Indexer] ⚠️ Enumeration returned 0 rules. Falling back to seed-based crawl.`);
+              // Convert seeds to crawlPlan via backend (backward compat)
+              const plan = await pegaClient.crawlPlan({ projectId, ruleKeys: seeds, visitedKeys: [] });
+              for (const item of plan.missing) {
+                enumeratedMap.set(item.insKey, {
+                  pzInsKey: item.insKey, pxObjClass: item.pxObjClass,
+                  pyClassName: item.pyClassName, pyRuleName: item.pyRuleName,
+                  pyRuleSet: '', pyRuleSetVersion: '',
                 });
-
-                if (!plan.missing || plan.missing.length === 0) {
-                    this.log(`[Pega Indexer] Crawl plan returned no missing items. Finish crawling.`);
-                    break;
-                }
-
-                this.log(`[Pega Indexer] Crawl plan: ${plan.missing.length} missing rules to fetch.`);
-
-                const fetchedRules: Record<string, unknown>[] = [];
-                const chunk = plan.missing.slice(0, 50);
-
-                // Mark all items as visited BEFORE parallel fetch to prevent duplicates
-                for (const item of chunk) {
-                    visitedKeys.add(item.insKey);
-                }
-
-                // Parallel rule fetches with concurrency=5 to avoid overwhelming Pega server
-                const fetchResult = await fetchRulesInParallel(
-                    chunk, pegaClient, this.log.bind(this),
-                );
-
-                // Abort immediately if a server error was detected
-                if (fetchResult.serverError) {
-                    throw new Error(fetchResult.serverError);
-                }
-
-                // Save fetched rules to disk + collect for ingestion
-                for (const { ruleObj, item } of fetchResult.fetched) {
-                    fetchedRules.push(ruleObj);
-                    saveRuleFile(ruleObj, root, this.log.bind(this), item.pxObjClass, item.pyRuleName);
-
-                    // Class => Full Rules Resolution: fetch ALL rule types in parallel
-                    const isClassRule = item.pxObjClass === "Rule-OBJ-CLASS"
-                        || item.pxObjClass === "Rule-Obj-Class"
-                        || ruleObj.pxObjClass === "Rule-Obj-Class";
-                    if (isClassRule) {
-                        const targetClassName = (ruleObj.pyClassName as string) || item.pyClassName;
-                        if (targetClassName) {
-                            const subRules = await fetchRuleTypesInParallel(
-                                targetClassName, pegaClient, visitedKeys, this.log.bind(this),
-                            );
-                            for (const sr of subRules) {
-                                saveRuleFile(sr.rule, root, this.log.bind(this), sr.ruleType);
-                                fetchedRules.push(sr.rule);
-                            }
-                        }
-                    }
-                }
-
-                if (fetchedRules.length === 0 && plan.missing.length <= chunk.length) {
-                    this.log(`[Pega Indexer] No rules could be fetched in this batch. Crawl finished.`);
-                    break;
-                }
-
-                if (fetchedRules.length > 0) {
-                    totalFetchedInRun += fetchedRules.length;
-                    this.log(`[Pega Indexer] Ingesting ${fetchedRules.length} rules via NDJSON stream (single request, O(1) memory)...`);
-
-                    // Compute checksums and versions for dedup
-                    const batchChecksums: Record<string, string> = {};
-                    const batchVersions: Record<string, string> = {};
-                    for (const rule of fetchedRules) {
-                        const objClass = (rule as any).pxObjClass || '';
-                        const className = (rule as any).pyClassName || '';
-                        const rName = (rule as any).pyRuleName || (rule as any).pyPropertyName || (rule as any).pyActivityName || (rule as any).pyFlowName || (rule as any).pyModelName || '';
-                        const fqn = `${objClass}:${className}:${rName}`;
-                        const chk = computeRuleChecksum(rule as Record<string, unknown>);
-                        if (chk) batchChecksums[fqn] = chk;
-                        const ver = (rule as any).pyRuleVersion || (rule as any).pyVersion || '';
-                        if (ver) batchVersions[fqn] = ver;
-                    }
-
-                    // SA4E-92: Stream all rules in one NDJSON request — no OOM
-                    const { PegaStreamIngester } = await import("./PegaStreamIngester");
-                    const ingester = new PegaStreamIngester(pegaClient.getBackendUrlPublic());
-                    try {
-                        const streamRes = await ingester.streamIngest(
-                            fetchedRules, projectId, batchChecksums, batchVersions,
-                            Array.from(visitedKeys), this.log.bind(this),
-                        );
-                        if (streamRes.totalRulesInDb) {
-                            totalStoredInDb = streamRes.totalRulesInDb;
-                        } else {
-                            totalStoredInDb += streamRes.stored || fetchedRules.length;
-                        }
-                        if (streamRes.totalKbEntriesInDb) totalKbInDb = streamRes.totalKbEntriesInDb;
-                        if (streamRes.totalGraphNodesInDb) totalGraphInDb = streamRes.totalGraphNodesInDb;
-                        currentQueue = streamRes.nextBatch ? streamRes.nextBatch.map((k: any) => k.insKey) : [];
-                    } catch (streamErr: any) {
-                        this.log(`[Pega Indexer] ⚠️ Stream ingest failed: ${streamErr.message}`);
-                        currentQueue = [];
-                    }
-                    this.log(`[Pega Indexer] Ingestion complete. Total DB Rules: ${totalStoredInDb}`);
-                } else {
-                    const remainingPlanKeys = plan.missing.slice(50).map(m => m.insKey).filter(k => !visitedKeys.has(k));
-                    currentQueue = remainingPlanKeys;
-                }
+              }
             }
 
-            this.log(`[Pega Indexer] Crawl finished. Total fetched in run: ${totalFetchedInRun}`);
-            return `🏛️ Pega Project Detected: "pega:${rawProjectId}" → "${projectId}" — Ingested ${totalFetchedInRun} rules in this run (Total in KB Database: ${totalStoredInDb} Pega Rules, ${totalKbInDb} KB Entries, ${totalGraphInDb} Graph Nodes)`;
+            // Convert to CrawlPlanItem array for fetchRulesInParallel
+            const crawlSet = Array.from(enumeratedMap.values()).map(summaryToCrawlItem);
+            this.log(`[Pega Indexer] 📋 Crawl set: ${crawlSet.length} rules to fetch`);
+
+            // Phase 3: Calibrate concurrency + chunked content fetch
+            await calibrateFetchConcurrency(pegaClient, crawlSet.length, this.log.bind(this));
+
+            const CHUNK_SIZE = 50;
+            const fetchedRules: Record<string, unknown>[] = [];
+
+            for (let i = 0; i < crawlSet.length; i += CHUNK_SIZE) {
+              const chunk = crawlSet.slice(i, i + CHUNK_SIZE);
+              report.report({ message: `Fetching rule content (${i + chunk.length}/${crawlSet.length})...` });
+
+              // Mark items as visited before fetch to prevent duplicates
+              for (const item of chunk) { visitedKeys.add(item.insKey); }
+
+              const fetchResult = await fetchRulesInParallel(chunk, pegaClient, this.log.bind(this));
+              if (fetchResult.serverError) { throw new Error(fetchResult.serverError); }
+
+              // Save + expand Class rules
+              for (const { ruleObj, item } of fetchResult.fetched) {
+                fetchedRules.push(ruleObj);
+                saveRuleFile(ruleObj, root, this.log.bind(this), item.pxObjClass, item.pyRuleName);
+
+                // Sub-rule expansion for Class rules (existing logic preserved)
+                const isClassRule = item.pxObjClass === "Rule-OBJ-CLASS"
+                  || item.pxObjClass === "Rule-Obj-Class"
+                  || ruleObj.pxObjClass === "Rule-Obj-Class";
+                if (isClassRule) {
+                  const targetClassName = (ruleObj.pyClassName as string) || item.pyClassName;
+                  if (targetClassName) {
+                    const subRules = await fetchRuleTypesInParallel(
+                      targetClassName, pegaClient, visitedKeys, this.log.bind(this),
+                    );
+                    for (const sr of subRules) {
+                      saveRuleFile(sr.rule, root, this.log.bind(this), sr.ruleType);
+                      fetchedRules.push(sr.rule);
+                    }
+                  }
+                }
+              }
+            }
+
+            totalFetchedInRun = fetchedRules.length;
+
+            // Phase 4: NDJSON Ingest — single stream, no nextBatch loop
+            if (fetchedRules.length > 0) {
+              this.log(`[Pega Indexer] Ingesting ${fetchedRules.length} rules via NDJSON stream...`);
+              report.report({ message: `Ingesting ${fetchedRules.length} rules into KB...` });
+
+              const batchChecksums: Record<string, string> = {};
+              const batchVersions: Record<string, string> = {};
+              for (const rule of fetchedRules) {
+                const objClass = (rule as any).pxObjClass || '';
+                const className = (rule as any).pyClassName || '';
+                const rName = (rule as any).pyRuleName || (rule as any).pyPropertyName || (rule as any).pyActivityName || (rule as any).pyFlowName || (rule as any).pyModelName || '';
+                const fqn = `${objClass}:${className}:${rName}`;
+                const chk = computeRuleChecksum(rule as Record<string, unknown>);
+                if (chk) { batchChecksums[fqn] = chk; }
+                const ver = (rule as any).pyRuleVersion || (rule as any).pyVersion || '';
+                if (ver) { batchVersions[fqn] = ver; }
+              }
+
+              const { PegaStreamIngester } = await import("./PegaStreamIngester");
+              const ingester = new PegaStreamIngester(pegaClient.getBackendUrlPublic());
+              try {
+                const streamRes = await ingester.streamIngest(
+                  fetchedRules, projectId, batchChecksums, batchVersions,
+                  Array.from(visitedKeys), this.log.bind(this),
+                );
+                totalStoredInDb = streamRes.totalRulesInDb || streamRes.stored || fetchedRules.length;
+                if (streamRes.totalKbEntriesInDb) { totalKbInDb = streamRes.totalKbEntriesInDb; }
+                if (streamRes.totalGraphNodesInDb) { totalGraphInDb = streamRes.totalGraphNodesInDb; }
+                // SA4E-94: nextBatch is intentionally NOT consumed — enumeration is complete
+              } catch (streamErr: any) {
+                this.log(`[Pega Indexer] ⚠️ Stream ingest failed: ${streamErr.message}`);
+              }
+            }
+
+            this.log(`[Pega Indexer] ✅ Crawl finished. Total fetched: ${totalFetchedInRun} from ${hierarchy.ruleSets.length} RuleSets`);
+            return `🏛️ Pega Project Detected: "pega:${rawProjectId}" → "${projectId}" — Ingested ${totalFetchedInRun} rules (Total in KB: ${totalStoredInDb} Rules, ${totalKbInDb} KB Entries, ${totalGraphInDb} Graph Nodes)`;
         } catch (err: any) {
             this.log(`[Pega Indexer] ❌ Fatal indexing error: ${err.message}`);
             return `❌ Pega Server Connection Failed: ${err.message}. Indexing ABORTED.`;

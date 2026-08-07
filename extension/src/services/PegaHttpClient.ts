@@ -5,6 +5,7 @@
 import * as vscode from "vscode";
 import { createHash } from "crypto";
 import { SECRET_KEYS } from "../models";
+import type { RuleSetRuleSummary } from "../models";
 import { setProjectId } from "../extension";
 import { resolvePegaHierarchy, type HierarchyResult } from "./PegaHierarchyResolver";
 
@@ -400,6 +401,35 @@ export class PegaHttpClient {
       }
     }
     throw new Error(`POST /rules/listRules failed:\n  ${logs.join("\n  ")}`);
+  }
+
+  /**
+   * Enumerate ALL rules belonging to a specific RuleSet via Service 10.
+   * Wraps listRulesByFilter() with pyRuleSet filter (SA4E-94, BR-13).
+   * @param ruleSetName - RuleSet name (e.g., "HRAppsV2")
+   * @param ruleSetVersion - RuleSet version (e.g., "01-02") — reserved for future filter
+   * @param pageSize - Records per page (default 200, BR-02)
+   * @param pageIndex - 1-based page number
+   * @returns Paginated response with rule summaries and pxMore flag
+   */
+  public async listRulesByRuleSet(
+    ruleSetName: string,
+    ruleSetVersion: string,
+    pageSize = 200,
+    pageIndex = 1,
+  ): Promise<{ pxResults: RuleSetRuleSummary[]; pxMore: boolean; totalCount?: number }> {
+    const result = await this.listRulesByFilter("Rule-", "pyRuleSet", ruleSetName, pageSize, pageIndex);
+    // Cast generic records to RuleSetRuleSummary — server returns these fields
+    const typed = result.pxResults.map((r) => ({
+      pzInsKey: String(r.pzInsKey || ''),
+      pxObjClass: String(r.pxObjClass || ''),
+      pyClassName: String(r.pyClassName || ''),
+      pyRuleName: String(r.pyRuleName || ''),
+      pyRuleSet: String(r.pyRuleSet || ruleSetName),
+      pyRuleSetVersion: String(r.pyRuleSetVersion || ruleSetVersion),
+      pyLabel: r.pyLabel ? String(r.pyLabel) : undefined,
+    }));
+    return { pxResults: typed, pxMore: result.pxMore, totalCount: result.totalCount };
   }
 
   /**
