@@ -116,13 +116,13 @@ export class PegaSchemaGenerator {
     }
   }
 
-  /** Fetch full harness JSON and extract controls */
+  /** Fetch full harness JSON by pzInsKey and extract controls */
   private async fetchAndParse(
     ruleType: string, summary: HarnessSummary,
   ): Promise<ControlDefinition[]> {
-    const harnessJson = await this.pegaClient.queryRuleByTriple(
-      "Rule-HTML-Harness", ruleType, summary.pyRuleName || "RuleForm",
-    );
+    // SA4E-93 fix: Use getRuleByInsKey with pzInsKey from listRules results.
+    // queryRuleByTriple fails with 404 because harness resolution needs exact insKey.
+    const harnessJson = await this.pegaClient.getRuleByInsKey(summary.pzInsKey);
     return this.sectionParser.extractControls(harnessJson);
   }
 

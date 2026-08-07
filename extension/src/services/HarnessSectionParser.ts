@@ -30,21 +30,34 @@ const SECTION_KEYS = ["pyHeaderSection", "pyContentSection", "pyFooterSection"];
 export class HarnessSectionParser {
   /**
    * Extract all UI controls from a raw harness JSON object.
-   * Recursively walks sections and layouts.
+   * Handles multiple Pega harness structures:
+   * 1. pyHeaderSection/pyContentSection/pyFooterSection (design-time sections)
+   * 2. pyLayouts / pxLayouts at top-level (actual rule JSON from Service 1)
    * @param harnessJson Full harness JSON from Pega
    * @returns Flat array of control definitions (deduplicated by fieldName)
    */
   public extractControls(harnessJson: Record<string, unknown>): ControlDefinition[] {
     const controls: ControlDefinition[] = [];
+    // Path 1: Named section keys (pyHeaderSection, pyContentSection, pyFooterSection)
     for (const key of SECTION_KEYS) {
       const section = harnessJson[key];
       if (section) { controls.push(...this.parseSection(section)); }
     }
-    // Also check pyLayouts (alternative harness structure)
+    // Path 2: Top-level pyLayouts (real harness JSON from Pega Service 1)
     if (Array.isArray(harnessJson.pyLayouts)) {
       for (const layout of harnessJson.pyLayouts) {
         controls.push(...this.parseSection(layout));
       }
+    }
+    // Path 3: Top-level pxLayouts (alternative key used in some Pega versions)
+    if (Array.isArray(harnessJson.pxLayouts)) {
+      for (const layout of harnessJson.pxLayouts) {
+        controls.push(...this.parseSection(layout));
+      }
+    }
+    // Path 4: Deep scan fallback for non-standard harness structures
+    if (controls.length === 0) {
+      controls.push(...this.deepScanForControls(harnessJson));
     }
     return this.deduplicateByFieldName(controls);
   }
@@ -83,7 +96,7 @@ export class HarnessSectionParser {
     }
   }
 
-  /** Recurse into nested pySections and pyLayouts */
+  /** Recurse into nested pySections, pyLayouts, and pxLayouts */
   private extractFromNestedSections(
     sec: Record<string, unknown>, out: ControlDefinition[],
   ): void {
@@ -94,6 +107,11 @@ export class HarnessSectionParser {
     const pyLayouts = sec.pyLayouts;
     if (Array.isArray(pyLayouts)) {
       for (const layout of pyLayouts) { out.push(...this.parseSection(layout)); }
+    }
+    // SA4E-93 fix: Also check pxLayouts (used in real Pega harness JSON)
+    const pxLayouts = sec.pxLayouts;
+    if (Array.isArray(pxLayouts)) {
+      for (const layout of pxLayouts) { out.push(...this.parseSection(layout)); }
     }
   }
 
@@ -143,6 +161,31 @@ export class HarnessSectionParser {
     if (props.pyPropertyMode === "PageList") { return "PageList"; }
     if (props.pyPropertyMode === "PageGroup") { return "PageGroup"; }
     return "Unknown";
+  }
+
+  /**
+   * Deep scan fallback: walk all object/array values recursively to find controls.
+   * Handles non-standard harness structures where controls are deeply nested.
+   */
+  private deepScanForControls(obj: Record<string, unknown>): ControlDefinition[] {
+    const controls: ControlDefinition[] = [];
+    for (const [key, value] of Object.entries(obj)) {
+      if (SECTION_KEYS.includes(key) || key === "pyLayouts" || key === "pxLayouts") { continue; }
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          if (item && typeof item === "object") {
+            controls.push(...this.parseSection(item));
+          }
+        }
+      } else if (value && typeof value === "object") {
+        // Check if this object itself looks like a section (has pyControls or pyLayouts)
+        const candidate = value as Record<string, unknown>;
+        if (candidate.pyControls || candidate.pyLayouts || candidate.pxLayouts || candidate.pySections) {
+          controls.push(...this.parseSection(candidate));
+        }
+      }
+    }
+    return controls;
   }
 
   /** Remove duplicate controls keeping first occurrence per fieldName */
