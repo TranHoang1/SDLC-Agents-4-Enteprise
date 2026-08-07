@@ -18,6 +18,7 @@ export interface IndexOptions {
     code: boolean;
     documents: boolean;
     sync: boolean;
+    schemas: boolean;
 }
 
 export type ProgressReporter = vscode.Progress<{ message?: string }>;
@@ -65,6 +66,12 @@ export class IndexingService {
                     results.push(pegaSummary);
                 }
 
+                // SA4E-93: Generate JSON Schemas from Pega RuleForms
+                if (options.schemas && secrets) {
+                    const schemaSummary = await this.indexPegaSchemas(root, report, secrets);
+                    if (schemaSummary) { results.push(schemaSummary); }
+                }
+
                 if (options.code) {
                     report.report({ message: "Scanning and uploading source code files..." });
                     const res = await this.httpClient.uploadSourceFiles(report, token);
@@ -76,7 +83,10 @@ export class IndexingService {
                 }
                 if (options.sync) {
                     report.report({ message: "Syncing code symbols to memory..." });
-                    results.push("✅ Code symbol sync triggered");
+                    const syncResult = await this.httpClient.syncCodeSymbols();
+                    results.push(syncResult
+                        ? `✅ Code symbol sync: ${syncResult}`
+                        : "⚠️ Code symbol sync failed — run manually via mem_sync_code");
                 }
             }
         );
@@ -142,7 +152,13 @@ export class IndexingService {
 
             const seedSet = new Set<string>(hierarchy.seeds);
             for (const ct of caseTypes) {
-                seedSet.add(`RULE-OBJ-CLASS ${ct}`);
+                // Only add case types with FQN-looking names (contain "-")
+                // Short labels from pega-project.json are superseded by pyWorkMetaData FQN (already in seeds)
+                const insKey = `RULE-OBJ-CLASS ${ct}`;
+                if (ct.includes("-") && !seedSet.has(insKey)) {
+                    seedSet.add(insKey);
+                }
+                // Short names without "-" are skipped — hierarchy already resolved FQN from pyWorkMetaData
             }
             const seeds = Array.from(seedSet);
 
@@ -312,6 +328,35 @@ export class IndexingService {
         } catch (err: any) {
             this.log(`[Pega Indexer] ❌ Fatal indexing error: ${err.message}`);
             return `❌ Pega Server Connection Failed: ${err.message}. Indexing ABORTED.`;
+        }
+    }
+
+    /** SA4E-93: Generate JSON Schemas from Pega RuleForms */
+    private async indexPegaSchemas(
+        root: string, report: ProgressReporter, secrets: vscode.SecretStorage,
+    ): Promise<string | null> {
+        try {
+            report.report({ message: "Generating Pega rule schemas..." });
+            const { PegaHttpClient } = await import("./PegaHttpClient");
+            const { HarnessSectionParser } = await import("./HarnessSectionParser");
+            const { ControlTypeMapper } = await import("./ControlTypeMapper");
+            const { SchemaWriter } = await import("./SchemaWriter");
+            const { PegaSchemaGenerator } = await import("./PegaSchemaGenerator");
+            const pegaClient = new PegaHttpClient(secrets, this.outputChannel);
+            const generator = new PegaSchemaGenerator(
+                pegaClient,
+                new HarnessSectionParser(),
+                new ControlTypeMapper(),
+                new SchemaWriter(),
+                root,
+                this.log.bind(this),
+            );
+            const result = await generator.generateSchemas(report);
+            const failMsg = result.schemasFailed > 0 ? ` (${result.schemasFailed} failed)` : "";
+            return `📐 Pega Rule Schemas: Generated ${result.schemasGenerated} schemas for ${result.uniqueRuleTypes} rule types${failMsg}`;
+        } catch (err: any) {
+            this.log(`[Schema Indexer] ❌ Schema generation error: ${err.message}`);
+            return `❌ Pega Schema Generation Failed: ${err.message}`;
         }
     }
 

@@ -344,9 +344,72 @@ export class PegaHttpClient {
   }
 
   /**
+   * Service 10: POST /rules/listRules
+   * List rules matching a property filter with pagination (SA4E-93).
+   * @param objClass Pega rule class (e.g., "Rule-HTML-Harness")
+   * @param filterPropName Property to filter on (e.g., "pyStreamName")
+   * @param filterPropValue Value to match (e.g., "RuleForm")
+   * @param pageSize Records per page (default 50, BR-05)
+   * @param pageIndex 1-based page number (default 1)
+   * @returns Paginated response with pxMore flag
+   */
+  public async listRulesByFilter(
+    objClass: string,
+    filterPropName: string,
+    filterPropValue: string,
+    pageSize = 50,
+    pageIndex = 1,
+  ): Promise<{ pxResults: Record<string, unknown>[]; pxMore: boolean; totalCount?: number }> {
+    const authHeader = await this.getAuthHeader();
+    const logs: string[] = [];
+    for (const prefix of this.getCustomRestPrefixes()) {
+      const queryParams = `ObjClass=${encodeURIComponent(objClass)}&FilterPropName=${encodeURIComponent(filterPropName)}&FilterPropValue=${encodeURIComponent(filterPropValue)}&PageSize=${pageSize}&PageIndex=${pageIndex}&RequestClass=${encodeURIComponent(objClass)}`;
+      const url = `${prefix}/rules/listRules?${queryParams}`;
+      const body = {
+        ruleJson: JSON.stringify({
+          ObjClass: objClass,
+          FilterPropName: filterPropName,
+          FilterPropValue: filterPropValue,
+          PageSize: pageSize,
+          PageIndex: pageIndex,
+        }),
+      };
+      try {
+        const res = await this.fetchWithRetry(url, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify(body),
+        });
+        const text = await res.text();
+        this.log(`[PegaHttpClient] 📡 POST ${url} => HTTP ${res.status} (${text.length} bytes)`);
+        if (res.ok) {
+          this.activePrefix = prefix;
+          const json = JSON.parse(text) as Record<string, unknown>;
+          const pxResults = (json.pxResults || json.results || []) as Record<string, unknown>[];
+          const pxMore = json.pxMore === true || json.pxMore === "true";
+          const totalCount = typeof json.totalCount === "number" ? json.totalCount : undefined;
+          return { pxResults: Array.isArray(pxResults) ? pxResults : [], pxMore, totalCount };
+        }
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Auth Error"}`);
+        }
+        logs.push(`POST ${url} => HTTP ${res.status}: ${text.substring(0, 150)}`);
+      } catch (err: any) {
+        if (err.message.includes("HTTP 401") || err.message.includes("HTTP 403")) { throw err; }
+        logs.push(`POST ${url} => Error: ${err.message}`);
+      }
+    }
+    throw new Error(`POST /rules/listRules failed:\n  ${logs.join("\n  ")}`);
+  }
+
+  /**
    * Truy vấn tất cả các Rule của 1 loại (Rule-Obj-Activity, Rule-Obj-Flow, Rule-Obj-Model...) thuộc về 1 Class cụ thể.
    */
   public async getClassRules(className: string, ruleType: string, pageSize = 200): Promise<Record<string, unknown>[]> {
+    // Skip invalid class names that cause 404 on Pega server
+    if (!className || className === "@baseclass" || className.length < 3) {
+      return [];
+    }
     try {
       const data = await this.listApplicationRules(ruleType, className, pageSize, 1);
       const pxResults = (data.pxResults || data.pxResult || data.rules || data.properties || []) as Record<string, unknown>[];
