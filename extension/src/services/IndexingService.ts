@@ -1,20 +1,11 @@
 /**
- * IndexingService — orchestrates workspace indexing with injected dependencies.
+ * IndexingService — Orchestrates workspace indexing by delegating to specialized indexers.
+ * Each indexer (Schema, Document, PegaProject) is in its own file (≤200 LOC).
  */
 import * as vscode from "vscode";
-import * as path from "path";
 import * as fs from "fs";
-import * as crypto from "crypto";
+import * as path from "path";
 import { IndexerHttpClient } from "./IndexerHttpClient";
-import { fetchRulesInParallel, fetchRuleTypesInParallel, saveRuleFile, calibrateFetchConcurrency } from "./PegaCrawlHelper";
-import { enumerateAllRuleSets } from "./PegaRuleSetEnumerator";
-import { summaryToCrawlItem } from "../models";
-
-function computeRuleChecksum(rule: Record<string, unknown>): string {
-    return crypto.createHash('sha256').update(JSON.stringify(rule)).digest('hex');
-}
-import { discoverDocuments } from "../indexer-discovery";
-import { getProjectId, setProjectId } from "../extension";
 
 export interface IndexOptions {
     code: boolean;
@@ -31,368 +22,137 @@ export class IndexingService {
         private readonly outputChannel?: vscode.OutputChannel
     ) {}
 
-    private walkDir(dir: string): string[] {
-        const results: string[] = [];
-        try {
-            const entries = fs.readdirSync(dir, { withFileTypes: true });
-            for (const e of entries) {
-                const fp = path.join(dir, e.name);
-                if (e.isDirectory()) results.push(...this.walkDir(fp));
-                else results.push(fp);
-            }
-        } catch { /* ignore */ }
-        return results;
+    private log(msg: string): void {
+        if (this.outputChannel) { this.outputChannel.appendLine(msg); }
+        else { console.log(msg); }
     }
 
-    private log(msg: string): void {
-        if (this.outputChannel) {
-            this.outputChannel.appendLine(msg);
-        } else {
-            console.log(msg);
-        }
+    /** Build a human-readable label describing which tasks are selected. */
+    private describeTasks(options: IndexOptions): string {
+        const tasks: string[] = [];
+        if (options.schemas) { tasks.push("Pega Rule Schema Generation"); }
+        if (options.code) { tasks.push("Source Code Indexing"); }
+        if (options.documents) { tasks.push("Document Indexing"); }
+        if (options.sync) { tasks.push("Code Symbol Sync"); }
+        if (tasks.length === 0) { return "Workspace Indexing"; }
+        if (tasks.length === 1) { return tasks[0]; }
+        return "Workspace Indexing";
     }
 
     async indexWorkspace(root: string, options: IndexOptions, token?: string, secrets?: vscode.SecretStorage): Promise<string[]> {
         const results: string[] = [];
+
+        // Auto-enable schema generation if no schemas exist yet
+        if (!options.schemas && secrets && !this.hasExistingSchemas(root)) {
+            options.schemas = true;
+            this.log("[IndexingService] Auto-enabling schema generation (no schemas found in workspace).");
+        }
+
         if (this.outputChannel) {
             this.outputChannel.show(true);
-            this.outputChannel.appendLine("=== Workspace Indexing Started ===\n");
+            this.outputChannel.appendLine(`=== ${this.describeTasks(options)} Started ===\n`);
         }
 
         await vscode.window.withProgress(
-            { location: vscode.ProgressLocation.Notification, title: "Indexing workspace...", cancellable: false },
+            { location: vscode.ProgressLocation.Notification, title: "SDLC Agents", cancellable: false },
             async (report) => {
-                // Crawl and index Pega Project rules if Pega project is present
-                const pegaSummary = await this.indexPegaProject(root, report, secrets);
-                if (pegaSummary) {
-                    results.push(pegaSummary);
-                }
-
-                // SA4E-93: Generate JSON Schemas from Pega RuleForms
                 if (options.schemas && secrets) {
-                    const schemaSummary = await this.indexPegaSchemas(root, report, secrets);
-                    if (schemaSummary) { results.push(schemaSummary); }
+                    const summary = await this.runSchemaIndexer(root, report, secrets);
+                    if (summary) { results.push(summary); }
                 }
 
+                // Pega project: rules ARE the code — detect and adjust behavior
+                const isPegaProject = this.isPegaProject(root);
+                let pegaRulesIndexed = false;
+
+                if (options.sync) {
+                    const pegaSummary = await this.runPegaProjectIndexer(root, report, secrets);
+                    if (pegaSummary) { results.push(pegaSummary); pegaRulesIndexed = true; }
+                }
                 if (options.code) {
-                    report.report({ message: "Scanning and uploading source code files..." });
-                    const res = await this.httpClient.uploadSourceFiles(report, token);
-                    results.push(res.summary);
+                    if (isPegaProject) {
+                        results.push(pegaRulesIndexed
+                            ? "✅ Source code: Pega rules are the source code — already indexed above"
+                            : "ℹ️ Pega project detected — rules are indexed via Sync option");
+                    } else {
+                        report.report({ message: "Scanning and uploading source code files..." });
+                        const res = await this.httpClient.uploadSourceFiles(report, token);
+                        results.push(res.summary);
+                    }
                 }
                 if (options.documents) {
                     report.report({ message: "Discovering documents..." });
-                    results.push(await this.indexDocuments(root, report, token));
+                    const { DocumentIndexer } = await import("./DocumentIndexer");
+                    const docIndexer = new DocumentIndexer(this.httpClient);
+                    results.push(await docIndexer.run(root, report, token));
                 }
                 if (options.sync) {
-                    report.report({ message: "Syncing code symbols to memory..." });
-                    const syncResult = await this.httpClient.syncCodeSymbols();
-                    results.push(syncResult
-                        ? `✅ Code symbol sync: ${syncResult}`
-                        : "⚠️ Code symbol sync failed — run manually via mem_sync_code");
+                    if (isPegaProject) {
+                        results.push("✅ Code symbol sync: Pega rules projected to KB graph during indexing");
+                    } else {
+                        report.report({ message: "Syncing code symbols to memory..." });
+                        const syncResult = await this.httpClient.syncCodeSymbols();
+                        results.push(syncResult
+                            ? `✅ Code symbol sync: ${syncResult}`
+                            : "⚠️ Code symbol sync failed — run manually via mem_sync_code");
+                    }
                 }
             }
         );
-
         return results;
     }
 
-    private async indexPegaProject(
-        root: string,
-        report: ProgressReporter,
-        secrets?: vscode.SecretStorage
-    ): Promise<string | null> {
-        let appName = "";
-        let pzInsKey = "";
-        let operatorId = "";
-        let operatorInsKey = "";
-        let caseTypes: string[] = [];
-
-        try {
-            const jsonUri = vscode.Uri.file(path.join(root, "pega-project.json"));
-            const raw = await vscode.workspace.fs.readFile(jsonUri);
-            const json = JSON.parse(Buffer.from(raw).toString("utf-8"));
-            if (json.isPegaProject) {
-                appName = json.applicationName || "";
-                operatorId = json.operatorId || "";
-                operatorInsKey = json.operatorInsKey || "";
-                pzInsKey = json.pzInsKey || json.applicationInsKey || (appName ? `RULE-APPLICATION ${appName.toUpperCase()}` : "");
-                if (Array.isArray(json.caseTypes)) {
-                    caseTypes = json.caseTypes.map((c: any) => c.caseTypeID || c.name);
-                }
-            }
-        } catch {
-            try {
-                const xmlUri = vscode.Uri.file(path.join(root, "Application.xml"));
-                const raw = await vscode.workspace.fs.readFile(xmlUri);
-                const content = Buffer.from(raw).toString("utf-8");
-                const m = content.match(/<application\s+name=['"]([^'"]+)['"]/i);
-                if (m) {
-                    appName = m[1];
-                    pzInsKey = `RULE-APPLICATION ${appName.toUpperCase()}`;
-                }
-            } catch { /* not a Pega project */ }
-        }
-
-        if (!appName) { return null; }
-
-        this.log(`[Pega Indexer] 🏛️ Pega Project Detected: "pega:${appName}"`);
-        report.report({ message: `🏛️ Pega Project Detected: pega:${appName} — Crawling Pega rules...` });
-
-        if (!secrets) {
-            this.log(`[Pega Indexer] ⚠️ Credentials not available in SecretStorage. Skipping live fetch.`);
-            return `🏛️ Pega Project Detected: pega:${appName} (${caseTypes.length} CaseTypes) — Metadata in pega-project.json`;
-        }
-
-        try {
-            const PegaHttpClient = (await import("./PegaHttpClient")).PegaHttpClient;
-            const pegaClient = new PegaHttpClient(secrets, this.outputChannel);
-
-            // Deterministic 4-Step Resolution Pipeline:
-            // 1. Account (Operator ID) => 2. Access Group => 3. Application Rule => 4. RuleSets & Rules/Data
-            this.log(`[Pega Indexer] 🔄 Resolving Deterministic Pega Hierarchy (Account -> Access Group -> App Rule -> RuleSets -> Rules)...`);
-            const hierarchy = await pegaClient.resolveDeterministicPegaHierarchy(operatorId || "SSA@TGB");
-
-            const seedSet = new Set<string>(hierarchy.seeds);
-            for (const ct of caseTypes) {
-                // Only add case types with FQN-looking names (contain "-")
-                // Short labels from pega-project.json are superseded by pyWorkMetaData FQN (already in seeds)
-                const insKey = `RULE-OBJ-CLASS ${ct}`;
-                if (ct.includes("-") && !seedSet.has(insKey)) {
-                    seedSet.add(insKey);
-                }
-                // Short names without "-" are skipped — hierarchy already resolved FQN from pyWorkMetaData
-            }
-            const seeds = Array.from(seedSet);
-
-            this.log(`[Pega Indexer] Resolved Deterministic Queue (${seeds.length} items, App: "${hierarchy.appName}", RuleSets: ${hierarchy.ruleSets.join(", ") || "Auto"}):`);
-            for (const s of seeds) {
-                this.log(`  - ${s}`);
-            }
-
-            const rawProjectId = appName || hierarchy.appName;
-            if (!rawProjectId) {
-                this.log(`[Pega Indexer] ⚠️ Could not resolve Pega Application Name for Project ID. Aborting Pega index.`);
-                return null;
-            }
-            const projectId = crypto.createHash('sha256').update('pega:' + rawProjectId).digest('hex').slice(0, 12);
-            this.log(`[Pega Indexer] 📌 Project ID: "pega:${rawProjectId}" → "${projectId}"`);
-            // Update extension runtime project_id so admin panels use correct scope
-            setProjectId(projectId);
-
-            // SA4E-94: Enumerate-then-fetch pipeline (replaces iterative blind dependency crawl)
-            const visitedKeys = new Set<string>();
-            let totalFetchedInRun = 0;
-            let totalStoredInDb = 0;
-            let totalKbInDb = 0;
-            let totalGraphInDb = 0;
-
-            // Phase 2: RuleSet Enumeration — discover ALL rules upfront
-            report.report({ message: `Enumerating rules from ${hierarchy.ruleSets.length} RuleSets...` });
-            const enumeratedMap = await enumerateAllRuleSets(
-              hierarchy.ruleSets, pegaClient, this.log.bind(this),
-            );
-
-            // Fallback (AF-03): if enumeration returns 0 rules, use seeds as minimal crawl set
-            if (enumeratedMap.size === 0 && seeds.length > 0) {
-              this.log(`[Pega Indexer] ⚠️ Enumeration returned 0 rules. Falling back to seed-based crawl.`);
-              // Convert seeds to crawlPlan via backend (backward compat)
-              const plan = await pegaClient.crawlPlan({ projectId, ruleKeys: seeds, visitedKeys: [] });
-              for (const item of plan.missing) {
-                enumeratedMap.set(item.insKey, {
-                  pzInsKey: item.insKey, pxObjClass: item.pxObjClass,
-                  pyClassName: item.pyClassName, pyRuleName: item.pyRuleName,
-                  pyRuleSet: '', pyRuleSetVersion: '',
-                });
-              }
-            }
-
-            // Convert to CrawlPlanItem array for fetchRulesInParallel
-            const crawlSet = Array.from(enumeratedMap.values()).map(summaryToCrawlItem);
-            this.log(`[Pega Indexer] 📋 Crawl set: ${crawlSet.length} rules to fetch`);
-
-            // Phase 3: Calibrate concurrency + chunked content fetch
-            await calibrateFetchConcurrency(pegaClient, crawlSet.length, this.log.bind(this));
-
-            const CHUNK_SIZE = 50;
-            const fetchedRules: Record<string, unknown>[] = [];
-
-            for (let i = 0; i < crawlSet.length; i += CHUNK_SIZE) {
-              const chunk = crawlSet.slice(i, i + CHUNK_SIZE);
-              report.report({ message: `Fetching rule content (${i + chunk.length}/${crawlSet.length})...` });
-
-              // Mark items as visited before fetch to prevent duplicates
-              for (const item of chunk) { visitedKeys.add(item.insKey); }
-
-              const fetchResult = await fetchRulesInParallel(chunk, pegaClient, this.log.bind(this));
-              if (fetchResult.serverError) { throw new Error(fetchResult.serverError); }
-
-              // Save + expand Class rules
-              for (const { ruleObj, item } of fetchResult.fetched) {
-                fetchedRules.push(ruleObj);
-                saveRuleFile(ruleObj, root, this.log.bind(this), item.pxObjClass, item.pyRuleName);
-
-                // Sub-rule expansion for Class rules (existing logic preserved)
-                const isClassRule = item.pxObjClass === "Rule-OBJ-CLASS"
-                  || item.pxObjClass === "Rule-Obj-Class"
-                  || ruleObj.pxObjClass === "Rule-Obj-Class";
-                if (isClassRule) {
-                  const targetClassName = (ruleObj.pyClassName as string) || item.pyClassName;
-                  if (targetClassName) {
-                    const subRules = await fetchRuleTypesInParallel(
-                      targetClassName, pegaClient, visitedKeys, this.log.bind(this),
-                    );
-                    for (const sr of subRules) {
-                      saveRuleFile(sr.rule, root, this.log.bind(this), sr.ruleType);
-                      fetchedRules.push(sr.rule);
-                    }
-                  }
-                }
-              }
-            }
-
-            totalFetchedInRun = fetchedRules.length;
-
-            // Phase 4: NDJSON Ingest — single stream, no nextBatch loop
-            if (fetchedRules.length > 0) {
-              this.log(`[Pega Indexer] Ingesting ${fetchedRules.length} rules via NDJSON stream...`);
-              report.report({ message: `Ingesting ${fetchedRules.length} rules into KB...` });
-
-              const batchChecksums: Record<string, string> = {};
-              const batchVersions: Record<string, string> = {};
-              for (const rule of fetchedRules) {
-                const objClass = (rule as any).pxObjClass || '';
-                const className = (rule as any).pyClassName || '';
-                const rName = (rule as any).pyRuleName || (rule as any).pyPropertyName || (rule as any).pyActivityName || (rule as any).pyFlowName || (rule as any).pyModelName || '';
-                const fqn = `${objClass}:${className}:${rName}`;
-                const chk = computeRuleChecksum(rule as Record<string, unknown>);
-                if (chk) { batchChecksums[fqn] = chk; }
-                const ver = (rule as any).pyRuleVersion || (rule as any).pyVersion || '';
-                if (ver) { batchVersions[fqn] = ver; }
-              }
-
-              const { PegaStreamIngester } = await import("./PegaStreamIngester");
-              const ingester = new PegaStreamIngester(pegaClient.getBackendUrlPublic());
-              try {
-                const streamRes = await ingester.streamIngest(
-                  fetchedRules, projectId, batchChecksums, batchVersions,
-                  Array.from(visitedKeys), this.log.bind(this),
-                );
-                totalStoredInDb = streamRes.totalRulesInDb || streamRes.stored || fetchedRules.length;
-                if (streamRes.totalKbEntriesInDb) { totalKbInDb = streamRes.totalKbEntriesInDb; }
-                if (streamRes.totalGraphNodesInDb) { totalGraphInDb = streamRes.totalGraphNodesInDb; }
-                // SA4E-94: nextBatch is intentionally NOT consumed — enumeration is complete
-              } catch (streamErr: any) {
-                this.log(`[Pega Indexer] ⚠️ Stream ingest failed: ${streamErr.message}`);
-              }
-            }
-
-            this.log(`[Pega Indexer] ✅ Crawl finished. Total fetched: ${totalFetchedInRun} from ${hierarchy.ruleSets.length} RuleSets`);
-            return `🏛️ Pega Project Detected: "pega:${rawProjectId}" → "${projectId}" — Ingested ${totalFetchedInRun} rules (Total in KB: ${totalStoredInDb} Rules, ${totalKbInDb} KB Entries, ${totalGraphInDb} Graph Nodes)`;
-        } catch (err: any) {
-            this.log(`[Pega Indexer] ❌ Fatal indexing error: ${err.message}`);
-            return `❌ Pega Server Connection Failed: ${err.message}. Indexing ABORTED.`;
-        }
-    }
-
-    /** SA4E-93: Generate JSON Schemas from Pega RuleForms */
-    private async indexPegaSchemas(
+    /** Delegate to PegaSchemaIndexer — batch generate all RuleForm schemas. */
+    private async runSchemaIndexer(
         root: string, report: ProgressReporter, secrets: vscode.SecretStorage,
     ): Promise<string | null> {
         try {
-            report.report({ message: "Generating Pega rule schemas..." });
+            const config = vscode.workspace.getConfiguration("kiroSdlc");
+            const username = config.get<string>("pegaUsername", "");
+            const password = (await secrets.get("kiroSdlc.pegaPassword")) || "";
+            if (!username || !password) {
+                return "⚠️ Pega Schema: credentials not configured (set pegaUsername + password in settings)";
+            }
             const { PegaHttpClient } = await import("./PegaHttpClient");
-            const { HarnessSectionParser } = await import("./HarnessSectionParser");
-            const { ControlTypeMapper } = await import("./ControlTypeMapper");
-            const { SchemaWriter } = await import("./SchemaWriter");
-            const { PegaSchemaGenerator } = await import("./PegaSchemaGenerator");
+            const { PegaSchemaIndexer } = await import("./PegaSchemaIndexer");
             const pegaClient = new PegaHttpClient(secrets, this.outputChannel);
-            const generator = new PegaSchemaGenerator(
-                pegaClient,
-                new HarnessSectionParser(),
-                new ControlTypeMapper(),
-                new SchemaWriter(),
-                root,
-                this.log.bind(this),
-            );
-            const result = await generator.generateSchemas(report);
-            const failMsg = result.schemasFailed > 0 ? ` (${result.schemasFailed} failed)` : "";
-            return `📐 Pega Rule Schemas: Generated ${result.schemasGenerated} schemas for ${result.uniqueRuleTypes} rule types${failMsg}`;
+            const indexer = new PegaSchemaIndexer(this.httpClient, this.log.bind(this));
+            return await indexer.run(root, report, pegaClient);
         } catch (err: any) {
-            this.log(`[Schema Indexer] ❌ Schema generation error: ${err.message}`);
+            this.log(`[SchemaGen] ❌ Fatal error: ${err.message}`);
             return `❌ Pega Schema Generation Failed: ${err.message}`;
         }
     }
 
-    async indexDocuments(root: string, report: ProgressReporter, token?: string): Promise<string> {
-        const docs = discoverDocuments(root);
-        if (docs.length === 0) { return "ℹ️ No documents found in documents/ folder"; }
-
-        const mdDocs = docs.filter(d => d.format === "markdown");
-        const textDocs = docs.filter(d => d.format === "text");
-        const binaryDocs = docs.filter(d => d.format !== "markdown" && d.format !== "text");
-        report.report({ message: `Found ${docs.length} files (${binaryDocs.length} binary → server-side convert)` });
-
-        const channel = vscode.window.createOutputChannel("SDLC Indexing");
-
-        // Text formats: read content locally, send with content (Task 7: client only handles text)
-        const textWithContent = await this.readTextDocs(textDocs, root, channel);
-
-        // Binary formats: send file_path only — server handles conversion via ConvertToolResolver (Task 7)
-        const binaryForServer = binaryDocs.map(d => ({ ...d, content: undefined }));
-        for (const d of binaryForServer) { channel.appendLine(`  📤 Server-convert: ${d.path}`); }
-
-        const allDocsForIngest = [...mdDocs, ...textWithContent, ...binaryForServer];
-        report.report({ message: `Indexing ${allDocsForIngest.length} files...` });
-        const apiResult = await this.httpClient.ingestDocuments(allDocsForIngest, report, token);
-
-        // Server-side un-convertible files → hiển thị log cho user (Design R1/NFR-5)
-        if (apiResult.unconvertible.length > 0) {
-            channel.appendLine("");
-            channel.appendLine(`⚠️ ${apiResult.unconvertible.length} file(s) server không convert được (không index):`);
-            for (const u of apiResult.unconvertible) { channel.appendLine(`   - ${u.file} (reason=${u.reason})`); }
-            channel.show(true);
+    /** Delegate to PegaProjectIndexer — crawl and ingest Pega project rules. */
+    private async runPegaProjectIndexer(
+        root: string, report: ProgressReporter, secrets?: vscode.SecretStorage,
+    ): Promise<string | null> {
+        try {
+            const { PegaProjectIndexer } = await import("./PegaProjectIndexer");
+            const indexer = new PegaProjectIndexer(this.httpClient, this.outputChannel, this.log.bind(this));
+            return await indexer.run(root, report, secrets);
+        } catch (err: any) {
+            this.log(`[Pega Indexer] ❌ Fatal error: ${err.message}`);
+            return `❌ Pega Project Indexing Failed: ${err.message}`;
         }
-
-        const serverConverted = apiResult.ingested - mdDocs.length - textWithContent.length;
-        const skipped = binaryDocs.length - Math.max(serverConverted, 0);
-        return this.buildSummary(docs.length, mdDocs.length + textWithContent.length, Math.max(serverConverted, 0), skipped, apiResult.summary, []);
     }
 
-    private async readTextDocs(
-        textDocs: Array<{ path: string; type: string; ticket: string; format: string }>,
-        root: string, channel: vscode.OutputChannel,
-    ): Promise<Array<{ path: string; type: string; ticket: string; format: string; content: string }>> {
-        const results: Array<{ path: string; type: string; ticket: string; format: string; content: string }> = [];
-        for (const doc of textDocs) {
-            try {
-                const absPath = path.join(root, doc.path);
-                const raw = await vscode.workspace.fs.readFile(vscode.Uri.file(absPath));
-                results.push({ ...doc, content: Buffer.from(raw).toString("utf-8") });
-                channel.appendLine(`  📄 Text read: ${doc.path}`);
-            } catch (err) {
-                console.debug(`[IndexingService] readTextDocs failed for ${doc.path} (non-fatal): ${(err as Error).message}`);
-                channel.appendLine(`  ⚠️ Cannot read: ${doc.path}`);
-            }
-        }
-        return results;
+    /** Check KB for existing Pega rule schemas (via backend mem_search). */
+    private hasExistingSchemas(root: string): boolean {
+        // Synchronous check: look for schema files on disk as quick proxy.
+        // KB is the authoritative source, but sync check via HTTP is not possible here.
+        // Schema gen will also ingest into KB, so next run will find them.
+        const schemaDir = path.join(root, "schemas", "auto");
+        try {
+            const files = fs.readdirSync(schemaDir);
+            return files.some((f: string) => f.endsWith(".json"));
+        } catch { return false; }
     }
 
-    private buildSummary(
-        total: number, direct: number, converted: number, skipped: number,
-        apiSummary: string, errors: Array<{ file: string; error: string }>
-    ): string {
-        const summary = [
-            `✅ Documents: ${total} discovered`,
-            `   📄 Direct: ${direct}`,
-            `   🔄 Converted: ${converted}`,
-            `   ⏭️ Skipped: ${skipped}`,
-            `   ${apiSummary}`,
-        ];
-        if (errors.length > 0) {
-            summary.push(`   ⚠️ Errors:`);
-            for (const e of errors.slice(0, 5)) { summary.push(`      - ${path.basename(e.file)}: ${e.error}`); }
-            if (errors.length > 5) { summary.push(`      ... and ${errors.length - 5} more`); }
-        }
-        return summary.join("\n");
+    /** Detect if workspace is a Pega project (has pega-project.json). */
+    private isPegaProject(root: string): boolean {
+        try { return fs.existsSync(path.join(root, "pega-project.json")); }
+        catch { return false; }
     }
 }

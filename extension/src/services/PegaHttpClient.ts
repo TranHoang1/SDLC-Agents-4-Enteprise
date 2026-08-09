@@ -73,6 +73,13 @@ export class PegaHttpClient {
           const activeAccessGroup = data.pyAccessGroup || "";
           const appName = activeAccessGroup ? activeAccessGroup.split(":")[0] : "PegaApp";
           const appInsKey = `RULE-APPLICATION ${appName.toUpperCase()}`;
+          // Derive activePrefix from successful URL pattern (api vs PRRestService)
+          if (url.includes("/PRRestService/")) {
+            this.activePrefix = `${base}/PRRestService/CodeIntelligence/v1`;
+          } else {
+            this.activePrefix = `${base}/api/CodeIntelligence/v1`;
+          }
+          this.log(`[PegaHttpClient] ✅ getOperatorContext success — activePrefix set to ${this.activePrefix}`);
           return {
             operatorId,
             activeAccessGroup,
@@ -206,10 +213,13 @@ export class PegaHttpClient {
   /**
    * Service 1: GET /rules/{insKey}
    * Tải 100% nội dung Rule XML/JSON gốc theo insKey duy nhất.
+   * Iterates all prefixes — only throws immediately on auth errors (401/403)
+   * or server errors (5xx). A 404 or body-level error means "try next prefix".
    */
   public async getRuleByInsKey(insKey: string): Promise<Record<string, unknown>> {
     const authHeader = await this.getAuthHeader();
     const logs: string[] = [];
+
     for (const prefix of this.getCustomRestPrefixes()) {
       const url = `${prefix}/rules/${encodeURIComponent(insKey)}`;
       try {
@@ -218,43 +228,67 @@ export class PegaHttpClient {
         });
         const text = await res.text();
         this.log(`[PegaHttpClient] 📡 GET ${url} => HTTP ${res.status} (${text.length} bytes)`);
-        
+
+        // Auth errors — fatal, throw immediately
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Auth Error"}`);
+        }
+
+        // Server errors — fatal, throw immediately
+        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+        }
+
         if (res.ok) {
-          this.activePrefix = prefix;
           const json = JSON.parse(text) as Record<string, unknown>;
           if (json && !json.error && json.pyHTTPResponseCode !== "404" && json.pyHTTPResponseCode !== 404) {
+            // Real success — lock this prefix
+            this.activePrefix = prefix;
             return json;
           }
-          throw new Error(String(json.error || `Rule not found: ${insKey}`));
+          // Body says "not found" — active prefix means rule genuinely doesn't exist (SA4E-95)
+          if (prefix === this.activePrefix) {
+            throw new Error(`Rule not found: ${insKey}`);
+          }
+          logs.push(`GET ${url} => 200 but body error: ${String(json.error || 'pyHTTPResponseCode=404')}`);
+          continue; // try next prefix
         }
 
         if (res.status === 404) {
-          this.activePrefix = prefix;
-          throw new Error(`Rule not found: ${insKey}`);
-        }
-
-        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500 || res.status === 401 || res.status === 403) {
-          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+          // Active prefix 404 → rule genuinely not found, short-circuit (SA4E-95)
+          if (prefix === this.activePrefix) {
+            throw new Error(`Rule not found: ${insKey}`);
+          }
+          logs.push(`GET ${url} => HTTP 404`);
+          continue; // try next prefix
         }
 
         logs.push(`GET ${url} => HTTP ${res.status}: ${text.substring(0, 150)}`);
       } catch (err: any) {
-        if (err.message.includes("Rule not found") || err.message.includes("HTTP 504") || err.message.includes("HTTP 503") || err.message.includes("HTTP 502") || err.message.includes("HTTP 401")) {
+        // Re-throw auth/server/rule-not-found errors immediately
+        if (err.message.includes("HTTP 401") || err.message.includes("HTTP 403") ||
+            err.message.includes("HTTP 504") || err.message.includes("HTTP 503") ||
+            err.message.includes("HTTP 502") || err.message.includes("HTTP 500") ||
+            err.message.includes("Rule not found")) {
           throw err;
         }
         logs.push(`GET ${url} => Network Error: ${err.message}`);
       }
     }
-    throw new Error(`GET /rules/${insKey} failed:\n  ${logs.join("\n  ")}`);
+
+    // All prefixes exhausted without finding the rule
+    throw new Error(`Rule not found: ${insKey}\n  ${logs.join("\n  ")}`);
   }
 
   /**
    * Service 2: POST /rules/query
    * Truy vấn chính xác Rule theo bộ 3 pxObjClass, appliesTo, pyRuleName.
+   * Iterates all prefixes — only throws on auth/server errors.
    */
   public async queryRuleByTriple(pxObjClass: string, appliesTo: string, pyRuleName: string): Promise<Record<string, unknown>> {
     const authHeader = await this.getAuthHeader();
     const logs: string[] = [];
+
     for (const prefix of this.getCustomRestPrefixes()) {
       const queryParams = `pxObjClass=${encodeURIComponent(pxObjClass)}&appliesTo=${encodeURIComponent(appliesTo || "")}&pyRuleName=${encodeURIComponent(pyRuleName)}&RequestClass=${encodeURIComponent(pxObjClass)}&RequestAppliesTo=${encodeURIComponent(appliesTo || "")}&RequestRuleName=${encodeURIComponent(pyRuleName)}`;
       const url = `${prefix}/rules/query?${queryParams}`;
@@ -274,41 +308,71 @@ export class PegaHttpClient {
         const text = await res.text();
         this.log(`[PegaHttpClient] 📡 POST ${url} Payload: ${JSON.stringify(payload.ruleJson)} => HTTP ${res.status} (${text.length} bytes)`);
 
+        // Auth errors — fatal
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Auth Error"}`);
+        }
+
+        // Server errors — fatal
+        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+        }
+
         if (res.ok) {
-          this.activePrefix = prefix;
           if (!text || !text.trim()) {
-            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+            // Empty response on active prefix → rule genuinely not found (SA4E-95 short-circuit)
+            if (prefix === this.activePrefix) {
+              throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+            }
+            logs.push(`POST ${url} => 200 but empty body`);
+            continue;
           }
           let json: Record<string, unknown> = {};
           try {
             json = JSON.parse(text);
           } catch {
-            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+            if (prefix === this.activePrefix) {
+              throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+            }
+            logs.push(`POST ${url} => 200 but invalid JSON`);
+            continue;
           }
           if (json && !json.error && json.pyHTTPResponseCode !== "404" && json.pyHTTPResponseCode !== 404) {
+            // Real success — lock prefix
+            this.activePrefix = prefix;
             return json;
           }
-          throw new Error(String(json.error || `Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`));
+          // Body-level 404 on active prefix → rule genuinely doesn't exist, stop immediately
+          if (prefix === this.activePrefix) {
+            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+          }
+          logs.push(`POST ${url} => 200 but body error: ${String(json.error || 'pyHTTPResponseCode=404')}`);
+          continue;
         }
 
         if (res.status === 404) {
-          this.activePrefix = prefix;
-          throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
-        }
-
-        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500 || res.status === 401 || res.status === 403) {
-          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+          // Active prefix returns HTTP 404 → rule genuinely not found, short-circuit (SA4E-95)
+          if (prefix === this.activePrefix) {
+            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+          }
+          logs.push(`POST ${url} => HTTP 404`);
+          continue; // try next prefix
         }
 
         logs.push(`POST ${url} => HTTP ${res.status}: ${text.substring(0, 150)}`);
       } catch (err: any) {
-        if (err.message.includes("Rule not found") || err.message.includes("HTTP 504") || err.message.includes("HTTP 503") || err.message.includes("HTTP 502") || err.message.includes("HTTP 401")) {
+        if (err.message.includes("HTTP 401") || err.message.includes("HTTP 403") ||
+            err.message.includes("HTTP 504") || err.message.includes("HTTP 503") ||
+            err.message.includes("HTTP 502") || err.message.includes("HTTP 500") ||
+            err.message.includes("Rule not found for triple")) {
           throw err;
         }
         logs.push(`POST ${url} => Network Error: ${err.message}`);
       }
     }
-    throw new Error(`POST /rules/query failed:\n  ${logs.join("\n  ")}`);
+
+    // All prefixes exhausted without finding the rule
+    throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}\n  ${logs.join("\n  ")}`);
   }
 
   /**
@@ -366,20 +430,11 @@ export class PegaHttpClient {
     for (const prefix of this.getCustomRestPrefixes()) {
       const queryParams = `ObjClass=${encodeURIComponent(objClass)}&FilterPropName=${encodeURIComponent(filterPropName)}&FilterPropValue=${encodeURIComponent(filterPropValue)}&PageSize=${pageSize}&PageIndex=${pageIndex}&RequestClass=${encodeURIComponent(objClass)}`;
       const url = `${prefix}/rules/listRules?${queryParams}`;
-      const body = {
-        ruleJson: JSON.stringify({
-          ObjClass: objClass,
-          FilterPropName: filterPropName,
-          FilterPropValue: filterPropValue,
-          PageSize: pageSize,
-          PageIndex: pageIndex,
-        }),
-      };
       try {
         const res = await this.fetchWithRetry(url, {
           method: "POST",
           headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify(body),
+          body: "",
         });
         const text = await res.text();
         this.log(`[PegaHttpClient] 📡 POST ${url} => HTTP ${res.status} (${text.length} bytes)`);
@@ -387,7 +442,10 @@ export class PegaHttpClient {
           this.activePrefix = prefix;
           const json = JSON.parse(text) as Record<string, unknown>;
           const pxResults = (json.pxResults || json.results || []) as Record<string, unknown>[];
-          const pxMore = json.pxMore === true || json.pxMore === "true";
+          // Pega pxMore can be: true, "true", "Yes", "yes", or absent (heuristic: count >= pageSize)
+          const rawMore = json.pxMore;
+          const pxMore = rawMore === true || rawMore === "true" || rawMore === "Yes" || rawMore === "yes"
+            || (rawMore === undefined && Array.isArray(pxResults) && pxResults.length >= pageSize);
           const totalCount = typeof json.totalCount === "number" ? json.totalCount : undefined;
           return { pxResults: Array.isArray(pxResults) ? pxResults : [], pxMore, totalCount };
         }
@@ -405,12 +463,13 @@ export class PegaHttpClient {
 
   /**
    * Enumerate ALL rules belonging to a specific RuleSet via Service 10.
-   * Wraps listRulesByFilter() with pyRuleSet filter (SA4E-94, BR-13).
+   * Queries each concrete rule type separately since Pega listRules
+   * does not support abstract "Rule-" base class filtering (SA4E-94).
    * @param ruleSetName - RuleSet name (e.g., "HRAppsV2")
-   * @param ruleSetVersion - RuleSet version (e.g., "01-02") — reserved for future filter
+   * @param ruleSetVersion - RuleSet version (e.g., "01-02") — used for result enrichment
    * @param pageSize - Records per page (default 200, BR-02)
-   * @param pageIndex - 1-based page number
-   * @returns Paginated response with rule summaries and pxMore flag
+   * @param pageIndex - 1-based page number (applied per rule type)
+   * @returns Aggregated rule summaries from all concrete types and pxMore flag
    */
   public async listRulesByRuleSet(
     ruleSetName: string,
@@ -418,18 +477,40 @@ export class PegaHttpClient {
     pageSize = 200,
     pageIndex = 1,
   ): Promise<{ pxResults: RuleSetRuleSummary[]; pxMore: boolean; totalCount?: number }> {
-    const result = await this.listRulesByFilter("Rule-", "pyRuleSet", ruleSetName, pageSize, pageIndex);
-    // Cast generic records to RuleSetRuleSummary — server returns these fields
-    const typed = result.pxResults.map((r) => ({
-      pzInsKey: String(r.pzInsKey || ''),
-      pxObjClass: String(r.pxObjClass || ''),
-      pyClassName: String(r.pyClassName || ''),
-      pyRuleName: String(r.pyRuleName || ''),
-      pyRuleSet: String(r.pyRuleSet || ruleSetName),
-      pyRuleSetVersion: String(r.pyRuleSetVersion || ruleSetVersion),
-      pyLabel: r.pyLabel ? String(r.pyLabel) : undefined,
-    }));
-    return { pxResults: typed, pxMore: result.pxMore, totalCount: result.totalCount };
+    // Pega requires concrete rule classes — "Rule-" base returns 0 results
+    const CONCRETE_TYPES = [
+      "Rule-Obj-Property", "Rule-Obj-Activity", "Rule-Obj-Flow",
+      "Rule-Obj-Model", "Rule-HTML-Section", "Rule-Declare-Expressions",
+      "Rule-Obj-FieldValue", "Rule-Obj-Report-Definition", "Rule-Obj-Class",
+    ];
+    const allResults: RuleSetRuleSummary[] = [];
+    let anyMore = false;
+
+    // Query each rule type in parallel for this RuleSet
+    const typeResults = await Promise.all(
+      CONCRETE_TYPES.map(async (objClass) => {
+        try {
+          return await this.listRulesByFilter(objClass, "pyRuleSet", ruleSetName, pageSize, pageIndex);
+        } catch { return { pxResults: [] as Record<string, unknown>[], pxMore: false }; }
+      }),
+    );
+
+    for (const result of typeResults) {
+      if (result.pxMore) { anyMore = true; }
+      for (const r of result.pxResults) {
+        allResults.push({
+          pzInsKey: String(r.pzInsKey || ''),
+          pxObjClass: String(r.pxObjClass || ''),
+          pyClassName: String(r.pyClassName || ''),
+          pyRuleName: String(r.pyRuleName || ''),
+          pyRuleSet: String(r.pyRuleSet || ruleSetName),
+          pyRuleSetVersion: String(r.pyRuleSetVersion || ruleSetVersion),
+          pyLabel: r.pyLabel ? String(r.pyLabel) : undefined,
+        });
+      }
+    }
+
+    return { pxResults: allResults, pxMore: anyMore, totalCount: allResults.length };
   }
 
   /**

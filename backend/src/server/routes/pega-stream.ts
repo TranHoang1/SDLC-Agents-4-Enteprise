@@ -39,12 +39,30 @@ export function createPegaStreamRoutes(registry: ModuleRegistry, logger: Logger)
       return c.json({ data: null, error: { code: 'NOT_READY', message: 'Memory module not ready' } }, 503);
     }
 
-    const body = await c.req.text();
-    if (!body.trim()) {
+    // Stream body line-by-line to avoid OOM on large payloads (39K+ rules)
+    const reader = c.req.raw.body?.getReader();
+    if (!reader) {
       return c.json({ data: null, error: { code: 'NO_BODY', message: 'Request body is empty' } }, 400);
     }
 
-    const lines = body.split('\n').filter((l) => l.trim().length > 0);
+    // Read stream into lines incrementally (still buffers lines array, but not raw text)
+    const lines: string[] = [];
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n');
+      buffer = parts.pop() || '';
+      for (const p of parts) { if (p.trim()) lines.push(p); }
+    }
+    if (buffer.trim()) lines.push(buffer);
+
+    if (lines.length === 0) {
+      return c.json({ data: null, error: { code: 'NO_BODY', message: 'Request body is empty' } }, 400);
+    }
+
     const jobId = pegaJobStore.createJob(lines.length);
 
     logger.info({ jobId, lineCount: lines.length }, '[pega-stream] Job created, processing in background');

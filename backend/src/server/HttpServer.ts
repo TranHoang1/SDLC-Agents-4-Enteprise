@@ -25,6 +25,7 @@ import { validateJwtConfig, jwtAuth } from './middleware/jwt-auth.js';
 import { createKbApiRoutes, createToolsApiRoutes } from './routes/kb-api.js';
 import { createPegaApiRoutes } from './routes/pega-api.js';
 import { createPegaStreamRoutes } from './routes/pega-stream.js';
+import { createPegaSchemaRoutes } from './routes/pega-schema-routes.js';
 import { createKnowledgeApiRoutes } from '../knowledge/routes.js';
 import { bodyLimit } from 'hono/body-limit';
 import { getMcpServer, registerTransport } from './mcpServer.js';
@@ -63,7 +64,11 @@ export class HttpServer {
     const toolRouter = this.options.toolRouter ?? new ToolRouter(this.options.registry, this.logger);
 
     app.use('*', securityHeaders);
-    app.use('*', bodyLimit({ maxSize: 100 * 1024 * 1024 }));
+    // Exempt streaming ingest from body limit — it uses ReadableStream getReader() directly
+    app.use('*', async (c, next) => {
+      if (c.req.path === '/api/v1/pega/ingest-stream') return next();
+      return bodyLimit({ maxSize: 100 * 1024 * 1024 })(c, next);
+    });
     app.use('*', createRequestLogger(this.logger));
     app.use('/api/admin/*', rateLimiter);
     app.use('/api/admin/auth/login', rateLimiter);
@@ -88,6 +93,10 @@ export class HttpServer {
     // SA4E-92: NDJSON streaming ingest — constant memory regardless of batch size
     const pegaStreamRoutes = createPegaStreamRoutes(this.options.registry, this.logger);
     app.route('/api/v1', pegaStreamRoutes);
+
+    // SA4E-95: Schema generation from harness JSON (backend analysis, no Pega API calls)
+    const pegaSchemaRoutes = createPegaSchemaRoutes(this.logger);
+    app.route('/api/v1', pegaSchemaRoutes);
 
     // SA4E-85 Phase 0: Backend-Driven Knowledge REST API (threads/messages/checkpoint/events/artifacts/agents)
     const knowledgeModule = this.options.registry.getModule('knowledge') as any;

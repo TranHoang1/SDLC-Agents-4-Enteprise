@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.23.0] - 2026-08-09
+
+### Added
+- **SA4E-95: Unified Schema Generation Pipeline** — single extension→backend flow replaces dual-flow (crawl ALL RuleForm harnesses → backend parse → write file + KB ingest)
+- **KB Ingest for Schemas** — generated schemas stored in Knowledge Base (type=PEGA_RULE, tags=pega,schema) for agent discovery via `mem_search`
+- **Graph Edge Creation** — `PegaGraphProjector` creates dependency edges (CALLS, INHERITS, HAS_PROPERTY, CONNECTS_TO, EVALUATES, USES) during rule ingest
+- **Schema-first QuickPick** — "Index Pega Rule Schemas" is first option, selected by default, auto-enables when no schemas exist
+- **Pega Project Detection** — shows "rules are the source code" instead of "No source files found" for Pega workspaces
+
+### Changed
+- **Dynamic banner title** — "Pega Rule Schema Generation Started" (not generic "Workspace Indexing")
+- **File splits (≤200 LOC)** — IndexingService→4 files, PegaService→3 files
+- **All log messages in English** — removed Vietnamese runtime messages
+- **IndexerHttpClient.getBaseUrl()** — exposed backend URL for schema pipeline
+
+### Fixed
+- **Backend route 404** — schema generate route requires `/api/v1` prefix
+
 ## [1.21.0] - 2026-08-02
 
 ### Added

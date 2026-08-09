@@ -1,0 +1,165 @@
+
+=== Step 1: Launch Chrome ===
+[BrowserInspector] Launching Chrome: C:\Program Files\Google\Chrome\Application\chrome.exe
+[BrowserInspector] Chrome launched.
+✅ Chrome launched
+
+=== Step 2: Login to Pega ===
+[BrowserInspector] Logging in: https://zdk8budo.pegaacademy.net/prweb/PRServlet
+[BrowserInspector] ✅ Logged into Pega Dev Studio.
+✅ Login successful
+
+=== Step 3: Inspect Harness ===
+[BrowserInspector] Inspecting: Data-Admin-Operator-ID
+[BrowserInspector] Opening: ruleClass=Rule-Html-Harness, insName=DATA-ADMIN-OPERATOR-ID!RULEFORM
+[BrowserInspector] openRule result: openRuleByClassAndName
+[BrowserInspector] Found rule iframe: PegaGadget0Ifr
+[BrowserInspector] Extracting from rule iframe.
+[BrowserInspector] ✅ Data-Admin-Operator-ID: 0 sections, 23 fields (19165ms)
+
+📋 Results:
+   Sections found: 0
+   Fields found: 23
+     - Purpose (hidden)  [root]
+     - ReadOnly (hidden)  [root]
+     - HarnessPurpose (hidden)  [root]
+     - FolderKey (hidden)  [root]
+     - InputEnabled (hidden)  [root]
+     - pyDirtyCheckConfirm_RH_1_5 (button)  [root]
+     - pyDirtyCheckConfirm_RH_1_6 (button)  [root]
+     - RuleFormHeader_RH_1_9 (a)  [root]
+     - PpyScriptsAndBundles1colWidthGBL (hidden)  [root]
+     - PpyScriptsAndBundles1colWidthGBR (hidden)  [root]
+     - PpyStyleSheetName1colWidthGBL (hidden)  [root]
+     - PpyStyleSheetName1colWidthGBR (hidden)  [root]
+     - PpyPagesAndClasses2colWidthGBL (hidden)  [root]
+     - PpyPagesAndClasses2colWidthGBR (hidden)  [root]
+     - EXPANDEDSubSectionpzRuleFormAdvancedHTMLSourceB (hidden)  [root]
+     - RuleFormHistory_CustomFields_RH_1_9 (a)  [root]
+     - PpyCustomFields1colWidthGBL (hidden)  [root]
+     - PpyCustomFields1colWidthGBR (hidden)  [root]
+     - RuleFormHistory_HistoryDetails_RH_1_37 (button)  [root]
+     - EXPANDEDSubSectionRuleFormHistory_HistoryDetailsB (hidden)  [root]
+   Duration: 19165ms
+
+=== IFRAME DOM DUMP ===
+
+<DIV data-ui-meta="{'type':'Section','ruleName':'pyDirtyCheckConfirm','insKey':'RULE-HTML-SECTION @" data-template="" node_name="pyDirtyCheckConfirm" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pyDirtyCheckConfirm" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396851">
+<DIV class="content-item content-sub_section item-2 remove-all-spacing flex flex-row margin-" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pyDirtyModalCon','classN" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'DisplayRFHarnessErrors','insKey':'RULE-HTML-SECTIO" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="DisplayRFHarnessErrors" data-node-id="DisplayRFHarnessErrors" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" uniqueid="SID1786180396854">
+<DIV style="" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'ErrorsSection_PAD','clas" class="content-item content-sub_section item-1 remove-all-spacing   " string_type="sub_section" reserve_space="false">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormMain','insKey':'RULE-HTML-SECTION @BASECLA" data-template="" node_name="RuleFormMain" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="RuleFormMain" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396867">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormLayout','insKey':'RULE-HTML-SECTION RULE-H" data-template="" node_name="RuleFormLayout" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle rf-sticky-header" style="" base_ref="" data-node-id="RuleFormLayout" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" readonly="false" expandrl="" index="" uniqueid="SID1786180396868">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormHeader','insKey':'RULE-HTML-SECTION @BASEC" data-template="" node_name="RuleFormHeader" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="RuleFormHeader" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" data-postvalue-url="pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH0zNDk2MTVlNDFmZDAzYTNiOTJlYTZiMWQ5OWEyMjZmYz" readonly="false" expandrl="" index="" uniqueid="SID1786180396869">
+<DIV class="content-item content-sub_section item-1 remove-all-spacing flex flex-row" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormKeysAndDescrip" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormKeysAndDescription','insKey':'RULE-HTML-" data-template="" node_name="pzRuleFormKeysAndDescription" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormKeysAndDescription" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396870">
+<DIV class="content-item content-sub_section item-4 remove-top-spacing remove-bottom-spacing" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormStatus','class" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormStatus','insKey':'RULE-HTML-SECTION RULE" data-template="" node_name="pzRuleFormStatus" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormStatus" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-" readonly="false" expandrl="" index="" uniqueid="SID1786180396872">
+<DIV class="content-item content-sub_section item-5 remove-top-spacing remove-bottom-spacing" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormHeaderCompareW" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormHeaderCompareWithDropDown','insKey':'RUL" data-template="" node_name="pzRuleFormHeaderCompareWithDropDown" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormHeaderCompareWithDropDown" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396874">
+<DIV class="content-item content-sub_section item-3 remove-top-spacing remove-bottom-spacing" string_type="sub_section" reserve_space="false" data-expr-id="149fe601399feb91e46c250621e1ac9a8ba8fdea_28" data-context="RH_1" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormRuleset','clas" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormRuleset','insKey':'RULE-HTML-SECTION RUL" data-template="" node_name="pzRuleFormRuleset" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormRuleset" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-" readonly="false" expandrl="" index="" uniqueid="SID1786180396877">
+<DIV class="content-item content-sub_section item-1 remove-all-spacing flex flex-row" string_type="sub_section" reserve_space="false" data-expr-id="149fe601399feb91e46c250621e1ac9a8ba8fdea_43" data-context="RH_1" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormToolbar','clas" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormToolbar','insKey':'RULE-HTML-SECTION @BA" data-template="" node_name="pzRuleFormToolbar" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormToolbar" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396878">
+<DIV class="content-item content-sub_section item-2 remove-top-spacing remove-bottom-spacing" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormToolbarHotKeys" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormToolbarHotKeys','insKey':'RULE-HTML-SECT" data-template="" node_name="pzRuleFormToolbarHotKeys" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormToolbarHotKeys" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396879">
+<DIV class="content-item content-sub_section item-3 remove-top-spacing remove-bottom-spacing" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormToolbarLockedI" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormToolbarLockedIcon','insKey':'RULE-HTML-S" data-template="" node_name="pzRuleFormToolbarLockedIcon" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormToolbarLockedIcon" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-" readonly="false" expandrl="" index="" uniqueid="SID1786180396893">
+<DIV class="content-item content-sub_section item-4 remove-top-spacing remove-bottom-spacing" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormToolbarSaveAs'" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormToolbarSaveAs','insKey':'RULE-HTML-SECTI" data-template="" node_name="pzRuleFormToolbarSaveAs" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormToolbarSaveAs" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396894">
+<DIV class="content-item content-sub_section item-6 remove-top-spacing remove-bottom-spacing" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormToolbarCheckou" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormToolbarCheckout','insKey':'RULE-HTML-SEC" data-template="" node_name="pzRuleFormToolbarCheckout" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormToolbarCheckout" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-" readonly="false" expandrl="" index="" uniqueid="SID1786180396898">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormHeaderMessages','insKey':'RULE-HTML-SECTIO" data-template="" node_name="RuleFormHeaderMessages" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="RuleFormHeaderMessages" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396901">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormHeaderMessagesInner','insKey':'RULE-HTML-S" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="RuleFormHeaderMessagesInner" data-node-id="RuleFormHeaderMessagesInner" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" name="BASE_REF" base_ref="" expandrl="" uniqueid="SID1786180396902">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pyRuleFormHeaderMessagesInner','insKey':'RULE-HTML" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="pyRuleFormHeaderMessagesInner" data-node-id="pyRuleFormHeaderMessagesInner" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" name="BASE_REF" base_ref="" expandrl="" uniqueid="SID1786180396903">
+<DIV style="" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleFormWarningsHeader" class="content-item content-sub_section item-1   flex flex-row " string_type="sub_section" reserve_space="false">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormWarningsHeader','insKey':'RULE-HTML-SECT" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="pzRuleFormWarningsHeader" data-node-id="pzRuleFormWarningsHeader" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" name="BASE_REF" base_ref="" expandrl="" uniqueid="SID1786180396904">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pyRuleFormHeaderMessagesExt','insKey':'RULE-HTML-S" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="pyRuleFormHeaderMessagesExt" data-node-id="pyRuleFormHeaderMessagesExt" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" name="BASE_REF" base_ref="" expandrl="" uniqueid="SID1786180396905">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormDisplayOptions','insKey':'RULE-HTML-SECT" data-template="" node_name="pzRuleFormDisplayOptions" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormDisplayOptions" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" readonly="false" expandrl="" index="" uniqueid="SID1786180396906">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzAuditInformation','insKey':'RULE-HTML-SECTION RU" data-template="" node_name="pzAuditInformation" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzAuditInformation" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-Obj-HTML" readonly="false" expandrl="" index="" uniqueid="SID1786180396908">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleCallParams','insKey':'RULE-HTML-SECTION @BAS" data-template="" node_name="pzRuleCallParams" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleCallParams" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396909">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzShowHarnessAction','insKey':'RULE-HTML-SECTION R" data-template="" node_name="pzShowHarnessAction" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzShowHarnessAction" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" data-postvalue-url="pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH0zNDk2MTVlNDFmZDAzYTNiOTJlYTZiMWQ5OWEyMjZmYz" readonly="false" expandrl="" index="" uniqueid="SID1786180396910">
+<DIV style=" display:none;" class="content-item content-sub_section item-3 flex flex-row" string_type="sub_section" reserve_space="false" data-expr-id="d1d1e5ebce7bcaacbd6b80f069855585f2053f80_31" data-context="RH_1" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzRuleCallParamsWrapper'" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleCallParamsWrapper','insKey':'RULE-HTML-SECTI" data-template="" node_name="pzRuleCallParamsWrapper" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleCallParamsWrapper" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396911">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleCallParams','insKey':'RULE-HTML-SECTION @BAS" data-template="" node_name="pzRuleCallParams" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleCallParams" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="" index="" uniqueid="SID1786180396912">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormScriptsStyles','insKey':'RULE-HTML-SECTI" data-template="" node_name="pzRuleFormScriptsStyles" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormScriptsStyles" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" readonly="false" expandrl="" index="" uniqueid="SID1786180396913">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormScriptsList','insKey':'RULE-HTML-SECTION" data-template="" node_name="pzRuleFormScriptsList" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormScriptsList" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" readonly="false" expandrl="" index="" uniqueid="SID1786180396914" full_base_ref="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pyOpenScripts','insKey':'RULE-HTML-SECTION RULE-FI" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="pyOpenScripts" data-node-id="pyOpenScripts" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-File-" readonly="false" expandrl="true" index="1" uniqueid="SID1786180396915">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pyOpenScripts','insKey':'RULE-HTML-SECTION RULE-FI" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="pyOpenScripts" data-node-id="pyOpenScripts" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-File-" readonly="false" expandrl="true" index="2" uniqueid="SID1786180396916">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormStylesList','insKey':'RULE-HTML-SECTION " data-template="" node_name="pzRuleFormStylesList" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormStylesList" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" data-postvalue-url="pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH0zNDk2MTVlNDFmZDAzYTNiOTJlYTZiMWQ5OWEyMjZmYz" readonly="false" expandrl="false" index="" uniqueid="SID1786180396917" full_base_ref="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormPagesAndClasses','insKey':'RULE-HTML-SECTI" data-template="" node_name="RuleFormPagesAndClasses" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="RuleFormPagesAndClasses" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-" readonly="false" expandrl="false" index="" uniqueid="SID1786180396918">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzPagesAndClassesWithMode','insKey':'RULE-HTML-SEC" data-template="" node_name="pzPagesAndClassesWithMode" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzPagesAndClassesWithMode" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-" data-postvalue-url="pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH0zNDk2MTVlNDFmZDAzYTNiOTJlYTZiMWQ5OWEyMjZmYz" readonly="false" expandrl="false" index="" uniqueid="SID1786180396919" full_base_ref="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormAdvancedTab','insKey':'RULE-HTML-SECTION" data-template="" node_name="pzRuleFormAdvancedTab" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormAdvancedTab" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" data-postvalue-url="pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH0zNDk2MTVlNDFmZDAzYTNiOTJlYTZiMWQ5OWEyMjZmYz" readonly="false" expandrl="false" index="" uniqueid="SID1786180396920">
+<DIV class="content-item content-sub_section item-6" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'pzSkeletonDetails','clas" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzSkeletonDetails','insKey':'RULE-HTML-SECTION RUL" data-template="" node_name="pzSkeletonDetails" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzSkeletonDetails" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" readonly="false" expandrl="false" index="" uniqueid="SID1786180396921">
+<DIV section_index="2" class=" sectionBodyContainerSubHead">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormAdvancedFrameSource','insKey':'RULE-HTML" data-template="" node_name="pzRuleFormAdvancedFrameSource" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormAdvancedFrameSource" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" readonly="false" expandrl="false" index="" uniqueid="SID1786180396926">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pzRuleFormAdvancedHTMLSource','insKey':'RULE-HTML-" data-template="" node_name="pzRuleFormAdvancedHTMLSource" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pzRuleFormAdvancedHTMLSource" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-HTML-Harness" readonly="false" expandrl="false" index="" uniqueid="SID1786180396927">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormHistory','insKey':'RULE-HTML-SECTION RULE-" data-template="" node_name="RuleFormHistory" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="RuleFormHistory" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-" readonly="false" expandrl="false" index="" uniqueid="SID1786180396928">
+<DIV class="content-item content-sub_section item-1 remove-all-spacing" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'RuleFormHistory_Descript" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormHistory_Description','insKey':'RULE-HTML-S" data-template="" node_name="RuleFormHistory_Description" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="RuleFormHistory_Description" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="false" index="" uniqueid="SID1786180396929">
+<DIV class="content-item content-sub_section item-2 remove-all-spacing" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'RuleFormHistory_CustomFi" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormHistory_CustomFields','insKey':'RULE-HTML-" data-template="" node_name="RuleFormHistory_CustomFields" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="RuleFormHistory_CustomFields" version="1" objclass="Rule-HTML-Section" pyclassname="Rule-" readonly="false" expandrl="false" index="" uniqueid="SID1786180396930" full_base_ref="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pyGridNoResultsMessage','insKey':'RULE-HTML-SECTIO" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="pyGridNoResultsMessage" data-node-id="pyGridNoResultsMessage" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="true" expandrl="false" uniqueid="SID1786180396931">
+<DIV data-ui-meta="{'type':'Section','ruleName':'RuleFormHistory_HistoryDetails','insKey':'RULE-HTM" data-template="" node_name="RuleFormHistory_HistoryDetails" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="RuleFormHistory_HistoryDetails" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="false" index="" uniqueid="SID1786180396932">
+<DIV class="content-item content-sub_section item-1 remove-all-spacing flex flex-row" string_type="sub_section" reserve_space="false" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'RuleFormSettings','class" data-template="">
+<DIV data-ui-meta="{'type':'Section','ruleName':'pyCustomHelp','insKey':'RULE-HTML-SECTION @BASECLA" data-template="" node_name="pyCustomHelp" node_type="MAIN_RULE" name="BASE_REF" id="RULE_KEY" class="sectionDivStyle  " style="" base_ref="" data-node-id="pyCustomHelp" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" expandrl="false" index="" uniqueid="SID1786180396939">
+<DIV data-ui-meta="{'type':'Section','ruleName':'DisplayRFHarnessErrors','insKey':'RULE-HTML-SECTIO" class="sectionDivStyle  " style="" id="RULE_KEY" node_type="MAIN_RULE" node_name="DisplayRFHarnessErrors" data-node-id="DisplayRFHarnessErrors" version="1" objclass="Rule-HTML-Section" pyclassname="@baseclass" readonly="false" name="BASE_REF" base_ref="" expandrl="false" uniqueid="SID1786180396940">
+<DIV style="" data-ui-meta="{'type':'Cell','subType':'SUB_SECTION','clipboardPath':'ErrorsSection_PAD','clas" class="content-item content-sub_section item-1 remove-all-spacing   " string_type="sub_section" reserve_space="false">
+
+--- data-node elements (first 50) ---
+<DIV data-template="" class=" flex content layout-content-stacked  content-stacked " data-test-id="2018070610345701299" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV class="content-item content-layout item-3 remove-all-spacing flex flex-row" data-template="">
+<DIV data-template="" class=" flex content layout-content-inline_middle  content-inline_middle  padding-2x" data-test-id="201807061034570145105" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1).pySectionBody" data-methodname="">
+<DIV class="layout layout-noheader layout-noheader-errors clear-floated-layouts">
+<DIV class=" layout-body clearfix">
+<DIV data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" class=" content  layout-content-inline_middle content-inline_middle ">
+<DIV data-template="" class="layout layout-noheader layout-noheader-ruleform_header" data-test-id="20180410071239067337" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" flex content layout-content-inline_middle  content-inline_middle  flex-grow-1-i" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV class="content-item content-layout item-1 remove-all-spacing set-width-auto flex flex-r" data-template="">
+<DIV data-template="" class="layout layout-none" data-test-id="201804100712390930664" data-layout-id="">
+<DIV class="layout-body clearfix  ">
+<DIV data-template="" class=" flex content layout-content-simple_list  content-simple_list set-width-auto hea" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1).pySectionBody" data-methodname="">
+<DIV data-template="" class="layout layout-none  set-width-auto" data-test-id="201802091544130506748" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" content layout-content-mimic_a_sentence  content-mimic_a_sentence set-width-aut" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV data-template="" class="layout layout-none  set-width-auto" data-test-id="201802091515390496676" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" content layout-content-mimic_a_sentence  content-mimic_a_sentence set-width-aut" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV data-template="" class="layout layout-none" data-expr-id="6e6afd9b844cd5451380f75cbb1832e29378a664_10" data-context="RH_1" data-layout-id="">
+<DIV class="layout-body clearfix  ">
+<DIV data-template="" class=" content layout-content-inline_labels_left  content-inline_labels_left " data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-expr-id="6e6afd9b844cd5451380f75cbb1832e29378a664_3" data-context="RH_1" data-refresh="true" data-methodname="simpleLayout_1">
+<DIV class="content-item content-layout item-2 remove-all-spacing flex flex-row" data-template="">
+<DIV data-template="" class="layout layout-none" data-test-id="201804100712390931254" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" flex content layout-content-inline_labels_left  content-inline_labels_left  rul" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1).pySectionBody" data-methodname="">
+<DIV data-template="" class="layout layout-none" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" flex content layout-content-inline_labels_left  content-inline_labels_left " data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV class="content-item content-layout item-2 remove-all-spacing flex flex-row" data-template="">
+<DIV data-template="" class="layout layout-none" data-test-id="201804100712390932781" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" flex content layout-content-inline_middle  content-inline_middle  flex-dir-row-" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1).pySectionBody" data-methodname="">
+<DIV data-template="" class="layout layout-none" data-test-id="201801100724370681191" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" flex content layout-content-inline_middle  content-inline_middle  rule-actions " data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV data-template="" class="layout layout-none" data-test-id="201801091528020030956" data-layout-id="">
+<DIV class="layout-body clearfix  ">
+<DIV data-template="" class=" content layout-content-default  content-default clearfix hidden" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV data-template="" class="layout layout-none  set-width-auto" data-test-id="202002030030030882281" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" content layout-content-inline_middle  content-inline_middle set-width-auto" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV data-template="" class="layout layout-none" data-test-id="20190514032638046429" data-layout-id="">
+<DIV class="layout-body clearfix  ">
+<DIV data-template="" class=" content layout-content-split_button  content-split_button clearfix" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV data-template="" class="layout layout-none  set-width-auto" data-test-id="201906120904510385800" data-layout-id="">
+<DIV class="layout-body  ">
+<DIV data-template="" class=" content layout-content-inline_middle  content-inline_middle set-width-auto" data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(1)'}" data-methodname="">
+<DIV class="layout layout-noheader layout-noheader-warnings">
+<DIV class=" layout-body clearfix">
+<DIV data-ui-meta="{'type':'Layout','subType':'DYNAMICLAYOUT','pgRef':'.pySections(4)'}" class="flex  content  layout-content-simple_list content-simple_list centered">
+
+⏸️  Press Ctrl+C to close browser...
+
+✅ Done.

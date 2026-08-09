@@ -1,0 +1,196 @@
+[SEC:S1] 'Title' tab=false
+[SEC:S2] 'Request' tab=false
+[SEC:S3] 'Headers' tab=false
+  RPT: list=.pyGETRequestHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S7] 'Additional query string parameters' tab=false
+  RPT: list=.pyGETRequestParameters class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S11] 'Response' tab=false
+[SEC:S12] 'Headers' tab=false
+  RPT: list=.pyGETResponseHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapToOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapToKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+  INC: pzConRESTMapPayloadTo page=.pyPATCHResponseDataList(1)
+[SEC:] 'Message Data' tab=false
+  INC: pzConRESTMapPayloadTo page=
+[SEC:S16] 'Title' tab=false
+[SEC:S17] 'Request' tab=false
+[SEC:S18] 'Headers' tab=false
+  RPT: list=.pyPOSTRequestHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S22] 'Additional query string parameters' tab=false
+  RPT: list=.pyPOSTRequestParameters class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S26] 'Response' tab=false
+[SEC:S27] 'Headers' tab=false
+  RPT: list=.pyPOSTResponseHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapToOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapToKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+  INC: pzConRESTMapPayloadTo page=.pyPOSTResponseDataList(1)
+[SEC:] 'Message Data' tab=false
+  INC: pzConRESTMapPayloadTo page=
+[SEC:S31] 'Title' tab=false
+[SEC:S32] 'Request' tab=false
+[SEC:S33] 'Headers' tab=false
+  RPT: list=.pyPUTRequestHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S37] 'Additional query string parameters' tab=false
+  RPT: list=.pyPUTRequestParameters class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S41] 'Response' tab=false
+[SEC:S42] 'Headers' tab=false
+  RPT: list=.pyPUTResponseHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapToOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapToKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+  INC: pzConRESTMapPayloadTo page=.pyPUTResponseDataList(1)
+[SEC:] 'Message Data' tab=false
+  INC: pzConRESTMapPayloadTo page=
+[SEC:S46] 'Title' tab=false
+[SEC:S47] 'Request' tab=false
+[SEC:S48] 'Headers' tab=false
+  RPT: list=.pyPATCHRequestHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S52] 'Additional query string parameters' tab=false
+  RPT: list=.pyPATCHRequestParameters class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S56] 'Response' tab=false
+[SEC:S57] 'Headers' tab=false
+  RPT: list=.pyPATCHResponseHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapToOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapToKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+  INC: pzConRESTMapPayloadTo page=.pyPATCHResponseDataList(1)
+[SEC:] 'Message Data' tab=false
+  INC: pzConRESTMapPayloadTo page=
+[SEC:S61] 'Title' tab=false
+[SEC:S62] 'Request' tab=false
+[SEC:S63] 'Headers' tab=false
+  RPT: list=.pyDELETERequestHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S67] 'Additional query string parameters' tab=false
+  RPT: list=.pyDELETERequestParameters class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapFromOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapFromKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+[SEC:S71] 'Response' tab=false
+[SEC:S72] 'Headers' tab=false
+  RPT: list=.pyDELETEResponseHeaders class=Embed-InterfaceParameter
+  FLD: .pyParameterName fmt=Default ro=true
+[SEC:] '' tab=
+  FLD: .pyDesc fmt=Default ro=true
+[SEC:] '' tab=
+  INC: pzConnectParamMapToOptions page=
+[SEC:] '' tab=
+  INC: pzConnectMapToKey page=
+[SEC:] '' tab=
+  FLD: .pyTemplateInputBox fmt=pxIconAddItem ro=false
+  INC: pzConRESTMapPayloadTo page=.pyDELETEResponseDataList(1)
+[SEC:] 'Message Data' tab=false
+  INC: pzConRESTMapPayloadTo page=
+

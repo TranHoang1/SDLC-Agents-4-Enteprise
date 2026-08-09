@@ -1,0 +1,126 @@
+[BrowserInspector] Launching Chrome: C:\Program Files\Google\Chrome\Application\chrome.exe
+[BrowserInspector] Chrome launched.
+[BrowserInspector] Logging in: https://zdk8budo.pegaacademy.net/prweb/PRServlet
+[BrowserInspector] ✅ Logged into Pega Dev Studio.
+
+=== Opening section with network capture ===
+
+[BrowserInspector] Inspecting: Data-Admin-Operator-ID
+[BrowserInspector] Opening: ruleClass=Rule-Html-Section, insName=DATA-ADMIN-OPERATOR-ID!PZACCESSGROUPS
+[BrowserInspector] openRule result: openRuleByClassAndName
+[BrowserInspector] Found rule iframe: unnamed
+[BrowserInspector] Found rule iframe: PegaGadget0Ifr
+[BrowserInspector] Extracting from rule iframe.
+[BrowserInspector] ✅ Data-Admin-Operator-ID: 34 sections, 18 fields (10313ms)
+
+=== CAPTURED: 12 responses ===
+
+[0] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pyActivity=%40baseclass.doUIAction&action=op
+    304384 bytes | text/html;charset=UTF-8
+     <!DOCTYPE html><html lang="en-US"class="wk chrome"><head>  <meta name="viewport" content="initial-scale=1, width=device-width"> <!--Added 'user-scalable=no' to disable zoom in/out in HC/PIMC app mobi
+
+[1] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!STANDARD?pzTransactionId=&pzFromFrame=&pzPrimaryPageNam
+    53347 bytes | text/html;charset=UTF-8
+    
+
+
+
+
+
+
+<DIV id="SECGRP" ><div data-template-name='pxSection' data-template-instance-id='34543205719863' CLASS='template-root-marker'></div></DIV>
+      <div id="pyCustomError" style="display:none;"> <
+
+[2] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pyActivity=pzRunActionWrapper&pzRuleTopLevel
+    134792 bytes | text/xml;charset=UTF-8
+    🎯 FIELD DATA
+    <?xml version="1.0"?>
+
+<pagedata>
+<pySectionType>standard</pySectionType>
+<pyParameterSetFlag>false</pyParameterSetFlag>
+<pyRuleName>pzAccessGroups</pyRuleName>
+<pxUpdateSystemID>sdeV722</pxUpdateSyst
+
+[3] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pzTransactionId=&pzFromFrame=&pzPrimaryPageN
+    12021 bytes | text/html;charset=UTF-8
+    
+
+
+
+
+	
+
+
+
+
+	<div data-template-name='pxLayoutContainer' data-template-instance-id='34543556417831' CLASS='template-root-marker'><div id='34543557114602' style='display:none'>      <script type="text/j
+
+[4] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH04OTNjNW
+    49376 bytes | text/html;charset=UTF-8
+    <!DOCTYPE html>
+<html>
+	<head>
+		<title>Harness section builder</title>
+		
+			
+		<link rel="stylesheet" type="text/css" href="webwb/pega_yui_styles_1150282336!!.css">
+      
+        <!-- if the pzrunt
+
+[5] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/blank.htm
+    113 bytes | text/html;charset=UTF-8
+    <HTML>
+<HEAD>
+  <META HTTP-EQUIV="EXPIRES" CONTENT="Mon, 22 Jul 2019 11:12:01 GMT">
+</HEAD>
+<BODY></BODY>
+</HTML>
+
+[6] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH1jNjZmNj
+    5025 bytes | text/xml;charset=UTF-8
+    <?xml version="1.0"?>
+<pagedata>
+	<pxObjClass>Code-Pega-List</pxObjClass>
+	<pxResultCount></pxResultCount>
+	<pxResults REPEATINGTYPE="PageList">
+
+		<rowdata>
+			<pxObjClass>Rule-Obj-Property</pxObjCla
+
+[7] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH04OTNjNW
+    42451 bytes | text/xml;charset=UTF-8
+    🎯 FIELD DATA
+    <?xml version="1.0"?>
+
+<pagedata>
+<pySectionType>standard</pySectionType>
+<pyParameterSetFlag>false</pyParameterSetFlag>
+<pxUpdateSystemID>slsv718h</pxUpdateSystemID>
+<pyRuleName>pzApplication</pyRule
+
+[8] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH05ODBiMT
+    2622 bytes | text/html;charset=UTF-8
+    <div data-ui-meta="{'type':'Section','ruleName':'pzApplication','insKey':'RULE-HTML-SECTION EMBED-DESKTOP-VALUELIST-ACCESSGROUPS PZAPPLICATION #20180713T135209.429 GMT','sectionType':'standard'}" clas
+
+[9] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH1jNjZmNj
+    5279 bytes | text/xml;charset=UTF-8
+    <?xml version="1.0"?>
+<pagedata>
+<pyPropertyHtmlReadOnly><![CDATA[     <a href='javascript:void();' class='iconDelete' title='Delete item'></a>  ]]></pyPropertyHtmlReadOnly>
+<pyPropertyHtml><![CDATA[ 
+
+[10] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/!TABTHREAD0?pzuiactionzzz=CXt0cn17VEFCVEhSRUFEMH1jNjZmNj
+    5264 bytes | text/xml;charset=UTF-8
+    <?xml version="1.0"?>
+<pagedata>
+<pyPropertyHtml><![CDATA[     <a href='javascript:void();' class='iconInsert' title='Add item'></a>  ]]></pyPropertyHtml>
+<pxObjClass>Rule-HTML-Property</pxObjClass>
+<
+
+[11] /prweb/PRServlet/app/hrappsv2/W6Mx7r8_7D3HJsAbfZlN0GapeBMRK2GX*/webwb/webwb/pz-autocomplete-angle_13010160740.svg!!.svg
+    317 bytes | image/svg+xml
+    <svg xmlns="http://www.w3.org/2000/svg" width="10px" height="10px" viewBox="0 0 9.99 10.02"><defs><style>.cls-1{fill:#006dff;}</style></defs><title>Asset 1</title><g id="Layer_2" data-name="Layer 2"><
+
+
+⏸️  Ctrl+C to close...
