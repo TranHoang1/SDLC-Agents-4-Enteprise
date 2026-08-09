@@ -130,6 +130,107 @@ mem_search(query: "MyApp:01-01", type: "PEGA_RULE", limit: 50)
 
 ---
 
+## Pega Application Context — Access Group Discovery
+
+### Purpose
+
+Sau khi xác định application context (AppName, AppVersion), agent PHẢI lấy danh sách Access Groups để hiểu permission model và RuleSet stack của app đó.
+
+### Workflow: Application → Access Groups
+
+```
+Step 0: Fetch DPage Rule Definition (MANDATORY before calling ANY Data Page)
+  execute_dynamic_tool(
+    toolName: "pega_get_rule",
+    arguments: { "insKey": "RULE-DECLARE-PAGES D_PZACCESSGROUPSBYAPPLICATION" }
+  )
+  → Returns: rule JSON with pyParameterPage (param names, types, defaults)
+  → Extract: exact parameter names from the rule (e.g., AppName, AppVersion)
+
+Step 1: Get Application Info
+  execute_dynamic_tool(
+    toolName: "pega_get_session_context",
+    arguments: {}
+  )
+  → Returns: { pyAccessGroup, pyUserIdentifier, pyUserName, ... }
+
+Step 2: Fetch Access Groups using CORRECT param names from Step 0
+  execute_dynamic_tool(
+    toolName: "pega_datapage_list",
+    arguments: {
+      "dataPageName": "D_pzAccessGroupsByApplication",
+      "parameters": { "AppName": "{appName}", "AppVersion": "{appVersion}" }
+    }
+  )
+  → Returns: { pxResults: [{ pyAccessGroup: "...", ... }, ...], totalCount: N }
+```
+
+### ⛔ CRITICAL RULE: Always Fetch DPage Rule Before Calling
+
+**Trước khi gọi BẤT KỲ Data Page nào qua `/datapage/list` hoặc `/datapage/single`:**
+
+1. Fetch rule definition: `GET /rules/RULE-DECLARE-PAGES D_{PAGE_NAME_UPPERCASE}`
+2. Parse `pyParameterPage` → extract param names + types
+3. Dùng CHÍNH XÁC param names từ rule definition (case-sensitive)
+4. KHÔNG ĐƯỢC đoán param names — Pega Data Pages rất nhạy cảm với tên tham số
+
+**Ví dụ:**
+- ❌ WRONG: `{ "ApplicationName": "HRAppsV2" }` (đoán tên)
+- ✅ RIGHT: Fetch rule → thấy param `AppName` → `{ "AppName": "HRAppsV2" }`
+
+### Khi nào dùng:
+
+| Trigger | Action |
+|---------|--------|
+| Bắt đầu phiên làm việc Pega mới | Lấy session context → access groups |
+| Trước khi save/checkout rule | Xác định RuleSet version từ access group stack |
+| Trước khi tạo branch | Biết RuleSet name từ access group |
+| Khi agent cần biết permission model | List access groups → xem operator permissions |
+
+### API Details
+
+**Endpoint:** `POST /api/CodeIntelligence/v1/datapage/list`
+
+**Parameters:**
+
+| Param | Location | Value |
+|-------|----------|-------|
+| `dataPageName` | Query string | `D_pzAccessGroupsByApplication` |
+| Body | JSON | `{ "AppName": "HRAppsV2", "AppVersion": "01.01" }` |
+
+**Response format:**
+```json
+{
+  "pxResults": [
+    { "pyAccessGroup": "HRAppsV2:Administrators", "pyRuleSetList": [...] },
+    { "pyAccessGroup": "HRAppsV2:Users", "pyRuleSetList": [...] }
+  ],
+  "totalCount": 2
+}
+```
+
+### Useful Data Pages (all via `/datapage/list`)
+
+| Data Page Name | Purpose | Parameters |
+|----------------|---------|------------|
+| `D_pzAccessGroupsByApplication` | All access groups for an app | `ApplicationName`, `ApplicationVersion` |
+| `D_pyCaseTypeList` | All case types in scope | _(none — uses session context)_ |
+| `D_pzRuleSetsInApplication` | All RuleSets in app stack | `ApplicationName`, `ApplicationVersion` |
+
+### MCP Tool Mapping
+
+Nếu tool `pega_datapage_list` chưa available, dùng `find_tools("pega datapage")` để discover tên chính xác. Fallback HTTP:
+
+```
+POST {pegaEndpoint}/api/CodeIntelligence/v1/datapage/list?dataPageName=D_pzAccessGroupsByApplication
+Authorization: Basic {base64(user:pass)}
+Content-Type: application/json
+
+{ "AppName": "HRAppsV2", "AppVersion": "01.01" }
+```
+
+---
+
 ## Rules for All Agents
 
 1. **ALWAYS start with `mem_search`** — fastest, covers most cases

@@ -132,6 +132,21 @@ async function resolveApplicationHierarchy(
   const dependedRefs = extractDependedApps(mainApp);
   log(`[PegaHierarchy] Step 3 OK: ${mainRuleSets.length} rulesets, ${prodRuleSets.length} prod, ${dependedRefs.length} deps`);
 
+  // Step 3a: Extract case type FQN class names from pyWorkMetaData (page list in App Rule)
+  const workMetaData = (mainApp as any).pyWorkMetaData;
+  if (Array.isArray(workMetaData)) {
+    for (const wm of workMetaData) {
+      const fqnClass = wm.pyWorkTypeImplementationClassName as string | undefined;
+      if (fqnClass && fqnClass.includes("-")) {
+        // Add class rule seed
+        seeds.add(`RULE-OBJ-CLASS ${fqnClass}`);
+        // Add case type rule seed (insKey = RULE-OBJ-CASETYPE {CLASS-UPPER} PYDEFAULT)
+        seeds.add(`RULE-OBJ-CASETYPE ${fqnClass.toUpperCase()} PYDEFAULT`);
+        log(`[PegaHierarchy] 📌 Case Type: "${wm.pyWorkTypeName || ''}" → class: ${fqnClass} + caseType: RULE-OBJ-CASETYPE ${fqnClass.toUpperCase()} PYDEFAULT`);
+      }
+    }
+  }
+
   // Step 3b: Discover access groups for this application (non-fatal)
   const accessGroups = await fetchAccessGroupsForApp(client, appName, appVersion, log);
   log(`[PegaHierarchy] Found ${accessGroups.length} access groups for app`);

@@ -65,18 +65,32 @@ async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.
     showIndexResults(results, picks, root, channel);
 }
 
+/** Build summary title matching selected operations. */
+function describeSummaryTitle(options: string[]): string {
+    if (options.length === 1) {
+        switch (options[0]) {
+            case "schemas": return "Pega Rule Schema Generation Summary";
+            case "code": return "Source Code Indexing Summary";
+            case "documents": return "Document Indexing Summary";
+            case "sync": return "Code Symbol Sync Summary";
+        }
+    }
+    return "Workspace Indexing Summary";
+}
+
 async function showIndexOptions(): Promise<string[] | undefined> {
     const picks = await vscode.window.showQuickPick([
+        { label: "$(symbol-class) Index Pega Rule Schemas", description: "Generate JSON Schemas from Pega RuleForms (run first)", id: "schemas", picked: true },
         { label: "$(code) Index Source Code", description: "Re-index all code symbols", id: "code", picked: true },
         { label: "$(book) Index Documents", description: "Index SDLC documents into KB", id: "documents", picked: true },
         { label: "$(sync) Sync Code → Memory", description: "Sync code entities into memory graph", id: "sync", picked: true },
-        { label: "$(symbol-class) Index Pega Rule Schemas", description: "Generate JSON Schemas from Pega RuleForms", id: "schemas", picked: false },
     ], { canPickMany: true, placeHolder: "Select what to index" });
     return picks?.map(p => p.id);
 }
 
 function showIndexResults(results: string[], options: string[], root: string, channel: vscode.OutputChannel): void {
-    channel.appendLine("\n=== Workspace Indexing Summary ===\n");
+    const summaryTitle = describeSummaryTitle(options);
+    channel.appendLine(`\n=== ${summaryTitle} ===\n`);
 
     // Auto-detect Salesforce project and show SF-specific summary
     const sfdxRoot = detectSfdxProject(root);

@@ -1,0 +1,72 @@
+<mxfile host="65bd71144e">
+    <diagram id="v4adPK0GzKdLPUJkax7N" name="Page-1">
+        <mxGraphModel dx="504" dy="387" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="actor1" value="Developer / AI Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="340" width="140" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="ext1" value="VS Code / Kiro Extension&#10;(PegaSchemaGenerator)&#10;(PegaHttpClient)&#10;(IndexingService)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="300" width="200" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="pega1" value="Pega Platform&#10;(REST Services)&#10;Service 10: /rules/listRules&#10;Service 2: /rules/query" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="160" width="220" height="110" as="geometry"/>
+                </mxCell>
+                <mxCell id="backend1" value="Backend Server&#10;(PegaRuleAstParser)&#10;Port 48721" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="310" width="220" height="90" as="geometry"/>
+                </mxCell>
+                <mxCell id="schema1" value="Schema Storage&#10;schemas/auto/{RuleType}.json&#10;(JSON Schema draft-07)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="560" y="560" width="220" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="safety1" value="Dual-Tier Safety&#10;Layer 1 (Schema Validation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="570" width="200" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="e1" value="1. Trigger Index Pega Rule Schemas" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;edgeStyle=orthogonalEdgeStyle;" parent="1" source="actor1" target="ext1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e2" value="2. listRulesByFilter() (Service 10)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;edgeStyle=orthogonalEdgeStyle;" parent="1" source="ext1" target="pega1" edge="1">
+                    <mxGeometry x="-0.4194" relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="400" y="240"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e3" value="3. queryRuleByTriple() (Service 2)" style="html=1;verticalAlign=top;endArrow=block;endFill=1;fontSize=9;edgeStyle=orthogonalEdgeStyle;" parent="1" source="ext1" target="pega1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="330" y="200"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e4" value="4. Parse Harness JSON (AST)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;edgeStyle=orthogonalEdgeStyle;" parent="1" source="ext1" target="backend1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="540" y="340"/>
+                            <mxPoint x="540" y="340"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e5" value="5. Save JSON Schema files" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;edgeStyle=orthogonalEdgeStyle;" parent="1" source="ext1" target="schema1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="410" y="510"/>
+                            <mxPoint x="670" y="510"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e6" value="6. Load schema for validation" style="html=1;verticalAlign=top;endArrow=block;endFill=1;fontSize=9;edgeStyle=orthogonalEdgeStyle;" parent="1" source="schema1" target="safety1" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e7" value="Return AST" style="html=1;verticalAlign=top;endArrow=open;endFill=0;dashed=1;fontSize=9;edgeStyle=orthogonalEdgeStyle;" parent="1" source="backend1" target="ext1" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="670" y="430"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

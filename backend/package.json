@@ -44,6 +44,8 @@
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@types/pg": "^8.20.0",
     "@xenova/transformers": "^2.0.1",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
     "better-sqlite3": "^11.10.0",
     "chokidar": "^5.0.0",
     "elkjs": "^0.9.3",

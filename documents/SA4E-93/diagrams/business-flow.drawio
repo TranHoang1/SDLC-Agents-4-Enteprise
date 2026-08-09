@@ -1,0 +1,159 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="Business Flow: Pega Rule Schema Generator (SA4E-93)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Trigger -->
+    <mxCell id="n1" value="Developer triggers&#10;Index Workspace&#10;Command" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="70" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="QuickPick shows&#10;indexing options&#10;(incl. Pega Schemas)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="70" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="User selects&#10;Index Pega Rule Schemas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="540" y="70" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Crawl -->
+    <mxCell id="n4" value="Call Service 10&#10;/rules/listRules&#10;ObjClass=Rule-HTML-Harness&#10;FilterPropName=pyStreamName&#10;FilterPropValue=RuleForm" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="200" width="200" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="Loop Pagination&#10;PageSize=50&#10;PageIndex++&#10;until pxMore=false" style="rhombus;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="320" y="200" width="180" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="Collect ALL&#10;harness instances&#10;(~110 records)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="580" y="210" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Group and Fetch -->
+    <mxCell id="n7" value="Group harnesses by&#10;pyClassName&#10;(~20+ distinct rule types)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="370" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="For each unique rule type:&#10;Call Service 2 /rules/query&#10;Fetch full Harness JSON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="320" y="370" width="220" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: Parse -->
+    <mxCell id="n9" value="Parse Harness JSON:&#10;Extract pyHeaderSection,&#10;pyContentSection,&#10;pyFooterSection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="620" y="370" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n10" value="Recursively expand&#10;nested sections&#10;(sections contain sections)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="900" y="370" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 5: Map Controls -->
+    <mxCell id="n11" value="Map UI Controls to&#10;Schema Properties:&#10;pyFieldName - property name&#10;Control type - JSON type&#10;Mandatory - required[]&#10;Labels - description" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="520" width="220" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Row 5: Generate -->
+    <mxCell id="n12" value="Generate JSON Schema&#10;draft-07 per rule type:&#10;$schema + title&#10;properties + types&#10;required array&#10;additionalProperties:true" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="340" y="520" width="220" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Row 5: Save -->
+    <mxCell id="n13" value="Save to&#10;schemas/auto/&#10;{RuleType}.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="640" y="540" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 6: Integration -->
+    <mxCell id="n14" value="Dual-Tier Layer 1:&#10;Validate LLM-generated&#10;rule JSON against schema&#10;BEFORE saving to Pega" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="880" y="530" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <!-- End -->
+    <mxCell id="n15" value="Report Summary:&#10;N schemas generated&#10;for M rule types" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="640" y="690" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Deferred node -->
+    <mxCell id="n16" value="Graph Edges&#10;(Deferred - UAT)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=2;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="900" y="690" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Pega Server (external) -->
+    <mxCell id="pega" value="Pega Server&#10;(External)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="900" y="200" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 1 -->
+    <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Row 1 to Row 2 -->
+    <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="630" y="160"/>
+          <mxPoint x="140" y="160"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Row 2 flow -->
+    <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="all pages" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Pagination loop back -->
+    <mxCell id="e5b" value="more pages" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;fontSize=9;" edge="1" parent="1" source="n5" target="n4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="410" y="310"/>
+          <mxPoint x="140" y="310"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Pega interaction -->
+    <mxCell id="e6" value="API calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;strokeColor=#d6b656;" edge="1" parent="1" source="n6" target="pega">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Row 2 to Row 3 -->
+    <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n6" target="n7">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="660" y="340"/>
+          <mxPoint x="140" y="340"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Row 3 flow -->
+    <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n7" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n8" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n9" target="n10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Row 4 to Row 5 -->
+    <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n10" target="n11">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1000" y="470"/>
+          <mxPoint x="150" y="470"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Row 5 flow -->
+    <mxCell id="e12" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n11" target="n12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n12" target="n13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" value="schemas consumed by" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#d6b656;" edge="1" parent="1" source="n13" target="n14">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Save to Report -->
+    <mxCell id="e15" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n13" target="n15">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Deferred -->
+    <mxCell id="e16" value="deferred" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;strokeColor=#666666;" edge="1" parent="1" source="n13" target="n16">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="720" y="650"/>
+          <mxPoint x="980" y="650"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -1,0 +1,144 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-94 — Architecture Overview: RuleSet-Scoped Enumeration Pipeline" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="10" width="700" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext_boundary" value="VS Code / Kiro Extension" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="30" y="60" width="750" height="700" as="geometry"/>
+    </mxCell>
+    <mxCell id="phase1" value="Phase 1: Hierarchy Resolution (UNCHANGED)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;html=1;fontSize=9;fontStyle=1;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="20" y="40" width="710" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="idx_svc" value="IndexingService&#xa;indexPegaProject()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="phase1">
+      <mxGeometry x="20" y="35" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="hier_res" value="PegaHierarchy&#xa;Resolver" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="phase1">
+      <mxGeometry x="260" y="35" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="hier_result" value="HierarchyResult&#xa;{ruleSets[], seeds[]}" style="shape=document;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="phase1">
+      <mxGeometry x="480" y="35" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_idx_hier" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="phase1" source="idx_svc" target="hier_res">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_hier_result" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="phase1" source="hier_res" target="hier_result">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="phase2" value="Phase 2: RuleSet Enumeration (NEW)" style="swimlane;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;html=1;fontSize=9;fontStyle=1;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="20" y="160" width="710" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="enum_all" value="enumerateAll&#xa;RuleSets()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="phase2">
+      <mxGeometry x="20" y="35" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="enum_one" value="enumerateRuleSet()&#xa;paginate until&#xa;pxMore=false" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="phase2">
+      <mxGeometry x="230" y="35" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="list_rs" value="listRulesByRuleSet()&#xa;POST /rules/listRules&#xa;pyRuleSet filter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="phase2">
+      <mxGeometry x="450" y="35" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="dedup" value="Dedup Map&#xa;&lt;insKey, Summary&gt;" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;size=10;" vertex="1" parent="phase2">
+      <mxGeometry x="100" y="95" width="130" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_all_one" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="phase2" source="enum_all" target="enum_one">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_one_list" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="phase2" source="enum_one" target="list_rs">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="phase3" value="Phase 3: Content Fetch (REUSED)" style="swimlane;startSize=25;fillColor=#f5f5f5;strokeColor=#666666;html=1;fontSize=9;fontStyle=1;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="20" y="300" width="710" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="calibrate" value="calibrateFetch&#xa;Concurrency()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="phase3">
+      <mxGeometry x="20" y="35" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="fetch_par" value="fetchRulesIn&#xa;Parallel()&#xa;chunks of 50" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="phase3">
+      <mxGeometry x="220" y="35" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="fetch_types" value="fetchRuleTypes&#xa;InParallel()&#xa;(Class → sub-rules)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="phase3">
+      <mxGeometry x="420" y="35" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="save_file" value="saveRuleFile()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="phase3">
+      <mxGeometry x="600" y="45" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cal_fetch" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="phase3" source="calibrate" target="fetch_par">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_fetch_types" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="phase3" source="fetch_par" target="fetch_types">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_types_save" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="phase3" source="fetch_types" target="save_file">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="phase4" value="Phase 4: NDJSON Ingest (SIMPLIFIED)" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;html=1;fontSize=9;fontStyle=1;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="20" y="440" width="710" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="stream_ing" value="PegaStream&#xa;Ingester" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="phase4">
+      <mxGeometry x="20" y="35" width="130" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="ndjson" value="NDJSON Stream&#xa;POST /pega/ingest-stream" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="phase4">
+      <mxGeometry x="230" y="35" width="180" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="no_next" value="&#x274C; nextBatch&#xa;(REMOVED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=2;" vertex="1" parent="phase4">
+      <mxGeometry x="500" y="35" width="120" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_str_ndj" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="phase4" source="stream_ing" target="ndjson">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="removed_box" value="REMOVED Code Paths" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;html=1;fontSize=9;fontStyle=1;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="20" y="550" width="710" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="rm_crawl" value="&#x274C; crawlPlan()&#xa;iterative loop" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=4;" vertex="1" parent="removed_box">
+      <mxGeometry x="20" y="35" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="rm_next" value="&#x274C; computeNextBatch()&#xa;dependency extraction" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=4;" vertex="1" parent="removed_box">
+      <mxGeometry x="200" y="35" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="rm_refs" value="&#x274C; extractRule&#xa;References()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=4;" vertex="1" parent="removed_box">
+      <mxGeometry x="420" y="35" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="rm_nextbatch" value="&#x274C; nextBatch&#xa;response field" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=4;" vertex="1" parent="removed_box">
+      <mxGeometry x="600" y="35" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pega_cloud" value="Pega Platform&#xa;(REST Services)" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="850" y="150" width="170" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="backend" value="Backend Server&#xa;(KB + Graph DB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="870" y="500" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_ext_pega" value="Service 10: listRules&#xa;(pyRuleSet filter)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="780" y="280" as="sourcePoint"/>
+        <mxPoint x="850" y="200" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e_ext_backend" value="NDJSON ingest" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="780" y="560" as="sourcePoint"/>
+        <mxPoint x="870" y="530" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="legend" value="Legend" style="swimlane;startSize=20;fillColor=none;strokeColor=#999999;html=1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="850" y="620" width="200" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_new" value="NEW" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="25" width="60" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_unchanged" value="UNCHANGED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="50" width="80" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_simplified" value="SIMPLIFIED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="75" width="80" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_removed" value="REMOVED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="100" width="70" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_external" value="EXTERNAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="100" y="25" width="80" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_data" value="DATA" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="100" y="50" width="60" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

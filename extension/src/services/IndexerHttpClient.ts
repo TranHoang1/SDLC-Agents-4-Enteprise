@@ -40,6 +40,9 @@ export interface UploadResult {
 export class IndexerHttpClient {
     constructor(private readonly backendUrl: string) {}
 
+    /** Expose backend base URL for other callers. */
+    getBaseUrl(): string { return this.backendUrl; }
+
     async ingestDocuments(
         docs: DocEntry[],
         report: vscode.Progress<{ message?: string }>,
@@ -120,6 +123,42 @@ export class IndexerHttpClient {
 
         const summary = `✅ Indexed ${uploaded} project files` + (errors > 0 ? `, ⚠️ Failed: ${errors} (see Output > Kiro Indexer for details)` : "");
         return { uploaded, errors, summary };
+    }
+
+    /**
+     * Trigger code symbol sync on backend — syncs indexed code symbols into KB knowledge_entries.
+     * Calls mem_sync_code via backend MCP endpoint. Auto-triggered after source upload.
+     */
+    async syncCodeSymbols(): Promise<string | null> {
+        const url = `${this.backendUrl}/mcp`;
+        const payload = {
+            jsonrpc: "2.0",
+            id: Date.now(),
+            method: "tools/call",
+            params: { name: "mem_sync_code", arguments: {} },
+        };
+        try {
+            // MCP Streamable HTTP requires Accept header
+            const body = JSON.stringify(payload);
+            const parsedUrl = new URL(url);
+            const http = await import("http");
+            const result = await new Promise<{ ok: boolean; body: string }>((resolve) => {
+                const req = http.default.request(
+                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname, method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json, text/event-stream", "Content-Length": Buffer.byteLength(body).toString() } },
+                    (res) => { let data = ""; res.on("data", (c: any) => { data += c; }); res.on("end", () => resolve({ ok: res.statusCode === 200, body: data })); },
+                );
+                req.on("error", () => resolve({ ok: false, body: "" }));
+                req.setTimeout(60000, () => { req.destroy(); resolve({ ok: false, body: "" }); });
+                req.write(body);
+                req.end();
+            });
+            if (!result.ok) { return null; }
+            const parsed = JSON.parse(result.body);
+            const text = parsed?.result?.content?.[0]?.text;
+            return typeof text === "string" ? text : null;
+        } catch {
+            return null;
+        }
     }
 
     private async uploadDocumentFile(relPath: string, content: string, token?: string): Promise<boolean> {

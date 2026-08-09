@@ -71,9 +71,17 @@ export async function fetchRulesInParallel(
         // Early exit: if a previous item detected a server error, skip
         if (serverError) { return null; }
 
-        log(`[Pega Indexer] ⬇️ Fetching rule: ${item.pxObjClass} | ${item.pyClassName} | ${item.pyRuleName} (${item.insKey})`);
+        // Purpose: fetch full rule JSON by insKey to index into KB
+        const purpose = item.pxObjClass.startsWith("Rule-OBJ-CLASS") || item.pxObjClass === "Rule-Obj-Class"
+            ? `[Class Definition] Fetching class rule to expand sub-rules (properties, activities, flows...)`
+            : `[Rule Content] Fetching rule content to index into KB`;
+        log(`[Pega Indexer] ⬇️ ${purpose}`);
+        log(`[Pega Indexer]    → Type: ${item.pxObjClass} | AppliesTo: ${item.pyClassName} | Name: ${item.pyRuleName} | insKey: ${item.insKey}`);
         try {
-            const ruleObj = await pegaClient.getObject(item.pxObjClass, item.pyRuleName, item.pyClassName);
+            // Use insKey directly when pyRuleName is empty (enumeration-sourced items)
+            const ruleObj = item.pyRuleName
+                ? await pegaClient.getObject(item.pxObjClass, item.pyRuleName, item.pyClassName)
+                : await pegaClient.getRuleByInsKey(item.insKey);
             if (ruleObj && (ruleObj.error || ruleObj.pyHTTPResponseCode === "404" || ruleObj.pyHTTPResponseCode === 404)) {
                 throw new Error(String(ruleObj.error || "Rule not found on Pega Server"));
             }
@@ -87,10 +95,17 @@ export async function fetchRulesInParallel(
             const errorCategory = classifyFetchError(errMsg);
 
             if (errorCategory === "server") {
-                log(`[Pega Indexer] ⛔ Server Error Detected: ${errMsg.substring(0, 150)}. Aborting crawl immediately.`);
+                log(`[Pega Indexer] ⛔ Server Error — ${errMsg.substring(0, 150)}. Aborting crawl.`);
                 serverError = `Pega Server Connection Failed: ${errMsg.split("\n")[0]}`;
             } else {
-                log(`[Pega Indexer] ❌ Failed to fetch ${item.pxObjClass} ${item.pyClassName} ${item.pyRuleName}: ${errMsg}`);
+                const hasSpaceInName = item.pyRuleName.includes(" ") || (item.insKey.split(" ").length > 2 && !item.insKey.includes("-Work-"));
+                const hint = hasSpaceInName
+                    ? ` ⚠️ Short name like "Payroll Setup" — Pega needs FQN class (e.g. TGB-HRApps-Work-PayrollSetup). Will resolve from App Rule dependencies.`
+                    : (item.pyClassName === "@baseclass" && !item.pyRuleName.includes("-"))
+                    ? ` ⚠️ Short name "${item.pyRuleName}" — Pega needs FQN class. Will resolve from App Rule dependencies.`
+                    : ``;
+                log(`[Pega Indexer] ❌ Not found: ${item.pxObjClass} | appliesTo="${item.pyClassName}" | name="${item.pyRuleName}"${hint}`);
+                log(`[Pega Indexer]    Tried insKey: "${item.insKey}" → ${errMsg}`);
             }
             return null;
         }

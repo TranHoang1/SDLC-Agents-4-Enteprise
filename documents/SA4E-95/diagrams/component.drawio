@@ -1,0 +1,103 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-95: Harness Schema Generator — Component Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage1" value="Stage 1: FETCH" style="swimlane;startSize=25;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="240" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="c1" value="HarnessFetcher" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="stage1">
+      <mxGeometry x="20" y="40" width="200" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="c1a" value="+ fetchHarness(ruleType)&#10;+ fetchSection(name, class)&#10;+ fetchClassChildren(class)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="stage1">
+      <mxGeometry x="20" y="90" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c1b" value="RetryStrategy&#10;(backoff + rate limit)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="stage1">
+      <mxGeometry x="40" y="150" width="160" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage2" value="Stage 2: PARSE" style="swimlane;startSize=25;fillColor=#f3e5f5;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="310" y="60" width="240" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2" value="HarnessParser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="stage2">
+      <mxGeometry x="20" y="40" width="200" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2a" value="+ parse(harnessJson)&#10;- parseSectionBody(body, ctx)&#10;- extractFieldsFromLayout()&#10;- extractRepeatLayout()" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="stage2">
+      <mxGeometry x="20" y="90" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2b" value="MAX_DEPTH=5&#10;visited: Set&lt;string&gt;" style="text;html=1;strokeColor=#f8cecc;fillColor=#f8cecc;align=center;fontSize=9;rounded=1;" vertex="1" parent="stage2">
+      <mxGeometry x="40" y="160" width="160" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage3" value="Stage 3: RESOLVE" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="580" y="60" width="240" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3" value="PageContextResolver" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="stage3">
+      <mxGeometry x="20" y="40" width="200" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3a" value="+ resolve(pyUsingPage,&#10;    contextPages, primaryClass)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="stage3">
+      <mxGeometry x="20" y="85" width="200" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="c4" value="ClassHierarchyResolver" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="stage3">
+      <mxGeometry x="20" y="130" width="200" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="c4a" value="+ resolveSection(name, class)&#10;+ getClassHierarchy(class)" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="stage3">
+      <mxGeometry x="20" y="170" width="200" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="stage4" value="Stage 4: GENERATE" style="swimlane;startSize=25;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="850" y="60" width="240" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="c5" value="SchemaBuilder" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="stage4">
+      <mxGeometry x="20" y="40" width="200" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="c5a" value="+ build(parsedHarness)&#10;- addFieldProperties()&#10;- addRepeatArrays()&#10;- addTemplateMarkers()" style="text;html=1;strokeColor=none;fillColor=none;align=left;fontSize=9;" vertex="1" parent="stage4">
+      <mxGeometry x="20" y="85" width="200" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="c6" value="FormatTypeMapper" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="stage4">
+      <mxGeometry x="40" y="155" width="140" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="orch" value="HarnessSchemaGenerator&#10;(Pipeline Orchestrator)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="310" width="300" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="valid" value="SchemaValidator&#10;(Ajv)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="140" y="420" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="cache" value="SchemaCacheManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="400" y="420" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="models" value="models/&#10;ParsedHarness, ParsedSection,&#10;ExtractedField, ResolvedContext,&#10;RepeatDefinition, TemplateMarker" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="660" y="400" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="eo1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="orch" target="stage1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="400" y="335"/>
+          <mxPoint x="160" y="335"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="eo2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="orch" target="stage2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eo3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="orch" target="stage3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eo4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="orch" target="stage4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="700" y="335"/>
+          <mxPoint x="970" y="335"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="eo5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="orch" target="valid">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eo6" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="orch" target="cache">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="flow" value="IDLE → FETCHING → PARSING → RESOLVING → GENERATING → COMPLETE" style="text;html=1;strokeColor=none;fillColor=none;align=center;fontSize=10;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="250" y="500" width="500" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

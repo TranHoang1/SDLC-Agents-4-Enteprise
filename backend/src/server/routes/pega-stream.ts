@@ -1,27 +1,24 @@
 /**
- * NDJSON streaming ingest endpoint for Pega rules (SA4E-92).
- * Processes rules line-by-line with O(1) memory per rule — fixes OOM on large batches.
- * Protocol: first line = metadata JSON, subsequent lines = one rule JSON each.
+ * Async NDJSON ingest endpoint for Pega rules (SA4E-94).
+ * POST /pega/ingest-stream — accepts NDJSON body, returns 202 + jobId immediately.
+ * GET /pega/jobs/:id — poll job progress/status.
+ * Background processing via setImmediate batches (50 rules/tick) to avoid blocking event loop.
  */
 
 import { Hono } from 'hono';
 import type { Logger } from 'pino';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
 import { PegaService } from '../../modules/pega/PegaService.js';
-import { PegaCrawler } from '../../modules/pega/PegaCrawler.js';
-import { queryPegaTotals, registerPegaProject } from './pega-stream-helpers.js';
+import { queryPegaTotals, registerPegaProject, processOneLine } from './pega-stream-helpers.js';
+import type { StreamMetadata } from './pega-stream-helpers.js';
+import { pegaJobStore } from './pega-job-store.js';
+import type { JobResult } from './pega-job-store.js';
 
-/** Metadata sent as the first NDJSON line */
-interface StreamMetadata {
-  __meta: true;
-  projectId: string;
-  checksums: Record<string, string>;
-  versions: Record<string, string>;
-  visitedKeys: string[];
-}
+/** Number of rules processed per setImmediate tick */
+const BATCH_SIZE = 50;
 
 /**
- * Create Hono routes for NDJSON streaming ingest.
+ * Create Hono routes for async NDJSON ingest + job polling.
  * @param registry - Module registry for accessing memory/PegaService
  * @param logger - Pino logger instance
  */
@@ -35,129 +32,128 @@ export function createPegaStreamRoutes(registry: ModuleRegistry, logger: Logger)
     return new PegaService(memModule.getEngine());
   };
 
+  // POST /pega/ingest-stream — buffer body, return 202 + jobId, process in background
   app.post('/pega/ingest-stream', async (c) => {
     const service = resolvePegaService();
     if (!service) {
       return c.json({ data: null, error: { code: 'NOT_READY', message: 'Memory module not ready' } }, 503);
     }
 
+    // Stream body line-by-line to avoid OOM on large payloads (39K+ rules)
     const reader = c.req.raw.body?.getReader();
     if (!reader) {
       return c.json({ data: null, error: { code: 'NO_BODY', message: 'Request body is empty' } }, 400);
     }
 
-    try {
-      const result = await processNdjsonStream(reader, service, logger);
-      return c.json({ data: result, error: null });
-    } catch (err: any) {
-      logger.error({ err }, 'pega/ingest-stream failed');
-      return c.json({ data: null, error: { code: 'STREAM_ERROR', message: err.message } }, 500);
+    // Read stream into lines incrementally (still buffers lines array, but not raw text)
+    const lines: string[] = [];
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const parts = buffer.split('\n');
+      buffer = parts.pop() || '';
+      for (const p of parts) { if (p.trim()) lines.push(p); }
     }
+    if (buffer.trim()) lines.push(buffer);
+
+    if (lines.length === 0) {
+      return c.json({ data: null, error: { code: 'NO_BODY', message: 'Request body is empty' } }, 400);
+    }
+
+    const jobId = pegaJobStore.createJob(lines.length);
+
+    logger.info({ jobId, lineCount: lines.length }, '[pega-stream] Job created, processing in background');
+    processInBackground(jobId, lines, service, logger);
+
+    return c.json({ data: { jobId }, error: null }, 202);
+  });
+
+  // GET /pega/jobs/:id — return current job status + progress
+  app.get('/pega/jobs/:id', (c) => {
+    const id = c.req.param('id');
+    const job = pegaJobStore.getJob(id);
+
+    if (!job) {
+      return c.json({ data: null, error: { code: 'NOT_FOUND', message: `Job ${id} not found or expired` } }, 404);
+    }
+
+    return c.json({
+      data: { status: job.status, progress: job.progress, result: job.result, error: job.error },
+      error: null,
+    });
   });
 
   return app;
 }
 
 /**
- * Process the NDJSON stream line-by-line. Constant memory regardless of batch size.
- * @param reader - ReadableStream reader from the request body
- * @param service - PegaService for ingesting individual rules
- * @param logger - Logger for diagnostics
+ * Process NDJSON lines in background using setImmediate batches.
+ * Processes BATCH_SIZE rules per tick to avoid blocking the event loop.
  */
-async function processNdjsonStream(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  service: PegaService,
-  logger: Logger,
-): Promise<{
-  stored: number;
-  totalRulesInDb: number;
-  totalKbEntriesInDb: number;
-  totalGraphNodesInDb: number;
-  nextBatch: Array<{ insKey: string; pxObjClass: string; pyClassName: string; pyRuleName: string }>;
-}> {
-  const decoder = new TextDecoder();
-  let buffer = '';
+function processInBackground(jobId: string, lines: string[], service: PegaService, logger: Logger): void {
   let meta: StreamMetadata | null = null;
   let stored = 0;
+  let index = 0;
   const ingestedRules: Record<string, unknown>[] = [];
 
-  // Read chunks from stream and split into lines
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
+  const processNextBatch = (): void => {
+    const end = Math.min(index + BATCH_SIZE, lines.length);
 
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || ''; // Incomplete last line stays in buffer
-
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      const result = await processLine(line, meta, service, logger);
-      if (result.isMeta) {
-        meta = result.meta!;
-      } else if (result.stored) {
-        stored++;
-        ingestedRules.push(result.rule!);
-      }
+    const promises: Promise<void>[] = [];
+    for (let i = index; i < end; i++) {
+      promises.push(processOneLine(lines[i], meta, service, logger).then((result) => {
+        if (result.isMeta) meta = result.meta!;
+        if (result.stored) { stored++; ingestedRules.push(result.rule!); }
+      }));
     }
-  }
 
-  // Process remaining buffer content (last line without trailing newline)
-  if (buffer.trim()) {
-    const result = await processLine(buffer, meta, service, logger);
-    if (result.stored) {
-      stored++;
-      ingestedRules.push(result.rule!);
-    }
-  }
+    Promise.all(promises)
+      .then(() => {
+        index = end;
+        pegaJobStore.updateProgress(jobId, index);
 
-  // Compute totals and next batch
-  const totals = await queryPegaTotals(service, meta?.projectId || '');
-  const crawler = new PegaCrawler();
-  const visitedKeys = new Set(meta?.visitedKeys || []);
-  const nextBatch = crawler.computeNextBatch(ingestedRules, visitedKeys, meta?.projectId || '');
+        if (index < lines.length) {
+          setImmediate(processNextBatch);
+        } else {
+          return finalizeJob(jobId, meta, stored, ingestedRules, service, logger);
+        }
+      })
+      .catch((err) => {
+        logger.error({ err, jobId }, '[pega-stream] Background processing failed');
+        pegaJobStore.fail(jobId, err.message || 'Unknown processing error');
+      });
+  };
 
-  // Register project in project_registry
-  if (meta) await registerPegaProject(service, meta.projectId, ingestedRules);
-
-  logger.info({ stored, total: totals.totalRulesInDb }, '[pega-stream] Ingest complete');
-  return { stored, ...totals, nextBatch };
+  setImmediate(processNextBatch);
 }
 
-/** Process a single NDJSON line — either metadata or a rule to ingest */
-async function processLine(
-  line: string,
+/** Compute totals + next batch after all lines processed, then mark job done */
+async function finalizeJob(
+  jobId: string,
   meta: StreamMetadata | null,
+  stored: number,
+  ingestedRules: Record<string, unknown>[],
   service: PegaService,
   logger: Logger,
-): Promise<{ isMeta: boolean; meta?: StreamMetadata; stored: boolean; rule?: Record<string, unknown> }> {
-  const obj = JSON.parse(line);
-
-  if (obj.__meta) {
-    return { isMeta: true, meta: obj as StreamMetadata, stored: false };
-  }
-
-  if (!meta) {
-    logger.warn('[pega-stream] Rule received before metadata line — skipping');
-    return { isMeta: false, stored: false };
-  }
+): Promise<void> {
+  let totals = { totalRulesInDb: 0, totalKbEntriesInDb: 0, totalGraphNodesInDb: 0 };
+  let nextBatch: JobResult['nextBatch'] = [];
 
   try {
-    const sym = service.parseRuleToSymbol(obj);
-    const checksum = sym ? meta.checksums[sym.fqn] : undefined;
-    const version = sym ? meta.versions[sym.fqn] : undefined;
-
-    const result = await service.ingestRule({
-      projectId: meta.projectId,
-      ruleJson: obj,
-      checksum,
-      version,
-    });
-
-    const didStore = result.status === 'success' && result.ruleId !== -1 && result.ruleId !== undefined;
-    return { isMeta: false, stored: didStore, rule: didStore ? obj : undefined };
+    totals = await queryPegaTotals(service, meta?.projectId || '');
   } catch (err: any) {
-    logger.debug({ err: err.message }, '[pega-stream] Single rule ingest failed — skipping');
-    return { isMeta: false, stored: false };
+    logger.warn({ err: err.message }, '[pega-stream] queryPegaTotals failed — using zeros');
   }
+
+  // SA4E-94: computeNextBatch removed — enumeration is handled by extension
+  nextBatch = [];
+
+  if (meta) await registerPegaProject(service, meta.projectId, ingestedRules);
+
+  const result: JobResult = { stored, ...totals, nextBatch };
+  pegaJobStore.complete(jobId, result);
+  logger.info({ jobId, stored, total: totals.totalRulesInDb }, '[pega-stream] Job complete');
 }
