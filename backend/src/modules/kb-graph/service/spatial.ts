@@ -178,12 +178,13 @@ export async function buildCrossClusterEdges(db: DatabaseAdapter): Promise<numbe
 }
 
 /**
- * Return flat position list for all nodes (used by 3D viewport initialisation).
+ * Return flat position list for all nodes + edges (used by 3D viewport initialisation).
+ * SA4E-97: Now includes edges from graph_edges table for relationship rendering.
  * @param projectId - Optional project scope
  */
 export async function getAllPositions(
   db: DatabaseAdapter, projectId?: string,
-): Promise<{ nodes: { id: string; x: number; y: number; z: number; type: string; tier: string; label: string }[]; total: number }> {
+): Promise<{ nodes: { id: string; x: number; y: number; z: number; type: string; tier: string; label: string }[]; edges: { source: string; target: string; weight: number; type: string }[]; total: number }> {
   const projectFilter = projectId ? ' WHERE project_id = ?' : '';
   const projectArgs: unknown[] = projectId ? [projectId] : [];
   type PosRow = { entry_id: string; x: number; y: number; z: number; type: string; tier: string; label: string };
@@ -191,7 +192,22 @@ export async function getAllPositions(
     `SELECT entry_id, x, y, z, type, tier, label FROM graph_nodes${projectFilter}`, projectArgs,
   );
   const nodes = rows.map(r => ({ id: r.entry_id, x: r.x, y: r.y, z: r.z, type: r.type, tier: r.tier, label: r.label }));
-  return { nodes, total: nodes.length };
+
+  // SA4E-97: Fetch edges for all nodes in this project
+  let edges: { source: string; target: string; weight: number; type: string }[] = [];
+  if (nodes.length > 0) {
+    const nodeIds = new Set(nodes.map(n => n.id));
+    // Fetch edges where BOTH source and target exist in our node set
+    const edgeRows = await db.allAsync<{ source: string; target: string; weight: number; rel_type: string }>(
+      `SELECT source, target, weight, rel_type FROM graph_edges${projectFilter ? ' WHERE source IN (SELECT entry_id FROM graph_nodes' + projectFilter + ')' : ''} LIMIT 10000`,
+      projectArgs,
+    );
+    edges = edgeRows
+      .filter(e => nodeIds.has(e.source) && nodeIds.has(e.target))
+      .map(e => ({ source: e.source, target: e.target, weight: e.weight, type: e.rel_type }));
+  }
+
+  return { nodes, edges, total: nodes.length };
 }
 
 /**

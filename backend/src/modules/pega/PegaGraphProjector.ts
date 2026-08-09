@@ -1,13 +1,36 @@
 /**
  * PegaGraphProjector — Projects Pega rules into graph_nodes + creates dependency edges.
- * Extracted from PegaService to keep files ≤200 LOC.
+ * SA4E-97: Uses computePositionByIndex() with Records tree categories for
+ * hierarchical 3D layout instead of flat random placement.
  */
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import type { UnresolvedDependency } from './models.js';
 import { pxObjClassToGraphType } from './pega-utils.js';
+import { computePositionByIndex } from '../kb-graph/service/nodes.js';
+
+/**
+ * 16 Pega Records tree categories — each maps to a cluster on the Fibonacci sphere.
+ * Order determines groupId (0..15) for spatial positioning.
+ */
+const PEGA_CATEGORIES = [
+  'APPLICATION_DEFINITION', 'DATA_MODEL', 'DECISION', 'GENERATIVE_AI',
+  'INTEGRATION_CONNECTORS', 'INTEGRATION_MAPPING', 'INTEGRATION_RESOURCES',
+  'INTEGRATION_SERVICES', 'ORGANIZATION', 'PROCESS', 'REPORTS',
+  'SECURITY', 'SURVEY', 'SYSADMIN', 'TECHNICAL', 'USER_INTERFACE',
+] as const;
+
+/** Per-category counters for assigning intra-cluster index. */
+const categoryCounters = new Map<string, number>();
+
+/** Get the groupId for a graph type (category), defaulting to TECHNICAL. */
+function getCategoryGroupId(graphType: string): number {
+  const idx = PEGA_CATEGORIES.indexOf(graphType as typeof PEGA_CATEGORIES[number]);
+  return idx >= 0 ? idx : PEGA_CATEGORIES.indexOf('TECHNICAL');
+}
 
 /**
  * Insert/update a graph node for an ingested Pega rule.
+ * SA4E-97: Positions nodes using Fibonacci sphere with category-based clustering.
  * @returns The graph node ID (pega:{fqn}).
  */
 export async function projectRuleToGraphNode(
@@ -18,22 +41,29 @@ export async function projectRuleToGraphNode(
 ): Promise<string> {
   const graphNodeId = `pega:${fqn}`;
   const graphType = pxObjClassToGraphType(pxObjClass);
-  const x = Math.floor(Math.random() * 400) - 200;
-  const y = Math.floor(Math.random() * 400) - 200;
+
+  // SA4E-97: Compute hierarchical position by category cluster
+  const groupId = getCategoryGroupId(graphType);
+  const intraIndex = categoryCounters.get(graphType) ?? 0;
+  categoryCounters.set(graphType, intraIndex + 1);
+  const pos = computePositionByIndex(
+    intraIndex, 200, graphType, groupId, PEGA_CATEGORIES.length,
+  );
 
   const engine = adapter.getEngine();
   if (engine === 'postgresql') {
     await adapter.runAsync(
       `INSERT INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-       ON CONFLICT (entry_id) DO UPDATE SET label = EXCLUDED.label, type = EXCLUDED.type`,
-      [graphNodeId, fqn, graphType, 'SEMANTIC', projectId, x, y, 0, 0, 'pega-cluster'],
+       ON CONFLICT (entry_id) DO UPDATE SET label = EXCLUDED.label, type = EXCLUDED.type,
+         x = EXCLUDED.x, y = EXCLUDED.y, z = EXCLUDED.z, level = EXCLUDED.level, cluster_id = EXCLUDED.cluster_id`,
+      [graphNodeId, fqn, graphType, 'SEMANTIC', projectId, pos.x, pos.y, pos.z, pos.level, pos.clusterId],
     );
   } else {
     await adapter.runAsync(
       `INSERT OR REPLACE INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [graphNodeId, fqn, graphType, 'SEMANTIC', projectId, x, y, 0, 0, 'pega-cluster'],
+      [graphNodeId, fqn, graphType, 'SEMANTIC', projectId, pos.x, pos.y, pos.z, pos.level, pos.clusterId],
     );
   }
   return graphNodeId;

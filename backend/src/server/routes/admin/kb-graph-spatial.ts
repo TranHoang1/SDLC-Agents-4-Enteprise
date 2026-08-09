@@ -34,6 +34,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
         const result = await graphService.getAllPositions!(ctx.getRequestProjectId(c));
         if (Array.isArray(allowedTiers)) result.nodes = result.nodes.filter((n: any) => n.tier === 'CODE' || allowedTiers.includes(n.tier));
         result.kbCount = kbCount; result.codeCount = codeCount; result.isPega = isPega;
+        // SA4E-97: edges already included from getAllPositions; pass through to frontend
         return c.json(result);
       } catch (err: any) { ctx.logger.warn({ error: err.message }, 'getAllPositions failed'); }
     }
@@ -61,7 +62,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
         label: ((e.summary || e.tags || '').substring(0, 50)) || (e.source || '').split('/').pop() || `Entry ${i + 1}`,
       };
     });
-    return c.json({ nodes, total: nodes.length, isPega });
+    return c.json({ nodes, edges: [], total: nodes.length, isPega });
   });
 
   app.get('/api/admin/kb/graph/spatial', async (c) => {
