@@ -88,7 +88,7 @@ export class IndexerHttpClient {
         log?: (msg: string) => void
     ): Promise<UploadResult> {
         // Priority 1: Project source code (exclude all library/vendor directories at ANY depth)
-        const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo,scratch,.code-intel,.analysis}/**";
+        const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo,scratch,.code-intel,.analysis,SDLC-Agents-4-Enterprise}/**";
         const projectFiles = await vscode.workspace.findFiles(
             "**/*.{ts,tsx,kt,java,py,go,rs}", libraryExcludes
         );
@@ -117,7 +117,13 @@ export class IndexerHttpClient {
             const entries = await Promise.all(
                 batch.map(async (file) => {
                     const content = await vscode.workspace.fs.readFile(file);
-                    return { path: vscode.workspace.asRelativePath(file), content: Buffer.from(content).toString("utf-8") };
+                    // SA4E-99: Compute path relative to workspace folder (not workspace root)
+                    // to avoid nested folder creation in multi-root workspaces
+                    const folder = vscode.workspace.getWorkspaceFolder(file);
+                    const relPath = folder
+                        ? file.fsPath.substring(folder.uri.fsPath.length + 1).replace(/\\/g, '/')
+                        : vscode.workspace.asRelativePath(file, false);
+                    return { path: relPath, content: Buffer.from(content).toString("utf-8") };
                 })
             );
             const result = await this.httpPostWithDetail(url, { files: entries }, token);
