@@ -29,6 +29,10 @@ interface SourceFile {
 }
 interface IndexScope { projectId: string; workspace: string }
 
+// SA4E-99: Server-side backpressure — limit concurrent index requests
+const INDEX_CONCURRENCY_LIMIT = 3;
+let activeIndexRequests = 0;
+
 /** Resolve request scope from trusted headers, falling back to boot config. */
 function resolveRequestScope(c: Context): IndexScope {
   const config = loadConfig();
@@ -142,7 +146,16 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
   app.post('/api/index/source', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleIndexSource(c, registry, logger, session.userId);
+    // SA4E-99: Backpressure — reject with 429 if too many concurrent requests
+    if (activeIndexRequests >= INDEX_CONCURRENCY_LIMIT) {
+      return c.json({ error: 'Server busy', retryAfter: 2 }, 429);
+    }
+    activeIndexRequests++;
+    try {
+      return await handleIndexSource(c, registry, logger, session.userId);
+    } finally {
+      activeIndexRequests--;
+    }
   });
   app.post('/api/index/document', async (c) => {
     const session = await requireAuth(c);

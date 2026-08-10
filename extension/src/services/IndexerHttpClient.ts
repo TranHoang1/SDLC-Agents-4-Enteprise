@@ -132,34 +132,31 @@ export class IndexerHttpClient {
                     return { path: relPath, content: Buffer.from(content).toString("utf-8") };
                 })
             );
-            const result = await this.httpPostWithDetail(url, { files: entries }, token);
+            // SA4E-99: Retry with exponential backoff for 429/5xx/network errors
+            const result = await this.sendBatchWithRetry(url, { files: entries }, token, 3);
             if (result.ok) {
                 uploaded += batch.length;
             } else if (result.status === 401 && this.tokenRefresher) {
-                // SA4E-99: Token expired — refresh and retry once
                 const freshToken = await this.tokenRefresher();
                 if (freshToken) {
                     token = freshToken;
-                    const retry = await this.httpPostWithDetail(url, { files: entries }, token);
+                    const retry = await this.sendBatchWithRetry(url, { files: entries }, token, 2);
                     if (retry.ok) { uploaded += batch.length; }
                     else {
                         errors += batch.length;
-                        channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED after token refresh (${batch.length} files)`);
+                        channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED after token refresh`);
                         channel.appendLine(`   Error: ${retry.error}`);
                         channel.show(true);
                     }
                 } else {
                     errors += batch.length;
-                    channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED — token refresh returned empty`);
+                    channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED — no token`);
                     channel.show(true);
                 }
             } else {
                 errors += batch.length;
-                const batchFiles = batch.map(f => vscode.workspace.asRelativePath(f)).join(", ");
                 channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED (${batch.length} files)`);
-                channel.appendLine(`   Error: ${result.error}`);
-                channel.appendLine(`   HTTP status: ${result.status}`);
-                channel.appendLine(`   Files in batch: ${batchFiles.length > 200 ? batchFiles.slice(0, 200) + "..." : batchFiles}`);
+                channel.appendLine(`   Error: ${result.error} | Status: ${result.status}`);
                 channel.show(true);
             }
         }
@@ -181,6 +178,34 @@ export class IndexerHttpClient {
             const url = `${this.backendUrl}/api/index/full`;
             await this.httpPostWithDetail(url, {}, token);
         } catch { /* non-fatal */ }
+    }
+
+    /**
+     * SA4E-99: Send batch with exponential backoff retry.
+     * Retries on: 429 (server busy), 5xx, network errors (ECONNRESET, ECONNREFUSED, timeout).
+     * Does NOT retry on 401 (handled by caller with token refresh).
+     */
+    private async sendBatchWithRetry(
+        url: string, payload: unknown, token: string | undefined, maxRetries: number,
+    ): Promise<{ ok: boolean; error: string; status: number }> {
+        let lastResult = { ok: false, error: 'no attempt', status: 0 };
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            if (attempt > 0) {
+                // Exponential backoff: 1s, 2s, 4s
+                const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+                await new Promise(r => setTimeout(r, delay));
+            }
+            lastResult = await this.httpPostWithDetail(url, payload, token);
+            if (lastResult.ok) return lastResult;
+            // Don't retry on 401 (auth issue) or 400 (client error)
+            if (lastResult.status === 401 || lastResult.status === 400) return lastResult;
+            // Retry on: 429, 5xx, network errors (status 0)
+            const shouldRetry = lastResult.status === 429
+                || lastResult.status >= 500
+                || lastResult.status === 0;
+            if (!shouldRetry) return lastResult;
+        }
+        return lastResult;
     }
 
     /**
