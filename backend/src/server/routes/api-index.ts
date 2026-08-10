@@ -211,22 +211,6 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
       fs.mkdirSync(path.dirname(targetPath), { recursive: true });
       fs.writeFileSync(targetPath, file.content, 'utf-8');
       written.push(file.path);
-
-      // Index single file and collect deps
-      if (indexer) {
-        try {
-          const result = await indexer.indexSingleFile(file.path, scope.projectId);
-          if (result && result.dependencies) {
-            for (const dep of result.dependencies) {
-              if (!allDeps.some(d => d.path === dep.path)) {
-                allDeps.push(dep);
-              }
-            }
-          }
-        } catch (err) {
-          logger.warn({ err, file: file.path }, '[index] single-file index failed (non-fatal)');
-        }
-      }
     }
 
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');

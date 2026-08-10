@@ -165,8 +165,22 @@ export class IndexerHttpClient {
         }
         report.report({ message: `Indexing source code: 100% complete`, increment: 0 });
 
+        // SA4E-99: Trigger full re-index ONCE after all files written (not per-batch)
+        if (uploaded > 0) {
+            report.report({ message: "Running full index on uploaded files..." });
+            await this.triggerFullIndex(token);
+        }
+
         const summary = `✅ Indexed ${uploaded} project files` + (errors > 0 ? `, ⚠️ Failed: ${errors} (see Output > Kiro Indexer for details)` : "");
         return { uploaded, errors, summary };
+    }
+
+    /** SA4E-99: Trigger a full re-index on backend after all source files are written. */
+    private async triggerFullIndex(token?: string): Promise<void> {
+        try {
+            const url = `${this.backendUrl}/api/index/full`;
+            await this.httpPostWithDetail(url, {}, token);
+        } catch { /* non-fatal */ }
     }
 
     /**
