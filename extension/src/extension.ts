@@ -4,7 +4,7 @@
  */
 
 import * as vscode from "vscode";
-import { getWorkspaceRoot, createStatusBar, updateStatusBar, checkForUpgrade } from "./activation-helpers";
+import { getWorkspaceRoot, checkForUpgrade } from "./activation-helpers";
 import { McpServerManager } from "./mcp-server-manager";
 import { WebviewPanelManager } from "./webview-panel-manager";
 import { KiroTreeViewProvider } from "./sidebar/tree-view-provider";
@@ -47,8 +47,7 @@ export function getProjectId(): string { return _projectId; }
 export function setProjectId(id: string): void { _projectId = id; }
 
 export async function activate(context: vscode.ExtensionContext) {
-  const statusBar = createStatusBar();
-  context.subscriptions.push(statusBar);
+  // SA4E-99: Removed duplicate createStatusBar() — StatusBarManager handles status display
 
   // Register Settings command early — must work even without a workspace folder.
   context.subscriptions.push(
@@ -64,10 +63,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workspaceRoot = getWorkspaceRoot();
   if (workspaceRoot) {
-    await initializeWorkspace(context, workspaceRoot, statusBar);
+    await initializeWorkspace(context, workspaceRoot);
   }
 
-  updateStatusBar(statusBar, mcpManager);
   checkForUpgrade(context);
 }
 
@@ -137,7 +135,7 @@ export async function deriveProjectId(workspaceRoot: string): Promise<string> {
   return projectId;
 }
 
-async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRoot: string, statusBar: vscode.StatusBarItem): Promise<void> {
+async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRoot: string): Promise<void> {
   _projectId = await deriveProjectId(workspaceRoot);
 
   const outputChannel = vscode.window.createOutputChannel("Kiro MCP Server");
@@ -194,7 +192,7 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
   );
 
   setupConfigWatcher(context, workspaceRoot, outputChannel);
-  setupMcpStatusBroadcast(statusBar, workspaceRoot);
+  setupMcpStatusBroadcast(workspaceRoot);
   await autoSpawnServer(mcpConfig, outputChannel);
 
   // Initialize Platform Swap feature (IDE-aware agent config swap)
@@ -256,11 +254,10 @@ function setupConfigWatcher(context: vscode.ExtensionContext, workspaceRoot: str
   }));
 }
 
-function setupMcpStatusBroadcast(statusBar: vscode.StatusBarItem, workspaceRoot: string): void {
+function setupMcpStatusBroadcast(workspaceRoot: string): void {
   mcpManager!.onStatusChange((status) => {
     const webviewStatus = mapServerStatusToWebview(status);
     panelManager?.notifyAllPanels({ type: "serverStatus", status: webviewStatus });
-    updateStatusBar(statusBar, mcpManager);
     // SA4E-39: Update StatusBarManager connection state from MCP status
     const connState = status === "running" ? "CONNECTED" : status === "starting" ? "CONNECTING" : "DISCONNECTED";
     statusBarManager?.setConnectionState(connState);
