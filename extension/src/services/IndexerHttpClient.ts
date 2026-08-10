@@ -109,7 +109,7 @@ export class IndexerHttpClient {
     /** SA4E-99: Trigger backend to ingest documents from Temp folder into KB. */
     private async triggerDocumentIngest(token?: string): Promise<void> {
         try {
-            await this.httpPostWithDetail(`${this.backendUrl}/api/index/full`, { documentsOnly: true }, token);
+            await this.httpPostWithDetail(`${this.backendUrl}/api/index/ingest-docs`, {}, token);
         } catch { /* non-fatal */ }
     }
 

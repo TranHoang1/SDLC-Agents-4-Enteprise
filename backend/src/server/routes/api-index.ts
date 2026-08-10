@@ -176,6 +176,12 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
     return handleFileEvents(c, registry, logger);
   });
+  // SA4E-99: Ingest documents from Temp folder into KB
+  app.post('/api/index/ingest-docs', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleIngestDocsFromTemp(c, registry, logger, session.userId);
+  });
   app.post('/api/index/cancel', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
@@ -260,6 +266,63 @@ async function handleIndexDocuments(c: Context, logger: Logger, userId = '') {
   }
 }
 
+/**
+ * SA4E-99: Scan Temp/{userId}/{projectId}/batch-docs/ and ingest all markdown files into KB.
+ * Called ONCE after all document batches are written to Temp.
+ */
+async function handleIngestDocsFromTemp(c: Context, registry: ModuleRegistry, logger: Logger, userId: string) {
+  try {
+    const scope = resolveRequestScope(c);
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId, scope.projectId, 'batch-docs');
+
+    if (!fs.existsSync(tempBase)) {
+      return c.json({ ingested: 0, message: 'No documents in Temp folder' });
+    }
+
+    // Recursively find all files in temp docs folder
+    const files: string[] = [];
+    function walk(dir: string) {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) { walk(full); }
+        else if (entry.name.endsWith('.md') || entry.name.endsWith('.txt')) { files.push(full); }
+      }
+    }
+    walk(tempBase);
+
+    // Ingest each file via mem_ingest_file handler
+    const mem = registry.getModule('memory') as any;
+    if (!mem || mem.status !== 'ready') {
+      return c.json({ error: 'Memory module not ready' }, 503);
+    }
+    const dispatcher = mem.getDispatcher();
+    let ingested = 0;
+    let errors = 0;
+
+    for (const filePath of files) {
+      const relPath = path.relative(tempBase, filePath).replace(/\\/g, '/');
+      try {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        await dispatcher.dispatch('mem_ingest_file', {
+          file_path: relPath,
+          content,
+          type: 'CONTEXT',
+          scope: 'PROJECT',
+        });
+        ingested++;
+      } catch (err) {
+        errors++;
+        logger.warn({ err, file: relPath }, '[ingest-docs] Failed to ingest document');
+      }
+    }
+
+    logger.info({ ingested, errors, total: files.length }, '[ingest-docs] Document ingest complete');
+    return c.json({ ingested, errors, total: files.length });
+  } catch (err: any) {
+    return indexError(c, err, logger, 'Error ingesting documents from Temp');
+  }
+}
+
 /** Map errors to responses — PROJECT_REQUIRED → 400, everything else → 500. */
 function indexError(c: Context, err: any, logger: Logger, context: string) {
   if (String(err?.message).startsWith('PROJECT_REQUIRED')) {
@@ -268,4 +331,3 @@ function indexError(c: Context, err: any, logger: Logger, context: string) {
   logger.error({ err }, context);
   return c.json({ error: 'Internal error' }, 500);
 }
-
