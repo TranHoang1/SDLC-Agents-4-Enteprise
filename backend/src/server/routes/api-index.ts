@@ -50,7 +50,7 @@ function writeFilesPhase(workspace: string, files: SourceFile[]): { written: num
   let written = 0;
   // SA4E-99: Write to temp dir outside workspace to avoid Kiro file watcher restart
   const wsBasename = path.basename(workspace);
-  const tempBase = path.join('C:\\projects\\kiro\\Temp', 'batch-docs', wsBasename);
+  const tempBase = path.join('C:\\projects\\kiro\\Temp', 'local-dev', 'default', 'batch-docs');
   fs.mkdirSync(tempBase, { recursive: true });
   for (const file of files) {
     let filePath = file.path;
@@ -201,8 +201,8 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const scope = resolveRequestScope(c);
 
     // SA4E-99: Write to temp dir OUTSIDE workspace to avoid triggering Kiro file watcher
-    // Structure: Temp/{userId}/{projectId}/files... (tenant-safe, no conflict)
-    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'anonymous', scope.projectId);
+    // Structure: Temp/{userId}/{projectId}/source/files...
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', scope.projectId, 'source');
     const wsBasename = path.basename(scope.workspace);
     fs.mkdirSync(tempBase, { recursive: true });
 
@@ -235,8 +235,8 @@ async function handleIndexDocument(c: Context, logger: Logger) {
     const { path: relPath, content } = body;
     if (!relPath || !content) return c.json({ error: 'path and content required' }, 400);
     const scope = resolveRequestScope(c);
-    // SA4E-99: Write to temp dir outside workspace (same as source indexing)
-    const tempBase = path.join('C:\\projects\\kiro\\Temp', 'documents', scope.projectId);
+    // SA4E-99: Write to temp dir outside workspace — consistent structure: Temp/{userId}/{projectId}/documents/
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', 'local-dev', scope.projectId, 'documents');
     const wsBasename = path.basename(scope.workspace);
     let filePath = relPath;
     if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
