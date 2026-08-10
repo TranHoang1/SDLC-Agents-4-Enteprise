@@ -229,6 +229,11 @@ export class TaskWorker {
     // NEW-03: Conditional structured_map update — only if still pending
     await this.updateEntryStructuredMapConditional(task.entry_id, result, context);
 
+    // SA4E-99: Propagate LLM summary to knowledge_entries.summary + graph_nodes.label
+    if (result.summary && result.summary.length > 0) {
+      await this.propagateSummary(task.entry_id, result.summary);
+    }
+
     // SA4E-79: Mark entry as enriched by backend LLM (atomic — changes=0 if client won)
     const now = new Date().toISOString();
     const updateResult = await this.engine.getAdapter().runAsync(
@@ -368,6 +373,30 @@ export class TaskWorker {
     } catch (err) {
       this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
         'structured_map conditional update failed');
+    }
+  }
+
+  /**
+   * SA4E-99: Propagate LLM-generated summary to knowledge_entries.summary and graph_nodes.label.
+   * Without this, entries display only the first heading line (e.g., "1. What's New").
+   */
+  private async propagateSummary(entryId: number, llmSummary: string): Promise<void> {
+    const truncatedSummary = llmSummary.slice(0, 300);
+    const graphLabel = llmSummary.slice(0, 60);
+    try {
+      await this.engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET summary = ? WHERE id = ? AND enrichment_status = 'pending'`,
+        [truncatedSummary, entryId],
+      );
+      await this.engine.getAdapter().runAsync(
+        `UPDATE graph_nodes SET label = ? WHERE entry_id = ?`,
+        [graphLabel, `doc-${entryId}`],
+      );
+      this.logger.debug({ entry_id: entryId, component: 'TaskWorker' },
+        'LLM summary propagated to KB entry + graph node');
+    } catch (err) {
+      this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
+        'Summary propagation failed (non-fatal)');
     }
   }
 
