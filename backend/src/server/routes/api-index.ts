@@ -199,7 +199,8 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const scope = resolveRequestScope(c);
 
     // SA4E-99: Write to temp dir OUTSIDE workspace to avoid triggering Kiro file watcher
-    const tempBase = 'C:\\projects\\kiro\\Temp';
+    // Structure: Temp/{userId}/{projectId}/files... (tenant-safe, no conflict)
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'anonymous', scope.projectId);
     const wsBasename = path.basename(scope.workspace);
     fs.mkdirSync(tempBase, { recursive: true });
 
