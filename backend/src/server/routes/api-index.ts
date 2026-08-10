@@ -74,6 +74,19 @@ function triggerIndexPhase(registry: ModuleRegistry, scope: IndexScope, logger: 
   return true;
 }
 
+/** SA4E-99: Sync code symbols to graph_nodes after incremental source upload (non-fatal). */
+async function syncGraphAfterUpload(registry: ModuleRegistry, projectId: string, logger: Logger): Promise<void> {
+  try {
+    const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
+    const indexer = codeIntel?.getIndexer() as any;
+    if (!indexer || !indexer.syncGraphNodesPublic) return;
+    await indexer.syncGraphNodesPublic(projectId);
+    logger.info({ projectId }, '[index] Graph nodes synced after source upload');
+  } catch (err) {
+    logger.warn({ err }, '[index] Graph sync after upload failed (non-fatal)');
+  }
+}
+
 /** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
 /** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
 async function ensureProjectKbEntry(registry: ModuleRegistry, scope: IndexScope, written: number, logger: Logger): Promise<void> {
@@ -218,6 +231,10 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
 
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
     await ensureProjectKbEntry(registry, scope, written.length, logger);
+    // SA4E-99: Sync code symbols into graph_nodes after batch upload (non-fatal)
+    if (written.length > 0) {
+      await syncGraphAfterUpload(registry, scope.projectId, logger);
+    }
     return c.json({ written: written.length, skipped: skipped.length, rejected, deps: allDeps, projectId: scope.projectId });
   } catch (err: any) {
     return indexError(c, err, logger, 'Error writing source batch');

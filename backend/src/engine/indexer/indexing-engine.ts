@@ -147,6 +147,11 @@ export class IndexingEngine {
     this.progressEmitter.emit('progress', { projectId, phase, current, total });
   }
 
+  /** SA4E-99: Public method for external callers (e.g., api-index route after batch upload). */
+  async syncGraphNodesPublic(projectId: string): Promise<void> {
+    return this.syncGraphNodes(projectId);
+  }
+
   /** Project this tenant's code symbols into graph_nodes in index DB (non-fatal). SA4E-53: async. SA4E-78: cached. */
   private async syncGraphNodes(projectId: string): Promise<void> {
     try {
