@@ -88,9 +88,9 @@ export class IndexerHttpClient {
         log?: (msg: string) => void
     ): Promise<UploadResult> {
         // Priority 1: Project source code (exclude all library/vendor directories at ANY depth)
-        const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo}/**";
+        const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo,scratch,.code-intel,.analysis}/**";
         const projectFiles = await vscode.workspace.findFiles(
-            "**/*.{ts,js,kt,java,py,go,rs,tsx,jsx}", libraryExcludes
+            "**/*.{ts,tsx,kt,java,py,go,rs}", libraryExcludes
         );
 
         if (projectFiles.length === 0) { return { uploaded: 0, errors: 0, summary: "ℹ️ No source files found" }; }

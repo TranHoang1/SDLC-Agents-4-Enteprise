@@ -71,9 +71,9 @@ export async function uploadDocumentFile(relPath: string, content: string, token
 export async function uploadSourceFiles(report: vscode.Progress<{ message?: string }>, token?: string): Promise<string> {
   const backendUrl = getBackendUrl();
   if (!backendUrl) return "❌ Backend URL not configured.";
-  const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo}/**";
+  const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo,scratch,.code-intel,.analysis}/**";
   const files = await vscode.workspace.findFiles(
-    "**/*.{ts,js,kt,java,py,go,rs,tsx,jsx}", libraryExcludes
+    "**/*.{ts,tsx,kt,java,py,go,rs}", libraryExcludes
   );
   if (files.length === 0) return "❌ No source files found";
   const url = `${backendUrl}/api/index/source`;
