@@ -45,19 +45,14 @@ function resolveRequestScope(c: Context): IndexScope {
 // NOTE: resolveUserId kept for backward compatibility but auth is now enforced at route level
 
 /** Phase: write files to disk under the workspace, rejecting unsafe paths. */
-function writeFilesPhase(workspace: string, files: SourceFile[]): { written: number; rejected: string[] } {
+function writeFilesPhase(userId: string, projectId: string, files: SourceFile[]): { written: number; rejected: string[] } {
   const rejected: string[] = [];
   let written = 0;
-  // SA4E-99: Write to temp dir outside workspace to avoid Kiro file watcher restart
-  const wsBasename = path.basename(workspace);
-  const tempBase = path.join('C:\\projects\\kiro\\Temp', 'local-dev', 'default', 'batch-docs');
+  // SA4E-99: Consistent temp structure — Temp/{userId}/{projectId}/batch-docs/
+  const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', projectId, 'batch-docs');
   fs.mkdirSync(tempBase, { recursive: true });
   for (const file of files) {
-    let filePath = file.path;
-    if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
-      filePath = filePath.substring(wsBasename.length + 1);
-    }
-    const targetPath = path.join(tempBase, filePath);
+    const targetPath = path.join(tempBase, file.path);
     try {
       fs.mkdirSync(path.dirname(targetPath), { recursive: true });
       fs.writeFileSync(targetPath, file.content, 'utf-8');
@@ -162,12 +157,12 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
   app.post('/api/index/document', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleIndexDocument(c, logger);
+    return handleIndexDocument(c, logger, session.userId);
   });
   app.post('/api/index/documents', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleIndexDocuments(c, logger);
+    return handleIndexDocuments(c, logger, session.userId);
   });
 
   // SA4E-78: Decoupled indexer endpoints
@@ -229,14 +224,14 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
   }
 }
 
-async function handleIndexDocument(c: Context, logger: Logger) {
+async function handleIndexDocument(c: Context, logger: Logger, userId = '') {
   try {
     const body = await c.req.json() as { path: string; content: string };
     const { path: relPath, content } = body;
     if (!relPath || !content) return c.json({ error: 'path and content required' }, 400);
     const scope = resolveRequestScope(c);
-    // SA4E-99: Write to temp dir outside workspace — consistent structure: Temp/{userId}/{projectId}/documents/
-    const tempBase = path.join('C:\\projects\\kiro\\Temp', 'local-dev', scope.projectId, 'documents');
+    // SA4E-99: Consistent temp structure — Temp/{userId}/{projectId}/documents/
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', scope.projectId, 'documents');
     const wsBasename = path.basename(scope.workspace);
     let filePath = relPath;
     if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
@@ -251,13 +246,13 @@ async function handleIndexDocument(c: Context, logger: Logger) {
   }
 }
 
-async function handleIndexDocuments(c: Context, logger: Logger) {
+async function handleIndexDocuments(c: Context, logger: Logger, userId = '') {
   try {
     const body = await c.req.json() as { files: SourceFile[] };
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c);
-    const { written, rejected } = writeFilesPhase(scope.workspace, files);
+    const { written, rejected } = writeFilesPhase(userId, scope.projectId, files);
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
     return c.json({ indexed: written, rejected });
   } catch (err: any) {
