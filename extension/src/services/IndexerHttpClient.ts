@@ -113,6 +113,8 @@ export class IndexerHttpClient {
             const progressMsg = `Indexing source code: ${pct}% (${i + 1}/${totalFiles} files, batch ${batchNum}/${totalBatches})`;
             report.report({ message: progressMsg, increment: incrementPerBatch });
             if (log) { log(progressMsg); }
+            // SA4E-99: Small delay between batches to prevent server overload
+            if (i > 0) { await new Promise(r => setTimeout(r, 100)); }
             const batch = projectFiles.slice(i, i + batchSize);
             const entries = await Promise.all(
                 batch.map(async (file) => {
@@ -191,8 +193,8 @@ export class IndexerHttpClient {
         let lastResult = { ok: false, error: 'no attempt', status: 0 };
         for (let attempt = 0; attempt <= maxRetries; attempt++) {
             if (attempt > 0) {
-                // Exponential backoff: 1s, 2s, 4s
-                const delay = Math.min(1000 * Math.pow(2, attempt - 1), 8000);
+                // Exponential backoff: 2s, 4s, 8s (longer to allow server recovery)
+                const delay = Math.min(2000 * Math.pow(2, attempt - 1), 10000);
                 await new Promise(r => setTimeout(r, delay));
             }
             lastResult = await this.httpPostWithDetail(url, payload, token);
