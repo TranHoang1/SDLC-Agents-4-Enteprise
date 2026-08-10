@@ -63,7 +63,10 @@ export class IndexerHttpClient {
 
         for (let i = 0; i < docs.length; i += batchSize) {
             const batch = docs.slice(i, i + batchSize);
-            report.report({ message: `Ingesting documents ${i + 1}/${docs.length}...` });
+            const batchNum = Math.floor(i / batchSize) + 1;
+            const totalBatches = Math.ceil(docs.length / batchSize);
+            const pct = Math.round((i / docs.length) * 100);
+            report.report({ message: `Ingesting documents: ${pct}% (${i + 1}/${docs.length} files, batch ${batchNum}/${totalBatches})` });
             if (i > 0) { await new Promise(r => setTimeout(r, 200)); }
 
             const entries: FileEntry[] = [];
