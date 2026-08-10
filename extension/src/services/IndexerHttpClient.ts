@@ -113,8 +113,8 @@ export class IndexerHttpClient {
             const progressMsg = `Indexing source code: ${pct}% (${i + 1}/${totalFiles} files, batch ${batchNum}/${totalBatches})`;
             report.report({ message: progressMsg, increment: incrementPerBatch });
             if (log) { log(progressMsg); }
-            // SA4E-99: Small delay between batches to prevent server overload
-            if (i > 0) { await new Promise(r => setTimeout(r, 100)); }
+            // SA4E-99: Delay between batches to prevent server overload (PG pool exhaustion)
+            if (i > 0) { await new Promise(r => setTimeout(r, 500)); }
             const batch = projectFiles.slice(i, i + batchSize);
             const entries = await Promise.all(
                 batch.map(async (file) => {
