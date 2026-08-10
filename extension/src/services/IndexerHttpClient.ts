@@ -117,12 +117,18 @@ export class IndexerHttpClient {
             const entries = await Promise.all(
                 batch.map(async (file) => {
                     const content = await vscode.workspace.fs.readFile(file);
-                    // SA4E-99: Compute path relative to workspace folder (not workspace root)
-                    // to avoid nested folder creation in multi-root workspaces
+                    // SA4E-99: Strip workspace folder prefix to avoid nested folder creation
                     const folder = vscode.workspace.getWorkspaceFolder(file);
-                    const relPath = folder
-                        ? file.fsPath.substring(folder.uri.fsPath.length + 1).replace(/\\/g, '/')
-                        : vscode.workspace.asRelativePath(file, false);
+                    let relPath: string;
+                    if (folder) {
+                        relPath = file.fsPath.substring(folder.uri.fsPath.length + 1).replace(/\\/g, '/');
+                    } else {
+                        // Fallback: strip first workspace folder path manually
+                        const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+                        relPath = file.fsPath.startsWith(root)
+                            ? file.fsPath.substring(root.length + 1).replace(/\\/g, '/')
+                            : file.fsPath.replace(/\\/g, '/');
+                    }
                     return { path: relPath, content: Buffer.from(content).toString("utf-8") };
                 })
             );
