@@ -61,8 +61,8 @@
 
 | Layer | Technology | Version |
 |-------|-----------|---------|
-| Language | {Kotlin/Java/TypeScript} | {version} |
-| Framework | {Spring Boot/NestJS/React} | {version} |
+| Language | {TypeScript/Python} | {version} |
+| Framework | {Hono/NestJS/Express/Svelte} | {version} |
 | Database | {PostgreSQL/MySQL/Oracle} | {version} |
 | Build Tool | {Gradle/Maven/npm} | {version} |
 | Container | {Docker} | {version} |
@@ -260,9 +260,9 @@ CREATE INDEX {idx_name} ON {table_name} ({column1}, {column2});
 
 ### 5.2 Key Interfaces
 
-```kotlin
-interface {ServiceInterface} {
-    fun {methodName}({params}): {ReturnType}
+```typescript
+export interface {ServiceInterface} {
+  {methodName}({params}): {ReturnType};
 }
 ```
 

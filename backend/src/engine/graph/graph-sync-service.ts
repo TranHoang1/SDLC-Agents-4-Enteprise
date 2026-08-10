@@ -10,6 +10,7 @@
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../database/dialect/DialectHelper.js';
 import { KIND_TO_TYPE } from '../../modules/kb-graph/service/constants.js';
+import { extractAndInsertCodeEdges } from './code-edge-extractor.js';
 import type { Logger } from 'pino';
 
 interface CodeSymbolRow {
@@ -44,9 +45,25 @@ export class GraphSyncService {
       const symbols = await this.readTopSymbols(projectId);
       await this.replaceCodeNodes(projectId, symbols);
       this.log.info(`[graph-sync] Synced ${symbols.length} code nodes for project ${projectId}`);
+      // SA4E-91: Extract and insert code edges (IMPORTS, CALLS, EXTENDS)
+      await this.syncCodeEdges(projectId);
     } catch (err) {
       // Non-fatal: visualization projection must never fail the index run.
       this.log.error({ err }, `[graph-sync] Failed to sync code nodes for ${projectId}`);
+    }
+  }
+
+  /** SA4E-91: Extract code relationships into graph_edges (non-fatal). */
+  private async syncCodeEdges(projectId: string): Promise<void> {
+    try {
+      const count = await extractAndInsertCodeEdges(
+        this.indexAdapter, this.adminAdapter, projectId, this.log,
+      );
+      if (count > 0) {
+        this.log.info(`[graph-sync] Inserted ${count} code edges for project ${projectId}`);
+      }
+    } catch (err) {
+      this.log.warn({ err }, `[graph-sync] Code edge extraction failed (non-fatal)`);
     }
   }
 

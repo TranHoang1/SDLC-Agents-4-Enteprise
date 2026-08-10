@@ -16,6 +16,20 @@ import * as os from 'os';
 const API_BASE = process.env.LLM_API_BASE || 'http://localhost:1234/v1';
 const MODEL = process.env.LLM_MODEL || '';
 
+/** Resolve model: use LLM_MODEL, else the first model the server exposes. */
+async function resolveModel(): Promise<string> {
+  if (MODEL) { return MODEL; }
+  try {
+    const res = await fetch(`${API_BASE}/models`, { signal: AbortSignal.timeout(5000) });
+    if (res.ok) {
+      const data = await res.json() as { data?: Array<{ id: string }> };
+      const id = data.data?.[0]?.id;
+      if (id) { return id; }
+    }
+  } catch { /* fall through */ }
+  return 'qwen3-4b-instruct-2507';
+}
+
 let tmpDir: string;
 
 beforeAll(() => {
@@ -35,9 +49,9 @@ tools: ["read", "write", "mcp"]
 Bạn là Business Analyst. Khi có ticket, bạn phân tích yêu cầu và tạo BRD.md.
 Bạn cũng tạo FSD.md (Functional Specification Document).
 
-Backend: Kotlin/Ktor/SQLDelight/Koin.
-Frontend: Kotlin/JS + Svelte 4 + Vite.
-Orchestration: Python MCP.`);
+Backend: TypeScript + Hono + MCP SDK.
+Frontend: Svelte 4 + Vite.
+Orchestration: Python FastAPI + LangGraph.`);
 
   // dev-agent.md
   fs.writeFileSync(path.join(agentsDir, 'dev-agent.md'), `---
@@ -132,11 +146,12 @@ ${steeringFiles.map(f => {
 }
 
 async function chat(userMessage: string, systemPrompt: string): Promise<string> {
+  const model = await resolveModel();
   const response = await fetch(`${API_BASE}/chat/completions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: MODEL,
+      model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },
@@ -170,7 +185,7 @@ describe('Real LLM — Agentic Chat', () => {
     console.log(`\n[LLM response] ${answer}`);
     expect(answer.length).toBeGreaterThan(10);
     // Model should reference something from prompt even if it hallucinates
-    expect(answer.toLowerCase()).toMatch(/kotlin|svelte|mcp|agent|python|node/i);
+    expect(answer.toLowerCase()).toMatch(/svelte|mcp|agent|python|node|hono|typescript/i);
   }, 30_000);
 
   it('should answer multi-turn conversation', async () => {
@@ -189,12 +204,12 @@ describe('Real LLM — Agentic Chat', () => {
     const response2 = await fetch(`${API_BASE}/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: MODEL, messages: history, max_tokens: 500, temperature: 0.5 }),
+      body: JSON.stringify({ model: await resolveModel(), messages: history, max_tokens: 500, temperature: 0.5 }),
     });
     const data2 = await response2.json() as any;
     const a2 = data2.choices?.[0]?.message?.content || '';
     console.log(`[Turn 2] ${a2}`);
     expect(a2.length).toBeGreaterThan(10);
-    expect(a2.toLowerCase()).toMatch(/kotlin|agent|backend|frontend|pipeline|sdlc|architect/i);
+    expect(a2.toLowerCase()).toMatch(/agent|backend|frontend|pipeline|sdlc|architect|hono|svelte/i);
   }, 30_000);
 });

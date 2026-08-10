@@ -1,74 +1,21 @@
 /**
  * PegaService — Logic nghiệp vụ cho Pega Rule & Data Indexing & Schema Storage.
  */
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
 import type { MemoryEngine } from '../memory/engine/core.js';
 import type {
   PegaCheckRuleRequest,
   PegaCheckRuleResponse,
   PegaIngestRuleRequest,
   PegaIngestRuleResponse,
+  UnresolvedDependency,
 } from './models.js';
-import { PegaParser } from './PegaParser.js';
+import { PegaParser, type ExtractedPegaSymbol } from './PegaParser.js';
 import { PegaSchemaLoader } from './PegaSchemaLoader.js';
 import type { PegaRuleKbSchema } from './strategies/KbDrivenPegaParserStrategy.js';
-
 import { PegaDeclarativeEngine } from './PegaDeclarativeEngine.js';
 import { PegaRuleAstParser } from './PegaRuleAstParser.js';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-function extractTagValueCsv(tags: string, key: string): string | null {
-  for (const tag of tags.split(',')) {
-    const trimmed = tag.trim();
-    if (trimmed.startsWith(key + ':')) return trimmed.slice(key.length + 1);
-  }
-  return null;
-}
-
-type CategoryRule = { keywords: string[]; category: string };
-
-const CATEGORY_RULES_PATH = path.resolve(__dirname, '../../../.code-intel/pega-categories.json');
-
-function loadCategoryRules(): CategoryRule[] {
-  try {
-    if (fs.existsSync(CATEGORY_RULES_PATH)) {
-      const raw = JSON.parse(fs.readFileSync(CATEGORY_RULES_PATH, 'utf-8'));
-      if (Array.isArray(raw.rules) && raw.rules.length > 0) return raw.rules;
-    }
-  } catch { /* ignore */ }
-  return [];
-}
-
-function autoCategory(shortName: string): string {
-  const segment = shortName.replace(/^Rule-Obj-/i, '').split('-')[0];
-  if (!segment) return 'OTHER';
-  const normalized = segment
-    .replace(/([A-Z])/g, '_$1')
-    .replace(/^_/, '')
-    .toUpperCase();
-  return normalized;
-}
-
-let _categoryRules: CategoryRule[] | null = null;
-function getCategoryRules(): CategoryRule[] {
-  if (_categoryRules === null) _categoryRules = loadCategoryRules();
-  return _categoryRules;
-}
-
-function pxObjClassToGraphType(pxObjClass: string): string {
-  // 1. Try config rules
-  const rules = getCategoryRules();
-  for (const rule of rules) {
-    for (const kw of rule.keywords) {
-      if (pxObjClass.includes(kw)) return rule.category;
-    }
-  }
-  // 2. Auto: extract first segment after Rule-Obj-
-  return autoCategory(pxObjClass);
-}
+import { extractTagValueCsv, pxObjClassToGraphType } from './pega-utils.js';
+import { projectRuleToGraphNode, createDependencyEdges } from './PegaGraphProjector.js';
 
 export class PegaService {
   private parser: PegaParser;
@@ -82,9 +29,7 @@ export class PegaService {
     this.initSchemasInDb().catch(() => {});
   }
 
-  public getDeclarativeEngine(): PegaDeclarativeEngine {
-    return this.declarativeEngine;
-  }
+  public getDeclarativeEngine(): PegaDeclarativeEngine { return this.declarativeEngine; }
 
   private async initSchemasInDb(): Promise<void> {
     const schemas = await this.getSchemasFromDb();
@@ -167,14 +112,8 @@ export class PegaService {
     }
   }
 
-  public getAstParser(): PegaRuleAstParser {
-    return this.astParser;
-  }
-
-  public parseRuleToAst(ruleJson: Record<string, unknown>) {
-    return this.astParser.parse(ruleJson);
-  }
-
+  public getAstParser(): PegaRuleAstParser { return this.astParser; }
+  public parseRuleToAst(ruleJson: Record<string, unknown>) { return this.astParser.parse(ruleJson); }
   public ruleToPromptContext(ruleJson: Record<string, unknown>): string {
     const ast = this.parseRuleToAst(ruleJson);
     return this.astParser.toPromptContext(ast);
@@ -208,7 +147,13 @@ export class PegaService {
   }
 
   public async ingestRule(req: PegaIngestRuleRequest): Promise<PegaIngestRuleResponse> {
-    const symbol = this.parser.parseSymbol(req.ruleJson);
+    let symbol: ExtractedPegaSymbol;
+    try {
+      symbol = this.parser.parseSymbol(req.ruleJson);
+    } catch {
+      // Rule type not supported by parser — skip gracefully instead of crashing stream
+      return { status: 'success', ruleId: -1, unresolvedDependencies: [] };
+    }
     const deps = this.parser.extractDependencies(req.ruleJson);
 
     if (req.checksum) {
@@ -261,25 +206,10 @@ export class PegaService {
       tags: 'pega,ast',
     });
 
-    // Project into graph_nodes for KB Graph visualization
-    const graphType = pxObjClassToGraphType(pxObjClass);
+    // Project into graph_nodes + create dependency edges
     try {
-      const graphNodeId = `pega:${symbol.fqn}`;
-      const engine = adapter.getEngine();
-      if (engine === 'postgresql') {
-        await adapter.runAsync(
-          `INSERT INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-           ON CONFLICT (entry_id) DO UPDATE SET label = EXCLUDED.label, type = EXCLUDED.type`,
-          [graphNodeId, symbol.fqn, graphType, 'SEMANTIC', req.projectId, Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 0, 'pega-cluster']
-        );
-      } else {
-        await adapter.runAsync(
-          `INSERT OR REPLACE INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [graphNodeId, symbol.fqn, graphType, 'SEMANTIC', req.projectId, Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 0, 'pega-cluster']
-        );
-      }
+      const graphNodeId = await projectRuleToGraphNode(adapter, symbol.fqn, pxObjClass, req.projectId);
+      await createDependencyEdges(adapter, graphNodeId, deps);
     } catch { /* non-fatal graph projection */ }
 
     return { status: 'success', ruleId: id, unresolvedDependencies: deps };

@@ -2,3 +2,10 @@ export { SECRET_KEYS, PROVIDER_BASE_URL_DEFAULTS, PROVIDER_BASE_URL_KEYS } from 
 export type { LlmTestResult } from "./LlmTestResult";
 export type { SettingsState } from "./SettingsState";
 export type { ProxyMode, ProxyConfig, ProxyCredentials, ProxyState, ProxyTestResult, ProxyTestInput } from "./ProxyModels";
+export type {
+  SchemaGenerationState, SchemaGenerationResult, SchemaError,
+  HarnessSummary, ListRulesResponse, PegaControlType, ControlDefinition,
+  JsonSchemaProperty, JsonSchema, JsonSchemaTypeInfo,
+} from "./PegaSchemaModels";
+export type { RuleSetRuleSummary, CrawlPlanItem } from "./PegaCrawlModels";
+export { summaryToCrawlItem, parseRuleSetEntry } from "./PegaCrawlModels";

@@ -41,7 +41,7 @@ agent_log(ticket_key="{TICKET or SCOPE}", agent_name="SECURITY", step="Step-{N}"
 - `Step-4`: API Security Review
 - `Step-5`: Data Protection & Cryptography Review
 - `Step-6`: Security Headers & Configuration
-- `Step-7`: Ktor-Specific Security Checks
+- `Step-7`: Hono/Node.js-Specific Security Checks
 - `Step-8`: MCP Protocol Security
 - `Step-9`: Report Generation
 - `Self-Check`: Final validation
@@ -84,13 +84,13 @@ stream_write_file(file_path="documents/SECURITY-REPORT.md", content="\n## Remedi
 ## Tech Stack Focus
 
 Your analysis is optimized for:
-- **Language/Runtime**: Kotlin / JVM
-- **Framework**: Ktor (HTTP server, routing, plugins)
-- **Database**: PostgreSQL (with Exposed ORM or raw SQL)
-- **API Style**: REST APIs, JSON serialization (kotlinx.serialization / Jackson)
+- **Language/Runtime**: TypeScript / Node.js
+- **Framework**: Hono (HTTP server, routing, middleware)
+- **Database**: SQLite (better-sqlite3) / PostgreSQL (pg)
+- **API Style**: REST APIs, JSON serialization (zod schemas)
 - **Protocol**: MCP (Model Context Protocol) — custom tool/agent communication
 - **Auth**: JWT, session-based, or custom token schemes
-- **Build**: Gradle (Kotlin DSL)
+- **Build**: npm (package.json)
 
 ---
 
@@ -98,9 +98,9 @@ Your analysis is optimized for:
 
 The user can provide:
 
-1. **Path to source code** — e.g., `src/main/kotlin/com/example/`
+1. **Path to source code** — e.g., `backend/src/`
 2. **Jira ticket key** — e.g., `MTO-16` (agent will read related documents and source code)
-3. **Specific file(s)** — e.g., `src/main/kotlin/com/example/auth/AuthService.kt`
+3. **Specific file(s)** — e.g., `backend/src/auth/AuthService.ts`
 4. **Scope directive** — e.g., "Review authentication module only" or "Full security audit"
 
 After parsing input, confirm:
@@ -119,13 +119,13 @@ After parsing input, confirm:
 2. Read project structure to understand the application layout:
    - Read `.analysis/code-intelligence/project-structure.md` if available.
    - Read relevant `.analysis/code-intelligence/modules/*.md` for module details.
-   - Read `build.gradle.kts` to identify dependencies and their versions.
+   - Read `package.json` to identify dependencies and their versions.
 3. Identify key areas to audit:
    - Authentication/Authorization modules
    - API route definitions
    - Database access layers
-   - Configuration files (application.yml, application.conf)
-   - Dependency manifests (build.gradle.kts, libs.versions.toml)
+   - Configuration files (.env, config/*.ts)
+   - Dependency manifests (package.json, package-lock.json)
    - Input handling and validation logic
    - Serialization/deserialization code
    - File upload/download handlers
@@ -133,15 +133,15 @@ After parsing input, confirm:
 
 ### Step 1: Dependency Vulnerability Analysis
 
-1. Read `build.gradle.kts` (root and submodules) and version catalogs (`libs.versions.toml`).
+1. Read `package.json` (root and workspaces) and lockfiles (`package-lock.json`).
 2. Identify all third-party dependencies and their versions.
 3. Check for known CVEs in critical dependencies:
-   - Ktor version — check for known security patches
-   - Jackson/kotlinx.serialization — deserialization vulnerabilities
-   - PostgreSQL JDBC driver — connection security
-   - JWT libraries (java-jwt, jjwt, nimbus-jose) — algorithm confusion, key handling
-   - Logging libraries (logback, log4j) — injection vulnerabilities
-   - Any HTTP client libraries — SSRF potential
+   - Hono version — check for known security patches
+   - zod / JSON parsing — validation vulnerabilities
+   - better-sqlite3 / pg driver — connection security
+   - JWT libraries (jsonwebtoken, jose) — algorithm confusion, key handling
+   - Logging libraries (pino, winston) — injection vulnerabilities
+   - Any HTTP client libraries (undici, fetch) — SSRF potential
 4. Flag outdated dependencies that have security patches available.
 5. Check for typosquatting or suspicious dependency names.
 
@@ -275,32 +275,32 @@ For each REST API endpoint:
 - Server version disclosure (Server header)
 - Debug mode in production
 - Default credentials
-- Unnecessary endpoints exposed (actuator, debug, swagger in prod)
+- Unnecessary endpoints exposed (health, debug, swagger/openapi in prod)
 - Directory listing enabled
 - HTTPS enforcement
 
-### Step 7: Ktor-Specific Security Checks
+### Step 7: Hono/Node.js-Specific Security Checks
 
-Since the tech stack uses Ktor, specifically check:
+Since the tech stack uses Hono (Node.js), specifically check:
 
-- **Ktor Plugins:**
-  - `Authentication` plugin configuration (JWT, session, basic)
-  - `CORS` plugin settings
-  - `ContentNegotiation` — strict content type handling
-  - `StatusPages` — error information leakage
-  - `CallLogging` — sensitive data in logs
-  - `RateLimit` plugin presence and configuration
-  - `HSTS` plugin configuration
-  - `HttpsRedirect` plugin
+- **Hono Middleware:**
+  - `jwt` / `basicAuth` middleware configuration (JWT, session, basic)
+  - `cors` middleware settings
+  - Body parsing / content type handling (zod validator)
+  - Custom error handler — error information leakage
+  - Logging middleware (pino-http) — sensitive data in logs
+  - Rate limiting middleware presence and configuration
+  - `secureHeaders` middleware — HSTS, CSP header configuration
+  - HTTPS redirect middleware
 
-- **Ktor Routing:**
+- **Hono Routing:**
   - Route-level authentication enforcement
-  - Missing `authenticate {}` blocks on sensitive routes
+  - Missing auth middleware on sensitive routes
   - Route parameter validation
 
-- **Ktor Serialization:**
-  - Polymorphic serialization risks
-  - Custom deserializer vulnerabilities
+- **Validation / Serialization (zod):**
+  - Zod schema validation bypass risks
+  - Custom validation logic vulnerabilities
   - Lenient parsing mode risks
 
 ### Step 8: MCP Protocol Security
@@ -399,7 +399,7 @@ Generate the report at the location specified by the user (default: `documents/{
 {What the vulnerability is and why it matters}
 
 **Evidence:**
-```kotlin
+```ts
 // Vulnerable code
 {code snippet showing the issue}
 ```
@@ -408,7 +408,7 @@ Generate the report at the location specified by the user (default: `documents/{
 {What an attacker could achieve by exploiting this}
 
 **Remediation:**
-```kotlin
+```ts
 // Fixed code
 {code snippet showing the secure implementation}
 ```
@@ -501,6 +501,6 @@ Use this CVSS-aligned scoring:
 5. **Respect existing security measures** — Acknowledge what the application does well. Don't only report negatives.
 6. **Prioritize actionable findings** — Focus on vulnerabilities that are realistically exploitable, not theoretical edge cases.
 7. **Check for defense-in-depth** — A single missing control might be mitigated by another layer. Note compensating controls.
-8. **Kotlin/Ktor idioms** — Remediation code must use idiomatic Kotlin and Ktor patterns (coroutines, DSL builders, extension functions).
+8. **TypeScript/Hono idioms** — Remediation code must use idiomatic TypeScript and Hono patterns (async/await, middleware composition, zod schemas).
 9. **Do NOT run destructive commands** — This is a static analysis agent. Never attempt to exploit vulnerabilities or modify production systems.
 10. **Report scope limitations honestly** — Static analysis cannot find all vulnerabilities. Always note what was NOT tested (runtime behavior, infrastructure, network).

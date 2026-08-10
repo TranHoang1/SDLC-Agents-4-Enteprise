@@ -28,7 +28,7 @@ Index: `mem_ingest_file { "file_path": "...", "type": "REQUIREMENT", "format": "
 ## Hybrid Indexing Strategy
 
 - **TypeScript script** generates: `index-metadata.json`, `kb-payloads.json`, `modules/*.md`
-- **Agent writes manually**: `project-structure.md` (script language detection is inaccurate for Kotlin)
+- **Agent writes manually**: `project-structure.md` (script language detection can be inaccurate, verify manually)
 
 Run: `cd .analysis/code-intelligence/scripts && npx tsx src/full-indexer.ts ../../../`
 

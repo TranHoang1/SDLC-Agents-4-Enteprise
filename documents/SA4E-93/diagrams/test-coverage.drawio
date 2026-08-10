@@ -1,0 +1,117 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-93 Test Coverage Matrix" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="500" y="20" width="400" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="sw_boundary" value="Components Under Test" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="700" height="280" as="geometry"/>
+    </mxCell>
+    <mxCell id="c1" value="ControlTypeMapper" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="sw_boundary">
+      <mxGeometry x="20" y="50" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2" value="HarnessSectionParser" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="sw_boundary">
+      <mxGeometry x="190" y="50" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3" value="SchemaWriter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="sw_boundary">
+      <mxGeometry x="370" y="50" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c4" value="PegaSchemaGenerator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="sw_boundary">
+      <mxGeometry x="530" y="50" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c5" value="PegaHttpClient&#10;.listRulesByFilter()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="sw_boundary">
+      <mxGeometry x="20" y="140" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c6" value="IndexingService&#10;(QuickPick)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="sw_boundary">
+      <mxGeometry x="200" y="140" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c7" value="Dual-Tier Layer 1&#10;(Schema Validation)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="sw_boundary">
+      <mxGeometry x="360" y="140" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c8" value="State Machine&#10;(Transitions)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="sw_boundary">
+      <mxGeometry x="540" y="140" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="tl_boundary" value="Test Levels (6 Levels)" style="swimlane;startSize=30;fillColor=none;strokeColor=#d6b656;html=1;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="40" y="400" width="700" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="t1" value="PBT&#10;(7 props)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="tl_boundary">
+      <mxGeometry x="20" y="50" width="90" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="t2" value="UT&#10;(23 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="tl_boundary">
+      <mxGeometry x="130" y="50" width="90" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="t3" value="IT&#10;(11 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="tl_boundary">
+      <mxGeometry x="240" y="50" width="90" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="t4" value="E2E-API&#10;(12 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="tl_boundary">
+      <mxGeometry x="350" y="50" width="90" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="t5" value="E2E-UI&#10;(3 cases)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="tl_boundary">
+      <mxGeometry x="460" y="50" width="90" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="t6" value="SIT&#10;(5 manual)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="tl_boundary">
+      <mxGeometry x="570" y="50" width="90" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="br_boundary" value="Business Rules Coverage (BR-01 to BR-12)" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="780" y="80" width="780" height="280" as="geometry"/>
+    </mxCell>
+    <mxCell id="br1" value="BR-01: draft-07 meta&#10;[UT, IT, E2E-API]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="20" y="40" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br2" value="BR-02: Required=mandatory&#10;[UT, PBT]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="200" y="40" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br3" value="BR-03: Type inference&#10;[UT, PBT]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="380" y="40" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br4" value="BR-04: File path&#10;[UT, IT]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="560" y="40" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br5" value="BR-05: Pagination&#10;[UT, IT, E2E-API]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="20" y="100" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br6" value="BR-06: additionalProps&#10;[UT, PBT]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="200" y="100" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br7" value="BR-07: Idempotent&#10;[IT, E2E-API]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="380" y="100" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br8" value="BR-08: Partial success&#10;[UT, IT, E2E-API]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="560" y="100" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br9" value="BR-09: Filename sanitize&#10;[UT, PBT]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="20" y="160" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br10" value="BR-10: Permissive mode&#10;[IT]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="200" y="160" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br11" value="BR-11: pyClassName group&#10;[UT, IT]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="380" y="160" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="br12" value="BR-12: Filter params&#10;[UT, E2E-API]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="br_boundary">
+      <mxGeometry x="560" y="160" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="coverage_label" value="Coverage: 12/12 BR = 100%" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" parent="br_boundary">
+      <mxGeometry x="250" y="220" width="240" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_boundary" value="Use Case Coverage" style="swimlane;startSize=30;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="780" y="400" width="780" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc1" value="UC-01: Full Pipeline&#10;(Main + 5 AF + 4 EF)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="uc_boundary">
+      <mxGeometry x="20" y="50" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc2" value="UC-02: Schema Validation&#10;(Main + 2 AF)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="uc_boundary">
+      <mxGeometry x="250" y="50" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc3" value="UC-03: QuickPick Trigger&#10;(Main flow)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="uc_boundary">
+      <mxGeometry x="480" y="50" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_total" value="Coverage: 3/3 UC + 7 AF + 4 EF = 100%" style="text;html=1;align=center;verticalAlign=middle;fontSize=12;fontStyle=1;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" parent="uc_boundary">
+      <mxGeometry x="230" y="120" width="300" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="summary" value="Total: 61 Automated + 5 Manual = 66 Test Cases" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fillColor=#e1f5fe;strokeColor=#0288d1;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="620" width="400" height="50" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

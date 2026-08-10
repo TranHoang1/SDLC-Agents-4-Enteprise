@@ -6,7 +6,7 @@ Distributed system with multiple independently deployable services communicating
 
 ## Signals
 
-- Multiple `build.gradle.kts` / `pom.xml` / `package.json` in subdirectories
+- Multiple `package.json` / `pyproject.toml` in subdirectories
 - `docker-compose.yml` with multiple services
 - `services/` or `apps/` directory structure
 - API gateway configuration

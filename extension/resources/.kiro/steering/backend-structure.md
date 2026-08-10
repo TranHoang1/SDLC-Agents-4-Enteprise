@@ -1,110 +1,111 @@
 ---
 inclusion: fileMatch
-fileMatchPattern: "shared/**,server/**"
+fileMatchPattern: "backend/src/**"
 ---
 
 # Backend Code Structure Standard
 
 ## Kiến trúc tổng quan
 
-Dự án sử dụng Kotlin Multiplatform với 2 module backend:
-- `shared/` — Business logic dùng chung (interfaces, models, implementations KMP-compatible)
-- `server/` — Ktor REST API server (JVM-only, routes, middleware, DI)
+Dự án sử dụng TypeScript + Hono với cấu trúc backend thống nhất:
+- `backend/src/` — TypeScript source, chạy trên Node.js
+- `backend/src/server/` — Hono HTTP + MCP Streamable HTTP server (routes, middleware, mcpServer)
+- `backend/src/modules/` — Business logic tách theo domain (code-intel, kb-graph, memory, orchestration, pega, analytics, web)
+- `backend/src/di/` — Dependency Injection container
+- `backend/src/shared/` — Types, utilities dùng chung
 
-## Quy tắc phân chia code giữa shared và server
+## Quy tắc phân chia code giữa server và modules
 
-### shared module (`shared/src/commonMain/`)
-Chứa code KMP-compatible, KHÔNG phụ thuộc JVM-specific libraries:
-- **Interfaces** — `AuthService.kt`, `RBACEngine.kt`, `KBRepository.kt`, `AIOrchestrator.kt`, `GraphEngine.kt`
-- **Data models** — `@Serializable` data classes, enums, sealed classes
-- **Business logic implementations** — Nếu KHÔNG cần JVM libs (ví dụ: `RBACEngineImpl`, `AIOrchestratorImpl`, `ForceDirectedGraphEngine`)
-- **Koin modules** — `aiModule`, `jiraModule`, `domainModule`
+### server module (`backend/src/server/`)
+Chứa code HTTP/MCP layer, KHÔNG chứa business logic:
+- **Routes** — Hono route handlers (`HttpServer.ts`, `routes/`)
+- **Middleware** — JWT auth, RBAC interceptors (`middleware/`)
+- **MCP** — `mcpServer.ts`, `toolUsageTracker.ts`
+- **Config** — Config đọc env vars (từ `backend/src/config/`)
 
-### shared module JVM (`shared/src/jvmMain/`)
-Chứa implementations cần JVM-specific libraries:
-- **SQLDelight implementations** — `KBRepositoryImpl.kt` (cần JDBC driver)
-- **Bất kỳ code nào dùng** `java.*`, `javax.*`, hoặc JVM-only dependencies
+### modules (`backend/src/modules/{domain}/`)
+Chứa business logic theo từng domain, KHÔNG import từ các module khác trực tiếp (dùng qua DI):
+- **Interfaces** — `AuthService`, `RBACEngine`, `KBRepository`, `AIOrchestrator`, `GraphEngine`
+- **Data models** — zod schemas, interfaces, enums, types
+- **Implementations** — Logic thuần TypeScript, không phụ thuộc framework cụ thể
+- **Services** — Business logic, validation, formatting, state management
 
-### server module (`server/src/jvmMain/`)
-Chứa code Ktor server, KHÔNG chứa business logic:
-- **Routes** — REST API endpoint handlers
-- **Middleware** — JWT auth, RBAC interceptors
-- **DI** — Koin server module tổng hợp
-- **Config** — ServerConfig đọc env vars
-- **JVM-only implementations** — Nếu cần Ktor/server-specific libs (ví dụ: `AuthServiceImpl` cần `com.auth0:java-jwt`)
+### shared (`backend/src/shared/`)
+- **Types** — DTOs, interfaces, enums dùng chung
+- **Utils** — Pure utility functions (không side effects)
 
 ## Package naming convention
 
 ```
-com.assistant.{domain}/
-├── {Domain}Interface.kt      # Interface definition
-├── {Domain}Impl.kt           # Implementation
-├── {Domain}Models.kt          # Data classes, enums (nếu nhiều models)
-└── {Domain}Module.kt          # Koin module (nếu cần)
+backend/src/shared/{domain}/
+├── {Domain}Types.ts        # Interfaces, types, enums
+├── {Domain}Schema.ts       # zod schemas (nếu nhiều schemas)
+├── {Domain}Service.ts      # Business logic implementation
+└── index.ts                # Re-exports
 ```
 
 Ví dụ:
 ```
-com.assistant.auth/
-├── AuthService.kt             # Interface
-├── AuthModels.kt              # AuthenticatedUser, AuthResult, UserRole
-com.assistant.server.auth/
-├── AuthServiceImpl.kt         # JVM implementation (JWT)
+backend/src/modules/kb-graph/
+├── kbGraphTypes.ts         # Interfaces, types
+├── kbGraphSchema.ts        # zod schemas
+├── kbGraphService.ts       # Implementation
+└── index.ts                # Re-exports
 ```
 
-## Quy tắc cho mỗi domain package trong shared
+## Quy tắc cho mỗi domain module
 
 Mỗi domain package PHẢI tách biệt:
-- **Interface** riêng 1 file — tên `{Feature}.kt` hoặc `{Feature}Interface.kt`
-- **Models** riêng 1 file — tên `{Feature}Models.kt` chứa tất cả data classes, enums, sealed classes liên quan
-- **Implementation** riêng 1 file — tên `{Feature}Impl.kt`
-- **Koin module** riêng 1 file (nếu cần) — tên `{Feature}Module.kt`
+- **Types/Schemas** riêng 1 file — `{Domain}Types.ts`, `{Domain}Schema.ts`
+- **Service** riêng 1 file — `{Domain}Service.ts`
+- **Controller/Handler** riêng (nếu cần) — `{Domain}Handler.ts`
 
-KHÔNG gộp interface + models + implementation vào cùng 1 file.
+KHÔNG gộp types + schemas + service vào cùng 1 file. Mỗi file ≤ 200 dòng.
 
 ## Quy tắc cho server routes
 
-Mỗi route group PHẢI nằm trong 1 file riêng tại `server/.../routes/`:
-- File name: `{Resource}Routes.kt` (ví dụ: `AuthRoutes.kt`, `ProjectRoutes.kt`)
-- Extension function: `fun Routing.{resource}Routes()` (ví dụ: `fun Routing.authRoutes()`)
-- Request/Response DTOs: Khai báo trong cùng file route hoặc file `{Resource}Dtos.kt` riêng nếu phức tạp
-- Tất cả routes PHẢI được mount trong `Routing.kt` qua `configureRouting()`
+Mỗi route group PHẢI nằm trong 1 file riêng tại `backend/src/server/routes/`:
+- File name: `{resource}-routes.ts` (ví dụ: `auth-routes.ts`, `project-routes.ts`)
+- Export function: `export function authRoutes(app: Hono)` (ví dụ `authRoutes`)
+- Request/Response DTOs: Khai báo trong cùng file route hoặc file `{resource}-dto.ts` riêng nếu phức tạp
+- Tất cả routes PHẢI được mount trong `HttpServer.ts` qua `configureRoutes(app)`
 
 ## Quy tắc cho server middleware
 
-- Mỗi middleware 1 file tại `server/.../middleware/`
-- Sử dụng Ktor route interceptor pattern (`Route.intercept`)
-- KHÔNG đặt business logic trong middleware — chỉ gọi shared module services
+- Mỗi middleware 1 file tại `backend/src/server/middleware/`
+- Sử dụng Hono middleware pattern (`app.use('/api/*', handler)`)
+- KHÔNG đặt business logic trong middleware — chỉ gọi services từ modules
 
-## Dependency Injection (Koin)
+## Dependency Injection
 
-- `shared/` modules: `aiModule`, `jiraModule`, `domainModule` — đăng ký shared dependencies
-- `server/` module: `serverModule(config)` — tổng hợp tất cả shared modules + đăng ký server-specific dependencies
-- Inject trong routes bằng `by inject<T>()` từ `org.koin.ktor.ext.inject`
-- KHÔNG tạo instances trực tiếp trong routes — luôn inject qua Koin
+- Dùng DI container tại `backend/src/di/`
+- Modules đăng ký dependencies: services, repositories, clients
+- Inject vào routes/handlers qua constructor injection hoặc container lookup
+- KHÔNG tạo instances trực tiếp trong routes — luôn inject qua DI container
 
-## Data class conventions
+## Data conventions
 
-- Tất cả data classes truyền qua API PHẢI có `@Serializable` annotation
-- Sử dụng `JsonConfig.instance` (shared config) cho serialization/deserialization
-- KHÔNG dùng `Json { }` inline — luôn dùng shared instance
+- Tất cả dữ liệu truyền qua API/MCP PHẢI validate bằng zod schemas
+- Dùng `safeParse` cho dữ liệu từ external source
+- Dùng shared schema instance — KHÔNG tạo schema inline trong function
 - Enum values: `UPPER_SNAKE_CASE`
-- Sealed classes cho polymorphic types (ví dụ: `AuthResult`, `AIResult`)
+- Dùng TypeScript discriminated unions cho polymorphic types (ví dụ: `AuthResult`, `AIResult`)
 
 ## Error handling
 
-- Routes: Throw `IllegalArgumentException` cho validation errors (StatusPages bắt → 400)
-- KHÔNG catch-all trong routes — để StatusPages xử lý
-- Business logic: Return sealed class results (Success/Failure) thay vì throw exceptions
-- Logging: Dùng `call.application.log` trong routes, `println`/logger trong shared
+- Routes: Throw validation errors (Hono error handler bắt → 400/4xx)
+- KHÔNG catch-all trong routes — để error handler middleware xử lý
+- Business logic: Trả result objects (Success/Failure) thay vì throw exceptions khi cần xử lý fallback
+- Logging: Dùng Pino logger (`backend/src/config/`) — logger.error cho failures, logger.info cho business events
 
 ## Testing conventions
 
-- Property tests: `server/src/jvmTest/` hoặc `shared/src/jvmTest/`
-- Test file name: `{Feature}PropertyTest.kt` hoặc `{Feature}Test.kt`
-- Sử dụng Kotest property testing với tối thiểu 100 iterations
-- Fake/Spy implementations cho dependencies (không dùng mocking framework)
-- In-memory SQLite (`JdbcSqliteDriver.IN_MEMORY`) cho DB tests
+- Unit/Integration tests: `backend/src/**/__tests__/` dùng Vitest
+- Test file name: `{Feature}.test.ts`
+- Dùng property-style test với `fast-check` khi cần (có trong devDependencies)
+- Fake/Spy implementations cho dependencies (không cần mocking framework phức tạp)
+- In-memory SQLite (`better-sqlite3` `:memory:`) hoặc DB mocks cho DB tests
+- E2E API: `vitest run --config vitest.e2e.config.ts`; E2E UI: `npx playwright test`
 
 
 ---
@@ -115,14 +116,14 @@ Mỗi route group PHẢI nằm trong 1 file riêng tại `server/.../routes/`:
 
 ### KHÔNG BAO GIỜ trả về empty result mà không giải thích
 
-```kotlin
+```typescript
 // ❌ CẤM — Trả về empty list không giải thích
-if (issues.isEmpty()) return emptyList()
+if (issues.length === 0) return [];
 
 // ✅ ĐÚNG — Trả về kèm message hoặc log entry giải thích
-if (issues.isEmpty()) {
-    logRepository.addEntry("No tickets found in project $projectKey")
-    return ScanResult(tickets = emptyList(), message = "No tickets found. Verify project has issues in Jira.")
+if (issues.length === 0) {
+  logRepository.addEntry("No tickets found in project $projectKey");
+  return { tickets: [], message: "No tickets found. Verify project has issues in Jira." };
 }
 ```
 
@@ -139,30 +140,30 @@ Mọi error response PHẢI dùng format:
 
 ### API KHÔNG ĐƯỢC fail silently
 
-```kotlin
+```typescript
 // ❌ CẤM — Catch exception và trả empty, frontend không biết lỗi
-} catch (e: Exception) {
-    emptyList()
+} catch (e) {
+  return [];
 }
 
 // ✅ ĐÚNG — Log lỗi và trả response có thông tin
-} catch (e: Exception) {
-    application.log.error("[Feature] Operation failed: ${e.message}", e)
-    call.respond(HttpStatusCode.InternalServerError, ErrorResponse(
-        error = "Operation failed",
-        details = e.message
-    ))
+} catch (e) {
+  logger.error(`[Feature] Operation failed: ${e.message}`, e);
+  return c.json({
+    error: "Operation failed",
+    details: e.message
+  }, 500);
 }
 ```
 
 ### Validation errors PHẢI cụ thể
 
-```kotlin
+```typescript
 // ❌ CẤM — Message chung chung
-throw IllegalArgumentException("Invalid input")
+throw new ValidationError("Invalid input");
 
 // ✅ ĐÚNG — Message cụ thể cho từng field
-throw IllegalArgumentException("JIRA_HOST must be a valid URL starting with https://")
+throw new ValidationError("JIRA_HOST must be a valid URL starting with https://");
 ```
 
 ### Long operations PHẢI có status tracking

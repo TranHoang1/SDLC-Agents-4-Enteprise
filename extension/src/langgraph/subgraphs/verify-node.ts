@@ -141,11 +141,11 @@ function parseVerdict(raw: string): VerifyResult {
       }
       return { verdict: "tool_needed", toolName, toolArgs };
     }
-    return { verdict: "tool_needed", toolName: rest || "list_directory", toolArgs: { path: "src", recursive: true } };
+    return { verdict: "tool_needed", toolName: rest || "list_directory", toolArgs: { path: ".", recursive: true } };
   }
   if (upper.startsWith("INCOMPLETE")) {
     // Treat INCOMPLETE as TOOL_NEEDED with list_directory fallback
-    return { verdict: "tool_needed", toolName: "list_directory", toolArgs: { path: "src", recursive: true } };
+    return { verdict: "tool_needed", toolName: "list_directory", toolArgs: { path: ".", recursive: true } };
   }
   // Default: treat as complete (don't infinite loop)
   return { verdict: "complete" };

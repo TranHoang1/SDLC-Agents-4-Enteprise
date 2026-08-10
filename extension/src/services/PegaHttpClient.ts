@@ -5,7 +5,9 @@
 import * as vscode from "vscode";
 import { createHash } from "crypto";
 import { SECRET_KEYS } from "../models";
+import type { RuleSetRuleSummary } from "../models";
 import { setProjectId } from "../extension";
+import { resolvePegaHierarchy, type HierarchyResult } from "./PegaHierarchyResolver";
 
 export interface PegaOperatorContext {
   operatorId: string;
@@ -32,7 +34,7 @@ export class PegaHttpClient {
     }
   }
 
-  private async getAuthHeader(): Promise<string> {
+  public async getAuthHeader(): Promise<string> {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     const username = config.get<string>("pegaUsername", "").trim();
     const password = (await this.secrets.get(SECRET_KEYS.pega)) || "";
@@ -40,7 +42,7 @@ export class PegaHttpClient {
     return `Basic ${credentials}`;
   }
 
-  private getPegaEndpoint(): string {
+  public getPegaEndpoint(): string {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     return config.get<string>("pegaEndpoint", "http://localhost:8080/prweb").replace(/\/$/, "");
   }
@@ -48,6 +50,11 @@ export class PegaHttpClient {
   private getBackendUrl(): string {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     return config.get<string>("backendUrl", "http://localhost:48721").replace(/\/$/, "");
+  }
+
+  /** Public accessor for backend URL — used by PegaStreamIngester (SA4E-92) */
+  public getBackendUrlPublic(): string {
+    return this.getBackendUrl();
   }
 
   public async getOperatorContext(): Promise<PegaOperatorContext> {
@@ -66,6 +73,13 @@ export class PegaHttpClient {
           const activeAccessGroup = data.pyAccessGroup || "";
           const appName = activeAccessGroup ? activeAccessGroup.split(":")[0] : "PegaApp";
           const appInsKey = `RULE-APPLICATION ${appName.toUpperCase()}`;
+          // Derive activePrefix from successful URL pattern (api vs PRRestService)
+          if (url.includes("/PRRestService/")) {
+            this.activePrefix = `${base}/PRRestService/CodeIntelligence/v1`;
+          } else {
+            this.activePrefix = `${base}/api/CodeIntelligence/v1`;
+          }
+          this.log(`[PegaHttpClient] ✅ getOperatorContext success — activePrefix set to ${this.activePrefix}`);
           return {
             operatorId,
             activeAccessGroup,
@@ -100,113 +114,21 @@ export class PegaHttpClient {
   }
 
   /**
-   * Deterministic 4-Step Hierarchy Resolution:
-   * Account (Operator ID) => Access Group => Application Rule => All RuleSets + Rules/Data
+   * Deterministic 5-Step Hierarchy Resolution:
+   * Operator → Access Group → Application → Dependencies → Merged RuleSets.
+   * Delegates to PegaHierarchyResolver for the full logic.
    */
-  public async resolveDeterministicPegaHierarchy(operatorIdHint?: string): Promise<{
-    seeds: string[];
-    operatorId: string;
-    accessGroup: string;
-    appName: string;
-    ruleSets: string[];
-  }> {
+  public async resolveDeterministicPegaHierarchy(operatorIdHint?: string): Promise<HierarchyResult> {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     const opId = (operatorIdHint || config.get<string>("pegaUsername", "") || "SSA@TGB").trim();
-    const seedSet = new Set<string>();
-    let accessGroup = "";
-    let appName = "";
-    let appVersion = "";
-    const ruleSets: string[] = [];
+    const root = this.getWorkspaceRoot();
+    return resolvePegaHierarchy(this, opId, root, this.log.bind(this));
+  }
 
-    // Step 1: Account Context (DATA-ADMIN-OPERATOR-ID)
-    const opInsKey = `DATA-ADMIN-OPERATOR-ID ${opId.toUpperCase()}`;
-    seedSet.add(opInsKey);
-    this.log(`[PegaHttpClient] 🔍 Step 1 (Account): Resolving Operator "${opId}"...`);
-    try {
-      const opObj = await this.getRuleByInsKey(opInsKey);
-      accessGroup = (opObj.pyDefaultAccessGroup as string) || (opObj.pyAccessGroup as string) || "";
-      this.log(`[PegaHttpClient] ✅ Step 1 Success: Default Access Group = "${accessGroup}"`);
-    } catch (err: any) {
-      this.log(`[PegaHttpClient] ⚠️ Step 1 Warning: Could not fetch Operator ${opInsKey}: ${err.message}`);
-    }
-
-    // Step 2: Access Group => Application Rule
-    if (accessGroup) {
-      const agInsKey = `DATA-ADMIN-OPERATOR-ACCESSGROUP ${accessGroup}`;
-      seedSet.add(agInsKey);
-      this.log(`[PegaHttpClient] 🔍 Step 2 (Access Group): Resolving "${accessGroup}"...`);
-      try {
-        const agObj = await this.getRuleByInsKey(agInsKey);
-        appName = (agObj.pyApplication as string) || (agObj.pyAppName as string) || (agObj.pyApplicationName as string) || (agObj.pyAccessGroupAppName as string) || "";
-        appVersion = (agObj.pyApplicationVersion as string) || (agObj.pyAppVersion as string) || (agObj.pyAccessGroupAppVersion as string) || "";
-        if (!appName && accessGroup.includes(":")) {
-          appName = accessGroup.split(":")[0];
-        }
-        this.log(`[PegaHttpClient] ✅ Step 2 Success: Application = "${appName}" (Version: "${appVersion || "Auto"}")`);
-      } catch (err: any) {
-        if (accessGroup.includes(":")) {
-          appName = accessGroup.split(":")[0];
-        }
-        this.log(`[PegaHttpClient] ⚠️ Step 2 Warning: Could not fetch Access Group ${agInsKey}: ${err.message}`);
-      }
-    }
-
-    // Step 3: Application Rule => All RuleSets
-    if (appName) {
-      const appKeysToTry = [
-        appVersion ? `RULE-APPLICATION ${appName.toUpperCase()} ${appVersion}` : null,
-        `RULE-APPLICATION ${appName.toUpperCase()}`,
-        `RULE-APPLICATION ${appName}`,
-      ].filter(Boolean) as string[];
-
-      let appObj: Record<string, unknown> | null = null;
-      for (const appKey of appKeysToTry) {
-        try {
-          this.log(`[PegaHttpClient] 🔍 Step 3 (Application Rule): Fetching "${appKey}"...`);
-          appObj = await this.getRuleByInsKey(appKey);
-          seedSet.add(appKey);
-          this.log(`[PegaHttpClient] ✅ Step 3 Success: Loaded Application Rule "${appKey}"`);
-          break;
-        } catch {
-          // try next variation
-        }
-      }
-
-      if (appObj) {
-        // Read pyRuleSetList
-        const rawRuleSets = (appObj.pyRuleSetList || appObj.pyRuleSets) as any[];
-        if (Array.isArray(rawRuleSets)) {
-          for (const rs of rawRuleSets) {
-            const rsName = typeof rs === "string" ? rs : (rs.pyRuleSet || rs.pyRuleSetName || rs.pxSubRuleSet);
-            const rsVer = typeof rs === "object" ? (rs.pyRuleSetVersion || rs.pyVersion) : "";
-            if (rsName) {
-              const fullRsKey = rsVer ? `${rsName}:${rsVer}` : rsName;
-              ruleSets.push(fullRsKey);
-              seedSet.add(`RULE-RULESET-NAME ${rsName.toUpperCase()}`);
-            }
-          }
-        }
-        // Read pyWorkTypes / pyDataClasses
-        const workTypes = (appObj.pyWorkTypes || appObj.pyCaseTypes) as any[];
-        if (Array.isArray(workTypes)) {
-          for (const wt of workTypes) {
-            const className = typeof wt === "string" ? wt : (wt.pyWorkTypeClass || wt.pyClassName || wt.pxObjClass);
-            if (className) {
-              seedSet.add(`RULE-OBJ-CLASS ${className}`);
-            }
-          }
-        }
-      }
-    }
-
-    const seeds = Array.from(seedSet);
-    return {
-      seeds,
-      operatorId: opId,
-      accessGroup,
-      appName: appName || "PegaApp",
-      ruleSets,
-    };
+  /** Resolve workspace root path for saving rules to disk */
+  private getWorkspaceRoot(): string {
+    const folder = vscode.workspace.workspaceFolders?.[0];
+    return folder ? folder.uri.fsPath : process.cwd();
   }
 
   private activePrefix: string | null = null;
@@ -291,10 +213,13 @@ export class PegaHttpClient {
   /**
    * Service 1: GET /rules/{insKey}
    * Tải 100% nội dung Rule XML/JSON gốc theo insKey duy nhất.
+   * Iterates all prefixes — only throws immediately on auth errors (401/403)
+   * or server errors (5xx). A 404 or body-level error means "try next prefix".
    */
   public async getRuleByInsKey(insKey: string): Promise<Record<string, unknown>> {
     const authHeader = await this.getAuthHeader();
     const logs: string[] = [];
+
     for (const prefix of this.getCustomRestPrefixes()) {
       const url = `${prefix}/rules/${encodeURIComponent(insKey)}`;
       try {
@@ -303,43 +228,67 @@ export class PegaHttpClient {
         });
         const text = await res.text();
         this.log(`[PegaHttpClient] 📡 GET ${url} => HTTP ${res.status} (${text.length} bytes)`);
-        
+
+        // Auth errors — fatal, throw immediately
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Auth Error"}`);
+        }
+
+        // Server errors — fatal, throw immediately
+        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+        }
+
         if (res.ok) {
-          this.activePrefix = prefix;
           const json = JSON.parse(text) as Record<string, unknown>;
           if (json && !json.error && json.pyHTTPResponseCode !== "404" && json.pyHTTPResponseCode !== 404) {
+            // Real success — lock this prefix
+            this.activePrefix = prefix;
             return json;
           }
-          throw new Error(String(json.error || `Rule not found: ${insKey}`));
+          // Body says "not found" — active prefix means rule genuinely doesn't exist (SA4E-95)
+          if (prefix === this.activePrefix) {
+            throw new Error(`Rule not found: ${insKey}`);
+          }
+          logs.push(`GET ${url} => 200 but body error: ${String(json.error || 'pyHTTPResponseCode=404')}`);
+          continue; // try next prefix
         }
 
         if (res.status === 404) {
-          this.activePrefix = prefix;
-          throw new Error(`Rule not found: ${insKey}`);
-        }
-
-        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500 || res.status === 401 || res.status === 403) {
-          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+          // Active prefix 404 → rule genuinely not found, short-circuit (SA4E-95)
+          if (prefix === this.activePrefix) {
+            throw new Error(`Rule not found: ${insKey}`);
+          }
+          logs.push(`GET ${url} => HTTP 404`);
+          continue; // try next prefix
         }
 
         logs.push(`GET ${url} => HTTP ${res.status}: ${text.substring(0, 150)}`);
       } catch (err: any) {
-        if (err.message.includes("Rule not found") || err.message.includes("HTTP 504") || err.message.includes("HTTP 503") || err.message.includes("HTTP 502") || err.message.includes("HTTP 401")) {
+        // Re-throw auth/server/rule-not-found errors immediately
+        if (err.message.includes("HTTP 401") || err.message.includes("HTTP 403") ||
+            err.message.includes("HTTP 504") || err.message.includes("HTTP 503") ||
+            err.message.includes("HTTP 502") || err.message.includes("HTTP 500") ||
+            err.message.includes("Rule not found")) {
           throw err;
         }
         logs.push(`GET ${url} => Network Error: ${err.message}`);
       }
     }
-    throw new Error(`GET /rules/${insKey} failed:\n  ${logs.join("\n  ")}`);
+
+    // All prefixes exhausted without finding the rule
+    throw new Error(`Rule not found: ${insKey}\n  ${logs.join("\n  ")}`);
   }
 
   /**
    * Service 2: POST /rules/query
    * Truy vấn chính xác Rule theo bộ 3 pxObjClass, appliesTo, pyRuleName.
+   * Iterates all prefixes — only throws on auth/server errors.
    */
   public async queryRuleByTriple(pxObjClass: string, appliesTo: string, pyRuleName: string): Promise<Record<string, unknown>> {
     const authHeader = await this.getAuthHeader();
     const logs: string[] = [];
+
     for (const prefix of this.getCustomRestPrefixes()) {
       const queryParams = `pxObjClass=${encodeURIComponent(pxObjClass)}&appliesTo=${encodeURIComponent(appliesTo || "")}&pyRuleName=${encodeURIComponent(pyRuleName)}&RequestClass=${encodeURIComponent(pxObjClass)}&RequestAppliesTo=${encodeURIComponent(appliesTo || "")}&RequestRuleName=${encodeURIComponent(pyRuleName)}`;
       const url = `${prefix}/rules/query?${queryParams}`;
@@ -359,41 +308,71 @@ export class PegaHttpClient {
         const text = await res.text();
         this.log(`[PegaHttpClient] 📡 POST ${url} Payload: ${JSON.stringify(payload.ruleJson)} => HTTP ${res.status} (${text.length} bytes)`);
 
+        // Auth errors — fatal
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Auth Error"}`);
+        }
+
+        // Server errors — fatal
+        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+        }
+
         if (res.ok) {
-          this.activePrefix = prefix;
           if (!text || !text.trim()) {
-            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+            // Empty response on active prefix → rule genuinely not found (SA4E-95 short-circuit)
+            if (prefix === this.activePrefix) {
+              throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+            }
+            logs.push(`POST ${url} => 200 but empty body`);
+            continue;
           }
           let json: Record<string, unknown> = {};
           try {
             json = JSON.parse(text);
           } catch {
-            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+            if (prefix === this.activePrefix) {
+              throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+            }
+            logs.push(`POST ${url} => 200 but invalid JSON`);
+            continue;
           }
           if (json && !json.error && json.pyHTTPResponseCode !== "404" && json.pyHTTPResponseCode !== 404) {
+            // Real success — lock prefix
+            this.activePrefix = prefix;
             return json;
           }
-          throw new Error(String(json.error || `Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`));
+          // Body-level 404 on active prefix → rule genuinely doesn't exist, stop immediately
+          if (prefix === this.activePrefix) {
+            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+          }
+          logs.push(`POST ${url} => 200 but body error: ${String(json.error || 'pyHTTPResponseCode=404')}`);
+          continue;
         }
 
         if (res.status === 404) {
-          this.activePrefix = prefix;
-          throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
-        }
-
-        if (res.status === 504 || res.status === 503 || res.status === 502 || res.status === 500 || res.status === 401 || res.status === 403) {
-          throw new Error(`HTTP ${res.status} ${res.statusText || "Server Error"}`);
+          // Active prefix returns HTTP 404 → rule genuinely not found, short-circuit (SA4E-95)
+          if (prefix === this.activePrefix) {
+            throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
+          }
+          logs.push(`POST ${url} => HTTP 404`);
+          continue; // try next prefix
         }
 
         logs.push(`POST ${url} => HTTP ${res.status}: ${text.substring(0, 150)}`);
       } catch (err: any) {
-        if (err.message.includes("Rule not found") || err.message.includes("HTTP 504") || err.message.includes("HTTP 503") || err.message.includes("HTTP 502") || err.message.includes("HTTP 401")) {
+        if (err.message.includes("HTTP 401") || err.message.includes("HTTP 403") ||
+            err.message.includes("HTTP 504") || err.message.includes("HTTP 503") ||
+            err.message.includes("HTTP 502") || err.message.includes("HTTP 500") ||
+            err.message.includes("Rule not found for triple")) {
           throw err;
         }
         logs.push(`POST ${url} => Network Error: ${err.message}`);
       }
     }
-    throw new Error(`POST /rules/query failed:\n  ${logs.join("\n  ")}`);
+
+    // All prefixes exhausted without finding the rule
+    throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}\n  ${logs.join("\n  ")}`);
   }
 
   /**
@@ -430,9 +409,118 @@ export class PegaHttpClient {
   }
 
   /**
+   * Service 10: POST /rules/listRules
+   * List rules matching a property filter with pagination (SA4E-93).
+   * @param objClass Pega rule class (e.g., "Rule-HTML-Harness")
+   * @param filterPropName Property to filter on (e.g., "pyStreamName")
+   * @param filterPropValue Value to match (e.g., "RuleForm")
+   * @param pageSize Records per page (default 50, BR-05)
+   * @param pageIndex 1-based page number (default 1)
+   * @returns Paginated response with pxMore flag
+   */
+  public async listRulesByFilter(
+    objClass: string,
+    filterPropName: string,
+    filterPropValue: string,
+    pageSize = 50,
+    pageIndex = 1,
+  ): Promise<{ pxResults: Record<string, unknown>[]; pxMore: boolean; totalCount?: number }> {
+    const authHeader = await this.getAuthHeader();
+    const logs: string[] = [];
+    for (const prefix of this.getCustomRestPrefixes()) {
+      const queryParams = `ObjClass=${encodeURIComponent(objClass)}&FilterPropName=${encodeURIComponent(filterPropName)}&FilterPropValue=${encodeURIComponent(filterPropValue)}&PageSize=${pageSize}&PageIndex=${pageIndex}&RequestClass=${encodeURIComponent(objClass)}`;
+      const url = `${prefix}/rules/listRules?${queryParams}`;
+      try {
+        const res = await this.fetchWithRetry(url, {
+          method: "POST",
+          headers: { Authorization: authHeader, "Content-Type": "application/json", Accept: "application/json" },
+          body: "",
+        });
+        const text = await res.text();
+        this.log(`[PegaHttpClient] 📡 POST ${url} => HTTP ${res.status} (${text.length} bytes)`);
+        if (res.ok) {
+          this.activePrefix = prefix;
+          const json = JSON.parse(text) as Record<string, unknown>;
+          const pxResults = (json.pxResults || json.results || []) as Record<string, unknown>[];
+          // Pega pxMore can be: true, "true", "Yes", "yes", or absent (heuristic: count >= pageSize)
+          const rawMore = json.pxMore;
+          const pxMore = rawMore === true || rawMore === "true" || rawMore === "Yes" || rawMore === "yes"
+            || (rawMore === undefined && Array.isArray(pxResults) && pxResults.length >= pageSize);
+          const totalCount = typeof json.totalCount === "number" ? json.totalCount : undefined;
+          return { pxResults: Array.isArray(pxResults) ? pxResults : [], pxMore, totalCount };
+        }
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || "Auth Error"}`);
+        }
+        logs.push(`POST ${url} => HTTP ${res.status}: ${text.substring(0, 150)}`);
+      } catch (err: any) {
+        if (err.message.includes("HTTP 401") || err.message.includes("HTTP 403")) { throw err; }
+        logs.push(`POST ${url} => Error: ${err.message}`);
+      }
+    }
+    throw new Error(`POST /rules/listRules failed:\n  ${logs.join("\n  ")}`);
+  }
+
+  /**
+   * Enumerate ALL rules belonging to a specific RuleSet via Service 10.
+   * Queries each concrete rule type separately since Pega listRules
+   * does not support abstract "Rule-" base class filtering (SA4E-94).
+   * @param ruleSetName - RuleSet name (e.g., "HRAppsV2")
+   * @param ruleSetVersion - RuleSet version (e.g., "01-02") — used for result enrichment
+   * @param pageSize - Records per page (default 200, BR-02)
+   * @param pageIndex - 1-based page number (applied per rule type)
+   * @returns Aggregated rule summaries from all concrete types and pxMore flag
+   */
+  public async listRulesByRuleSet(
+    ruleSetName: string,
+    ruleSetVersion: string,
+    pageSize = 200,
+    pageIndex = 1,
+  ): Promise<{ pxResults: RuleSetRuleSummary[]; pxMore: boolean; totalCount?: number }> {
+    // Pega requires concrete rule classes — "Rule-" base returns 0 results
+    const CONCRETE_TYPES = [
+      "Rule-Obj-Property", "Rule-Obj-Activity", "Rule-Obj-Flow",
+      "Rule-Obj-Model", "Rule-HTML-Section", "Rule-Declare-Expressions",
+      "Rule-Obj-FieldValue", "Rule-Obj-Report-Definition", "Rule-Obj-Class",
+    ];
+    const allResults: RuleSetRuleSummary[] = [];
+    let anyMore = false;
+
+    // Query each rule type in parallel for this RuleSet
+    const typeResults = await Promise.all(
+      CONCRETE_TYPES.map(async (objClass) => {
+        try {
+          return await this.listRulesByFilter(objClass, "pyRuleSet", ruleSetName, pageSize, pageIndex);
+        } catch { return { pxResults: [] as Record<string, unknown>[], pxMore: false }; }
+      }),
+    );
+
+    for (const result of typeResults) {
+      if (result.pxMore) { anyMore = true; }
+      for (const r of result.pxResults) {
+        allResults.push({
+          pzInsKey: String(r.pzInsKey || ''),
+          pxObjClass: String(r.pxObjClass || ''),
+          pyClassName: String(r.pyClassName || ''),
+          pyRuleName: String(r.pyRuleName || ''),
+          pyRuleSet: String(r.pyRuleSet || ruleSetName),
+          pyRuleSetVersion: String(r.pyRuleSetVersion || ruleSetVersion),
+          pyLabel: r.pyLabel ? String(r.pyLabel) : undefined,
+        });
+      }
+    }
+
+    return { pxResults: allResults, pxMore: anyMore, totalCount: allResults.length };
+  }
+
+  /**
    * Truy vấn tất cả các Rule của 1 loại (Rule-Obj-Activity, Rule-Obj-Flow, Rule-Obj-Model...) thuộc về 1 Class cụ thể.
    */
   public async getClassRules(className: string, ruleType: string, pageSize = 200): Promise<Record<string, unknown>[]> {
+    // Skip invalid class names that cause 404 on Pega server
+    if (!className || className === "@baseclass" || className.length < 3) {
+      return [];
+    }
     try {
       const data = await this.listApplicationRules(ruleType, className, pageSize, 1);
       const pxResults = (data.pxResults || data.pxResult || data.rules || data.properties || []) as Record<string, unknown>[];
@@ -690,129 +778,76 @@ export class PegaHttpClient {
     caseTypesCount: number;
     filePath: string;
   }> {
-    const base = this.getPegaEndpoint();
-    const authHeader = await this.getAuthHeader();
-    const headers = { Authorization: authHeader };
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     const username = config.get<string>("pegaUsername", "").trim();
 
-    let operatorId = username;
-    let operatorName = "";
-    let accessGroup = "";
-    let applicationName = "";
-    let organization = "";
-    let division = "";
-    let unit = "";
+    // Delegate to the correct hierarchy resolver
+    this.log(`[PegaHttpClient] 🔍 fetchAndSavePegaContext: Starting hierarchy resolution...`);
+    const result = await this.resolveDeterministicPegaHierarchy(username);
 
-    // 1. Fetch exact Operator & Access Group from D_OperatorID data page
-    for (const ep of [`${base}/api/v1/data/D_OperatorID`, `${base}/PRRestService/api/v1/data/D_OperatorID`]) {
-      try {
-        const res = await fetch(ep, { headers });
-        if (res.ok) {
-          const data = (await res.json().catch(() => ({}))) as any;
-          operatorId = data.pyUserIdentifier || username;
-          operatorName = data.pyUserName || "";
-          accessGroup = data.pyAccessGroup || "";
-          organization = data.pyOrganization || "";
-          division = data.pyOrgDivision || "";
-          unit = data.pyOrgUnit || "";
-          if (accessGroup) {
-            applicationName = accessGroup.split(":")[0];
-          }
-          break;
-        }
-      } catch { /* skip fallback */ }
-    }
+    // Fetch case types (optional, for display)
+    const caseTypes = await this.fetchCaseTypes();
 
-    // 2. Fetch CaseTypes list
-    let caseTypes: Array<{ name: string; caseTypeID: string }> = [];
-    for (const ep of [`${base}/api/v1/casetypes`, `${base}/PRRestService/api/v1/casetypes`]) {
-      try {
-        const res = await fetch(ep, { headers });
-        if (res.ok) {
-          const data = (await res.json().catch(() => ({}))) as any;
-          if (Array.isArray(data.caseTypes)) {
-            caseTypes = data.caseTypes.map((c: any) => ({
-              name: c.name || c.caseTypeName || "CaseType",
-              caseTypeID: c.caseTypeID || c.ID || "",
-            }));
-            break;
-          }
-        }
-      } catch { /* skip */ }
-    }
+    // Build correct applicationInsKey WITH version
+    const appInsKey = result.appVersion
+      ? `RULE-APPLICATION ${result.appName.toUpperCase()} ${result.appVersion}`
+      : `RULE-APPLICATION ${result.appName.toUpperCase()}`;
 
-    // 3. Fallbacks if D_OperatorID wasn't accessible
-    if (!applicationName) {
-      for (const ep of [`${base}/api/v1/applications`, `${base}/PRRestService/api/v1/applications`]) {
-        try {
-          const res = await fetch(ep, { headers });
-          if (res.ok) {
-            const data = (await res.json().catch(() => ({}))) as any;
-            const apps = data.applications || data.applicationList;
-            if (Array.isArray(apps) && apps.length > 0) {
-              applicationName = apps[0].name || apps[0].applicationName || "";
-              break;
-            }
-          }
-        } catch { /* skip */ }
-      }
-    }
-
-    if (!applicationName) {
-      applicationName = caseTypes.length > 0 ? caseTypes[0].caseTypeID.split("-")[1] || "PegaApp" : "PegaApp";
-    }
-
-    const applicationInsKey = `RULE-APPLICATION ${applicationName.toUpperCase()}`;
-    const accessGroupInsKey = accessGroup ? `RULE-OBJ-ACCESSGROUP ${accessGroup.toUpperCase()}` : "";
-    const operatorInsKey = `DATA-ADMIN-OPERATOR-ID ${operatorId.toUpperCase()}`;
-
-    const jsonPath = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), "pega-project.json");
-    const xmlPath = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), "Application.xml");
-
+    // Save pega-project.json with CORRECT data
     const projectData = {
       isPegaProject: true,
-      pegaEndpoint: base,
-      operatorId,
-      operatorName,
-      operatorInsKey,
-      accessGroup,
-      accessGroupInsKey,
-      applicationName,
-      applicationInsKey,
-      pzInsKey: applicationInsKey,
-      organization,
-      division,
-      unit,
+      pegaEndpoint: this.getPegaEndpoint(),
+      operatorId: result.operatorId,
+      accessGroup: result.accessGroup,
+      applicationName: result.appName,
+      applicationVersion: result.appVersion,
+      applicationInsKey: appInsKey,
+      pzInsKey: appInsKey,
+      ruleSets: result.ruleSets,
+      dependedApps: result.dependedApps,
+      accessGroups: result.accessGroups,
       caseTypes,
       fetchedAt: new Date().toISOString(),
     };
 
-    const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
-<application name="${applicationName}" accessGroup="${accessGroup}" pzInsKey="${applicationInsKey}">
-  <operator id="${operatorId}" name="${operatorName}" pzInsKey="${operatorInsKey}"/>
-  <accessGroup name="${accessGroup}" pzInsKey="${accessGroupInsKey}"/>
-  <organization name="${organization}" division="${division}" unit="${unit}"/>
-  <endpoint url="${base}"/>
-</application>`;
-
+    const jsonPath = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), "pega-project.json");
     await vscode.workspace.fs.writeFile(jsonPath, Buffer.from(JSON.stringify(projectData, null, 2), "utf-8"));
-    await vscode.workspace.fs.writeFile(xmlPath, Buffer.from(xmlContent, "utf-8"));
 
     // Derive and persist project ID from Pega application name
     const codeIntelDir = vscode.Uri.joinPath(vscode.Uri.file(workspaceRoot), ".code-intel");
     await vscode.workspace.fs.createDirectory(codeIntelDir);
     const pjPath = vscode.Uri.joinPath(codeIntelDir, "project.json");
-    const projectId = createHash("sha256").update("pega:" + applicationName).digest("hex").slice(0, 12);
+    const projectId = createHash("sha256").update("pega:" + result.appName).digest("hex").slice(0, 12);
     await vscode.workspace.fs.writeFile(pjPath, Buffer.from(JSON.stringify({ projectId }, null, 2), "utf-8"));
-    // Update extension runtime project_id immediately
     setProjectId(projectId);
 
+    this.log(`[PegaHttpClient] ✅ fetchAndSavePegaContext complete: app="${result.appName}" v${result.appVersion}, ${caseTypes.length} caseTypes`);
+
     return {
-      applicationName,
-      accessGroup,
+      applicationName: result.appName,
+      accessGroup: result.accessGroup,
       caseTypesCount: caseTypes.length,
-      filePath: "pega-project.json",
+      filePath: jsonPath.fsPath,
     };
+  }
+
+  /** Fetch case types from Pega API (non-fatal) */
+  private async fetchCaseTypes(): Promise<Array<{ name: string; caseTypeID: string }>> {
+    const base = this.getPegaEndpoint();
+    const authHeader = await this.getAuthHeader();
+    const endpoints = [`${base}/api/v1/casetypes`, `${base}/PRRestService/api/v1/casetypes`];
+
+    for (const ep of endpoints) {
+      try {
+        const res = await fetch(ep, { headers: { Authorization: authHeader } });
+        if (res.ok) {
+          const data = (await res.json()) as any;
+          if (Array.isArray(data.caseTypes)) {
+            return data.caseTypes.map((c: any) => ({ name: c.name || "", caseTypeID: c.caseTypeID || "" }));
+          }
+        }
+      } catch { /* non-fatal */ }
+    }
+    return [];
   }
 }

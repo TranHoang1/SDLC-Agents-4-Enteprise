@@ -1,6 +1,7 @@
 import type { MemoryEngine } from '../engine/core.js';
 import type { ScopeContext } from '../models.js';
 import type { TagAnalyzerService } from '../llm/analyzer.js';
+import { isPegaQuery, executeGraphFallback } from './graph-fallback.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'memory-tool-dispatcher' });
@@ -12,10 +13,17 @@ export async function handleSearch(engine: MemoryEngine, scopeCtx: ScopeContext 
   if (!query) return 'Error: query required';
   const scope = a.scope as string | undefined;
   const scopeCtxResolved = scope === 'all' ? undefined : scopeCtx;
-  const results = await engine.search(query, (a.limit as number) ?? 10, a.tier as string, undefined, scopeCtxResolved);
+  const limit = (a.limit as number) ?? 10;
+  const results = await engine.search(query, limit, a.tier as string, undefined, scopeCtxResolved);
   await engine.auditLog('SEARCH');
   for (const r of results) await engine.recordAccess(r.entry.id);
   const lines: string[] = [];
+
+  // SA4E-89: Auto-fallback to graph when text search returns 0 and query matches Pega patterns
+  if (results.length === 0 && isPegaQuery(query)) {
+    return handleGraphFallback(query, limit);
+  }
+
   if (results.length === 0) return lines.join('\n') + `No knowledge found for "${query}"`;
   lines.push(`Found ${results.length} results:\n`);
   for (const r of results) {
@@ -38,6 +46,26 @@ export async function handleSearch(engine: MemoryEngine, scopeCtx: ScopeContext 
     });
   }
 
+  return lines.join('\n');
+}
+
+/**
+ * SA4E-89: Format graph fallback results as mem_search output.
+ * Transparent to caller — same output shape with source: "graph_fallback" flag.
+ */
+async function handleGraphFallback(query: string, limit: number): Promise<string> {
+  const graphResults = await executeGraphFallback(query, limit);
+  if (graphResults.length === 0) {
+    return `No knowledge found for "${query}"`;
+  }
+  const lines: string[] = [];
+  lines.push(`Found ${graphResults.length} results (source: graph_fallback):\n`);
+  for (const r of graphResults) {
+    lines.push(`[${r.type}] ${r.summary}`);
+    lines.push(`  ID: ${r.id} | Source: ${r.source} | Score: ${r.score.toFixed(3)}`);
+    lines.push(`  Content: ${r.content}`);
+    lines.push('');
+  }
   return lines.join('\n');
 }
 

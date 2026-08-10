@@ -31,7 +31,7 @@
 | Title | {Feature Title} |
 | Executed By | {Name / QA Agent} |
 | Date | {YYYY-MM-DD} |
-| Environment | {e.g., localhost:3000 (Vite) → localhost:8080 (Ktor backend)} |
+| Environment | {e.g., localhost:5173 (Vite webview) → localhost:48721 (Hono backend)} |
 | Browser | {e.g., Playwright Chromium / Chrome 120 / Firefox 121} |
 | Overall Verdict | **{✅ PASS — Ready for Release / ❌ FAIL — Blocked / ⚠️ CONDITIONAL PASS}** |
 | Re-test Rounds | {N} ({summary, e.g., "all bugs resolved" or "1 open bug remaining"}) |
@@ -65,7 +65,7 @@
 ### 2.1 Execution
 
 ```
-{command used to run tests, e.g., ./gradlew :shared:jvmTest :server:jvmTest}
+{command used to run tests, e.g., npm test (Vitest) — backend + extension}
 ```
 
 | Metric | Result |

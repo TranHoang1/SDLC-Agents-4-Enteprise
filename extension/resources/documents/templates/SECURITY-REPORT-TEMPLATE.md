@@ -73,7 +73,7 @@
 {What the vulnerability is and why it matters}
 
 **Evidence:**
-```kotlin
+```typescript
 // Vulnerable code
 {code snippet showing the issue}
 ```
@@ -82,7 +82,7 @@
 {What an attacker could achieve by exploiting this}
 
 **Remediation:**
-```kotlin
+```typescript
 // Fixed code
 {code snippet showing the secure implementation}
 ```

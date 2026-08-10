@@ -1,0 +1,181 @@
+ConvertFrom-Json : A parameter cannot be found that matches parameter name 'AsHashtable'.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:57 char:38
++     $rule = $json | ConvertFrom-Json -AsHashtable
++                                      ~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [ConvertFrom-Json], ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.PowerShell.Commands.ConvertFromJsonCommand
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:37 char:56
++ ... $lines.Add("[$className::RuleForm]  layout=$($rule['pyLayoutType'])")
++                                                  ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:38 char:5
++     $pacs = $rule['pyPagesAndClasses']
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:40 char:9
++     if ($rule['pySections'] -is [array]) { foreach ($sec in $rule['py ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+ConvertFrom-Json : A parameter cannot be found that matches parameter name 'AsHashtable'.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:57 char:38
++     $rule = $json | ConvertFrom-Json -AsHashtable
++                                      ~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [ConvertFrom-Json], ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.PowerShell.Commands.ConvertFromJsonCommand
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:37 char:56
++ ... $lines.Add("[$className::RuleForm]  layout=$($rule['pyLayoutType'])")
++                                                  ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:38 char:5
++     $pacs = $rule['pyPagesAndClasses']
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:40 char:9
++     if ($rule['pySections'] -is [array]) { foreach ($sec in $rule['py ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+ConvertFrom-Json : A parameter cannot be found that matches parameter name 'AsHashtable'.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:57 char:38
++     $rule = $json | ConvertFrom-Json -AsHashtable
++                                      ~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [ConvertFrom-Json], ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.PowerShell.Commands.ConvertFromJsonCommand
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:37 char:56
++ ... $lines.Add("[$className::RuleForm]  layout=$($rule['pyLayoutType'])")
++                                                  ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:38 char:5
++     $pacs = $rule['pyPagesAndClasses']
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:40 char:9
++     if ($rule['pySections'] -is [array]) { foreach ($sec in $rule['py ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+ConvertFrom-Json : A parameter cannot be found that matches parameter name 'AsHashtable'.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:57 char:38
++     $rule = $json | ConvertFrom-Json -AsHashtable
++                                      ~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [ConvertFrom-Json], ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.PowerShell.Commands.ConvertFromJsonCommand
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:37 char:56
++ ... $lines.Add("[$className::RuleForm]  layout=$($rule['pyLayoutType'])")
++                                                  ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:38 char:5
++     $pacs = $rule['pyPagesAndClasses']
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:40 char:9
++     if ($rule['pySections'] -is [array]) { foreach ($sec in $rule['py ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+ConvertFrom-Json : A parameter cannot be found that matches parameter name 'AsHashtable'.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:57 char:38
++     $rule = $json | ConvertFrom-Json -AsHashtable
++                                      ~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [ConvertFrom-Json], ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.PowerShell.Commands.ConvertFromJsonCommand
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:37 char:56
++ ... $lines.Add("[$className::RuleForm]  layout=$($rule['pyLayoutType'])")
++                                                  ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:38 char:5
++     $pacs = $rule['pyPagesAndClasses']
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:40 char:9
++     if ($rule['pySections'] -is [array]) { foreach ($sec in $rule['py ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+ConvertFrom-Json : A parameter cannot be found that matches parameter name 'AsHashtable'.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:57 char:38
++     $rule = $json | ConvertFrom-Json -AsHashtable
++                                      ~~~~~~~~~~~~
+    + CategoryInfo          : InvalidArgument: (:) [ConvertFrom-Json], ParameterBindingException
+    + FullyQualifiedErrorId : NamedParameterNotFound,Microsoft.PowerShell.Commands.ConvertFromJsonCommand
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:37 char:56
++ ... $lines.Add("[$className::RuleForm]  layout=$($rule['pyLayoutType'])")
++                                                  ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:38 char:5
++     $pacs = $rule['pyPagesAndClasses']
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+Cannot index into a null array.
+At C:\projects\kiro\SDLC-Agents-4-Enterprise\documents\SA4E-95\parse-harnesses.ps1:40 char:9
++     if ($rule['pySections'] -is [array]) { foreach ($sec in $rule['py ...
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : InvalidOperation: (:) [], RuntimeException
+    + FullyQualifiedErrorId : NullArray
+ 
+
+[Data-Admin-Operator-ID::RuleForm]  layout=
+
+[Rule-Obj-Model::RuleForm]  layout=
+
+[Rule-Obj-When::RuleForm]  layout=
+
+[Rule-Declare-DecisionTable::RuleForm]  layout=
+
+[Rule-Obj-Report-Definition::RuleForm]  layout=
+
+[Rule-Connect-REST::RuleForm]  layout=
+

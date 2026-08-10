@@ -4,14 +4,14 @@
 
 | Module | File | Registry |
 |---|---|---|
-| Node.js Bridge | `mcp-client-bridge/package.json` → "version" | npm |
-| Python Bridge | `mcp-bridge-python/pyproject.toml` → version | PyPI |
-| Kotlin Server | `build.gradle.kts` → version | GitHub Release |
+| Extension | `extension/package.json` → "version" | VS Code Marketplace |
+| Backend | `backend/package.json` → "version" | npm |
+| Python Services | `backend/servers/fastapi/pyproject.toml` → version | PyPI |
 
 ## Release process (DevOps + SM)
 
 1. **Bump versions** — all modules must have new version
-2. **Run tests locally** — `npm test` (bridge), `gradlew test` (server)
+2. **Run tests locally** — `npm test` (backend + extension) with Vitest
 3. **Commit version bumps** — `chore: bump versions to X.Y.Z`
 4. **Create tag** — `git tag vX.Y.Z -m "..."`
 5. **Push** — `git push origin master --tags`

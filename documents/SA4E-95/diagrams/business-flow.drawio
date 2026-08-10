@@ -1,0 +1,98 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-95: Schema Generator Engine — Business Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="450" y="20" width="420" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="n1" value="1. Discovery&lt;br&gt;Query Pega API&lt;br&gt;listRules (RuleForm)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="80" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="2. Fetch Harness&lt;br&gt;GET /rules/{insKey}&lt;br&gt;Full harness JSON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="340" y="80" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="3. Parse Harness&lt;br&gt;Walk pySections[]&lt;br&gt;pySectionBody[]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="600" y="80" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="4. Resolve Sections&lt;br&gt;OOP Rule Resolution&lt;br&gt;Most-specific class wins" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="600" y="220" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="5. Extract Fields&lt;br&gt;pyValue = property&lt;br&gt;pyFormat = type" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="340" y="220" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="6. Resolve Context&lt;br&gt;pyUsingPage&lt;br&gt;pyPagesAndClasses" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="220" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="7. Generate Schema&lt;br&gt;JSON Schema per rule type&lt;br&gt;(properties, types, required)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="360" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="8. Validate Rules&lt;br&gt;PegaRuleAstParser upgrade&lt;br&gt;Schema-based validation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="340" y="360" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="pyBodyType&lt;br&gt;= TEMPLATE?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="870" y="80" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="Skip + Log&lt;br&gt;x-template-layout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1100" y="90" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext1" value="Pega&lt;br&gt;CodeIntelligence API" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="500" width="150" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="out1" value="JSON Schema Files&lt;br&gt;(*.schema.json)" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=0.2;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="340" y="500" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="out2" value="Validated Rule JSON&lt;br&gt;(pass / errors[])" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=0.2;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="580" y="500" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="n3" target="d1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=9;" edge="1" parent="1" source="d1" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#9673a6;fontSize=9;" edge="1" parent="1" source="d1" target="n4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="940" y="190"/>
+          <mxPoint x="690" y="190"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#9673a6;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#9673a6;" edge="1" parent="1" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="n6" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="n7" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="fetch" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#0288d1;fontSize=9;" edge="1" parent="1" source="ext1" target="n1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="output" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#82b366;fontSize=9;" edge="1" parent="1" source="n7" target="out1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="validate" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#82b366;fontSize=9;" edge="1" parent="1" source="n8" target="out2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" value="recursive include" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#9673a6;fontSize=9;" edge="1" parent="1" source="n4" target="n3">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="690" y="200"/>
+          <mxPoint x="810" y="200"/>
+          <mxPoint x="810" y="115"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

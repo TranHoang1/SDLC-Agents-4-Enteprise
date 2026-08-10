@@ -105,7 +105,7 @@ Confirm:
    - `.gitlab-ci.yml` / `Jenkinsfile` / `.github/workflows/` — CI/CD
    - `*.yml` / `*.properties` in resources — application config
    - `.env*` files — environment variables
-   - `build.gradle.kts` / `pom.xml` / `package.json` — build system
+   - `package.json` — build system
 2. Understand the current deployment model (containers, VMs, cloud services).
 3. Identify what changes are needed for the new feature.
 

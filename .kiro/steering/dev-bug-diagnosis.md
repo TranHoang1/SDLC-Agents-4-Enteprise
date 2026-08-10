@@ -25,8 +25,8 @@ DEV enters bug diagnosis mode when:
 
 **Goal:** Get the system into a state where you can run code and see output.
 
-1. Verify project builds: `./gradlew build` (or equivalent)
-2. Verify existing tests run: `./gradlew test`
+1. Verify project builds: `npm run build` (or equivalent)
+2. Verify existing tests run: `npm test` (Vitest)
 3. If build broken → fix compilation first (this is NOT the bug fix)
 4. Confirm: "Build succeeds, N tests pass, ready to diagnose."
 
@@ -45,20 +45,19 @@ DEV enters bug diagnosis mode when:
 4. Run the test — confirm it FAILS with the described symptom
 5. If test passes → bug may be already fixed or reproduction is wrong → re-read bug report
 
-```kotlin
+```typescript
 // Example: Bug says "empty name accepted when it shouldn't be"
-@Test
-fun `should reject empty provider name`() {
-    // ARRANGE: preconditions from bug report
-    val request = CreateProviderRequest(name = "", transport = "stdio")
+it('should reject empty provider name', async () => {
+  // ARRANGE: preconditions from bug report
+  const request: CreateProviderRequest = { name: "", transport: "stdio" };
 
-    // ACT: trigger the buggy behavior
-    val response = client.post("/api/providers", request)
+  // ACT: trigger the buggy behavior
+  const response = await client.post("/api/providers", request);
 
-    // ASSERT: expected correct behavior (this should FAIL currently)
-    assertEquals(400, response.status)
-    assertContains(response.body, "name must not be empty")
-}
+  // ASSERT: expected correct behavior (this should FAIL currently)
+  expect(response.status).toBe(400);
+  expect(response.body).toContain("name must not be empty");
+});
 ```
 
 **Exit criteria:** At least one test FAILS demonstrating the bug.
@@ -74,9 +73,9 @@ fun `should reject empty provider name`() {
 3. Identify the specific line(s) where behavior diverges from expectation
 4. Write the hypothesis in a comment:
 
-```kotlin
+```typescript
 // HYPOTHESIS: ValidationService.validateName() does not check for empty strings,
-// only checks for null. Line 42 of ValidationService.kt.
+// only checks for null. Line 42 of ValidationService.ts.
 ```
 
 **Rules:**
@@ -97,15 +96,15 @@ fun `should reject empty provider name`() {
 2. Run the failing test with instrumentation
 3. Confirm or reject hypothesis based on observed output
 
-```kotlin
+```typescript
 // Instrumentation: Add temporary assertion
-fun validateName(name: String?): ValidationResult {
-    // INSTRUMENT: Verify this is reached with empty string
-    println("[BUG-DIAG] validateName called with: '$name', isEmpty=${name?.isEmpty()}")
+function validateName(name: string | null): ValidationResult {
+  // INSTRUMENT: Verify this is reached with empty string
+  console.log(`[BUG-DIAG] validateName called with: '${name}', isEmpty=${name?.length === 0}`);
 
-    if (name == null) return ValidationResult.invalid("name is required")
-    // ← CONFIRMED: empty string passes this check!
-    return ValidationResult.valid()
+  if (name == null) return ValidationResult.invalid("name is required");
+  // ← CONFIRMED: empty string passes this check!
+  return ValidationResult.valid();
 }
 ```
 
@@ -123,13 +122,13 @@ fun validateName(name: String?): ValidationResult {
 3. Run ALL existing tests → should still PASS (no regressions)
 4. Remove instrumentation code from Phase 4
 
-```kotlin
+```typescript
 // FIX: Add empty string check
-fun validateName(name: String?): ValidationResult {
-    if (name == null || name.isBlank()) {
-        return ValidationResult.invalid("name must not be empty")
-    }
-    return ValidationResult.valid()
+function validateName(name: string | null): ValidationResult {
+  if (name == null || name.trim().length === 0) {
+    return ValidationResult.invalid("name must not be empty");
+  }
+  return ValidationResult.valid();
 }
 ```
 
@@ -147,9 +146,8 @@ fun validateName(name: String?): ValidationResult {
 
 1. Remove ALL debug/instrumentation code
 2. Ensure the reproduction test is properly named and documented:
-   ```kotlin
-   @Test
-   fun `BUG-{TICKET}: should reject empty provider name`() { ... }
+   ```typescript
+   it('BUG-{TICKET}: should reject empty provider name', () => { ... });
    ```
 3. Run full test suite one final time
 4. Check code standards (file ≤200 lines, function ≤20 lines)

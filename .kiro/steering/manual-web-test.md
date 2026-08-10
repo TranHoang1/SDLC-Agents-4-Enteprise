@@ -16,8 +16,6 @@ Agent PHẢI thực hiện đầy đủ các bước sau (không skip, không h�
 
 1. **Detect build system** — đọc project root để xác định build tool:
    - `package.json` → `npm run build` (hoặc script build trong scripts section)
-   - `build.gradle.kts` / `build.gradle` → `gradlew build` hoặc task tạo artifact
-   - `pom.xml` → `mvn package -DskipTests`
    - `pyproject.toml` / `setup.py` → build theo hướng dẫn trong README
    - `Makefile` → `make build`
    - Nếu không rõ → đọc README, tìm section "Build" hoặc "Getting Started"
@@ -27,13 +25,11 @@ Agent PHẢI thực hiện đầy đủ các bước sau (không skip, không h�
    - Nếu build fail → fix lỗi rồi build lại
 
 3. **Deploy artifacts** (nếu cần) — copy output vào vị trí chạy:
-   - Jar → copy vào thư mục deploy
    - dist/ hoặc build/ → serve bằng static server
    - Nếu project chạy trực tiếp từ source (Node.js, Python) → skip bước này
 
 4. **Detect start command** — xác định cách start server:
    - `package.json` scripts → `npm start` hoặc `npm run dev`
-   - Jar file → `java -jar <path-to-jar>`
    - Python → `python main.py` hoặc `uvicorn app:app`
    - Nếu không rõ → đọc README section "Run" hoặc "Usage"
 

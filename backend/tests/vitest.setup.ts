@@ -22,3 +22,9 @@ if (!process.env.ADMIN_INITIAL_PASSWORD) {
 if (!process.env.CODE_INTEL_WORKSPACE) {
   process.env.CODE_INTEL_WORKSPACE = fs.mkdtempSync(path.join(os.tmpdir(), 'sa4e-test-'));
 }
+
+// SA4E-41: MCP routes require authentication. Enable API key auth for tests so
+// authenticated requests are exercised; tests must send X-API-Key / Bearer.
+if (!process.env.CODE_INTEL_API_KEY) {
+  process.env.CODE_INTEL_API_KEY = 'test-api-key-01';
+}

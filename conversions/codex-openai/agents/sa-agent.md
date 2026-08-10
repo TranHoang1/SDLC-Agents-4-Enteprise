@@ -137,10 +137,10 @@ After parsing, confirm:
 
 **Only after reading code intelligence**, if you need more detail:
 
-1. **Read build files** — Read `build.gradle.kts` (root and submodules) to identify:
-   - Exact library versions (Spring Boot, Kotlin, etc.)
+1. **Read build files** — Read `package.json` (root and sub-packages) to identify:
+   - Exact library versions (Hono, better-sqlite3, zod, etc.)
    - Key dependencies not captured by code intelligence
-2. **Read application configuration** — Read `application.yml` or `application.properties` for:
+2. **Read application configuration** — Read `backend/.env` or `backend/src/config/` for:
    - Database connections, feature flags, caching config, external service URLs
 3. **Read specific source files** — For the most relevant module, read 2-3 existing files to verify patterns:
    - A controller file — to confirm API patterns, error handling, response format
@@ -152,12 +152,12 @@ After parsing, confirm:
 
 **What to look for specifically:**
 - Existing DataSource configurations (how many databases? how are they configured?)
-- Existing caching setup (Redis? Caffeine? Spring Cache?)
+- Existing caching setup (Redis? in-memory cache?)
 - Existing security/auth patterns (JWT? OAuth2? Custom?)
 - Existing API versioning pattern (e.g., `/api/v1/`)
 - Existing error response format
 - Existing logging framework and format
-- Existing test patterns (JUnit? MockK? TestContainers?)
+- Existing test patterns (Vitest? supertest? Playwright?)
 - **Reusable entities/services from `shared` module** — Check if common entities (CustomerAddress, CustomerContact, CustomerRef) already exist
 
 ### Step 1.6: Analyze Existing Database (MANDATORY)
@@ -337,13 +337,13 @@ Create draw.io XML diagrams and export to PNG:
 
 **CRITICAL — When designing features that have UI or API components, you MUST document the E2E test architecture in the TDD so that DEV agent can implement E2E tests correctly.**
 
-1. **Read existing e2e-tests module** to understand current architecture:
-   - Read `e2e-tests/build.gradle.kts` for dependencies and configuration
-   - Read `e2e-tests/src/test/kotlin/com/assistant/e2e/api/ApiTestBase.kt` for API test base class
-   - Read `e2e-tests/src/test/kotlin/com/assistant/e2e/steps/CommonSteps.kt` for shared step definitions
-   - Read `e2e-tests/src/test/kotlin/com/assistant/e2e/steps/TestHelper.kt` for utility functions
-   - Read 1-2 existing `{Feature}Steps.kt` to understand step definition patterns
-   - Read 1-2 existing `.feature` files to understand Gherkin conventions
+1. **Read existing test module** to understand current architecture:
+   - Read `backend/package.json` for dependencies and configuration
+   - Read `backend/tests/helpers/apiTestBase.ts` for API test base class
+   - Read `backend/tests/e2e/helpers/common.ts` for shared test helpers
+   - Read `backend/tests/helpers/testUtils.ts` for utility functions
+   - Read 1-2 existing `{Feature}.spec.ts` to understand Playwright test patterns
+   - Read 1-2 existing `*.test.ts` files to understand Vitest conventions
 
 2. **Include in TDD Section 11 (E2E Test Architecture):**
 
@@ -351,38 +351,36 @@ Create draw.io XML diagrams and export to PNG:
 ## 11. E2E Test Architecture
 
 ### 11.1 Framework & Language
-- **Framework**: Cucumber + Serenity BDD + WebDriver (JVM-based)
-- **Language**: {Kotlin/Java — match project's main language}
-- **API test client**: {Ktor HTTP client (Kotlin) / RestAssured (Java)}
-- **Note**: E2E module is independent (`e2e-tests/`) with its own `build.gradle.kts`. Step classes MUST use the same language as the project to share models and utilities.
+- **Framework**: Playwright (E2E-UI) + Vitest (E2E-API)
+- **Language**: {TypeScript — match project's main language}
+- **API test client**: {fetch / undici + Vitest}
+- **Note**: E2E module is independent (`backend/tests/`) with its own `package.json`. Test files MUST use the same language as the project to share models and utilities.
 
 ### 11.2 E2E Module Structure
-- Module location: `e2e-tests/`
-- API tests: `e2e-tests/src/test/kotlin/.../api/{Feature}ApiTest.kt`
-- UI tests: `e2e-tests/src/test/resources/features/{capability}/{NNN}-{Feature}.feature`
-- Steps: `e2e-tests/src/test/kotlin/.../steps/{Feature}Steps.kt`
-- Runner: `e2e-tests/src/test/kotlin/.../runners/Ui{Feature}Runner.kt`
+- Module location: `backend/tests/`
+- API tests: `backend/tests/api/{Feature}ApiTest.ts`
+- UI tests: `backend/tests/e2e/{capability}/{NNN}-{Feature}.spec.ts`
+- Helpers: `backend/tests/helpers/testUtils.ts`
 
 ### 11.3 Reusable Components
-- **ApiTestBase**: {describe auth helpers, HTTP client setup, base URL config}
-- **CommonSteps**: {list key reusable steps — login, navigation, click, wait, assert}
-- **TestHelper**: {describe utility functions — wait conditions, JS execution}
-- **SharedTestContext**: {describe shared state mechanism between steps}
+- **apiTestBase**: {describe auth helpers, HTTP client setup, base URL config}
+- **common**: {list key reusable helpers — login, navigation, click, wait, assert}
+- **testUtils**: {describe utility functions — wait conditions, request builders}
 
 ### 11.4 E2E-API Test Design for {Feature}
-- File: `{Feature}ApiTest.kt`
+- File: `{Feature}ApiTest.ts`
 - Test cases: {list E2E-API cases from STC with brief description}
 - Auth setup: {how to get admin JWT for tests}
 - Data cleanup: {how to clean up test data after tests}
 
 ### 11.5 E2E-UI Test Design for {Feature}
-- Feature file: `features/{capability}/{NNN}-{Feature}.feature`
-- New steps needed: {list only NEW steps, not reused ones}
-- Reused steps from CommonSteps: {list which existing steps to reuse}
-- CSS selectors: {key element IDs/classes for WebDriver interaction}
+- Spec file: `backend/tests/e2e/{capability}/{NNN}-{Feature}.spec.ts`
+- New helpers needed: {list only NEW helpers, not reused ones}
+- Reused helpers from common.ts: {list which existing helpers to reuse}
+- CSS selectors: {key element IDs/classes for Playwright interaction}
 ```
 
-3. **Purpose**: This section serves as a **knowledge transfer** from SA to DEV, ensuring DEV can implement E2E tests without re-analyzing the entire e2e-tests module. It also serves as **reusable knowledge** for future projects that need similar E2E test architecture.
+3. **Purpose**: This section serves as a **knowledge transfer** from SA to DEV, ensuring DEV can implement E2E tests without re-analyzing the entire test module. It also serves as **reusable knowledge** for future projects that need similar E2E test architecture.
 
 ### Step 5.5: Generate Discrepancy Report (MANDATORY)
 
@@ -467,7 +465,7 @@ Report: "📚 TDD ingested into workspace memory for cross-agent access."
 
 - **MANDATORY DOCUMENT EXPORT**: After creating TDD.md, you MUST export to DOCX and ingest into KB. SM will attach to Jira. If SM does not attach, report the gap.
 - **MANDATORY MERMAID DIAGRAMS IN MARKDOWN**: Every TDD document MUST contain inline Mermaid diagrams directly in the markdown content. These are IN ADDITION to any draw.io diagrams. Mermaid diagrams ensure documents are readable and visual even without draw.io export. Required Mermaid diagrams:
-- **MANDATORY E2E TEST ARCHITECTURE IN TDD**: When the feature has UI or API components, TDD MUST include Section 11 (E2E Test Architecture) documenting the existing e2e-tests module structure, reusable components (ApiTestBase, CommonSteps, TestHelper), and specific E2E test design for the feature. This enables DEV to implement E2E tests without re-analyzing the module, and serves as reusable knowledge for future projects. **Note**: E2E framework runs on JVM — step classes and test code must match the project's main language (Kotlin or Java). Document the language choice in Section 11.1.
+- **MANDATORY E2E TEST ARCHITECTURE IN TDD**: When the feature has UI or API components, TDD MUST include Section 11 (E2E Test Architecture) documenting the existing test module structure, reusable components (apiTestBase, common, testUtils), and specific E2E test design for the feature. This enables DEV to implement E2E tests without re-analyzing the module, and serves as reusable knowledge for future projects. **Note**: E2E framework runs on Node.js — test files must match the project's main language (TypeScript). Document the language choice in Section 11.1.
   - **TDD**: At minimum — 1 architecture/component graph (graph TB), 1 sequence diagram (request flow), 1 class diagram (key interfaces and relationships), 1 state diagram (entity lifecycle if applicable)
   - Use ` ```mermaid ` code blocks with proper Mermaid syntax (flowchart, sequenceDiagram, stateDiagram-v2, classDiagram, graph TB/LR)
   - Place diagrams INLINE next to the relevant section text, not in a separate appendix

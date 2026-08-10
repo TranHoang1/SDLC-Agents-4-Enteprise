@@ -54,6 +54,7 @@ async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.
         code: picks.includes("code"),
         documents: picks.includes("documents"),
         sync: picks.includes("sync"),
+        schemas: picks.includes("schemas"),
     };
 
     const channel = getIndexingOutputChannel();
@@ -64,17 +65,32 @@ async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.
     showIndexResults(results, picks, root, channel);
 }
 
+/** Build summary title matching selected operations. */
+function describeSummaryTitle(options: string[]): string {
+    if (options.length === 1) {
+        switch (options[0]) {
+            case "schemas": return "Pega Rule Schema Generation Summary";
+            case "code": return "Source Code Indexing Summary";
+            case "documents": return "Document Indexing Summary";
+            case "sync": return "Code Symbol Sync Summary";
+        }
+    }
+    return "Workspace Indexing Summary";
+}
+
 async function showIndexOptions(): Promise<string[] | undefined> {
     const picks = await vscode.window.showQuickPick([
+        { label: "$(symbol-class) Index Pega Rule Schemas", description: "Generate JSON Schemas from Pega RuleForms (run first)", id: "schemas", picked: true },
         { label: "$(code) Index Source Code", description: "Re-index all code symbols", id: "code", picked: true },
         { label: "$(book) Index Documents", description: "Index SDLC documents into KB", id: "documents", picked: true },
-        { label: "$(sync) Sync Code → Memory", description: "Sync code entities into memory graph", id: "sync", picked: true }
+        { label: "$(sync) Sync Code → Memory", description: "Sync code entities into memory graph", id: "sync", picked: true },
     ], { canPickMany: true, placeHolder: "Select what to index" });
     return picks?.map(p => p.id);
 }
 
 function showIndexResults(results: string[], options: string[], root: string, channel: vscode.OutputChannel): void {
-    channel.appendLine("\n=== Workspace Indexing Summary ===\n");
+    const summaryTitle = describeSummaryTitle(options);
+    channel.appendLine(`\n=== ${summaryTitle} ===\n`);
 
     // Auto-detect Salesforce project and show SF-specific summary
     const sfdxRoot = detectSfdxProject(root);
@@ -95,7 +111,7 @@ function showIndexResults(results: string[], options: string[], root: string, ch
     channel.appendLine("\n--- Next Steps ---");
     if (options.includes("code")) { channel.appendLine("• Code: MCP server indexes automatically."); }
     if (options.includes("documents")) { channel.appendLine("• Documents: Indexed via HTTP API."); }
-    if (options.includes("sync")) { channel.appendLine("• Sync: Ask agent to run mem_sync_code"); }
+    if (options.includes("sync")) { channel.appendLine("• Sync: Code symbols synced to KB automatically."); }
     vscode.window.showInformationMessage("📋 Indexing complete — see Output panel.", "Open Output")
         .then(action => { if (action === "Open Output") { channel.show(); } });
 }

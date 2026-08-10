@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-Multi-agent SDLC pipeline with specialized agents (SM, BA, TA, SA, QA, DEV, DevOps, UI, Security) coordinated by Scrum Master. Kotlin Multiplatform backend + Kotlin/JS frontend + Python MCP orchestration.
+Multi-agent SDLC pipeline with specialized agents (SM, BA, TA, SA, QA, DEV, DevOps, UI, Security) coordinated by Scrum Master. TypeScript + Hono backend + Svelte 4 webview + Python MCP orchestration.
 
 ## Key Rules
 
@@ -18,8 +18,8 @@ Multi-agent SDLC pipeline with specialized agents (SM, BA, TA, SA, QA, DEV, DevO
 
 ## Architecture
 
-- Backend: Kotlin/Ktor/SQLDelight/Koin (`shared/` + `server/`)
-- Frontend: Kotlin/JS + HTML Templates + Vite (`frontend/`)
+- Backend: TypeScript + Hono + MCP SDK (`backend/`) with SQLite/PostgreSQL
+- Extension: VS Code/Kiro extension with Svelte 4 webview (`extension/`)
 - Orchestration: Python MCP server with child servers
 - Documents: `documents/{TICKET}/` with STATUS.json
 
@@ -93,7 +93,7 @@ After each sub-agent completes:
 - File ≤ 200 lines, Function ≤ 20 lines
 - Models in separate `models/` folder
 - No swallowed exceptions — always inform user
-- Serialization: `encodeDefaults = true` for protocol communication
+- Serialization: validate protocol communication with zod schemas (safeParse)
 
 ## Jira Integration
 

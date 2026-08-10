@@ -64,9 +64,9 @@ Confirm:
 ### Step 1: Analyze Project Structure
 
 1. Scan the workspace to understand the existing project structure:
-   - Build system (Gradle/Maven/npm)
-   - Language (Kotlin/Java/TypeScript)
-   - Framework (Spring Boot/NestJS/React)
+   - Build system (npm)
+   - Language (TypeScript)
+   - Framework (Hono/Svelte)
    - Existing packages and naming conventions
 2. Identify where new code should be placed based on existing patterns.
 3. Read existing similar implementations as reference for coding style.
@@ -131,22 +131,22 @@ Integration tests MUST test real component interactions, NOT just mock everythin
 
 | STC Specifies | DEV MUST Use | ❌ FORBIDDEN |
 |---------------|-------------|-------------|
-| "Ktor testApplication" | `testApplication { }` block with real routing | Direct service method calls |
-| "Testcontainers" / "real DB" | Testcontainers dependency + real container | `mockk<DbClient>()` or `mockk<VectorDbClient>()` |
-| "Mock upstream server process" | Real mock process (spawn process or embedded server) | `mockk<McpConnection>()` |
-| "HTTP server" | Embedded HTTP server (e.g., MockWebServer, Ktor test server) | `mockk<HttpClient>()` |
+| "HTTP integration via supertest" | Supertest against real Hono app routing | Direct service function calls |
+| "Testcontainers" / "real DB" | Testcontainers dependency + real container | `vi.mock()` for DB clients |
+| "Mock upstream server process" | Real mock process (spawn process or embedded server) | `vi.mock()` for MCP connection |
+| "HTTP server" | Embedded HTTP server (e.g., supertest, undici against Hono) | `vi.mock()` for HTTP client |
 | "Config hot-reload" | Real file watcher + actual file modification | Only testing YAML parsing |
 
 **Acceptable mocks in IT tests:** Only for external paid services (OpenAI API, cloud services) that cannot run locally. Everything else MUST be real or use Testcontainers.
 
-**If STC requires a dependency not in build.gradle.kts** (e.g., Testcontainers), DEV MUST:
-1. Add the dependency to build.gradle.kts
+**If STC requires a dependency not in package.json** (e.g., Testcontainers), DEV MUST:
+1. Add the dependency to package.json
 2. Inform user about the new dependency
 3. Implement tests using the real dependency
 
 **If DEV cannot implement a real integration** (e.g., no Docker available for Testcontainers):
 1. Document the limitation explicitly in test comments
-2. Implement the test with mocks BUT mark it clearly: `// TODO: Replace mockk with Testcontainers when Docker is available`
+2. Implement the test with mocks BUT mark it clearly: `// TODO: Replace mock with Testcontainers when Docker is available`
 3. Report to SM/QA that IT tests are degraded
 
 1. Read `documents/{TICKET-KEY}/STC.md` to get the full list of test cases
@@ -154,41 +154,41 @@ Integration tests MUST test real component interactions, NOT just mock everythin
 
 | STC Level | What to implement | Where |
 |-----------|------------------|-------|
-| **PBT-XX** | Property-based tests with kotest-property | `shared/src/jvmTest/` or `server/*/src/jvmTest/` |
-| **UT-XX** | Unit tests with kotest | `server/*/src/jvmTest/` |
-| **IT-XX** | Integration tests with Ktor testApplication | `server/*/src/jvmTest/` |
-| **E2E-API-XX** | API E2E tests with Ktor client + JUnit 5 | `e2e-tests/src/test/kotlin/.../api/` |
-| **E2E-UI-XX** | Cucumber feature + Steps + Runner | `e2e-tests/src/test/` (see below) |
+| **PBT-XX** | Property-based tests with fast-check | `backend/src/**/__tests__/` or `backend/tests/` |
+| **UT-XX** | Unit tests with Vitest | `backend/src/**/__tests__/` |
+| **IT-XX** | Integration tests with Vitest + supertest | `backend/src/**/__tests__/` |
+| **E2E-API-XX** | API E2E tests with Vitest + supertest/undici | `backend/tests/` |
+| **E2E-UI-XX** | Playwright spec + helpers + config | `backend/tests/` (see below) |
 | **SIT-XX** | ❌ SKIP — manual only | N/A |
 
-3. **For E2E-UI implementation**, create 3 files per feature:
-   - `.feature` file with Gherkin scenarios from STC
-   - `Steps.kt` with step definitions — **MUST reuse existing steps from CommonSteps.kt** (read it first!)
-   - `Runner.kt` with Serenity Cucumber runner
+3. **For E2E-UI implementation**, create per feature:
+   - Playwright spec file (`.spec.ts`) with scenarios from STC
+   - Shared UI helper — **MUST reuse existing helpers from `tests/helpers/uiSteps.ts`** (read it first!)
+   - Register the spec in `playwright.config.ts`
    - Reference `.kiro/steering/e2e-testing.md` for file structure and conventions
 
-4. **For E2E-API implementation**, create `{Feature}ApiTest.kt`:
-   - Extend `ApiTestBase()`
-   - Use `@Tag("api")`, `@TestMethodOrder(OrderAnnotation::class)`
-   - Each test method maps to an E2E-API-XX case from STC
+4. **For E2E-API implementation**, create `{Feature}.test.ts`:
+   - Reuse shared API helpers (base URL, auth setup)
+   - Group cases with `describe()` and each case with `it()`
+   - Each test case maps to an E2E-API-XX case from STC
 
-5. **Traceability**: Each test method MUST have a comment linking to STC:
-   ```kotlin
+5. **Traceability**: Each test MUST have a comment linking to STC:
+   ```ts
    // STC: PBT-01 — Name validation rejects empty/whitespace
    // STC: E2E-API-02 — Full CRUD lifecycle on real server
    // STC: E2E-UI-06 — Disable an active user
    ```
 
-6. **Run all tests** after implementation: `./gradlew :shared:jvmTest :server:jvmTest`
+6. **Run all tests** after implementation: `npm test`
 7. **Run E2E tests** if E2E cases exist:
-   - **E2E-API**: Cần server đang chạy trước (`./gradlew :server:jvmRun`), sau đó: `./gradlew :e2e-tests:test --tests "*ApiTest*"`
-   - **E2E-UI**: Cần server + frontend đang chạy trước (`./gradlew :server:jvmRun` + `cd frontend && npx vite`), sau đó: `./gradlew :e2e-tests:test --tests "*Runner*"`
+   - **E2E-API**: Cần server đang chạy trước (`npm start`), sau đó: `npm run test:e2e-api`
+   - **E2E-UI**: Cần server + frontend đang chạy trước (`npm start` + `cd extension && npm run dev`), sau đó: `npm run test:e2e-ui`
    - **Quy trình chạy E2E-UI đầy đủ:**
-     1. Build frontend: `./gradlew :frontend:jsBrowserDevelopmentWebpack`
-     2. Start server (background): dùng `controlPwshProcess` action="start" với `./gradlew :server:jvmRun`
-     3. Start Vite (background): dùng `controlPwshProcess` action="start" với `npx vite` trong thư mục `frontend/`
+     1. Build frontend: `cd extension && npm run build`
+     2. Start server (background): dùng `controlPwshProcess` action="start" với `npm start`
+     3. Start Vite (background): dùng `controlPwshProcess` action="start" với `npm run dev` trong thư mục `extension/`
      4. Đợi server ready (check log "Application started" hoặc đợi 10s)
-     5. Chạy E2E-UI: `./gradlew :e2e-tests:test --tests "*Runner*"`
+     5. Chạy E2E-UI: `npm run test:e2e-ui`
      6. Stop Vite + server sau khi test xong
    - **Nếu không thể chạy E2E-UI** (thiếu browser, server không start được): báo cáo rõ ràng cho user rằng E2E-UI tests đã được viết nhưng chưa chạy, cần chạy manual
 8. Fix any failures before reporting completion
@@ -205,9 +205,9 @@ Before presenting code to user, verify:
 - [ ] No security vulnerabilities (SQL injection, XSS, etc.)
 - [ ] Unit tests cover happy path + error scenarios
 - [ ] Code compiles without errors
-- [ ] **ALL tests pass** — `./gradlew :shared:jvmTest :server:jvmTest` must be GREEN
+- [ ] **ALL tests pass** — `npm test` must be GREEN
 - [ ] **E2E tests pass** (if implemented) — E2E-API and E2E-UI must be GREEN
-- [ ] **No duplicate step definitions** — verify Cucumber steps don't conflict with CommonSteps.kt
+- [ ] **No duplicate helpers/selectors** — verify Playwright helpers don't conflict with existing `tests/helpers`
 - [ ] **No test data assumptions** — test data must match actual server state (pre-seeded users, JWT claims)
 
 ### Step 8.5: Update Code Intelligence Index (MANDATORY)
@@ -295,13 +295,13 @@ while (tests fail):
 
 | Lỗi | Root Cause | Fix |
 |-----|-----------|-----|
-| `DuplicateStepDefinitionException` | Step definition trùng với CommonSteps.kt | Xóa duplicate step, reuse CommonSteps |
+| Duplicate helper/selector conflict | Helper trùng với `tests/helpers` hiện có | Xóa duplicate, reuse `tests/helpers` |
 | Test data không match server state | Email/ID pre-seeded khác với test expectation | Đọc actual pre-seeded data, sửa test |
 | Endpoint trả status code khác expected | Test assumption sai hoặc endpoint chưa implement | Verify endpoint behavior, sửa test hoặc code |
-| `CompilationException` | Syntax error trong test code | Fix syntax |
-| `ClassNotFoundException` | Import sai hoặc thiếu dependency | Fix imports, check build.gradle.kts |
+| `SyntaxError` / `TypeError` | Lỗi cú pháp trong test code | Fix syntax |
+| `ERR_MODULE_NOT_FOUND` | Import sai hoặc thiếu dependency | Fix imports, check package.json |
 - [ ] **ALL tests pass** — PBT, UT, IT, E2E-API, E2E-UI. Nếu test fail → fix ngay trước khi báo cáo hoàn thành
-- [ ] **No duplicate step definitions** — khi viết E2E-UI steps, verify không trùng với CommonSteps.kt
+- [ ] **No duplicate helpers/selectors** — khi viết E2E-UI tests, verify không trùng với `tests/helpers`
 - [ ] **Test data chính xác** — email, user ID, endpoint paths phải match với server thực tế
 
 ### ⛔ ZERO BROKEN TESTS POLICY
@@ -310,12 +310,12 @@ while (tests fail):
 
 Quy trình bắt buộc sau khi implement:
 
-1. **Chạy unit/integration tests**: `./gradlew :shared:jvmTest :server:jvmTest`
+1. **Chạy unit/integration tests**: `npm test`
    - Nếu FAIL → fix ngay → chạy lại → lặp cho đến khi PASS
 2. **Chạy E2E-API tests** (nếu có): Start server → chạy tests → fix failures
    - Nếu FAIL → phân tích root cause → fix test code hoặc production code → chạy lại
 3. **Chạy E2E-UI tests** (nếu có): Start server + Vite → chạy tests → fix failures
-   - Nếu `DuplicateStepDefinitionException` → loại bỏ duplicate steps, reuse CommonSteps
+   - Nếu duplicate helper/selector → loại bỏ duplicates, reuse `tests/helpers`
    - Nếu element not found → sửa CSS selectors, thêm waits
    - Nếu test data sai → sửa test data match với server thực tế
 4. **Chỉ báo cáo "hoàn thành" khi TẤT CẢ tests PASS**
@@ -325,26 +325,26 @@ Quy trình bắt buộc sau khi implement:
 - ❌ Báo cáo "compiled successfully" mà chưa chạy tests
 - ❌ Bỏ qua test failures với lý do "sẽ fix sau"
 - ❌ Tạo test code mà không verify nó chạy được
-- ❌ Tạo duplicate step definitions với CommonSteps.kt
+- ❌ Tạo duplicate helpers/selectors với `tests/helpers` hiện có
 
 ## Implementation Rules
 
 - ALWAYS read existing code first to match project style — do NOT introduce new patterns.
 - **MANDATORY DOCUMENT EXPORT**: After creating any document (UG.md, implementation summary), you MUST export to DOCX and ingest into KB. SM will attach to Jira. If SM does not attach, report the gap.
 - **ALWAYS read STC.md** before writing tests — implement ALL automated test cases (PBT, UT, IT, E2E-API, E2E-UI) defined in STC. Do NOT skip E2E tests.
-- **E2E-TESTS MODULE KNOWLEDGE**: Before writing E2E tests, read the existing `e2e-tests/` module structure to understand:
-  - `ApiTestBase.kt` — base class for API E2E tests (auth helpers, HTTP client setup)
-  - `CommonSteps.kt` — shared Cucumber steps (login, navigation, click, wait, assert)
-  - `TestHelper.kt` — utility functions (wait conditions, JS execution, page rendered check)
-  - `SharedTestContext.kt` — shared state between steps
-  - Existing `{Feature}Steps.kt` files — reusable domain steps
-  - Existing `.feature` files — Gherkin patterns and conventions
-  - **REUSE existing steps and patterns** — do NOT create duplicate step definitions
-- **E2E FRAMEWORK LANGUAGE**: E2E automation framework (Cucumber + Serenity + WebDriver) chạy trên JVM. Step classes và test code PHẢI dùng cùng ngôn ngữ với dự án chính:
-  - Dự án Kotlin → Step classes viết bằng Kotlin (`.kt`), dùng Ktor HTTP client cho API tests
-  - Dự án Java → Step classes viết bằng Java (`.java`), dùng RestAssured cho API tests
-  - Đọc `e2e-tests/build.gradle.kts` để xác định ngôn ngữ và dependencies hiện tại
-  - Runner class: `@RunWith(CucumberWithSerenity::class)` (Kotlin) hoặc `@RunWith(CucumberWithSerenity.class)` (Java)
+- **E2E-TESTS MODULE KNOWLEDGE**: Before writing E2E tests, read the existing `backend/tests/` + `extension/src/__tests__/` structure to understand:
+  - `tests/helpers/apiClient.ts` — shared API E2E test helpers (auth helpers, HTTP client setup)
+  - `tests/helpers/uiSteps.ts` — shared UI test helpers (login, navigation, click, wait, assert)
+  - `tests/helpers/testUtils.ts` — utility functions (wait conditions, JS execution, page rendered check)
+  - `tests/helpers/testContext.ts` — shared state between tests
+  - Existing `{Feature}.test.ts` files — reusable domain test patterns
+  - Existing `playwright.config.ts` — Playwright conventions and base URLs
+  - **REUSE existing helpers and patterns** — do NOT create duplicate helpers
+- **E2E FRAMEWORK LANGUAGE**: E2E automation framework (Playwright) chạy trên Node.js. Test files PHẢI dùng cùng ngôn ngữ với dự án chính:
+  - Dự án TypeScript → Test files viết bằng TypeScript (`.ts`), dùng Vitest + supertest/undici cho API tests
+  - E2E-UI tests dùng Playwright + Svelte/Vite
+  - Đọc `backend/package.json` để xác định ngôn ngữ và dependencies hiện tại
+  - Runner: Playwright test runner / Vitest runner
 - Follow the project's existing dependency injection, error handling, and logging patterns.
 - Use the project's existing libraries — do NOT add new dependencies without asking.
 - Database migrations must be backward-compatible (no DROP without confirmation).

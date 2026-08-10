@@ -17,11 +17,13 @@ export class AnthropicProvider extends BaseLlmProvider {
   private client: any = null;
   private readonly getApiKey: () => Promise<string | undefined>;
   private readonly baseUrl: string;
+  private readonly defaultModel: string;
 
-  constructor(getApiKey: () => Promise<string | undefined>, baseUrl?: string) {
+  constructor(getApiKey: () => Promise<string | undefined>, baseUrl?: string, defaultModel?: string) {
     super();
     this.getApiKey = getApiKey;
     this.baseUrl = (baseUrl || DEFAULT_BASE_URL).replace(/\/$/, "");
+    this.defaultModel = defaultModel || DEFAULT_MODEL;
     this.contextWindowTokens = 200000; // Claude models have 200K context
   }
 
@@ -53,7 +55,7 @@ export class AnthropicProvider extends BaseLlmProvider {
     }));
     const formattedMessages = formatMessagesForTools(userMessages);
     const params: Record<string, unknown> = {
-      model: options?.model || DEFAULT_MODEL,
+      model: options?.model || this.defaultModel,
       max_tokens: options?.maxTokens || DEFAULT_MAX_TOKENS,
       messages: formattedMessages, tools: anthropicTools, stream: false,
     };
@@ -93,7 +95,7 @@ export class AnthropicProvider extends BaseLlmProvider {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: DEFAULT_MODEL, max_tokens: 1,
+        model: this.defaultModel, max_tokens: 1,
         messages: [{ role: "user", content: "ping" }],
       }),
     };
@@ -110,7 +112,7 @@ export class AnthropicProvider extends BaseLlmProvider {
     systemPrompt: string | undefined, stream: boolean
   ): Record<string, unknown> {
     const params: Record<string, unknown> = {
-      model: options?.model || DEFAULT_MODEL,
+      model: options?.model || this.defaultModel,
       max_tokens: options?.maxTokens || DEFAULT_MAX_TOKENS,
       messages: userMessages.map(m => ({ role: m.role, content: m.content })),
       stream,

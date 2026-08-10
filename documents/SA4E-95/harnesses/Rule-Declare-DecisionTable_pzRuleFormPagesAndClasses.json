@@ -1,0 +1,618 @@
+{
+  "pxCommitDateTime": "20250401T180013.091 GMT",
+  "pxCreateDateTime": "20180713T140906.139 GMT",
+  "pxCreateOperator": "yalav",
+  "pxCreateOpName": "Vineel Yalamarthy",
+  "pxCreateSystemID": "SLSHYD",
+  "pxHostId": "1d407e1106c501b92d737506992c6d06",
+  "pxInsId": "!PZRULEFORMPAGESANDCLASSES",
+  "pxInsName": "RULE-DECLARE-DECISIONTABLE!PZRULEFORMPAGESANDCLASSES",
+  "pxInstanceLockedBy": "",
+  "pxInstanceLockedCreateDateTime": "",
+  "pxInstanceLockedDateTime": "",
+  "pxInstanceLockedKey": "",
+  "pxInstanceLockedRuleSet": "",
+  "pxInstanceLockedRuleSetVersion": "",
+  "pxLimitedAccess": "Dev",
+  "pxMoveFromSystem": "pega",
+  "pxMoveImportDateTime": "20130919T014052.410 GMT",
+  "pxMoveImportOperId": "Administrator@pega.com",
+  "pxMoveImportOperName": "Administrator",
+  "pxMoveOriginalKey": "RULE-HTML-SECTION RULE-DECLARE-DECISIONTABLE PZRULEFORMPAGESANDCLASSES #20130919T014052.410 GMT",
+  "pxMoveOriginalRuleSet": "Pega-ProcessArchitect",
+  "pxMoveOriginalRuleSetVersion": "07-10-01",
+  "pxObjClass": "Rule-HTML-Section",
+  "pxOriginalCreateDateTime": "20180713T140906.139 GMT",
+  "pxOriginalCreateOperator": "yalav",
+  "pxOriginalCreateOpName": "Vineel Yalamarthy",
+  "pxOriginalCreateSystemID": "SLSHYD",
+  "pxSaveDateTime": "20180713T140906.140 GMT",
+  "pxUpdateDateTime": "20180713T140906.139 GMT",
+  "pxUpdateOperator": "yalav",
+  "pxUpdateOpName": "Vineel Yalamarthy",
+  "pxUpdateSystemID": "SLSHYD",
+  "pyAccessibilityCount": "0",
+  "pyAccessibilityLevel": "0",
+  "pyAdvParamPageClass": "",
+  "pyAdvParamPageSection": "",
+  "pyAutoHTML": "true",
+  "pyBaseRule": "false",
+  "pyBrowserSupportLevel": "1",
+  "pyCategory": "STANDARD",
+  "pyCategoryDisplayName": "None",
+  "pyCheckInRuleSet": "Pega-ProcessArchitect",
+  "pyCircumstanceDate": "",
+  "pyCircumstanceDateProp": "",
+  "pyCircumstanceDefinition": "",
+  "pyCircumstanceProp": "",
+  "pyCircumstanceTemplate": "",
+  "pyCircumstanceType": "",
+  "pyCircumstanceVal": "",
+  "pyClassName": "Rule-Declare-DecisionTable",
+  "pyCompact": "true",
+  "pyContainerType": "NONE",
+  "pyCorrType": "",
+  "pyDescription": "",
+  "pyHasCustomFields": "",
+  "pyHistoryObject": "false",
+  "pyHTMLVersion": "1",
+  "pyInterface": "",
+  "pyIsDirty": "false",
+  "pyJavaClassName": "rule_declare_decisiontable_pzruleformpagesandclasses_20180713_140906_139",
+  "pyJavaGenerateAPIVersion": "04-02",
+  "pyJavaStream": "",
+  "pyJSRCompliant": "false",
+  "pyLabel": "Pages & Classes - No Mode Column",
+  "pyLabelOld": "Pages & Classes - No Mode Column",
+  "pyLocalized": "true",
+  "pyMemo": "GRP-6193:  Pages and classes Tab",
+  "pyMethodStatus": "Internal",
+  "pyPageName": "RH_1",
+  "pyParameterSetFlag": "true",
+  "pyProjectID": "",
+  "pyProjectIDLabel": " ( )",
+  "pyRelativePath": "",
+  "pyRuleAvailable": "Final",
+  "pyRuleEnds": "",
+  "pyRuleForm": "true",
+  "pyRuleName": "pzRuleFormPagesAndClasses",
+  "pyRuleParamsStreamName": "",
+  "pyRuleSet": "Pega-ProcessArchitect",
+  "pyRuleSetVersion": "08-01-01",
+  "pyRuleStarts": "",
+  "pySectionXML": "",
+  "pyShowAttachment": "",
+  "pyShowJavaURL": "",
+  "pySortDateCircumWithinRSMajor": "true",
+  "pySourceStream": "<%pzSection.includeExpressions();%><pega:choose>\n<pega:when test='param.partialRefresh==\"true\"'>\n\t\t\t\t\t\t\t\t<pega:save name=\"rowClass\" value=\"\"/>\n</pega:when>\n<pega:otherwise>\n<%pzAuto.getSection().includeShowMeHarnessInsert();%>\n<%tools.putSaveValue(\"sectionUniqueID\", \"SID\" + (((com.pega.pegarules.priv.context.PegaRequestor) \t\t\ttools.getRequestor()).currentTimeUnique())+ \"\");%><% sectionDivStart_1(); %>\n<%pzSection.getLayout().setExpandParam(\"SubSectionpzRuleFormPagesAndClassesB\",\"\",false);%>\n\n\t\t\t\t\t\t\t<%-- GenerateSectionBodyHTML: Begin --%><%if(pzSection.getLayout().loadLayoutBody()) {%>\n<% { %>\n\t\t\t\t\t\t<% String strSectionPageProp = \"\"; %> <%tools.appendString(pzAuto.getSection().getSectionStream(\"RuleFormPagesAndClassesNoMode\",\"\",false,\"\"));%>\n<% } %><%elementModel_1();%><%}%>\n\t\t\t\t\t\t\t\t<pega:save name=\"rowClass\" value=\"\"/>\n\n\t\t\t\t\t\t\t<%-- GenerateSectionBodyHTML: End --%>\n<% tools.putSaveValue(\"ContainerID\", \"\");%><% sectionDivEnd_1(); %>\n<% tools.putSaveValue(\"sectionUniqueID\", \"\");%> \n</pega:otherwise>\n</pega:choose>",
+  "pySourceStreamDispBackUp": "",
+  "pySpecialityControl": "false",
+  "pySPRuleSetName": "yalav@",
+  "pyStatus": "",
+  "pyStreamName": "pzRuleFormPagesAndClasses",
+  "pyTaskGroup": "",
+  "pyTemplateDataField": "",
+  "pyTemplateInputBox": "",
+  "pyTempNewVersion": "false",
+  "pyTemporaryObject": "",
+  "pyUsage": "",
+  "pyValueChanged": "false",
+  "pyWorkKey": "",
+  "pyXMLSignature": "<methodSignature><pyStepsCallParams><HidePageMode DESCRIPTION= \"Should the page mode column be hidden?\" TYPE= \"BOOLEAN\" REQUIRED= \"0\" INOUT= \"\" SIZE=\"\" SMARTPROMPT=\"N\" SMARTPROMPTRULE=\"RULEKEY\" SMARTPROMPTRULECLASS=\"\" SMARTPROMPTBASECLASS=\"PageClass\" SMARTPROMPTDATANODE=\"\" DEFAULTVALUE=\"\" /></pyStepsCallParams><pyStepsPageAliases></pyStepsPageAliases></methodSignature>",
+  "pzChecksum": "1152666764",
+  "pzIndexCount": "2",
+  "pzInsKey": "RULE-HTML-SECTION RULE-DECLARE-DECISIONTABLE PZRULEFORMPAGESANDCLASSES #20180713T140906.139 GMT",
+  "pzInvalidateCss": "true",
+  "pzIsAutoGenerated": "false",
+  "pzOriginalInstanceKey": "RULE-HTML-SECTION RULE-DECLARE-DECISIONTABLE PZRULEFORMPAGESANDCLASSES #20130409T065712.859 GMT",
+  "pzRuleSetVersionMajor": "08",
+  "pzRuleSetVersionMinor": "01",
+  "pzRuleSetVersionPatch": "01",
+  "pzSectionParamPageClass": "",
+  "pzSectionParamPageSection": "",
+  "pxAPIMethodReferences": [],
+  "pxCSSSelectors": [],
+  "pxNamedPageReferences": [],
+  "pxRuleReferences": [
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Declare-DecisionTable",
+      "pxRuleFamilyName": "RULE-DECLARE-DECISIONTABLE",
+      "pxRuleObjClass": "Rule-Obj-Class",
+      "pyRuleName": "Rule-Declare-DecisionTable",
+      "pzIndexOwnerKey": "RULE-HTML-SECTION RULE-DECLARE-DECISIONTABLE PZRULEFORMPAGESANDCLASSES #20180713T140906.139 GMT",
+      "pzIndexes": {
+        "RuleReference": "0"
+      }
+    },
+    {
+      "pxObjClass": "Embed-Reference-Rule",
+      "pxRuleClassName": "Rule-Declare-DecisionTable",
+      "pxRuleFamilyName": "RULEFORMPAGESANDCLASSESNOMODE",
+      "pxRuleObjClass": "Rule-HTML-Section",
+      "pyRuleName": "RuleFormPagesAndClassesNoMode",
+      "pzIndexOwnerKey": "RULE-HTML-SECTION RULE-DECLARE-DECISIONTABLE PZRULEFORMPAGESANDCLASSES #20180713T140906.139 GMT",
+      "pzIndexes": {
+        "RuleReference": "1"
+      }
+    }
+  ],
+  "pxWarnings": [],
+  "pyDefaultButton": {
+    "pxObjClass": "Embed-Harness-Button",
+    "pyAction": "",
+    "pyActionComplete": "",
+    "pyButtonId": "",
+    "pyButtonPosition": "",
+    "pyButtonType": "",
+    "pyCaption": "",
+    "pyIsModalWindow": "false",
+    "pyLocalAction": "",
+    "pyNoFormSubmit": "false",
+    "pyPassCurrentParameterPage": "",
+    "pyPrivilege": "",
+    "pyStyle": "",
+    "pyTargetName": "",
+    "pyTooltip": "",
+    "pyUseExistingFrame": "",
+    "pyVisibleWhen": "",
+    "pyWhenNotPrivilege": "",
+    "pyWindowHeight": "82",
+    "pyWindowWidth": "80",
+    "pyActionParams": {
+      "pyTempPlaceHolder": "TempPlaceHolder"
+    }
+  },
+  "pyDefaultUserData": {
+    "pxObjClass": "Embed-Harness-UserData",
+    "pyCondition": "",
+    "pyDefaultValue": "",
+    "pyIsClientROWhen": "false",
+    "pyIsClientWhen": "false",
+    "pyIsVisibleWhenActive": "false",
+    "pyReadOnly": "",
+    "pyReadOnlyCondition": "",
+    "pyRefreshWhen": "",
+    "pyRequired": "",
+    "pyVisible": "ALWAYS"
+  },
+  "pyIndirectIncludes": [
+    {
+      "pxObjClass": "Embed-Alias",
+      "pxSubscript": "1",
+      "pyDescription": "",
+      "pyName": "",
+      "pyValue": ""
+    }
+  ],
+  "pyPagesAndClasses": [
+    {
+      "pxObjClass": "Embed-PagesAndClasses",
+      "pxSubscript": "1",
+      "pyPagesAndClassesClass": "",
+      "pyPagesAndClassesMode": "",
+      "pyPagesAndClassesPage": ""
+    }
+  ],
+  "pyParameters": [
+    {
+      "pxObjClass": "Embed-MethodParams",
+      "pxSubscript": "1",
+      "pyParametersParamDesc": "Should the page mode column be hidden?",
+      "pyParametersParamInOut": "",
+      "pyParametersParamIntelliBaseClass": "",
+      "pyParametersParamIntelliRule": "",
+      "pyParametersParamIntelliValidateAs": "",
+      "pyParametersParamName": "HidePageMode",
+      "pyParametersParamReq": "0",
+      "pyParametersParamSize": "",
+      "pyParametersParamType": "BOOLEAN"
+    }
+  ],
+  "pySections": [
+    {
+      "pxObjClass": "Embed-Harness-Section",
+      "pxSubscript": "1",
+      "pyAllowChangesToColumns": "",
+      "pyAssociatedPrivileges": "",
+      "pyContainerActiveWhen": "",
+      "pyContainerFormat": "NOHEADER",
+      "pyContainerOtherFormat": "",
+      "pyContainerStyle": "",
+      "pyContainerType": "NOHEADER",
+      "pyContainerTypeUpgrade": "NO_HEADER",
+      "pyContainerVisibleWhen": "",
+      "pyCustomHeader": "",
+      "pyCustomTabStyle": "",
+      "pyDeferLoadRetrievalActivity": "",
+      "pyEditOptions": "",
+      "pyExpandable": "true",
+      "pyExpanded": "true",
+      "pyExpandedWhen": "",
+      "pyHeaderType": "",
+      "pyImage": "",
+      "pyImageTitle": "",
+      "pyIncludeHeader": "",
+      "pyIncludeTitleIcon": "",
+      "pyIsBodyVisibilityOption": "",
+      "pyIsClientWhen": "false",
+      "pyIsVisibilityOption": "",
+      "pyLoadDeferred": "false",
+      "pyNewTabGroup": "false",
+      "pyPageContext": "",
+      "pyPrefix": "",
+      "pyPrefixOther": "",
+      "pyPrefixRowColRepeat": "",
+      "pyPreProcRunActivity": "",
+      "pyPreProcRunDataTrans": "",
+      "pyPromptClass": "",
+      "pyRefreshWhenActive": "false",
+      "pySectionId": "S1",
+      "pySpecifyPreLoadActivity": "",
+      "pyStretchTab": "false",
+      "pyTabAlignment": "",
+      "pyTabbedHeader": "false",
+      "pyTabPosition": "Top",
+      "pyTitle": "Title",
+      "pyUsingPage": "",
+      "pyDeferLoadRetrievalActivityParams": {
+        "pyTempPlaceHolder": "TempPlaceHolder"
+      },
+      "pyHeaderTable": {
+        "pxObjClass": "Embed-Display-Table",
+        "pyColumnCount": "1",
+        "pyHeight": "",
+        "pyID": "",
+        "pyLayoutFormat": "CUSTOM",
+        "pyLayoutFormatType": "FREEFORM",
+        "pyLayoutOtherFormat": "",
+        "pyRowCount": "1",
+        "pyUnit": "px",
+        "pyWidth": "100",
+        "pyRows": [
+          {
+            "pxObjClass": "Embed-Display-Table-Row",
+            "pyCells": [
+              {
+                "pxObjClass": "Embed-Display-Table-Cell",
+                "pyAutoHTML": "",
+                "pyBeforeMergeHeight": "",
+                "pyBeforeMergeWidth": "",
+                "pyCellHeader": "false",
+                "pyCellId": "",
+                "pyClientAction": "",
+                "pyClientEvent": "",
+                "pyColSpan": "",
+                "pyEditOptions": "Auto",
+                "pyFormat": "",
+                "pyHeight": "13",
+                "pyHeightUse": "true",
+                "pyInlineStyle": "",
+                "pyInputFormat": "false",
+                "pyLabelFieldValue": "",
+                "pyLabelFor": "",
+                "pyLabelFormat": "Standard",
+                "pyLabelFormatOther": "",
+                "pyPassCurrentParameterPage": "",
+                "pyPreActivity": "",
+                "pyReadOnly": "true",
+                "pyReadOnlyStyle": "",
+                "pyReadWriteStyle": "",
+                "pyRestricted": "false",
+                "pyRowSpan": "",
+                "pyTooltip": "",
+                "pyType": "LABEL",
+                "pyUseLabelDesc": "true",
+                "pyValue": "",
+                "pyWidth": "90",
+                "pyWidthUse": "true",
+                "pyWrap": "false",
+                "pyHTMLParams": {
+                  "pyTempPlaceHolder": "TempPlaceHolder"
+                },
+                "pyPreActivityParams": {
+                  "pyTempPlaceHolder": "TempPlaceHolder"
+                },
+                "pyPreDataTransform": {
+                  "pxObjClass": "Embed-Invoke-DataTransform"
+                },
+                "pyUserData": {
+                  "pxObjClass": "Embed-Harness-HeaderElements",
+                  "pyCondition": "",
+                  "pyDefaultValue": "",
+                  "pyIsClientROWhen": "false",
+                  "pyIsClientWhen": "false",
+                  "pyIsVisibleWhenActive": "false",
+                  "pyReadOnly": "",
+                  "pyReadOnlyCondition": "",
+                  "pyRefreshWhen": "",
+                  "pyRequired": "",
+                  "pyVisible": "ALWAYS"
+                },
+                "pzSectionParamPage": {
+                  "pxObjClass": "PegaGadget"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "pySectionBody": [
+        {
+          "pxObjClass": "Embed-Harness-SectionBody",
+          "pxSubscript": "1",
+          "pyAlignment": "",
+          "pyAllowRowUpdate": "true",
+          "pyAppendActivity": "",
+          "pyBodyType": "INCLUDE",
+          "pyColumnResizing": "false",
+          "pyDecPassCurrentParamPage": "false",
+          "pyDeleteActivity": "",
+          "pyDisplayWhen": "",
+          "pyDPName": "",
+          "pyDPResultsClass": "",
+          "pyDragDrop": "false",
+          "pyInclude": "RuleFormPagesAndClassesNoMode",
+          "pyIsClientWhen": "false",
+          "pyNumberOfColumns": "",
+          "pyPageListProperty": "",
+          "pyPageListPropertyClass": "",
+          "pyPassCurrentParameterPage": "false",
+          "pyPreActivity": "",
+          "pyPrivilegeUpdate": "",
+          "pyPrivilegeView": "",
+          "pyRDAppliesTo": "",
+          "pyRDName": "",
+          "pyRefreshWhen": "",
+          "pyRepeatDirection": "",
+          "pyRowResizing": "false",
+          "pySectionId": "",
+          "pySourceType": "Property",
+          "pySummary": "",
+          "pyUsingPage": "",
+          "pyDCPreDataTransform": {
+            "pxObjClass": "Embed-Invoke-DataTransform",
+            "pyName": ""
+          },
+          "pyDeclareParams": {},
+          "pyDPParams": {},
+          "pyPreactivityParams": {},
+          "pyPreDataTransform": {
+            "pxObjClass": "Embed-Invoke-DataTransform",
+            "pyName": ""
+          },
+          "pyRDParams": {},
+          "pySectionBodyElements": [
+            {
+              "pxObjClass": "Embed-Harness-HeaderElements",
+              "pxSubscript": "1",
+              "pyCaption": "Label",
+              "pyCondition": "",
+              "pyDefaultValue": "",
+              "pyField": "",
+              "pyOverridingStyle": "",
+              "pyReadOnly": "false",
+              "pyReadOnlyCondition": "",
+              "pyVisible": "ALWAYS"
+            }
+          ],
+          "pySectionParams": {
+            "pyTempPlaceHolder": "TempPlaceHolder"
+          },
+          "pyTable": {
+            "pxObjClass": "Embed-Display-Table",
+            "pyColumnCount": "2",
+            "pyHeight": "",
+            "pyID": "",
+            "pyLayoutFormat": "CUSTOM",
+            "pyLayoutFormatType": "FREEFORM",
+            "pyLayoutOtherFormat": "",
+            "pyRowCount": "2",
+            "pyUnit": "px",
+            "pyUnitHeight": "px",
+            "pyWidth": "",
+            "pyColumnDefaults": [
+              {
+                "pxObjClass": "Embed-Display-Table-Restricted",
+                "pyCellHeader": "false",
+                "pyCellId": "",
+                "pyHeaderStyle": "",
+                "pyInlineStyle": "",
+                "pyRestrictedType": "NONE"
+              },
+              {
+                "pxObjClass": "Embed-Display-Table-Restricted",
+                "pyCellHeader": "false",
+                "pyCellId": "",
+                "pyHeaderStyle": "",
+                "pyInlineStyle": "",
+                "pyRestrictedType": "NONE"
+              }
+            ],
+            "pyRows": [
+              {
+                "pxObjClass": "Embed-Display-Table-Row",
+                "pyCells": [
+                  {
+                    "pxObjClass": "Embed-Display-Table-Cell",
+                    "pyAutoHTML": "",
+                    "pyBeforeMergeHeight": "",
+                    "pyBeforeMergeWidth": "",
+                    "pyCellHeader": "false",
+                    "pyCellId": "",
+                    "pyClientAction": "",
+                    "pyClientEvent": "",
+                    "pyColSpan": "",
+                    "pyColumnCategorize": "false",
+                    "pyColumnFiltering": "true",
+                    "pyColumnFilteringDropDown": "true",
+                    "pyColumnSorting": "true",
+                    "pyEditOptions": "Auto",
+                    "pyFormat": "",
+                    "pyHeight": "22",
+                    "pyHeightUse": "true",
+                    "pyInlineStyle": "",
+                    "pyInputFormat": "false",
+                    "pyLabelFieldValue": "",
+                    "pyLabelFor": "",
+                    "pyLabelFormat": "Standard",
+                    "pyLabelFormatOther": "",
+                    "pyPassCurrentParameterPage": "",
+                    "pyPreActivity": "",
+                    "pyReadOnly": "",
+                    "pyReadOnlyStyle": "",
+                    "pyReadWriteStyle": "",
+                    "pyRequired": "",
+                    "pyRestricted": "false",
+                    "pyRowSpan": "",
+                    "pyShowFilterUIBy": "format",
+                    "pyTooltip": "",
+                    "pyType": "",
+                    "pyUseLabelDesc": "true",
+                    "pyValue": "",
+                    "pyWidth": "130",
+                    "pyWidthUse": "true",
+                    "pyWrap": "true",
+                    "pyHTMLParams": {
+                      "pyTempPlaceHolder": "TempPlaceHolder"
+                    },
+                    "pyPreActivityParams": {
+                      "pyTempPlaceHolder": "TempPlaceHolder"
+                    },
+                    "pyPreDataTransform": {
+                      "pxObjClass": "Embed-Invoke-DataTransform"
+                    },
+                    "pyUserData": {
+                      "pxObjClass": "Embed-Harness-HeaderElements",
+                      "pyCondition": "",
+                      "pyDefaultValue": "",
+                      "pyIsClientROWhen": "false",
+                      "pyIsClientWhen": "false",
+                      "pyIsVisibleWhenActive": "false",
+                      "pyReadOnly": "",
+                      "pyReadOnlyCondition": "",
+                      "pyRefreshWhen": "",
+                      "pyRequired": "",
+                      "pyVisible": ""
+                    },
+                    "pzSectionParamPage": {
+                      "pxObjClass": "PegaGadget"
+                    }
+                  },
+                  {
+                    "pxObjClass": "Embed-Display-Table-Cell",
+                    "pyAutoHTML": "",
+                    "pyBeforeMergeHeight": "",
+                    "pyBeforeMergeWidth": "",
+                    "pyCellHeader": "false",
+                    "pyCellId": "",
+                    "pyClientAction": "",
+                    "pyClientEvent": "",
+                    "pyColSpan": "",
+                    "pyColumnCategorize": "false",
+                    "pyColumnFiltering": "true",
+                    "pyColumnFilteringDropDown": "true",
+                    "pyColumnSorting": "true",
+                    "pyEditOptions": "Auto",
+                    "pyFormat": "",
+                    "pyHeight": "22",
+                    "pyHeightUse": "true",
+                    "pyInlineStyle": "",
+                    "pyInputFormat": "false",
+                    "pyLabelFieldValue": "",
+                    "pyLabelFor": "",
+                    "pyLabelFormat": "Standard",
+                    "pyLabelFormatOther": "",
+                    "pyPassCurrentParameterPage": "",
+                    "pyPreActivity": "",
+                    "pyReadOnly": "",
+                    "pyReadOnlyStyle": "",
+                    "pyReadWriteStyle": "",
+                    "pyRequired": "",
+                    "pyRestricted": "false",
+                    "pyRowSpan": "",
+                    "pyShowFilterUIBy": "format",
+                    "pyTooltip": "",
+                    "pyType": "",
+                    "pyUseLabelDesc": "true",
+                    "pyValue": "",
+                    "pyWidth": "130",
+                    "pyWidthUse": "true",
+                    "pyWrap": "true",
+                    "pyHTMLParams": {
+                      "pyTempPlaceHolder": "TempPlaceHolder"
+                    },
+                    "pyPreActivityParams": {
+                      "pyTempPlaceHolder": "TempPlaceHolder"
+                    },
+                    "pyPreDataTransform": {
+                      "pxObjClass": "Embed-Invoke-DataTransform"
+                    },
+                    "pyUserData": {
+                      "pxObjClass": "Embed-Harness-HeaderElements",
+                      "pyCondition": "",
+                      "pyDefaultValue": "",
+                      "pyIsClientROWhen": "false",
+                      "pyIsClientWhen": "false",
+                      "pyIsVisibleWhenActive": "false",
+                      "pyReadOnly": "",
+                      "pyReadOnlyCondition": "",
+                      "pyRefreshWhen": "",
+                      "pyRequired": "",
+                      "pyVisible": ""
+                    },
+                    "pzSectionParamPage": {
+                      "pxObjClass": "PegaGadget"
+                    }
+                  }
+                ],
+                "pyRowDefaults": {
+                  "pxObjClass": "Embed-Display-Table-Restricted",
+                  "pyCellHeader": "false",
+                  "pyCellId": "",
+                  "pyHeaderStyle": "",
+                  "pyInlineStyle": "",
+                  "pyRestrictedType": "NONE"
+                }
+              }
+            ]
+          },
+          "pzSectionParamPage": {
+            "pxObjClass": "PegaGadget"
+          }
+        }
+      ],
+      "pyStandardHeaderElements": [
+        {
+          "pxObjClass": "Embed-Harness-HeaderElements",
+          "pxSubscript": "1",
+          "pyCaption": "",
+          "pyCondition": "",
+          "pyField": "",
+          "pyOverridingStyle": "",
+          "pyReadOnly": "",
+          "pyReadOnlyCondition": "",
+          "pyVisible": "ALWAYS"
+        }
+      ]
+    }
+  ],
+  "pyThirdPartyParams": [
+    {
+      "pxObjClass": "Embed-MethodParams",
+      "pyParametersParamDesc": "",
+      "pyParametersParamName": "",
+      "pyParametersParamType": "scalar",
+      "pyThirdPartyParams": [
+        {
+          "pxObjClass": "Embed-MethodParams",
+          "pyParametersParamDesc": "",
+          "pyParametersParamName": ""
+        }
+      ]
+    }
+  ],
+  "pzSectionParamPageDefaults": {
+    "pxObjClass": "PegaGadget"
+  }
+}

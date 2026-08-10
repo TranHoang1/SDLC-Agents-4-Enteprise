@@ -11,14 +11,14 @@ description: Release versioning rules. Activate khi tạo release tag, bump vers
 
 | Module | File | Registry |
 |--------|------|----------|
-| Node.js Bridge | `mcp-client-bridge/package.json` → `"version"` | npm |
-| Python Bridge | `mcp-bridge-python/pyproject.toml` → `version` | PyPI |
-| Kotlin Server | `build.gradle.kts` → `version` | GitHub Release |
+| Extension | `extension/package.json` → `"version"` | VS Code Marketplace |
+| Backend | `backend/package.json` → `"version"` | npm |
+| Python Services | `backend/servers/fastapi/pyproject.toml` → `version` | PyPI |
 
 ### Quy trình release (DevOps + SM):
 
 1. **Bump versions** — tất cả modules phải có version mới (npm/PyPI reject duplicate)
-2. **Run tests locally** — `npm test` (bridge), `gradlew test` (server)
+2. **Run tests locally** — `npm test` (backend + extension) dùng Vitest
 3. **Commit version bumps** — `chore: bump versions to X.Y.Z for release`
 4. **Create tag** — `git tag vX.Y.Z -m "description"`
 5. **Push** — `git push origin master --tags`

@@ -1,0 +1,135 @@
+[BrowserInspector] Launching Chrome: C:\Program Files\Google\Chrome\Application\chrome.exe
+[BrowserInspector] Chrome launched.
+[BrowserInspector] Logging in: https://zdk8budo.pegaacademy.net/prweb/PRServlet
+[BrowserInspector] ✅ Logged into Pega Dev Studio.
+
+=== Extracting Pega open-rule JS APIs ===
+
+=== OpenRuleInPortal ===
+function OpenRuleInPortal(G,D,B,E){if(typeof G==="undefined"){return }if(typeof E==="undefined"){E=""}if(typeof D==="undefined"){D=""}if(typeof B==="undefined"){B=""}var A;var H={success:function(I){portalName=I.responseText;if(portalName==="pxPredictionStudio"||portalName==="No PortalName"||portalName==="pxPredictionStudio-Work"){if(portalName=="No PortalName"){alert("Add Prediction Studio portal to your access group")}else{if(E!="true"){if(G!==""&&D!==""){top.pega.desktop.wks.openRule(portalName,G,D,B,"true")}else{if(G!==""&&D==""&&B==""&&portalName=="pxPredictionStudio"){top.pega.desktop.wks.openRule(portalName,G,D,B,"true")}else{if(G!==""&&D==""&&B==""&&portalName=="pxPredictionStudio-Work"){top.pega.desktop.wks.openWorkByHandle("pxPredictionStudio",G,"true")}}}}else{top.pega.desktop.wks.openRule(portalName,G,D,B,"true","true")}}pega.control.actionSequencer.clearQueue()}},failure:function(I){var J=I.responseText}};var F=new SafeURL("@baseclass.pzGetPortalName");if((G!==""&&D!==""&&(E!="true"))||(G!==""&&E=="true")){F.put("RuleClassName",G);F.put("RuleName",D);F.put("AppliesToClass",B);var C=pega.u.d.asyncRequest("GET",F,H)}else{if(G!==""&&D==""){F.put("inskey",G);var C=pega.u.d.asyncRequest("GET",F,H)}}}
+
+=== OpenRuleInPortalByInsName ===
+function OpenRuleInPortalByInsName(F,E){var B=E.indexOf("!");var C="";var D="";if(B!=-1){var A=E.split("!");C=A[0];D=A[1]}else{D=E}OpenRuleInPortal(F,D,C)}
+
+=== openRuleByClassAndName ===
+function openRuleByClassAndName(b,e,c,d){return pega.desktop.openRuleByClassAndName(b,e,c,d)}
+
+=== pega.desktop (rule/open) ===
+Keys: showNewRuleForm, showOpenWorkByHandleBusyIndicator, hideOpenWorkByHandleBusyIndicator, openRule, openWizard, openAssignment, openWorkByURL, openWorkByHandleReload, openWorkByHandle, openUrlInSpace, openUrlInDashboard, openUrlInDialog, compositeOpenSpace, compositeOpenUrlInSpace, openTagDeck, openPulseSearchResults, openLandingPage, openUrlInWindow, openRuleByClassAndName, openRuleByKeys, openWorkItem
+
+--- pega.desktop.showNewRuleForm ---
+function(a){if(!openSpace("Rules",a,"rulebyurl")){var b=new SafeURL("WBOpenLaunch");b.put("newRuleURL",a);b.put("SourceType","rulecreatewithurl");pega.desktop.openUrlInWindow(b,"",RuleFormSize+PopupWindowFeatures)}}
+
+--- pega.desktop.showOpenWorkByHandleBusyIndicator ---
+function(){pega.u&&pega.u.d&&pega.u.d.setBusyIndicator&&pega.u.d.setBusyIndicator(document.body,!0)}
+
+--- pega.desktop.hideOpenWorkByHandleBusyIndicator ---
+function(){pega.u&&pega.u.d&&pega.u.d.gBusyInd&&pega.u.d.gBusyInd.hide()}
+
+--- pega.desktop.openRule ---
+function(a,b,c,f,h,e){if(""!=a){var d=new SafeURL;a=pega.tools.SUtils.trim(a);-1<a.indexOf("+")&&(a=a.replace(/[+]/g," "));d.put("Handle",a);2<=arguments.length&&b&&d.put("OpenSpecificVersion",b+"");f&&""!=f&&d.put("contentID",f);h&&""!=h&&d.put("dynamicContainerID",h);null!=e&&d.put("SkipConflictCheck",e);var k=window.dialogArguments&&window.dialogArguments.opener,g=pega.desktop.support.getDesktopWindow();if(g&&g.pega&&g.pega.ui&&g.pega.ui.NavigateTopHandler||k||!pega.desktop.support.openSpace("Rules",
+d,"rulespecific"))0<a.length?(d=a.replace(/\W/g,"_"),k=new SafeURL("WBOpenLaunch"),k.put("I
+
+--- pega.desktop.openWizard ---
+function(a,b,c){(null!=c&&""!=c?pega.desktop.support.openWizard(a,b,c):pega.desktop.support.openWizard(a,b))||(c=new SafeURL("RedirectAndRun"),c.put("ThreadName",a),c.put("Location",b),c.put("PagesToCopy","pyPortal"),c.put("bEncodeLocation","true"),a=new DesktopNavigationEvent("Rules",c,""),a=pega.desktop.support.constructUrl(a.sourceString,"openwizard"),pega.desktop.openUrlInWindow(a,"pyWorkPage",WorkFormSize+PopupWindowFeatures))}
+
+--- pega.desktop.openAssignment ---
+function(a,b,c,f,h,e,d){var k=a,g=null;pega&&pega.ui&&pega.ui.statetracking&&pega.ui.statetracking.setPALInteraction("abc?\x26action\x3dopenAssignment\x26key\x3d"+a);pega&&pega.u&&pega.u.autoSave&&pega.u.autoSave.isAutoSaveFeatureEnabled()&&pega.u.autoSave.resetBannerState();"object"==typeof k&&"safeURL"==k.name&&(g=SafeURL_clone(k),a=g.get("key"),b=g.get("contentID"),c=g.get("dynamicContainerID"));g||(g=new SafeURL);null!=c&&""!=c&&g.put("dynamicContainerID",c);null!=
+b&&""!=b&&g.put("contentID",b);null!=h&&g.put("SkipConflictCheck",h);e&&g.put("offlineEnabled",e);pega.mobile&&pega.mobile.isM
+
+--- pega.desktop.openWorkByURL ---
+function(a,b){if("object"!=typeof a&&"safeURL"!=a.name){var c=SafeURL_createFromURL(a);a=c}openSpace("Work",a,"formbyurl")||(a=c.toQueryString(),a=pega.desktop.support.constructUrl(a,"formbyurl"),pega.desktop.openUrlInWindow(a,"pyWorkPage",WorkFormSize+PopupWindowFeatures,null,b))}
+
+--- pega.desktop.openWorkByHandleReload ---
+function(a,b,c,f,h){var e=a,d=null;"object"==typeof e&&"safeURL"==e.name&&(d=SafeURL_clone(e),a=d.get("key"),c=d.get("contentID"),f=d.get("dynamicContainerID"));d||(d=new SafeURL);c&&""!=c&&d.put("contentID",c);f&&""!=f&&d.put("dynamicContainerID",f);"true"==h&&d.put("SkipConflictCheck",h);d.put("reload","true");pega.desktop.support.handleMultipleAG(a,!1,b)&&pega.desktop.support.postOpenWorkByHandle(a,b,d)}
+
+--- pega.desktop.openWorkByHandle ---
+function(a,b,c,f,h,e,d){try{if(pega.coexistenceBroadcastChannel&&parent&&parent.uniqueId&&"undefined"!=typeof isCoexistenceEnabledForConstellation&&isCoexistenceEnabledForConstellation&&(pega.ctx.strKey!==a&&pega.isConstellationCaseType(a)||pega.ctx.openCaseFromC11nCoexistence)){var k=null,g=function(p){var q=p.caseClassName;p=p.pyID;k&&clearTimeout(k);k=setTimeout(function(){k=null;pega.desktop.hideOpenWorkByHandleBusyIndicator()},5E3);try{pega.coexistenceBroadcastChannel.postMessage({action:"openWorkByHandle",
+uniqueId:parent.uniqueId,key:p,caseClassName:q})}catch(r){}},n=function(){k&&clear
+
+--- pega.desktop.openUrlInSpace ---
+function(a,b,c){pega.desktop.support.openUrlInSpace(a,b,c)}
+
+--- pega.desktop.openUrlInDashboard ---
+function(a){a="object"==typeof a&&"safeURL"==a.name?a.toQueryString():SafeURL_createFromURL(a).toQueryString();pega.desktop.support.openUrlInSpace(a,"Dashboard")}
+
+--- pega.desktop.openUrlInDialog ---
+function(a,b,c,f,h){return pega.desktop.support.openUrlInDialog(a,b,c,f,h)}
+
+--- pega.desktop.compositeOpenSpace ---
+function(c,a,d){c=d.toLowerCase();switch(c){case "rulebyurl":case "spacehomewithurl":case "listbybasket":case "listbyurl":case "listbyuser":return!1}if(""==d&&""!=pega.desktop.nextSpace&&pega.desktop.nextSpace==pega.desktop.getCurrentSpaceName())return!0;if(""!=pega.desktop.nextSpace&&pega.desktop.nextSpace!=pega.desktop.getCurrentSpaceName())return pega.desktop.doDesktopAction(pega.desktop.nextSpace,a,d),pega.desktop.nextSpace="",!0;var e=pega.desktop.support.getDesktopApplication().gadgetPool.findAvailableGadget(pega.desktop.nextGadget);
+if(!e)return pega.desktop.support.isSpaceAvailable("wo
+
+--- pega.desktop.compositeOpenUrlInSpace ---
+function(c,a){a!=pega.desktop.getCurrentSpaceName()&&pega.desktop.doDesktopAction(a,c.toURL(),"openURL");var d=pega.desktop.support.getDesktopApplication().gadgetPool.findAvailableGadget(pega.desktop.nextGadget);d?d.openURL(c.toURL()):pega.desktop.doDesktopAction(a,c.toURL(),"openURL")}
+
+--- pega.desktop.openTagDeck ---
+function(c,d,b){var e=pega.desktop.support.getDesktopApplication(),g=null;e&&(e=e.gadgetPool)&&(g=e.findAvailableGadget());if(g&&g.gadgetAvailable){if("object"==typeof c&&"safeURL"==c.name)var a=SafeURL_clone(c);a||(a=new SafeURL,""==b&&(b="Tag Deck"),a.put("name",b),a.put("ClassName","Data-Social-Tag"),a.put("HarnessName","pyTagDeck"),a.put("Page",""),a.put("Model",""),a.put("ReadOnly",""),a.put("preActivityName","pzGetTagDeck"),a.put("preActivityParams","tagName:"+d),a.put("SkipConflictCheck",
+!0));pega.desktop.support.openSpace("Work",a,"display")}else{if(pega.desktop.support.getDesktopWind
+
+--- pega.desktop.openPulseSearchResults ---
+function(b,c,g,h){var d=pega.desktop.support.getDesktopApplication(),f=null;d&&(d=d.gadgetPool)&&(f=d.findAvailableGadget());if(f&&f.gadgetAvailable){if("object"==typeof b&&"safeURL"==b.name)var a=SafeURL_clone(b);a||(a=new SafeURL,a.put("name","Social Search"),a.put("ClassName","PegaSocial-Message"),a.put("HarnessName","pyPulseSearchResults"),a.put("Page",""),a.put("Model",""),a.put("ReadOnly",""),a.put("preActivityName","pzGetPulseStream"),a.put("preActivityParams",
+"searchPageName:"+c+",searchText:"+h+",threadName:"+g),a.put("SkipConflictCheck",!0));pega.desktop.support.openSpace("Work",a,"
+
+--- pega.desktop.openLandingPage ---
+function(c,b,a,d){pega.desktop.support.openLandingPage(c,b,a,d)}
+
+--- pega.desktop.openUrlInWindow ---
+function(a,b,c,d,e){return pega.desktop.support.openUrlInWindow(a,b,c,d,e)}
+
+--- pega.desktop.openRuleByClassAndName ---
+function(b,e,c,d){var f=new SafeURL;b=pega.tools.SUtils.trim(b);e=pega.tools.SUtils.trim(e);f.put("objClass",e);f.put("insName",b);c&&""!=c&&f.put("contentID",c);d&&""!=d&&f.put("dynamicContainerID",d);if(pega&&pega.ui&&pega.ui.NavigateTopHandler||!pega.desktop.support.openSpace("Rules",f,"rulebyclassandname"))if(0<b.length&&0<e.length){f=b.replace(/\W/g,"_");var a=new SafeURL("WBOpenLaunch");a.put("InsName",b);a.put("Action","Open");a.put("ObjClass",e);c&&""!=
+c&&a.put("contentID",c);d&&""!=d&&a.put("dynamicContainerID",d);a.put("target","popup");"undefined"!=typeof isCoexistenceEnabledForCon
+
+--- pega.desktop.openRuleByKeys ---
+function(C,D,F,B){var A=null;var E;if(typeof D=="object"&&D.name=="safeURL"){D.put("pxObjClass",C);if(F&&F!=""){D.put("contentID",F)}if(B&&B!=""){D.put("dynamicContainerID",B)}var E;if(pega&&pega.ui&&pega.ui.NavigateTopHandler){E=false}else{E=pega.desktop.support.openSpace("Rules",D,"rulebykeys")}}else{var G=SafeURL_createFromURL(D);G.put("pxObjClass",C);if(F&&F!=""){G.put("contentID",F)}if(B&&B!=""){G.put("dynamicContainerID",B)}var E;if(pega&&pega.ui&&pega.ui.NavigateTopHandler){E=false}else{E=pega.desktop.support.openSpace("Rules",G,"rulebykeys")}}if(!E){if(typeof D=="object"&&D.name=="safe
+
+--- pega.desktop.openWorkItem ---
+function(a,c,d,e,g){var h=a;if("object"==typeof h&&"safeURL"==h.name){var b=SafeURL_clone(h);a=b.get("ID");c=b.get("workpool")}var f;if(0==c||1==c)f=c+"";b||(b=new SafeURL);a&&""!=a&&b.put("param",a);f&&""!=f&&b.put("version",f);d&&""!=d&&b.put("contentID",d);e&&""!=e&&b.put("dynamicContainerID",e);c&&1!=c&&0!=c&&b.put("workpool",c);pega.desktop.augmentConfigParams(g,b);openSpace("Work",b,"openbyworkItem")||(a=b.toQueryString(),a=pega.desktop.support.constructUrl(a,"openbyworkItem"),
+pega.desktop.openUrlInWindow(a,"pyWorkPage",WorkFormSize+PopupWindowFeatures))}
+
+=== Global openRule* ===
+
+--- openRule ---
+function openRule(a,b,c,d,e){return pega.desktop.openRule(a,b,c,d,e)}
+
+--- openRuleRecord ---
+function openRuleRecord(B,A){openRule(B)}
+
+--- deferredOpenRule ---
+function deferredOpenRule(D,A,E,C,B){return pega.desktop.support.deferredOpenRule(D,A,E,C,B)}
+
+--- openRuleByURL ---
+function openRuleByURL(A){return pega.desktop.support.openRuleByURL(A)}
+
+--- openRuleWithURL ---
+function openRuleWithURL(A,B){return pega.desktop.support.openRuleWithURL(A,B)}
+
+--- openRuleInWindow ---
+function openRuleInWindow(D,C,B,A){return pega.desktop.support.openRuleInWindow(D,C,B,A)}
+
+--- openRuleByClassAndName ---
+function openRuleByClassAndName(b,e,c,d){return pega.desktop.openRuleByClassAndName(b,e,c,d)}
+
+--- openRuleByKeys ---
+function openRuleByKeys(B,C,D,A){return pega.desktop.openRuleByKeys(B,C,D,A)}
+
+--- openRuleByKeysforAgentNode ---
+function openRuleByKeysforAgentNode(C,A,B,D){var E={};E.pyRuleSet=B;E.pyNodeName=D;pega.desktop.wks.openRule(C,A,E)}
+
+--- openRuleByKeysforAgentNotification ---
+function openRuleByKeysforAgentNotification(D,A,B,C,E){var F={};F.pyAccountName=B;F.pyAccountType=C;pega.desktop.wks.openRule(D,A,F,E)}
+
+--- OpenRuleInDeveloper ---
+function OpenRuleInDeveloper(E,D,B){var A={success:function(H){this.strRuleXml=null;if(this.strRuleXml==null){this.strRuleXml=pega.tools.XMLDocument.get()}var I=H.responseText;this.strRuleXml.loadXML(I);var J=this.strRuleXml.selectSingleNode("//pyIsPredictionStudioAvailable").text;var G=this.strRuleXml.selectSingleNode("//pyIsDeveloper").text;if(pega.desktop.portalName==="pxPredictionStudio"&&E!=""&&D!=""){if(G!="true"){if(E==="Rule-Decision-DecisionParameters"){alert("Contact system administrator to get access to open the lexicon text model");pega.control.actionSequencer.clearQueue()}else{ale
+
+--- OpenRuleInPortalByInsName ---
+function OpenRuleInPortalByInsName(F,E){var B=E.indexOf("!");var C="";var D="";if(B!=-1){var A=E.split("!");C=A[0];D=A[1]}else{D=E}OpenRuleInPortal(F,D,C)}
+
+--- OpenRuleInPortal ---
+function OpenRuleInPortal(G,D,B,E){if(typeof G==="undefined"){return }if(typeof E==="undefined"){E=""}if(typeof D==="undefined"){D=""}if(typeof B==="undefined"){B=""}var A;var H={success:function(I){portalName=I.responseText;if(portalName==="pxPredictionStudio"||portalName==="No PortalName"||portalName==="pxPredictionStudio-Work"){if(portalName=="No PortalName"){alert("Add Prediction Studio portal to your access group")}else{if(E!="true"){if(G!==""&&D!==""){top.pega.desktop.wks.openRule(portalName,G,D,B,"true")}else{if(G!==""&&D==""&&B==""&&portalName=="pxPredictionStudio"){top.pega.desktop.wk
+
+=== SafeURL: function ===
+=== pega.u.d.submit: function ===
+
+⏸️  Press Ctrl+C to close...

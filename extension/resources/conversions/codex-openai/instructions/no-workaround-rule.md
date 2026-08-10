@@ -28,28 +28,30 @@ When detecting design issues:
 
 ## ⛔ Forbidden
 
-```kotlin
+```typescript
 // ❌ WORKAROUND — fallback when UserService not found
-val user = userService.getUserByEmail(email)
-if (user == null) { val roles = extractRolesFromJwt(headers) } // hidden bug
+const user = userService.getUserByEmail(email);
+if (!user) { const roles = extractRolesFromJwt(headers); } // hidden bug
 
 // ❌ WORKAROUND — query 2 tables
-val result = tableA.find(id) ?: tableB.find(id) // design flaw
+const result = (await tableA.findById(id)) ?? (await tableB.findById(id)); // design flaw
 ```
 
 ## ✅ Correct
 
-```kotlin
+```typescript
 // Single UserRepository for both auth and user management
-class AdminAuthMiddleware(
-    private val userRepository: UserRepository
-) {
-    suspend fun validateAdmin(headers: Map<String, String>): String {
-        val email = extractEmail(headers)
-        val user = userRepository.findByEmail(email)
-            ?: throw PermissionDeniedException("User not found")
-        return email
-    }
+class AdminAuthMiddleware {
+  constructor(
+    private readonly userRepository: UserRepository,
+  ) {}
+
+  async validateAdmin(headers: Map<string, string>): Promise<string> {
+    const email = extractEmail(headers);
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) throw new PermissionDeniedException("User not found");
+    return email;
+  }
 }
 ```
 

@@ -38,7 +38,7 @@ function createController(overrides?: Partial<{ onSelect: (t: string, s: string)
 }
 
 // Arbitraries
-const validOptionText = fc.string({ base: fc.constantFrom(...'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.split('')), minLength: 1, maxLength: 60 });
+const validOptionText = fc.stringMatching(/^[A-Za-z0-9]{1,60}$/);
 const validOptionsArray = fc.array(validOptionText, {
   minLength: 2,
   maxLength: OPTIONS_CONFIG.MAX_OPTIONS,

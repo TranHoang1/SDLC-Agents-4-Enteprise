@@ -34,7 +34,7 @@
 ## 2. Workaround: External File Watcher
 
 ```bash
-npx chokidar '**/*.kt' '**/*.ts' '**/*.drawio' -c 'npx ts-node .analysis/code-intelligence/scripts/src/incremental-indexer.ts --files {path}'
+npx chokidar '**/*.ts' '**/*.drawio' -c 'npx ts-node .analysis/code-intelligence/scripts/src/incremental-indexer.ts --files {path}'
 ```
 
 ## 3. askAgent → command Limitation

@@ -43,7 +43,7 @@ class StubPegaClient {
   }
 
   async resolveDeterministicPegaHierarchy() {
-    return { seeds: [], operatorId: "SSA", accessGroup: "HRApps:Administrators", appName: "HRAppsV2", ruleSets: this.hierarchy.ruleSets };
+    return { seeds: [], operatorId: "SSA", accessGroup: "HRApps:Administrators", appName: "HRAppsV2", appVersion: "01.01", ruleSets: this.hierarchy.ruleSets, dependedApps: [] };
   }
 }
 
@@ -188,3 +188,4 @@ describe("PegaRuleSetResolverService", () => {
     });
   });
 });
+

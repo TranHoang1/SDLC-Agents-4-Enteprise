@@ -1,0 +1,133 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-94 — Component Diagram: Module Dependencies &amp; Change Impact" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=13;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="180" y="10" width="700" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext_layer" value="Extension Layer (extension/src/services/)" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="30" y="50" width="700" height="430" as="geometry"/>
+    </mxCell>
+    <mxCell id="idx_svc" value="IndexingService&#xa;.indexPegaProject()&#xa;(REDESIGNED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="ext_layer">
+      <mxGeometry x="250" y="40" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="hier_resolver" value="PegaHierarchy&#xa;Resolver&#xa;(UNCHANGED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ext_layer">
+      <mxGeometry x="20" y="40" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="http_client" value="PegaHttpClient&#xa;(+listRulesByRuleSet)&#xa;(EXTENDED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="ext_layer">
+      <mxGeometry x="520" y="40" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="crawl_helper" value="PegaCrawlHelper&#xa;(+enumerateRuleSet&#xa;+enumerateAllRuleSets)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="ext_layer">
+      <mxGeometry x="20" y="160" width="180" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="fetch_parallel" value="fetchRulesIn&#xa;Parallel()&#xa;(REUSED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ext_layer">
+      <mxGeometry x="250" y="160" width="130" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="fetch_types" value="fetchRuleTypes&#xa;InParallel()&#xa;(REUSED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ext_layer">
+      <mxGeometry x="430" y="160" width="130" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="calibrate" value="calibrateFetch&#xa;Concurrency()&#xa;(REUSED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ext_layer">
+      <mxGeometry x="590" y="160" width="100" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="stream_ing" value="PegaStream&#xa;Ingester&#xa;(SIMPLIFIED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;" vertex="1" parent="ext_layer">
+      <mxGeometry x="250" y="290" width="130" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="save_rule" value="saveRuleFile()&#xa;(REUSED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ext_layer">
+      <mxGeometry x="430" y="300" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="models_new" value="models/&#xa;RuleSetRuleSummary&#xa;(NEW interface)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="ext_layer">
+      <mxGeometry x="20" y="300" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="rm_crawlplan" value="&#x274C; crawlPlan() call&#xa;(REMOVED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=4;" vertex="1" parent="ext_layer">
+      <mxGeometry x="20" y="380" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="rm_nextbatch" value="&#x274C; nextBatch loop&#xa;(REMOVED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=4;" vertex="1" parent="ext_layer">
+      <mxGeometry x="200" y="380" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="ext_layer" source="idx_svc" target="hier_resolver">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="ext_layer" source="idx_svc" target="http_client">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="ext_layer" source="idx_svc" target="crawl_helper">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="ext_layer" source="idx_svc" target="fetch_parallel">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="ext_layer" source="idx_svc" target="fetch_types">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="ext_layer" source="crawl_helper" target="http_client">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="110" y="130"/>
+          <mxPoint x="600" y="130"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="ext_layer" source="idx_svc" target="stream_ing">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="340" y="120"/>
+          <mxPoint x="315" y="120"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="backend_layer" value="Backend Layer (backend/src/)" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="30" y="510" width="700" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="pega_stream" value="pega-stream.ts&#xa;NDJSON ingest route&#xa;(SIMPLIFIED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="backend_layer">
+      <mxGeometry x="20" y="40" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="pega_api" value="pega-api.ts&#xa;crawl-plan route&#xa;(SIMPLIFIED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="backend_layer">
+      <mxGeometry x="210" y="40" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="pega_crawler" value="PegaCrawler&#xa;plan() &#x2714;&#xa;parseInsKey() &#x2714;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="backend_layer">
+      <mxGeometry x="400" y="40" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="rm_compute" value="&#x274C; computeNextBatch()&#xa;&#x274C; extractRuleReferences()&#xa;(REMOVED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;fontStyle=4;" vertex="1" parent="backend_layer">
+      <mxGeometry x="400" y="120" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="kb_store" value="KB Storage&#xa;+ Graph DB&#xa;(UNCHANGED)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;size=10;" vertex="1" parent="backend_layer">
+      <mxGeometry x="20" y="120" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_stream_kb" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="backend_layer" source="pega_stream" target="kb_store">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_api_crawler" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="backend_layer" source="pega_api" target="pega_crawler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="pega_ext" value="Pega Platform&#xa;REST API" style="shape=cloud;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="820" y="200" width="170" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_client_pega" value="HTTP&#xa;(Basic Auth)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="730" y="120" as="sourcePoint"/>
+        <mxPoint x="820" y="240" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="legend2" value="Legend" style="swimlane;startSize=20;fillColor=none;strokeColor=#999999;html=1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="820" y="350" width="200" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="l_new" value="NEW" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" vertex="1" parent="legend2">
+      <mxGeometry x="10" y="25" width="50" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="l_unch" value="UNCHANGED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=8;" vertex="1" parent="legend2">
+      <mxGeometry x="10" y="48" width="80" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="l_simp" value="SIMPLIFIED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="legend2">
+      <mxGeometry x="10" y="71" width="80" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="l_rem" value="REMOVED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=8;" vertex="1" parent="legend2">
+      <mxGeometry x="10" y="94" width="70" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="l_ext" value="EXTERNAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=8;" vertex="1" parent="legend2">
+      <mxGeometry x="110" y="25" width="70" height="18" as="geometry"/>
+    </mxCell>
+    <mxCell id="l_primary" value="PRIMARY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;" vertex="1" parent="legend2">
+      <mxGeometry x="110" y="48" width="70" height="18" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
