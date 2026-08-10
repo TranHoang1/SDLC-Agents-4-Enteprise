@@ -143,8 +143,8 @@ export class IndexingEngine {
   }
 
   /** SA4E-78: Emit progress event via EventEmitter (Observer pattern). */
-  private emitProgress(projectId: string, phase: ProgressPhase, current: number, total: number): void {
-    this.progressEmitter.emit('progress', { projectId, phase, current, total });
+  private emitProgress(projectId: string, phase: ProgressPhase, current: number, total: number, currentFile?: string): void {
+    this.progressEmitter.emit('progress', { projectId, phase, current, total, currentFile });
   }
 
   /** SA4E-99: Public method for external callers (e.g., api-index route after batch upload). */
@@ -258,7 +258,8 @@ export class IndexingEngine {
           ]);
         }
       });
-      this.emitProgress(projectId, 'indexing', Math.min(i + BATCH, files.length), files.length);
+      const lastFile = batch[batch.length - 1]?.relativePath || '';
+      this.emitProgress(projectId, 'indexing', Math.min(i + BATCH, files.length), files.length, lastFile);
       await new Promise<void>(resolve => setImmediate(resolve));
     }
     return { filesToIndex, skippedCount };

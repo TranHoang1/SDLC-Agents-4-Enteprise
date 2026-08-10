@@ -73,16 +73,22 @@ export class IndexerHttpClient {
                     req.end();
                 });
                 const { ok, body } = resp;
-                if (!ok) { statusBar.text = "$(sync~spin) Indexing..."; continue; }
+                if (!ok) { statusBar.text = "$(sync~spin) Indexing..."; statusBar.tooltip = "Code Intelligence: Indexing workspace..."; continue; }
                 try {
                     const progress = JSON.parse(body);
                     if (progress.phase === 'idle') {
                         statusBar.text = "$(check) Index complete";
+                        statusBar.tooltip = "Code Intelligence: Indexing finished successfully";
                         setTimeout(() => statusBar.dispose(), 5000);
                         return;
                     }
-                    statusBar.text = `$(sync~spin) ${progress.phase}: ${progress.percentage}% (${progress.current}/${progress.total})`;
-                } catch { statusBar.text = "$(sync~spin) Indexing..."; }
+                    const elapsed = Math.round((progress.elapsedMs || 0) / 1000);
+                    statusBar.text = `$(sync~spin) Indexing: ${progress.percentage}%`;
+                    statusBar.tooltip = `Code Intelligence — ${progress.phase}\n`
+                        + `Progress: ${progress.current}/${progress.total} files (${progress.percentage}%)\n`
+                        + `Elapsed: ${elapsed}s\n`
+                        + (progress.currentFile ? `Current: ${progress.currentFile}` : '');
+                } catch { statusBar.text = "$(sync~spin) Indexing..."; statusBar.tooltip = "Code Intelligence: Processing..."; }
             }
             statusBar.text = "$(warning) Index timeout";
             setTimeout(() => statusBar.dispose(), 5000);

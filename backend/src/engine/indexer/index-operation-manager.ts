@@ -17,6 +17,7 @@ export interface IndexOperation {
   phase: ProgressPhase;
   current: number;
   total: number;
+  currentFile?: string;
   startedAt: Date;
   abortController: AbortController;
   error?: string;
@@ -67,6 +68,13 @@ export class IndexOperationManager {
         setTimeout(() => this.operations.delete(projectId), CLEANUP_DELAY_MS);
       });
 
+    // SA4E-99: Subscribe to engine progress events to update operation state
+    this.engine.on('progress', (evt: any) => {
+      if (evt.projectId === projectId && this.operations.has(projectId)) {
+        this.updateProgress(projectId, evt.phase, evt.current, evt.total, evt.currentFile);
+      }
+    });
+
     return op;
   }
 
@@ -106,6 +114,7 @@ export class IndexOperationManager {
       current: op.current,
       total: op.total,
       percentage: pct,
+      currentFile: op.currentFile,
       startedAt: op.startedAt.toISOString(),
       elapsedMs: elapsed,
     };
@@ -125,13 +134,14 @@ export class IndexOperationManager {
    */
   updateProgress(
     projectId: string, phase: ProgressPhase,
-    current: number, total: number,
+    current: number, total: number, currentFile?: string,
   ): void {
     const op = this.operations.get(projectId);
     if (op) {
       op.phase = phase;
       op.current = current;
       op.total = total;
+      if (currentFile) { op.currentFile = currentFile; }
     }
   }
 }
