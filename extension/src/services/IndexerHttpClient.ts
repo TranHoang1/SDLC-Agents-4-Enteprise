@@ -54,35 +54,60 @@ export class IndexerHttpClient {
         report: vscode.Progress<{ message?: string }>,
         token?: string
     ): Promise<IngestResult> {
-        // SA4E-30: Use REST API endpoint instead of /mcp/tools/call
-        const url = `${this.backendUrl}/api/v1/memory/ingest-file`;
+        // SA4E-99: Unified approach — write docs to Temp (same as source), then batch ingest
         let ingested = 0;
         let errors = 0;
-
         const unconvertible: UnconvertibleEntry[] = [];
         const channel = vscode.window.createOutputChannel("Kiro Doc Indexer");
-        for (let i = 0; i < docs.length; i++) {
-            const d = docs[i];
-            if (i % 10 === 0) { report.report({ message: `Ingesting ${i + 1}/${docs.length} files...` }); }
+        const batchSize = 20;
 
-            let fileContent = d.content;
-            if (!fileContent) { fileContent = await this.readFileContent(d.path); }
-            if (!fileContent) { errors++; channel.appendLine(`⚠️ ${d.path}: no content (unreadable)`); continue; }
-            await this.uploadDocumentFile(d.path, fileContent, token);
+        for (let i = 0; i < docs.length; i += batchSize) {
+            const batch = docs.slice(i, i + batchSize);
+            report.report({ message: `Ingesting documents ${i + 1}/${docs.length}...` });
+            if (i > 0) { await new Promise(r => setTimeout(r, 200)); }
 
-            const payload = { file_path: d.path, type: d.type, format: "markdown", ...(fileContent ? { content: fileContent } : {}) };
-            const { ok, body } = await this.httpPostJson(url, payload, token);
-            if (!ok) { errors++; channel.appendLine(`⚠️ ${d.path}: ingest failed (${body?.slice(0, 100) || 'no response'})`); continue; }
+            const entries: FileEntry[] = [];
+            for (const d of batch) {
+                let fileContent = d.content;
+                if (!fileContent) { fileContent = await this.readFileContent(d.path); }
+                if (!fileContent) { errors++; channel.appendLine(`⚠️ ${d.path}: no content`); continue; }
+                entries.push({ path: d.path, content: fileContent });
+            }
 
-            const result = parseIngestResponse(body, d.path);
-            if (result.entry) { unconvertible.push(result.entry); } else { ingested++; }
+            if (entries.length === 0) continue;
+
+            // Write to Temp via /api/index/documents (batch write to disk)
+            const writeResult = await this.sendBatchWithRetry(
+                `${this.backendUrl}/api/index/documents`,
+                { files: entries }, token, 3,
+            );
+            if (writeResult.ok) {
+                ingested += entries.length;
+            } else {
+                errors += entries.length;
+                channel.appendLine(`⚠️ Doc batch ${Math.floor(i / batchSize) + 1}: ${writeResult.error}`);
+            }
         }
+
         if (errors > 0) { channel.show(true); }
+
+        // Trigger KB ingest from Temp files (single call)
+        if (ingested > 0) {
+            report.report({ message: "Running document KB ingest..." });
+            await this.triggerDocumentIngest(token);
+        }
 
         const parts = [`✅ Indexed: ${ingested} files`];
         if (errors > 0) { parts.push(`⚠️ Failed: ${errors}`); }
         if (unconvertible.length > 0) { parts.push(`⏭️ Un-convertible: ${unconvertible.length}`); }
         return { ingested, errors, summary: parts.join(", "), unconvertible };
+    }
+
+    /** SA4E-99: Trigger backend to ingest documents from Temp folder into KB. */
+    private async triggerDocumentIngest(token?: string): Promise<void> {
+        try {
+            await this.httpPostWithDetail(`${this.backendUrl}/api/index/full`, { documentsOnly: true }, token);
+        } catch { /* non-fatal */ }
     }
 
     async uploadSourceFiles(
