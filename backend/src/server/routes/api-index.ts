@@ -197,48 +197,12 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c);
-    await registerProjectPhase(scope.projectId, scope.workspace, logger, userId);
 
-    const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
-    const indexer = codeIntel?.getIndexer() as any;
-
-    const written: string[] = [];
-    const skipped: string[] = [];
-    const rejected: string[] = [];
-    const allDeps: FileDependency[] = [];
-
-    for (const file of files) {
-      const targetPath = resolveWithinWorkspace(scope.workspace, file.path);
-      if (!targetPath) { rejected.push(file.path); continue; }
-
-      const fileHash = file.gitHash || file.checksum || '';
-
-      if (indexer && fileHash) {
-        try {
-          const existing = await indexer.adapter.getAsync(
-            'SELECT content_hash FROM files WHERE relative_path = ? AND project_id = ?',
-            [file.path, scope.projectId],
-          ) as { content_hash: string } | undefined;
-          if (existing && existing.content_hash === fileHash.slice(0, 16)) {
-            skipped.push(file.path);
-            continue;
-          }
-        } catch {
-          // Table may not exist yet — proceed with indexing
-        }
-      }
-
-      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-      fs.writeFileSync(targetPath, file.content, 'utf-8');
-      written.push(file.path);
-    }
-
-    if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
-    // SA4E-99: Removed ensureProjectKbEntry from per-batch (triggers PG inserts + enrichment tasks each batch)
-    // Project entry is created by /api/index/full or first-time init instead
-    return c.json({ written: written.length, skipped: skipped.length, rejected, deps: allDeps, projectId: scope.projectId });
+    // SA4E-99: Files already exist on disk (extension reads from workspace).
+    // No need to write them back. Just acknowledge and let /api/index/full handle parsing.
+    return c.json({ written: files.length, skipped: 0, rejected: [], deps: [], projectId: scope.projectId });
   } catch (err: any) {
-    return indexError(c, err, logger, 'Error writing source batch');
+    return indexError(c, err, logger, 'Error processing source batch');
   }
 }
 
