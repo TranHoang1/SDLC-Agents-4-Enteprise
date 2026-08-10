@@ -77,11 +77,12 @@ export class IndexerHttpClient {
     }
 
     async uploadSourceFiles(
-        report: vscode.Progress<{ message?: string }>,
-        token?: string
+        report: vscode.Progress<{ message?: string; increment?: number }>,
+        token?: string,
+        log?: (msg: string) => void
     ): Promise<UploadResult> {
-        // Priority 1: Project source code (exclude all library/vendor directories)
-        const libraryExcludes = "{node_modules,dist,.git,build,out,backend,.opencode,vendor,packages,bower_components}/**";
+        // Priority 1: Project source code (exclude all library/vendor directories at ANY depth)
+        const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo}/**";
         const projectFiles = await vscode.workspace.findFiles(
             "**/*.{ts,js,kt,java,py,go,rs,tsx,jsx}", libraryExcludes
         );
@@ -91,16 +92,22 @@ export class IndexerHttpClient {
         const url = `${this.backendUrl}/api/index/source`;
         let uploaded = 0;
         let errors = 0;
+        const totalFiles = projectFiles.length;
+        const batchSize = 20; // SA4E-99: reduced from 50 to avoid timeout on large files
+        const totalBatches = Math.ceil(totalFiles / batchSize);
+        const incrementPerBatch = 100 / totalBatches;
 
         // Create output channel for detailed error reporting
         const channel = vscode.window.createOutputChannel("Kiro Indexer");
 
         // Upload project code first (high priority)
-        for (let i = 0; i < projectFiles.length; i += 50) {
-            const batchNum = Math.floor(i / 50) + 1;
-            const totalBatches = Math.ceil(projectFiles.length / 50);
-            report.report({ message: `Indexing project code ${i + 1}/${projectFiles.length} (batch ${batchNum}/${totalBatches})...` });
-            const batch = projectFiles.slice(i, i + 50);
+        for (let i = 0; i < totalFiles; i += batchSize) {
+            const batchNum = Math.floor(i / batchSize) + 1;
+            const pct = Math.round((i / totalFiles) * 100);
+            const progressMsg = `Indexing source code: ${pct}% (${i + 1}/${totalFiles} files, batch ${batchNum}/${totalBatches})`;
+            report.report({ message: progressMsg, increment: incrementPerBatch });
+            if (log) { log(progressMsg); }
+            const batch = projectFiles.slice(i, i + batchSize);
             const entries = await Promise.all(
                 batch.map(async (file) => {
                     const content = await vscode.workspace.fs.readFile(file);
@@ -120,6 +127,7 @@ export class IndexerHttpClient {
                 channel.show(true);
             }
         }
+        report.report({ message: `Indexing source code: 100% complete`, increment: 0 });
 
         const summary = `✅ Indexed ${uploaded} project files` + (errors > 0 ? `, ⚠️ Failed: ${errors} (see Output > Kiro Indexer for details)` : "");
         return { uploaded, errors, summary };
@@ -249,7 +257,7 @@ export class IndexerHttpClient {
                 }
             );
             req.on("error", (err: Error) => resolve({ ok: false, error: `Network error: ${err.message}`, status: 0 }));
-            req.setTimeout(30000, () => { req.destroy(); resolve({ ok: false, error: "Request timeout (30s) — batch may be too large", status: 0 }); });
+            req.setTimeout(60000, () => { req.destroy(); resolve({ ok: false, error: "Request timeout (60s) — batch may be too large", status: 0 }); });
             req.write(body);
             req.end();
         });
