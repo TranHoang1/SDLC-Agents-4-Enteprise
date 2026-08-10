@@ -60,21 +60,24 @@ export class IndexerHttpClient {
         let errors = 0;
 
         const unconvertible: UnconvertibleEntry[] = [];
+        const channel = vscode.window.createOutputChannel("Kiro Doc Indexer");
         for (let i = 0; i < docs.length; i++) {
             const d = docs[i];
             if (i % 10 === 0) { report.report({ message: `Ingesting ${i + 1}/${docs.length} files...` }); }
 
             let fileContent = d.content;
             if (!fileContent) { fileContent = await this.readFileContent(d.path); }
-            if (fileContent) { await this.uploadDocumentFile(d.path, fileContent, token); }
+            if (!fileContent) { errors++; channel.appendLine(`⚠️ ${d.path}: no content (unreadable)`); continue; }
+            await this.uploadDocumentFile(d.path, fileContent, token);
 
             const payload = { file_path: d.path, type: d.type, format: "markdown", ...(fileContent ? { content: fileContent } : {}) };
             const { ok, body } = await this.httpPostJson(url, payload, token);
-            if (!ok) { errors++; continue; }
+            if (!ok) { errors++; channel.appendLine(`⚠️ ${d.path}: ingest failed (${body?.slice(0, 100) || 'no response'})`); continue; }
 
             const result = parseIngestResponse(body, d.path);
             if (result.entry) { unconvertible.push(result.entry); } else { ingested++; }
         }
+        if (errors > 0) { channel.show(true); }
 
         const parts = [`✅ Indexed: ${ingested} files`];
         if (errors > 0) { parts.push(`⚠️ Failed: ${errors}`); }
