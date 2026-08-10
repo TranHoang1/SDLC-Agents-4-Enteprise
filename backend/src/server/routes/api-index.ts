@@ -48,19 +48,21 @@ function resolveRequestScope(c: Context): IndexScope {
 function writeFilesPhase(workspace: string, files: SourceFile[]): { written: number; rejected: string[] } {
   const rejected: string[] = [];
   let written = 0;
-  // SA4E-99: Strip workspace folder name prefix from paths (multi-root workspace sends prefixed paths)
+  // SA4E-99: Write to temp dir outside workspace to avoid Kiro file watcher restart
   const wsBasename = path.basename(workspace);
+  const tempBase = path.join('C:\\projects\\kiro\\Temp', 'batch-docs', wsBasename);
+  fs.mkdirSync(tempBase, { recursive: true });
   for (const file of files) {
     let filePath = file.path;
-    // Strip prefix like "SDLC-Agents-4-Enterprise/backend/src/..." → "backend/src/..."
     if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
       filePath = filePath.substring(wsBasename.length + 1);
     }
-    const targetPath = resolveWithinWorkspace(workspace, filePath);
-    if (!targetPath) { rejected.push(file.path); continue; }
-    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-    fs.writeFileSync(targetPath, file.content, 'utf-8');
-    written++;
+    const targetPath = path.join(tempBase, filePath);
+    try {
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      fs.writeFileSync(targetPath, file.content, 'utf-8');
+      written++;
+    } catch { rejected.push(file.path); }
   }
   return { written, rejected };
 }
@@ -233,8 +235,14 @@ async function handleIndexDocument(c: Context, logger: Logger) {
     const { path: relPath, content } = body;
     if (!relPath || !content) return c.json({ error: 'path and content required' }, 400);
     const scope = resolveRequestScope(c);
-    const targetPath = resolveWithinWorkspace(scope.workspace, relPath);
-    if (!targetPath) return c.json({ error: 'Invalid path' }, 400);
+    // SA4E-99: Write to temp dir outside workspace (same as source indexing)
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', 'documents', scope.projectId);
+    const wsBasename = path.basename(scope.workspace);
+    let filePath = relPath;
+    if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
+      filePath = filePath.substring(wsBasename.length + 1);
+    }
+    const targetPath = path.join(tempBase, filePath);
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
     fs.writeFileSync(targetPath, content, 'utf-8');
     return c.json({ success: true });
