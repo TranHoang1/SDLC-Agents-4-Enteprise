@@ -267,36 +267,15 @@ export class IndexerHttpClient {
     /** POST with detailed error info for user-facing error reporting. */
     private async httpPostWithDetail(url: string, payload: unknown, token: string | undefined): Promise<{ ok: boolean; error: string; status: number }> {
         const headers = await this.buildHeaders(token);
-        const body = JSON.stringify(payload);
-        const parsedUrl = new URL(url);
-        const http = await import("http");
-        return new Promise((resolve) => {
-            const reqHeaders: Record<string, string> = {
-                "Content-Type": "application/json",
-                "Content-Length": Buffer.byteLength(body).toString(),
-                ...headers,
-            };
-            const req = http.default.request(
-                { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname + parsedUrl.search, method: "POST", headers: reqHeaders },
-                (res) => {
-                    let data = "";
-                    res.on("data", (chunk: any) => { data += chunk; });
-                    res.on("end", () => {
-                        const status = res.statusCode || 0;
-                        const ok = status === 200 || status === 201;
-                        let error = ok ? "" : `HTTP ${status}`;
-                        if (!ok && data) {
-                            try { error = JSON.parse(data).error || JSON.parse(data).message || error; } catch { error = data.slice(0, 200); }
-                        }
-                        resolve({ ok, error, status });
-                    });
-                }
-            );
-            req.on("error", (err: Error) => resolve({ ok: false, error: `Network error: ${err.message}`, status: 0 }));
-            req.setTimeout(60000, () => { req.destroy(); resolve({ ok: false, error: "Request timeout (60s) — batch may be too large", status: 0 }); });
-            req.write(body);
-            req.end();
-        });
+        try {
+            const result = await utilHttpPostJson<any>(url, payload, { headers, timeoutMs: 60000 });
+            return { ok: true, error: "", status: 200 };
+        } catch (err: any) {
+            const status = err?.statusCode || err?.status || 0;
+            const msg = err?.message || String(err);
+            if (status === 401) return { ok: false, error: "Unauthorized", status: 401 };
+            return { ok: false, error: msg.slice(0, 200), status };
+        }
     }
 
     /** Build standard auth + project-id headers. */
