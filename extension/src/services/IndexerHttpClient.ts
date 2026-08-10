@@ -38,8 +38,14 @@ export interface UploadResult {
 }
 
 export class IndexerHttpClient {
+    private tokenRefresher?: () => Promise<string | undefined>;
+
     constructor(private readonly backendUrl: string) {}
 
+    /** SA4E-99: Set token refresher callback — called on 401 to get a fresh token. */
+    setTokenRefresher(refresher: () => Promise<string | undefined>): void {
+        this.tokenRefresher = refresher;
+    }
     /** Expose backend base URL for other callers. */
     getBaseUrl(): string { return this.backendUrl; }
 
@@ -117,6 +123,24 @@ export class IndexerHttpClient {
             const result = await this.httpPostWithDetail(url, { files: entries }, token);
             if (result.ok) {
                 uploaded += batch.length;
+            } else if (result.status === 401 && this.tokenRefresher) {
+                // SA4E-99: Token expired — refresh and retry once
+                const freshToken = await this.tokenRefresher();
+                if (freshToken) {
+                    token = freshToken;
+                    const retry = await this.httpPostWithDetail(url, { files: entries }, token);
+                    if (retry.ok) { uploaded += batch.length; }
+                    else {
+                        errors += batch.length;
+                        channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED after token refresh (${batch.length} files)`);
+                        channel.appendLine(`   Error: ${retry.error}`);
+                        channel.show(true);
+                    }
+                } else {
+                    errors += batch.length;
+                    channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED — token refresh returned empty`);
+                    channel.show(true);
+                }
             } else {
                 errors += batch.length;
                 const batchFiles = batch.map(f => vscode.workspace.asRelativePath(f)).join(", ");

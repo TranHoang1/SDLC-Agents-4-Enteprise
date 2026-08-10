@@ -29,8 +29,10 @@ function getIndexingOutputChannel(): vscode.OutputChannel {
     return indexingOutputChannel;
 }
 
-function createService(): IndexingService {
-    return new IndexingService(new IndexerHttpClient(getBackendUrl()), getIndexingOutputChannel());
+function createService(tokenRefresher?: () => Promise<string | undefined>): IndexingService {
+    const client = new IndexerHttpClient(getBackendUrl());
+    if (tokenRefresher) { client.setTokenRefresher(tokenRefresher); }
+    return new IndexingService(client, getIndexingOutputChannel());
 }
 
 export async function promptIndexAfterInject(root: string, token?: string): Promise<void> {
@@ -40,13 +42,13 @@ export async function promptIndexAfterInject(root: string, token?: string): Prom
     if (action === "Index Now") { await runIndexWorkspace(root, token); }
 }
 
-export async function handleIndexWorkspace(token?: string, secrets?: vscode.SecretStorage): Promise<void> {
+export async function handleIndexWorkspace(token?: string, secrets?: vscode.SecretStorage, tokenRefresher?: () => Promise<string | undefined>): Promise<void> {
     const root = getWorkspaceRoot();
     if (!root) { return; }
-    await runIndexWorkspace(root, token, secrets);
+    await runIndexWorkspace(root, token, secrets, tokenRefresher);
 }
 
-async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.SecretStorage): Promise<void> {
+async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.SecretStorage, tokenRefresher?: () => Promise<string | undefined>): Promise<void> {
     const picks = await showIndexOptions();
     if (!picks || picks.length === 0) { return; }
 
@@ -60,7 +62,7 @@ async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.
     const channel = getIndexingOutputChannel();
     channel.show(true);
 
-    const service = createService();
+    const service = createService(tokenRefresher);
     const results = await service.indexWorkspace(root, options, token, secrets);
     showIndexResults(results, picks, root, channel);
 }
@@ -79,12 +81,20 @@ function describeSummaryTitle(options: string[]): string {
 }
 
 async function showIndexOptions(): Promise<string[] | undefined> {
-    const picks = await vscode.window.showQuickPick([
-        { label: "$(symbol-class) Index Pega Rule Schemas", description: "Generate JSON Schemas from Pega RuleForms (run first)", id: "schemas", picked: true },
+    const root = getWorkspaceRoot();
+    const isPega = root ? require('fs').existsSync(require('path').join(root, 'pega-project.json')) : false;
+
+    const items: Array<{ label: string; description: string; id: string; picked: boolean }> = [];
+    if (isPega) {
+        items.push({ label: "$(symbol-class) Index Pega Rule Schemas", description: "Generate JSON Schemas from Pega RuleForms (run first)", id: "schemas", picked: true });
+    }
+    items.push(
         { label: "$(code) Index Source Code", description: "Re-index all code symbols", id: "code", picked: true },
         { label: "$(book) Index Documents", description: "Index SDLC documents into KB", id: "documents", picked: true },
         { label: "$(sync) Sync Code → Memory", description: "Sync code entities into memory graph", id: "sync", picked: true },
-    ], { canPickMany: true, placeHolder: "Select what to index" });
+    );
+
+    const picks = await vscode.window.showQuickPick(items, { canPickMany: true, placeHolder: "Select what to index" });
     return picks?.map(p => p.id);
 }
 

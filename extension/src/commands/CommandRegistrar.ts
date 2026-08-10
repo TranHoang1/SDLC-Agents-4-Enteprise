@@ -43,7 +43,11 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     vscode.commands.registerCommand("kiroSdlc.injectSelective", () => handleInjectSelective(context)),
     vscode.commands.registerCommand("kiroSdlc.update", () => handleUpdate(context)),
     vscode.commands.registerCommand("kiroSdlc.status", () => handleStatus(context)),
-    vscode.commands.registerCommand("kiroSdlc.indexWorkspace", () => handleIndexWorkspace(authManager?.getTokenSync(), context.secrets)),
+    vscode.commands.registerCommand("kiroSdlc.indexWorkspace", () => handleIndexWorkspace(
+        authManager?.getTokenSync(),
+        context.secrets,
+        async () => { await authManager?.refreshToken(); return authManager?.getTokenSync() || undefined; }
+    )),
     vscode.commands.registerCommand("kiroSdlc.login", () => handleLogin(context, authManager, treeProvider)),
     vscode.commands.registerCommand("kiroSdlc.logout", () => handleLogout(authManager, panelManager)),
     vscode.commands.registerCommand("kiroSdlc.openKbGraph", () => panelManager?.openPanel("graph")),
