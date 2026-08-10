@@ -44,8 +44,15 @@ function resolveRequestScope(c: Context): IndexScope {
 function writeFilesPhase(workspace: string, files: SourceFile[]): { written: number; rejected: string[] } {
   const rejected: string[] = [];
   let written = 0;
+  // SA4E-99: Strip workspace folder name prefix from paths (multi-root workspace sends prefixed paths)
+  const wsBasename = path.basename(workspace);
   for (const file of files) {
-    const targetPath = resolveWithinWorkspace(workspace, file.path);
+    let filePath = file.path;
+    // Strip prefix like "SDLC-Agents-4-Enterprise/backend/src/..." → "backend/src/..."
+    if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
+      filePath = filePath.substring(wsBasename.length + 1);
+    }
+    const targetPath = resolveWithinWorkspace(workspace, filePath);
     if (!targetPath) { rejected.push(file.path); continue; }
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
     fs.writeFileSync(targetPath, file.content, 'utf-8');
