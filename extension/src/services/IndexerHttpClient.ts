@@ -49,6 +49,46 @@ export class IndexerHttpClient {
     /** Expose backend base URL for other callers. */
     getBaseUrl(): string { return this.backendUrl; }
 
+    /**
+     * SA4E-99: Poll /api/index/progress until idle. Shows status bar progress.
+     * Resolves when indexing completes or times out after maxWaitMs.
+     */
+    async pollIndexProgress(token?: string, maxWaitMs = 300000): Promise<void> {
+        const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
+        statusBar.show();
+        const start = Date.now();
+        try {
+            while (Date.now() - start < maxWaitMs) {
+                await new Promise(r => setTimeout(r, 2000));
+                const headers = await this.buildHeaders(token);
+                const http = await import("http");
+                const url = new URL(`${this.backendUrl}/api/index/progress`);
+                const resp = await new Promise<{ ok: boolean; body: string }>(resolve => {
+                    const req = http.default.request(
+                        { hostname: url.hostname, port: url.port, path: url.pathname, method: 'GET', headers },
+                        (res) => { let d = ''; res.on('data', c => d += c); res.on('end', () => resolve({ ok: res.statusCode === 200, body: d })); },
+                    );
+                    req.on('error', () => resolve({ ok: false, body: '' }));
+                    req.setTimeout(5000, () => { req.destroy(); resolve({ ok: false, body: '' }); });
+                    req.end();
+                });
+                const { ok, body } = resp;
+                if (!ok) { statusBar.text = "$(sync~spin) Indexing..."; continue; }
+                try {
+                    const progress = JSON.parse(body);
+                    if (progress.phase === 'idle') {
+                        statusBar.text = "$(check) Index complete";
+                        setTimeout(() => statusBar.dispose(), 5000);
+                        return;
+                    }
+                    statusBar.text = `$(sync~spin) ${progress.phase}: ${progress.percentage}% (${progress.current}/${progress.total})`;
+                } catch { statusBar.text = "$(sync~spin) Indexing..."; }
+            }
+            statusBar.text = "$(warning) Index timeout";
+            setTimeout(() => statusBar.dispose(), 5000);
+        } catch { statusBar.dispose(); }
+    }
+
     async ingestDocuments(
         docs: DocEntry[],
         report: vscode.Progress<{ message?: string }>,
@@ -199,6 +239,8 @@ export class IndexerHttpClient {
         if (uploaded > 0) {
             report.report({ message: "Running full index on uploaded files..." });
             await this.triggerFullIndex(token);
+            // SA4E-99: Poll backend progress until index + LLM enrichment complete
+            this.pollIndexProgress(token).catch(() => {}); // fire-and-forget, shows status bar
         }
 
         const summary = `✅ Indexed ${uploaded} project files` + (errors > 0 ? `, ⚠️ Failed: ${errors} (see Output > Kiro Indexer for details)` : "");
