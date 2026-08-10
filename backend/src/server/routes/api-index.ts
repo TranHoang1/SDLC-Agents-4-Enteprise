@@ -198,9 +198,29 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c);
 
-    // SA4E-99: Files already exist on disk (extension reads from workspace).
-    // No need to write them back. Just acknowledge and let /api/index/full handle parsing.
-    return c.json({ written: files.length, skipped: 0, rejected: [], deps: [], projectId: scope.projectId });
+    // SA4E-99: Write to temp dir OUTSIDE workspace to avoid triggering Kiro file watcher
+    const tempBase = 'C:\\projects\\kiro\\Temp';
+    const wsBasename = path.basename(scope.workspace);
+    fs.mkdirSync(tempBase, { recursive: true });
+
+    const written: string[] = [];
+    const rejected: string[] = [];
+
+    for (const file of files) {
+      let filePath = file.path;
+      // Strip workspace prefix if present
+      if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
+        filePath = filePath.substring(wsBasename.length + 1);
+      }
+      const targetPath = path.join(tempBase, filePath);
+      try {
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        fs.writeFileSync(targetPath, file.content, 'utf-8');
+        written.push(filePath);
+      } catch { rejected.push(filePath); }
+    }
+
+    return c.json({ written: written.length, skipped: 0, rejected, deps: [], projectId: scope.projectId });
   } catch (err: any) {
     return indexError(c, err, logger, 'Error processing source batch');
   }
