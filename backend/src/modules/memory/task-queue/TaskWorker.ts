@@ -9,6 +9,7 @@ import type { Logger } from 'pino';
 import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import type { TagAnalyzerService, TagAnalysisResult } from '../llm/analyzer.js';
 import type { EmbeddingService } from '../../../engine/parsers/embedding/EmbeddingService.js';
+import type { LLMMessage } from '../llm/types.js';
 import { PendingTaskRepository } from './PendingTaskRepository.js';
 import { TaskType } from './models.js';
 import type { PendingTask } from './models.js';
@@ -17,6 +18,28 @@ import { DEFAULT_TASK_WORKER_CONFIG } from './TaskWorkerConfig.js';
 import type { MemoryEngine } from '../engine/index.js';
 import type { ContextChainInput, StructuredMapData } from '../llm/types.js';
 import { safeParseStructuredMap } from '../llm/types.js';
+
+/** SA4E-99: System prompt for code symbol summary + pseudo code generation. */
+const CODE_SUMMARY_SYSTEM_PROMPT = `You are a code documentation generator. Given a code symbol (function, class, method), produce a concise summary and pseudo code.
+
+## Output Format
+Return ONLY valid JSON (no markdown, no code fences):
+
+{
+  "summary": "1-2 sentence description of what this symbol does, its purpose and key behavior",
+  "pseudo_code": "Simplified pseudo code showing the algorithm/logic flow (max 10 lines)"
+}
+
+## Rules
+- summary: max 200 chars, describe WHAT it does and WHY (business purpose)
+- pseudo_code: simplified logic flow, not the actual code. Use plain English + simple control flow
+- For classes: summary describes responsibility, pseudo_code lists key methods and their roles
+- For functions: summary describes input→output, pseudo_code shows algorithm steps
+
+## Example
+
+Input: function calculateDiscount(order, customer)
+Output: {"summary":"Calculates order discount based on customer loyalty tier and order total.","pseudo_code":"1. Get customer tier (gold/silver/bronze)\\n2. If tier=gold AND total>100: discount=20%\\n3. If tier=silver AND total>50: discount=10%\\n4. Apply max discount cap from config\\n5. Return final discounted price"}`;
 
 export interface TaskWorkerStats {
   pending: number;
@@ -34,7 +57,7 @@ export class TaskWorker {
   private readonly engine: MemoryEngine;
   private tagAnalyzer?: TagAnalyzerService;
   private embeddingService?: EmbeddingService;
-  private llmService?: { getConfig(): { model: string } };
+  private llmService?: { getConfig(): { model: string }; complete(messages: LLMMessage[]): Promise<{ content: string }> };
   private running = false;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private consecutiveEmpty = 0;
@@ -56,7 +79,7 @@ export class TaskWorker {
 
   setTagAnalyzer(analyzer: TagAnalyzerService): void { this.tagAnalyzer = analyzer; }
   setEmbeddingService(service: EmbeddingService): void { this.embeddingService = service; }
-  setLlmService(service: { getConfig(): { model: string } }): void { this.llmService = service; }
+  setLlmService(service: { getConfig(): { model: string }; complete(messages: LLMMessage[]): Promise<{ content: string }> }): void { this.llmService = service; }
 
   /**
    * Update mutable config fields at runtime — no restart needed.
@@ -163,6 +186,14 @@ export class TaskWorker {
 
   private async processTask(task: PendingTask): Promise<void> {
     try {
+      // CODE_SUMMARY tasks don't use knowledge_entries — they use graph_nodes directly
+      if (task.task_type === TaskType.CODE_SUMMARY) {
+        let payload: any;
+        try { payload = JSON.parse(task.payload); }
+        catch { this.repo.markFailed(task.id, 'invalid_json_payload'); return; }
+        await this.processCodeSummary(task, payload);
+        return;
+      }
       const entry = await this.engine.findById(task.entry_id);
       if (!entry) { await this.repo.markFailed(task.id, 'entry_not_found'); return; }
       let payload: any;
@@ -374,6 +405,84 @@ export class TaskWorker {
       this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
         'structured_map conditional update failed');
     }
+  }
+
+  // ── SA4E-99: Code Symbol Summary + Pseudo Code ──
+
+  /**
+   * SA4E-99: Generate LLM summary + pseudo code for a code symbol.
+   * Reads symbol body from body_embeddings, calls LLM, updates graph_nodes.label.
+   * Runs async in background queue — does not block code indexing.
+   */
+  private async processCodeSummary(task: PendingTask, payload: any): Promise<void> {
+    if (!this.llmService) { this.repo.resetForRetry(task.id); return; }
+
+    const { symbol_id, name, kind, signature, body, file_path } = payload;
+    if (!body || body.length < 20) {
+      await this.repo.markCompleted(task.id);
+      return;
+    }
+
+    const prompt = this.buildCodeSummaryPrompt(name, kind, signature, body, file_path);
+    try {
+      const timeoutMs = this.config.llmTimeout ?? 30000;
+      const response = await Promise.race([
+        this.llmService.complete([
+          { role: 'system', content: CODE_SUMMARY_SYSTEM_PROMPT },
+          { role: 'user', content: prompt },
+        ]),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
+      ]);
+
+      const parsed = this.parseCodeSummaryResponse(response.content, name, kind);
+
+      // Update graph_nodes.label with the short summary
+      const entryId = `code:${symbol_id}`;
+      const label = parsed.summary.slice(0, 60);
+      await this.engine.getAdapter().runAsync(
+        `UPDATE graph_nodes SET label = ? WHERE entry_id = ?`,
+        [label, entryId],
+      );
+
+      // Store full summary + pseudo code in graph node metadata (JSON in cluster_id or separate)
+      // For now, store in body_embeddings metadata or a simple update to level field
+      // TODO: Consider a dedicated column for code_summary in graph_nodes
+      this.logger.debug({ symbol_id, name, component: 'TaskWorker' },
+        'Code summary generated and propagated');
+    } catch (err) {
+      this.logger.warn({ symbol_id, name, err, component: 'TaskWorker' },
+        'Code summary LLM failed (non-fatal)');
+    }
+    await this.repo.markCompleted(task.id);
+  }
+
+  /** Build prompt for code symbol summary generation. */
+  private buildCodeSummaryPrompt(
+    name: string, kind: string, signature: string | null, body: string, filePath: string,
+  ): string {
+    const sig = signature ? `\nSignature: ${signature}` : '';
+    return `/no_think\n\nSymbol: ${name}\nKind: ${kind}\nFile: ${filePath}${sig}\n\nBody:\n\`\`\`\n${body.slice(0, 4000)}\n\`\`\``;
+  }
+
+  /** Parse LLM response for code summary. Falls back to name if parse fails. */
+  private parseCodeSummaryResponse(
+    llmOutput: string, name: string, kind: string,
+  ): { summary: string; pseudoCode: string } {
+    const defaults = { summary: `${kind}: ${name}`, pseudoCode: '' };
+    if (!llmOutput || llmOutput.trim().length === 0) return defaults;
+    try {
+      const jsonMatch = llmOutput.match(/\{[\s\S]*"summary"[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+          summary: (parsed.summary || defaults.summary).slice(0, 300),
+          pseudoCode: (parsed.pseudo_code || parsed.pseudoCode || '').slice(0, 2000),
+        };
+      }
+    } catch { /* fallback */ }
+    // Fallback: treat first line as summary
+    const lines = llmOutput.trim().split('\n');
+    return { summary: lines[0].slice(0, 300), pseudoCode: lines.slice(1).join('\n').slice(0, 2000) };
   }
 
   /**

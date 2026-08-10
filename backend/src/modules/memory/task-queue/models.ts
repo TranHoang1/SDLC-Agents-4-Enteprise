@@ -6,6 +6,8 @@
 export enum TaskType {
   TAG_ENRICHMENT = 'TAG_ENRICHMENT',
   VECTOR_EMBEDDING = 'VECTOR_EMBEDDING',
+  /** SA4E-99: LLM summary + pseudo code for code symbols (functions, classes). */
+  CODE_SUMMARY = 'CODE_SUMMARY',
 }
 
 export enum TaskStatus {
