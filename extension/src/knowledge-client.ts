@@ -251,6 +251,9 @@ export class KnowledgeClient {
         const isNetwork = (err as NodeJS.ErrnoException).code === "ECONNREFUSED"
           || (err as NodeJS.ErrnoException).code === "ECONNRESET"
           || (err as NodeJS.ErrnoException).code === "ENOTFOUND";
+        // SA4E-104: HTTP 4xx/5xx errors are not retryable — throw immediately
+        const httpStatus = (err as any)?.status;
+        if (httpStatus && httpStatus >= 400) { throw err; }
         if (!isTimeout && !isNetwork) { throw err; }
         if (attempt < this.retries) {
           await sleep(50 * Math.pow(2, attempt));
