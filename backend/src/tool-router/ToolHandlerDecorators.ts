@@ -46,7 +46,9 @@ export function withScopeContext(dispatcher: { setScopeContext: (ctx: { userId: 
       dispatcher.setScopeContext({ userId: injectedCtx.userId || '', projectId: injectedCtx.projectId || '' });
     } else {
       const userId = (args as any).__userId as string | undefined;
-      dispatcher.setScopeContext(userId ? { userId } : undefined);
+      // SA4E-103: Also read __projectId stamped by stampProjectScope (MCP tool call path)
+      const projectId = (args as any).__projectId as string | undefined;
+      dispatcher.setScopeContext(userId || projectId ? { userId: userId || '', projectId } : undefined);
     }
     return next(args);
   };

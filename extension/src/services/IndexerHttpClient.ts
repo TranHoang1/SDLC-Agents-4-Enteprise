@@ -80,8 +80,8 @@ export class IndexerHttpClient {
         report: vscode.Progress<{ message?: string }>,
         token?: string
     ): Promise<UploadResult> {
-        // Priority 1: Project source code (exclude all library/vendor directories)
-        const libraryExcludes = "{node_modules,dist,.git,build,out,backend,.opencode,vendor,packages,bower_components}/**";
+        // Priority 1: Project source code (exclude all library/vendor/dot-prefix directories)
+        const libraryExcludes = "{node_modules,dist,.git,.kiro,.claude,.code-intel,.analysis,.agents,build,out,backend,.opencode,vendor,packages,bower_components}/**";
         const projectFiles = await vscode.workspace.findFiles(
             "**/*.{ts,js,kt,java,py,go,rs,tsx,jsx}", libraryExcludes
         );
@@ -138,13 +138,13 @@ export class IndexerHttpClient {
             params: { name: "mem_sync_code", arguments: {} },
         };
         try {
-            // MCP Streamable HTTP requires Accept header
+            const headers = await this.buildHeaders(undefined);
             const body = JSON.stringify(payload);
             const parsedUrl = new URL(url);
             const http = await import("http");
             const result = await new Promise<{ ok: boolean; body: string }>((resolve) => {
                 const req = http.default.request(
-                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname, method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json, text/event-stream", "Content-Length": Buffer.byteLength(body).toString() } },
+                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname, method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json, text/event-stream", "Content-Length": Buffer.byteLength(body).toString(), ...headers } },
                     (res) => { let data = ""; res.on("data", (c: any) => { data += c; }); res.on("end", () => resolve({ ok: res.statusCode === 200, body: data })); },
                 );
                 req.on("error", () => resolve({ ok: false, body: "" }));
@@ -153,7 +153,11 @@ export class IndexerHttpClient {
                 req.end();
             });
             if (!result.ok) { return null; }
-            const parsed = JSON.parse(result.body);
+            // MCP Streamable HTTP returns SSE format: "event: message\ndata: {...}\n"
+            let jsonText = result.body;
+            const dataMatch = result.body.match(/^data:\s*(.+)$/m);
+            if (dataMatch) { jsonText = dataMatch[1]; }
+            const parsed = JSON.parse(jsonText);
             const text = parsed?.result?.content?.[0]?.text;
             return typeof text === "string" ? text : null;
         } catch {
@@ -261,7 +265,8 @@ export class IndexerHttpClient {
         if (token) { headers["Authorization"] = `Bearer ${token}`; }
         const { getProjectId } = await import("../extension");
         const pid = getProjectId();
-        if (pid && pid !== "default") { headers["X-Project-Id"] = pid; }
+        // SA4E-103: Always send X-Project-Id (even "default") so backend can scope entries correctly
+        if (pid) { headers["X-Project-Id"] = pid; }
         // Send workspace root so server registers correct display_name
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (workspaceFolders && workspaceFolders.length > 0) {

@@ -52,6 +52,12 @@ export function getIframeHtml(panelType: PanelType, authTokenProvider?: () => st
     <script nonce="${nonce}">
       const vscode = acquireVsCodeApi();
       window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'token_refreshed' && event.data.token) {
+          const iframe = document.querySelector('iframe');
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage({ type: 'token_refreshed', token: event.data.token }, '*');
+          }
+        }
         if (event.data && (event.data.type === 'auth_error' || event.data.status === 401)) {
           vscode.postMessage({ type: 'auth_error' });
         }

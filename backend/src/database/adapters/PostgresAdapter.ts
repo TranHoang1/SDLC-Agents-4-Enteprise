@@ -67,7 +67,23 @@ export class PostgresAdapter implements DatabaseAdapter {
 
   // Async methods
   async runAsync(sql: string, params?: unknown[]): Promise<RunResult> {
-    const r = await this.pool.query(this.translateParams(sql), params);
+    const translated = this.translateParams(sql);
+    // SA4E-104: If INSERT without RETURNING, add RETURNING id to get lastInsertRowid
+    const isInsert = /^\s*INSERT/i.test(sql);
+    const hasReturning = /RETURNING/i.test(sql);
+    if (isInsert && !hasReturning) {
+      const withReturning = translated + ' RETURNING id';
+      try {
+        const r = await this.pool.query(withReturning, params);
+        const insertedId = r.rows?.[0]?.id ?? 0;
+        return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
+      } catch {
+        // Fallback: table may not have 'id' column — run without RETURNING
+        const r = await this.pool.query(translated, params);
+        return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
+      }
+    }
+    const r = await this.pool.query(translated, params);
     return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
   }
 
@@ -86,9 +102,23 @@ export class PostgresAdapter implements DatabaseAdapter {
   }
 
   async transactionAsync<T>(fn: () => Promise<T>): Promise<T> {
-    await this.pool.query('BEGIN');
-    try { const r = await fn(); await this.pool.query('COMMIT'); return r; }
-    catch (err) { await this.pool.query('ROLLBACK'); throw err; }
+    const client = await this.pool.connect();
+    try {
+      await client.query('BEGIN');
+      // Temporarily override pool.query to use this client for all calls within fn()
+      const originalQuery = this.pool.query.bind(this.pool);
+      (this.pool as any).query = client.query.bind(client);
+      const r = await fn();
+      (this.pool as any).query = originalQuery;
+      await client.query('COMMIT');
+      return r;
+    } catch (err) {
+      try { await client.query('ROLLBACK'); } catch { /* ignore rollback error */ }
+      throw err;
+    } finally {
+      // Restore pool.query in case it wasn't restored above (error path)
+      client.release();
+    }
   }
 
   getEngine(): DatabaseEngine { return 'postgresql'; }

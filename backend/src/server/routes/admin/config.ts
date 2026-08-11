@@ -12,8 +12,11 @@ import { bus, Events } from '../../../shared/EventBus.js';
 
 async function getEffectiveConfig(ctx: AdminContext): Promise<Record<string, Record<string, any>>> {
   const cfg = loadConfig();
+  const os = await import('os');
+  const path = await import('path');
+  const defaultIndexTempDir = path.join(os.tmpdir(), 'CodeIntel');
   const base: Record<string, Record<string, any>> = {
-    server: { port: cfg.port, host: cfg.host, logLevel: cfg.logLevel },
+    server: { port: cfg.port, host: cfg.host, logLevel: cfg.logLevel, indexTempDir: (cfg as any).indexTempDir || defaultIndexTempDir },
     embedding: { model: 'paraphrase-multilingual-MiniLM-L12-v2', dimensions: 384, onnxModelPath: cfg.onnxModelPath },
     llm: {
       provider: process.env.LLM_PROVIDER || 'ollama',
@@ -56,6 +59,15 @@ async function getEffectiveConfig(ctx: AdminContext): Promise<Record<string, Rec
         const n = parseInt(val, 10);
         if (!isNaN(n)) base.taskWorker[key] = n;
       }
+    }
+  } catch { /* DB not ready — use env defaults */ }
+
+  // Merge DB-persisted server config (indexTempDir)
+  try {
+    const serverKeys = ['indexTempDir'] as const;
+    for (const key of serverKeys) {
+      const val = await getLatestConfigValue('server', key);
+      if (val !== undefined && val.trim()) base.server[key] = val;
     }
   } catch { /* DB not ready — use env defaults */ }
 
@@ -309,6 +321,18 @@ export function createConfigRoutes(ctx: AdminContext): Hono {
     const stats = await worker.getStats();
     const config = { concurrency: (worker as any).config?.concurrency, baseInterval: (worker as any).config?.baseInterval };
     return c.json({ enabled: true, stats, config });
+  });
+
+  /** SA4E-101: Lightweight progress endpoint for status bar polling (no permission check — read-only). */
+  app.get('/api/admin/taskworker/progress', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const memory = ctx.registry?.getModule?.('memory');
+    const worker = memory?.taskWorker;
+    if (!worker) return c.json({ active: false });
+    const progress = await worker.getProgress();
+    if (!progress) return c.json({ active: false });
+    return c.json({ active: true, ...progress });
   });
 
   app.post('/api/admin/taskworker/retry-all', async (c) => {

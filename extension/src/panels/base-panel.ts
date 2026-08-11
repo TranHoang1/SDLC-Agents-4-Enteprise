@@ -47,8 +47,12 @@ export abstract class BasePanel implements IKbPanel, vscode.Disposable {
     this._panel.webview.onDidReceiveMessage(
       (msg: WebviewToExtMessage | { type: 'auth_error' }) => {
         if (msg.type === 'auth_error') {
+          // SA4E: Refresh token silently — do NOT reload entire webview (preserves page state)
           vscode.commands.executeCommand('kiroSdlc.refreshToken').then(() => {
-            if (this._panel) { this._panel.webview.html = this.getHtml(this._panel.webview); }
+            const newToken = BasePanel.authTokenProvider ? BasePanel.authTokenProvider() : '';
+            if (this._panel && newToken) {
+              this._panel.webview.postMessage({ type: 'token_refreshed', token: newToken });
+            }
           });
           return;
         }

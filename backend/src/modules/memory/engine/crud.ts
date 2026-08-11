@@ -69,7 +69,7 @@ export class MemoryEngineCrud {
     // Skip PEGA_AST (auxiliary — duplicates PEGA_RULE in graph)
     if (id > 0 && entry.type && !['PEGA_RULE', 'PEGA_DATA', 'PEGA_AST'].includes(entry.type)) {
       try {
-        const graphType = entry.type === 'PEGA_SCHEMA' ? 'PEGA_SCHEMA' : 'KNOWLEDGE_ENTRY';
+        const graphType = entry.type || 'CONTEXT';
         const graphLabel = (entry.summary || entry.source || `entry-${id}`).slice(0, 200);
         const pid = entry.project_id || '';
         if (engine === 'postgresql') {

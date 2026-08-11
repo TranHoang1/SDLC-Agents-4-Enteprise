@@ -75,7 +75,7 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
 
     if (entryId.startsWith('code:') || entryId.startsWith('sym-')) {
       const symbolId = entryId.startsWith('code:') ? entryId.replace('code:', '') : entryId.replace('sym-', '');
-      const detail = getCodeSymbolDetail(symbolId, ctx);
+      const detail = await getCodeSymbolDetail(symbolId, ctx);
       if (detail) return c.json(detail);
       return c.json({ error: 'Code symbol not found' }, 404);
     }
@@ -198,6 +198,21 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
     const detail = await ctx.db.symbol.getSymbolDetail(symbolId);
     if (!detail) return null;
     const lines = detail.startLine && detail.endLine ? `Lines ${detail.startLine}\u2013${detail.endLine}` : '';
+    // SA4E-104: Fetch body/pseudo code from body_embeddings if available
+    let bodyCode = '';
+    try {
+      const numId = parseInt(symbolId, 10);
+      if (!isNaN(numId)) {
+        const { getIndexAdapter } = await import('../../../admin/db/core.js');
+        const indexAdapter = getIndexAdapter();
+        const bodyRow = await indexAdapter.getAsync<{ embedding: Buffer | Uint8Array }>(
+          'SELECT embedding FROM body_embeddings WHERE symbol_id = ? AND chunk_index = 0', [numId],
+        );
+        if (bodyRow && bodyRow.embedding) {
+          bodyCode = Buffer.from(bodyRow.embedding).toString('utf-8');
+        }
+      }
+    } catch { /* body_embeddings may not exist or be empty */ }
     const contentParts = [
       detail.signature ? `**Signature:** \`${detail.signature}\`` : '',
       detail.docComment ? `**Doc:** ${detail.docComment}` : '',
@@ -206,6 +221,7 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
       detail.module ? `**Module:** ${detail.module}` : '',
       detail.visibility ? `**Visibility:** ${detail.visibility}` : '',
       detail.parentSymbol ? `**Parent:** ${detail.parentSymbol}` : '',
+      bodyCode ? `\n**Code:**\n\`\`\`typescript\n${bodyCode.substring(0, 2000)}\n\`\`\`` : '',
     ].filter(Boolean).join('\n');
     return {
       id: `code:${detail.id}`,
