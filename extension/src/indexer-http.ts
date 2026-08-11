@@ -6,6 +6,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { httpPostJson } from "./utils/http-client-utils";
+import { buildBackendAuthHeaders } from "./utils/backend-auth-headers";
 
 function getBackendUrl(): string | undefined {
   return vscode.workspace.getConfiguration("kiroSdlc").get<string>("backend.url");
@@ -25,7 +26,11 @@ export async function ingestDocumentsViaHttp(
   const url = `${backendUrl}/mcp/tools/call`;
   let ingested = 0;
   let errors = 0;
-  const authHeaders: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
+  // SA4E-103: Use buildBackendAuthHeaders which includes X-Project-Id for proper scoping
+  const authHeaders = buildBackendAuthHeaders();
+  if (token && !authHeaders["Authorization"]) {
+    authHeaders["Authorization"] = `Bearer ${token}`;
+  }
 
   try {
     for (let i = 0; i < docs.length; i++) {
@@ -62,7 +67,11 @@ export async function ingestDocumentsViaHttp(
 export async function uploadDocumentFile(relPath: string, content: string, token?: string): Promise<boolean> {
   const backendUrl = getBackendUrl();
   if (!backendUrl) return false;
-  const authHeaders: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
+  // SA4E-103: Use buildBackendAuthHeaders for X-Project-Id
+  const authHeaders = buildBackendAuthHeaders();
+  if (token && !authHeaders["Authorization"]) {
+    authHeaders["Authorization"] = `Bearer ${token}`;
+  }
   return httpPostJson<unknown>(`${backendUrl}/api/index/document`, { path: relPath, content }, { headers: authHeaders })
     .then(() => true)
     .catch(() => false);
@@ -79,7 +88,11 @@ export async function uploadSourceFiles(report: vscode.Progress<{ message?: stri
   const url = `${backendUrl}/api/index/source`;
   let uploaded = 0;
   let errors = 0;
-  const authHeaders: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
+  // SA4E-103: Use buildBackendAuthHeaders for X-Project-Id
+  const authHeaders = buildBackendAuthHeaders();
+  if (token && !authHeaders["Authorization"]) {
+    authHeaders["Authorization"] = `Bearer ${token}`;
+  }
 
   for (let i = 0; i < files.length; i += 50) {
     report.report({ message: `Indexing project code ${i + 1}/${files.length}...` });
