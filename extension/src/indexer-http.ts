@@ -94,7 +94,7 @@ export async function uploadSourceFiles(report: vscode.Progress<{ message?: stri
   let uploaded = 0;
   let errors = 0;
   // SA4E-103: Use buildBackendAuthHeaders for X-Project-Id
-  const authHeaders = buildBackendAuthHeaders();
+  let authHeaders = buildBackendAuthHeaders();
   if (token && !authHeaders["Authorization"]) {
     authHeaders["Authorization"] = `Bearer ${token}`;
   }
@@ -108,10 +108,33 @@ export async function uploadSourceFiles(report: vscode.Progress<{ message?: stri
         return { path: vscode.workspace.asRelativePath(file), content: Buffer.from(content).toString("utf-8") };
       })
     );
-    const success = await httpPostJson<unknown>(url, { files: entries }, { headers: authHeaders })
-      .then(() => true)
-      .catch(() => false);
-    if (success) uploaded += batch.length; else errors += batch.length;
+    let success: boolean | string = await httpPostJson<any>(url, { files: entries }, { headers: authHeaders })
+      .then((resp: any) => {
+        // SA4E-104: Detect 401 from response body (httpPostJson resolves all status codes)
+        if (resp?.error === 'Unauthorized' || resp?.error?.code === 'UNAUTHORIZED') {
+          return 'retry_auth';
+        }
+        return true;
+      })
+      .catch((err: any) => {
+        if (err?.message?.includes('401') || err?.message?.includes('Unauthorized')) {
+          return 'retry_auth';
+        }
+        return false;
+      });
+    if (success === 'retry_auth') {
+      // Re-login: refresh token via command, then rebuild headers
+      await vscode.commands.executeCommand('kiroSdlc.refreshToken');
+      authHeaders = buildBackendAuthHeaders();
+      if (token && !authHeaders["Authorization"]) {
+        authHeaders["Authorization"] = `Bearer ${token}`;
+      }
+      // Retry this batch once
+      success = await httpPostJson<unknown>(url, { files: entries }, { headers: authHeaders })
+        .then(() => true)
+        .catch(() => false);
+    }
+    if (success === true) uploaded += batch.length; else errors += batch.length;
   }
   return `✅ Indexed ${uploaded} project files` + (errors > 0 ? `, ⚠️ Failed: ${errors}` : "");
 }
