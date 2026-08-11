@@ -43,6 +43,39 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git ca-certificates wget \
     && rm -rf /var/lib/apt/lists/*
+
+# draw.io CLI + Electron runtime dependencies (for drawio_export_png tool)
+# Electron requires X11 libs + virtual framebuffer (xvfb) to render headless in Docker
+# libasound2t64 is the amd64 Bookworm name; arm64 keeps the original libasound2
+ARG DRAWIO_VERSION=24.7.8
+RUN apt-get update \
+    && ARCH=$(dpkg --print-architecture) \
+    && ALSA_PKG=$(if [ "$ARCH" = "amd64" ]; then echo "libasound2t64"; else echo "libasound2"; fi) \
+    && apt-get install -y --no-install-recommends \
+        xvfb \
+        xauth \
+        libgbm1 \
+        "$ALSA_PKG" \
+        libatk1.0-0 \
+        libatk-bridge2.0-0 \
+        libcups2 \
+        libdrm2 \
+        libglib2.0-0 \
+        libgtk-3-0 \
+        libnspr4 \
+        libnss3 \
+        libx11-xcb1 \
+        libxcomposite1 \
+        libxdamage1 \
+        libxrandr2 \
+        libxss1 \
+        libxtst6 \
+        fonts-liberation \
+    && wget -q -O /tmp/drawio.deb \
+       "https://github.com/jgraph/drawio-desktop/releases/download/v${DRAWIO_VERSION}/drawio-${ARCH}-${DRAWIO_VERSION}.deb" \
+    && apt-get install -y --no-install-recommends /tmp/drawio.deb \
+    && rm /tmp/drawio.deb \
+    && rm -rf /var/lib/apt/lists/*
  
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
@@ -52,7 +85,7 @@ COPY --from=build /app/package.json ./
 #   /app/.code-intel — DB + config
 #   /app/workspaces  — per-tenant workspaces (see SERVER_WORKSPACES_ROOT)
 RUN groupadd -g 1001 sa4e && \
-    useradd -u 1001 -g sa4e -s /bin/sh sa4e && \
+    useradd -u 1001 -g sa4e -m -s /bin/sh sa4e && \
     mkdir -p /app/.code-intel /app/workspaces && \
     chown -R sa4e:sa4e /app
 
