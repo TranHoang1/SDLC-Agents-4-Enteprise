@@ -14,8 +14,8 @@ export interface HttpPostOptions {
 /**
  * Generic JSON HTTP request via Node http/https module.
  * Compatible with older VS Code environments (no global fetch dependency).
- * Resolves with the parsed response body regardless of status code —
- * callers check the backend `{ data, error }` envelope.
+ * Rejects with HttpError on 4xx/5xx status codes.
+ * Resolves with parsed response body on 2xx/3xx.
  */
 function httpRequestJson<T = unknown>(
   method: string,
@@ -45,8 +45,26 @@ function httpRequestJson<T = unknown>(
         let data = "";
         res.on("data", (c) => { data += c; });
         res.on("end", () => {
-          try { resolve(JSON.parse(data) as T); }
-          catch (e) { reject(new Error(`HTTP parse error: ${(e as Error).message} — body: ${data.slice(0, 200)}`)); }
+          const status = res.statusCode ?? 0;
+          try {
+            const parsed = JSON.parse(data) as T;
+            if (status >= 400) {
+              const err = new Error(`HTTP ${status}: ${(parsed as any)?.error ?? data.slice(0, 100)}`);
+              (err as any).status = status;
+              (err as any).body = parsed;
+              reject(err);
+            } else {
+              resolve(parsed);
+            }
+          } catch (e) {
+            if (status >= 400) {
+              const err = new Error(`HTTP ${status}: ${data.slice(0, 200)}`);
+              (err as any).status = status;
+              reject(err);
+            } else {
+              reject(new Error(`HTTP parse error: ${(e as Error).message} — body: ${data.slice(0, 200)}`));
+            }
+          }
         });
       }
     );
