@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.23.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.24.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,12 @@ MIT
 ---
 
 ## Changelog
+
+### v1.24.0 (2026-08-11)
+
+- **SA4E-103: KB Document Ingestion Scope Fix** — `mem_ingest` now correctly uses project scope via `withScopeContext(__projectId)`. Documents ingested through pipeline get proper PROJECT scope instead of USER scope.
+- **SA4E-104: PostgreSQL Adapter Parity** — Fixed `RETURNING id` in PG pool transactions (uses dedicated client via `pool.connect`), `transactionAsync` isolation, and `pg-schema-ensure` migration module for automatic table creation on PG.
+- **Admin UI Improvements** — Zoom/orbit controls for graph visualization, KB entry filter, AJAX-style refresh button (preserves sidebar state), silent token refresh (no full webview reload).
 
 ### v1.21.0 (2026-08-02)
 
