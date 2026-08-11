@@ -302,6 +302,55 @@ try {
 - Cleanup code trong `finally` block có thể bỏ qua lỗi phụ (nhưng PHẢI log)
 - Retry logic có thể bắt exception ở vòng lặp nhưng PHẢI thông báo user nếu retry hết lần
 
+### ⛔ Database Transaction Error Handling (CRITICAL)
+
+**PostgreSQL aborts toàn bộ transaction khi BẤT KỲ query nào trong transaction fail.** Không thể chạy query tiếp — phải ROLLBACK trước.
+
+#### Quy tắc bắt buộc
+
+1. **CẤM silent catch bên trong transaction** — Nếu code bên trong `transactionAsync()` catch error và tiếp tục, transaction đã bị abort mà caller không biết
+2. **CẤM try-fallback pattern bên trong transaction** — Ví dụ: thử INSERT RETURNING id, fail → retry INSERT không RETURNING. Query thứ 2 **luôn fail** vì tx đã abort
+3. **PHẢI let error propagate** trong transaction — `transactionAsync` sẽ tự ROLLBACK
+4. **Nếu cần fallback logic**: tách ra ngoài transaction, hoặc check schema trước (IF EXISTS), không dùng try/catch
+
+```typescript
+// ❌ CẤM — Silent catch trong transaction poisons toàn bộ tx
+await adapter.transactionAsync(async () => {
+  try {
+    await adapter.runAsync('INSERT ... RETURNING id', params);
+  } catch {
+    // Transaction đã ABORT ở đây — query tiếp theo sẽ fail!
+    await adapter.runAsync('INSERT ...', params);  // ← LUÔN FAIL
+  }
+});
+
+// ❌ CẤM — safeExec pattern trong transaction
+await adapter.transactionAsync(async () => {
+  await safeExec(adapter, 'ALTER TABLE ...');  // nếu fail → tx abort
+  await adapter.runAsync('INSERT ...');         // ← FAIL vì tx aborted
+});
+
+// ✅ ĐÚNG — Let error propagate, transactionAsync handles ROLLBACK
+await adapter.transactionAsync(async () => {
+  await adapter.runAsync('INSERT ... RETURNING id', params);
+  await taskRepo.create({ ... });
+  // Nếu bất kỳ query nào fail → error propagates → auto ROLLBACK
+});
+
+// ✅ ĐÚNG — DDL/schema changes ngoài transaction (autocommit)
+await adapter.execAsync('CREATE TABLE IF NOT EXISTS ...');  // autocommit
+await adapter.transactionAsync(async () => {
+  await adapter.runAsync('INSERT ...', params);  // safe
+});
+```
+
+#### Checklist cho database code
+
+- [ ] Không có `try/catch` bên trong `transactionAsync()` callback mà nuốt error?
+- [ ] DDL statements (CREATE, ALTER) chạy NGOÀI transaction?
+- [ ] Không có fallback/retry logic bên trong transaction?
+- [ ] `safeExec()` chỉ dùng ngoài transaction context?
+
 ## Checklist khi viết/review code
 
 - [ ] File ≤ 200 dòng?

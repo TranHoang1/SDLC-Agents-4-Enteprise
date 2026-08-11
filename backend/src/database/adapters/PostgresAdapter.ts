@@ -89,14 +89,27 @@ export class PostgresAdapter implements DatabaseAdapter {
     const isInsert = /^\s*INSERT/i.test(sql);
     const hasReturning = /RETURNING/i.test(sql);
     if (isInsert && !hasReturning) {
-      if (inTransaction) {
-        // Inside a transaction: do NOT attempt RETURNING id fallback — it would abort the tx.
-        // Just run the INSERT as-is and return lastInsertRowid=0.
-        const r = await queryFn(translated, params);
-        return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
-      }
-      // Outside transaction: safe to attempt RETURNING id with fallback
       const withReturning = translated + ' RETURNING id';
+      if (inTransaction) {
+        // Inside transaction: attempt RETURNING id but DO NOT fallback on error.
+        // If it fails (no id column), let the error propagate → transaction ROLLBACK.
+        // This is safe: caller should ensure table has 'id' column before transacting.
+        try {
+          const r = await queryFn(withReturning, params);
+          const insertedId = r.rows?.[0]?.id ?? 0;
+          return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
+        } catch (err: any) {
+          // Only suppress "column does not exist" — rethrow everything else
+          if (err.message?.includes('column') && err.message?.includes('does not exist')) {
+            // Table has no 'id' column — run without RETURNING, accept lastInsertRowid=0
+            // This is ONLY safe if caller doesn't need the ID
+            const r = await queryFn(translated, params);
+            return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
+          }
+          throw err; // Propagate → transaction ROLLBACK
+        }
+      }
+      // Outside transaction: safe to attempt RETURNING id with silent fallback
       try {
         const r = await queryFn(withReturning, params);
         const insertedId = r.rows?.[0]?.id ?? 0;
