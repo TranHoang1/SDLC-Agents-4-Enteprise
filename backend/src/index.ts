@@ -5,6 +5,7 @@
  */
 
 import pino from 'pino/pino.js';
+import * as fs from 'fs';
 import { loadConfig } from './config/index.js';
 import { ModuleRegistry } from './modules/ModuleRegistry.js';
 import { ModuleFactory } from './modules/ModuleFactory.js';
@@ -117,6 +118,39 @@ async function main() {
   );
 
   // --- HTTP Server ---
+  // Ensure indexTempDir exists for source file writes
+  const indexTempDir = config.indexTempDir;
+  if (!fs.existsSync(indexTempDir)) {
+    fs.mkdirSync(indexTempDir, { recursive: true });
+    logger.info({ indexTempDir }, 'Created index temp directory');
+  }
+
+  // SA4E-103: Fix graph_nodes type for existing KB entries (one-time migration)
+  try {
+    const { getAdminAdapter } = await import('./admin/db/core.js');
+    const adminAdapter = getAdminAdapter();
+    if (adminAdapter.isConnected()) {
+      const engine = adminAdapter.getEngine();
+      // SA4E-104: Ensure body_embeddings has project_id + UNIQUE constraint on PG
+      if (engine === 'postgresql') {
+        const { ensurePostgresIndexSchema } = await import('./database/migration/pg-schema-ensure.js');
+        await ensurePostgresIndexSchema(adminAdapter);
+      }
+      if (engine === 'postgresql') {
+        await adminAdapter.runAsync(
+          `UPDATE graph_nodes SET type = ke.type FROM knowledge_entries ke WHERE graph_nodes.entry_id = 'kb-entry:' || ke.id::text AND graph_nodes.type = 'KNOWLEDGE_ENTRY'`, [],
+        );
+      } else {
+        await adminAdapter.runAsync(
+          `UPDATE graph_nodes SET type = (SELECT ke.type FROM knowledge_entries ke WHERE 'kb-entry:' || ke.id = graph_nodes.entry_id) WHERE entry_id LIKE 'kb-entry:%' AND type = 'KNOWLEDGE_ENTRY'`, [],
+        );
+      }
+      logger.info('Fixed graph_nodes types from KNOWLEDGE_ENTRY to actual entry types');
+    }
+  } catch (err) {
+    logger.warn({ err }, 'graph_nodes type migration skipped (non-fatal)');
+  }
+
   const toolRouter = factory.createToolRouter();
   const mcpConfigService = factory.createMcpConfigService();
   const server = factory.createHttpServer(toolRouter, mcpConfigService);

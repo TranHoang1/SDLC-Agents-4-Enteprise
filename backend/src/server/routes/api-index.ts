@@ -29,11 +29,14 @@ interface SourceFile {
 }
 interface IndexScope { projectId: string; workspace: string }
 
-/** Resolve request scope from trusted headers, falling back to boot config. */
-function resolveRequestScope(c: Context): IndexScope {
+/** Resolve request scope — uses authenticated userId from session for tenant isolation. */
+function resolveRequestScope(c: Context, sessionUserId?: string): IndexScope {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
-  const workspace = c.req.header('X-Workspace-Root') || config.workspace;
+  const userId = sessionUserId || 'default';
+  // indexTempDir/{userId}/{projectId} for source file writes
+  const workspace = path.join(config.indexTempDir, userId, projectId);
+  if (!fs.existsSync(workspace)) fs.mkdirSync(workspace, { recursive: true });
   return { projectId, workspace };
 }
 
@@ -127,12 +130,12 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
   app.post('/api/index/document', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleIndexDocument(c, logger);
+    return handleIndexDocument(c, logger, session.userId);
   });
   app.post('/api/index/documents', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleIndexDocuments(c, logger);
+    return handleIndexDocuments(c, logger, session.userId);
   });
 
   // SA4E-78: Decoupled indexer endpoints
@@ -163,7 +166,7 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const body = await c.req.json() as { files: SourceFile[] };
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
-    const scope = resolveRequestScope(c);
+    const scope = resolveRequestScope(c, userId);
     await registerProjectPhase(scope.projectId, scope.workspace, logger, userId);
 
     const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
@@ -224,12 +227,12 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
   }
 }
 
-async function handleIndexDocument(c: Context, logger: Logger) {
+async function handleIndexDocument(c: Context, logger: Logger, userId = '') {
   try {
     const body = await c.req.json() as { path: string; content: string };
     const { path: relPath, content } = body;
     if (!relPath || !content) return c.json({ error: 'path and content required' }, 400);
-    const scope = resolveRequestScope(c);
+    const scope = resolveRequestScope(c, userId);
     const targetPath = resolveWithinWorkspace(scope.workspace, relPath);
     if (!targetPath) return c.json({ error: 'Invalid path' }, 400);
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
@@ -240,12 +243,12 @@ async function handleIndexDocument(c: Context, logger: Logger) {
   }
 }
 
-async function handleIndexDocuments(c: Context, logger: Logger) {
+async function handleIndexDocuments(c: Context, logger: Logger, userId = '') {
   try {
     const body = await c.req.json() as { files: SourceFile[] };
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
-    const scope = resolveRequestScope(c);
+    const scope = resolveRequestScope(c, userId);
     const { written, rejected } = writeFilesPhase(scope.workspace, files);
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
     return c.json({ indexed: written, rejected });

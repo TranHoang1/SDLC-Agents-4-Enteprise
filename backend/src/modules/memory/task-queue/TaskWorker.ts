@@ -41,6 +41,8 @@ export class TaskWorker {
   private lastPollAt: string | null = null;
   private processing = false;
   private shutdownResolve: (() => void) | null = null;
+  /** SA4E-101: Track current processing task for status bar progress. */
+  private currentTaskInfo: { file: string; type: string; current: number; total: number } | null = null;
 
   constructor(
     db: DatabaseAdapter,
@@ -118,6 +120,22 @@ export class TaskWorker {
     return { ...dbStats, isRunning: this.running, lastPollAt: this.lastPollAt };
   }
 
+  /** SA4E-101: Get current task progress for status bar display. */
+  async getProgress(): Promise<{ phase: string; file: string; current: number; total: number; percent: number } | null> {
+    if (!this.processing || !this.currentTaskInfo) return null;
+    const stats = await this.repo.getStats();
+    const total = stats.pending + stats.processing + stats.completed;
+    const current = stats.completed;
+    const percent = total > 0 ? Math.round((current / total) * 100) : 0;
+    return {
+      phase: this.currentTaskInfo.type,
+      file: this.currentTaskInfo.file,
+      current,
+      total,
+      percent,
+    };
+  }
+
   getRepository(): PendingTaskRepository { return this.repo; }
 
   // ── Private ──
@@ -168,6 +186,9 @@ export class TaskWorker {
       let payload: any;
       try { payload = JSON.parse(task.payload); }
       catch { this.repo.markFailed(task.id, 'invalid_json_payload'); return; }
+      // SA4E-101: Track current task for progress reporting
+      const file = (entry as any).source || `entry-${task.entry_id}`;
+      this.currentTaskInfo = { file, type: task.task_type, current: 0, total: 0 };
       switch (task.task_type) {
         case TaskType.TAG_ENRICHMENT:
           await this.processTagEnrichment(task, payload);

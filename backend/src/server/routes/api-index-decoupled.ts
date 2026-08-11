@@ -40,10 +40,13 @@ function getManager(registry: ModuleRegistry): IndexOperationManager | null {
 }
 
 /** Resolve project scope from request headers. */
-function resolveScope(c: Context) {
+function resolveScope(c: Context, sessionUserId?: string) {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
-  const workspace = c.req.header('X-Workspace-Root') || config.workspace;
+  const userId = sessionUserId || 'default';
+  // indexTempDir/{userId}/{projectId} for source file writes
+  const workspace = path.join(config.indexTempDir, userId, projectId);
+  if (!fs.existsSync(workspace)) fs.mkdirSync(workspace, { recursive: true });
   return { projectId, workspace };
 }
 

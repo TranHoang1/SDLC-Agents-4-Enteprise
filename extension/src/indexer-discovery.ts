@@ -22,6 +22,9 @@ const INDEXABLE_EXTENSIONS = new Set([
 // Everything else (any project/feature/ticket folder name) is scanned.
 const FOLDER_DENYLIST = new Set(["diagrams", "testdata", "templates", "node_modules", ".git"]);
 
+/** Skip any folder whose name starts with "." (hidden/config directories). */
+function isDotFolder(name: string): boolean { return name.startsWith("."); }
+
 export function discoverDocuments(root: string): Array<{ path: string; type: string; ticket: string; format: string }> {
   const docsDir = path.join(root, "documents");
   if (!fs.existsSync(docsDir)) { return []; }
@@ -39,7 +42,7 @@ function scanDirectoryRecursive(
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     if (entry.isDirectory()) {
-      if (FOLDER_DENYLIST.has(entry.name)) { continue; }
+      if (FOLDER_DENYLIST.has(entry.name) || isDotFolder(entry.name)) { continue; }
       // At the documents/ root, each subfolder name becomes the group/ticket label.
       const childTicket = ticket === "documents" ? entry.name : ticket;
       scanDirectoryRecursive(path.join(dir, entry.name), childTicket, `${relativePath}/${entry.name}`, results);
