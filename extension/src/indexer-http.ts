@@ -80,10 +80,15 @@ export async function uploadDocumentFile(relPath: string, content: string, token
 export async function uploadSourceFiles(report: vscode.Progress<{ message?: string }>, token?: string): Promise<string> {
   const backendUrl = getBackendUrl();
   if (!backendUrl) return "❌ Backend URL not configured.";
-  const libraryExcludes = "{node_modules,dist,.git,build,out,backend,.opencode,vendor,packages,bower_components}/**";
-  const files = await vscode.workspace.findFiles(
+  const libraryExcludes = "{node_modules,**/node_modules,dist,.git,.kilo,.kiro,.claude,.code-intel,.analysis,.agents,build,out,backend,.opencode,vendor,packages,bower_components}/**";
+  const allFiles = await vscode.workspace.findFiles(
     "**/*.{ts,js,kt,java,py,go,rs,tsx,jsx}", libraryExcludes
   );
+  // SA4E-104: Post-filter — exclude any file under a dot-folder (e.g. .kilo/, .vscode/)
+  const files = allFiles.filter(f => {
+    const rel = vscode.workspace.asRelativePath(f, false);
+    return !rel.split(/[\\/]/).some(seg => seg.startsWith('.') && seg.length > 1);
+  });
   if (files.length === 0) return "❌ No source files found";
   const url = `${backendUrl}/api/index/source`;
   let uploaded = 0;
