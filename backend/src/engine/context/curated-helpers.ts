@@ -1,4 +1,4 @@
-﻿import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
+import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { SymbolResolver } from '../graph/symbol-resolver.js';
 import { GraphTraverser } from '../graph/traverser.js';
 import { QueryLayer } from '../query/query-layer.js';
@@ -35,7 +35,7 @@ export async function searchCode(
     );
 
     return { source: 'code', results: combined.slice(0, 20) };
-  } catch {
+  } catch (err) {
     return { source: 'code', results: [] };
   }
 }
@@ -71,7 +71,7 @@ export async function searchMemory(
         file: undefined, line: undefined
       }))
     };
-  } catch {
+  } catch (err) {
     return { source: 'memory', results: [] };
   }
 }
@@ -104,7 +104,7 @@ export async function expandGraph(topSymbols: any[], traverser: GraphTraverser):
           relationship: `${r.edgeType} ${symbol.name}`
         });
       }
-    } catch { /* skip */ }
+    } catch (err) { console.debug('[curated-helpers] skip :', (err as Error).message); }
   }
 
   return { source: 'graph', results: expanded };

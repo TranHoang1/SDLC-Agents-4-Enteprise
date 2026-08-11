@@ -1,4 +1,4 @@
-﻿/**
+/**
  * KB entries routes — search, list, and detail for KB entries.
  * SA4E-50: All admin-db calls are awaited since they are now async.
  */
@@ -150,7 +150,7 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
           if (props.length > 10) parts.push(`- ... and ${props.length - 10} more`);
         }
         ruleInfo = parts.join('\n');
-      } catch { ruleInfo = entry.summary || fqn; }
+      } catch (err) { ruleInfo = entry.summary || fqn; }
       return c.json({
         id: entryId,
         title: fqn.split(':').pop() || fqn,
@@ -212,7 +212,7 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
           bodyCode = Buffer.from(bodyRow.embedding).toString('utf-8');
         }
       }
-    } catch { /* body_embeddings may not exist or be empty */ }
+    } catch (err) { /* body_embeddings table may not exist */ }
     const contentParts = [
       detail.signature ? `**Signature:** \`${detail.signature}\`` : '',
       detail.docComment ? `**Doc:** ${detail.docComment}` : '',
@@ -231,7 +231,7 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
       tags: [detail.kind, detail.language, detail.module].filter(Boolean),
       links: [], qualityScore: null, createdAt: null, updatedAt: null,
     };
-  } catch {
+  } catch (err) {
     ctx.logger.warn({ symbolId }, 'Failed to fetch code symbol detail');
     return null;
   }

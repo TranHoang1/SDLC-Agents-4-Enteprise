@@ -76,7 +76,7 @@ export class MigrationService {
           } else {
             (target as DatabaseAdapter).exec(`DROP TABLE IF EXISTS "${table}" CASCADE`);
           }
-        } catch { /* ignore if table doesn't exist */ }
+        } catch (err) { logger.debug({ err }, '[MigrationService] Ignore if table does not exist'); }
         const ddl = typeMapper.generateCreateTable(
           table, this.targetConfig.engine
         );
@@ -153,7 +153,7 @@ export class MigrationService {
       } else {
         (target as DatabaseAdapter).run(`DELETE FROM "${table}"`, []);
       }
-    } catch { /* table may be empty or not exist yet */ }
+    } catch (err) { logger.debug({ err }, '[MigrationService] table may be empty or not exist yet '); }
 
     let copied = 0;
     while (copied < total) {

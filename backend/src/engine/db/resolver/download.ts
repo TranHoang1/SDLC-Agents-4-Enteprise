@@ -140,7 +140,7 @@ function computeSha256Sync(filePath: string): string {
 function cleanupFile(filePath: string): void {
   try {
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  } catch { /* ignore */ }
+  } catch (err) { logger.debug({ err }, '[download] ignore '); }
 }
 
 function sleep(ms: number): Promise<void> {

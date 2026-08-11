@@ -42,7 +42,7 @@ export function findDrawioCli(): string | null {
     const which = process.platform === 'win32' ? 'where drawio 2>nul' : 'which drawio';
     const result = execSync(which, { timeout: 5000, stdio: 'pipe' }).toString().trim();
     if (result && fs.existsSync(result.split('\n')[0])) return result.split('\n')[0];
-  } catch { /* not in PATH */ }
+  } catch (err) { console.debug('[drawio-renderers] not in PATH :', (err as Error).message); }
   return null;
 }
 
@@ -91,7 +91,7 @@ export function hasUpstreamServer(orchestrationEngine: any, serverName: string):
     return status.servers.some((s: any) =>
       s.name?.toLowerCase().includes(serverName.toLowerCase()) && s.state === 'ACTIVE'
     );
-  } catch { return false; }
+  } catch (err) { return false; }
 }
 
 export function sleep(ms: number): Promise<void> {

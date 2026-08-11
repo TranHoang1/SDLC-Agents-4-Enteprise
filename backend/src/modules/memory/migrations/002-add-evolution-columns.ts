@@ -11,14 +11,14 @@ async function columnExists(db: DatabaseAdapter, table: string, column: string):
       [table, column],
     );
     if (pg.length > 0) return true;
-  } catch {
+  } catch (err) {
     try {
       const lite = await db.allAsync<{ name: string }>(
         `SELECT name FROM pragma_table_info('${table}') WHERE name = ?`,
         [column],
       );
       return lite.length > 0;
-    } catch { return false; }
+    } catch (err) { return false; }
   }
   return false;
 }
@@ -31,14 +31,14 @@ async function tableExists(db: DatabaseAdapter, table: string): Promise<boolean>
       [table],
     );
     if (pg.length > 0) return true;
-  } catch {
+  } catch (err) {
     try {
       const lite = await db.allAsync<{ name: string }>(
         `SELECT name FROM sqlite_master WHERE type='table' AND name=?`,
         [table],
       );
       return lite.length > 0;
-    } catch { return false; }
+    } catch (err) { return false; }
   }
   return false;
 }
@@ -78,11 +78,11 @@ export async function migrate002AddEvolutionColumns(db: DatabaseAdapter): Promis
     `);
   }
 
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_expires_at ON knowledge_entries(expires_at)`); } catch {}
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_updated_at ON knowledge_entries(updated_at)`); } catch {}
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_needs_verification ON knowledge_entries(needs_verification)`); } catch {}
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_entry_outcomes_entry_id ON entry_outcomes(entry_id)`); } catch {}
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_search_log_failed ON search_log(result_count)`); } catch {}
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_expires_at ON knowledge_entries(expires_at)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_updated_at ON knowledge_entries(updated_at)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_needs_verification ON knowledge_entries(needs_verification)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_entry_outcomes_entry_id ON entry_outcomes(entry_id)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_search_log_failed ON search_log(result_count)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
 
   // INSERT OR IGNORE is SQLite; use ON CONFLICT for cross-engine
   await db.execAsync(`INSERT INTO decay_config (key, value) VALUES ('half_life_days', '30') ON CONFLICT (key) DO NOTHING`);

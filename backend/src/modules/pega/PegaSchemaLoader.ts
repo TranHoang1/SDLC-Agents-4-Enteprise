@@ -43,8 +43,6 @@ export class PegaSchemaLoader {
       } else if (parsed && parsed.targetClass) {
         results.push(parsed as PegaRuleKbSchema);
       }
-    } catch {
-      /* ignore invalid JSON files */
-    }
+    } catch (err) { console.debug('[PegaSchemaLoader] ignore invalid JSON files :', (err as Error).message); }
   }
 }

@@ -107,7 +107,7 @@ export async function handleIngest(
           `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE id = ?`,
           [id],
         );
-      } catch { /* non-fatal — graceful degradation */ }
+      } catch (err) { logger.debug({ err }, '[ingest] Failed to set enrichment_status (non-fatal — graceful degradation)'); }
     }
     if (tagAnalyzer) {
       tagAnalyzer.analyzeTags(content).then(async result => {
@@ -198,7 +198,7 @@ export async function handleIngestFile(
         const idList = oldIds.map(r => `'doc-${r.id}'`).join(',');
         await adminAdapter.runAsync(`DELETE FROM graph_nodes WHERE entry_id IN (${idList})`, []);
       }
-    } catch { /* non-fatal */ }
+    } catch (err) { logger.debug({ err }, '[ingest-file] Failed to delete stale graph nodes (non-fatal)'); }
     await engine.getAdapter().runAsync(clause, params);
   } else {
     // Delete stale graph nodes before removing KB entries (while IDs still exist)
@@ -212,7 +212,7 @@ export async function handleIngestFile(
         const idList = oldIds.map(r => `'doc-${r.id}'`).join(',');
         await adminAdapter.runAsync(`DELETE FROM graph_nodes WHERE entry_id IN (${idList})`, []);
       }
-    } catch { /* non-fatal */ }
+    } catch (err) { logger.debug({ err }, '[ingest-file] Failed to delete stale graph nodes (non-fatal)'); }
     await engine.getAdapter().runAsync('DELETE FROM knowledge_entries WHERE source = ?', [filePath]);
   }
 
@@ -235,7 +235,7 @@ export async function handleIngestFile(
         `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE id = ?`,
         [id],
       );
-    } catch { /* non-fatal — column may not exist pre-migration */ }
+    } catch (err) { logger.debug({ err }, '[ingest-file] Failed to set enrichment_status (column may not exist pre-migration)'); }
     if (structuredMap) {
       await engine.updateStructuredMap(id, structuredMap);
     }

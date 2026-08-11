@@ -37,7 +37,7 @@ export class PegaProjectDetector {
               info.pzInsKey = `RULE-APPLICATION ${content.applicationName.toUpperCase()}`;
             }
             info.indicators.push('pega-project.json');
-          } catch { /* skip invalid json */ }
+          } catch (err) { console.debug('[PegaProjectDetector] skip invalid json :', (err as Error).message); }
         },
       },
       {
@@ -126,7 +126,7 @@ export class PegaProjectDetector {
                     info.indicators.push(`JSON with pxObjClass in src/${e.name}/`);
                     return;
                   }
-                } catch { /* skip */ }
+                } catch (err) { console.debug('[PegaProjectDetector] skip :', (err as Error).message); }
               }
             }
           }
@@ -171,7 +171,7 @@ export class PegaProjectDetector {
       try {
         indicator.cb();
         info.confidence += indicator.weight;
-      } catch { /* skip */ }
+      } catch (err) { console.debug('[PegaProjectDetector] skip :', (err as Error).message); }
     }
 
     info.confidence = Math.min(info.confidence, 100);

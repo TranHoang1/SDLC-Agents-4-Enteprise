@@ -32,7 +32,7 @@ export async function migrate007Up(adapter: DatabaseAdapter): Promise<void> {
       `ALTER TABLE knowledge_entries ADD COLUMN enriched_by TEXT DEFAULT NULL`,
       `ALTER TABLE knowledge_entries ADD COLUMN enriched_at TEXT DEFAULT NULL`,
     ]) {
-      try { await adapter.runAsync(col, []); } catch { /* column already exists */ }
+      try { await adapter.runAsync(col, []); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
     }
   }
 

@@ -114,7 +114,7 @@ export class PostgresAdapter implements DatabaseAdapter {
         const r = await queryFn(withReturning, params);
         const insertedId = r.rows?.[0]?.id ?? 0;
         return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
-      } catch {
+      } catch (err) {
         // Fallback: table may not have 'id' column — run without RETURNING
         const r = await queryFn(translated, params);
         return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
@@ -154,7 +154,7 @@ export class PostgresAdapter implements DatabaseAdapter {
       await client.query('COMMIT');
       return result;
     } catch (err) {
-      try { await client.query('ROLLBACK'); } catch { /* ignore rollback error */ }
+      try { await client.query('ROLLBACK'); } catch (err) { console.debug('[PostgresAdapter] ignore rollback error :', (err as Error).message); }
       throw err;
     } finally {
       client.release();

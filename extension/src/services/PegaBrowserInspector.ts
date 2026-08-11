@@ -506,7 +506,7 @@ export class PegaBrowserInspector {
           if (body.length > 3000 && (body.includes("Cell Properties") || body.includes("Property") || body.includes("template-root-marker"))) {
             capturedHTML = body;
           }
-        } catch {}
+        } catch (err) { console.debug('[PegaBrowserInspector] Operation failed (non-fatal):', (err as Error).message); }
       }
     };
     this.page.on("response", handler);
@@ -602,7 +602,7 @@ export class PegaBrowserInspector {
           if (body.length > 5000 && body.includes("Cell Properties")) {
             capturedHTML = body;
           }
-        } catch { /* stream consumed */ }
+        } catch (err) { console.debug('[PegaBrowserInspector] stream consumed :', (err as Error).message); }
       }
     };
     this.page.on("response", handler);
@@ -791,7 +791,7 @@ export class PegaBrowserInspector {
           // Remove leading dot
           return propValue.startsWith(".") ? propValue.substring(1) : propValue;
         }
-      } catch {
+      } catch (err) {
         // Frame may be detached — try next
       }
     }
@@ -877,7 +877,7 @@ export class PegaBrowserInspector {
         if (body.length > 3000 && (body.includes("Layout Properties") || body.includes("Data source") || body.includes("Row operations"))) {
           capturedHTML = body;
         }
-      } catch {}
+      } catch (err) { console.debug('[PegaBrowserInspector] Operation failed (non-fatal):', (err as Error).message); }
     };
     this.page.on("response", handler);
 
@@ -995,7 +995,7 @@ export class PegaBrowserInspector {
       this.browser = null; this.page = null; this.isLoggedIn = false;
     }
     if (this.userDataDir && fs.existsSync(this.userDataDir)) {
-      try { fs.rmSync(this.userDataDir, { recursive: true, force: true }); } catch { /* ok */ }
+      try { fs.rmSync(this.userDataDir, { recursive: true, force: true }); } catch (err) { console.debug('[PegaBrowserInspector] ok :', (err as Error).message); }
       this.userDataDir = null;
     }
   }
@@ -1086,7 +1086,7 @@ export class PegaBrowserInspector {
         this.log(`[BrowserInspector] Dismissed error popup: ${dismissed}`);
         await new Promise((r) => setTimeout(r, 1000));
       }
-    } catch { /* ignore */ }
+    } catch (err) { console.debug('[PegaBrowserInspector] ignore :', (err as Error).message); }
   }
 
   private async fillLoginForm(): Promise<boolean> {
@@ -1128,7 +1128,7 @@ export class PegaBrowserInspector {
         const l = document.querySelector(".loading-indicator, #pzLoading, .pega-busy");
         return !l || (l as HTMLElement).style.display === "none";
       }, { timeout: 15_000 });
-    } catch { /* no loader */ }
+    } catch (err) { console.debug('[PegaBrowserInspector] no loader :', (err as Error).message); }
     await this.page.waitForFunction(() => new Promise<boolean>((resolve) => {
       let t: ReturnType<typeof setTimeout>;
       const o = new MutationObserver(() => { clearTimeout(t); t = setTimeout(() => { o.disconnect(); resolve(true); }, 1000); });
@@ -1149,7 +1149,7 @@ export class PegaBrowserInspector {
     } else if (os.platform() === "darwin") {
       candidates.push("/Applications/Google Chrome.app/Contents/MacOS/Google Chrome");
     } else {
-      try { const w = execSync("which google-chrome || which chromium-browser", { encoding: "utf-8" }).trim(); if (w) return w; } catch { /* noop */ }
+      try { const w = execSync("which google-chrome || which chromium-browser", { encoding: "utf-8" }).trim(); if (w) return w; } catch (err) { console.debug('[PegaBrowserInspector] noop :', (err as Error).message); }
       candidates.push("/usr/bin/google-chrome", "/usr/bin/chromium-browser");
     }
     for (const c of candidates) { if (fs.existsSync(c)) return c; }

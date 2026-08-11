@@ -107,7 +107,7 @@ export class PegaHttpClient {
             rulesetStack: [],
           };
         }
-      } catch { /* skip */ }
+      } catch (err) { console.debug('[PegaHttpClient] skip :', (err as Error).message); }
     }
 
     throw new Error("Failed to connect to Pega Server");
@@ -330,7 +330,7 @@ export class PegaHttpClient {
           let json: Record<string, unknown> = {};
           try {
             json = JSON.parse(text);
-          } catch {
+          } catch (err) {
             if (prefix === this.activePrefix) {
               throw new Error(`Rule not found for triple: ${pxObjClass} | ${appliesTo} | ${pyRuleName}`);
             }
@@ -403,7 +403,7 @@ export class PegaHttpClient {
             return json;
           }
         }
-      } catch { /* try next prefix */ }
+      } catch (err) { console.debug('[PegaHttpClient] try next prefix :', (err as Error).message); }
     }
     throw new Error(`POST /rules/list failed on all custom REST prefixes`);
   }
@@ -491,7 +491,7 @@ export class PegaHttpClient {
       CONCRETE_TYPES.map(async (objClass) => {
         try {
           return await this.listRulesByFilter(objClass, "pyRuleSet", ruleSetName, pageSize, pageIndex);
-        } catch { return { pxResults: [] as Record<string, unknown>[], pxMore: false }; }
+        } catch (err) { console.debug('[PegaHttpClient] Rule listing failed for ruleSet (non-fatal):', (err as Error).message); return { pxResults: [] as Record<string, unknown>[], pxMore: false }; }
       }),
     );
 
@@ -525,7 +525,8 @@ export class PegaHttpClient {
       const data = await this.listApplicationRules(ruleType, className, pageSize, 1);
       const pxResults = (data.pxResults || data.pxResult || data.rules || data.properties || []) as Record<string, unknown>[];
       return Array.isArray(pxResults) ? pxResults : [];
-    } catch {
+    } catch (err) {
+      console.debug('[PegaHttpClient] Failed to parse rule list response:', (err as Error).message);
       return [];
     }
   }
@@ -570,7 +571,7 @@ export class PegaHttpClient {
             return json;
           }
         }
-      } catch { /* try next prefix */ }
+      } catch (err) { console.debug('[PegaHttpClient] try next prefix :', (err as Error).message); }
     }
     throw new Error(`POST /rules/save failed on all custom REST prefixes`);
   }
@@ -614,7 +615,7 @@ export class PegaHttpClient {
             return json;
           }
         }
-      } catch { /* try next prefix */ }
+      } catch (err) { console.debug('[PegaHttpClient] try next prefix :', (err as Error).message); }
     }
     throw new Error(`POST /rules/checkout failed on all custom REST prefixes`);
   }
@@ -647,7 +648,7 @@ export class PegaHttpClient {
             return json;
           }
         }
-      } catch { /* try next prefix */ }
+      } catch (err) { console.debug('[PegaHttpClient] try next prefix :', (err as Error).message); }
     }
     throw new Error(`POST /rules/test failed on all custom REST prefixes`);
   }
@@ -690,7 +691,7 @@ export class PegaHttpClient {
             return json;
           }
         }
-      } catch { /* try next prefix */ }
+      } catch (err) { console.debug('[PegaHttpClient] try next prefix :', (err as Error).message); }
     }
     throw new Error(`POST /rules/branch failed on all custom REST prefixes`);
   }
@@ -846,7 +847,7 @@ export class PegaHttpClient {
             return data.caseTypes.map((c: any) => ({ name: c.name || "", caseTypeID: c.caseTypeID || "" }));
           }
         }
-      } catch { /* non-fatal */ }
+      } catch (err) { console.debug('[PegaHttpClient] non-fatal :', (err as Error).message); }
     }
     return [];
   }

@@ -55,7 +55,7 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
       reclassified = true;
       pegaService.reclassifyExistingGraphNodes().then(n => {
         if (n > 0) logger.info({ count: n }, '[pega] Reclassified existing graph nodes');
-      }).catch(() => {});
+      }).catch((err) => { logger.debug({ err }, '[pega] Graph node reclassification failed (non-fatal)'); });
     }
     return pegaService;
   };
@@ -203,7 +203,7 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
             version: ver,
           });
           if (result.status === 'success' && result.ruleId !== -1 && result.ruleId !== undefined) stored++;
-        } catch { /* skip individual failures */ }
+        } catch (err) { logger.debug({ err }, '[pega] Single rule ingest failed in batch — skipping'); }
       }
 
       let totalRulesInDb = stored;
@@ -228,7 +228,7 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
           [body.projectId]
         )) as { cnt?: number } | undefined;
         if (rowGraph && typeof rowGraph.cnt === 'number') { totalGraphNodesInDb = Number(rowGraph.cnt); }
-      } catch { /* fallback */ }
+      } catch (err) { logger.debug({ err }, '[pega] Failed to query DB totals (using fallback values)'); }
 
       try {
         const adapter = (service as any).memoryEngine.getAdapter();
@@ -240,7 +240,7 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
            ON CONFLICT (project_id) DO UPDATE SET last_seen = ${ts}`,
           [body.projectId, 'Pega: ' + ((body.rules[0] as any)?.pyApplication || body.projectId), '', 'pega-crawler'],
         );
-      } catch { /* non-fatal */ }
+      } catch (err) { logger.debug({ err }, '[pega] Failed to register project in project_registry (non-fatal)'); }
 
       // SA4E-94: computeNextBatch removed — enumeration handled by extension
       const nextBatch: Array<{ insKey: string; pxObjClass: string; pyClassName: string; pyRuleName: string }> = [];

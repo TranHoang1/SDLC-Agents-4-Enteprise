@@ -48,7 +48,7 @@ async function getEffectiveConfig(ctx: AdminContext): Promise<Record<string, Rec
     if (llmOverrides.maxTokens !== undefined) base.llm.maxTokens = llmOverrides.maxTokens;
     if (llmOverrides.tagAnalysisEnabled !== undefined) base.llm.tagAnalysisEnabled = llmOverrides.tagAnalysisEnabled;
     if (llmOverrides.tagConfidenceThreshold !== undefined) base.llm.tagConfidenceThreshold = llmOverrides.tagConfidenceThreshold;
-  } catch { /* DB not ready — use env defaults */ }
+  } catch (err) { /* DB not ready for LLM config — using env defaults */ }
 
   // Merge DB-persisted taskWorker config
   try {
@@ -60,7 +60,7 @@ async function getEffectiveConfig(ctx: AdminContext): Promise<Record<string, Rec
         if (!isNaN(n)) base.taskWorker[key] = n;
       }
     }
-  } catch { /* DB not ready — use env defaults */ }
+  } catch (err) { /* DB not ready for taskWorker config — using env defaults */ }
 
   // Merge DB-persisted server config (indexTempDir)
   try {
@@ -69,7 +69,7 @@ async function getEffectiveConfig(ctx: AdminContext): Promise<Record<string, Rec
       const val = await getLatestConfigValue('server', key);
       if (val !== undefined && val.trim()) base.server[key] = val;
     }
-  } catch { /* DB not ready — use env defaults */ }
+  } catch (err) { /* DB not ready for server config — using env defaults */ }
 
   // Runtime in-memory overrides (from PATCH calls in current session) always win
   for (const [section, keys] of Object.entries(ctx.configOverrides)) {
@@ -184,7 +184,7 @@ export function createConfigRoutes(ctx: AdminContext): Hono {
         const probe = await doFetch(chatUrl, { model: 'deepseek-v4-flash-free', max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] }, { 'Content-Type': 'application/json' }, controller.signal);
         checks.push(probe.ok ? `✓ Reachable (${probe.ms}ms)` : `⚠ Endpoint: ${probe.status === 401 ? 'auth-gated' : 'HTTP ' + probe.status}`);
       } else {
-        try { const p = await fetch(chatUrl.replace('/chat/completions', '/models'), { headers: { 'Content-Type': 'application/json' }, signal: controller.signal }); checks.push(`✓ Reachable`); } catch { checks.push(`⚠ Endpoint unreachable`); }
+        try { const p = await fetch(chatUrl.replace('/chat/completions', '/models'), { headers: { 'Content-Type': 'application/json' }, signal: controller.signal }); checks.push(`✓ Reachable`); } catch (err) { checks.push(`⚠ Endpoint unreachable`); }
       }
 
       // Step 2: test user's model
@@ -196,13 +196,13 @@ export function createConfigRoutes(ctx: AdminContext): Hono {
 
       if (r.ok) {
         let info = 'responded';
-        try { const d = JSON.parse(r.text); if (d.choices?.[0]?.message?.content) info = d.choices[0].message.content.substring(0, 80); else if (d.content?.[0]?.text) info = d.content[0].text.substring(0, 80); } catch { }
+        try { const d = JSON.parse(r.text); if (d.choices?.[0]?.message?.content) info = d.choices[0].message.content.substring(0, 80); else if (d.content?.[0]?.text) info = d.content[0].text.substring(0, 80); } catch (err) { /* response parse non-critical */ }
         return c.json({ success: true, errorType: null, message: `✓ Connected + Authenticated (${r.ms}ms) [model: ${testModel}] — ${info}`, checks });
       }
 
       // Error handling with suggestions
       let msg = '';
-      try { const d = JSON.parse(r.text); const e = d.error || d; msg = e.message || JSON.stringify(d).substring(0, 300); } catch { msg = r.text.substring(0, 300); }
+      try { const d = JSON.parse(r.text); const e = d.error || d; msg = e.message || JSON.stringify(d).substring(0, 300); } catch (err) { msg = r.text.substring(0, 300); }
       if (r.status === 401) return c.json({ success: false, errorType: 'auth', message: `HTTP ${r.status} — API key rejected (Unauthorized)`, checks });
       if (r.status === 403) return c.json({ success: false, errorType: 'auth', message: `HTTP ${r.status} — API key lacks permissions (Forbidden)`, checks });
       let hint = '';

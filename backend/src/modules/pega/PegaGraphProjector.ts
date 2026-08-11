@@ -5,6 +5,9 @@
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import type { UnresolvedDependency } from './models.js';
 import { pxObjClassToGraphType } from './pega-utils.js';
+import pino from 'pino';
+
+const logger = pino({ name: 'pega-graph-projector' });
 
 /**
  * Insert/update a graph node for an ingested Pega rule.
@@ -59,7 +62,7 @@ export async function createDependencyEdges(
     const relType = mapDependencyRelType(dep.ruleType);
     try {
       await adapter.runAsync(sql, [sourceNodeId, targetNodeId, 0.7, relType]);
-    } catch { /* non-fatal — target node may not exist yet */ }
+    } catch (err) { logger.debug({ err, sourceNodeId, targetNodeId }, '[PegaGraphProjector] Edge insert failed (target node may not exist yet)'); }
   }
 }
 

@@ -24,7 +24,7 @@ function readPackageDirectories(workspace: string): string[] {
         .map((pd: any) => pd.path ?? pd)
         .filter(Boolean);
     }
-  } catch { /* ignore parse errors */ }
+  } catch (err) { console.debug('[sfdx-helper] Failed to parse sfdx-project.json (non-fatal):', (err as Error).message); }
   return ['force-app'];
 }
 

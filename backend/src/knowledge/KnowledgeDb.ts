@@ -15,7 +15,7 @@ type Row = Record<string, any>;
 
 function parse<T>(raw: string | null | undefined, fallback: T): T {
   if (!raw) return fallback;
-  try { return JSON.parse(raw) as T; } catch { return fallback; }
+  try { return JSON.parse(raw) as T; } catch (err) { return fallback; }
 }
 
 function openDb(dbPath?: string): Database.Database {
@@ -24,7 +24,7 @@ function openDb(dbPath?: string): Database.Database {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   const db = new Database(dbPath);
   db.pragma('journal_mode = WAL'); db.pragma('foreign_keys = ON');
-  try { fs.chmodSync(dbPath, 0o600); } catch { /* best-effort on Windows */ }
+  try { fs.chmodSync(dbPath, 0o600); } catch (err) { console.debug('[KnowledgeDb] best-effort on Windows :', (err as Error).message); }
   return db;
 }
 

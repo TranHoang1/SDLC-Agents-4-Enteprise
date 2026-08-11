@@ -41,7 +41,7 @@ async function buildLLMConfig() {
       ...(dbOverrides.temperature !== undefined && { temperature: dbOverrides.temperature }),
       ...(dbOverrides.maxTokens !== undefined && { maxTokens: dbOverrides.maxTokens }),
     };
-  } catch {
+  } catch (err) {
     // DB not ready at startup — use env vars only
     return envConfig;
   }
@@ -93,7 +93,7 @@ export function initLLMInBackground(
         const embSvc = EmbeddingService.getInstance();
         taskWorker?.setEmbeddingService(embSvc);
         dispatcher.setEmbeddingAvailable(true);
-      } catch { /* ONNX not available */ }
+      } catch (err) { logger.debug({ err }, '[LLMInitializer] ONNX not available '); }
     } catch (err) {
       logger.info({ err }, 'TagAnalyzer LLM unavailable — keyword fallback only');
     }

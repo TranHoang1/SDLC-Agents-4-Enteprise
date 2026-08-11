@@ -149,7 +149,7 @@ async function addEnhancedSymbolColumns(adapter: DatabaseAdapter): Promise<void>
       try {
         await adapter.execAsync(`ALTER TABLE symbols ADD COLUMN ${col.name} ${col.type}`);
         added++;
-      } catch {
+      } catch (err) {
         // Column may already exist
       }
     }
@@ -161,7 +161,7 @@ async function addEnhancedSymbolColumns(adapter: DatabaseAdapter): Promise<void>
       await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_sym_parent ON symbols(parent_symbol_id)');
       await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_sym_exported ON symbols(is_exported)');
       await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_sym_file_kind ON symbols(file_id, kind)');
-    } catch {
+    } catch (err) {
       // Indexes may already exist
     }
   }
@@ -175,13 +175,13 @@ async function getExistingColumns(adapter: DatabaseAdapter, table: string): Prom
       [table],
     );
     if (pg.length > 0) return new Set(pg.map(r => r.column_name));
-  } catch { /* SQLite fallback */ }
+  } catch (err) { logger.debug({ err }, '[migrator] SQLite fallback '); }
   try {
     const sqlite = await adapter.allAsync<{ name: string }>(
       `SELECT name FROM pragma_table_info('${table}')`,
     );
     return new Set(sqlite.map(r => r.name));
-  } catch { return new Set(); }
+  } catch (err) { return new Set(); }
 }
 
 /** Check if graph migrations have been applied. */
@@ -192,12 +192,12 @@ export async function isGraphSchemaReady(adapter: DatabaseAdapter): Promise<bool
       `SELECT table_name FROM information_schema.tables WHERE table_name = 'relationships'`,
     );
     if (pg.length > 0) return true;
-  } catch {}
+  } catch (err) { logger.debug({ err }, '[migrator] Operation failed (non-fatal)'); }
   try {
     // SQLite
     const lite = await adapter.getAsync<{ name: string }>(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='relationships'",
     );
     return !!lite;
-  } catch { return false; }
+  } catch (err) { return false; }
 }

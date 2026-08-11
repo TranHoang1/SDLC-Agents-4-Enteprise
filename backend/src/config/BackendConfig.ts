@@ -54,7 +54,7 @@ function deriveProjectId(workspace: string, overrides?: Partial<BackendConfig>):
         return content.projectId;
       }
     }
-  } catch { /* ignore parse errors */ }
+  } catch (err) { console.debug('[BackendConfig] ignore parse errors :', (err as Error).message); }
 
   // Priority 2: Git remote origin URL hash
   try {
@@ -62,7 +62,7 @@ function deriveProjectId(workspace: string, overrides?: Partial<BackendConfig>):
     if (remoteUrl) {
       return crypto.createHash('sha256').update(remoteUrl).digest('hex').slice(0, 12);
     }
-  } catch { /* no git or no remote */ }
+  } catch (err) { console.debug('[BackendConfig] no git or no remote :', (err as Error).message); }
 
   // Priority 3: Hash of userId + folder name (prevents cross-user data leak)
   const userId = os.userInfo().username || 'unknown';

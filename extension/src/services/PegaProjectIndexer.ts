@@ -83,7 +83,7 @@ export class PegaProjectIndexer {
                 operatorId = json.operatorId || "";
                 caseTypes = (json.caseTypes || []).map((c: any) => c.caseTypeID || c.name);
             }
-        } catch { /* not a Pega project */ }
+        } catch (err) { console.debug('[PegaProjectIndexer] not a Pega project :', (err as Error).message); }
         return { appName, operatorId, caseTypes };
     }
 

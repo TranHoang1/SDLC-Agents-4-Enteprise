@@ -113,13 +113,13 @@ function deriveProjectId(workspace: string, overrides?: Partial<UnifiedConfig>):
         return content.projectId;
       }
     }
-  } catch { /* ignore */ }
+  } catch (err) { logger.debug({ err }, '[index] ignore '); }
   try {
     const remoteUrl = execSync('git remote get-url origin', { cwd: workspace, encoding: 'utf-8', timeout: 3000 }).trim();
     if (remoteUrl) {
       return crypto.createHash('sha256').update(remoteUrl).digest('hex').slice(0, 12);
     }
-  } catch { /* no git or no remote */ }
+  } catch (err) { logger.debug({ err }, '[index] no git or no remote '); }
   const userId = os.userInfo().username || 'unknown';
   const folderName = path.basename(workspace) || 'default';
   return crypto.createHash('sha256').update(`${userId}:${folderName}`).digest('hex').slice(0, 12);
@@ -173,7 +173,7 @@ export function setWorkspace(config: UnifiedConfig, rootUri: string | null): Uni
 export function fileUriToPath(uri: string): string {
   try {
     return fileURLToPath(uri);
-  } catch {
+  } catch (err) {
     return uri.replace(/^file:\/\/\//, process.platform === 'win32' ? '' : '/');
   }
 }

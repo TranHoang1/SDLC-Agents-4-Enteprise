@@ -110,7 +110,7 @@ export function initSchema(db: Database.Database): void {
   // Idempotent migration: add project_id to graph_nodes for existing DBs
   try {
     db.exec(`ALTER TABLE graph_nodes ADD COLUMN project_id TEXT NOT NULL DEFAULT ''`);
-  } catch { /* column already exists */ }
+  } catch (err) { console.debug('[schema] column already exists :', (err as Error).message); }
   db.exec(`CREATE INDEX IF NOT EXISTS idx_graph_nodes_project ON graph_nodes(project_id)`);
 
   // SA4E-50: project_registry — workspace → projectId mapping
@@ -127,7 +127,7 @@ export function initSchema(db: Database.Database): void {
   // Idempotent migration: add created_by to project_registry for ownership-based visibility
   try {
     db.exec(`ALTER TABLE project_registry ADD COLUMN created_by TEXT NOT NULL DEFAULT ''`);
-  } catch { /* column already exists */ }
+  } catch (err) { console.debug('[schema] column already exists :', (err as Error).message); }
 }
 
 export function seedDefaults(db: Database.Database): void {

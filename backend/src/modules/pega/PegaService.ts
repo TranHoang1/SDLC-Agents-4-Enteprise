@@ -16,6 +16,9 @@ import { PegaDeclarativeEngine } from './PegaDeclarativeEngine.js';
 import { PegaRuleAstParser } from './PegaRuleAstParser.js';
 import { extractTagValueCsv, pxObjClassToGraphType } from './pega-utils.js';
 import { projectRuleToGraphNode, createDependencyEdges } from './PegaGraphProjector.js';
+import pino from 'pino';
+
+const logger = pino({ name: 'pega-service' });
 
 export class PegaService {
   private parser: PegaParser;
@@ -26,7 +29,7 @@ export class PegaService {
     this.parser = new PegaParser();
     this.declarativeEngine = new PegaDeclarativeEngine();
     this.astParser = new PegaRuleAstParser();
-    this.initSchemasInDb().catch(() => {});
+    this.initSchemasInDb().catch((err) => { logger.debug({ err }, '[PegaService] Schema init failed (non-fatal)'); });
   }
 
   public getDeclarativeEngine(): PegaDeclarativeEngine { return this.declarativeEngine; }
@@ -39,7 +42,7 @@ export class PegaService {
       for (const item of allSchemas) {
         await this.upsertSchemaInDb(item);
       }
-    } catch { /* non-fatal */ }
+    } catch (err) { logger.debug({ err }, '[PegaService] Failed to load schemas into DB (non-fatal)'); }
   }
 
   public async getSchemasFromDb(): Promise<PegaRuleKbSchema[]> {
@@ -50,7 +53,7 @@ export class PegaService {
     );
     return rows.map((r) => {
       try { return JSON.parse(r.content) as PegaRuleKbSchema; }
-      catch { return null; }
+      catch (err) { logger.debug({ err }, '[PegaService] Failed to parse PEGA_SCHEMA entry'); return null; }
     }).filter((s): s is PegaRuleKbSchema => s !== null);
   }
 
@@ -86,7 +89,7 @@ export class PegaService {
     try {
       const parsed = JSON.parse(row.content);
       if (parsed.__checksum) return { exists: true, checksumMatch: parsed.__checksum === checksum };
-    } catch { /* not JSON or no __checksum field */ }
+    } catch (err) { logger.debug({ err }, '[PegaService] Content not JSON or missing __checksum field'); }
     const dbChecksum = extractTagValueCsv(row.tags, 'checksum');
     return { exists: true, checksumMatch: dbChecksum === checksum };
   }
@@ -100,14 +103,14 @@ export class PegaService {
     );
     if (!row) return { cached: false };
     let content = {};
-    try { content = JSON.parse(row.content); } catch { content = {}; }
+    try { content = JSON.parse(row.content); } catch (err) { logger.debug({ err }, '[PegaService] Failed to parse rule content'); content = {}; }
     return { cached: true, ruleId: row.id, updatedAt: row.updated_at, content };
   }
 
   public parseRuleToSymbol(ruleJson: Record<string, unknown>): { fqn: string; isRule: boolean } | null {
     try {
       return this.parser.parseSymbol(ruleJson);
-    } catch {
+    } catch (err) {
       return null;
     }
   }
@@ -141,7 +144,7 @@ export class PegaService {
           );
           count++;
         }
-      } catch { /* skip */ }
+      } catch (err) { logger.debug({ err }, '[PegaService] Skipped unparseable rule content during reclassification'); }
     }
     return count;
   }
@@ -150,7 +153,7 @@ export class PegaService {
     let symbol: ExtractedPegaSymbol;
     try {
       symbol = this.parser.parseSymbol(req.ruleJson);
-    } catch {
+    } catch (err) {
       // Rule type not supported by parser — skip gracefully instead of crashing stream
       return { status: 'success', ruleId: -1, unresolvedDependencies: [] };
     }
@@ -210,7 +213,7 @@ export class PegaService {
     try {
       const graphNodeId = await projectRuleToGraphNode(adapter, symbol.fqn, pxObjClass, req.projectId);
       await createDependencyEdges(adapter, graphNodeId, deps);
-    } catch { /* non-fatal graph projection */ }
+    } catch (err) { logger.warn({ err }, '[PegaService] Failed to project rule into graph (non-fatal)'); }
 
     return { status: 'success', ruleId: id, unresolvedDependencies: deps };
   }

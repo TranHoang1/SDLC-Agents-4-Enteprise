@@ -77,7 +77,7 @@ export class PostgresAsyncAdapter implements AsyncDatabaseAdapter {
       await client.query('COMMIT');
       return result;
     } catch (err) {
-      try { await client.query('ROLLBACK'); } catch { /* ignore */ }
+      try { await client.query('ROLLBACK'); } catch (err) { console.debug('[PostgresAsyncAdapter] ignore :', (err as Error).message); }
       throw err;
     } finally {
       // ALWAYS restore pool.query — prevents poisoning on error path

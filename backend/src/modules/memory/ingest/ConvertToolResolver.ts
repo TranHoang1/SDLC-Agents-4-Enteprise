@@ -92,7 +92,7 @@ export function extractMarkdown(raw: string): string {
       if (typeof obj.markdown === 'string') { return obj.markdown; }
       if (typeof obj.content === 'string') { return obj.content; }
       if (typeof obj.text === 'string') { return obj.text; }
-    } catch { /* raw không phải JSON — dùng nguyên văn */ }
+    } catch (err) { console.debug('[ConvertToolResolver] raw không phải JSON — dùng nguyên văn :', (err as Error).message); }
   }
   return raw;
 }

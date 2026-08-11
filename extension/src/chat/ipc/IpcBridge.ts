@@ -108,7 +108,7 @@ export class IpcBridge implements IIpcBridge, vscode.Disposable {
       conn.socket.on('message', (data) => this.handleMessage(conn, data));
       conn.socket.on('close', () => this.handleClose(conn));
       conn.socket.on('error', () => this.handleClose(conn));
-    } catch {
+    } catch (err) {
       this.scheduleReconnect(conn);
     }
   }
@@ -168,7 +168,7 @@ export class IpcBridge implements IIpcBridge, vscode.Disposable {
     }
     conn.rpcClient.rejectAll('Disconnected');
     if (conn.socket) {
-      try { conn.socket.close(); } catch { /* ignore */ }
+      try { conn.socket.close(); } catch (err) { console.debug('[IpcBridge] ignore :', (err as Error).message); }
       conn.socket = null;
     }
   }
@@ -178,7 +178,7 @@ export class IpcBridge implements IIpcBridge, vscode.Disposable {
     try {
       const url = new URL(discovery.ws_endpoint);
       return url.port ? `svc-${url.port}` : `svc-${url.hostname}`;
-    } catch {
+    } catch (err) {
       return `svc-${Date.now()}`;
     }
   }
