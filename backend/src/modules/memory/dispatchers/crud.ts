@@ -72,26 +72,28 @@ export async function handleIngest(
   let id!: number;
 
   if (dbAdapter) {
-    await dbAdapter.transactionAsync(async () => {
-      id = await engine.insert({
-        content, summary, type,
-        tier: tierForType(type), scope, user_id: userId,
-        project_id: scopeCtx?.projectId ?? null,
-        source, tags, agent_name: agentName,
-        owner: inferOwner(source),
-      });
-      // NEW-06/NEW-10: Always set 'pending' — TaskWorker handles enrichment
-      // This removes the contradiction of 'done' + TAG_ENRICHMENT coexisting
+    // SA4E-107: Run insert + task creation WITHOUT transaction wrapper.
+    // Root cause: PG connection pool has poisoned connections from prior failed tx.
+    // Once pool is clean, can re-enable transactionAsync.
+    id = await engine.insert({
+      content, summary, type,
+      tier: tierForType(type), scope, user_id: userId,
+      project_id: scopeCtx?.projectId ?? null,
+      source, tags, agent_name: agentName,
+      owner: inferOwner(source),
+    });
+    const taskRepo = new PendingTaskRepository(dbAdapter);
+    await taskRepo.create({ task_type: TaskType.TAG_ENRICHMENT, entry_id: id, payload: { entry_id: id, content, existing_tags: tags, options: { threshold: 0.6, autoApply: true } } });
+    if (embeddingAvailable) {
+      await taskRepo.create({ task_type: TaskType.VECTOR_EMBEDDING, entry_id: id, payload: { entry_id: id, text: `${summary} ${content}`.slice(0, 4000) } });
+    }
+    // Set enrichment_status (non-fatal if column missing)
+    try {
       await dbAdapter.runAsync(
         `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE id = ?`,
         [id],
       );
-      const taskRepo = new PendingTaskRepository(dbAdapter);
-      await taskRepo.create({ task_type: TaskType.TAG_ENRICHMENT, entry_id: id, payload: { entry_id: id, content, existing_tags: tags, options: { threshold: 0.6, autoApply: true } } });
-      if (embeddingAvailable) {
-        await taskRepo.create({ task_type: TaskType.VECTOR_EMBEDDING, entry_id: id, payload: { entry_id: id, text: `${summary} ${content}`.slice(0, 4000) } });
-      }
-    });
+    } catch (err) { logger.debug({ err }, '[ingest] Failed to set enrichment_status (non-fatal)'); }
   } else {
     id = await engine.insert({
       content, summary, type,
