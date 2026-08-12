@@ -21,6 +21,15 @@ const ENHANCED_SYMBOL_COLUMNS = [
   { name: 'modifiers', type: 'TEXT' },
 ] as const;
 
+/** SA4E-107: Enrichment columns for LLM-generated metadata. */
+const ENRICHMENT_COLUMNS = [
+  { name: 'summary', type: 'TEXT' },
+  { name: 'pseudo_code', type: 'TEXT' },
+  { name: 'llm_tags', type: 'TEXT' },
+  { name: 'enrichment_status', type: 'TEXT' },
+  { name: 'enriched_at', type: 'TEXT' },
+] as const;
+
 /** Build cross-engine DDL for the relationships table. */
 function buildGraphSchema(engine: string): string {
   const serial = engine === 'sqlite' ? 'INTEGER PRIMARY KEY' : 'SERIAL PRIMARY KEY';
@@ -101,6 +110,9 @@ export async function runGraphMigrations(adapter: DatabaseAdapter): Promise<void
 
   await addEnhancedSymbolColumns(adapter);
 
+  // SA4E-107: Add enrichment columns
+  await addEnrichmentColumns(adapter);
+
   await execIdempotent(adapter, buildGraphSchema(engine));
   logger.error('[graph-migrator] Relationships table ready');
 
@@ -164,6 +176,35 @@ async function addEnhancedSymbolColumns(adapter: DatabaseAdapter): Promise<void>
     } catch (err) {
       // Indexes may already exist
     }
+  }
+}
+
+/** SA4E-107: Add enrichment columns to symbols table (idempotent). */
+async function addEnrichmentColumns(adapter: DatabaseAdapter): Promise<void> {
+  const existing = await getExistingColumns(adapter, 'symbols');
+  let added = 0;
+
+  for (const col of ENRICHMENT_COLUMNS) {
+    if (!existing.has(col.name)) {
+      try {
+        await adapter.execAsync(`ALTER TABLE symbols ADD COLUMN ${col.name} ${col.type}`);
+        added++;
+      } catch (err) {
+        // Column may already exist — idempotent
+      }
+    }
+  }
+
+  if (added > 0) {
+    logger.error(`[graph-migrator] Added ${added} enrichment columns`);
+  }
+
+  // Create indexes for enrichment queries (idempotent)
+  try {
+    await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_symbols_enrichment_status ON symbols(enrichment_status)');
+    await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_symbols_project_enrichment ON symbols(project_id, enrichment_status)');
+  } catch (err) {
+    // Indexes may already exist
   }
 }
 

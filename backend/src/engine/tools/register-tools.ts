@@ -26,6 +26,8 @@ import {
   handleCodeIndexStatus, handleStreamWriteFile, handleCodeKbExport,
 } from './code-intel-handlers.js';
 import { ArtifactAnalyzerRegistry } from './artifact-analyzer/ArtifactAnalyzerRegistry.js';
+import { CODE_SEARCH_BY_TAG_DEFINITION, handleCodeSearchByTag } from './code-search-by-tag.js';
+import { CODE_ENRICHMENT_STATS_DEFINITION, handleCodeEnrichmentStats } from './code-enrichment-stats.js';
 
 // Singleton registry for artifact analysis
 const artifactAnalyzerRegistry = new ArtifactAnalyzerRegistry();
@@ -81,6 +83,8 @@ export const CODE_INTEL_TOOL_DEFINITIONS = [
   ...AI_CONTEXT_TOOL_DEFINITIONS,
   ...SIMILARITY_TOOL_DEFINITIONS,
   ANALYZE_ARTIFACT_TOOL_DEFINITION,
+  CODE_SEARCH_BY_TAG_DEFINITION,
+  CODE_ENRICHMENT_STATS_DEFINITION,
 ];
 
 /** Context bag injected into every code-intel tool handler. */
@@ -138,6 +142,8 @@ const TOOL_HANDLER_REGISTRY: Record<string, CodeIntelHandlerFn> = {
   git_search:         (a, ctx) => p(handleSimilarityTool('git_search', a, ctx.adapter, ctx.workspace, ctx.projectId), 'Unknown tool: git_search'),
   git_index:          (a, ctx) => p(handleSimilarityTool('git_index', a, ctx.adapter, ctx.workspace, ctx.projectId), 'Unknown tool: git_index'),
   analyze_artifact:    (a, _ctx) => handleAnalyzeArtifact(a, _ctx),
+  code_search_by_tag:  (a, ctx) => p(handleCodeSearchByTag(ctx.adapter, a.tag as string, (a.limit as number) ?? 20, ctx.projectId)),
+  code_enrichment_stats: (a, ctx) => p(handleCodeEnrichmentStats(ctx.adapter, ctx.projectId)),
 };
 
 /**

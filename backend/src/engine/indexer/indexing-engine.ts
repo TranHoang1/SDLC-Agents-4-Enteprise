@@ -25,6 +25,7 @@ import { GraphRepository as AdminGraphRepository } from '../../database/reposito
 import { getAdminAdapter } from '../../admin/db/core.js';
 import type { IndexResult } from '../parsers/types.js';
 import type { ProgressPhase } from './types.js';
+import { CodeEnrichmentTaskCreator } from '../enrichment/CodeEnrichmentTaskCreator.js';
 
 
 const logger = pino({ name: 'indexing-engine' });
@@ -45,12 +46,15 @@ export class IndexingEngine {
   private readonly progressEmitter = new EventEmitter();
   /** SA4E-78: Cached instance avoids repeated instantiation (AD-6). */
   private readonly graphSyncService: GraphSyncService;
+  /** SA4E-107: Creates enrichment tasks after indexing. */
+  private readonly enrichmentTaskCreator: CodeEnrichmentTaskCreator;
 
   constructor(adapter: DatabaseAdapter, config: AppConfig) {
     this.adapter = adapter;
     this.dialect = new DialectHelper(adapter.getEngine());
     this.config = config;
     this.graphSyncService = new GraphSyncService(this.adapter, this.adapter, logger);
+    this.enrichmentTaskCreator = new CodeEnrichmentTaskCreator(this.adapter, logger);
     this.initTreeSitter();
   }
 
@@ -132,6 +136,9 @@ export class IndexingEngine {
       await new Promise<void>(resolve => setImmediate(resolve));
       await this.syncGraphNodes(projectId);
       await new Promise<void>(resolve => setImmediate(resolve));
+      // SA4E-107: Create enrichment tasks (non-blocking — failures don't affect indexing)
+      await this.createEnrichmentTasks(projectId);
+      await new Promise<void>(resolve => setImmediate(resolve));
       logSfdxStats(this.adapter, this.config, logger);
       this.registerWorkspace(projectId, workspace);
 
@@ -153,6 +160,15 @@ export class IndexingEngine {
       await this.graphSyncService.syncProjectSymbols(projectId);
     } catch (err) {
       logger.error({ err }, '[indexer] Graph node sync skipped');
+    }
+  }
+
+  /** SA4E-107: Create enrichment tasks for unenriched symbols (non-fatal, BR-01). */
+  private async createEnrichmentTasks(projectId: string): Promise<void> {
+    try {
+      await this.enrichmentTaskCreator.createTasksForProject(projectId);
+    } catch (err) {
+      logger.warn({ err }, '[indexer] Enrichment task creation skipped (non-fatal)');
     }
   }
 
