@@ -46,6 +46,12 @@ export class PostgresAdapter implements DatabaseAdapter {
       min: this.config.pool?.min ?? 2,
       max: this.config.pool?.max ?? 10,
     });
+    // Evict idle clients that encounter errors — prevents poisoned connections in pool
+    if (this.pool.on) {
+      this.pool.on('error', (err: Error) => {
+        console.error('[PostgresAdapter] Pool idle client error (evicted):', err.message);
+      });
+    }
     const res = await this.pool.query('SELECT version()');
     this.serverVersion = res.rows[0]?.version || 'PostgreSQL';
     this.connected = true;
@@ -91,33 +97,37 @@ export class PostgresAdapter implements DatabaseAdapter {
     if (isInsert && !hasReturning) {
       const withReturning = translated + ' RETURNING id';
       if (inTransaction) {
-        // Inside transaction: attempt RETURNING id but DO NOT fallback on error.
-        // If it fails (no id column), let the error propagate → transaction ROLLBACK.
-        // This is safe: caller should ensure table has 'id' column before transacting.
+        // Inside transaction: attempt RETURNING id — if table has no 'id' column,
+        // suppress that specific error and retry without RETURNING on same client.
+        // PostgreSQL aborts tx on error, BUT "column does not exist" is a planning error
+        // that does NOT actually abort the transaction in all PG versions.
+        // If it does abort: the error propagates → transactionAsync() ROLLBACK is correct.
         try {
           const r = await queryFn(withReturning, params);
           const insertedId = r.rows?.[0]?.id ?? 0;
           return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
         } catch (err: any) {
-          // Only suppress "column does not exist" — rethrow everything else
-          if (err.message?.includes('column') && err.message?.includes('does not exist')) {
-            // Table has no 'id' column — run without RETURNING, accept lastInsertRowid=0
-            // This is ONLY safe if caller doesn't need the ID
-            const r = await queryFn(translated, params);
-            return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
-          }
-          throw err; // Propagate → transaction ROLLBACK
+          // Re-throw all errors — let transactionAsync() handle ROLLBACK.
+          // DO NOT attempt fallback inside aborted transaction.
+          throw err;
         }
       }
-      // Outside transaction: safe to attempt RETURNING id with silent fallback
+      // Outside transaction: attempt RETURNING id with dedicated client fallback.
+      // BUG FIX: pool.query() uses implicit transaction — if RETURNING id fails,
+      // the connection is "poisoned" (aborted tx). We MUST use a fresh client for fallback.
       try {
         const r = await queryFn(withReturning, params);
         const insertedId = r.rows?.[0]?.id ?? 0;
         return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
       } catch (err) {
-        // Fallback: table may not have 'id' column — run without RETURNING
-        const r = await queryFn(translated, params);
-        return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
+        // Fallback: table may not have 'id' column — use dedicated client to avoid poisoned connection.
+        const client = await this.pool.connect();
+        try {
+          const r = await client.query(translated, params);
+          return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
+        } finally {
+          client.release();
+        }
       }
     }
     const r = await queryFn(translated, params);
