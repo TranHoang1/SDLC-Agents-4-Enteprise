@@ -57,4 +57,12 @@ export interface SymbolDetail {
   relativePath: string | null;
   language: string | null;
   module: string | null;
+  /** LLM-generated summary of the symbol. */
+  summary: string | null;
+  /** Structured pseudo code (functions/methods). */
+  pseudoCode: string | null;
+  /** LLM-generated tags for categorization. */
+  llmTags: string | null;
+  /** Enrichment status: PENDING | COMPLETED | FAILED | null. */
+  enrichmentStatus: string | null;
 }
