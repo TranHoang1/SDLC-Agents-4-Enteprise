@@ -2,7 +2,7 @@
   "name": "sdlc-agents-4-enterprise",
   "displayName": "SDLC Agents 4 Enterprise",
   "description": "Multi-agent SDLC pipeline for enterprise — 9 AI agents (SM, BA, TA, SA, QA, DEV, DevOps, Security, UI) orchestrated via MCP",
-  "version": "1.24.0",
+  "version": "1.25.0",
   "publisher": "dnguyenminh",
   "license": "MIT",
   "repository": {
@@ -281,19 +281,42 @@
           "default": "",
           "description": "Pega developer short name — used for Pega branch naming (e.g. ssa_SA4E-58). Falls back to pegaUsername before @"
         },
+        "kiroSdlc.atlassianConnectionType": {
+          "type": "string",
+          "enum": ["cloud", "server"],
+          "default": "cloud",
+          "description": "Atlassian connection type: cloud (email + API token) or server (username + PAT)"
+        },
+        "kiroSdlc.jiraSyncState": {
+          "type": "object",
+          "default": {},
+          "description": "Internal: Jira project sync state (last sync dates per project key)"
+        },
+        "kiroSdlc.jiraLastProject": {
+          "type": "string",
+          "default": "",
+          "description": "Last selected Jira project key for indexing"
+        },
+        "kiroSdlc.jiraAttachmentChecksums": {
+          "type": "object",
+          "default": {},
+          "description": "Internal: checksum cache for Jira attachment dedup (id+size per file)"
+        },
         "kiroSdlc.proxy.mode": {
           "type": "string",
           "enum": [
             "none",
             "system",
-            "manual"
+            "manual",
+            "curl"
           ],
           "default": "system",
-          "description": "Proxy mode: none (direct), system (auto-detect), manual (user-configured)",
+          "description": "Proxy mode: none (direct), system (auto-detect), manual (user-configured), curl (curl.exe subprocess for NTLM/EDR)",
           "enumDescriptions": [
             "Direct connection — no proxy",
             "Auto-detect via VS Code proxy settings (http.proxy, http.proxySupport, http.noProxy, env vars) with OS-native fallback",
-            "Manual configuration — specify proxy host and port"
+            "Manual configuration — specify proxy host and port",
+            "Curl subprocess — uses curl.exe with NTLM SSO for corporate EDR environments where node.exe is blocked"
           ]
         },
         "kiroSdlc.proxy.host": {

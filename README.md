@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.24.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.25.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,11 @@ MIT
 ---
 
 ## Changelog
+
+### v1.25.0 (2026-08-14)
+
+- **SA4E-155: On-demand KB Entry Enrichment** — Priority queue (HIGH/NORMAL), 15s configurable polling timeout, 3-tier LLM fallback (kiroSdlc.llmChat → Ollama → LMStudio), graceful degradation UX, extension-side enrichment save via COALESCE first-write-wins semantics.
+- **SDLC Pipeline Docs** — Full BRD, FSD (TA-enriched with Zod schemas + pseudocode), TDD with 6-phase implementation checklist, 7 draw.io diagrams.
 
 ### v1.24.0 (2026-08-11)
 
