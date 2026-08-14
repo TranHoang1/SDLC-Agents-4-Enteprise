@@ -62,6 +62,10 @@ export async function activate(context: vscode.ExtensionContext) {
   const proxyDetectionService = new ProxyDetectionService();
   ProxyAgentFactory.initialize(proxyConfigService, proxyDetectionService);
 
+  // SA4E-PROXY: Patch globalThis.fetch to route ALL fetch() calls through proxy
+  const { applyGlobalFetchPatch } = await import("./proxy/global-fetch-patch");
+  applyGlobalFetchPatch();
+
   const workspaceRoot = getWorkspaceRoot();
   if (workspaceRoot) {
     await initializeWorkspace(context, workspaceRoot, statusBar);
@@ -76,6 +80,9 @@ export async function deactivate(): Promise<void> {
   panelManager?.disposeAll();
   chatEngineAdapter?.dispose();
   await sessionManager?.cleanup();
+  // Remove global fetch proxy patch
+  const { removeGlobalFetchPatch } = await import("./proxy/global-fetch-patch");
+  removeGlobalFetchPatch();
   // Must await kill() so VS Code waits for the HTTP server to release its port
   // before reloading — prevents EADDRINUSE on reload window.
   try {
@@ -228,6 +235,11 @@ function setupAuthStateHandlers(): void {
         });
       }
     }
+  });
+
+  // Broadcast refreshed token to all iframe panels so they stay alive
+  authManager?.onTokenRefreshed((newToken) => {
+    panelManager?.notifyAllPanels({ type: "token_refreshed", token: newToken } as any);
   });
 }
 
