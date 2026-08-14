@@ -100,19 +100,20 @@ export class PegaProjectIndexer {
 
     /**
      * SA4E-155: Log rules that have multiple versions in the fetched set.
-     * Helps identify which Pega API calls return old versions that should be filtered.
+     * Groups by FQN (pxObjClass:pyClassName:ruleName) which is the dedup key used by ingestRule.
      */
     private logDuplicateVersions(rules: Record<string, unknown>[]): void {
-        // Group by ruleType:className:ruleName (without version)
+        // Group by FQN = pxObjClass:pyClassName:name (same logic as PegaSymbolParser)
         const versionMap = new Map<string, string[]>();
         for (const rule of rules) {
             const ruleType = String(rule.pxObjClass || '');
-            const className = String(rule.pyClassName || '');
-            const ruleName = String(rule.pyRuleName || '');
-            const version = String(rule.pyRuleSetVersion || rule.pxRuleSetVersion || '');
-            const key = `${ruleType}:${className}:${ruleName}`;
-            if (!versionMap.has(key)) { versionMap.set(key, []); }
-            versionMap.get(key)!.push(version);
+            const className = String(rule.pyClassName || '@baseclass');
+            // Name extraction varies by type but pyRuleName/pyLabel covers most
+            const name = String(rule.pyActivityName || rule.pyModelName || rule.pyRuleName || rule.pyLabel || '');
+            const version = String(rule.pyRuleSetVersion || '');
+            const fqn = `${ruleType}:${className}:${name}`;
+            if (!versionMap.has(fqn)) { versionMap.set(fqn, []); }
+            versionMap.get(fqn)!.push(version);
         }
 
         const duplicates = Array.from(versionMap.entries())
@@ -120,16 +121,19 @@ export class PegaProjectIndexer {
             .sort((a, b) => b[1].length - a[1].length);
 
         if (duplicates.length === 0) {
-            this.log(`[Pega Indexer] ✅ No duplicate versions found — all rules are unique.`);
+            this.log(`[Pega Indexer] ✅ No duplicate versions found — all ${versionMap.size} FQNs are unique.`);
             return;
         }
 
+        const totalWasted = rules.length - versionMap.size;
         this.log(`\n=== DUPLICATE VERSIONS REPORT ===`);
-        this.log(`Total unique rules: ${versionMap.size}, Rules with multiple versions: ${duplicates.length}`);
-        this.log(`Wasted fetches: ${rules.length - versionMap.size} (${rules.length} total - ${versionMap.size} unique)`);
-        this.log(`\nTop 20 rules with most versions:`);
-        for (const [key, versions] of duplicates.slice(0, 20)) {
-            this.log(`  ${key} — ${versions.length} versions: [${versions.join(', ')}]`);
+        this.log(`Total fetched rules: ${rules.length}`);
+        this.log(`Unique FQNs: ${versionMap.size}`);
+        this.log(`Rules with multiple versions: ${duplicates.length}`);
+        this.log(`Wasted fetches (overwritten by dedup): ${totalWasted}`);
+        this.log(`\nTop 30 rules with most versions:`);
+        for (const [fqn, versions] of duplicates.slice(0, 30)) {
+            this.log(`  ${fqn} — ${versions.length} versions: [${versions.join(', ')}]`);
         }
         this.log(`=== END DUPLICATE VERSIONS REPORT ===\n`);
     }
