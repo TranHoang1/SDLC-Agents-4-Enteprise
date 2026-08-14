@@ -237,6 +237,35 @@ export class TaskWorker {
 
     const result = await this.tagAnalyzer.analyzeTags(payload.content, payload.options, context);
 
+    // SA4E-155: Quality gate — if LLM failed (fallback used), ALWAYS mark failed.
+    // LLM must succeed for enrichment to be considered done.
+    if (result.fallbackUsed) {
+      const reason = result.fallbackReason || 'unknown';
+      const errorMsg = `llm_enrichment_failed: ${reason}`;
+      this.logger.warn({ entry_id: task.entry_id, task_id: task.id, reason, component: 'TaskWorker' },
+        'LLM enrichment failed — marking task FAILED (not done)');
+      await this.repo.markFailed(task.id, errorMsg);
+      // Write error details into structured_map so it's queryable/visible in Admin UI
+      const errorMap = JSON.stringify({
+        error: errorMsg,
+        error_at: new Date().toISOString(),
+        task_id: task.id,
+        retry_count: task.retry_count,
+        fallback_used: true,
+        extraction_meta: {
+          model: this.llmService?.getConfig()?.model || 'unknown',
+          timestamp: new Date().toISOString(),
+          fallback_used: true,
+          error: reason,
+        },
+      });
+      await this.engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET enrichment_status = 'failed', structured_map = ? WHERE id = ? AND enrichment_status = 'pending'`,
+        [errorMap, task.entry_id],
+      );
+      return;
+    }
+
     // TA-08: Re-check status after LLM call — client may have enriched during processing
     const currentEntry = await this.engine.findById(task.entry_id);
     if (!currentEntry || (currentEntry as any).enrichment_status === 'done') {
