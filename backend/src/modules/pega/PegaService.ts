@@ -233,7 +233,7 @@ export class PegaService {
       await taskRepo.create({
         task_type: TaskType.TAG_ENRICHMENT,
         entry_id: astId,
-        payload: { entry_id: astId, content: (promptCtx || '').slice(0, 4000), existing_tags: 'pega,ast', options: { threshold: 0.6, autoApply: true } },
+        payload: { entry_id: astId, content: promptCtx || '', existing_tags: 'pega,ast', options: { threshold: 0.6, autoApply: true } },
       });
     } catch (err) { logger.debug({ err }, '[PegaService] Failed to create AST enrichment task (non-fatal)'); }
 

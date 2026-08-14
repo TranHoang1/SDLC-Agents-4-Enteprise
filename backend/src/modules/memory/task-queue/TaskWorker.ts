@@ -44,6 +44,9 @@ export class TaskWorker {
   private shutdownResolve: (() => void) | null = null;
   /** SA4E-101: Track current processing task for status bar progress. */
   private currentTaskInfo: { file: string; type: string; current: number; total: number } | null = null;
+  /** SA4E-155: Adaptive concurrency — reduces on LLM errors, recovers on success. */
+  private activeConcurrency: number = 0;
+  private consecutiveErrors = 0;
 
   constructor(
     db: DatabaseAdapter,
@@ -153,8 +156,11 @@ export class TaskWorker {
     if (!this.running) { this.finishShutdown(); return; }
     this.lastPollAt = new Date().toISOString();
     try {
-      const concurrency = this.config.concurrency ?? 1;
-      const tasks = await this.repo.claimBatch(concurrency);
+      // SA4E-155: Adaptive concurrency — use activeConcurrency (adjusted by LLM error rate)
+      const maxConcurrency = this.config.concurrency ?? 1;
+      if (this.activeConcurrency === 0) this.activeConcurrency = maxConcurrency;
+      const claimCount = this.activeConcurrency;
+      const tasks = await this.repo.claimBatch(claimCount);
       if (tasks.length === 0) {
         this.consecutiveEmpty++;
         const delay = Math.min(
@@ -165,14 +171,35 @@ export class TaskWorker {
       }
       this.consecutiveEmpty = 0;
       this.processing = true;
-      // Run all claimed tasks concurrently — keeps GPU busy between token batches
+      // Run all claimed tasks concurrently
+      const errorsBefore = this.consecutiveErrors;
       await Promise.allSettled(tasks.map(task => this.processTask(task)));
+      // SA4E-155: processTask catches errors internally (marks task FAILED).
+      // Detect failures by checking if consecutiveErrors was incremented during processing.
+      const errorsThisCycle = this.consecutiveErrors - errorsBefore;
+      if (errorsThisCycle > 0) {
+        // Halve concurrency on errors, minimum 1
+        this.activeConcurrency = Math.max(1, Math.floor(this.activeConcurrency / 2));
+        this.logger.warn({ failures: errorsThisCycle, activeConcurrency: this.activeConcurrency, component: 'TaskWorker' },
+          'LLM errors detected — reducing concurrency');
+      } else {
+        this.consecutiveErrors = 0;
+        // Recover: increment towards max (slow ramp-up)
+        if (this.activeConcurrency < maxConcurrency) {
+          this.activeConcurrency = Math.min(maxConcurrency, this.activeConcurrency + 1);
+        }
+      }
       this.processing = false;
       if (!this.running) { this.finishShutdown(); return; }
-      this.schedulePoll(this.config.baseInterval);
+      // Backoff delay if errors persist
+      const delay = this.consecutiveErrors >= 3
+        ? this.config.baseInterval * 3
+        : this.config.baseInterval;
+      this.schedulePoll(delay);
     } catch (err) {
       this.processing = false;
       this.logger.error({ err }, 'Poll cycle error');
+      this.activeConcurrency = 1;
       this.schedulePoll(this.config.baseInterval * 2);
     }
   }
@@ -240,6 +267,7 @@ export class TaskWorker {
     // SA4E-155: Quality gate — if LLM failed (fallback used), ALWAYS mark failed.
     // LLM must succeed for enrichment to be considered done.
     if (result.fallbackUsed) {
+      this.consecutiveErrors++;
       const reason = result.fallbackReason || 'unknown';
       const errorMsg = `llm_enrichment_failed: ${reason}`;
       this.logger.warn({ entry_id: task.entry_id, task_id: task.id, reason, component: 'TaskWorker' },
@@ -450,6 +478,7 @@ export class TaskWorker {
   }
 
   private async handleTaskError(task: PendingTask, err: Error): Promise<void> {
+    this.consecutiveErrors++;
     const nonRetryable = err.message.includes('invalid_json')
       || err.message.includes('entry_not_found');
     if (nonRetryable || task.retry_count + 1 >= task.max_retries) {
