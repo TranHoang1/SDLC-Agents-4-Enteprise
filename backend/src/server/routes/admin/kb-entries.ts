@@ -295,6 +295,35 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     }
   });
 
+  /** Save enrichment data from extension-side LLM (fallback path). */
+  app.post('/api/admin/kb/entries/:id/enrich-save', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const permCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
+    if (permCheck instanceof Response) return permCheck;
+    const entryId = c.req.param('id');
+
+    if (!entryId.startsWith('code:') && !entryId.startsWith('sym-')) {
+      return c.json({ error: 'Only code symbols support enrichment save' }, 400);
+    }
+    const symbolId = entryId.startsWith('code:') ? entryId.replace('code:', '') : entryId.replace('sym-', '');
+    const numId = parseInt(symbolId, 10);
+    if (isNaN(numId)) return c.json({ error: 'Invalid symbol ID' }, 400);
+
+    const { summary, pseudoCode } = await c.req.json();
+    if (!summary && !pseudoCode) return c.json({ error: 'At least summary or pseudoCode required' }, 400);
+
+    const { getIndexAdapter } = await import('../../../admin/db/core.js');
+    const indexAdapter = getIndexAdapter();
+    const now = new Date().toISOString();
+    await indexAdapter.runAsync(
+      `UPDATE symbols SET summary = COALESCE(?, summary), pseudo_code = COALESCE(?, pseudo_code),
+       enrichment_status = 'COMPLETED', enriched_at = ? WHERE id = ?`,
+      [summary || null, pseudoCode || null, now, numId],
+    );
+    return c.json({ status: 'saved' });
+  });
+
   return app;
 }
 

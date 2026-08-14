@@ -147,7 +147,7 @@ function KBGraphPage({activeTab}){
   };
 
   // On-demand enrichment: if code symbol lacks enrichment, trigger backend LLM
-  const[enriching,setEnriching]=useState(false);
+  const[enriching,setEnriching]=useState(false);useEffect(()=>{const handler=(ev)=>{if(ev.data&&ev.data.type==='enrich_code_symbol_result'){setEnriching(false);if(ev.data.status==='enriched'&&ev.data.enrichment){setNodeDetail(function(prev){if(!prev||prev.id!==ev.data.symbolId)return prev;return{...prev,enrichment:{summary:ev.data.enrichment.summary||null,pseudoCode:ev.data.enrichment.pseudoCode||null,llmTags:null,status:'COMPLETED'}};});}}};window.addEventListener('message',handler);return()=>window.removeEventListener('message',handler);},[]);
   const maybeAutoEnrich=(det)=>{
     if(!det||!det.id)return;var eid=String(det.id);if(!eid.startsWith('code:')&&!eid.startsWith('sym-')&&det.type!=='CODE_ENTITY'&&det.type!=='FUNCTION'&&det.type!=='METHOD'&&det.type!=='CLASS')return;
     if(det.enrichment&&det.enrichment.status==='COMPLETED')return;

@@ -61,6 +61,15 @@ export function getIframeHtml(panelType: PanelType, authTokenProvider?: () => st
         if (event.data && (event.data.type === 'auth_error' || event.data.status === 401)) {
           vscode.postMessage({ type: 'auth_error' });
         }
+        if (event.data && event.data.type === 'enrich_code_symbol') {
+          vscode.postMessage({ type: 'enrich_code_symbol', symbolId: event.data.symbolId, content: event.data.content, kind: event.data.kind });
+        }
+        if (event.data && event.data.type === 'enrich_code_symbol_result') {
+          const iframe = document.querySelector('iframe');
+          if (iframe && iframe.contentWindow) {
+            iframe.contentWindow.postMessage(event.data, '*');
+          }
+        }
       });
     </script>
 </body>
