@@ -154,8 +154,12 @@ export class PegaService {
     try {
       symbol = this.parser.parseSymbol(req.ruleJson);
     } catch (err) {
-      // Rule type not supported by parser — skip gracefully instead of crashing stream
-      return { status: 'success', ruleId: -1, unresolvedDependencies: [] };
+      // SA4E-155: Log skipped rule type instead of silent skip
+      const ruleClass = (req.ruleJson as any)?.pxObjClass || 'unknown';
+      const ruleName = (req.ruleJson as any)?.pyRuleName || (req.ruleJson as any)?.pyLabel || 'unknown';
+      logger.warn({ ruleClass, ruleName, err: (err as Error).message, component: 'PegaService' },
+        'Rule type not supported by parser — skipped');
+      return { status: 'success', ruleId: -1, reason: `parser_skip: ${ruleClass}`, unresolvedDependencies: [] };
     }
     const deps = this.parser.extractDependencies(req.ruleJson);
 
@@ -194,6 +198,18 @@ export class PegaService {
       tier: 'SEMANTIC', scope: 'PROJECT', project_id: req.projectId,
       source: symbol.fqn, tags: baseTags,
     });
+
+    // Create enrichment task for LLM to generate summary + pseudo code
+    try {
+      const { PendingTaskRepository } = await import('../memory/task-queue/PendingTaskRepository.js');
+      const { TaskType } = await import('../memory/task-queue/models.js');
+      const taskRepo = new PendingTaskRepository(adapter);
+      await taskRepo.create({
+        task_type: TaskType.TAG_ENRICHMENT,
+        entry_id: id,
+        payload: { entry_id: id, content: promptCtx || summaryText, existing_tags: baseTags, options: { threshold: 0.6, autoApply: true } },
+      });
+    } catch (err) { logger.debug({ err }, '[PegaService] Failed to create enrichment task (non-fatal)'); }
 
     // Index AST as a separate knowledge entry for LLM querying
     const astSource = `pega-ast:${symbol.fqn}`;
