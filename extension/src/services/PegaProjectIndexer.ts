@@ -68,6 +68,9 @@ export class PegaProjectIndexer {
         await calibrateFetchConcurrency(pegaClient, crawlSet.length, this.log);
         const fetchedRules = await this.fetchAllRules(crawlSet, pegaClient, root, report);
 
+        // SA4E-155: Log rules with multiple versions (helps identify Pega API filter issue)
+        this.logDuplicateVersions(fetchedRules);
+
         const result = await this.ingestRules(fetchedRules, pegaClient, projectId, crawlSet);
         const rawName = appName || hierarchy.appName;
         return `🏛️ Pega: "pega:${rawName}" — Ingested ${fetchedRules.length} rules (KB: ${result.kb}, Graph: ${result.graph})`;
@@ -93,6 +96,42 @@ export class PegaProjectIndexer {
             if (ct.includes("-")) { seedSet.add(`RULE-OBJ-CLASS ${ct}`); }
         }
         return Array.from(seedSet);
+    }
+
+    /**
+     * SA4E-155: Log rules that have multiple versions in the fetched set.
+     * Helps identify which Pega API calls return old versions that should be filtered.
+     */
+    private logDuplicateVersions(rules: Record<string, unknown>[]): void {
+        // Group by ruleType:className:ruleName (without version)
+        const versionMap = new Map<string, string[]>();
+        for (const rule of rules) {
+            const ruleType = String(rule.pxObjClass || '');
+            const className = String(rule.pyClassName || '');
+            const ruleName = String(rule.pyRuleName || '');
+            const version = String(rule.pyRuleSetVersion || rule.pxRuleSetVersion || '');
+            const key = `${ruleType}:${className}:${ruleName}`;
+            if (!versionMap.has(key)) { versionMap.set(key, []); }
+            versionMap.get(key)!.push(version);
+        }
+
+        const duplicates = Array.from(versionMap.entries())
+            .filter(([, versions]) => versions.length > 1)
+            .sort((a, b) => b[1].length - a[1].length);
+
+        if (duplicates.length === 0) {
+            this.log(`[Pega Indexer] ✅ No duplicate versions found — all rules are unique.`);
+            return;
+        }
+
+        this.log(`\n=== DUPLICATE VERSIONS REPORT ===`);
+        this.log(`Total unique rules: ${versionMap.size}, Rules with multiple versions: ${duplicates.length}`);
+        this.log(`Wasted fetches: ${rules.length - versionMap.size} (${rules.length} total - ${versionMap.size} unique)`);
+        this.log(`\nTop 20 rules with most versions:`);
+        for (const [key, versions] of duplicates.slice(0, 20)) {
+            this.log(`  ${key} — ${versions.length} versions: [${versions.join(', ')}]`);
+        }
+        this.log(`=== END DUPLICATE VERSIONS REPORT ===\n`);
     }
 
     private resolveProjectId(appName: string): string | null {
