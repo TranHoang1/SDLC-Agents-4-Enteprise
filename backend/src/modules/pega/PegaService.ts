@@ -214,7 +214,7 @@ export class PegaService {
     // Index AST as a separate knowledge entry for LLM querying
     const astSource = `pega-ast:${symbol.fqn}`;
     await adapter.runAsync('DELETE FROM knowledge_entries WHERE source = $1', [astSource]);
-    await this.memoryEngine.insert({
+    const astId = await this.memoryEngine.insert({
       content: JSON.stringify(ast),
       summary: promptCtx,
       type: 'PEGA_AST',
@@ -224,6 +224,18 @@ export class PegaService {
       source: astSource,
       tags: 'pega,ast',
     });
+
+    // Create enrichment task for PEGA_AST entry (uses promptCtx as content for LLM)
+    try {
+      const { PendingTaskRepository } = await import('../memory/task-queue/PendingTaskRepository.js');
+      const { TaskType } = await import('../memory/task-queue/models.js');
+      const taskRepo = new PendingTaskRepository(adapter);
+      await taskRepo.create({
+        task_type: TaskType.TAG_ENRICHMENT,
+        entry_id: astId,
+        payload: { entry_id: astId, content: (promptCtx || '').slice(0, 4000), existing_tags: 'pega,ast', options: { threshold: 0.6, autoApply: true } },
+      });
+    } catch (err) { logger.debug({ err }, '[PegaService] Failed to create AST enrichment task (non-fatal)'); }
 
     // Project into graph_nodes + create dependency edges
     try {
