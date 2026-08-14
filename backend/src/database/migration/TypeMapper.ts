@@ -149,7 +149,7 @@ export class TypeMapper {
         `FROM "${table}" WHERE "${column}" IS NOT NULL LIMIT 100`
       );
       return rows.map(r => r.t.toLowerCase());
-    } catch {
+    } catch (err) {
       return [];
     }
   }
@@ -169,7 +169,7 @@ export class TypeMapper {
       );
       const dflt = colInfo?.dflt_value ?? '';
       if (dflt.includes("datetime('now')")) return true;
-    } catch { /* pragma_table_info may not work on all adapters */ }
+    } catch (err) { console.debug('[TypeMapper] pragma_table_info may not work on all adapters :', (err as Error).message); }
 
     if (declaredType.toUpperCase() !== 'TEXT') return false;
     try {
@@ -179,7 +179,7 @@ export class TypeMapper {
       );
       if (samples.length === 0) return false;
       return samples.every(s => ISO_DATE_PATTERN.test(s.v));
-    } catch {
+    } catch (err) {
       return false;
     }
   }
@@ -192,7 +192,7 @@ export class TypeMapper {
         [table]
       );
       return row?.sql?.toUpperCase().includes('AUTOINCREMENT') ?? false;
-    } catch {
+    } catch (err) {
       return false;
     }
   }

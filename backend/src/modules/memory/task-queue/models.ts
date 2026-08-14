@@ -6,6 +6,7 @@
 export enum TaskType {
   TAG_ENRICHMENT = 'TAG_ENRICHMENT',
   VECTOR_EMBEDDING = 'VECTOR_EMBEDDING',
+  CODE_ENRICHMENT = 'CODE_ENRICHMENT',
 }
 
 export enum TaskStatus {

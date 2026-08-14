@@ -112,31 +112,43 @@ function basenameFromClientPath(hostPath: string): string {
   return parts[parts.length - 1] || '';
 }
 
-/**
- * Resolve request scope. Both paths are computed here:
- *   1. `workspace` — server-side FS path used for indexing/writes.
- *   2. `clientWorkspaceRoot` — original client host path, stored verbatim in
- *      DB metadata so displays and graph labels use the user's own path (not
- *      the internal `/app/workspaces/<projectId>/...` layout).
- */
-function resolveRequestScope(c: Context): IndexScope {
+/** Resolve request scope — uses authenticated userId from session for tenant isolation. */
+function resolveRequestScope(c: Context, sessionUserId?: string): IndexScope {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
-  const clientPath = c.req.header('X-Workspace-Root');
-  const safeProjectDir = path.resolve(resolveServerWorkspacesRoot(), sanitizeProjectIdForFs(projectId));
-
-  const workspace = clientPath
-    ? mapClientPathToContainer(clientPath, projectId)
-    : safeProjectDir;
-  fs.mkdirSync(workspace, { recursive: true });
-
-  // `clientWorkspaceRoot` reflects what the user sent; fall back to the
-  // stable projectId marker so downstream code always has *something*.
-  const clientWorkspaceRoot = clientPath ?? projectId;
-  const displayName = (clientPath && basenameFromClientPath(clientPath)) || projectId;
-
-  return { projectId, workspace, clientWorkspaceRoot, displayName };
+  const userId = sessionUserId || 'default';
+  // indexTempDir/{userId}/{projectId} for source file writes
+  const workspace = path.join(config.indexTempDir, userId, projectId);
+  if (!fs.existsSync(workspace)) fs.mkdirSync(workspace, { recursive: true });
+  return { projectId, workspace };
 }
+
+
+// /**
+//  * Resolve request scope. Both paths are computed here:
+//  *   1. `workspace` — server-side FS path used for indexing/writes.
+//  *   2. `clientWorkspaceRoot` — original client host path, stored verbatim in
+//  *      DB metadata so displays and graph labels use the user's own path (not
+//  *      the internal `/app/workspaces/<projectId>/...` layout).
+//  */
+// function resolveRequestScope(c: Context): IndexScope {
+//   const config = loadConfig();
+//   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
+//   const clientPath = c.req.header('X-Workspace-Root');
+//   const safeProjectDir = path.resolve(resolveServerWorkspacesRoot(), sanitizeProjectIdForFs(projectId));
+
+//   const workspace = clientPath
+//     ? mapClientPathToContainer(clientPath, projectId)
+//     : safeProjectDir;
+//   fs.mkdirSync(workspace, { recursive: true });
+
+//   // `clientWorkspaceRoot` reflects what the user sent; fall back to the
+//   // stable projectId marker so downstream code always has *something*.
+//   const clientWorkspaceRoot = clientPath ?? projectId;
+//   const displayName = (clientPath && basenameFromClientPath(clientPath)) || projectId;
+
+//   return { projectId, workspace, clientWorkspaceRoot, displayName };
+// }
 
 /** Extract userId from Bearer token (non-fatal — returns '' if unauthenticated). */
 // NOTE: resolveUserId kept for backward compatibility but auth is now enforced at route level
@@ -160,7 +172,8 @@ function writeFilesPhase(workspace: string, files: SourceFile[]): { written: num
  * We store the CLIENT-provided host path (e.g. `/Users/foo/proj`) as the
  * display workspace_path — never the internal `/app/workspaces/...` prefix.
  */
-async function registerProjectPhase(scope: IndexScope, logger: Logger, createdBy = ''): Promise<void> {
+async function 
+  (scope: IndexScope, logger: Logger, createdBy = ''): Promise<void> {
   try {
     const graphRepo = new GraphRepository(getAdminAdapter());
     await graphRepo.registerProject(
@@ -240,12 +253,12 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
   app.post('/api/index/document', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleIndexDocument(c, logger);
+    return handleIndexDocument(c, logger, session.userId);
   });
   app.post('/api/index/documents', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleIndexDocuments(c, logger);
+    return handleIndexDocuments(c, logger, session.userId);
   });
 
   // SA4E-78: Decoupled indexer endpoints
@@ -276,8 +289,9 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const body = await c.req.json() as { files: SourceFile[] };
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
-    const scope = resolveRequestScope(c);
-    await registerProjectPhase(scope, logger, userId);
+    const scope = resolveRequestScope(c, userId);
+    await registerProjectPhase(scope.projectId, scope.workspace, logger, userId);
+
     const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
     const indexer = codeIntel?.getIndexer() as any;
 
@@ -336,12 +350,12 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
   }
 }
 
-async function handleIndexDocument(c: Context, logger: Logger) {
+async function handleIndexDocument(c: Context, logger: Logger, userId = '') {
   try {
     const body = await c.req.json() as { path: string; content: string };
     const { path: relPath, content } = body;
     if (!relPath || !content) return c.json({ error: 'path and content required' }, 400);
-    const scope = resolveRequestScope(c);
+    const scope = resolveRequestScope(c, userId);
     const targetPath = resolveWithinWorkspace(scope.workspace, relPath);
     if (!targetPath) return c.json({ error: 'Invalid path' }, 400);
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
@@ -352,12 +366,12 @@ async function handleIndexDocument(c: Context, logger: Logger) {
   }
 }
 
-async function handleIndexDocuments(c: Context, logger: Logger) {
+async function handleIndexDocuments(c: Context, logger: Logger, userId = '') {
   try {
     const body = await c.req.json() as { files: SourceFile[] };
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
-    const scope = resolveRequestScope(c);
+    const scope = resolveRequestScope(c, userId);
     const { written, rejected } = writeFilesPhase(scope.workspace, files);
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
     return c.json({ indexed: written, rejected });

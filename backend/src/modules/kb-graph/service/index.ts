@@ -461,7 +461,7 @@ export class GraphService {
             [sn.entry_id, tn.entry_id, 0.8, 'CROSS_TENANT'],
           );
           edgesCreated++;
-        } catch { /* non-fatal */ }
+        } catch (err) { this.logger.debug({ err }, '[kb-graph] Cross-tenant edge insert failed (non-fatal)'); }
       }
     }
 

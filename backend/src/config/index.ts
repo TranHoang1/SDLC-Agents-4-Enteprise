@@ -36,6 +36,7 @@ const UnifiedConfigSchema = z.object({
   maxFileSize: z.number().default(512_000),
   projectId: z.string().default('default'),
   workspace: z.string(),
+  indexTempDir: z.string(),
   dbPath: z.string(),
   configPath: z.string(),
   dataDir: z.string(),
@@ -112,13 +113,13 @@ function deriveProjectId(workspace: string, overrides?: Partial<UnifiedConfig>):
         return content.projectId;
       }
     }
-  } catch { /* ignore */ }
+  } catch (err) { logger.debug({ err }, '[index] ignore '); }
   try {
     const remoteUrl = execSync('git remote get-url origin', { cwd: workspace, encoding: 'utf-8', timeout: 3000 }).trim();
     if (remoteUrl) {
       return crypto.createHash('sha256').update(remoteUrl).digest('hex').slice(0, 12);
     }
-  } catch { /* no git or no remote */ }
+  } catch (err) { logger.debug({ err }, '[index] no git or no remote '); }
   const userId = os.userInfo().username || 'unknown';
   const folderName = path.basename(workspace) || 'default';
   return crypto.createHash('sha256').update(`${userId}:${folderName}`).digest('hex').slice(0, 12);
@@ -147,6 +148,7 @@ export function loadConfig(overrides?: Partial<UnifiedConfig>): UnifiedConfig {
     maxFileSize: fileConfig.maxFileSize ?? 512_000,
     projectId: deriveProjectId(workspace, overrides),
     workspace,
+    indexTempDir: process.env.CODE_INTEL_INDEX_TEMP_DIR || path.join(os.tmpdir(), 'CodeIntel'),
     dbPath,
     configPath,
     dataDir: envDataDir,
@@ -171,7 +173,7 @@ export function setWorkspace(config: UnifiedConfig, rootUri: string | null): Uni
 export function fileUriToPath(uri: string): string {
   try {
     return fileURLToPath(uri);
-  } catch {
+  } catch (err) {
     return uri.replace(/^file:\/\/\//, process.platform === 'win32' ? '' : '/');
   }
 }

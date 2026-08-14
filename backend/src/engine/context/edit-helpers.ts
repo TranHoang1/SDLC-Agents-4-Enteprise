@@ -59,7 +59,7 @@ export function readSymbolSource(symbol: ResolvedSymbolFull, workspace: string):
     const start = symbol.line - 1;
     const end = symbol.endLine || start + 50;
     return lines.slice(start, end).join('\n');
-  } catch {
+  } catch (err) {
     return '';
   }
 }
@@ -91,7 +91,7 @@ export function getLineContext(file: string, line: number, surroundingLines: num
     const start = Math.max(0, line - 1 - surroundingLines);
     const end = Math.min(lines.length, line + surroundingLines);
     return lines.slice(start, end).join('\n');
-  } catch {
+  } catch (err) {
     return '';
   }
 }
@@ -112,7 +112,7 @@ export async function getTestContext(symbol: ResolvedSymbolFull, testDetector: T
           source: block.source
         });
       }
-    } catch { /* skip unreadable files */ }
+    } catch (err) { console.debug('[edit-helpers] skip unreadable files :', (err as Error).message); }
   }
 
   return results;

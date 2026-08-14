@@ -111,7 +111,7 @@ export function createMcpConfigRoutes(
       throw e;
     }
 
-    try { await clientManager.disconnectServer(name); } catch { /* ok */ }
+    try { await clientManager.disconnectServer(name); } catch (err) { logger?.debug({ err }, '[McpConfigRoutes] Disconnect during removal failed (non-fatal)'); }
     return c.json({ removed: name, tools_removed: toolsBefore });
   });
 

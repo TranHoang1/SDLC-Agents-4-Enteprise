@@ -30,13 +30,16 @@ export class SymbolRepository implements ISymbolRepository {
 
   async getSymbolDetail(symbolId: string): Promise<SymbolDetail | null> {
     try {
+      const numericId = parseInt(symbolId, 10);
+      if (isNaN(numericId)) return null;
       const row = await this.adapter.getAsync<any>(
         `SELECT s.id, s.name, s.kind, s.signature, s.start_line, s.end_line,
                 s.parent_symbol, s.visibility, s.doc_comment,
+                s.summary, s.pseudo_code, s.llm_tags, s.enrichment_status,
                 f.relative_path, f.language, f.module
          FROM symbols s JOIN files f ON s.file_id = f.id
          WHERE s.id = ?`,
-        [symbolId],
+        [numericId],
       );
       if (!row) return null;
       return {
@@ -48,6 +51,10 @@ export class SymbolRepository implements ISymbolRepository {
         docComment: row.doc_comment ?? null,
         relativePath: row.relative_path ?? null,
         language: row.language ?? null, module: row.module ?? null,
+        summary: row.summary ?? null,
+        pseudoCode: row.pseudo_code ?? null,
+        llmTags: row.llm_tags ?? null,
+        enrichmentStatus: row.enrichment_status ?? null,
       };
     } catch (err) {
       throw translateError(err);

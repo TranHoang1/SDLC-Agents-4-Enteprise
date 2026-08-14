@@ -66,7 +66,7 @@ export class DeadImportDetector {
         try {
           const meta = JSON.parse(row.metadata);
           fromModule = meta.source ?? meta.from ?? '';
-        } catch { /* ignore */ }
+        } catch (err) { console.debug('[DeadImportDetector] ignore :', (err as Error).message); }
       }
       return {
         filePath: row.filePath,

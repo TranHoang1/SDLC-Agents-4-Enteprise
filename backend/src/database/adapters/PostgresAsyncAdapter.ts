@@ -66,14 +66,22 @@ export class PostgresAsyncAdapter implements AsyncDatabaseAdapter {
   }
 
   async transaction<T>(fn: () => Promise<T>): Promise<T> {
-    await this.pool.query('BEGIN');
+    const client = await this.pool.connect();
     try {
+      await client.query('BEGIN');
+      // Use dedicated client for all queries within fn()
+      const originalQuery = this.pool.query.bind(this.pool);
+      (this.pool as any).query = client.query.bind(client);
       const result = await fn();
-      await this.pool.query('COMMIT');
+      (this.pool as any).query = originalQuery;
+      await client.query('COMMIT');
       return result;
     } catch (err) {
-      await this.pool.query('ROLLBACK');
+      try { await client.query('ROLLBACK'); } catch (err) { console.debug('[PostgresAsyncAdapter] ignore :', (err as Error).message); }
       throw err;
+    } finally {
+      // ALWAYS restore pool.query — prevents poisoning on error path
+      client.release();
     }
   }
 

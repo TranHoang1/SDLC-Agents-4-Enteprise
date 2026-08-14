@@ -39,7 +39,7 @@ export class EventBus {
     for (const handler of set) {
       try {
         await handler.callback(payload);
-      } catch { /* subscriber errors never crash the bus */ }
+      } catch (err) { /* subscriber errors never crash the bus */ console.debug('[EventBus] Subscriber error for event:', event, (err as Error).message); }
       if (handler.once) toRemove.push(handler);
     }
     for (const h of toRemove) set.delete(h);

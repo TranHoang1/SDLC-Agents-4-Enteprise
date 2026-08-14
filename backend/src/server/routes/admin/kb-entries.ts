@@ -1,4 +1,4 @@
-﻿/**
+/**
  * KB entries routes — search, list, and detail for KB entries.
  * SA4E-50: All admin-db calls are awaited since they are now async.
  */
@@ -75,7 +75,7 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
 
     if (entryId.startsWith('code:') || entryId.startsWith('sym-')) {
       const symbolId = entryId.startsWith('code:') ? entryId.replace('code:', '') : entryId.replace('sym-', '');
-      const detail = getCodeSymbolDetail(symbolId, ctx);
+      const detail = await getCodeSymbolDetail(symbolId, ctx);
       if (detail) return c.json(detail);
       return c.json({ error: 'Code symbol not found' }, 404);
     }
@@ -150,7 +150,7 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
           if (props.length > 10) parts.push(`- ... and ${props.length - 10} more`);
         }
         ruleInfo = parts.join('\n');
-      } catch { ruleInfo = entry.summary || fqn; }
+      } catch (err) { ruleInfo = entry.summary || fqn; }
       return c.json({
         id: entryId,
         title: fqn.split(':').pop() || fqn,
@@ -189,6 +189,141 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     });
   });
 
+  /** On-demand enrichment: trigger LLM enrichment for a single unenriched code symbol. */
+  app.post('/api/admin/kb/entries/:id/enrich', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const permCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
+    if (permCheck instanceof Response) return permCheck;
+    const entryId = c.req.param('id');
+
+    // Only code symbols can be enriched on-demand
+    if (!entryId.startsWith('code:') && !entryId.startsWith('sym-')) {
+      return c.json({ error: 'Only code symbols support on-demand enrichment' }, 400);
+    }
+    const symbolId = entryId.startsWith('code:') ? entryId.replace('code:', '') : entryId.replace('sym-', '');
+    const numId = parseInt(symbolId, 10);
+    if (isNaN(numId)) return c.json({ error: 'Invalid symbol ID' }, 400);
+
+    // Check if already enriched
+    const { getIndexAdapter } = await import('../../../admin/db/core.js');
+    const indexAdapter = getIndexAdapter();
+    const sym = await indexAdapter.getAsync<{ enrichment_status: string | null; kind: string; name: string; file_id: number }>(
+      'SELECT enrichment_status, kind, name, file_id FROM symbols WHERE id = ?', [numId],
+    );
+    if (!sym) return c.json({ error: 'Symbol not found' }, 404);
+    if (sym.enrichment_status === 'COMPLETED') {
+      return c.json({ status: 'already_enriched', message: 'Symbol already has enrichment data' });
+    }
+
+    // Get file path for the payload
+    const fileRow = await indexAdapter.getAsync<{ relative_path: string }>(
+      'SELECT relative_path FROM files WHERE id = ?', [sym.file_id],
+    );
+    const filePath = fileRow?.relative_path || '';
+    const projectId = ctx.getRequestProjectId(c);
+
+    // Try to enrich via backend LLM
+    try {
+      const { CodeEnrichmentHandler } = await import('../../../engine/enrichment/CodeEnrichmentHandler.js');
+      const { LLMService } = await import('../../../modules/memory/llm/LLMService.js');
+      const { loadPersistedLLMConfig } = await import('../../../admin/admin-db.js');
+
+      // Build LLM config from env + DB overrides
+      const envConfig = {
+        provider: (process.env.LLM_PROVIDER || 'lmstudio') as any,
+        model: process.env.LLM_MODEL || 'qwen2.5-vl-7b-instruct',
+        baseUrl: process.env.LLM_BASE_URL || 'http://localhost:1234/v1',
+        apiKey: process.env.LLM_API_KEY || undefined,
+        temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
+        maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '800', 10),
+      };
+      let llmConfig = envConfig;
+      try {
+        const dbOverrides = await loadPersistedLLMConfig();
+        llmConfig = {
+          ...envConfig,
+          ...(dbOverrides.provider && { provider: dbOverrides.provider as any }),
+          ...(dbOverrides.model && { model: dbOverrides.model }),
+          ...(dbOverrides.baseUrl && { baseUrl: dbOverrides.baseUrl }),
+          ...(dbOverrides.apiKey && dbOverrides.apiKey !== '***' && { apiKey: dbOverrides.apiKey }),
+          ...(dbOverrides.temperature !== undefined && { temperature: dbOverrides.temperature }),
+          ...(dbOverrides.maxTokens !== undefined && { maxTokens: dbOverrides.maxTokens }),
+        };
+      } catch { /* DB not ready — use env config */ }
+
+      const llmService = new LLMService(llmConfig);
+      const enrichHandler = new CodeEnrichmentHandler(indexAdapter, llmService, ctx.logger);
+
+      // Build a proper PendingTask payload matching CodeEnrichmentPayloadSchema
+      const fakeTask = {
+        id: 0,
+        payload: JSON.stringify({
+          symbolId: numId,
+          symbolName: sym.name,
+          symbolKind: sym.kind,
+          projectId: projectId,
+          filePath: filePath,
+          workspaceType: 'standard',
+        }),
+        task_type: 'CODE_ENRICHMENT',
+        status: 'PENDING',
+        created_at: new Date().toISOString(),
+      };
+      await enrichHandler.enrichSymbol(fakeTask as any);
+
+      // Re-fetch updated data
+      const updated = await indexAdapter.getAsync<{ summary: string | null; pseudo_code: string | null; llm_tags: string | null }>(
+        'SELECT summary, pseudo_code, llm_tags FROM symbols WHERE id = ?', [numId],
+      );
+      return c.json({
+        status: 'enriched',
+        enrichment: {
+          summary: updated?.summary || null,
+          pseudoCode: updated?.pseudo_code || null,
+          llmTags: updated?.llm_tags ? JSON.parse(updated.llm_tags) : null,
+          status: 'COMPLETED',
+        },
+      });
+    } catch (err: any) {
+      ctx.logger.warn({ symbolId, err: err.message }, '[on-demand-enrich] Backend LLM enrichment failed');
+      return c.json({
+        status: 'llm_unavailable',
+        message: 'Backend LLM not available. Extension-side enrichment may be used as fallback.',
+        error: err.message,
+      }, 503);
+    }
+  });
+
+  /** Save enrichment data from extension-side LLM (fallback path). */
+  app.post('/api/admin/kb/entries/:id/enrich-save', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const permCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
+    if (permCheck instanceof Response) return permCheck;
+    const entryId = c.req.param('id');
+
+    if (!entryId.startsWith('code:') && !entryId.startsWith('sym-')) {
+      return c.json({ error: 'Only code symbols support enrichment save' }, 400);
+    }
+    const symbolId = entryId.startsWith('code:') ? entryId.replace('code:', '') : entryId.replace('sym-', '');
+    const numId = parseInt(symbolId, 10);
+    if (isNaN(numId)) return c.json({ error: 'Invalid symbol ID' }, 400);
+
+    const { summary, pseudoCode } = await c.req.json();
+    if (!summary && !pseudoCode) return c.json({ error: 'At least summary or pseudoCode required' }, 400);
+
+    const { getIndexAdapter } = await import('../../../admin/db/core.js');
+    const indexAdapter = getIndexAdapter();
+    const now = new Date().toISOString();
+    await indexAdapter.runAsync(
+      `UPDATE symbols SET summary = COALESCE(?, summary), pseudo_code = COALESCE(?, pseudo_code),
+       enrichment_status = 'COMPLETED', enriched_at = ? WHERE id = ?`,
+      [summary || null, pseudoCode || null, now, numId],
+    );
+    return c.json({ status: 'saved' });
+  });
+
   return app;
 }
 
@@ -198,6 +333,21 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
     const detail = await ctx.db.symbol.getSymbolDetail(symbolId);
     if (!detail) return null;
     const lines = detail.startLine && detail.endLine ? `Lines ${detail.startLine}\u2013${detail.endLine}` : '';
+    // SA4E-104: Fetch body/pseudo code from body_embeddings if available
+    let bodyCode = '';
+    try {
+      const numId = parseInt(symbolId, 10);
+      if (!isNaN(numId)) {
+        const { getIndexAdapter } = await import('../../../admin/db/core.js');
+        const indexAdapter = getIndexAdapter();
+        const bodyRow = await indexAdapter.getAsync<{ embedding: Buffer | Uint8Array }>(
+          'SELECT embedding FROM body_embeddings WHERE symbol_id = ? AND chunk_index = 0', [numId],
+        );
+        if (bodyRow && bodyRow.embedding) {
+          bodyCode = Buffer.from(bodyRow.embedding).toString('utf-8');
+        }
+      }
+    } catch (err) { /* body_embeddings table may not exist */ }
     const contentParts = [
       detail.signature ? `**Signature:** \`${detail.signature}\`` : '',
       detail.docComment ? `**Doc:** ${detail.docComment}` : '',
@@ -206,6 +356,7 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
       detail.module ? `**Module:** ${detail.module}` : '',
       detail.visibility ? `**Visibility:** ${detail.visibility}` : '',
       detail.parentSymbol ? `**Parent:** ${detail.parentSymbol}` : '',
+      bodyCode ? `\n**Code:**\n\`\`\`typescript\n${bodyCode.substring(0, 2000)}\n\`\`\`` : '',
     ].filter(Boolean).join('\n');
     return {
       id: `code:${detail.id}`,
@@ -214,8 +365,14 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
       source: detail.relativePath || '',
       tags: [detail.kind, detail.language, detail.module].filter(Boolean),
       links: [], qualityScore: null, createdAt: null, updatedAt: null,
+      enrichment: {
+        summary: detail.summary || null,
+        pseudoCode: detail.pseudoCode || null,
+        llmTags: detail.llmTags ? JSON.parse(detail.llmTags) : null,
+        status: detail.enrichmentStatus || null,
+      },
     };
-  } catch {
+  } catch (err) {
     ctx.logger.warn({ symbolId }, 'Failed to fetch code symbol detail');
     return null;
   }

@@ -12,7 +12,7 @@ async function columnExists(db: DatabaseAdapter, table: string, column: string):
       [table, column],
     );
     if (pg.length > 0) return true;
-  } catch {
+  } catch (err) {
     // SQLite fallback
     try {
       const lite = await db.allAsync<{ name: string }>(
@@ -20,7 +20,7 @@ async function columnExists(db: DatabaseAdapter, table: string, column: string):
         [column],
       );
       return lite.length > 0;
-    } catch { return false; }
+    } catch (err) { return false; }
   }
   return false;
 }
@@ -30,7 +30,7 @@ export async function migrate001AddScopeColumns(db: DatabaseAdapter): Promise<vo
 
   await db.execAsync(`ALTER TABLE knowledge_entries ADD COLUMN scope TEXT NOT NULL DEFAULT 'USER'`);
   await db.execAsync(`ALTER TABLE knowledge_entries ADD COLUMN user_id TEXT DEFAULT NULL`);
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_scope ON knowledge_entries(scope)`); } catch {}
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_user_id ON knowledge_entries(user_id)`); } catch {}
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_scope_user ON knowledge_entries(scope, user_id)`); } catch {}
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_scope ON knowledge_entries(scope)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_user_id ON knowledge_entries(user_id)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_ke_scope_user ON knowledge_entries(scope, user_id)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
 }

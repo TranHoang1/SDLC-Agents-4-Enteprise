@@ -13,13 +13,13 @@ export async function migrate003PendingTasks(db: DatabaseAdapter): Promise<void>
       ['pending_tasks'],
     );
     exists = pg.length > 0;
-  } catch {
+  } catch (err) {
     try {
       const lite = await db.allAsync<{ name: string }>(
         `SELECT name FROM sqlite_master WHERE type='table' AND name='pending_tasks'`,
       );
       exists = lite.length > 0;
-    } catch {}
+    } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
   }
 
   if (exists) return;
@@ -40,6 +40,6 @@ export async function migrate003PendingTasks(db: DatabaseAdapter): Promise<void>
       FOREIGN KEY (entry_id) REFERENCES knowledge_entries(id)
     )
   `);
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_pending_tasks_status_created ON pending_tasks(status, created_at)`); } catch {}
-  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_pending_tasks_entry_id ON pending_tasks(entry_id)`); } catch {}
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_pending_tasks_status_created ON pending_tasks(status, created_at)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
+  try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_pending_tasks_entry_id ON pending_tasks(entry_id)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
 }

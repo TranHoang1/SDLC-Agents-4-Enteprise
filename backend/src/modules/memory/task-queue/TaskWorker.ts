@@ -17,6 +17,7 @@ import { DEFAULT_TASK_WORKER_CONFIG } from './TaskWorkerConfig.js';
 import type { MemoryEngine } from '../engine/index.js';
 import type { ContextChainInput, StructuredMapData } from '../llm/types.js';
 import { safeParseStructuredMap } from '../llm/types.js';
+import type { CodeEnrichmentHandler } from '../../../engine/enrichment/CodeEnrichmentHandler.js';
 
 export interface TaskWorkerStats {
   pending: number;
@@ -41,6 +42,8 @@ export class TaskWorker {
   private lastPollAt: string | null = null;
   private processing = false;
   private shutdownResolve: (() => void) | null = null;
+  /** SA4E-101: Track current processing task for status bar progress. */
+  private currentTaskInfo: { file: string; type: string; current: number; total: number } | null = null;
 
   constructor(
     db: DatabaseAdapter,
@@ -57,6 +60,9 @@ export class TaskWorker {
   setTagAnalyzer(analyzer: TagAnalyzerService): void { this.tagAnalyzer = analyzer; }
   setEmbeddingService(service: EmbeddingService): void { this.embeddingService = service; }
   setLlmService(service: { getConfig(): { model: string } }): void { this.llmService = service; }
+  /** SA4E-107: Inject code enrichment handler for CODE_ENRICHMENT tasks. */
+  private codeEnrichmentHandler?: CodeEnrichmentHandler;
+  setCodeEnrichmentHandler(handler: CodeEnrichmentHandler): void { this.codeEnrichmentHandler = handler; }
 
   /**
    * Update mutable config fields at runtime — no restart needed.
@@ -118,6 +124,22 @@ export class TaskWorker {
     return { ...dbStats, isRunning: this.running, lastPollAt: this.lastPollAt };
   }
 
+  /** SA4E-101: Get current task progress for status bar display. */
+  async getProgress(): Promise<{ phase: string; file: string; current: number; total: number; percent: number } | null> {
+    if (!this.processing || !this.currentTaskInfo) return null;
+    const stats = await this.repo.getStats();
+    const total = stats.pending + stats.processing + stats.completed;
+    const current = stats.completed;
+    const percent = total > 0 ? Math.round((current / total) * 100) : 0;
+    return {
+      phase: this.currentTaskInfo.type,
+      file: this.currentTaskInfo.file,
+      current,
+      total,
+      percent,
+    };
+  }
+
   getRepository(): PendingTaskRepository { return this.repo; }
 
   // ── Private ──
@@ -163,11 +185,20 @@ export class TaskWorker {
 
   private async processTask(task: PendingTask): Promise<void> {
     try {
+      // SA4E-107: CODE_ENRICHMENT uses symbols table, not knowledge_entries
+      if (task.task_type === TaskType.CODE_ENRICHMENT) {
+        this.currentTaskInfo = { file: `symbol-${task.entry_id}`, type: task.task_type, current: 0, total: 0 };
+        await this.processCodeEnrichment(task);
+        return;
+      }
       const entry = await this.engine.findById(task.entry_id);
       if (!entry) { await this.repo.markFailed(task.id, 'entry_not_found'); return; }
       let payload: any;
       try { payload = JSON.parse(task.payload); }
       catch { this.repo.markFailed(task.id, 'invalid_json_payload'); return; }
+      // SA4E-101: Track current task for progress reporting
+      const file = (entry as any).source || `entry-${task.entry_id}`;
+      this.currentTaskInfo = { file, type: task.task_type, current: 0, total: 0 };
       switch (task.task_type) {
         case TaskType.TAG_ENRICHMENT:
           await this.processTagEnrichment(task, payload);
@@ -369,6 +400,13 @@ export class TaskWorker {
       this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
         'structured_map conditional update failed');
     }
+  }
+
+  /** SA4E-107: Process CODE_ENRICHMENT task via injected handler. */
+  private async processCodeEnrichment(task: PendingTask): Promise<void> {
+    if (!this.codeEnrichmentHandler) { this.repo.resetForRetry(task.id); return; }
+    await this.codeEnrichmentHandler.enrichSymbol(task);
+    await this.repo.markCompleted(task.id);
   }
 
   private async processVectorEmbedding(task: PendingTask, payload: any): Promise<void> {

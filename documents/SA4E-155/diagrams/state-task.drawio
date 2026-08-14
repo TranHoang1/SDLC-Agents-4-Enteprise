@@ -1,0 +1,80 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="Task Lifecycle State Machine (pending_tasks)" style="text;html=1;align=center;fontSize=14;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="320" y="20" width="400" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Initial state (start) -->
+    <mxCell id="start" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="500" y="70" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <!-- State: PENDING -->
+    <mxCell id="s1" value="PENDING&#xa;(priority: 0=NORMAL, 1=HIGH)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="150" width="230" height="60" as="geometry"/>
+    </mxCell>
+    <!-- State: PROCESSING -->
+    <mxCell id="s2" value="PROCESSING&#xa;(claimed by TaskWorker)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="320" width="230" height="60" as="geometry"/>
+    </mxCell>
+    <!-- State: COMPLETED -->
+    <mxCell id="s3" value="COMPLETED&#xa;(enrichment saved)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="510" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <!-- State: FAILED -->
+    <mxCell id="s4" value="FAILED&#xa;(error recorded)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="620" y="510" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <!-- End state -->
+    <mxCell id="end" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;html=1;" vertex="1" parent="1">
+      <mxGeometry x="285" y="630" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Edge: start -> PENDING -->
+    <mxCell id="e1" value="Task created&#xa;(priority=1 for on-demand)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="start" target="s1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: PENDING -> PROCESSING -->
+    <mxCell id="e2" value="claimNext() / claimBatch()&#xa;ORDER BY priority DESC, created_at ASC" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s1" target="s2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: PROCESSING -> COMPLETED -->
+    <mxCell id="e3" value="LLM enrichment succeeds&#xa;markCompleted()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="s2" target="s3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: PROCESSING -> FAILED -->
+    <mxCell id="e4" value="LLM error / exception&#xa;markFailed()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#b85450;exitX=0.75;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="s2" target="s4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: FAILED -> PENDING (retry) -->
+    <mxCell id="e5" value="retry_count &lt; max_retries&#xa;resetForRetry()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#d6b656;" edge="1" parent="1" source="s4" target="s1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="900" y="540"/>
+          <mxPoint x="900" y="180"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: PROCESSING -> PENDING (stale recovery) -->
+    <mxCell id="e6" value="Stale recovery&#xa;(crash/restart)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#d6b656;" edge="1" parent="1" source="s2" target="s1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="160" y="350"/>
+          <mxPoint x="160" y="180"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: COMPLETED -> end -->
+    <mxCell id="e7" value="Terminal state" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s3" target="end">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Note: Priority ordering -->
+    <mxCell id="note1" value="Priority Queue Ordering:&#xa;1. priority DESC (HIGH=1 first)&#xa;2. created_at ASC (oldest first within same priority)&#xa;&#xa;Normal tasks (priority=0) only processed&#xa;when no HIGH tasks exist (no starvation)." style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="700" y="140" width="270" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Note: On-demand flow -->
+    <mxCell id="note2" value="On-demand enrichment:&#xa;- Creates task with priority=1&#xa;- Backend polls for completion (500ms x 30)&#xa;- If COMPLETED within 15s: return data&#xa;- If timeout: task stays in queue (BR-09)" style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="700" y="290" width="270" height="90" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

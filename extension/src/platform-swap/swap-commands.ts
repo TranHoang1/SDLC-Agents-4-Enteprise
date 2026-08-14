@@ -135,7 +135,7 @@ async function getAvailablePlatforms(workspaceRoot: string): Promise<PlatformId[
     try {
       await fs.access(convPath);
       available.push(def.id);
-    } catch { /* not available — intentional: fs.access failure = binary absent */ }
+    } catch (err) { console.debug('[swap-commands] not available — intentional: fs.access failure = binary absent :', (err as Error).message); }
   }
   return available;
 }

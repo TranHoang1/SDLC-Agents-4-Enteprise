@@ -151,7 +151,7 @@ export class TagAnalyzerService {
           business_rules: (parsed.business_rules || [])
             .filter((r: any) => typeof r === 'string' && r.length <= 300).slice(0, 10),
         };
-      } catch { /* fall through to regex */ }
+      } catch (err) { this.logger?.debug({ err }, '[analyzer] LLM parse failed, falling through to regex'); }
     }
 
     const tagPattern = /["']([a-z][a-z0-9-]{4,40}[a-z0-9])["']/g;

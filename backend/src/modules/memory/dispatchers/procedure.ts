@@ -12,7 +12,7 @@ const PROCEDURE_TYPE = 'PROCEDURE';
 
 function parseSteps(raw: unknown): ProcedureStep[] {
   if (typeof raw === 'string') {
-    try { return JSON.parse(raw) as ProcedureStep[]; } catch { return []; }
+    try { return JSON.parse(raw) as ProcedureStep[]; } catch (err) { console.debug('[procedure] Failed to parse steps JSON:', (err as Error).message); return []; }
   }
   if (Array.isArray(raw)) return raw as ProcedureStep[];
   return [];
@@ -39,7 +39,7 @@ export async function handleProcedure(
       const rawSteps = args.steps;
       const steps = parseSteps(rawSteps);
       if (rawSteps !== undefined && typeof rawSteps === 'string') {
-        try { JSON.parse(rawSteps); } catch {
+        try { JSON.parse(rawSteps); } catch (err) {
           return JSON.stringify({ error: 'steps must be a valid JSON array of {tool, args} objects' });
         }
       }
@@ -105,7 +105,7 @@ export async function handleProcedure(
       try {
         const parsed = JSON.parse(entry.structured_map || '{}');
         steps = parsed.steps || [];
-      } catch { /* ignore */ }
+      } catch (err) { console.debug('[procedure] ignore :', (err as Error).message); }
 
       return JSON.stringify({
         id: entry.id,
@@ -238,7 +238,7 @@ export async function handleSkillCapture(
           args: (call.arguments || call.args || {}) as Record<string, unknown>,
         });
       }
-    } catch { /* skip unparseable */ }
+    } catch (err) { console.debug('[procedure] skip unparseable :', (err as Error).message); }
   }
 
   if (allSteps.length === 0) return JSON.stringify({ error: 'No parseable tool calls found' });
@@ -288,7 +288,7 @@ export async function handleSkillExecute(
   const name = (args.name as string) || '';
   const variablesRaw = (args.variables as string) || '{}';
   let variables: Record<string, unknown> = {};
-  try { variables = JSON.parse(typeof variablesRaw === 'string' ? variablesRaw : '{}'); } catch { /* ignore */ }
+  try { variables = JSON.parse(typeof variablesRaw === 'string' ? variablesRaw : '{}'); } catch (err) { console.debug('[procedure] ignore :', (err as Error).message); }
 
   const adapter = engine.getAdapter();
   let entry: any;
@@ -308,7 +308,7 @@ export async function handleSkillExecute(
   try {
     const parsed = JSON.parse(entry.structured_map || '{}');
     steps = parsed.steps || [];
-  } catch { /* ignore */ }
+  } catch (err) { console.debug('[procedure] ignore :', (err as Error).message); }
 
   if (steps.length === 0) return JSON.stringify({ error: 'Procedure has no steps' });
 

@@ -91,6 +91,12 @@ export async function extractAndStoreBodies(
     const lines = source.split('\n');
     const functionKinds = new Set(['function', 'method', 'arrow_function', 'generator', 'function_declaration']);
     const minBodyLines = 3;
+    // SA4E-104 debug: log symbolIds state
+    const validIds = Array.from(symbolIds.values()).filter(v => v > 0);
+    if (validIds.length === 0) {
+      logger.warn({ filePath, projectId, mapSize: symbolIds.size }, '[storage] extractAndStoreBodies: symbolIds all zero or empty — skipping');
+      return;
+    }
     const dialect = new DialectHelper(adapter.getEngine());
     const insertSql = dialect.upsert(
       'body_embeddings',

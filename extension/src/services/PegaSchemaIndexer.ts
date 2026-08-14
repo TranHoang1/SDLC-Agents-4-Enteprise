@@ -110,7 +110,7 @@ export class PegaSchemaIndexer {
             try {
                 const json = await pegaClient.queryRuleByTriple("Rule-HTML-Section", ruleType, name);
                 if (json) { result[name] = json; }
-            } catch { /* section not found — non-fatal */ }
+            } catch (err) { console.debug('[PegaSchemaIndexer] section not found — non-fatal :', (err as Error).message); }
         }
         return result;
     }
@@ -145,7 +145,7 @@ export class PegaSchemaIndexer {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(body),
             });
-        } catch {
+        } catch (err) {
             // KB ingest failure is non-fatal — file already written
         }
     }

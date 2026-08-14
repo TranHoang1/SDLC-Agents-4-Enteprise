@@ -37,7 +37,7 @@ async function checkCacheBinding(bindingFile: string): Promise<boolean> {
   if (!fs.existsSync(bindingFile) || fs.statSync(bindingFile).size === 0) return false;
   if (await validateBinding(bindingFile)) return true;
   logger.error(`[native-addon] ⚠️ Cached binary MODULE_VERSION mismatch. Deleting: ${bindingFile}`);
-  try { fs.unlinkSync(bindingFile); } catch { /* ignore */ }
+  try { fs.unlinkSync(bindingFile); } catch (err) { logger.debug({ err }, '[index] ignore '); }
   return false;
 }
 

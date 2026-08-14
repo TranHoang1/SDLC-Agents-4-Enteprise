@@ -47,7 +47,7 @@ export class PegaRuleFetcherService {
             return { ruleJson: json, isFullContent: true, format: 'JSON' };
           }
         }
-      } catch { /* try next strategy */ }
+      } catch (err) { console.debug('[PegaRuleFetcherService] try next strategy :', (err as Error).message); }
     }
 
     // 2. Try Custom Service REST Endpoint: POST /api/HRAppsV2Service/V1/rules/query
@@ -74,7 +74,7 @@ export class PegaRuleFetcherService {
             return { ruleJson: json, isFullContent: true, format: 'JSON' };
           }
         }
-      } catch { /* try next strategy */ }
+      } catch (err) { console.debug('[PegaRuleFetcherService] try next strategy :', (err as Error).message); }
     }
 
     // 3. Fallback: Try Pega PRServlet Activity via Session Authentication (pzGetRuleXML)
@@ -93,7 +93,7 @@ export class PegaRuleFetcherService {
             return { ruleJson: jsonFromXml, isFullContent: true, format: 'XML_CONVERTED' };
           }
         }
-      } catch { /* try next strategy */ }
+      } catch (err) { console.debug('[PegaRuleFetcherService] try next strategy :', (err as Error).message); }
     }
 
     // 4. Fallback: Return complete structured Pega Rule specification object
@@ -155,7 +155,8 @@ export class PegaRuleFetcherService {
         pyRuleName,
         ...pagedata,
       };
-    } catch {
+    } catch (err) {
+      console.debug('[PegaRuleFetcherService] XML parse failed, returning raw content:', (err as Error).message);
       return {
         pxObjClass,
         pyRuleName,

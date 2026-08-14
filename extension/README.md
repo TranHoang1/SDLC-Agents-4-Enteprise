@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.23.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.25.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -242,6 +242,10 @@ MIT
 ---
 
 ## Changelog
+
+### v1.25.0 (2026-08-14)
+
+- **SA4E-155: On-demand KB Entry Enrichment** — 3-tier LLM fallback chain (kiroSdlc.llmChat → Ollama → LMStudio), EnrichmentFallback class, local LLM probe with configurable timeout, graceful degradation UX toast.
 
 ### v1.21.0 (2026-08-02)
 

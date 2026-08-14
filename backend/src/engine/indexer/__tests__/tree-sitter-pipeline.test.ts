@@ -88,6 +88,7 @@ describe('KSA-145: Tree-sitter Pipeline Integration', () => {
       sqliteDbPath: dbPath,
       orchestrationConfigPath: path.join(tmpDir, '.code-intel', 'orchestration.json'),
       workspace: tmpDir,
+      indexTempDir: path.join(tmpDir, 'CodeIntel'),
       viewerPort: 0,
       dbPath,
       configPath: path.join(tmpDir, '.code-intel', 'config.json'),

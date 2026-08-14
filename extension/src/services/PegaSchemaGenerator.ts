@@ -188,7 +188,7 @@ export class PegaSchemaGenerator {
 
         hasMore = results.length >= 50;
         pageIndex++;
-      } catch {
+      } catch (err) {
         break;
       }
     }
@@ -388,7 +388,7 @@ export class PegaSchemaGenerator {
         pageClass: pageClass || undefined,
         required: false,
       };
-    } catch {
+    } catch (err) {
       return { name: propertyName, type: "string", pegaType: "SingleValue", required: false };
     }
   }
@@ -670,7 +670,7 @@ export class PegaSchemaGenerator {
       });
       this.log(`[SchemaGen]   Tab close: ${closed}`);
       await new Promise((r) => setTimeout(r, 1500));
-    } catch { /* ignore */ }
+    } catch (err) { console.debug('[PegaSchemaGenerator] ignore :', (err as Error).message); }
   }
 
   /** Convert result to standard JSON Schema format. */

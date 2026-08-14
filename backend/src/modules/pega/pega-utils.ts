@@ -27,7 +27,7 @@ function loadCategoryRules(): CategoryRule[] {
       const raw = JSON.parse(fs.readFileSync(CATEGORY_RULES_PATH, 'utf-8'));
       if (Array.isArray(raw.rules) && raw.rules.length > 0) return raw.rules;
     }
-  } catch { /* ignore */ }
+  } catch (err) { console.debug('[pega-utils] ignore :', (err as Error).message); }
   return [];
 }
 

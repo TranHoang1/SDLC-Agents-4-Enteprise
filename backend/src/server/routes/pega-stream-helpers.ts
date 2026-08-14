@@ -33,7 +33,7 @@ export async function processOneLine(
   let obj: Record<string, unknown>;
   try {
     obj = JSON.parse(line);
-  } catch {
+  } catch (err) {
     logger.debug({ line: line.substring(0, 80) }, '[pega-stream] Malformed JSON line — skipping');
     return { isMeta: false, stored: false };
   }
@@ -100,7 +100,7 @@ export async function queryPegaTotals(service: PegaService, projectId: string): 
       [projectId],
     ) as { cnt?: number } | undefined;
     if (rowGraph?.cnt) totalGraphNodesInDb = Number(rowGraph.cnt);
-  } catch { /* fallback to zeros */ }
+  } catch (err) { console.debug('[pega-stream] Failed to query DB totals (fallback to zeros):', (err as Error).message); }
 
   return { totalRulesInDb, totalKbEntriesInDb, totalGraphNodesInDb };
 }
@@ -122,5 +122,5 @@ export async function registerPegaProject(
        ON CONFLICT (project_id) DO UPDATE SET last_seen = ${ts}`,
       [projectId, 'Pega: ' + appName, '', 'pega-crawler'],
     );
-  } catch { /* non-fatal */ }
+  } catch (err) { console.debug('[pega-stream] Failed to register project in project_registry (non-fatal):', (err as Error).message); }
 }

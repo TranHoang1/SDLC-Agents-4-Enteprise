@@ -17,6 +17,8 @@ export interface IndexOptions {
 export type ProgressReporter = vscode.Progress<{ message?: string }>;
 
 export class IndexingService {
+    private statusBarItem: vscode.StatusBarItem | null = null;
+
     constructor(
         private readonly httpClient: IndexerHttpClient,
         private readonly outputChannel?: vscode.OutputChannel
@@ -25,6 +27,24 @@ export class IndexingService {
     private log(msg: string): void {
         if (this.outputChannel) { this.outputChannel.appendLine(msg); }
         else { console.log(msg); }
+    }
+
+    /** Show indexing progress on status bar with file info and percentage. */
+    private showProgress(message: string): void {
+        if (!this.statusBarItem) {
+            this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
+            this.statusBarItem.show();
+        }
+        this.statusBarItem.text = `$(sync~spin) ${message}`;
+        this.statusBarItem.tooltip = `Indexing in progress: ${message}`;
+    }
+
+    /** Hide indexing status bar item when done. */
+    private hideProgress(): void {
+        if (this.statusBarItem) {
+            this.statusBarItem.dispose();
+            this.statusBarItem = null;
+        }
     }
 
     /** Build a human-readable label describing which tasks are selected. */
@@ -42,10 +62,10 @@ export class IndexingService {
     async indexWorkspace(root: string, options: IndexOptions, token?: string, secrets?: vscode.SecretStorage): Promise<string[]> {
         const results: string[] = [];
 
-        // Auto-enable schema generation if no schemas exist yet
-        if (!options.schemas && secrets && !this.hasExistingSchemas(root)) {
+        // Auto-enable schema generation only for Pega projects without existing schemas
+        if (!options.schemas && secrets && this.isPegaProject(root) && !this.hasExistingSchemas(root)) {
             options.schemas = true;
-            this.log("[IndexingService] Auto-enabling schema generation (no schemas found in workspace).");
+            this.log("[IndexingService] Auto-enabling schema generation (no schemas found in Pega workspace).");
         }
 
         if (this.outputChannel) {
@@ -57,6 +77,7 @@ export class IndexingService {
             { location: vscode.ProgressLocation.Notification, title: "SDLC Agents", cancellable: false },
             async (report) => {
                 if (options.schemas && secrets) {
+                    this.showProgress("Generating Pega schemas...");
                     const summary = await this.runSchemaIndexer(root, report, secrets);
                     if (summary) { results.push(summary); }
                 }
@@ -66,6 +87,7 @@ export class IndexingService {
                 let pegaRulesIndexed = false;
 
                 if (options.sync) {
+                    this.showProgress("Syncing Pega project rules...");
                     const pegaSummary = await this.runPegaProjectIndexer(root, report, secrets);
                     if (pegaSummary) { results.push(pegaSummary); pegaRulesIndexed = true; }
                 }
@@ -75,21 +97,29 @@ export class IndexingService {
                             ? "✅ Source code: Pega rules are the source code — already indexed above"
                             : "ℹ️ Pega project detected — rules are indexed via Sync option");
                     } else {
+                        this.showProgress("Scanning source code...");
                         report.report({ message: "Scanning and uploading source code files..." });
-                        const res = await this.httpClient.uploadSourceFiles(report, token);
+                        const res = await this.httpClient.uploadSourceFiles(
+                            { report: (v) => { report.report(v); if (v.message) this.showProgress(v.message); } },
+                            token,
+                        );
                         results.push(res.summary);
                     }
                 }
                 if (options.documents) {
+                    this.showProgress("Discovering documents...");
                     report.report({ message: "Discovering documents..." });
                     const { DocumentIndexer } = await import("./DocumentIndexer");
                     const docIndexer = new DocumentIndexer(this.httpClient);
-                    results.push(await docIndexer.run(root, report, token));
+                    results.push(await docIndexer.run(root,
+                        { report: (v) => { report.report(v); if (v.message) this.showProgress(v.message); } },
+                        token));
                 }
                 if (options.sync) {
                     if (isPegaProject) {
                         results.push("✅ Code symbol sync: Pega rules projected to KB graph during indexing");
                     } else {
+                        this.showProgress("Syncing code symbols to memory...");
                         report.report({ message: "Syncing code symbols to memory..." });
                         const syncResult = await this.httpClient.syncCodeSymbols();
                         results.push(syncResult
@@ -97,9 +127,39 @@ export class IndexingService {
                             : "⚠️ Code symbol sync failed — run manually via mem_sync_code");
                     }
                 }
+                this.hideProgress();
             }
         );
+        // SA4E-101: Start polling backend TaskWorker progress for LLM analysis status bar
+        this.pollTaskWorkerProgress();
         return results;
+    }
+
+    /** SA4E-101: Poll backend TaskWorker progress and show on status bar until done. */
+    private pollTaskWorkerProgress(): void {
+        const backendUrl = this.httpClient.getBaseUrl();
+        if (!backendUrl) return;
+        const poll = async () => {
+            try {
+                const res = await fetch(`${backendUrl}/api/admin/taskworker/progress`, {
+                    headers: { "Authorization": `Bearer ${this.getToken()}` },
+                });
+                if (!res.ok) { this.hideProgress(); return; }
+                const data = await res.json() as { active: boolean; phase?: string; file?: string; current?: number; total?: number; percent?: number };
+                if (!data.active) { this.hideProgress(); return; }
+                const fileName = data.file ? data.file.split('/').pop() || data.file : '';
+                const pct = data.percent ?? 0;
+                this.showProgress(`Analyzing ${fileName} (${data.current}/${data.total} — ${pct}%)`);
+                setTimeout(poll, 3000);
+            } catch { this.hideProgress(); }
+        };
+        setTimeout(poll, 2000);
+    }
+
+    /** Get auth token from storage (best-effort). */
+    private getToken(): string {
+        try { return vscode.workspace.getConfiguration("kiroSdlc").get<string>("authToken") || ""; }
+        catch { return ""; }
     }
 
     /** Delegate to PegaSchemaIndexer — batch generate all RuleForm schemas. */

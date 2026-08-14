@@ -101,7 +101,7 @@ function loadAgentInstructions(workspaceRoot: string): string {
   let mdFiles: string[] = [];
   try {
     mdFiles = fs.readdirSync(agentsDir).filter(f => f.endsWith(".md")).map(f => path.join(agentsDir, f));
-  } catch { /* ignore */ }
+  } catch (err) { console.debug('[chat-graph] ignore :', (err as Error).message); }
 
   if (mdFiles.length === 0) return "";
 
@@ -112,7 +112,7 @@ function loadAgentInstructions(workspaceRoot: string): string {
       const afterFm = content.replace(/^---[\s\S]*?---\r?\n?/, "").trim();
       const name = path.basename(file, ".md");
       instructions.push(`### Agent: ${name}\n\n${afterFm}`);
-    } catch { /* skip unreadable */ }
+    } catch (err) { console.debug('[chat-graph] skip unreadable :', (err as Error).message); }
   }
   // Budget: limit to ~6000 chars
   let block = "";

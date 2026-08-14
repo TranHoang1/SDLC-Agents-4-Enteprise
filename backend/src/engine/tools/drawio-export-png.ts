@@ -103,7 +103,7 @@ async function renderWithEngine(
 }
 
 function cleanupTmpDir(dir: string): void {
-  try { fs.rmSync(dir, { recursive: true, force: true }); } catch { /* best-effort */ }
+  try { fs.rmSync(dir, { recursive: true, force: true }); } catch (err) { logger.debug({ err }, '[drawio-export-png] best-effort '); }
 }
 
 function jsonError(msg: string): string {
