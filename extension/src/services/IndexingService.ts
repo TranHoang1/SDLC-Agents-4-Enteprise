@@ -12,12 +12,15 @@ export interface IndexOptions {
     documents: boolean;
     sync: boolean;
     schemas: boolean;
+    jira: boolean;
 }
 
 export type ProgressReporter = vscode.Progress<{ message?: string }>;
 
 export class IndexingService {
     private statusBarItem: vscode.StatusBarItem | null = null;
+    /** Token refresh callback — set by caller to enable retry-on-401. */
+    refreshTokenFn?: () => Promise<string | undefined>;
 
     constructor(
         private readonly httpClient: IndexerHttpClient,
@@ -54,6 +57,7 @@ export class IndexingService {
         if (options.code) { tasks.push("Source Code Indexing"); }
         if (options.documents) { tasks.push("Document Indexing"); }
         if (options.sync) { tasks.push("Code Symbol Sync"); }
+        if (options.jira) { tasks.push("Jira Project Indexing"); }
         if (tasks.length === 0) { return "Workspace Indexing"; }
         if (tasks.length === 1) { return tasks[0]; }
         return "Workspace Indexing";
@@ -84,24 +88,20 @@ export class IndexingService {
 
                 // Pega project: rules ARE the code — detect and adjust behavior
                 const isPegaProject = this.isPegaProject(root);
-                let pegaRulesIndexed = false;
 
-                if (options.sync) {
-                    this.showProgress("Syncing Pega project rules...");
-                    const pegaSummary = await this.runPegaProjectIndexer(root, report, secrets);
-                    if (pegaSummary) { results.push(pegaSummary); pegaRulesIndexed = true; }
-                }
                 if (options.code) {
                     if (isPegaProject) {
-                        results.push(pegaRulesIndexed
-                            ? "✅ Source code: Pega rules are the source code — already indexed above"
-                            : "ℹ️ Pega project detected — rules are indexed via Sync option");
+                        // Pega: download rules from server = indexing source code
+                        this.showProgress("Indexing Pega project rules...");
+                        const pegaSummary = await this.runPegaProjectIndexer(root, report, secrets);
+                        if (pegaSummary) { results.push(pegaSummary); }
                     } else {
                         this.showProgress("Scanning source code...");
                         report.report({ message: "Scanning and uploading source code files..." });
                         const res = await this.httpClient.uploadSourceFiles(
                             { report: (v) => { report.report(v); if (v.message) this.showProgress(v.message); } },
                             token,
+                            this.refreshTokenFn,
                         );
                         results.push(res.summary);
                     }
@@ -117,7 +117,13 @@ export class IndexingService {
                 }
                 if (options.sync) {
                     if (isPegaProject) {
-                        results.push("✅ Code symbol sync: Pega rules projected to KB graph during indexing");
+                        // SA4E-158: Pega sync now calls Phase 2 endpoint to sync indexed rules to KB
+                        this.showProgress("Syncing Pega rules to KB...");
+                        report.report({ message: "Syncing indexed Pega rules to KB + graph..." });
+                        const { getProjectId } = await import("../extension");
+                        const projectId = getProjectId() || "PegaCollProj";
+                        const syncResult = await this.httpClient.syncPegaRulesToKb(projectId, token);
+                        results.push(syncResult.message);
                     } else {
                         this.showProgress("Syncing code symbols to memory...");
                         report.report({ message: "Syncing code symbols to memory..." });
@@ -126,6 +132,12 @@ export class IndexingService {
                             ? `✅ Code symbol sync: ${syncResult}`
                             : "⚠️ Code symbol sync failed — run manually via mem_sync_code");
                     }
+                }
+                if (options.jira && secrets) {
+                    this.showProgress("Indexing Jira project...");
+                    report.report({ message: "Indexing Jira project tickets..." });
+                    const jiraSummary = await this.runJiraProjectIndexer(report, secrets, token);
+                    results.push(jiraSummary);
                 }
                 this.hideProgress();
             }
@@ -195,6 +207,20 @@ export class IndexingService {
         } catch (err: any) {
             this.log(`[Pega Indexer] ❌ Fatal error: ${err.message}`);
             return `❌ Pega Project Indexing Failed: ${err.message}`;
+        }
+    }
+
+    /** Delegate to JiraProjectIndexer — fetch all Jira tickets and ingest into KB. */
+    private async runJiraProjectIndexer(
+        report: ProgressReporter, secrets: vscode.SecretStorage, token?: string,
+    ): Promise<string> {
+        try {
+            const { JiraProjectIndexer } = await import("./JiraProjectIndexer");
+            const indexer = new JiraProjectIndexer(this.httpClient, this.log.bind(this));
+            return await indexer.run(report, secrets, token);
+        } catch (err: any) {
+            this.log(`[Jira Indexer] ❌ Fatal error: ${err.message}`);
+            return `❌ Jira Project Indexing Failed: ${err.message}`;
         }
     }
 
