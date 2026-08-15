@@ -35,4 +35,6 @@ export interface CreateTaskInput {
   entry_id: number;
   payload: object;
   max_retries?: number;
+  /** SA4E-164: Direct project_id avoids JOIN for per-project stats. */
+  project_id?: string | null;
 }
