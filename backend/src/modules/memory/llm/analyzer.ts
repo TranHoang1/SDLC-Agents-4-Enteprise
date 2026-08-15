@@ -101,10 +101,13 @@ export class TagAnalyzerService {
       { role: 'user', content: userPrompt },
     ];
     const timeoutMs = this.workerConfig?.llmTimeout ?? 30000;
+    this.logger?.info({ contentLen: content.length, timeoutMs, model: this.llmService.getConfig().model },
+      '[TagAnalyzer] Calling LLM...');
     const response = await Promise.race([
       this.llmService.complete(messages),
       this.timeout(timeoutMs),
     ]);
+    this.logger?.info({ responseLen: response.content.length }, '[TagAnalyzer] LLM responded');
     return this.parseEnhancedResponse(response.content);
   }
 
