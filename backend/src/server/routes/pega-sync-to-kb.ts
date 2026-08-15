@@ -54,6 +54,19 @@ export function createPegaSyncToKbRoutes(registry: ModuleRegistry, logger: Logge
         }, 400);
       }
 
+      // Duplicate prevention: check if there are already pending enrichment tasks for this project
+      const pendingCount = await checkPendingTaskCount(registry, body.projectId);
+      if (pendingCount > 100) {
+        logger.info({ projectId: body.projectId, pendingCount },
+          '[pega-sync-to-kb] Skipped — enrichment already in progress');
+        return c.json({
+          data: { synced: 0, skipped: 0, errors: 0, details: [],
+            llmStatus: `⚠️ Enrichment already in progress (${pendingCount} tasks pending). Wait for completion.`,
+            llmReady: isLlmAvailable(), alreadyRunning: true, pendingCount },
+          error: null,
+        });
+      }
+
       // Check LLM availability BEFORE syncing
       const llmReady = isLlmAvailable();
 
@@ -78,4 +91,14 @@ export function createPegaSyncToKbRoutes(registry: ModuleRegistry, logger: Logge
   });
 
   return app;
+}
+
+/** Check how many pending/processing tasks exist for TAG_ENRICHMENT. */
+async function checkPendingTaskCount(registry: ModuleRegistry, projectId: string): Promise<number> {
+  try {
+    const memModule = registry.getModule('memory') as any;
+    if (!memModule?.taskWorker) return 0;
+    const stats = await memModule.taskWorker.getStats();
+    return (stats.pending || 0) + (stats.processing || 0);
+  } catch { return 0; }
 }

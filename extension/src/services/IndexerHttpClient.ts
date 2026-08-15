@@ -223,6 +223,15 @@ export class IndexerHttpClient {
         try {
             const parsed = JSON.parse(body);
             const data = parsed?.data;
+            // Duplicate prevention: backend returns alreadyRunning if tasks pending
+            if (data?.alreadyRunning) {
+                return {
+                    ok: true,
+                    synced: 0,
+                    errors: 0,
+                    message: `⚠️ Enrichment already in progress (${data.pendingCount} tasks pending). Check status bar for progress.`,
+                };
+            }
             const llmWarning = data?.llmReady === false
                 ? `\n⚠️ LLM NOT AVAILABLE — tasks created but enrichment will NOT run. Start LMStudio and restart backend.`
                 : '';
