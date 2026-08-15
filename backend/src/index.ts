@@ -174,3 +174,4 @@ main().catch((err) => {
   rootLogger.error({ err }, 'Fatal error starting Backend:');
   process.exit(1);
 });
+

@@ -51,8 +51,8 @@ export const DEFAULT_TASK_WORKER_CONFIG: TaskWorkerConfig = {
   contextChainMaxLength: 500,
   llmChunkSize: 6000,
   llmChunkOverlap: 200,
-  llmTimeout: 30000,
+  llmTimeout: 120000,
   structuredMapMaxSize: 102400,
-  concurrency: 6,
+  concurrency: 1,
   tagConfidenceThreshold: 0.6,
 };
