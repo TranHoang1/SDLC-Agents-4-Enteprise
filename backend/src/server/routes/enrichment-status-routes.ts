@@ -48,10 +48,20 @@ function getTaskWorker(registry: ModuleRegistry): TaskWorker | null {
 
 /** Build the full enrichment status response from TaskWorker data. */
 async function buildStatusResponse(taskWorker: TaskWorker): Promise<EnrichmentStatusResponse> {
-  const stats = await taskWorker.getStats();
+  const rawStats = await taskWorker.getStats();
   const progress = await taskWorker.getProgress();
   const repo = taskWorker.getRepository();
   const startedAt = await repo.getEarliestActiveTimestamp();
+
+  // PostgreSQL COUNT returns bigint as string — ensure numbers
+  const stats = {
+    pending: Number(rawStats.pending) || 0,
+    processing: Number(rawStats.processing) || 0,
+    completed: Number(rawStats.completed) || 0,
+    failed: Number(rawStats.failed) || 0,
+    isRunning: rawStats.isRunning,
+    lastPollAt: rawStats.lastPollAt,
+  };
 
   const state = deriveEnrichmentState(stats);
   const total = stats.pending + stats.processing + stats.completed + stats.failed;
