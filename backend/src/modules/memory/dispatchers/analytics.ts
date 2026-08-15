@@ -43,6 +43,12 @@ export async function handleAdmin(engine: MemoryEngine, a: Args): Promise<string
       );
       return `Reset ${result.changes} entries enrichment_status from 'done' to 'pending'. TaskWorker will re-process them with LLM.`;
     }
+    case 'purge_orphan_tasks': {
+      const result = await engine.getAdapter().runAsync(
+        `DELETE FROM pending_tasks WHERE entry_id NOT IN (SELECT id FROM knowledge_entries)`,
+      );
+      return `Purged ${result.changes} orphaned tasks (entry_id references non-existent entries).`;
+    }
     default: return `Admin: "${action}" via portal`;
   }
 }
