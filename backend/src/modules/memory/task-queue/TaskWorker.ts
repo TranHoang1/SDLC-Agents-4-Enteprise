@@ -163,12 +163,18 @@ export class TaskWorker {
       const tasks = await this.repo.claimBatch(claimCount);
       if (tasks.length === 0) {
         this.consecutiveEmpty++;
+        if (this.consecutiveEmpty <= 3 || this.consecutiveEmpty % 10 === 0) {
+          this.logger.info({ consecutiveEmpty: this.consecutiveEmpty, claimCount },
+            '[TaskWorker] poll: no tasks claimed');
+        }
         const delay = Math.min(
           this.config.baseInterval * Math.pow(2, this.consecutiveEmpty),
           this.config.maxInterval);
         this.schedulePoll(delay);
         return;
       }
+      this.logger.info({ claimed: tasks.length, taskIds: tasks.map(t => t.id).slice(0, 3) },
+        '[TaskWorker] poll: claimed tasks');
       this.consecutiveEmpty = 0;
       this.processing = true;
       // Run all claimed tasks concurrently
