@@ -107,7 +107,9 @@ export async function syncRuleToKb(
 
 /**
  * Sync all indexed-but-not-synced rules in a project to KB.
- * Finds PEGA_INDEX entries without corresponding PEGA_RULE/PEGA_DATA.
+ * Strategy:
+ * 1. Find PEGA_INDEX entries without corresponding PEGA_RULE/PEGA_DATA → sync them
+ * 2. If no PEGA_INDEX entries exist (legacy data), re-enrich existing PEGA_RULE/PEGA_DATA entries
  */
 export async function syncAllIndexedRules(
   memoryEngine: MemoryEngine,
@@ -117,7 +119,7 @@ export async function syncAllIndexedRules(
 ): Promise<SyncBatchResult> {
   const adapter = memoryEngine.getAdapter();
 
-  // Find all PEGA_INDEX entries that don't have corresponding KB entry
+  // Strategy 1: Find PEGA_INDEX entries that need syncing to KB
   const rows = await adapter.allAsync<{ source: string; content: string }>(
     `SELECT source, content FROM knowledge_entries
      WHERE project_id = $1 AND type = 'PEGA_INDEX'
@@ -130,18 +132,61 @@ export async function syncAllIndexedRules(
 
   const result: SyncBatchResult = { synced: 0, skipped: 0, errors: 0, details: [] };
 
+  if (rows.length > 0) {
+    // New-style: sync PEGA_INDEX → PEGA_RULE/PEGA_DATA + graph + enrichment
+    for (const row of rows) {
+      try {
+        const content = JSON.parse(row.content);
+        const syncResult = await syncRuleToKb(
+          memoryEngine, parser, declarativeEngine, content, projectId,
+        );
+        if (syncResult.status === 'success') { result.synced++; }
+        else { result.errors++; }
+        result.details.push(syncResult);
+      } catch (err) {
+        result.errors++;
+        logger.warn({ err, source: row.source }, 'Failed to sync indexed rule to KB');
+      }
+    }
+    return result;
+  }
+
+  // Strategy 2: Legacy — no PEGA_INDEX entries, re-enrich existing PEGA_RULE/PEGA_DATA
+  return reEnrichExistingRules(memoryEngine, projectId);
+}
+
+/**
+ * Legacy fallback: re-create enrichment tasks for existing PEGA_RULE/PEGA_DATA entries
+ * that don't have pending enrichment tasks. Ensures LLM summary + pseudocode gets generated.
+ */
+async function reEnrichExistingRules(
+  memoryEngine: MemoryEngine,
+  projectId: string,
+): Promise<SyncBatchResult> {
+  const adapter = memoryEngine.getAdapter();
+  const result: SyncBatchResult = { synced: 0, skipped: 0, errors: 0, details: [] };
+
+  // Find PEGA_RULE/PEGA_DATA entries without pending enrichment tasks
+  const rows = await adapter.allAsync<{ id: number; source: string; summary: string; tags: string }>(
+    `SELECT id, source, summary, tags FROM knowledge_entries
+     WHERE project_id = $1 AND type IN ('PEGA_RULE', 'PEGA_DATA')
+       AND id NOT IN (
+         SELECT entry_id FROM pending_tasks WHERE status IN ('pending', 'processing')
+       )`,
+    [projectId],
+  );
+
+  if (rows.length === 0) {
+    return result;
+  }
+
   for (const row of rows) {
     try {
-      const content = JSON.parse(row.content);
-      const syncResult = await syncRuleToKb(
-        memoryEngine, parser, declarativeEngine, content, projectId,
-      );
-      if (syncResult.status === 'success') { result.synced++; }
-      else { result.errors++; }
-      result.details.push(syncResult);
+      await createEnrichmentTask(adapter, row.id, row.summary || '', row.tags || 'pega');
+      result.synced++;
     } catch (err) {
       result.errors++;
-      logger.warn({ err, source: row.source }, 'Failed to sync indexed rule to KB');
+      logger.warn({ err, source: row.source }, 'Failed to create enrichment task for legacy rule');
     }
   }
 
