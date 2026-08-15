@@ -33,6 +33,16 @@ export async function handleAdmin(engine: MemoryEngine, a: Args): Promise<string
       const stats = await repo.getStats();
       return JSON.stringify(stats);
     }
+    case 'reset_enrichment': {
+      const projectId = a.project_id as string || '';
+      const typeFilter = projectId
+        ? `AND project_id = '${projectId}'`
+        : '';
+      const result = await engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE type IN ('PEGA_RULE', 'PEGA_DATA', 'PEGA_AST') AND enrichment_status = 'done' ${typeFilter}`,
+      );
+      return `Reset ${result.changes} entries enrichment_status from 'done' to 'pending'. TaskWorker will re-process them with LLM.`;
+    }
     default: return `Admin: "${action}" via portal`;
   }
 }
