@@ -18,16 +18,16 @@ import type { MemoryToolDispatcher } from '../dispatchers/index.js';
 import type { TaskWorker } from '../task-queue/TaskWorker.js';
 import { loadPersistedLLMConfig } from '../../../admin/db/config.js';
 
-/** Build LLM config: DB overrides > env vars > NO hardcoded defaults (error if missing). */
+/** Build LLM config: DB overrides > env vars > auto-detect from LMStudio. */
 async function buildLLMConfig() {
   const provider = process.env.LLM_PROVIDER || '';
   const model = process.env.LLM_MODEL || '';
-  const baseUrl = process.env.LLM_BASE_URL || '';
+  const baseUrl = process.env.LLM_BASE_URL || 'http://localhost:1234/v1';
 
   const envConfig = {
     provider: (provider || 'lmstudio') as any,
     model,
-    baseUrl: baseUrl || 'http://localhost:1234/v1',
+    baseUrl,
     apiKey: process.env.LLM_API_KEY || undefined,
     temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
     maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '800', 10),
@@ -45,17 +45,38 @@ async function buildLLMConfig() {
       ...(dbOverrides.temperature !== undefined && { temperature: dbOverrides.temperature }),
       ...(dbOverrides.maxTokens !== undefined && { maxTokens: dbOverrides.maxTokens }),
     };
-    if (!merged.model) {
-      throw new Error('LLM_MODEL not configured. Set env var LLM_MODEL or configure via Admin UI.');
-    }
+    if (merged.model) return merged;
+    // Auto-detect: query LMStudio /v1/models and use first available
+    merged.model = await autoDetectModel(merged.baseUrl);
     return merged;
   } catch (err: any) {
-    if (err.message?.includes('LLM_MODEL not configured')) throw err;
-    // DB not ready at startup — use env vars only
-    if (!envConfig.model) {
-      throw new Error('LLM_MODEL not configured. Set env var LLM_MODEL or configure via Admin UI.');
-    }
+    if (err.message?.includes('LLM_MODEL')) throw err;
+    // DB not ready — try env, then auto-detect
+    if (envConfig.model) return envConfig;
+    envConfig.model = await autoDetectModel(envConfig.baseUrl);
     return envConfig;
+  }
+}
+
+/** Auto-detect model from LLM server's /v1/models endpoint. Throws if unavailable. */
+async function autoDetectModel(baseUrl: string): Promise<string> {
+  const modelsUrl = baseUrl.replace(/\/v1\/?$/, '') + '/v1/models';
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+  try {
+    const resp = await fetch(modelsUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!resp.ok) throw new Error(`LLM server returned ${resp.status}`);
+    const json = await resp.json() as { data?: Array<{ id: string }> };
+    const models = json.data?.filter(m => !m.id.includes('embedding')) || [];
+    if (models.length === 0) {
+      throw new Error('LLM_MODEL not configured and no models found on LLM server. Set LLM_MODEL or load a model in LMStudio.');
+    }
+    return models[0].id;
+  } catch (err: any) {
+    clearTimeout(timeout);
+    if (err.message?.includes('LLM_MODEL')) throw err;
+    throw new Error(`LLM_MODEL not configured and cannot auto-detect from ${modelsUrl}: ${err.message}`);
   }
 }
 
@@ -119,7 +140,7 @@ export function initLLMInBackground(
         dispatcher.setEmbeddingAvailable(true);
       } catch (err) { logger.debug({ err }, '[LLMInitializer] ONNX not available '); }
     } catch (err) {
-      logger.info({ err }, 'TagAnalyzer LLM unavailable — keyword fallback only');
+      logger.error({ err }, '[LLMInitializer] LLM initialization FAILED — TaskWorker will NOT process enrichment tasks');
     }
   })();
 }
