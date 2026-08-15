@@ -23,7 +23,7 @@ export interface LineResult {
   rule?: Record<string, unknown>;
 }
 
-/** Process a single NDJSON line — either metadata or a rule to ingest */
+/** Process a single NDJSON line — either metadata or a rule to index (Phase 1 only) */
 export async function processOneLine(
   line: string,
   meta: StreamMetadata | null,
@@ -52,17 +52,18 @@ export async function processOneLine(
     const checksum = sym ? meta.checksums[sym.fqn] : undefined;
     const version = sym ? meta.versions[sym.fqn] : undefined;
 
-    const result = await service.ingestRule({
+    // SA4E-158: Use indexRuleOnly (Phase 1) — no KB/graph/enrichment
+    const result = await service.indexRuleOnly({
       projectId: meta.projectId,
       ruleJson: obj,
       checksum,
       version,
     });
 
-    const didStore = result.status === 'success' && result.ruleId !== -1 && result.ruleId !== undefined;
+    const didStore = result.status === 'success' && result.ruleId !== -1;
     return { isMeta: false, stored: didStore, rule: didStore ? obj : undefined };
   } catch (err: any) {
-    logger.debug({ err: err.message }, '[pega-stream] Single rule ingest failed — skipping');
+    logger.debug({ err: err.message }, '[pega-stream] Single rule index failed — skipping');
     return { isMeta: false, stored: false };
   }
 }

@@ -1,5 +1,6 @@
 /**
  * PegaService — Logic nghiệp vụ cho Pega Rule & Data Indexing & Schema Storage.
+ * SA4E-158: Separated into indexRule (Phase 1) + syncRuleToKb (Phase 2).
  */
 import type { MemoryEngine } from '../memory/engine/core.js';
 import type {
@@ -16,6 +17,8 @@ import { PegaDeclarativeEngine } from './PegaDeclarativeEngine.js';
 import { PegaRuleAstParser } from './PegaRuleAstParser.js';
 import { extractTagValueCsv, pxObjClassToGraphType } from './pega-utils.js';
 import { projectRuleToGraphNode, createDependencyEdges } from './PegaGraphProjector.js';
+import { indexRule, type IndexRuleResult } from './PegaIndexer.js';
+import { syncRuleToKb, syncAllIndexedRules, type SyncRuleResult, type SyncBatchResult } from './PegaKbSync.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'pega-service' });
@@ -149,6 +152,32 @@ export class PegaService {
     return count;
   }
 
+  /**
+   * SA4E-158 Phase 1: Index rule — parse + dedup + store raw.
+   * No KB entries, no graph, no enrichment tasks.
+   */
+  public async indexRuleOnly(req: PegaIngestRuleRequest): Promise<IndexRuleResult> {
+    return indexRule(this.memoryEngine, this.parser, this.astParser, req);
+  }
+
+  /**
+   * SA4E-158 Phase 2: Sync all indexed-but-not-synced rules to KB.
+   * Creates KB entries, AST entries, enrichment tasks, graph nodes.
+   */
+  public async syncIndexedRulesToKb(projectId: string): Promise<SyncBatchResult> {
+    return syncAllIndexedRules(this.memoryEngine, this.parser, this.declarativeEngine, projectId);
+  }
+
+  /** SA4E-158: Expose parser for route-level access. */
+  public getParser(): PegaParser { return this.parser; }
+
+  /** SA4E-158: Expose memoryEngine for route-level access. */
+  public getMemoryEngine(): MemoryEngine { return this.memoryEngine; }
+
+  /**
+   * Legacy ingestRule — backward compatible, runs Phase 1 + Phase 2 in one call.
+   * @deprecated Use indexRuleOnly + syncIndexedRulesToKb for SRP separation.
+   */
   public async ingestRule(req: PegaIngestRuleRequest): Promise<PegaIngestRuleResponse> {
     let symbol: ExtractedPegaSymbol;
     try {

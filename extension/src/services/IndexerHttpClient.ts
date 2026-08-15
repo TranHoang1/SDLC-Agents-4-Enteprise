@@ -78,19 +78,33 @@ export class IndexerHttpClient {
 
     async uploadSourceFiles(
         report: vscode.Progress<{ message?: string }>,
-        token?: string
+        token?: string,
+        /** Optional: token provider for refresh-on-401. Returns fresh token. */
+        refreshToken?: () => Promise<string | undefined>
     ): Promise<UploadResult> {
-        // Priority 1: Project source code (exclude all library/vendor/dot-prefix directories)
-        const libraryExcludes = "{node_modules,dist,.git,.kiro,.claude,.code-intel,.analysis,.agents,build,out,backend,.opencode,vendor,packages,bower_components}/**";
-        const projectFiles = await vscode.workspace.findFiles(
-            "**/*.{ts,js,kt,java,py,go,rs,tsx,jsx}", libraryExcludes
-        );
+        // SA4E-108: Detect project type → use type-aware file patterns
+        const { ProjectTypeDetector } = await import('./ProjectTypeDetector');
+        const detector = new ProjectTypeDetector(this.backendUrl);
+        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '';
+        const detection = await detector.detect(workspaceRoot);
+
+        // Use detected type patterns (or fallback to hardcoded defaults)
+        const includeGlob = detector.getFileGlob(detection);
+        const excludeGlob = detector.getExcludeGlob(detection);
+        const allProjectFiles = await vscode.workspace.findFiles(includeGlob, excludeGlob);
+
+        // SA4E-104: Post-filter — exclude any file under a dot-folder (e.g. .kilo/, .vscode/)
+        const projectFiles = allProjectFiles.filter(f => {
+            const rel = vscode.workspace.asRelativePath(f, false);
+            return !rel.split(/[\\/]/).some(seg => seg.startsWith('.') && seg.length > 1);
+        });
 
         if (projectFiles.length === 0) { return { uploaded: 0, errors: 0, summary: "ℹ️ No source files found" }; }
 
         const url = `${this.backendUrl}/api/index/source`;
         let uploaded = 0;
         let errors = 0;
+        let currentToken = token;
 
         // Create output channel for detailed error reporting
         const channel = vscode.window.createOutputChannel("Kiro Indexer");
@@ -107,7 +121,24 @@ export class IndexerHttpClient {
                     return { path: vscode.workspace.asRelativePath(file), content: Buffer.from(content).toString("utf-8") };
                 })
             );
-            const result = await this.httpPostWithDetail(url, { files: entries }, token);
+
+            // Refresh token before each batch to prevent mid-indexing expiry
+            if (refreshToken) {
+                const freshToken = await refreshToken();
+                if (freshToken) { currentToken = freshToken; }
+            }
+
+            let result = await this.httpPostWithDetail(url, { files: entries }, currentToken);
+
+            // Retry once on 401: refresh token then retry the same batch
+            if (result.status === 401 && refreshToken) {
+                const freshToken = await refreshToken();
+                if (freshToken) {
+                    currentToken = freshToken;
+                    result = await this.httpPostWithDetail(url, { files: entries }, currentToken);
+                }
+            }
+
             if (result.ok) {
                 uploaded += batch.length;
             } else {
@@ -163,6 +194,74 @@ export class IndexerHttpClient {
         } catch {
             return null;
         }
+    }
+
+    /**
+     * SA4E-157: GET enrichment status from backend.
+     * Lightweight polling — 10s timeout, no retry (next poll handles failures).
+     * @param token JWT auth token
+     * @returns ok flag + raw body string
+     */
+    async getEnrichmentStatus(token?: string): Promise<{ ok: boolean; body: string }> {
+        const url = this.backendUrl + "/api/v1/enrichment/status";
+        return this.httpGetJson(url, token);
+    }
+
+    /**
+     * SA4E-158: Trigger Phase 2 — sync indexed Pega rules to KB + graph + enrichment.
+     * Calls POST /api/v1/pega/sync-to-kb with projectId.
+     * @param projectId Pega project identifier
+     * @param token JWT auth token
+     * @returns Sync result with counts (synced, errors)
+     */
+    async syncPegaRulesToKb(projectId: string, token?: string): Promise<{ ok: boolean; synced: number; errors: number; message: string }> {
+        const url = `${this.backendUrl}/api/v1/pega/sync-to-kb`;
+        const { ok, body } = await this.httpPostJson(url, { projectId }, token);
+        if (!ok) {
+            return { ok: false, synced: 0, errors: 0, message: `Sync failed: ${body || 'unknown error'}` };
+        }
+        try {
+            const parsed = JSON.parse(body);
+            const data = parsed?.data;
+            return {
+                ok: true,
+                synced: data?.synced ?? 0,
+                errors: data?.errors ?? 0,
+                message: `✅ Synced ${data?.synced ?? 0} rules to KB (${data?.errors ?? 0} errors)`,
+            };
+        } catch {
+            return { ok: true, synced: 0, errors: 0, message: "Sync completed (could not parse response)" };
+        }
+    }
+
+    /**
+     * SA4E-157: Generic HTTP GET with JSON response.
+     * Reusable for future GET endpoints. 10s timeout for lightweight status queries.
+     */
+    private async httpGetJson(url: string, token: string | undefined): Promise<{ ok: boolean; body: string }> {
+        const headers = await this.buildHeaders(token);
+        const parsedUrl = new URL(url);
+        const http = await import("http");
+        return new Promise((resolve) => {
+            const req = http.default.request(
+                {
+                    hostname: parsedUrl.hostname,
+                    port: parsedUrl.port || undefined,
+                    path: parsedUrl.pathname + parsedUrl.search,
+                    method: "GET",
+                    headers: { "Accept": "application/json", ...headers },
+                },
+                (res) => {
+                    let data = "";
+                    res.on("data", (chunk: any) => { data += chunk; });
+                    res.on("end", () => resolve({ ok: res.statusCode === 200, body: data }));
+                }
+            );
+            req.on("error", () => resolve({ ok: false, body: "" }));
+            // 10s timeout — enrichment status is a lightweight aggregate query
+            req.setTimeout(10000, () => { req.destroy(); resolve({ ok: false, body: '{"error":"timeout"}' }); });
+            req.end();
+        });
     }
 
     private async uploadDocumentFile(relPath: string, content: string, token?: string): Promise<boolean> {
