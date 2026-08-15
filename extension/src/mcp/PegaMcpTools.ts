@@ -56,6 +56,8 @@ export class PegaMcpTools {
     visited: Set<string>,
   ): Promise<void> {
     const queue: Array<{ ruleType: string; className: string; ruleName: string }> = [...initialDeps];
+    // Track classes whose hierarchy has already been resolved to avoid duplicate API calls
+    const hierarchyResolved = new Set<string>();
 
     while (queue.length > 0) {
       const batch = queue.splice(0, 10);
@@ -79,6 +81,19 @@ export class PegaMcpTools {
           const ruleJson = await this.client.getObject(key.pyClassName, key.pyRuleName);
           fetched.push(ruleJson);
           visited.add(key.insKey);
+
+          // When a class is fetched, resolve its full hierarchy via Pega API
+          const className = (ruleJson.pyClassName as string) || key.pyRuleName;
+          if (key.pxObjClass === 'Rule-Obj-Class' && className && !hierarchyResolved.has(className)) {
+            hierarchyResolved.add(className);
+            const parents = await this.client.fetchClassHierarchy(className);
+            for (const parent of parents) {
+              const parentKey = `Rule-Obj-Class ${parent}`;
+              if (!visited.has(parentKey)) {
+                queue.push({ ruleType: 'Rule-Obj-Class', className: '@baseclass', ruleName: parent });
+              }
+            }
+          }
         } catch {
           visited.add(key.insKey);
         }

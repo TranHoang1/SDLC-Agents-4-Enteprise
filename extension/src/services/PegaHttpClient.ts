@@ -900,4 +900,45 @@ export class PegaHttpClient {
 
     throw new Error(`DataPage D_LatestRules4ExactedApps failed on all endpoints for app "${appName}"`);
   }
+
+  /**
+   * Fetch full class inheritance hierarchy from Pega via D_pzInheritanceListofClass data page.
+   * Returns parent classes (pattern + directed) excluding @baseclass and the class itself.
+   * @param className - Class to resolve hierarchy for (e.g. "Common-Work-Activity")
+   * @returns Array of parent class names to download
+   */
+  public async fetchClassHierarchy(className: string): Promise<string[]> {
+    if (!className || className === '@baseclass') return [];
+    const base = this.getPegaEndpoint();
+    const authHeader = await this.getAuthHeader();
+    const endpoints = [
+      `${base}/api/CodeIntelligence/v1/datapage/list?dataPageName=D_pzInheritanceListofClass`,
+      `${base}/PRRestService/CodeIntelligence/v1/datapage/list?dataPageName=D_pzInheritanceListofClass`,
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const res = await this.fetchWithRetry(url, {
+          method: 'POST',
+          headers: {
+            Authorization: authHeader,
+            Accept: 'application/json',
+            'Content-Type': 'text/plain',
+          },
+          body: JSON.stringify({ classname: className }),
+        });
+        if (!res.ok) continue;
+        const json = (await res.json()) as Record<string, unknown>;
+        const results = json.pxResults as Array<Record<string, unknown>> | undefined;
+        if (!Array.isArray(results)) continue;
+        // Return all parent class names except self and @baseclass
+        return results
+          .map((r) => r.pyClassName as string)
+          .filter((name) => name && name !== className && name !== '@baseclass');
+      } catch (err: any) {
+        this.log(`[PegaHttpClient] fetchClassHierarchy attempt failed: ${err.message}`);
+      }
+    }
+    return [];
+  }
 }
