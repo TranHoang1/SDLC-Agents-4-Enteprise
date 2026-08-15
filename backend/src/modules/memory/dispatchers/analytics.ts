@@ -45,9 +45,14 @@ export async function handleAdmin(engine: MemoryEngine, a: Args): Promise<string
     }
     case 'purge_orphan_tasks': {
       const result = await engine.getAdapter().runAsync(
-        `DELETE FROM pending_tasks WHERE entry_id NOT IN (SELECT id FROM knowledge_entries)`,
+        `DELETE FROM pending_tasks WHERE id IN (
+          SELECT pt.id FROM pending_tasks pt
+          LEFT JOIN knowledge_entries ke ON pt.entry_id = ke.id
+          WHERE ke.id IS NULL
+          LIMIT 10000
+        )`,
       );
-      return `Purged ${result.changes} orphaned tasks (entry_id references non-existent entries).`;
+      return `Purged ${result.changes} orphaned tasks (batch, max 10000). Run again if more remain.`;
     }
     default: return `Admin: "${action}" via portal`;
   }
