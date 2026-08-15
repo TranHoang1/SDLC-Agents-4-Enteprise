@@ -84,11 +84,13 @@ function computeEstimatedCompletion(
 ): string | null {
   if (!startedAt || completed < 10 || total === 0) return null;
   const start = new Date(startedAt).getTime();
+  if (isNaN(start)) return null;
   const now = Date.now();
   const elapsed = now - start;
   if (elapsed <= 0) return null;
   const msPerTask = elapsed / completed;
   const remaining = total - completed;
-  const eta = new Date(now + msPerTask * remaining);
-  return eta.toISOString();
+  const etaMs = now + msPerTask * remaining;
+  if (!isFinite(etaMs)) return null;
+  return new Date(etaMs).toISOString();
 }
