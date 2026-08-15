@@ -18,10 +18,10 @@ export class PendingTaskRepository {
 
   async create(input: CreateTaskInput): Promise<number> {
     const result = await this.db.runAsync(
-      `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, created_at)
-       VALUES (?, ?, ?, ?, ?, ${this.dialect.now()})`,
+      `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, project_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ${this.dialect.now()})`,
       [input.task_type, input.entry_id, TaskStatus.PENDING,
-       JSON.stringify(input.payload), input.max_retries ?? 3],
+       JSON.stringify(input.payload), input.max_retries ?? 3, input.project_id ?? null],
     );
     return result.lastInsertRowid as number;
   }
@@ -125,14 +125,13 @@ export class PendingTaskRepository {
     return stats;
   }
 
-  /** Get task stats scoped to a specific project (JOIN with knowledge_entries). */
+  /** Get task stats scoped to a specific project. SA4E-164: direct WHERE instead of JOIN. */
   async getStatsByProject(projectId: string): Promise<{ pending: number; processing: number; completed: number; failed: number }> {
     const rows = await this.db.allAsync<{ status: string; cnt: number }>(
-      `SELECT pt.status, COUNT(*) as cnt
-       FROM pending_tasks pt
-       JOIN knowledge_entries ke ON pt.entry_id = ke.id
-       WHERE ke.project_id = $1
-       GROUP BY pt.status`,
+      `SELECT status, COUNT(*) as cnt
+       FROM pending_tasks
+       WHERE project_id = $1
+       GROUP BY status`,
       [projectId],
     );
     const stats = { pending: 0, processing: 0, completed: 0, failed: 0 };
@@ -173,6 +172,20 @@ export class PendingTaskRepository {
     const result = await this.db.runAsync(
       `UPDATE pending_tasks SET status = ?, started_at = NULL, error = NULL, retry_count = 0 WHERE status = ?`,
       [TaskStatus.PENDING, TaskStatus.FAILED],
+    );
+    return result.changes;
+  }
+
+  /**
+   * SA4E-165: Reconcile orphan tasks whose entry_id no longer exists.
+   * Marks them FAILED with 'entry_deleted_orphan' error instead of letting them retry forever.
+   */
+  async reconcileOrphans(): Promise<number> {
+    const result = await this.db.runAsync(
+      `UPDATE pending_tasks SET status = ?, error = 'entry_deleted_orphan'
+       WHERE status IN (?, ?)
+         AND entry_id NOT IN (SELECT id FROM knowledge_entries)`,
+      [TaskStatus.FAILED, TaskStatus.PENDING, TaskStatus.PROCESSING],
     );
     return result.changes;
   }

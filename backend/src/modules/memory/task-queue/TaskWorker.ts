@@ -336,6 +336,7 @@ export class TaskWorker {
       this.logger.info({ entry_id: task.entry_id }, 'Client enriched during tag/map update — discarding');
     }
 
+    // SA4E-165: Always mark task completed — entry sync is best-effort above
     await this.repo.markCompleted(task.id);
   }
 
