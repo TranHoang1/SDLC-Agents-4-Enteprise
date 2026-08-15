@@ -125,6 +125,24 @@ export class PendingTaskRepository {
     return stats;
   }
 
+  /** Get task stats scoped to a specific project (JOIN with knowledge_entries). */
+  async getStatsByProject(projectId: string): Promise<{ pending: number; processing: number; completed: number; failed: number }> {
+    const rows = await this.db.allAsync<{ status: string; cnt: number }>(
+      `SELECT pt.status, COUNT(*) as cnt
+       FROM pending_tasks pt
+       JOIN knowledge_entries ke ON pt.entry_id = ke.id
+       WHERE ke.project_id = $1
+       GROUP BY pt.status`,
+      [projectId],
+    );
+    const stats = { pending: 0, processing: 0, completed: 0, failed: 0 };
+    for (const row of rows) {
+      const key = row.status.toLowerCase() as keyof typeof stats;
+      if (key in stats) stats[key] = Number(row.cnt);
+    }
+    return stats;
+  }
+
   /**
    * SA4E-157: Get earliest created_at timestamp among active tasks (BR-12).
    * Used for enrichment start time and ETA calculation.

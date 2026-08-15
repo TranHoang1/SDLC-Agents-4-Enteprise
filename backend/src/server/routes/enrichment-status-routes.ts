@@ -29,7 +29,10 @@ export function createEnrichmentStatusRoutes(registry: ModuleRegistry, logger: L
         return c.json({ error: 'Enrichment service unavailable', details: 'TaskWorker not initialized' }, 503);
       }
 
-      const response = await buildStatusResponse(taskWorker);
+      // Filter by project_id from request context (X-Project-Id header or JWT)
+      const projectId = c.req.header('X-Project-Id') || '';
+
+      const response = await buildStatusResponse(taskWorker, projectId);
       return c.json(response, 200);
     } catch (err: any) {
       logger.error({ err }, '[EnrichmentStatus] Failed to retrieve status');
@@ -46,11 +49,15 @@ function getTaskWorker(registry: ModuleRegistry): TaskWorker | null {
   return memory?.taskWorker ?? null;
 }
 
-/** Build the full enrichment status response from TaskWorker data. */
-async function buildStatusResponse(taskWorker: TaskWorker): Promise<EnrichmentStatusResponse> {
-  const rawStats = await taskWorker.getStats();
-  const progress = await taskWorker.getProgress();
+/** Build the full enrichment status response from TaskWorker data, scoped to project. */
+async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): Promise<EnrichmentStatusResponse> {
   const repo = taskWorker.getRepository();
+  const progress = await taskWorker.getProgress();
+
+  // Project-scoped stats: JOIN pending_tasks with knowledge_entries to filter by project_id
+  const rawStats = projectId
+    ? await repo.getStatsByProject(projectId)
+    : await taskWorker.getStats();
   const startedAt = await repo.getEarliestActiveTimestamp();
 
   // PostgreSQL COUNT returns bigint as string — ensure numbers
@@ -59,8 +66,8 @@ async function buildStatusResponse(taskWorker: TaskWorker): Promise<EnrichmentSt
     processing: Number(rawStats.processing) || 0,
     completed: Number(rawStats.completed) || 0,
     failed: Number(rawStats.failed) || 0,
-    isRunning: rawStats.isRunning,
-    lastPollAt: rawStats.lastPollAt,
+    isRunning: (rawStats as any).isRunning ?? (Number(rawStats.processing) > 0 || Number(rawStats.pending) > 0),
+    lastPollAt: (rawStats as any).lastPollAt ?? null,
   };
 
   const state = deriveEnrichmentState(stats);
