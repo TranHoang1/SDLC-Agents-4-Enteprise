@@ -8,8 +8,8 @@ import type { DatabaseAdapter, PreparedStatement } from '../../database/adapters
 import { DialectHelper } from '../../database/dialect/DialectHelper.js';
 import * as fs from 'fs';
 import type { Logger } from 'pino';
-import type { ScannedFile } from '../scanner/file-scanner.js';
-import { extractSymbols } from '../scanner/signature-extractor.js';
+import type { ScannedFile } from './file-scanner.js';
+import { extractSymbols } from '../parsers/signature-extractor.js';
 import { detectModule } from './module-helper.js';
 
 /**

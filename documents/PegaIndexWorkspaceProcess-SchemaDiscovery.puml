@@ -1,0 +1,120 @@
+@startuml
+'===============================================================
+' PegaIndexWorkspaceProcess — Target Design (NEW)
+' 1. DataPage D_LatestRules4ExactedApps → initial rule list
+' 2. Schema-driven relative discovery via backend
+' 3. Recursive queue with dedup
+'===============================================================
+
+title Pega Index Workspace Process\n(Target Design — DataPage + Schema-Driven Discovery)
+
+|Extension|
+start
+
+:User triggers "Index Workspace";
+
+== Phase 0: Project Detection ==
+
+:Read **pega-project.json** from workspace root;
+:Extract appName, operatorId;
+:Compute projectId =\nSHA256("pega:" + appName).slice(0,12);
+:Call **setProjectId(projectId)**;
+
+== Phase 1: Initial Rule Enumeration (DataPage — App-Centric) ==
+
+|Pega Server|
+:POST **D_LatestRules4ExactedApps**\n  Body: { "ApplicationNames": "{appName}" };
+note right
+  DataPage returns ALL latest rules
+  belonging to this Application stack.
+  Single API call — no per-RuleSet pagination.
+  Returns: { pxResults: RuleSummary[] }
+end note
+
+|Extension|
+:Receive **RuleSummaryList** (pxResults);
+:Create **dedupSet** = Set<string>\n(key = "{pxObjClass}!{pyClassName}!{pyRuleName}");
+:Create **fetchQueue** = Queue(RuleSummaryList);
+:Add all items to dedupSet;
+
+== Phase 2: Fetch + Schema-Driven Relative Discovery ==
+
+:Call **calibrateFetchConcurrency()**;
+
+repeat
+  :Pick next batch from **fetchQueue** (chunk=50);
+
+  |Pega Server|
+  :Fetch rule content in parallel\nvia GET /rules/{pzInsKey};
+
+  |Extension|
+  :For each fetched rule:;
+  :Save to disk:\n**./rules/{appliedClass}/{pyRuleName}.pega.json**;
+
+  :Send rule to Backend for ingest;
+
+  |Backend Server|
+  :POST **/api/v1/pega/ingest-rule**\nBody: { projectId, ruleJson };
+
+  :1. **ingestRule()** → KB + Graph;
+
+  :2. **extractRelatives(ruleJson)**:;
+  note right
+    a. Lookup pxObjClass in pega-core-schemas.json
+    b. Get schema.dependencyPaths[]
+    c. Traverse each path in ruleJson
+    d. Extract referenced rule identifiers
+    e. Resolve to { pxObjClass, pyClassName, pyRuleName, insKey }
+  end note
+
+  :Return **RelativeRuleInfoList[]**;
+
+  |Extension|
+  :For each relative in RelativeRuleInfoList:;
+
+  if (dedupSet.contains(\n{objClass}!{className}!{ruleName})) then (already known)
+    :Skip;
+  else (new rule discovered)
+    :dedupSet.add(key);
+    :fetchQueue.enqueue(relative);
+  endif
+
+repeat while (fetchQueue.isEmpty()?) is (no)
+
+:All rules fetched + all schema-driven relatives discovered;
+
+== Phase 3: Finalize ==
+
+|Backend Server|
+:queryPegaTotals() → compute DB stats;
+
+|Extension|
+:Report: "🏛️ Pega: Ingested {N} rules\n(initial: {I} from DataPage,\ndiscovered: {D} via schema relations)";
+
+stop
+
+== Key Design Decisions ==
+
+note as DesignNotes
+**1. DataPage vs per-RuleSet enumeration:**
+  DataPage D_LatestRules4ExactedApps = 1 API call
+  → trả latest version only
+  → app-centric (tất cả rules thuộc app stack)
+  → không cần resolve hierarchy/rulesets trước
+
+**2. Schema-driven relative discovery:**
+  Backend dùng pega-core-schemas.json → dependencyPaths
+  → chỉ fetch rules thực sự được reference
+  → không blind expand 9 types cho mọi class
+
+**3. Per-rule ingest (not batch NDJSON):**
+  Mỗi rule ingest ngay → backend trả relatives ngay
+  → Extension queue relatives → fetch tiếp
+  → Recursive BFS cho tới khi queue empty
+
+**4. Dedup key:**
+  "{pxObjClass}!{pyClassName}!{pyRuleName}"
+  → check TRƯỚC fetch → save bandwidth
+end note
+
+@enduml

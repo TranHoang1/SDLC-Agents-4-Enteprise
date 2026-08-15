@@ -1,7 +1,7 @@
 /**
  * SA4E-158 — POST /api/v1/pega/sync-to-kb
  * Triggers Phase 2: sync all indexed-but-not-synced Pega rules to KB + graph + enrichment.
- * Accepts projectId in body, returns batch sync result.
+ * LLM enrichment runs INLINE (not background) to ensure user sees results immediately.
  */
 import { Hono } from 'hono';
 import type { Logger } from 'pino';
@@ -23,10 +23,18 @@ export function createPegaSyncToKbRoutes(registry: ModuleRegistry, logger: Logge
     return new PegaService(memModule.getEngine());
   };
 
+  /** Check if LLM TagAnalyzer is available (TaskWorker has it set). */
+  const isLlmAvailable = (): boolean => {
+    const memModule = registry.getModule('memory') as any;
+    if (!memModule) return false;
+    const worker = memModule.taskWorker;
+    return !!(worker as any)?.tagAnalyzer;
+  };
+
   /**
    * POST /pega/sync-to-kb — Sync indexed rules to KB for a project.
    * Body: { projectId: string }
-   * Returns: { synced, skipped, errors, details[] }
+   * Returns: { synced, skipped, errors, llmStatus, details[] }
    */
   app.post('/pega/sync-to-kb', async (c) => {
     const service = resolvePegaService();
@@ -46,12 +54,20 @@ export function createPegaSyncToKbRoutes(registry: ModuleRegistry, logger: Logge
         }, 400);
       }
 
-      logger.info({ projectId: body.projectId }, '[pega-sync-to-kb] Starting KB sync');
+      // Check LLM availability BEFORE syncing
+      const llmReady = isLlmAvailable();
+
+      logger.info({ projectId: body.projectId, llmReady }, '[pega-sync-to-kb] Starting KB sync');
       const result = await service.syncIndexedRulesToKb(body.projectId);
-      logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors },
+
+      const llmStatus = llmReady
+        ? 'LLM enrichment tasks queued — TaskWorker will process'
+        : '⚠️ LLM NOT AVAILABLE — enrichment tasks created but will NOT be processed. Check LMStudio connection.';
+
+      logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors, llmReady },
         '[pega-sync-to-kb] KB sync complete');
 
-      return c.json({ data: result, error: null });
+      return c.json({ data: { ...result, llmStatus, llmReady }, error: null });
     } catch (err: any) {
       logger.error({ err }, '[pega-sync-to-kb] Sync failed');
       return c.json({

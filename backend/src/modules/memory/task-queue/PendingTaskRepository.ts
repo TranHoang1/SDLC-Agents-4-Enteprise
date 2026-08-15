@@ -125,6 +125,19 @@ export class PendingTaskRepository {
     return stats;
   }
 
+  /**
+   * SA4E-157: Get earliest created_at timestamp among active tasks (BR-12).
+   * Used for enrichment start time and ETA calculation.
+   * @returns ISO timestamp string or null if no active tasks
+   */
+  async getEarliestActiveTimestamp(): Promise<string | null> {
+    const row = await this.db.getAsync<{ started_at: string | null }>(
+      `SELECT MIN(created_at) as started_at FROM pending_tasks WHERE status IN (?, ?)`,
+      [TaskStatus.PENDING, TaskStatus.PROCESSING],
+    );
+    return row?.started_at ?? null;
+  }
+
   async listFailed(limit = 20): Promise<PendingTask[]> {
     return this.db.allAsync<PendingTask>(
       `SELECT * FROM pending_tasks WHERE status = ? ORDER BY completed_at DESC LIMIT ?`,

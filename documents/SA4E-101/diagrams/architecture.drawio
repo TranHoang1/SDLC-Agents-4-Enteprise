@@ -1,0 +1,102 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-101: Architecture Overview — Dual-Path Persistence" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="10" width="600" height="30" as="geometry"/>
+    </mxCell>
+    <!-- VS Code Extension (Actor) -->
+    <mxCell id="ext" value="VS Code Extension&#xa;(IndexerHttpClient)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="120" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Backend Server -->
+    <mxCell id="backend" value="Backend (Hono HTTP Server)" style="swimlane;startSize=30;fillColor=none;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="360" y="60" width="520" height="380" as="geometry"/>
+    </mxCell>
+    <!-- API Layer -->
+    <mxCell id="api" value="API Routes&#xa;(api-index-decoupled.ts)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="backend">
+      <mxGeometry x="30" y="50" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- IndexOperationManager -->
+    <mxCell id="iom" value="IndexOperationManager&#xa;(Hot-Path: in-memory Map)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="backend">
+      <mxGeometry x="30" y="140" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- IndexingEngine -->
+    <mxCell id="engine" value="IndexingEngine&#xa;+ ChecksumService" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="backend">
+      <mxGeometry x="30" y="230" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Repositories -->
+    <mxCell id="repos" value="Repositories&#xa;(IndexOperation + FileChecksum)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="backend">
+      <mxGeometry x="280" y="140" width="210" height="50" as="geometry"/>
+    </mxCell>
+    <!-- StartupInterruptDetector -->
+    <mxCell id="startup" value="StartupInterruptDetector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="backend">
+      <mxGeometry x="280" y="230" width="210" height="50" as="geometry"/>
+    </mxCell>
+    <!-- CleanupScheduler -->
+    <mxCell id="cleanup" value="CleanupScheduler&#xa;(every 10min)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="backend">
+      <mxGeometry x="280" y="310" width="210" height="50" as="geometry"/>
+    </mxCell>
+    <!-- PostgreSQL -->
+    <mxCell id="pg" value="PostgreSQL&#xa;index_operations + file_checksums" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="980" y="200" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Extension → API -->
+    <mxCell id="e1" value="GET /progress&#xa;POST /index/full" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="ext" target="api">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- API → IOM -->
+    <mxCell id="e2" value="hot-path read/write" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="backend" source="api" target="iom">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- IOM → Engine -->
+    <mxCell id="e3" value="start/cancel" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="backend" source="iom" target="engine">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- IOM → Repos (persist) -->
+    <mxCell id="e4" value="async persist&#xa;(fire-and-forget)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="backend" source="iom" target="repos">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Engine → Repos (checksum) -->
+    <mxCell id="e5" value="checksum UPSERT" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="backend" source="engine" target="repos">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Repos → PostgreSQL -->
+    <mxCell id="e6" value="SQL (parameterized)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="repos" target="pg">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Startup → Repos -->
+    <mxCell id="e7" value="mark interrupted" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="backend" source="startup" target="repos">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Cleanup → Repos -->
+    <mxCell id="e8" value="DELETE terminal" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="backend" source="cleanup" target="repos">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="385" y="290"/>
+          <mxPoint x="385" y="200"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- API → Repos (cold-path read) -->
+    <mxCell id="e9" value="cold-path&#xa;fallback read" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="backend" source="api" target="repos">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="250" y="75"/>
+          <mxPoint x="250" y="165"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="leg1" value="Green = NEW modules (SA4E-101)" style="text;html=1;fontSize=9;fillColor=#d5e8d4;strokeColor=#82b366;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="470" width="200" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="Blue = EXISTING (modified)" style="text;html=1;fontSize=9;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="470" width="170" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="Yellow = EXTERNAL (PostgreSQL)" style="text;html=1;fontSize=9;fillColor=#fff2cc;strokeColor=#d6b656;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="490" y="470" width="190" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

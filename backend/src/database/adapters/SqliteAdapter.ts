@@ -19,14 +19,16 @@ export class SqliteAdapter implements DatabaseAdapter {
   private db: Database.Database | null = null;
   private connected = false;
 
-  constructor(private readonly dbPath: string) {}
+  constructor(private readonly dbPath: string, private readonly nativeBinding?: string) {}
 
   async connect(): Promise<void> {
     const dir = path.dirname(this.dbPath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    this.db = new Database(this.dbPath);
+    this.db = this.nativeBinding
+      ? new Database(this.dbPath, { nativeBinding: this.nativeBinding })
+      : new Database(this.dbPath);
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('foreign_keys = ON');
     this.connected = true;

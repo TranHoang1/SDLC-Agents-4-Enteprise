@@ -178,7 +178,32 @@ export class MemoryModuleBuilder {
       : new TaskWorker(this.memAdapter!, this.mod.engine, this.logger, this.config.taskWorkerConfig);
     worker.start();
     this.mod.setTaskWorker(worker);
+
+    // SA4E-107: Load persisted TaskWorker config from DB (Admin UI values survive restart)
+    this.loadPersistedTaskWorkerConfig(worker).catch(err => {
+      this.logger.debug({ err }, '[MemoryModuleBuilder] Failed to load persisted TaskWorker config (using defaults)');
+    });
+
     return this;
+  }
+
+  /** Load TaskWorker config overrides from config_changes DB table (non-blocking). */
+  private async loadPersistedTaskWorkerConfig(worker: TaskWorker): Promise<void> {
+    try {
+      const { getAdminAdapter } = await import('../../admin/db/core.js');
+      const adapter = getAdminAdapter();
+      const rows = await adapter.allAsync<{ key: string; new_value: string }>(
+        "SELECT key, new_value FROM config_changes WHERE section = 'taskWorker' ORDER BY changed_at DESC",
+      );
+      const patch: Record<string, number> = {};
+      for (const row of rows) {
+        if (!patch[row.key]) { patch[row.key] = parseInt(row.new_value, 10); }
+      }
+      if (Object.keys(patch).length > 0) {
+        worker.updateConfig(patch as any);
+        this.logger.info({ patch }, '[TaskWorker] Loaded persisted config from DB');
+      }
+    } catch { /* DB may not have config_changes table yet — use defaults */ }
   }
 
   /** Step 5: Start scope promotion service + background scheduler. */

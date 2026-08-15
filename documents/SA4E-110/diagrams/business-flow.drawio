@@ -1,0 +1,142 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-110: Atlassian Child Server — Business Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="420" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Entry Points -->
+    <mxCell id="n1" value="Orchestrator&#xa;Startup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="Read&#xa;orchestration.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="60" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="McpClientManager&#xa;.connectServer()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="60" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Child Server Init -->
+    <mxCell id="n4" value="Atlassian Child Server&#xa;(stdio process)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="180" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="Retrieve Credentials&#xa;from SecretStorage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="740" y="180" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="Authenticate to&#xa;Jira + Confluence" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="740" y="280" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Tool Registration -->
+    <mxCell id="n7" value="Respond tools/list&#xa;(65+ tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="280" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="Index Tools&#xa;(ONNX embeddings)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="280" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="Tools Ready&#xa;in mcp_tools table" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="280" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: Agent Usage -->
+    <mxCell id="n10" value="AI Agent&#xa;(SM/BA/QA/DevOps)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="410" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n11" value="find_tools(query)&#xa;→ Semantic Search" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="410" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n12" value="execute_dynamic_tool&#xa;(tool_name, args)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="410" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n13" value="Proxy to&#xa;Child Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="740" y="410" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 5: External + Response -->
+    <mxCell id="n14" value="Atlassian API&#xa;(Jira/Confluence)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="740" y="530" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n15" value="Return Result&#xa;to Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="530" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Health Check -->
+    <mxCell id="n16" value="Health Monitor&#xa;(periodic ping)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="180" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n17" value="Auto-Reconnect&#xa;on Failure" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="180" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 1 flow -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#0288d1;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#0288d1;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Row 1 to Row 2 -->
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Child server init flow -->
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;" edge="1" parent="1" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Auth done, respond tools -->
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#82b366;" edge="1" parent="1" source="n6" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Tool registration flow -->
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="n7" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="n8" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Agent usage flow -->
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#0288d1;" edge="1" parent="1" source="n10" target="n11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="n11" target="n12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="n12" target="n13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Proxy to Atlassian API -->
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;" edge="1" parent="1" source="n13" target="n14">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Response back -->
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;" edge="1" parent="1" source="n14" target="n15">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="820" y="620"/>
+          <mxPoint x="350" y="620"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;" edge="1" parent="1" source="n15" target="n10">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="130" y="555"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Health check flow -->
+    <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#666666;" edge="1" parent="1" source="n16" target="n17">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e16" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;" edge="1" parent="1" source="n17" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Ready state connects to agents -->
+    <mxCell id="e17" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;dashed=1;" edge="1" parent="1" source="n9" target="n10">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="130" y="360"/>
+          <mxPoint x="130" y="410"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

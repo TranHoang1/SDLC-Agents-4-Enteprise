@@ -4,7 +4,7 @@
  */
 
 import * as vscode from "vscode";
-import { getWorkspaceRoot, createStatusBar, updateStatusBar, checkForUpgrade } from "./activation-helpers";
+import { getWorkspaceRoot, checkForUpgrade } from "./activation-helpers";
 import { McpServerManager } from "./mcp-server-manager";
 import { WebviewPanelManager } from "./webview-panel-manager";
 import { KiroTreeViewProvider } from "./sidebar/tree-view-provider";
@@ -30,6 +30,8 @@ import { ProxyAgentFactory } from "./proxy/ProxyAgentFactory";
 import { ProxyConfigService } from "./proxy/ProxyConfigService";
 import { ProxyDetectionService } from "./proxy/ProxyDetectionService";
 import { KnowledgeClient } from "./knowledge-client";
+import { EnrichmentStatusService } from "./services/EnrichmentStatusService";
+import type { EnrichmentStatusResponse } from "./services/enrichment-status-schema";
 
 let mcpManager: McpServerManager | undefined;
 let panelManager: WebviewPanelManager | undefined;
@@ -47,9 +49,6 @@ export function getProjectId(): string { return _projectId; }
 export function setProjectId(id: string): void { _projectId = id; }
 
 export async function activate(context: vscode.ExtensionContext) {
-  const statusBar = createStatusBar();
-  context.subscriptions.push(statusBar);
-
   // Register Settings command early — must work even without a workspace folder.
   context.subscriptions.push(
     vscode.commands.registerCommand("kiroSdlc.openSettings", () =>
@@ -68,10 +67,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const workspaceRoot = getWorkspaceRoot();
   if (workspaceRoot) {
-    await initializeWorkspace(context, workspaceRoot, statusBar);
+    await initializeWorkspace(context, workspaceRoot);
   }
 
-  updateStatusBar(statusBar, mcpManager);
   checkForUpgrade(context);
 }
 
@@ -144,7 +142,7 @@ export async function deriveProjectId(workspaceRoot: string): Promise<string> {
   return projectId;
 }
 
-async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRoot: string, statusBar: vscode.StatusBarItem): Promise<void> {
+async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRoot: string): Promise<void> {
   _projectId = await deriveProjectId(workspaceRoot);
 
   const outputChannel = vscode.window.createOutputChannel("Kiro MCP Server");
@@ -201,8 +199,32 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
   );
 
   setupConfigWatcher(context, workspaceRoot, outputChannel);
-  setupMcpStatusBroadcast(statusBar, workspaceRoot);
+  setupMcpStatusBroadcast(workspaceRoot);
   await autoSpawnServer(mcpConfig, outputChannel);
+
+  // SA4E-157: Enrichment status polling + StatusBarItem
+  const enrichmentEnabled = vscode.workspace.getConfiguration('kiroSdlc').get<boolean>('enrichment.pollingEnabled', true);
+  if (enrichmentEnabled) {
+    const { IndexerHttpClient } = await import('./services/IndexerHttpClient');
+    const enrichmentClient = new IndexerHttpClient(backendUrl);
+    const enrichmentService = new EnrichmentStatusService(
+      enrichmentClient,
+      () => authManager?.getTokenSync(),
+      outputChannel,
+    );
+    enrichmentService.start();
+    context.subscriptions.push(enrichmentService);
+    context.subscriptions.push(
+      vscode.commands.registerCommand('sa4e.showEnrichmentStatus', async () => {
+        const status = await enrichmentService.pollNow();
+        if (!status) {
+          vscode.window.showErrorMessage('Cannot reach backend. Verify server is running.');
+          return;
+        }
+        vscode.window.showInformationMessage(formatEnrichmentStatus(status));
+      })
+    );
+  }
 
   // Initialize Platform Swap feature (IDE-aware agent config swap)
   await initPlatformSwap(context, workspaceRoot, outputChannel).catch((err) => {
@@ -268,11 +290,10 @@ function setupConfigWatcher(context: vscode.ExtensionContext, workspaceRoot: str
   }));
 }
 
-function setupMcpStatusBroadcast(statusBar: vscode.StatusBarItem, workspaceRoot: string): void {
+function setupMcpStatusBroadcast(workspaceRoot: string): void {
   mcpManager!.onStatusChange((status) => {
     const webviewStatus = mapServerStatusToWebview(status);
     panelManager?.notifyAllPanels({ type: "serverStatus", status: webviewStatus });
-    updateStatusBar(statusBar, mcpManager);
     // SA4E-39: Update StatusBarManager connection state from MCP status
     const connState = status === "running" ? "CONNECTED" : status === "starting" ? "CONNECTING" : "DISCONNECTED";
     statusBarManager?.setConnectionState(connState);
@@ -300,6 +321,20 @@ async function autoSpawnServer(config: vscode.WorkspaceConfiguration, outputChan
   }
 }
 
+
+/** SA4E-157: Format enrichment status for UC-4 information message. */
+function formatEnrichmentStatus(s: EnrichmentStatusResponse): string {
+  const parts: string[] = [
+    'Enrichment Status',
+    'State: ' + s.state,
+    'Progress: ' + s.completedRules + '/' + s.totalRules + ' (' + s.percent + '%)',
+  ];
+  if (s.failedRules > 0) { parts.push('Failed: ' + s.failedRules + ' rules'); }
+  if (s.startedAt) { parts.push('Started: ' + new Date(s.startedAt).toLocaleTimeString()); }
+  if (s.estimatedCompletion) { parts.push('Estimated: ' + new Date(s.estimatedCompletion).toLocaleTimeString()); }
+  if (s.currentFile) { parts.push('Current: ' + s.currentFile); }
+  return parts.join(' | ');
+}
 
 /**
  * SA4E-85: Open the new Agentic Chat panel.

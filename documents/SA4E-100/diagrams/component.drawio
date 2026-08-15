@@ -1,0 +1,99 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="h_title" value="SA4E-100 — Component Diagram: Proxy Subsystem" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="280" y="10" width="450" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_curl" value="&lt;b&gt;CurlTransport&lt;/b&gt;&#xa;[NEW]&#xa;&#xa;+ request(url, opts): CurlResponse&#xa;+ testConnection(url, proxy, auth): number&#xa;+ static isAvailable(): boolean&#xa;- buildArgs(): string[]&#xa;- parseOutput(raw): CurlResponse&#xa;- interpretCurlError(err): string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="260" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_testservice" value="&lt;b&gt;ProxyTestService&lt;/b&gt;&#xa;[REWRITE]&#xa;&#xa;+ testConnection(input): ProxyTestResult&#xa;+ testWithCurlOnly(input): ProxyTestResult&#xa;- resolveTestProxyUrl(input): string|null&#xa;- testWithUndici(proxy, url, input): Result&#xa;- testWithCurl(proxy, url, input): Result&#xa;- buildTemporaryAgent(proxy, input): Agent&#xa;- interpretResponse(resp, ms): Result&#xa;- mapErrorToResult(err): Result" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="380" y="60" width="270" height="190" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_handler" value="&lt;b&gt;ProxyMessageHandler&lt;/b&gt;&#xa;[UPDATED — +copyDetectedToManual]&#xa;&#xa;+ handle(msg): void&#xa;- handleGetProxyState()&#xa;- handleSetProxyMode(mode)&#xa;- handleSaveProxy(msg)&#xa;- handleSaveProxyCredentials(msg)&#xa;- handleClearProxyCredentials()&#xa;- handleTestProxyConnection(msg)&#xa;- handleDetectSystemProxy()&#xa;- handleCopyDetectedToManual()&#xa;- invalidateFactory()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="730" y="60" width="260" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_detection" value="&lt;b&gt;ProxyDetectionService&lt;/b&gt;&#xa;[Existing]&#xa;&#xa;+ detect(): { url, bypass }" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="40" y="310" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_resolver" value="&lt;b&gt;VscodeProxyResolverService&lt;/b&gt;&#xa;[Existing]&#xa;&#xa;+ resolveByUrl(url): { url }" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="300" y="310" width="230" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_config" value="&lt;b&gt;ProxyConfigService&lt;/b&gt;&#xa;[Existing]&#xa;&#xa;+ getState(url, bypass): ProxyState&#xa;+ setMode(mode): void&#xa;+ saveProxy(host, port, bypass): void&#xa;+ saveCredentials(user, pass): void&#xa;+ clearCredentials(): void" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="570" y="310" width="240" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_factory" value="&lt;b&gt;ProxyAgentFactory&lt;/b&gt;&#xa;[Existing — Singleton]&#xa;&#xa;+ getInstance(): Factory&#xa;+ invalidate(): void&#xa;+ getAgent(): ProxyAgent" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="850" y="310" width="210" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_error" value="&lt;b&gt;CurlTransportError&lt;/b&gt;&#xa;extends Error&#xa;&#xa;+ message: string&#xa;+ code?: string" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="40" y="470" width="200" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_models" value="&lt;b&gt;ProxyModels&lt;/b&gt; (interfaces)&#xa;&#xa;• ProxyTestInput&#xa;• ProxyTestResult&#xa;• ProxyCredentials&#xa;• CurlResponse&#xa;• CurlRequestOptions" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="300" y="470" width="200" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_webview" value="&lt;b&gt;proxy-tab.js&lt;/b&gt;&#xa;[UPDATED]&#xa;&#xa;Webview event handlers:&#xa;• testBtn → testProxyConnection&#xa;• detectBtn → detectSystemProxy&#xa;• copyToManualBtn → copyDetectedToManual&#xa;• handleCopyToManual(msg)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="570" y="470" width="240" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_undici" value="&lt;b&gt;undici&lt;/b&gt;&#xa;(ProxyAgent)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="850" y="470" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_cp" value="&lt;b&gt;child_process&lt;/b&gt;&#xa;(execFile)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="1">
+      <mxGeometry x="850" y="540" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;fontSize=8;dashed=1;" edge="1" parent="1" source="n_testservice" target="n_curl">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;fontSize=8;dashed=1;" edge="1" parent="1" source="n_testservice" target="n_resolver">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="n_handler" target="n_testservice">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="n_handler" target="n_detection">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="n_handler" target="n_config">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="invalidates" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;strokeColor=#b85450;" edge="1" parent="1" source="n_handler" target="n_factory">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;fontSize=8;dashed=1;" edge="1" parent="1" source="n_testservice" target="n_undici">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="700" y="500"/>
+          <mxPoint x="830" y="500"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e8" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;fontSize=8;dashed=1;" edge="1" parent="1" source="n_curl" target="n_cp">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="170" y="560"/>
+          <mxPoint x="850" y="560"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e9" value="throws" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;fontSize=8;dashed=1;strokeColor=#b85450;" edge="1" parent="1" source="n_curl" target="n_error">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="postMessage" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;strokeColor=#0288d1;" edge="1" parent="1" source="n_webview" target="n_handler">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="690" y="460"/>
+          <mxPoint x="860" y="460"/>
+          <mxPoint x="860" y="260"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e11" value="ctor" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;fontSize=8;dashed=1;" edge="1" parent="1" source="n_testservice" target="n_detection">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="380" y="280"/>
+          <mxPoint x="150" y="280"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

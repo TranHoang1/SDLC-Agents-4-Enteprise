@@ -15,18 +15,18 @@ import { isUuidV4, UUID_V4_REGEX } from '../models.js';
 const logger = pino({ level: 'silent' });
 
 describe('PBT-HYD-01 — backend thread_id always valid UUID v4', () => {
-  it('holds for 500 random createThread inputs', () => {
+  it('holds for 500 random createThread inputs', async () => {
     const db = KnowledgeDb.createInMemory();
     const service = new KnowledgeService(db, logger);
     const ctx = createProjectContext('pbt-ws', 'pbt-user');
 
-    fc.assert(
-      fc.property(
+    await fc.assert(
+      fc.asyncProperty(
         fc.string({ maxLength: 64 }),
         fc.string({ maxLength: 32 }),
         fc.boolean(),
-        (title, agentId, hasAgent) => {
-          const thread = service.createThread(ctx, {
+        async (title, agentId, hasAgent) => {
+          const thread = await service.createThread(ctx, {
             title,
             agent_id: hasAgent ? agentId : null,
           });
@@ -38,24 +38,28 @@ describe('PBT-HYD-01 — backend thread_id always valid UUID v4', () => {
     );
   });
 
-  it('thread ids are unique across creations', () => {
+  it('thread ids are unique across creations', async () => {
     const db = KnowledgeDb.createInMemory();
     const service = new KnowledgeService(db, logger);
     const ctx = createProjectContext('pbt-ws', 'pbt-user');
-    const ids = new Set(Array.from({ length: 100 }, () => service.createThread(ctx, {}).thread_id));
+    const ids = new Set<string>();
+    for (let i = 0; i < 100; i++) {
+      const thread = await service.createThread(ctx, {});
+      ids.add(thread.thread_id);
+    }
     expect(ids.size).toBe(100);
   });
 
-  it('invalid thread_id strings are rejected by accessors', () => {
+  it('invalid thread_id strings are rejected by accessors', async () => {
     const db = KnowledgeDb.createInMemory();
     const service = new KnowledgeService(db, logger);
     const ctx = createProjectContext('pbt-ws', 'pbt-user');
-    fc.assert(
-      fc.property(fc.string({ maxLength: 100 }), (badId) => {
+    await fc.assert(
+      fc.asyncProperty(fc.string({ maxLength: 100 }), async (badId) => {
         fc.pre(!UUID_V4_REGEX.test(badId));
-        expect(service.getThread(ctx, badId)).toBeNull();
-        expect(service.getMessages(ctx, badId)).toBeNull();
-        expect(service.getCheckpoint(ctx, badId)).toBeNull();
+        expect(await service.getThread(ctx, badId)).toBeNull();
+        expect(await service.getMessages(ctx, badId)).toBeNull();
+        expect(await service.getCheckpoint(ctx, badId)).toBeNull();
       }),
       { numRuns: 500 },
     );

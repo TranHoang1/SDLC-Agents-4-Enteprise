@@ -29,6 +29,9 @@ export class AuthManager implements vscode.Disposable {
   private cachedToken: string | null = null;
   private _onStateChange = new vscode.EventEmitter<AuthState>();
   readonly onStateChange: vscode.Event<AuthState> = this._onStateChange.event;
+  private _onTokenRefreshed = new vscode.EventEmitter<string>();
+  /** Fires with new token string whenever token is successfully refreshed. */
+  readonly onTokenRefreshed: vscode.Event<string> = this._onTokenRefreshed.event;
 
   constructor(
     private readonly secrets: vscode.SecretStorage,
@@ -151,6 +154,8 @@ export class AuthManager implements vscode.Disposable {
       if (data.expiresAt) {
         this.tokenExpiresAt = new Date(data.expiresAt).getTime();
       }
+      // Notify listeners (e.g. iframe panels) that token has been refreshed
+      this._onTokenRefreshed.fire(data.token);
     } catch (err) {
       console.warn("Failed to refresh token due to network/server issue. Keeping current session.", err);
     }
@@ -204,6 +209,7 @@ export class AuthManager implements vscode.Disposable {
   dispose(): void {
     this.refreshTimer.stop();
     this._onStateChange.dispose();
+    this._onTokenRefreshed.dispose();
   }
 }
 

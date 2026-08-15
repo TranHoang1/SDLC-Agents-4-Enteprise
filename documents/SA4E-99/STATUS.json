@@ -1,0 +1,15 @@
+{
+  "ticket": "SA4E-99",
+  "issueType": "Bug",
+  "currentPhase": "testing",
+  "autonomyLevel": "L3",
+  "phases": {
+    "requirements": { "status": "skipped", "reason": "Bug ticket - no docs pipeline" },
+    "specification": { "status": "skipped", "reason": "Bug ticket - no docs pipeline" },
+    "design": { "status": "skipped", "reason": "Bug ticket - no docs pipeline" },
+    "implementation": { "status": "done", "completedAt": "2026-08-10T14:00:00Z" },
+    "testing": { "status": "in_progress", "startedAt": "2026-08-10T14:00:00Z" },
+    "deployment": { "status": "not_started" }
+  },
+  "lastUpdated": "2026-08-10T14:00:00Z"
+}

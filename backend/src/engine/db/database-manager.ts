@@ -1,24 +1,25 @@
 ﻿/**
- * DatabaseManager — SQLite lifecycle management.
+ * DatabaseManager — SQLite lifecycle management for the indexing engine.
  * Handles open, WAL mode, migrations, and graceful close.
+ * SA4E-53: Uses SqliteAdapter instead of raw better-sqlite3 import.
  */
 
-import Database from 'better-sqlite3';
 import * as fs from 'fs';
 import * as path from 'path';
 import pino from 'pino';
 import { runMigrations, getCurrentVersion } from './migrations.js';
 import { resolveNativeBinding, resolveNativeBindingSync } from './resolver/index.js';
+import { SqliteAdapter } from '../../database/adapters/SqliteAdapter.js';
+import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 
 const logger = pino({ name: 'database-manager' });
 
 export class DatabaseManager {
-  private db: Database.Database | null = null;
+  private adapter: SqliteAdapter | null = null;
   private readonly dbPath: string;
   private readonly projectId: string;
-  private static resolvedBinding: string | undefined | null = null; // null = not yet resolved
-  private static sharedDb: Database.Database | null = null;
-  private static initPromise: Promise<void> | null = null;
+  private static resolvedBinding: string | undefined | null = null;
+  private static sharedAdapter: SqliteAdapter | null = null;
 
   /**
    * @param dbPath  Path to the SQLite index.db file.
@@ -40,8 +41,8 @@ export class DatabaseManager {
 
   /** Open database, enable WAL, run migrations. */
   initialize(): void {
-    if (DatabaseManager.sharedDb) {
-      this.db = DatabaseManager.sharedDb;
+    if (DatabaseManager.sharedAdapter) {
+      this.adapter = DatabaseManager.sharedAdapter;
       return;
     }
 
@@ -54,49 +55,58 @@ export class DatabaseManager {
 
     if (nativeBinding) {
       logger.error(`[db] Using native binding: ${nativeBinding}`);
-      this.db = new Database(this.dbPath, { nativeBinding });
     } else {
       logger.error('[db] Using npm-installed better-sqlite3');
-      this.db = new Database(this.dbPath);
     }
 
+    // Create adapter and connect (handles WAL, foreign_keys)
+    this.adapter = new SqliteAdapter(this.dbPath, nativeBinding || undefined);
+    void this.adapter.connect();
     this.configureDatabase();
     this.backupBeforeV5();
-    runMigrations(this.db, this.projectId);
-    DatabaseManager.sharedDb = this.db;
+    runMigrations(this.adapter, this.projectId);
+    DatabaseManager.sharedAdapter = this.adapter;
     logger.error(`[db] Initialized at ${this.dbPath}`);
   }
 
   /**
    * SA4E-41 (TDD §10.3): snapshot the pre-V5 index.db before the multi-tenant
-   * migration runs, so a failed migration can be rolled back. Uses VACUUM INTO for
-   * a consistent copy (WAL-safe). Skipped for in-memory DBs and when already ≥ V5.
+   * migration runs. Skipped for in-memory DBs and when already ≥ V5.
    */
   private backupBeforeV5(): void {
-    if (!this.db || this.dbPath === ':memory:') return;
+    if (!this.adapter || this.dbPath === ':memory:') return;
     try {
-      if (getCurrentVersion(this.db) >= 5) return;
+      if (getCurrentVersion(this.adapter) >= 5) return;
       const backupPath = `${this.dbPath}.pre-v5.bak`;
-      if (fs.existsSync(backupPath)) return; // don't overwrite an existing snapshot
-      this.db.exec(`VACUUM INTO '${backupPath.replace(/'/g, "''")}'`);
+      if (fs.existsSync(backupPath)) return;
+      this.adapter.exec(`VACUUM INTO '${backupPath.replace(/'/g, "''")}'`);
       logger.error(`[db] Pre-V5 backup written to ${backupPath}`);
     } catch (err) {
-      // Non-fatal: log loudly but let migration proceed (backup is best-effort).
       logger.error({ err }, '[db] Pre-V5 backup failed (continuing with migration)');
     }
   }
 
-  /** Get the underlying database instance. */
-  getDb(): Database.Database {
-    if (!this.db) throw new Error('Database not initialized');
-    return this.db;
+  /** Get the underlying database adapter. */
+  getAdapter(): DatabaseAdapter {
+    if (!this.adapter) throw new Error('Database not initialized');
+    return this.adapter;
+  }
+
+  /**
+   * Get the raw better-sqlite3 Database instance.
+   * @deprecated Prefer getAdapter() for new code. Kept for backward compat with tests.
+   */
+  getDb(): import('better-sqlite3').Database {
+    if (!this.adapter) throw new Error('Database not initialized');
+    return this.adapter.getRawDb();
   }
 
   /** Close database connection gracefully. */
   close(): void {
-    if (this.db) {
-      this.db.close();
-      this.db = null;
+    if (this.adapter) {
+      void this.adapter.disconnect();
+      this.adapter = null;
+      DatabaseManager.sharedAdapter = null;
       logger.error('[db] Connection closed');
     }
   }
@@ -109,11 +119,10 @@ export class DatabaseManager {
   }
 
   private configureDatabase(): void {
-    if (!this.db) return;
-    this.db.pragma('journal_mode = WAL');
-    this.db.pragma('synchronous = NORMAL');
-    this.db.pragma('cache_size = -64000');
-    this.db.pragma('foreign_keys = ON');
-    this.db.pragma('temp_store = MEMORY');
+    if (!this.adapter) return;
+    // Additional pragmas beyond what SqliteAdapter.connect() sets
+    this.adapter.exec('PRAGMA synchronous = NORMAL');
+    this.adapter.exec('PRAGMA cache_size = -64000');
+    this.adapter.exec('PRAGMA temp_store = MEMORY');
   }
 }

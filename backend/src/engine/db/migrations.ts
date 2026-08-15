@@ -1,18 +1,17 @@
 /**
  * Migration runner — sequential, versioned schema migrations.
  * Each migration is applied once and tracked in schema_version table.
+ * SA4E-53: Uses SyncDatabaseAdapter instead of raw better-sqlite3.
  */
 
-import Database from 'better-sqlite3';
 import pino from 'pino';
+import type { SyncDatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { SCHEMA_V1 } from './schema.js';
-import { runGraphMigrations } from '../database/migrator.js';
-import { SqliteDbAdapter } from '../../modules/memory/task-queue/SqliteDbAdapter.js';
 import { applyMigrationV5 } from './migration-v5.js';
 
 const logger = pino({ name: 'migrations' });
 
-function applyMemorySchema(db: Database.Database): void {
+function applyMemorySchema(db: SyncDatabaseAdapter): void {
   try {
     db.exec(SCHEMA_V1);
   } catch (err) {
@@ -41,11 +40,11 @@ const MIGRATIONS: Migration[] = [
 ];
 
 /** Get current schema version from database. */
-export function getCurrentVersion(db: Database.Database): number {
+export function getCurrentVersion(db: SyncDatabaseAdapter): number {
   try {
-    const row = db.prepare(
-      'SELECT MAX(version) as v FROM schema_version'
-    ).get() as { v: number | null } | undefined;
+    const row = db.get<{ v: number | null }>(
+      'SELECT MAX(version) as v FROM schema_version',
+    );
     return row?.v ?? 0;
   } catch {
     return 0;
@@ -53,13 +52,11 @@ export function getCurrentVersion(db: Database.Database): number {
 }
 
 /** Run all pending migrations sequentially. */
-export function runMigrations(db: Database.Database, legacyProjectId: string = 'default'): void {
+export function runMigrations(db: SyncDatabaseAdapter, legacyProjectId: string = 'default'): void {
   // Idempotent memory schema execution
   applyMemorySchema(db);
 
-  // SA4E-42 (PT-01): additive `server` column on mcp_tools. Idempotent (PRAGMA probe),
-  // so it MUST run on every startup BEFORE the early-return below — existing v5 DBs
-  // (left by SA4E-41) would otherwise skip it and crash on the scoped INSERT.
+  // SA4E-42 (PT-01): additive `server` column on mcp_tools.
   migrateAddMcpToolsServerColumn(db);
 
   const current = getCurrentVersion(db);
@@ -80,7 +77,7 @@ export function runMigrations(db: Database.Database, legacyProjectId: string = '
     applyMigrationV2(db);
   }
 
-  // Run V3 graph migrations (KSA-145/153/169) — idempotent, SQLite synchronous execution
+  // Run V3 graph migrations (KSA-145/153/169) — idempotent
   if (current < 3) {
     try {
       applyGraphMigrationsSync(db);
@@ -94,7 +91,7 @@ export function runMigrations(db: Database.Database, legacyProjectId: string = '
     applyMigrationV4(db);
   }
 
-  // Run V5 multi-tenant isolation (SA4E-41) — idempotent, backfills legacyProjectId
+  // Run V5 multi-tenant isolation (SA4E-41)
   if (current < 5) {
     applyMigrationV5(db, legacyProjectId);
   }
@@ -102,10 +99,9 @@ export function runMigrations(db: Database.Database, legacyProjectId: string = '
 
 /**
  * SA4E-42 — add the `server` scoping column to `mcp_tools` for existing DBs.
- * Uses a PRAGMA table_info probe (F-02) instead of a swallow-all catch, so a
- * genuine migration failure surfaces rather than being silently ignored.
+ * Uses column existence probe instead of a swallow-all catch.
  */
-export function migrateAddMcpToolsServerColumn(db: Database.Database): void {
+export function migrateAddMcpToolsServerColumn(db: SyncDatabaseAdapter): void {
   const existing = getExistingColumns(db, 'mcp_tools');
   if (!existing.has('server')) {
     db.exec('ALTER TABLE mcp_tools ADD COLUMN server TEXT');
@@ -114,29 +110,15 @@ export function migrateAddMcpToolsServerColumn(db: Database.Database): void {
   db.exec('CREATE INDEX IF NOT EXISTS idx_mcp_tools_server ON mcp_tools(server)');
 }
 
-function applyMigrationV4(db: Database.Database): void {
+function applyMigrationV4(db: SyncDatabaseAdapter): void {
   try {
     const memoryTables = [
-      'knowledge_entries',
-      'knowledge_vectors',
-      'knowledge_graph_edges',
-      'consolidation_log',
-      'memory_sessions',
-      'memory_audit',
-      'conversation_turns',
-      'entity_index',
-      'agent_scope_config',
-      'quality_scores',
-      'tags',
-      'entry_tags',
-      'citations',
-      'attachments',
-      'templates',
-      'feedback',
-      'reminders',
-      'search_log',
-      'popular_queries',
-      'knowledge_fts'
+      'knowledge_entries', 'knowledge_vectors', 'knowledge_graph_edges',
+      'consolidation_log', 'memory_sessions', 'memory_audit',
+      'conversation_turns', 'entity_index', 'agent_scope_config',
+      'quality_scores', 'tags', 'entry_tags', 'citations',
+      'attachments', 'templates', 'feedback', 'reminders',
+      'search_log', 'popular_queries', 'knowledge_fts',
     ];
 
     db.exec('PRAGMA foreign_keys=OFF;');
@@ -145,24 +127,22 @@ function applyMigrationV4(db: Database.Database): void {
     }
     db.exec('PRAGMA foreign_keys=ON;');
 
-    // Re-apply memory schema to create the new tables
     applyMemorySchema(db);
-
-    db.prepare('INSERT OR REPLACE INTO schema_version (version) VALUES (?)').run(4);
-    logger.error('[migrations] V4: Memory tables dropped and recreated with full schema');
+    db.run('INSERT OR REPLACE INTO schema_version (version) VALUES (?)', [4]);
+    logger.error('[migrations] V4: Memory tables dropped and recreated');
   } catch (err) {
     logger.error({ err }, `[migrations] V4 error:`);
   }
 }
 
-function applyMigration(db: Database.Database, migration: Migration): void {
+function applyMigration(db: SyncDatabaseAdapter, migration: Migration): void {
   db.exec(migration.sql);
-  db.prepare('INSERT INTO schema_version (version) VALUES (?)').run(migration.version);
+  db.run('INSERT INTO schema_version (version) VALUES (?)', [migration.version]);
   logger.error(`[migrations] v${migration.version} applied`);
 }
 
 /** Migration V2 — Add pattern metadata columns to modules table. */
-function applyMigrationV2(db: Database.Database): void {
+function applyMigrationV2(db: SyncDatabaseAdapter): void {
   try {
     const existing = getExistingColumns(db, 'modules');
     let added = 0;
@@ -174,22 +154,22 @@ function applyMigrationV2(db: Database.Database): void {
       }
     }
 
-    db.prepare('INSERT OR REPLACE INTO schema_version (version) VALUES (?)').run(2);
+    db.run('INSERT OR REPLACE INTO schema_version (version) VALUES (?)', [2]);
     logger.error(`[migrations] V2: Added ${added} pattern columns`);
   } catch (err) {
     logger.error({ err }, `[migrations] V2 error (graceful degradation):`);
   }
 }
 
-/** Get set of column names for a table via PRAGMA. */
-function getExistingColumns(db: Database.Database, table: string): Set<string> {
-  const rows = db.pragma(`table_info(${table})`) as { name: string }[];
+/** Get set of column names for a table via pragma_table_info. */
+function getExistingColumns(db: SyncDatabaseAdapter, table: string): Set<string> {
+  const rows = db.all<{ name: string }>(`SELECT name FROM pragma_table_info('${table}')`);
   return new Set(rows.map(r => r.name));
 }
 
-function applyGraphMigrationsSync(db: Database.Database): void {
+function applyGraphMigrationsSync(db: SyncDatabaseAdapter): void {
   logger.error('[migrations] Running graph schema migrations (SQLite sync)...');
-  
+
   // 1. Add enhanced columns to symbols
   const existing = getExistingColumns(db, 'symbols');
   let added = 0;
@@ -208,9 +188,7 @@ function applyGraphMigrationsSync(db: Database.Database): void {
       try {
         db.exec(`ALTER TABLE symbols ADD COLUMN ${col.name} ${col.type}`);
         added++;
-      } catch {
-        // Column may already exist
-      }
+      } catch { /* Column may already exist */ }
     }
   }
 
@@ -220,9 +198,7 @@ function applyGraphMigrationsSync(db: Database.Database): void {
       db.exec('CREATE INDEX IF NOT EXISTS idx_sym_parent ON symbols(parent_symbol_id)');
       db.exec('CREATE INDEX IF NOT EXISTS idx_sym_exported ON symbols(is_exported)');
       db.exec('CREATE INDEX IF NOT EXISTS idx_sym_file_kind ON symbols(file_id, kind)');
-    } catch {
-      // Indexes may already exist
-    }
+    } catch { /* Indexes may already exist */ }
   }
 
   // 2. Create relationships table
@@ -289,6 +265,6 @@ CREATE INDEX IF NOT EXISTS idx_body_embeddings_symbol ON body_embeddings(symbol_
   logger.error('[migrations] Body embeddings table ready');
 
   // 6. Update schema version
-  db.prepare('INSERT OR REPLACE INTO schema_version (version) VALUES (?)').run(3);
+  db.run('INSERT OR REPLACE INTO schema_version (version) VALUES (?)', [3]);
   logger.error('[migrations] Schema version set to 3 (sync)');
 }

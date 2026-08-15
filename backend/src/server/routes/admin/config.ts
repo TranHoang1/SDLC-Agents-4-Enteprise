@@ -31,7 +31,7 @@ async function getEffectiveConfig(ctx: AdminContext): Promise<Record<string, Rec
     kb: { maxEntries: 100000, sqliteDbPath: cfg.sqliteDbPath, dataDir: cfg.dataDir },
     mcp: { orchestrationConfigPath: cfg.orchestrationConfigPath },
     taskWorker: {
-      concurrency: parseInt(process.env.TASK_WORKER_CONCURRENCY || '2', 10),
+      concurrency: parseInt(process.env.TASK_WORKER_CONCURRENCY || '6', 10),
       baseInterval: parseInt(process.env.TASK_WORKER_BASE_INTERVAL || '2000', 10),
       maxInterval: parseInt(process.env.TASK_WORKER_MAX_INTERVAL || '30000', 10),
     },

@@ -8,7 +8,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from 'better-sqlite3';
 import { SqliteDbAdapter } from '../../../modules/memory/task-queue/SqliteDbAdapter.js';
 import { SymbolResolver } from '../symbol-resolver.js';
-import { GraphRepository } from '../../database/graph-repository.js';
+import { GraphRepository } from '../graph-repository.js';
 import { CallGraphService } from '../call-graph-service.js';
 import { FileResolver } from '../file-resolver.js';
 import { DependencyGraphService } from '../dependency-graph-service.js';

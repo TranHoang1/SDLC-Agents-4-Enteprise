@@ -469,6 +469,51 @@
     });
   }
 
+  // ─── Atlassian Connection Events ───────────────────────────────────────
+
+  const atlassianUrlInput = document.getElementById("atlassian-url-input");
+  const atlassianEmailInput = document.getElementById("atlassian-email-input");
+  const atlassianTokenInput = document.getElementById("atlassian-token-input");
+  const toggleAtlassianTokenBtn = document.getElementById("toggle-atlassian-token-visibility");
+  const saveAtlassianBtn = document.getElementById("save-atlassian-btn");
+  const testAtlassianBtn = document.getElementById("test-atlassian-btn");
+  const atlassianTestResult = document.getElementById("atlassian-test-result");
+
+  if (toggleAtlassianTokenBtn && atlassianTokenInput) {
+    toggleAtlassianTokenBtn.addEventListener("click", () => {
+      const isHidden = atlassianTokenInput.type === "password";
+      atlassianTokenInput.type = isHidden ? "text" : "password";
+      toggleAtlassianTokenBtn.textContent = isHidden ? "\uD83D\uDE48" : "\uD83D\uDC41";
+    });
+  }
+
+  if (saveAtlassianBtn) {
+    saveAtlassianBtn.addEventListener("click", () => {
+      const baseUrl = atlassianUrlInput ? atlassianUrlInput.value.trim() : "";
+      const email = atlassianEmailInput ? atlassianEmailInput.value.trim() : "";
+      const apiToken = atlassianTokenInput ? atlassianTokenInput.value : "";
+      const typeEl = document.querySelector('input[name="atlassian-type"]:checked');
+      const connectionType = typeEl ? typeEl.value : "cloud";
+      if (!baseUrl) {
+        showStatus(atlassianTestResult, "\u274C Jira Base URL is required", "error");
+        return;
+      }
+      saveAtlassianBtn.classList.add("loading");
+      saveAtlassianBtn.disabled = true;
+      vscode.postMessage({ type: "saveAtlassianConfig", baseUrl, email, apiToken, connectionType });
+    });
+  }
+
+  if (testAtlassianBtn) {
+    testAtlassianBtn.addEventListener("click", () => {
+      atlassianTestResult.textContent = "Testing connection...";
+      atlassianTestResult.className = "status-indicator";
+      testAtlassianBtn.classList.add("loading");
+      testAtlassianBtn.disabled = true;
+      vscode.postMessage({ type: "testAtlassianConnection" });
+    });
+  }
+
   // ─── Post Message Handler ──────────────────────────────────────────────────────
 
   window.addEventListener("message", function (event) {
@@ -498,6 +543,14 @@
       case "pegaContextFetched":
         if (fetchPegaBtn) { fetchPegaBtn.classList.remove("loading"); fetchPegaBtn.disabled = false; }
         showStatus(pegaTestResult, (msg.success ? "\u2705 " : "\u274C ") + msg.message, msg.success ? "success" : "error");
+        break;
+      case "atlassianSaved":
+        if (saveAtlassianBtn) { saveAtlassianBtn.classList.remove("loading"); saveAtlassianBtn.disabled = false; }
+        showStatus(atlassianTestResult, msg.success ? "\u2705 Atlassian config saved" : ("\u274C Save failed: " + (msg.error || "")), msg.success ? "success" : "error");
+        break;
+      case "atlassianTestResult":
+        if (testAtlassianBtn) { testAtlassianBtn.classList.remove("loading"); testAtlassianBtn.disabled = false; }
+        showStatus(atlassianTestResult, (msg.success ? "\u2705 " : "\u274C ") + msg.message, msg.success ? "success" : "error");
         break;
     }
   });
@@ -551,6 +604,21 @@
     }
     if (msg.hasPegaPassword && pegaPasswordInput) {
       pegaPasswordInput.placeholder = "•••••••• (Saved)";
+    }
+
+    // Load Atlassian config
+    if (msg.atlassianBaseUrl !== undefined && atlassianUrlInput) {
+      atlassianUrlInput.value = msg.atlassianBaseUrl;
+    }
+    if (msg.atlassianEmail !== undefined && atlassianEmailInput) {
+      atlassianEmailInput.value = msg.atlassianEmail;
+    }
+    if (msg.hasAtlassianToken && atlassianTokenInput) {
+      atlassianTokenInput.placeholder = "•••••••• (Saved)";
+    }
+    if (msg.atlassianConnectionType) {
+      const radio = document.querySelector('input[name="atlassian-type"][value="' + msg.atlassianConnectionType + '"]');
+      if (radio) { radio.checked = true; }
     }
 
     updateSections(msg.provider);

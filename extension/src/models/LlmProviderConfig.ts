@@ -9,6 +9,9 @@ export const SECRET_KEYS: Record<string, string> = {
   openrouter: "kiroSdlc.openaiApiKey",
   lmstudio: "kiroSdlc.openaiApiKey",
   pega: "kiroSdlc.pegaPassword",
+  atlassianEmail: "kiroSdlc.atlassian.email",
+  atlassianToken: "kiroSdlc.atlassian.apiToken",
+  atlassianBaseUrl: "kiroSdlc.atlassian.baseUrl",
 };
 
 /** Provider-specific base URL defaults */

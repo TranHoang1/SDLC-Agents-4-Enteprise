@@ -1,0 +1,119 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-101: Backend Component Diagram" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="320" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Layer 1: API Routes -->
+    <mxCell id="api_layer" value="API Layer" style="swimlane;startSize=30;fillColor=none;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="340" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="route_full" value="POST /api/index/full&#xa;(auto-cancel + start)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="api_layer">
+      <mxGeometry x="20" y="40" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="route_progress" value="GET /api/index/progress&#xa;(hot→cold fallback)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="api_layer">
+      <mxGeometry x="180" y="40" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Layer 1b: Middleware -->
+    <mxCell id="mw_auth" value="requireAuth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="420" y="100" width="100" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="mw_project" value="requireProjectId" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="540" y="100" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Layer 2: Business Logic -->
+    <mxCell id="biz_layer" value="Business Logic Layer" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="210" width="620" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="iom" value="IndexOperationManager&#xa;(composite Map key)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="biz_layer">
+      <mxGeometry x="20" y="40" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="checksum_svc" value="ChecksumService&#xa;(SHA-256 + compare)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="biz_layer">
+      <mxGeometry x="220" y="40" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="startup_det" value="StartupInterruptDetector&#xa;(server boot hook)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="biz_layer">
+      <mxGeometry x="410" y="40" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Layer 2b: Scheduler -->
+    <mxCell id="scheduler" value="CleanupScheduler&#xa;(setInterval 10min)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="700" y="250" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Layer 3: Engine -->
+    <mxCell id="engine_layer" value="Indexing Engine" style="swimlane;startSize=30;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="380" width="340" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="idx_engine" value="IndexingEngine&#xa;(file loop + checksum skip)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="engine_layer">
+      <mxGeometry x="20" y="40" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="abort_ctrl" value="AbortController&#xa;(cancel signal)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="engine_layer">
+      <mxGeometry x="210" y="40" width="110" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Layer 4: Data Access -->
+    <mxCell id="data_layer" value="Data Access Layer (Repositories)" style="swimlane;startSize=30;fillColor=none;strokeColor=#d6b656;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="530" width="520" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="op_repo" value="IndexOperationRepository&#xa;(CRUD index_operations)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="data_layer">
+      <mxGeometry x="20" y="40" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="cs_repo" value="FileChecksumRepository&#xa;(CRUD file_checksums)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="data_layer">
+      <mxGeometry x="240" y="40" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- PostgreSQL -->
+    <mxCell id="pg" value="PostgreSQL" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="550" width="130" height="70" as="geometry"/>
+    </mxCell>
+    <!-- Edges -->
+    <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="route_full" target="iom">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="route_progress" target="iom">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="iom" target="idx_engine">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="idx_engine" target="checksum_svc">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="120" y="370"/>
+          <mxPoint x="335" y="370"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="checksum_svc" target="cs_repo">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="iom" target="op_repo">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="130" y="500"/>
+          <mxPoint x="130" y="600"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="startup_det" target="op_repo">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="540" y="500"/>
+          <mxPoint x="130" y="500"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="scheduler" target="op_repo">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="775" y="500"/>
+          <mxPoint x="130" y="500"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="op_repo" target="pg">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="cs_repo" target="pg">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

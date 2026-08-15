@@ -14,6 +14,7 @@
 import { describe, it, expect } from 'vitest';
 import Database from 'better-sqlite3';
 import { runMigrations, getCurrentVersion } from '../../src/engine/db/migrations.js';
+import { SqliteDbAdapter } from '../../src/modules/memory/task-queue/SqliteDbAdapter.js';
 
 /** Build a minimal DB pre-seeded at schema_version=5 with a legacy mcp_tools (no `server`). */
 function seedV5DbWithoutServerColumn(): Database.Database {
@@ -45,11 +46,12 @@ function columns(db: Database.Database, table: string): string[] {
 describe('SA4E-42 PT-01 — v5 upgrade path adds mcp_tools.server', () => {
   it('BUG-SA4E-42: runMigrations on an existing v5 DB adds server column + index', () => {
     const db = seedV5DbWithoutServerColumn();
+    const adapter = new SqliteDbAdapter(db);
     try {
-      expect(getCurrentVersion(db)).toBe(5); // precondition: already at v5
+      expect(getCurrentVersion(adapter)).toBe(5); // precondition: already at v5
       expect(columns(db, 'mcp_tools')).not.toContain('server'); // precondition: legacy shape
 
-      runMigrations(db); // full entry point — must NOT early-return past the additive migration
+      runMigrations(adapter); // full entry point — must NOT early-return past the additive migration
 
       // The additive `server` column must now exist (else startup INSERT crashes).
       expect(columns(db, 'mcp_tools')).toContain('server');
@@ -65,8 +67,9 @@ describe('SA4E-42 PT-01 — v5 upgrade path adds mcp_tools.server', () => {
 
   it('BUG-SA4E-42: startup-style scoped INSERT succeeds after v5 upgrade', () => {
     const db = seedV5DbWithoutServerColumn();
+    const adapter = new SqliteDbAdapter(db);
     try {
-      runMigrations(db);
+      runMigrations(adapter);
       // Mirrors index.ts tool ingest — this is the statement that crashed pre-fix.
       expect(() =>
         db

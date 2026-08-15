@@ -1,0 +1,138 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-101: Persistent Index Status Business Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="10" width="420" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="swim_ext" value="VS Code Extension" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="400" height="900" as="geometry"/>
+    </mxCell>
+    <mxCell id="swim_be" value="Backend (Hono + IndexOperationManager)" style="swimlane;startSize=30;fillColor=none;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="480" y="60" width="400" height="900" as="geometry"/>
+    </mxCell>
+    <mxCell id="swim_db" value="PostgreSQL" style="swimlane;startSize=30;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="920" y="60" width="300" height="900" as="geometry"/>
+    </mxCell>
+    <mxCell id="n1" value="Extension activate()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="100" y="50" width="180" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="GET /api/index/progress&#xa;(JWT + X-Project-Id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="100" y="130" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="Status = idle?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="120" y="220" width="140" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="Do nothing&#xa;(no status bar)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="20" y="330" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="Status = running?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="200" y="330" width="140" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="Show progress status bar&#xa;Start polling (2s)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="200" y="440" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="Status = interrupted?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="30" y="440" width="140" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="Show: Index interrupted&#xa;at X%. Click to retry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="20" y="560" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="User clicks Retry&#xa;POST /api/index/full" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="100" y="660" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n10" value="Poll until complete&#xa;then dispose status bar" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_ext">
+      <mxGeometry x="100" y="760" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b1" value="Start index operation&#xa;(POST /api/index/full)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_be">
+      <mxGeometry x="100" y="50" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b2" value="INSERT index_operations&#xa;(userId, projectId, running)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_be">
+      <mxGeometry x="100" y="140" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b3" value="Index engine runs&#xa;(batch processing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_be">
+      <mxGeometry x="100" y="230" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b4" value="Every batch boundary:&#xa;UPDATE progress in DB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_be">
+      <mxGeometry x="100" y="320" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b5" value="Handle GET /progress:&#xa;Query DB by userId+projectId" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim_be">
+      <mxGeometry x="100" y="420" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b6" value="On startup: detect stale&#xa;running → mark interrupted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="swim_be">
+      <mxGeometry x="100" y="520" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="b7" value="Index complete:&#xa;status = completed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim_be">
+      <mxGeometry x="100" y="630" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="b8" value="Periodic cleanup:&#xa;DELETE completed > 1hr" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="swim_be">
+      <mxGeometry x="100" y="730" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="index_operations&#xa;TABLE" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="swim_db">
+      <mxGeometry x="70" y="140" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="d2" value="id, user_id, project_id,&#xa;status, phase, current,&#xa;total, current_file,&#xa;started_at, updated_at" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=#9673a6;fillColor=#f3e5f5;fontSize=9;rounded=1;" vertex="1" parent="swim_db">
+      <mxGeometry x="40" y="260" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="d3" value="INDEX: (user_id, project_id)&#xa;UNIQUE per active op" style="text;html=1;align=left;verticalAlign=top;resizable=0;points=[];autosize=1;strokeColor=#9673a6;fillColor=#f3e5f5;fontSize=9;rounded=1;" vertex="1" parent="swim_db">
+      <mxGeometry x="40" y="380" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="swim_ext" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="swim_ext" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe3" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#666666;fontSize=9;" edge="1" parent="swim_ext" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe4" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0288d1;fontSize=9;" edge="1" parent="swim_ext" source="n3" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe5" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#82b366;fontSize=9;" edge="1" parent="swim_ext" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe6" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#b85450;fontSize=9;" edge="1" parent="swim_ext" source="n5" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe7" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#b85450;fontSize=9;" edge="1" parent="swim_ext" source="n7" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#0288d1;" edge="1" parent="swim_ext" source="n8" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#82b366;" edge="1" parent="swim_ext" source="n6" target="n10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fb1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#6c8ebf;" edge="1" parent="swim_be" source="b1" target="b2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fb2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#6c8ebf;" edge="1" parent="swim_be" source="b2" target="b3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fb3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#6c8ebf;" edge="1" parent="swim_be" source="b3" target="b4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fb4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#6c8ebf;" edge="1" parent="swim_be" source="b4" target="b5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fb5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#b85450;" edge="1" parent="swim_be" source="b5" target="b6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fb6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#82b366;" edge="1" parent="swim_be" source="b6" target="b7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fb7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9673a6;" edge="1" parent="swim_be" source="b7" target="b8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ce1" value="INSERT/UPDATE" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9673a6;dashed=1;fontSize=9;" edge="1" parent="1" source="b2" target="d1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ce2" value="UPDATE progress" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9673a6;dashed=1;fontSize=9;" edge="1" parent="1" source="b4" target="d1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ce3" value="SELECT" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#9673a6;dashed=1;fontSize=9;" edge="1" parent="1" source="b5" target="d1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

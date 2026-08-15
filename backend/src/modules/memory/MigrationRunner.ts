@@ -2,9 +2,10 @@
  * MigrationRunner — versioned schema migration system.
  * Replaces fragile try/catch ALTER TABLE approach (SA4E-26).
  * Implements BR-10 through BR-15.
+ * SA4E-53: Uses SyncDatabaseAdapter instead of raw better-sqlite3.
  */
 
-import type Database from 'better-sqlite3';
+import type { SyncDatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 
 export interface Migration {
   version: number;
@@ -34,9 +35,9 @@ const REGISTERED_MIGRATIONS: Migration[] = [
 ];
 
 export class MigrationRunner {
-  private readonly db: Database.Database;
+  private readonly db: SyncDatabaseAdapter;
 
-  constructor(db: Database.Database) {
+  constructor(db: SyncDatabaseAdapter) {
     this.db = db;
   }
 
@@ -70,7 +71,7 @@ export class MigrationRunner {
           } catch (stmtErr: unknown) {
             const stmtMsg = stmtErr instanceof Error ? stmtErr.message : String(stmtErr);
             if (stmtMsg.includes('duplicate column')) {
-              // SA4E-26 leftover — column already exists, continue with remaining statements
+              // SA4E-26 leftover — column already exists, continue
               console.info(`[MigrationRunner] v${m.version} (${m.name}): column exists, recording as applied.`);
             } else {
               throw stmtErr;
@@ -82,9 +83,10 @@ export class MigrationRunner {
         throw new Error(`Migration v${m.version} (${m.name}) failed: ${msg}`);
       }
 
-      this.db.prepare(
+      this.db.run(
         'INSERT INTO schema_migrations (version, name, applied_at, checksum) VALUES (?, ?, ?, ?)',
-      ).run(m.version, m.name, new Date().toISOString(), null);
+        [m.version, m.name, new Date().toISOString(), null],
+      );
       appliedCount++;
     }
 
@@ -97,8 +99,8 @@ export class MigrationRunner {
 
   getAppliedVersions(): number[] {
     try {
-      return (this.db.prepare('SELECT version FROM schema_migrations ORDER BY version')
-        .all() as Array<{ version: number }>).map(r => r.version);
+      return (this.db.all<{ version: number }>('SELECT version FROM schema_migrations ORDER BY version'))
+        .map(r => r.version);
     } catch {
       return []; // Table doesn't exist yet
     }

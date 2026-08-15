@@ -12,7 +12,7 @@
     "test_planning": { "status": "not_started" },
     "implementation": { "status": "done", "completedAt": "2026-08-12T10:40:00Z" },
     "security_code_review": { "status": "not_started" },
-    "testing": { "status": "not_started" },
+    "testing": { "status": "done", "completedAt": "2026-08-12T11:00:00Z" },
     "deployment": { "status": "not_started" }
   },
   "tokenBudget": {

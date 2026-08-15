@@ -1,0 +1,191 @@
+<mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-110 — Component Diagram: Atlassian Child Server Internal Modules" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="20" width="600" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Main boundary -->
+    <mxCell id="root_pkg" value="backend/src/servers/atlassian/" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="70" width="1500" height="850" as="geometry"/>
+    </mxCell>
+    <!-- Layer 1: Entry -->
+    <mxCell id="c1" value="index.ts&#xa;(Process Entry + IPC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="root_pkg">
+      <mxGeometry x="40" y="50" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2" value="server.ts&#xa;(MCP Server + Tool Registry)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="root_pkg">
+      <mxGeometry x="260" y="50" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3" value="config.ts&#xa;(Server Config + Defaults)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="root_pkg">
+      <mxGeometry x="500" y="50" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Credentials package -->
+    <mxCell id="cred_pkg" value="credentials/" style="swimlane;startSize=25;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="root_pkg">
+      <mxGeometry x="40" y="150" width="340" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="c4" value="credential-manager.ts&#xa;(IPC Receiver + Cache)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="cred_pkg">
+      <mxGeometry x="20" y="40" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c5" value="credential-schemas.ts&#xa;(Zod: IPC Messages)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="cred_pkg">
+      <mxGeometry x="190" y="40" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Clients package -->
+    <mxCell id="cli_pkg" value="clients/" style="swimlane;startSize=25;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="root_pkg">
+      <mxGeometry x="40" y="310" width="600" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="c6" value="base-client.ts&#xa;(Fetch + Retry + Auth)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="cli_pkg">
+      <mxGeometry x="20" y="40" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c7" value="jira-client.ts&#xa;(Jira REST v2/v3)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="cli_pkg">
+      <mxGeometry x="200" y="40" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c8" value="confluence-client.ts&#xa;(Confluence REST)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="cli_pkg">
+      <mxGeometry x="360" y="40" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c9" value="rate-limiter.ts&#xa;(Token Bucket)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="cli_pkg">
+      <mxGeometry x="200" y="100" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Models package -->
+    <mxCell id="mod_pkg" value="models/" style="swimlane;startSize=25;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="root_pkg">
+      <mxGeometry x="700" y="150" width="560" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="c10" value="types.ts&#xa;(Interfaces + Enums)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="mod_pkg">
+      <mxGeometry x="20" y="40" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c11" value="jira-schemas.ts&#xa;(Zod: 42 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="mod_pkg">
+      <mxGeometry x="160" y="40" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c12" value="confluence-schemas.ts&#xa;(Zod: 23 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="mod_pkg">
+      <mxGeometry x="300" y="40" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c13" value="error-schemas.ts&#xa;(Error Response)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="mod_pkg">
+      <mxGeometry x="450" y="40" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Tools package -->
+    <mxCell id="tool_pkg" value="tools/ (65 tool handlers)" style="swimlane;startSize=25;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="root_pkg">
+      <mxGeometry x="40" y="490" width="1420" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="t1" value="jira-issue-tools.ts&#xa;(8 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="20" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t2" value="jira-search-tools.ts&#xa;(4 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="160" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t3" value="jira-transition-tools.ts&#xa;(3 tools — fuzzy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="300" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t4" value="jira-comment-tools.ts&#xa;(5 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="460" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t5" value="jira-attachment-tools.ts&#xa;(4 tools — file upload)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="600" y="40" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t6" value="jira-field-tools.ts&#xa;(5 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="770" y="40" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t7" value="jira-project-tools.ts&#xa;(6 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="900" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t8" value="jira-agile-tools.ts&#xa;(5 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="1040" y="40" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t9" value="jira-user-tools.ts&#xa;(4 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="1170" y="40" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t10" value="jira-worklog-tools.ts&#xa;(3 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="1300" y="40" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t11" value="confluence-page-tools.ts&#xa;(7 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="20" y="110" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t12" value="confluence-search-tools.ts&#xa;(4 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="180" y="110" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t13" value="confluence-space-tools.ts&#xa;(5 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="350" y="110" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t14" value="confluence-content-tools.ts&#xa;(5 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="510" y="110" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="t15" value="confluence-comment-tools.ts&#xa;(2 tools)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="tool_pkg">
+      <mxGeometry x="680" y="110" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Utils package -->
+    <mxCell id="util_pkg" value="utils/" style="swimlane;startSize=25;fillColor=none;strokeColor=#666666;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="root_pkg">
+      <mxGeometry x="700" y="310" width="420" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="c14" value="levenshtein.ts&#xa;(Distance Algo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="util_pkg">
+      <mxGeometry x="20" y="40" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c15" value="normalize.ts&#xa;(String Utils)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="util_pkg">
+      <mxGeometry x="160" y="40" width="110" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c16" value="mime-types.ts&#xa;(Extension → MIME)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="util_pkg">
+      <mxGeometry x="290" y="40" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Tests package -->
+    <mxCell id="test_pkg" value="__tests__/" style="swimlane;startSize=25;fillColor=none;strokeColor=#666666;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="root_pkg">
+      <mxGeometry x="40" y="740" width="800" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="c17" value="credential-manager.test.ts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="test_pkg">
+      <mxGeometry x="20" y="35" width="160" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="c18" value="rate-limiter.test.ts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="test_pkg">
+      <mxGeometry x="200" y="35" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="c19" value="jira-client.test.ts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="test_pkg">
+      <mxGeometry x="340" y="35" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="c20" value="levenshtein.test.ts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="test_pkg">
+      <mxGeometry x="480" y="35" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="c21" value="jira-transition-tools.test.ts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="test_pkg">
+      <mxGeometry x="620" y="35" width="160" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Dependency edges -->
+    <mxCell id="d1" value="boots" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="root_pkg" source="c1" target="c2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="root_pkg" source="c2" target="c3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d3" value="IPC setup" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="root_pkg" source="c1" target="c4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d4" value="provides auth" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="root_pkg" source="c4" target="c6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d5" value="extends" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=0;fontSize=8;" edge="1" parent="cli_pkg" source="c6" target="c7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d6" value="extends" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=0;fontSize=8;" edge="1" parent="cli_pkg" source="c6" target="c8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d7" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=8;" edge="1" parent="cli_pkg" source="c6" target="c9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="lgd" value="Legend" style="text;html=1;align=left;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="960" width="60" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgd1" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="40" y="990" width="20" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgd1t" value="Implementation" style="text;html=1;align=left;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="70" y="990" width="90" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgd2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="180" y="990" width="20" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgd2t" value="Models / Schemas" style="text;html=1;align=left;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="210" y="990" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgd3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="330" y="990" width="20" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="lgd3t" value="Tests" style="text;html=1;align=left;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="360" y="990" width="50" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

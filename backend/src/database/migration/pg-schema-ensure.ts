@@ -127,6 +127,12 @@ export async function ensurePostgresIndexSchema(adapter: DatabaseAdapter): Promi
       'doc_comment_full TEXT DEFAULT NULL',
       'modifiers TEXT DEFAULT NULL',
       'file_path TEXT DEFAULT NULL',
+      // SA4E-107: LLM enrichment columns
+      'enrichment_status TEXT DEFAULT NULL',
+      'summary TEXT DEFAULT NULL',
+      'pseudo_code TEXT DEFAULT NULL',
+      'llm_tags TEXT DEFAULT NULL',
+      'enriched_at TEXT DEFAULT NULL',
     ];
     for (const col of symColumns) {
       await safeExec(adapter, `ALTER TABLE symbols ADD COLUMN IF NOT EXISTS ${col}`);
@@ -134,9 +140,11 @@ export async function ensurePostgresIndexSchema(adapter: DatabaseAdapter): Promi
 
     // 8. Supporting tables from migrations.ts
     await safeExec(adapter, `CREATE TABLE IF NOT EXISTS relationships (
-      id SERIAL PRIMARY KEY, source_symbol_id INTEGER NOT NULL, target_symbol TEXT NOT NULL,
+      id SERIAL PRIMARY KEY, project_id TEXT NOT NULL DEFAULT '', source_symbol_id INTEGER NOT NULL, target_symbol TEXT NOT NULL,
       target_symbol_id INTEGER, kind TEXT NOT NULL, file_path TEXT NOT NULL DEFAULT '', line INTEGER NOT NULL DEFAULT 0, metadata TEXT
     )`);
+    // SA4E-104: Ensure project_id exists if table was created before this column was added
+    await safeExec(adapter, `ALTER TABLE relationships ADD COLUMN IF NOT EXISTS project_id TEXT NOT NULL DEFAULT ''`);
     await safeExec(adapter, `CREATE TABLE IF NOT EXISTS file_index (
       path TEXT PRIMARY KEY, mtime INTEGER NOT NULL DEFAULT 0, content_hash TEXT NOT NULL DEFAULT '',
       size_bytes INTEGER NOT NULL DEFAULT 0, last_indexed TEXT NOT NULL DEFAULT (NOW()::TEXT), symbol_count INTEGER DEFAULT 0

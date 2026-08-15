@@ -223,11 +223,14 @@ export class IndexerHttpClient {
         try {
             const parsed = JSON.parse(body);
             const data = parsed?.data;
+            const llmWarning = data?.llmReady === false
+                ? `\n⚠️ LLM NOT AVAILABLE — tasks created but enrichment will NOT run. Start LMStudio and restart backend.`
+                : '';
             return {
                 ok: true,
                 synced: data?.synced ?? 0,
                 errors: data?.errors ?? 0,
-                message: `✅ Synced ${data?.synced ?? 0} rules to KB (${data?.errors ?? 0} errors)`,
+                message: `✅ Synced ${data?.synced ?? 0} rules to KB (${data?.errors ?? 0} errors)${llmWarning}`,
             };
         } catch {
             return { ok: true, synced: 0, errors: 0, message: "Sync completed (could not parse response)" };

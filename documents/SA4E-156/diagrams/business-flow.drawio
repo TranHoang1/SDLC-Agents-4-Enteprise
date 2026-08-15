@@ -1,0 +1,137 @@
+<mxfile host="drawio-plugin" modified="2026-08-15T07:26:50.994Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" version="22.1.22" etag="87rey78VZAOVzHYCgV_I" type="embed">
+  <diagram id="u9kUqjeDHN_4crvea2J4" name="Page-1">
+    <mxGraphModel dx="1162" dy="955" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Business Flow: Schema-Driven Relative Discovery + DataPage Enumeration" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="400" y="10" width="500" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="swim_ext" value="VS Code Extension" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="30" y="60" width="440" height="900" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" value="User triggers&#xa;&quot;Index Workspace&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="150" y="50" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="Read pega-project.json&#xa;Extract appName" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="150" y="130" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="POST D_LatestRules4ExactedApps&#xa;{ ApplicationNames: appName }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" parent="swim_ext" vertex="1">
+          <mxGeometry x="120" y="210" width="210" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="Init fetchQueue + dedupSet&#xa;from pxResults" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="150" y="290" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n5" value="fetchQueue&#xa;empty?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="170" y="380" width="110" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="n6" value="Pick next batch&#xa;(chunk=50)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="150" y="500" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n7" value="Fetch rule content&#xa;from Pega Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="150" y="580" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n8" value="Save rule to disk&#xa;./rules/{class}/{name}.pega.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="140" y="660" width="180" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n9" value="For each relative:&#xa;dedupSet.has(key)?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="160" y="780" width="130" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="n10" value="Enqueue to&#xa;fetchQueue" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="swim_ext" vertex="1">
+          <mxGeometry x="30" y="795" width="110" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="n11" value="Report: Ingested {N} rules&#xa;(initial: {I}, discovered: {D})" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" parent="swim_ext" vertex="1">
+          <mxGeometry x="300" y="350" width="130" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ex1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" parent="swim_ext" source="n1" target="n2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" parent="swim_ext" source="n2" target="n3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" parent="swim_ext" source="n3" target="n4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" parent="swim_ext" source="n4" target="n5" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex5" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;fontSize=9;" parent="swim_ext" source="n5" target="n6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex6" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;" parent="swim_ext" source="n5" target="n11" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" parent="swim_ext" source="n6" target="n7" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" parent="swim_ext" source="n7" target="n8" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex10" value="New" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;" parent="swim_ext" source="n9" target="n10" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ex11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;dashed=1;" parent="swim_ext" source="n10" target="n5" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="820" />
+              <mxPoint x="20" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ex12" value="Known (skip)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#666666;dashed=1;fontSize=9;" parent="swim_ext" source="n9" target="n5" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="350" y="820" />
+              <mxPoint x="350" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="swim_be" value="Backend MCP Server" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="530" y="60" width="400" height="900" as="geometry" />
+        </mxCell>
+        <mxCell id="b1" value="POST /api/v1/pega/ingest-rule&#xa;{ projectId, ruleJson }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" parent="swim_be" vertex="1">
+          <mxGeometry x="80" y="620" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b2" value="ingestRule()&#xa;KB + Graph storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="swim_be" vertex="1">
+          <mxGeometry x="110" y="700" width="170" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="b3" value="extractRelatives(ruleJson)&#xa;Lookup pxObjClass in schema&#xa;Traverse dependencyPaths[]&#xa;Resolve rule references" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" parent="swim_be" vertex="1">
+          <mxGeometry x="70" y="780" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="b4" value="Return { stored,&#xa;relatives: RelativeRuleInfoList[] }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" parent="swim_be" vertex="1">
+          <mxGeometry x="90" y="870" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="be1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" parent="swim_be" source="b1" target="b2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="be2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" parent="swim_be" source="b2" target="b3" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="be3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" parent="swim_be" source="b3" target="b4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="swim_pega" value="Pega Server" style="swimlane;startSize=30;fillColor=none;strokeColor=#d6b656;html=1;fontStyle=1;fontSize=11;" parent="1" vertex="1">
+          <mxGeometry x="990" y="60" width="300" height="900" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="D_LatestRules4ExactedApps&#xa;Returns: { pxResults: RuleSummary[] }&#xa;(ALL latest rules for App)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="swim_pega" vertex="1">
+          <mxGeometry x="30" y="170" width="240" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="GET /rules/{pzInsKey}&#xa;Returns: full rule JSON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="swim_pega" vertex="1">
+          <mxGeometry x="50" y="540" width="200" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cross1" value="1. DataPage call" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;fontSize=9;" parent="1" source="n3" target="p1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cross2" value="2. Fetch rule" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;fontSize=9;" parent="1" source="n7" target="p2" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cross3" value="3. Ingest rule" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;" parent="1" source="n8" target="b1" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cross4" value="4. Return relatives" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#9673a6;fontSize=9;" parent="1" source="b4" target="n9" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

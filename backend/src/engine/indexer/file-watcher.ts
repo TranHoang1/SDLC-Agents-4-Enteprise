@@ -9,7 +9,7 @@
 
 import pino from 'pino';
 import { AppConfig } from '../config.js';
-import { detectLanguage } from '../scanner/file-scanner.js';
+import { detectLanguage } from './file-scanner.js';
 
 const logger = pino({ name: 'file-watcher' });
 

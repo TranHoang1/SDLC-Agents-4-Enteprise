@@ -14,6 +14,8 @@ import { httpGetJson, httpPostJson } from "./utils/http-client-utils";
 import { buildBackendAuthHeaders } from "./utils/backend-auth-headers";
 import { PegaMcpTools } from "./mcp/PegaMcpTools";
 import { registerPegaLocalTools } from "./mcp/pega-local-tools";
+import { AtlassianCredentialService } from "./services/AtlassianCredentialService";
+import { registerAtlassianLocalTools } from "./mcp/atlassian/index";
 
 /** Health check timeout in milliseconds */
 const HEALTH_TIMEOUT_MS = 5000;
@@ -57,6 +59,11 @@ export class RemoteBackendClient implements vscode.Disposable {
         registerPegaLocalTools(new PegaMcpTools(secrets));
       } catch (err) {
         console.warn(`[RemoteBackendClient] Pega tools registration failed: ${(err as Error).message}`);
+      }
+      try {
+        registerAtlassianLocalTools(new AtlassianCredentialService(secrets));
+      } catch (err) {
+        console.warn(`[RemoteBackendClient] Atlassian tools registration failed: ${(err as Error).message}`);
       }
     }
   }

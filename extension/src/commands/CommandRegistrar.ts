@@ -43,7 +43,11 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     vscode.commands.registerCommand("kiroSdlc.injectSelective", () => handleInjectSelective(context)),
     vscode.commands.registerCommand("kiroSdlc.update", () => handleUpdate(context)),
     vscode.commands.registerCommand("kiroSdlc.status", () => handleStatus(context)),
-    vscode.commands.registerCommand("kiroSdlc.indexWorkspace", () => handleIndexWorkspace(authManager?.getTokenSync(), context.secrets)),
+    vscode.commands.registerCommand("kiroSdlc.indexWorkspace", () => handleIndexWorkspace(
+      authManager?.getTokenSync(),
+      context.secrets,
+      async () => { await authManager?.refreshToken(); return authManager?.getTokenSync() || undefined; }
+    )),
     vscode.commands.registerCommand("kiroSdlc.login", () => handleLogin(context, authManager, treeProvider)),
     vscode.commands.registerCommand("kiroSdlc.logout", () => handleLogout(authManager, panelManager)),
     vscode.commands.registerCommand("kiroSdlc.openKbGraph", () => panelManager?.openPanel("graph")),
@@ -160,7 +164,8 @@ async function handleStatus(context: vscode.ExtensionContext): Promise<void> {
 
 async function handleOpenKbBrowser(mcpManager?: IServerManager): Promise<void> {
   if (!mcpManager || mcpManager.status !== "running") { vscode.window.showErrorMessage("MCP server not running."); return; }
-  await vscode.env.openExternal(vscode.Uri.parse(`http://localhost:${mcpManager.port}/`));
+  const backendUrl = vscode.workspace.getConfiguration("kiroSdlc").get<string>("backend.url", "http://127.0.0.1:48721");
+  await vscode.env.openExternal(vscode.Uri.parse(`${backendUrl}/admin`));
 }
 
 async function handleRestartServer(mcpManager?: IServerManager): Promise<void> {

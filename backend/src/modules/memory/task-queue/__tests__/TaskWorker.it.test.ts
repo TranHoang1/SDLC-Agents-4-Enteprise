@@ -271,12 +271,12 @@ describe('TaskWorker Integration Tests', () => {
       await (worker as any).processTagEnrichment(task!, payload);
 
       const entry = await engine.findById(id);
-      expect(entry!.tags).toContain('error-pattern');
+      // SA4E-155: LLM failure marks task as failed, tags NOT updated
+      expect(entry!.tags).toBe('');
 
       const sm = JSON.parse(entry!.structured_map);
+      expect(sm.fallback_used).toBe(true);
       expect(sm.extraction_meta.fallback_used).toBe(true);
-      expect(sm.summary).toBe('');
-      expect(sm.business_entities).toEqual([]);
     });
   });
 

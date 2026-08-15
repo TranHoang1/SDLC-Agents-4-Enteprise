@@ -1,0 +1,130 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-110: Atlassian Child Server — Use Case Diagram" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="10" width="440" height="30" as="geometry"/>
+    </mxCell>
+    <!-- System Boundary -->
+    <mxCell id="boundary" value="Atlassian Child Server (SA4E Orchestrator)" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="240" y="50" width="520" height="720" as="geometry"/>
+    </mxCell>
+    <!-- Use Cases inside boundary -->
+    <mxCell id="uc1" value="UC-1: Discover Jira Tools&#xa;(find_tools)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="50" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc2" value="UC-2: Transition Issue&#xa;by Name" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="140" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc3" value="UC-3: Search Confluence&#xa;Pages" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="230" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc4" value="UC-4: Attach File&#xa;to Jira (Multipart)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="320" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc5" value="UC-5: Auto-Connect&#xa;&amp; Reconnect" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="290" y="50" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc6" value="UC-6: Query Agile&#xa;Boards/Sprints" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="410" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc7" value="UC-7: Secure Credential&#xa;Storage" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="290" y="140" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc8" value="UC-8: Execute Jira&#xa;CRUD Operations" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="500" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc9" value="UC-9: Discover&#xa;Confluence Tools" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="590" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc10" value="UC-10: Health Check&#xa;&amp; Monitor" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="290" y="230" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc11" value="UC-11: Re-index Tools&#xa;on Reconnect" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="290" y="320" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Actors (outside boundary) -->
+    <mxCell id="actor_sm" value="SM Agent" style="shape=mxgraph.basic.person;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="60" y="100" width="60" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_ba" value="BA Agent" style="shape=mxgraph.basic.person;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="60" y="250" width="60" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_qa" value="QA Agent" style="shape=mxgraph.basic.person;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="60" y="390" width="60" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_devops" value="DevOps Agent" style="shape=mxgraph.basic.person;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="60" y="530" width="60" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_orch" value="Orchestrator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="880" y="100" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_atlassian" value="Atlassian API&#xa;(External)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="880" y="300" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_secret" value="SecretStorage&#xa;(OS Keychain)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="880" y="500" width="100" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Actor-to-UC edges (SM) -->
+    <mxCell id="ea1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#0288d1;" edge="1" parent="1" source="actor_sm" target="uc1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#0288d1;" edge="1" parent="1" source="actor_sm" target="uc2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Actor-to-UC edges (BA) -->
+    <mxCell id="ea3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#0288d1;" edge="1" parent="1" source="actor_ba" target="uc3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#0288d1;" edge="1" parent="1" source="actor_ba" target="uc1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Actor-to-UC edges (QA) -->
+    <mxCell id="ea5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#0288d1;" edge="1" parent="1" source="actor_qa" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Actor-to-UC edges (DevOps) -->
+    <mxCell id="ea6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#0288d1;" edge="1" parent="1" source="actor_devops" target="uc6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#0288d1;" edge="1" parent="1" source="actor_devops" target="uc8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- System actor edges (Orchestrator) -->
+    <mxCell id="ea8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#9673a6;" edge="1" parent="1" source="actor_orch" target="uc5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#9673a6;" edge="1" parent="1" source="actor_orch" target="uc10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#9673a6;" edge="1" parent="1" source="actor_orch" target="uc11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- External system edges -->
+    <mxCell id="ea11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#d6b656;" edge="1" parent="1" source="actor_atlassian" target="uc8">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="850" y="580"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ea12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;strokeColor=#d6b656;" edge="1" parent="1" source="actor_secret" target="uc7">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="850" y="240"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Include/Extend relationships -->
+    <mxCell id="rel1" value="&lt;&lt;include&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;fontSize=8;" edge="1" parent="1" source="uc2" target="uc8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="rel2" value="&lt;&lt;include&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;fontSize=8;" edge="1" parent="1" source="uc5" target="uc11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="rel3" value="&lt;&lt;include&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;fontSize=8;" edge="1" parent="1" source="uc5" target="uc7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

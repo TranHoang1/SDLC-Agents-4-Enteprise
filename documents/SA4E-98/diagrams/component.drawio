@@ -1,0 +1,69 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-98 — Component Design: Edge Extraction Pipeline" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="200" y="10" width="600" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Entry Points -->
+    <mxCell id="r1_label" value="Entry Points" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontStyle=2;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="20" y="60" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="ep_ingest" value="PegaService.ingestRule()&#10;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&#10;1. PegaParser.parseSymbol()&#10;2. PegaParser.extractDependencies()&#10;3. projectRuleToGraphNode()&#10;4. createDependencyEdges()&#10;5. linkReverseEdges()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="90" width="260" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="ep_admin" value="POST /reconcile-edges&#10;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&#10;1. requireAuth()&#10;2. requirePermission(RBAC_MANAGE)&#10;3. reconcileAllEdges(adapter, pid)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="350" y="90" width="250" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="ep_startup" value="KBGraphModule.initialize()&#10;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&#10;1. COUNT pega nodes&#10;2. COUNT pega edges&#10;3. if ratio &lt; 0.5 → reconcileAllEdges()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="650" y="90" width="260" height="110" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Core Functions -->
+    <mxCell id="r2_label" value="Core Functions (PegaGraphProjector)" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontStyle=2;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="20" y="260" width="250" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn_create" value="createDependencyEdges(adapter, srcId, deps)&#10;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&#10;• For each dep: construct targetNodeId&#10;• mapDependencyRelType(dep.ruleType)&#10;• INSERT OR IGNORE (source, target, 0.7, relType)&#10;• Non-fatal: try/catch per edge" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="290" width="320" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn_reverse" value="linkReverseEdges(adapter, newNodeId)&#10;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&#10;• SELECT id FROM graph_edges WHERE target = ?&#10;• Returns count (informational)&#10;• Does NOT create/modify edges" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="400" y="290" width="290" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn_reconcile" value="reconcileAllEdges(adapter, projectId?)&#10;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&#10;• SELECT all pega:* nodes&#10;• For each: get rule JSON from knowledge_entries&#10;• Dynamic import PegaParser&#10;• Extract deps → INSERT OR IGNORE edges&#10;• Returns { edgesCreated, nodesScanned, errors }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="730" y="290" width="290" height="130" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Mapping -->
+    <mxCell id="r3_label" value="Relationship Mapping" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontStyle=2;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="20" y="440" width="200" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="fn_map" value="mapDependencyRelType(ruleType: string): string&#10;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&#10;FlowAction → CONTAINS  |  Activity/Flow → CALLS&#10;Class → INHERITS  |  Property → HAS_PROPERTY&#10;Connect → CONNECTS_TO  |  When/Decision → EVALUATES&#10;Model/Transform → USES  |  Section → REFERENCES&#10;default → USES" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="470" width="400" height="120" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Error Strategy -->
+    <mxCell id="fn_error" value="Error Handling Strategy&#10;━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━&#10;• All edge ops are NON-FATAL&#10;• INSERT OR IGNORE = idempotent&#10;• Per-edge try/catch in createDependencyEdges&#10;• Startup reconcile: logger.warn on failure&#10;• Admin endpoint: HTTP 500 on DB error" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1">
+      <mxGeometry x="490" y="470" width="340" height="120" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Entry Points → Core Functions -->
+    <mxCell id="e1" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep_ingest" target="fn_create">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep_ingest" target="fn_reverse">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep_admin" target="fn_reconcile">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="475" y="250"/>
+          <mxPoint x="875" y="250"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e4" value="calls (async)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;fontSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="ep_startup" target="fn_reconcile">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: createDependencyEdges → mapDependencyRelType -->
+    <mxCell id="e5" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="fn_create" target="fn_map">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

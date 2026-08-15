@@ -1,0 +1,91 @@
+<mxGraphModel dx="485" dy="475" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="actor1" value="Developer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;" parent="1" vertex="1">
+            <mxGeometry x="40" y="280" width="40" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="actor2" value="Platform&#10;Engineer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;" parent="1" vertex="1">
+            <mxGeometry x="40" y="560" width="40" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="boundary" value="Project-Type-Aware Indexing System" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=12;" parent="1" vertex="1">
+            <mxGeometry x="180" y="40" width="800" height="720" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc1" value="UC1: Detect Project Type&#10;Automatically" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="80" y="60" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc2" value="UC2: Exclude Build Artifacts&#10;by Project Type" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="70" y="390" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc3" value="UC3: Prioritize Source Roots" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="80" y="300" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc4" value="UC4: Detect Mono-repo&#10;Sub-Projects" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="80" y="170" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc5" value="UC5: Cache Project Type&#10;in Registry" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="80" y="540" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc6" value="UC6: Fallback to Default&#10;Strategy" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="420" y="60" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc7" value="UC7: Separate Test from&#10;Production Code" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="420" y="300" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc8" value="UC8: Resolve Indexing&#10;Strategy from Registry" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="420" y="180" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="uc9" value="UC9: Invalidate Cache&#10;on Build File Change" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="boundary" vertex="1">
+            <mxGeometry x="420" y="540" width="200" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="inc1" value="&lt;&lt;extends&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" parent="boundary" source="uc6" target="uc1" edge="1">
+            <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="inc2" value="&lt;&lt;includes&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" parent="boundary" source="uc3" target="uc7" edge="1">
+            <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="inc3" value="&lt;&lt;includes&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" parent="boundary" source="uc1" target="uc8" edge="1">
+            <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="ext1" value="&lt;&lt;extends&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" parent="boundary" source="uc4" target="uc1" edge="1">
+            <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="inc4" value="&lt;&lt;extends&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;endArrow=open;endFill=0;fontSize=9;" parent="boundary" source="uc9" target="uc5" edge="1">
+            <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a1_uc1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" parent="1" source="actor1" target="uc1" edge="1">
+            <mxGeometry relative="1" as="geometry">
+                <Array as="points">
+                    <mxPoint x="170" y="310"/>
+                    <mxPoint x="170" y="140"/>
+                </Array>
+            </mxGeometry>
+        </mxCell>
+        <mxCell id="a1_uc2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" parent="1" source="actor1" target="uc2" edge="1">
+            <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a1_uc3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" parent="1" source="actor1" target="uc3" edge="1">
+            <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a1_uc4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" parent="1" source="actor1" target="uc4" edge="1">
+            <mxGeometry relative="1" as="geometry">
+                <Array as="points">
+                    <mxPoint x="170" y="310"/>
+                    <mxPoint x="170" y="250"/>
+                </Array>
+            </mxGeometry>
+        </mxCell>
+        <mxCell id="a2_uc5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" parent="1" source="actor2" target="uc5" edge="1">
+            <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="a1_uc7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" parent="1" source="actor1" target="uc7" edge="1">
+            <mxGeometry relative="1" as="geometry">
+                <Array as="points">
+                    <mxPoint x="60" y="410"/>
+                    <mxPoint x="340" y="410"/>
+                    <mxPoint x="340" y="380"/>
+                </Array>
+            </mxGeometry>
+        </mxCell>
+    </root>
+</mxGraphModel>

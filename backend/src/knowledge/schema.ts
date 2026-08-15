@@ -1,8 +1,9 @@
 /**
- * SA4E-85 — Knowledge schema (SQLite DDL).
+ * SA4E-85 — Knowledge schema (cross-engine DDL).
  * Append-only `events` log (Event Sourcing) + projections:
  * threads, messages, checkpoints, tool_executions, artifacts, agents.
- * Checkpoints are JSON projections — not a LangGraph checkpointer.
+ * Compatible with both SQLite and PostgreSQL.
+ * Note: events.id uses SERIAL for PG / INTEGER PRIMARY KEY for SQLite (both auto-increment).
  */
 
 export const KNOWLEDGE_SCHEMA = `
@@ -65,7 +66,7 @@ CREATE TABLE IF NOT EXISTS artifacts (
 CREATE INDEX IF NOT EXISTS idx_artifacts_thread ON artifacts(thread_id);
 
 CREATE TABLE IF NOT EXISTS events (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id INTEGER PRIMARY KEY,
   thread_id TEXT NOT NULL,
   workspace_id TEXT NOT NULL,
   type TEXT NOT NULL,

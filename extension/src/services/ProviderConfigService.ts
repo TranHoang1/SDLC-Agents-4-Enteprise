@@ -18,6 +18,8 @@ export class ProviderConfigService {
     hasAnthropicKey: boolean; hasOpenaiKey: boolean;
     backendUrl: string; mcpServerPort: number; enableMcpServer: boolean;
     pegaEndpoint: string; pegaUsername: string; hasPegaPassword: boolean;
+    atlassianBaseUrl: string; atlassianEmail: string; hasAtlassianToken: boolean;
+    atlassianConnectionType: string;
   }> {
     const config = vscode.workspace.getConfiguration("kiroSdlc");
     const provider = config.get<string>("llmProvider", "anthropic");
@@ -35,11 +37,18 @@ export class ProviderConfigService {
     const pegaEndpoint = config.get<string>("pegaEndpoint", "http://localhost:8080/prweb");
     const pegaUsername = config.get<string>("pegaUsername", "");
 
+    const atlassianBaseUrl = await this.secrets.get(SECRET_KEYS.atlassianBaseUrl) || "";
+    const atlassianEmail = await this.secrets.get(SECRET_KEYS.atlassianEmail) || "";
+    const atlassianToken = await this.secrets.get(SECRET_KEYS.atlassianToken);
+    const atlassianConnectionType = config.get<string>("atlassianConnectionType", "cloud");
+
     return {
       provider, model, ollamaUrl, baseUrl: baseUrl || "",
       hasAnthropicKey: !!anthropicKey, hasOpenaiKey: !!openaiKey,
       backendUrl, mcpServerPort, enableMcpServer,
       pegaEndpoint, pegaUsername, hasPegaPassword: !!pegaPassword,
+      atlassianBaseUrl, atlassianEmail, hasAtlassianToken: !!atlassianToken,
+      atlassianConnectionType,
     };
   }
 

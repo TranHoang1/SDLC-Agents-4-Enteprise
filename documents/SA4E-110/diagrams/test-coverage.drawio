@@ -1,0 +1,134 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-110 — Test Coverage Map" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="500" y="10" width="400" height="40" as="geometry"/>
+    </mxCell>
+    <!-- PBT Level -->
+    <mxCell id="pbt_header" value="PBT (Property-Based) — 8 Cases" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="70" width="300" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt1" value="PBT-01: Levenshtein&#xa;Properties (5 props)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="pbt_header">
+      <mxGeometry x="10" y="40" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt2" value="PBT-02: Rate Limiter&#xa;Invariants (3 props)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="pbt_header">
+      <mxGeometry x="155" y="40" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt3" value="PBT-03: Normalize&#xa;Idempotence" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="pbt_header">
+      <mxGeometry x="10" y="90" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt4" value="PBT-04: Path Validator&#xa;Containment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="pbt_header">
+      <mxGeometry x="155" y="90" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt5" value="PBT-05..08: Schemas,&#xa;Keys, Backoff, JQL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="pbt_header">
+      <mxGeometry x="80" y="145" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <!-- UT Level -->
+    <mxCell id="ut_header" value="UT (Unit) — 22 Cases" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="360" y="70" width="380" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut1" value="UT-01..02: Tool Name&#xa;Convention (jira_, confluence_)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_header">
+      <mxGeometry x="10" y="40" width="170" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut2" value="UT-03..05: Levenshtein,&#xa;FileSize, Credentials" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="ut_header">
+      <mxGeometry x="195" y="40" width="170" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut3" value="UT-10..12: Rate Limiter,&#xa;401 Retry, 429 Retry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="ut_header">
+      <mxGeometry x="10" y="90" width="170" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut4" value="UT-13..15: Path Traversal,&#xa;IPC Validation, Reconnect" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="ut_header">
+      <mxGeometry x="195" y="90" width="170" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut5" value="UT-16..22: Backoff, MIME,&#xa;Sanitize, JQL, Auth, Timeout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_header">
+      <mxGeometry x="100" y="145" width="180" height="40" as="geometry"/>
+    </mxCell>
+    <!-- IT Level -->
+    <mxCell id="it_header" value="IT (Integration) — 14 Cases" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="760" y="70" width="380" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="it1" value="IT-01: Transition&#xa;Fuzzy Match" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_header">
+      <mxGeometry x="10" y="40" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="it2" value="IT-02: Attach File&#xa;Multipart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_header">
+      <mxGeometry x="135" y="40" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="it3" value="IT-03: Credential&#xa;IPC Flow" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="it_header">
+      <mxGeometry x="260" y="40" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="it4" value="IT-04: Reconnect&#xa;+ Re-index" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_header">
+      <mxGeometry x="10" y="90" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="it5" value="IT-05..08: Rate Load,&#xa;Auth Refresh, CQL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="it_header">
+      <mxGeometry x="135" y="90" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="it6" value="IT-09..14: Handshake,&#xa;Proxy, Hot-reload" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="it_header">
+      <mxGeometry x="260" y="90" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <!-- E2E-API Level -->
+    <mxCell id="e2e_header" value="E2E-API — 9 Cases" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="310" width="500" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e1" value="E2E-01: Startup&#xa;find_tools (42+)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="e2e_header">
+      <mxGeometry x="10" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e2" value="E2E-02..04: Timing,&#xa;Performance, Latency" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="e2e_header">
+      <mxGeometry x="165" y="40" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e3" value="E2E-05: Reconnect&#xa;+ Re-index" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="e2e_header">
+      <mxGeometry x="330" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e4" value="E2E-07: Transition&#xa;Lifecycle" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="e2e_header">
+      <mxGeometry x="10" y="100" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e5" value="E2E-08: Confluence&#xa;Search" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="e2e_header">
+      <mxGeometry x="165" y="100" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e6" value="E2E-09: File&#xa;Attachment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="e2e_header">
+      <mxGeometry x="330" y="100" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <!-- SEC Level -->
+    <mxCell id="sec_header" value="SEC (Security) — 7 Cases" style="swimlane;startSize=30;fillColor=none;strokeColor=#b85450;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="560" y="310" width="500" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec1" value="SEC-01: Credential&#xa;Exposure" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sec_header">
+      <mxGeometry x="10" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec2" value="SEC-02: Path&#xa;Traversal (10 vectors)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sec_header">
+      <mxGeometry x="165" y="40" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec3" value="SEC-03: JQL&#xa;Injection" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sec_header">
+      <mxGeometry x="330" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec4" value="SEC-04: IPC&#xa;Integrity" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sec_header">
+      <mxGeometry x="10" y="100" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec5" value="SEC-05: Rate Limiter&#xa;Reconnect" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sec_header">
+      <mxGeometry x="165" y="100" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="sec6" value="SEC-06..07: Error Leak,&#xa;autoApprove" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="sec_header">
+      <mxGeometry x="330" y="100" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="legend_title" value="Legend" style="text;html=1;align=left;verticalAlign=middle;fontSize=11;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="40" y="530" width="60" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg1" value="Functional" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="560" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="New/Critical Path" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="145" y="560" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="Security" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="270" y="560" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="Performance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="375" y="560" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Coverage Stats -->
+    <mxCell id="stats" value="Total: 60 Test Cases | PBT: 8 | UT: 22 | IT: 14 | E2E-API: 9 | SEC: 7 | Automation: 100%" style="text;html=1;align=center;verticalAlign=middle;fontSize=10;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="620" width="600" height="30" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

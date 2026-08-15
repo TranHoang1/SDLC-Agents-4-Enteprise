@@ -100,7 +100,7 @@ function KBGraphPage({activeTab}){
       if(destroyed||!d||d.__error)return;
       allNodesRef.current=d.nodes||[];
       setGraphStats({totalNodes:d.total||d.nodes.length,kbNodes:d.kbCount||0,codeNodes:d.codeCount||0,totalEdges:0});
-      if(d.isPega){setIsPega(true);const dynFilters={};(d.nodes||[]).forEach(n=>{if(n.type)dynFilters[n.type]=true;});setTypeFilters(dynFilters);}
+      if(d.isPega){setIsPega(true);}const dynFilters={};(d.nodes||[]).forEach(n=>{if(n.type)dynFilters[n.type]=true;});setTypeFilters(dynFilters);
       // Create renderer
       KBGraphRenderer.create(mainRef.current,{minimapCanvas:miniRef.current}).then(r=>{
         if(destroyed){r.destroy();return;}
@@ -130,7 +130,7 @@ function KBGraphPage({activeTab}){
         if(!d||d.__error)return;
         allNodesRef.current=d.nodes||[];
         setGraphStats({totalNodes:d.total||d.nodes.length,kbNodes:d.kbCount||0,codeNodes:d.codeCount||0,totalEdges:0});
-        if(d.isPega){setIsPega(true);const dynFilters={};(d.nodes||[]).forEach(n=>{if(n.type)dynFilters[n.type]=true;});setTypeFilters(dynFilters);}
+        if(d.isPega){setIsPega(true);}const dynFilters2={};(d.nodes||[]).forEach(n=>{if(n.type)dynFilters2[n.type]=true;});setTypeFilters(dynFilters2);
         if(rendererRef.current)rendererRef.current.loadPositions(allNodesRef.current);
       });
     };
@@ -149,7 +149,7 @@ function KBGraphPage({activeTab}){
   // On-demand enrichment: if code symbol lacks enrichment, trigger backend LLM
   const[enriching,setEnriching]=useState(false);useEffect(()=>{const handler=(ev)=>{if(ev.data&&ev.data.type==='enrich_code_symbol_result'){setEnriching(false);if(ev.data.status==='enriched'&&ev.data.enrichment){setNodeDetail(function(prev){if(!prev||prev.id!==ev.data.symbolId)return prev;return{...prev,enrichment:{summary:ev.data.enrichment.summary||null,pseudoCode:ev.data.enrichment.pseudoCode||null,llmTags:null,status:'COMPLETED'}};});}}};window.addEventListener('message',handler);return()=>window.removeEventListener('message',handler);},[]);
   const maybeAutoEnrich=(det)=>{
-    if(!det||!det.id)return;var eid=String(det.id);if(!eid.startsWith('code:')&&!eid.startsWith('sym-')&&det.type!=='CODE_ENTITY'&&det.type!=='FUNCTION'&&det.type!=='METHOD'&&det.type!=='CLASS')return;
+    if(!det||!det.id)return;var eid=String(det.id);if(!eid.startsWith('code:')&&!eid.startsWith('sym-')&&!eid.startsWith('pega:')&&!eid.startsWith('kb-entry:')&&det.type!=='CODE_ENTITY'&&det.type!=='FUNCTION'&&det.type!=='METHOD'&&det.type!=='CLASS'&&det.type!=='PEGA_RULE'&&det.type!=='PEGA_DATA'&&det.type!=='PEGA_SCHEMA')return;
     if(det.enrichment&&det.enrichment.status==='COMPLETED')return;
     setEnriching(true);
     api('/kb/entries/'+det.id+'/enrich',{method:'POST'}).then(function(res){

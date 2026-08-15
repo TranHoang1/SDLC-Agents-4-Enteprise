@@ -8,6 +8,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import Database from 'better-sqlite3';
 import { applyMigrationV5 } from '../migration-v5.js';
+import { SqliteDbAdapter } from '../../../modules/memory/task-queue/SqliteDbAdapter.js';
 
 const LEGACY = 'legacy12345x';
 
@@ -68,46 +69,47 @@ function columnNames(db: Database.Database, table: string): string[] {
 }
 
 describe('SA4E-41 Migration V5', () => {
-  let db: Database.Database;
-  beforeEach(() => { db = new Database(':memory:'); seedPreV5(db); });
-  afterEach(() => db.close());
+  let rawDb: Database.Database;
+  let adapter: SqliteDbAdapter;
+  beforeEach(() => { rawDb = new Database(':memory:'); seedPreV5(rawDb); adapter = new SqliteDbAdapter(rawDb); });
+  afterEach(() => rawDb.close());
 
   it('adds project_id to all code-intel tables', () => {
-    applyMigrationV5(db, LEGACY);
+    applyMigrationV5(adapter, LEGACY);
     for (const t of ['files', 'symbols', 'modules', 'embeddings', 'relationships', 'body_embeddings']) {
-      expect(columnNames(db, t)).toContain('project_id');
+      expect(columnNames(rawDb, t)).toContain('project_id');
     }
   });
 
   it('backfills every row to the legacy project id', () => {
-    applyMigrationV5(db, LEGACY);
-    const distinct = (t: string) => db.prepare(`SELECT DISTINCT project_id FROM ${t}`).all() as { project_id: string }[];
+    applyMigrationV5(adapter, LEGACY);
+    const distinct = (t: string) => rawDb.prepare(`SELECT DISTINCT project_id FROM ${t}`).all() as { project_id: string }[];
     for (const t of ['files', 'symbols', 'modules', 'relationships', 'body_embeddings', 'embeddings']) {
       expect(distinct(t)).toEqual([{ project_id: LEGACY }]);
     }
   });
 
   it('preserves row counts and FTS still returns results', () => {
-    applyMigrationV5(db, LEGACY);
-    expect((db.prepare('SELECT COUNT(*) c FROM files').get() as any).c).toBe(2);
-    expect((db.prepare('SELECT COUNT(*) c FROM symbols').get() as any).c).toBe(2);
-    const fts = db.prepare(`SELECT s.name FROM symbols_fts JOIN symbols s ON symbols_fts.rowid = s.id WHERE symbols_fts MATCH 'doAuth'`).all() as any[];
+    applyMigrationV5(adapter, LEGACY);
+    expect((rawDb.prepare('SELECT COUNT(*) c FROM files').get() as any).c).toBe(2);
+    expect((rawDb.prepare('SELECT COUNT(*) c FROM symbols').get() as any).c).toBe(2);
+    const fts = rawDb.prepare(`SELECT s.name FROM symbols_fts JOIN symbols s ON symbols_fts.rowid = s.id WHERE symbols_fts MATCH 'doAuth'`).all() as any[];
     expect(fts.map(r => r.name)).toContain('doAuth');
   });
 
   it('bumps schema_version to 5 and is idempotent', () => {
-    applyMigrationV5(db, LEGACY);
-    expect((db.prepare('SELECT MAX(version) v FROM schema_version').get() as any).v).toBe(5);
+    applyMigrationV5(adapter, LEGACY);
+    expect((rawDb.prepare('SELECT MAX(version) v FROM schema_version').get() as any).v).toBe(5);
     // Re-run must not throw or change data.
-    expect(() => applyMigrationV5(db, LEGACY)).not.toThrow();
-    expect((db.prepare('SELECT COUNT(*) c FROM symbols').get() as any).c).toBe(2);
+    expect(() => applyMigrationV5(adapter, LEGACY)).not.toThrow();
+    expect((rawDb.prepare('SELECT COUNT(*) c FROM symbols').get() as any).c).toBe(2);
   });
 
   it('enforces composite UNIQUE(project_id, path) on files', () => {
-    applyMigrationV5(db, LEGACY);
+    applyMigrationV5(adapter, LEGACY);
     // Same path under a different project is allowed.
-    expect(() => db.prepare(`INSERT INTO files (project_id, path, relative_path, language, content_hash, size_bytes) VALUES ('other', '/w/src/a.ts', 'src/a.ts', 'typescript', 'h', 1)`).run()).not.toThrow();
+    expect(() => rawDb.prepare(`INSERT INTO files (project_id, path, relative_path, language, content_hash, size_bytes) VALUES ('other', '/w/src/a.ts', 'src/a.ts', 'typescript', 'h', 1)`).run()).not.toThrow();
     // Duplicate (project_id, path) is rejected.
-    expect(() => db.prepare(`INSERT INTO files (project_id, path, relative_path, language, content_hash, size_bytes) VALUES (?, '/w/src/a.ts', 'src/a.ts', 'typescript', 'h', 1)`).run(LEGACY)).toThrow();
+    expect(() => rawDb.prepare(`INSERT INTO files (project_id, path, relative_path, language, content_hash, size_bytes) VALUES (?, '/w/src/a.ts', 'src/a.ts', 'typescript', 'h', 1)`).run(LEGACY)).toThrow();
   });
 });
