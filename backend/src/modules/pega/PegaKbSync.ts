@@ -171,7 +171,7 @@ async function reEnrichExistingRules(
     `SELECT id, source, summary, tags FROM knowledge_entries
      WHERE project_id = $1 AND type IN ('PEGA_RULE', 'PEGA_DATA')
        AND id NOT IN (
-         SELECT entry_id FROM pending_tasks WHERE status IN ('pending', 'processing')
+         SELECT entry_id FROM pending_tasks WHERE status IN ('PENDING', 'PROCESSING')
        )`,
     [projectId],
   );
