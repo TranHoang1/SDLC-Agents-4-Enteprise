@@ -18,12 +18,16 @@ import type { MemoryToolDispatcher } from '../dispatchers/index.js';
 import type { TaskWorker } from '../task-queue/TaskWorker.js';
 import { loadPersistedLLMConfig } from '../../../admin/db/config.js';
 
-/** Build LLM config: DB overrides > env vars > hardcoded defaults. */
+/** Build LLM config: DB overrides > env vars > NO hardcoded defaults (error if missing). */
 async function buildLLMConfig() {
+  const provider = process.env.LLM_PROVIDER || '';
+  const model = process.env.LLM_MODEL || '';
+  const baseUrl = process.env.LLM_BASE_URL || '';
+
   const envConfig = {
-    provider: (process.env.LLM_PROVIDER || 'lmstudio') as any,
-    model: process.env.LLM_MODEL || 'qwen2.5-vl-7b-instruct',
-    baseUrl: process.env.LLM_BASE_URL || 'http://localhost:1234/v1',
+    provider: (provider || 'lmstudio') as any,
+    model,
+    baseUrl: baseUrl || 'http://localhost:1234/v1',
     apiKey: process.env.LLM_API_KEY || undefined,
     temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
     maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '800', 10),
@@ -32,7 +36,7 @@ async function buildLLMConfig() {
   // Merge DB overrides on top (Admin UI wins over env vars)
   try {
     const dbOverrides = await loadPersistedLLMConfig();
-    return {
+    const merged = {
       ...envConfig,
       ...(dbOverrides.provider && { provider: dbOverrides.provider as any }),
       ...(dbOverrides.model && { model: dbOverrides.model }),
@@ -41,8 +45,16 @@ async function buildLLMConfig() {
       ...(dbOverrides.temperature !== undefined && { temperature: dbOverrides.temperature }),
       ...(dbOverrides.maxTokens !== undefined && { maxTokens: dbOverrides.maxTokens }),
     };
-  } catch (err) {
+    if (!merged.model) {
+      throw new Error('LLM_MODEL not configured. Set env var LLM_MODEL or configure via Admin UI.');
+    }
+    return merged;
+  } catch (err: any) {
+    if (err.message?.includes('LLM_MODEL not configured')) throw err;
     // DB not ready at startup — use env vars only
+    if (!envConfig.model) {
+      throw new Error('LLM_MODEL not configured. Set env var LLM_MODEL or configure via Admin UI.');
+    }
     return envConfig;
   }
 }
@@ -88,6 +100,18 @@ export function initLLMInBackground(
       const classifyService = new ClassifyService(llmService);
       dispatcher.setClassifyService(classifyService);
       logger.info('ClassifyService initialized — Smart KB Ingest enabled');
+
+      // SA4E-107: Wire CodeEnrichmentHandler into TaskWorker for LLM enrichment of code symbols
+      try {
+        const { CodeEnrichmentHandler } = await import('../../../engine/enrichment/CodeEnrichmentHandler.js');
+        const { getAdminAdapter } = await import('../../../admin/db/core.js');
+        const adapter = getAdminAdapter();
+        const enrichHandler = new CodeEnrichmentHandler(adapter, llmService, logger);
+        taskWorker?.setCodeEnrichmentHandler(enrichHandler);
+        logger.info('CodeEnrichmentHandler initialized — LLM code enrichment enabled');
+      } catch (err) {
+        logger.warn({ err }, '[LLMInitializer] CodeEnrichmentHandler init failed (non-fatal)');
+      }
 
       try {
         const embSvc = EmbeddingService.getInstance();
