@@ -21,6 +21,18 @@ export async function handleAdmin(engine: MemoryEngine, a: Args): Promise<string
     case 'audit': return (await engine.listAudit((a.limit as number) ?? 20, a.operation as string)).map((e: any) => `[${e.operation}] ${e.created_at}`).join('\n') || 'Empty';
     case 'sessions': return (await engine.listSessions()).map((s: any) => `[${s.session_id}] ${s.status}`).join('\n') || 'None';
     case 'analytics': case 'popular': return '{}';
+    case 'retry_all_failed': {
+      const { PendingTaskRepository } = await import('../task-queue/PendingTaskRepository.js');
+      const repo = new PendingTaskRepository(engine.getAdapter());
+      const count = await repo.retryAllFailed();
+      return `Reset ${count} FAILED tasks back to PENDING for retry.`;
+    }
+    case 'task_stats': {
+      const { PendingTaskRepository } = await import('../task-queue/PendingTaskRepository.js');
+      const repo = new PendingTaskRepository(engine.getAdapter());
+      const stats = await repo.getStats();
+      return JSON.stringify(stats);
+    }
     default: return `Admin: "${action}" via portal`;
   }
 }
