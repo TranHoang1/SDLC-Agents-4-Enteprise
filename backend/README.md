@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.25.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.26.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/tools-66+-teal?style=for-the-badge" alt="Tools">
   <img src="https://img.shields.io/badge/node-%3E%3D18-green?style=for-the-badge" alt="Node">
 </p>
@@ -233,7 +233,7 @@ The embedding model is expected at `.code-intel/models/model.onnx`. Download it:
 
 | Version | Date | Ticket | Changes |
 |---------|------|--------|---------|
-| 1.25.0 | 2026-08-14 | SA4E-155 | On-demand KB entry enrichment: priority queue (HIGH/NORMAL column), configurable polling timeout (15s default), 3-tier fallback, COALESCE first-write-wins, ConfigService (Admin UI > ENV > Default), PendingTaskRepository priority-aware claimBatch(). |
+| 1.26.0 | 2026-08-14 | SA4E-155 | On-demand KB entry enrichment: priority queue (HIGH/NORMAL column), configurable polling timeout (15s default), 3-tier fallback, COALESCE first-write-wins, ConfigService (Admin UI > ENV > Default), PendingTaskRepository priority-aware claimBatch(). |
 | 1.19.1 | 2026-07-31 | SA4E-81 | Version alignment with extension release. No backend code changes in this release. |
 | 1.18.0 | 2026-07-31 | SA4E-79 | Client-Side LLM Knowledge Enrichment hardening: `handleIngestFile`/`handleIngest` always mark `pending` + enqueue TAG_ENRICHMENT (NEW-01/NEW-06/NEW-10), TaskWorker tags/structured_map conditional updates as race guards (NEW-03), USER-scoped entries enrichable without projectId (NEW-07), pending section LIMIT 3→10 (NEW-09). FTS fix: `knowledge_fts` auto-rebuild at startup when empty — restores `mem_search` for pre-existing entries. |
 | 1.17.0 | 2026-07-30 | SA4E-77 | Pega Knowledge Graph: categorized node types (PROCESS, DECISION, DATA_MODEL, UI, etc.), config-driven mapping (`pega-categories.json`), Pega-mode color switching in graph legend. Code/KB split uses entry_id prefix. Dashboard includes Pega rules in codeSymbols. isPega flag in /positions API. |
