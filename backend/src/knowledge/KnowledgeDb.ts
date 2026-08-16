@@ -7,6 +7,7 @@
 import * as crypto from 'crypto';
 import Database from 'better-sqlite3';
 import type { QueryDatabaseAdapter } from '../database/adapters/DatabaseAdapter.js';
+import { adapterEngine } from '../database/adapters/DatabaseAdapter.js';
 import { KNOWLEDGE_SCHEMA } from './schema.js';
 import type {
   Thread, Message, Checkpoint, ToolExecution, Artifact,
@@ -47,6 +48,16 @@ export class KnowledgeDb {
   /** Run schema migration (CREATE IF NOT EXISTS). */
   async migrate(): Promise<void> {
     await this.adapter.execAsync(KNOWLEDGE_SCHEMA);
+    // PostgreSQL: events.id has no auto-increment default in the shared DDL
+    // (INTEGER PRIMARY KEY auto-increments only in SQLite). Ensure a sequence
+    // so concurrent LangGraph put/putWrites compute ids atomically (no MAX() race).
+    if (adapterEngine(this.adapter) === 'postgresql') {
+      await this.adapter.execAsync(`
+        CREATE SEQUENCE IF NOT EXISTS knowledge_events_id_seq;
+        SELECT setval('knowledge_events_id_seq', COALESCE((SELECT MAX(id) FROM events), 1));
+        ALTER TABLE events ALTER COLUMN id SET DEFAULT nextval('knowledge_events_id_seq');
+      `);
+    }
   }
 
   /** No-op for adapter-based lifecycle (adapter manages its own connection). */
@@ -86,7 +97,8 @@ export class KnowledgeDb {
     const id = m.id ?? crypto.randomUUID();
     const timestamp = m.timestamp ?? new Date().toISOString();
     await this.adapter.runAsync(
-      'INSERT OR IGNORE INTO messages (id, thread_id, workspace_id, role, content, agent_id, timestamp, seq) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+      `INSERT INTO messages (id, thread_id, workspace_id, role, content, agent_id, timestamp, seq) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (id) DO NOTHING`,
       [id, threadId, workspaceId, m.role, m.content, m.agent_id ?? null, timestamp, seq],
     );
   }
@@ -168,6 +180,8 @@ export class KnowledgeDb {
 
   // --- events (append-only log) ---
   async appendEvent(workspaceId: string, threadId: string, type: string, payload: unknown): Promise<void> {
+    // id auto-increments on both engines: SQLite rowid for INTEGER PRIMARY KEY,
+    // PostgreSQL via knowledge_events_id_seq default (see migrate()).
     await this.adapter.runAsync(
       'INSERT INTO events (thread_id, workspace_id, type, payload, created_at) VALUES (?, ?, ?, ?, ?)',
       [threadId, workspaceId, type, JSON.stringify(payload ?? {}), new Date().toISOString()],
