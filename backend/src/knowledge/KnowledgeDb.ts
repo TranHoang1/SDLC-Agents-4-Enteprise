@@ -7,7 +7,6 @@
 import * as crypto from 'crypto';
 import Database from 'better-sqlite3';
 import type { QueryDatabaseAdapter } from '../database/adapters/DatabaseAdapter.js';
-import { adapterEngine } from '../database/adapters/DatabaseAdapter.js';
 import { KNOWLEDGE_SCHEMA } from './schema.js';
 import type {
   Thread, Message, Checkpoint, ToolExecution, Artifact,
@@ -45,13 +44,19 @@ export class KnowledgeDb {
     return new KnowledgeDb(adapter);
   }
 
+  /** Detect PostgreSQL via runtime duck-typing (composed adapters expose getEngine). */
+  private isPostgres(): boolean {
+    return typeof (this.adapter as { getEngine?: () => string }).getEngine === 'function'
+      && (this.adapter as { getEngine: () => string }).getEngine() === 'postgresql';
+  }
+
   /** Run schema migration (CREATE IF NOT EXISTS). */
   async migrate(): Promise<void> {
     await this.adapter.execAsync(KNOWLEDGE_SCHEMA);
     // PostgreSQL: events.id has no auto-increment default in the shared DDL
     // (INTEGER PRIMARY KEY auto-increments only in SQLite). Ensure a sequence
     // so concurrent LangGraph put/putWrites compute ids atomically (no MAX() race).
-    if (adapterEngine(this.adapter) === 'postgresql') {
+    if (this.isPostgres()) {
       await this.adapter.execAsync(`
         CREATE SEQUENCE IF NOT EXISTS knowledge_events_id_seq;
         SELECT setval('knowledge_events_id_seq', COALESCE((SELECT MAX(id) FROM events), 1));
