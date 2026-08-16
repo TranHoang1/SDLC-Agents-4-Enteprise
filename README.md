@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.26.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.27.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,13 @@ MIT
 ---
 
 ## Changelog
+
+### v1.27.0 (2025-08-16)
+
+- **SA4E-171: Migrate Pega Rules from knowledge_entries to symbols table** — Internal data migration moving 1409 Pega rules into structured `symbols` table with proper metadata (class, ruleset, version). Dual-write/dual-read for zero-downtime transition, pega-mapping enrichment, unified pega-search across both stores. 54 new tests, security review clean.
+- **SA4E-132: GateGuard Module** — Denylist, override, audit capabilities for tool approval gate.
+- **SA4E-124: Pega rules as code nodes** — Graph integration for Pega rule symbols.
+- **SA4E-106: Pega content extraction** — LLM enrichment on Pega rule body content.
 
 ### v1.26.0 (2026-08-14)
 
