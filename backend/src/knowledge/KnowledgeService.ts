@@ -93,8 +93,29 @@ export class KnowledgeService {
 
   /** Save checkpoint (+ optional writes / messages) — projection updated. */
   async saveCheckpoint(ctx: ProjectContext, threadId: string, input: SaveCheckpointInput): Promise<Checkpoint | null> {
-    const thread = await this.ownedThread(ctx, threadId);
-    if (!thread) return null;
+    const workspaceId = this.resolveWorkspaceId(ctx);
+    let thread = await this.ownedThread(ctx, threadId);
+    if (!thread) {
+      // LangGraph generates arbitrary thread_id UUIDs per run and persists via the
+      // checkpointer without a prior POST /threads — auto-create the thread if it
+      // genuinely does not exist (mock contract, IT-HYD-03). A thread owned by
+      // another workspace is NEVER created or written (SECURITY-REVIEW #18 → 404).
+      const existing = await this.db.getThread(threadId);
+      if (existing) return null;
+      if (!isUuidV4(threadId)) return null;
+      const now = new Date().toISOString();
+      thread = {
+        thread_id: threadId,
+        workspace_id: workspaceId,
+        title: 'Auto thread',
+        agent_id: null,
+        status: 'active',
+        created_at: now,
+        updated_at: now,
+      };
+      await this.db.createThread(thread);
+      await this.db.appendEvent(workspaceId, threadId, 'THREAD_CREATED', { title: thread.title, agent_id: null });
+    }
     const checkpoint = await this.db.upsertCheckpoint(thread.workspace_id, threadId, input);
     const messages = input.messages ?? [];
     const seqBase = await this.db.countMessages(threadId);

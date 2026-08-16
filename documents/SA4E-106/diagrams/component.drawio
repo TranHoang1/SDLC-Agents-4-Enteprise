@@ -1,0 +1,148 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-106 Component Diagram — Enrichment Pipeline Changes" style="text;html=1;fontSize=14;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Trigger Layer -->
+    <mxCell id="r1" value="Trigger Layer (Upstream)" style="swimlane;startSize=25;fillColor=none;strokeColor=#0288d1;html=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="1320" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="c1" value="IndexingEngine&#xa;.storeResults()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="r1">
+      <mxGeometry x="20" y="40" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2" value="CodeEnrichmentTaskCreator&#xa;.createTasks()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;fontStyle=1;" vertex="1" parent="r1">
+      <mxGeometry x="280" y="40" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2b" value="NEW: copyEnrichment&#xa;FromOtherScope()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;fontStyle=3;" vertex="1" parent="r1">
+      <mxGeometry x="520" y="40" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2c" value="isFileEnrichedIn&#xa;OtherScope()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;" vertex="1" parent="r1">
+      <mxGeometry x="740" y="40" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Processing Layer -->
+    <mxCell id="r2" value="Processing Layer (TaskWorker)" style="swimlane;startSize=25;fillColor=none;strokeColor=#666666;html=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="240" width="1320" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3" value="TaskWorker&#xa;.processTask()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="r2">
+      <mxGeometry x="20" y="40" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c4" value="TaskWorker&#xa;.processCodeEnrichment()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="r2">
+      <mxGeometry x="240" y="40" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c5" value="TaskWorker&#xa;.handleTaskError()&#xa;FIX OI-02" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="r2">
+      <mxGeometry x="500" y="40" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c5b" value="Non-retryable patterns:&#xa;invalid_json | entry_not_found&#xa;+ invalid_payload (NEW)&#xa;+ symbol_not_found (NEW)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;align=left;spacingLeft=5;" vertex="1" parent="r2">
+      <mxGeometry x="720" y="30" width="230" height="70" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Handler Layer -->
+    <mxCell id="r3" value="Handler Layer (engine/enrichment/)" style="swimlane;startSize=25;fillColor=none;strokeColor=#82b366;html=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="440" width="1320" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="c6" value="CodeEnrichmentHandler&#xa;.enrichSymbol()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;fontStyle=1;" vertex="1" parent="r3">
+      <mxGeometry x="20" y="40" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c7" value="CodeEnrichment&#xa;PromptBuilder&#xa;.build()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="r3">
+      <mxGeometry x="250" y="40" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c8" value="tag-validator&#xa;validateTags()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="r3">
+      <mxGeometry x="450" y="40" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c9" value="LLMService&#xa;.complete()&#xa;[30s timeout]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="r3">
+      <mxGeometry x="650" y="40" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c10" value="Strategy Selection:&#xa;PEGA_SUMMARY&#xa;FUNCTION_SUMMARY&#xa;CLASS_SUMMARY" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;align=left;spacingLeft=5;" vertex="1" parent="r3">
+      <mxGeometry x="860" y="30" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="c11" value="parseResponse()&#xa;JSON then fence then regex" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;" vertex="1" parent="r3">
+      <mxGeometry x="1070" y="40" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: Output Layer -->
+    <mxCell id="r4" value="Output Layer (Data + UI)" style="swimlane;startSize=25;fillColor=none;strokeColor=#9673a6;html=1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="640" width="1320" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="c12" value="symbols table&#xa;UPDATE SET&#xa;summary, pseudo_code,&#xa;llm_tags, enrichment_status" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=8;size=10;" vertex="1" parent="r4">
+      <mxGeometry x="20" y="35" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="c13" value="code_enrichment_stats&#xa;MCP Tool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="r4">
+      <mxGeometry x="280" y="45" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c14" value="code_search_by_tag&#xa;MCP Tool" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="r4">
+      <mxGeometry x="500" y="45" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c15" value="EnrichmentProgress.svelte&#xa;(NEW — Admin UI)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="r4">
+      <mxGeometry x="720" y="45" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="c16" value="Graph Info Card&#xa;(summary + tags display)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="r4">
+      <mxGeometry x="970" y="45" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 1 internal -->
+    <mxCell id="e1" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="r1" source="c1" target="c2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="OI-05: calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;strokeColor=#82b366;" edge="1" parent="r1" source="c2" target="c2b">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2b" value="checks" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="r1" source="c2" target="c2c">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 2 internal -->
+    <mxCell id="e3" value="dispatch" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="r2" source="c3" target="c4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="on error" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;strokeColor=#b85450;" edge="1" parent="r2" source="c3" target="c5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4b" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;strokeColor=#82b366;" edge="1" parent="r2" source="c5" target="c5b">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 3 internal -->
+    <mxCell id="e5" value="builds" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="r3" source="c6" target="c7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="validates" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="r3" source="c6" target="c8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="r3" source="c6" target="c9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Cross-row edges -->
+    <mxCell id="e8" value="invokes handler" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="c4" target="c6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="stores" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="c6" target="c12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="reads" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="1" source="c13" target="c12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="reads" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="1" source="c14" target="c12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="polls TaskWorker" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="1" source="c15" target="c3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="legend" value="Legend" style="swimlane;startSize=20;fillColor=none;strokeColor=#666666;html=1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="1080" y="60" width="280" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="lg1" value="Existing (unchanged)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=8;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="30" width="120" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="lg2" value="Existing (core)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;" vertex="1" parent="legend">
+      <mxGeometry x="145" y="30" width="120" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="lg3" value="NEW / CHANGED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;fontStyle=1;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="65" width="120" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="lg4" value="External (LLM)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=8;" vertex="1" parent="legend">
+      <mxGeometry x="145" y="65" width="120" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="lg5" value="Data store" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=8;size=5;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="95" width="120" height="25" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

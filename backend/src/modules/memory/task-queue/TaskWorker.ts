@@ -499,8 +499,11 @@ export class TaskWorker {
 
   private async handleTaskError(task: PendingTask, err: Error): Promise<void> {
     this.consecutiveErrors++;
+    // SA4E-106: Non-retryable patterns include CODE_ENRICHMENT-specific errors
     const nonRetryable = err.message.includes('invalid_json')
-      || err.message.includes('entry_not_found');
+      || err.message.includes('entry_not_found')
+      || err.message.includes('invalid_payload')
+      || err.message.includes('symbol_not_found');
     if (nonRetryable || task.retry_count + 1 >= task.max_retries) {
       await this.repo.markFailed(task.id, err.message);
     } else {

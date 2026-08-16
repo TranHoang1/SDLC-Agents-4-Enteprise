@@ -39,7 +39,8 @@ async function httpRequestJson<T = unknown>(
   if (response.status >= 400) {
     let parsed: any;
     try { parsed = JSON.parse(text); } catch { parsed = null; }
-    const errMsg = parsed?.error || text.slice(0, 200);
+    const rawError = parsed?.error ?? text.slice(0, 200);
+    const errMsg = formatErrorPayload(rawError);
     const err = new Error(`HTTP ${response.status}: ${errMsg}`);
     (err as any).status = response.status;
     (err as any).body = parsed;
@@ -85,4 +86,20 @@ export function httpDeleteJson<T = unknown>(
   options: HttpPostOptions = {}
 ): Promise<T> {
   return httpRequestJson<T>("DELETE", url, undefined, options);
+}
+
+/**
+ * Render an error payload into a human-readable message.
+ * Backend error envelopes may carry `error` either as a string or as an object
+ * (e.g. `{ code, message }` from the Knowledge service) — never surface
+ * `[object Object]` for the latter.
+ */
+function formatErrorPayload(rawError: unknown): string {
+  if (typeof rawError === "string") { return rawError; }
+  if (rawError && typeof rawError === "object") {
+    const msg = (rawError as { message?: unknown }).message;
+    if (typeof msg === "string" && msg.length > 0) { return msg; }
+    try { return JSON.stringify(rawError); } catch { return String(rawError); }
+  }
+  return String(rawError ?? "");
 }
