@@ -8,12 +8,12 @@
 import type { Logger } from 'pino';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { TaskType, TaskStatus } from '../../modules/memory/task-queue/models.js';
+import { isPegaKind } from '../../modules/pega/pega-mapping.js';
 
 /** Kinds eligible for enrichment — excludes trivial symbols like variables. */
 const ENRICHABLE_KINDS = new Set([
   'class', 'interface', 'enum',
   'function', 'method', 'arrow_function', 'generator',
-  'pega_activity', 'pega_data_transform', 'pega_flow',
 ]);
 
 /**
@@ -55,7 +55,7 @@ export class CodeEnrichmentTaskCreator {
       if (!shouldCreate) continue;
 
       const kind = await this.getSymbolKind(symbolId);
-      if (!kind || !ENRICHABLE_KINDS.has(kind)) continue;
+      if (!kind || (!ENRICHABLE_KINDS.has(kind) && !isPegaKind(kind))) continue;
 
       await this.insertTask(symbolId, symbolName, kind, filePath, projectId);
       created++;
@@ -78,7 +78,9 @@ export class CodeEnrichmentTaskCreator {
     const symbols = await this.adapter.allAsync<{ id: number; name: string; kind: string; file_path: string }>(
       `SELECT s.id, s.name, s.kind, f.relative_path as file_path
        FROM symbols s JOIN files f ON s.file_id = f.id
-       WHERE s.project_id = ? AND (s.enrichment_status IS NULL OR s.enrichment_status = 'FAILED')
+       WHERE s.project_id = ?
+         AND (s.enrichment_status IS NULL OR s.enrichment_status = 'FAILED'
+              OR (s.enrichment_status = 'COMPLETED' AND s.summary IS NULL))
        LIMIT 500`,
       [projectId],
     );
@@ -98,7 +100,7 @@ export class CodeEnrichmentTaskCreator {
 
     let created = 0;
     for (const sym of symbols) {
-      if (!ENRICHABLE_KINDS.has(sym.kind)) continue;
+      if (!ENRICHABLE_KINDS.has(sym.kind) && !isPegaKind(sym.kind)) continue;
       if (skippedFiles.has(sym.file_path)) continue; // Cross-scope dedup
       await this.insertTask(sym.id, sym.name, sym.kind, sym.file_path, projectId);
       created++;
@@ -110,14 +112,14 @@ export class CodeEnrichmentTaskCreator {
     return created;
   }
 
-  /** Skip if symbol already enriched (BR-14). */
+  /** Skip if symbol already fully enriched (has summary). */
   private async shouldCreateTask(symbolId: number): Promise<boolean> {
-    const row = await this.adapter.getAsync<{ enrichment_status: string | null }>(
-      'SELECT enrichment_status FROM symbols WHERE id = ?',
+    const row = await this.adapter.getAsync<{ enrichment_status: string | null; summary: string | null }>(
+      'SELECT enrichment_status, summary FROM symbols WHERE id = ?',
       [symbolId],
     );
-    // Skip if COMPLETED — allow re-enrichment for FAILED or NULL
-    return row?.enrichment_status !== 'COMPLETED';
+    // Skip only if COMPLETED AND has summary (CODE_ENRICHMENT done, not just TAG_ENRICHMENT)
+    return !(row?.enrichment_status === 'COMPLETED' && row?.summary);
   }
 
   /**
@@ -161,9 +163,11 @@ export class CodeEnrichmentTaskCreator {
     symbolId: number, symbolName: string, kind: string,
     filePath: string, projectId: string,
   ): Promise<void> {
+    // SA4E-171: dynamically set workspaceType based on symbol kind
     const payload = JSON.stringify({
       symbolId, symbolName, symbolKind: kind,
-      projectId, filePath, workspaceType: 'standard',
+      projectId, filePath,
+      workspaceType: isPegaKind(kind) ? 'pega' : 'standard',
     });
 
     await this.adapter.runAsync(

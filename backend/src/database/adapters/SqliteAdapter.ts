@@ -14,6 +14,7 @@ import type {
   ConnectionStatus,
   PreparedStatement,
 } from './DatabaseAdapter.js';
+import { normalizeSqlitePlaceholders } from './sqlite-placeholders.js';
 
 export class SqliteAdapter implements DatabaseAdapter {
   private db: Database.Database | null = null;
@@ -60,18 +61,18 @@ export class SqliteAdapter implements DatabaseAdapter {
   }
 
   run(sql: string, params?: unknown[]): RunResult {
-    const stmt = this.getDb().prepare(sql);
+    const stmt = this.getDb().prepare(normalizeSqlitePlaceholders(sql));
     const result = params ? stmt.run(...params) : stmt.run();
     return { changes: result.changes, lastInsertRowid: result.lastInsertRowid };
   }
 
   get<T = unknown>(sql: string, params?: unknown[]): T | undefined {
-    const stmt = this.getDb().prepare(sql);
+    const stmt = this.getDb().prepare(normalizeSqlitePlaceholders(sql));
     return (params ? stmt.get(...params) : stmt.get()) as T | undefined;
   }
 
   all<T = unknown>(sql: string, params?: unknown[]): T[] {
-    const stmt = this.getDb().prepare(sql);
+    const stmt = this.getDb().prepare(normalizeSqlitePlaceholders(sql));
     return (params ? stmt.all(...params) : stmt.all()) as T[];
   }
 
@@ -84,7 +85,7 @@ export class SqliteAdapter implements DatabaseAdapter {
   }
 
   prepare(sql: string): PreparedStatement {
-    const stmt = this.getDb().prepare(sql);
+    const stmt = this.getDb().prepare(normalizeSqlitePlaceholders(sql));
     return {
       run: (...params: unknown[]) => {
         const r = stmt.run(...params);

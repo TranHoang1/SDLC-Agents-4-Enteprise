@@ -1,0 +1,96 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-119 — Test Coverage Map (196 Cases)" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="320" y="10" width="450" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt_group" value="PBT — Property-Based (21)" style="swimlane;startSize=30;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="1080" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt1" value="Confidence&#xa;Invariants (4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="pbt_group">
+      <mxGeometry x="20" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt2" value="GateGuard&#xa;Latency (4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="pbt_group">
+      <mxGeometry x="150" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt3" value="Compaction&#xa;Tokens (2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="pbt_group">
+      <mxGeometry x="280" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt4" value="Pattern&#xa;Dedup (2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="pbt_group">
+      <mxGeometry x="410" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt5" value="AgentShield&#xa;Detection (2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="pbt_group">
+      <mxGeometry x="540" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt6" value="Skill Pack&#xa;Compose (2)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="pbt_group">
+      <mxGeometry x="670" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt7" value="Other&#xa;PBTs (5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="pbt_group">
+      <mxGeometry x="800" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut_group" value="UT — Unit Tests (67)" style="swimlane;startSize=30;fillColor=none;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="160" width="1080" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut1" value="ConfidenceScorer (8)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_group">
+      <mxGeometry x="20" y="40" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut2" value="GateGuard (8)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_group">
+      <mxGeometry x="170" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut3" value="AgentShield (6)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_group">
+      <mxGeometry x="300" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut4" value="SkillPack (6)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_group">
+      <mxGeometry x="430" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut5" value="Context/Tier (9)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_group">
+      <mxGeometry x="560" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut6" value="QA Domain (8)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_group">
+      <mxGeometry x="690" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut7" value="Security UTs (6)&#xa;+ Other (16)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="ut_group">
+      <mxGeometry x="820" y="40" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="it_group" value="IT — Integration Tests (57)" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="260" width="1080" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="it1" value="DB: Confidence (6)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_group">
+      <mxGeometry x="20" y="40" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="it2" value="DB: GateGuard (6)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_group">
+      <mxGeometry x="170" y="40" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="it3" value="DB: SkillPack (5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_group">
+      <mxGeometry x="310" y="40" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="it4" value="AgentShield (5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_group">
+      <mxGeometry x="450" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="it5" value="LangGraph (15)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_group">
+      <mxGeometry x="580" y="40" width="110" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="it6" value="Security (8)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_group">
+      <mxGeometry x="710" y="40" width="100" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="it7" value="Other ITs (12)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="it_group">
+      <mxGeometry x="830" y="40" width="100" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e_group" value="E2E-API (26) + E2E-UI (4) + SIT (21)" style="swimlane;startSize=30;fillColor=none;strokeColor=#d6b656;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="360" width="1080" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e1" value="MCP Tools (26)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="e2e_group">
+      <mxGeometry x="20" y="40" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e2" value="Plan Canvas UI (4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="e2e_group">
+      <mxGeometry x="160" y="40" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e3" value="Cross-Module SIT (21)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="e2e_group">
+      <mxGeometry x="310" y="40" width="140" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="summary" value="Total: 196 Test Cases | Coverage Target: ≥80% (UT+IT)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="300" y="470" width="500" height="40" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -83,6 +83,7 @@ async function autoDetectModel(baseUrl: string): Promise<string> {
 /**
  * Attempt LLM health check and wire TagAnalyzer + ClassifyService + EmbeddingService.
  * Fire-and-forget — never blocks module startup. Errors are silently logged.
+ * If init fails, retries every 60s until LLM becomes available.
  *
  * @param dispatcher - MemoryToolDispatcher to wire services into
  * @param taskWorker - TaskWorker to wire TagAnalyzer + EmbeddingService into
@@ -93,7 +94,11 @@ export function initLLMInBackground(
   taskWorker: TaskWorker | null,
   logger: Logger,
 ): void {
-  (async () => {
+  /** Retry interval in ms (60s). */
+  const RETRY_INTERVAL_MS = 60_000;
+  let retryTimer: ReturnType<typeof setInterval> | null = null;
+
+  const doInit = async (): Promise<boolean> => {
     try {
       const llmConfig = await buildLLMConfig();
       logger.info({ provider: llmConfig.provider, model: llmConfig.model }, '[LLMInitializer] Resolved LLM config');
@@ -105,8 +110,8 @@ export function initLLMInBackground(
       clearTimeout(timeout);
 
       if (!healthResp.ok) {
-        logger.info({ provider: llmConfig.provider }, 'TagAnalyzer LLM not reachable — keyword fallback only');
-        return;
+        logger.info({ provider: llmConfig.provider }, 'TagAnalyzer LLM not reachable — will retry in 60s');
+        return false;
       }
 
       const llmService = new LLMService(llmConfig);
@@ -139,8 +144,27 @@ export function initLLMInBackground(
         taskWorker?.setEmbeddingService(embSvc);
         dispatcher.setEmbeddingAvailable(true);
       } catch (err) { logger.debug({ err }, '[LLMInitializer] ONNX not available '); }
+
+      return true;
     } catch (err) {
-      logger.error({ err }, '[LLMInitializer] LLM initialization FAILED — TaskWorker will NOT process enrichment tasks');
+      logger.error({ err }, '[LLMInitializer] LLM initialization FAILED — will retry in 60s');
+      return false;
     }
-  })();
+  };
+
+  // First attempt
+  doInit().then(success => {
+    if (success) return;
+    // Schedule periodic retry until LLM connects
+    logger.info('[LLMInitializer] Scheduling periodic LLM health check (every 60s)');
+    retryTimer = setInterval(async () => {
+      logger.debug('[LLMInitializer] Retrying LLM connection...');
+      const ok = await doInit();
+      if (ok && retryTimer) {
+        clearInterval(retryTimer);
+        retryTimer = null;
+        logger.info('[LLMInitializer] LLM connected after retry — periodic check stopped');
+      }
+    }, RETRY_INTERVAL_MS);
+  });
 }

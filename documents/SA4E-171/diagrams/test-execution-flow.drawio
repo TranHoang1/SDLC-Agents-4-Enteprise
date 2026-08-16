@@ -1,0 +1,105 @@
+<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-171 — Test Execution Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="450" y="10" width="400" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="start" value="Build Pass&#xa;(npm run build)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="570" y="50" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt" value="PBT Tests&#xa;(12 tests, fast-check)&#xa;10k iterations each" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="320" y="160" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut" value="Unit Tests&#xa;(28 tests, Vitest)&#xa;Mocked dependencies" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="760" y="160" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="it" value="Integration Tests&#xa;(18 tests)&#xa;In-memory SQLite + FTS triggers" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="280" width="280" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e" value="E2E-API Tests&#xa;(8 tests)&#xa;MCP JSON-RPC calls" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="400" width="280" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit" value="System Integration Tests&#xa;(6 tests)&#xa;On-disk SQLite WAL + Performance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="520" width="280" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="report" value="Test Report&#xa;Generated" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="570" y="640" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate1" value="Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="600" y="230" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate2" value="Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="600" y="350" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate3" value="Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="600" y="470" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate4" value="Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="600" y="590" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="fail1" value="Fix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="160" y="237" width="60" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fail2" value="Fix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="160" y="355" width="60" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fail3" value="Fix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="160" y="475" width="60" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="fail4" value="Fix" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="160" y="595" width="60" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;" edge="1" parent="1" source="start" target="pbt">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;" edge="1" parent="1" source="start" target="ut">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="pbt" target="gate1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="ut" target="gate1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="gate1" target="it">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=9;" edge="1" parent="1" source="gate1" target="fail1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="it" target="gate2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="gate2" target="e2e">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=9;" edge="1" parent="1" source="gate2" target="fail2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="e2e" target="gate3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="gate3" target="sit">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=9;" edge="1" parent="1" source="gate3" target="fail3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="sit" target="gate4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="gate4" target="report">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e15" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=9;" edge="1" parent="1" source="gate4" target="fail4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="par" value="Parallel" style="text;html=1;align=center;verticalAlign=middle;fontSize=9;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="590" y="140" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="cov" value="Exit Criteria:&#xa;• 100% pass all levels&#xa;• ≥80% branch coverage&#xa;• Perf: 10k &lt;5min, FTS &lt;50ms&#xa;• 0 Critical/High security" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=10;" vertex="1" parent="1">
+      <mxGeometry x="1050" y="300" width="220" height="80" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

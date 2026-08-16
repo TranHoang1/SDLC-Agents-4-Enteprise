@@ -2,12 +2,13 @@
  * SA4E-158 — PegaKbSync: Phase 2 of separated ingest pipeline.
  * Reads indexed rules → inserts into KB (knowledge_entries) + graph + enrichment.
  * Handles: KB entries, AST entries, enrichment tasks, graph projection, Declare Expressions.
+ * SA4E-171: Dual-write to symbols table via PegaSymbolSync.
  */
 import type { MemoryEngine } from '../memory/engine/core.js';
 import type { UnresolvedDependency } from './models.js';
 import { PegaParser } from './PegaParser.js';
 import { PegaDeclarativeEngine } from './PegaDeclarativeEngine.js';
-import { projectRuleToGraphNode, createDependencyEdges } from './PegaGraphProjector.js';
+import { syncRuleToSymbols, PEGA_DUAL_WRITE } from './PegaSymbolSync.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'pega-kb-sync' });
@@ -85,7 +86,7 @@ export async function syncRuleToKb(
   // Create enrichment task for LLM tagging
   await createEnrichmentTask(adapter, kbId, promptCtx || summaryText, baseTags);
 
-  // Insert AST as separate KB entry
+  // Project AST as separate KB entry
   const astSource = `pega-ast:${fqn}`;
   await adapter.runAsync('DELETE FROM knowledge_entries WHERE source = $1', [astSource]);
   const astId = await memoryEngine.insert({
@@ -99,8 +100,16 @@ export async function syncRuleToKb(
   // Create enrichment task for AST entry
   await createEnrichmentTask(adapter, astId, promptCtx, 'pega,ast');
 
-  // Project into graph_nodes + dependency edges
-  await projectToGraph(adapter, fqn, pxObjClass, projectId, deps);
+  // SA4E-171: Dual-write to symbols table (non-fatal during transition).
+  // SA4E-106: No "pega:" graph nodes — rules are projected as code nodes
+  // by GraphSyncService.syncProjectSymbols() (see syncAllIndexedRules).
+  if (PEGA_DUAL_WRITE) {
+    try {
+      await syncRuleToSymbols(adapter, ruleJson, projectId, promptCtx);
+    } catch (err) {
+      logger.warn({ err, fqn }, 'Failed to sync to symbols (non-fatal during transition)');
+    }
+  }
 
   return { status: 'success', fqn, kbEntryId: kbId, astEntryId: astId };
 }
@@ -148,6 +157,8 @@ export async function syncAllIndexedRules(
         logger.warn({ err, source: row.source }, 'Failed to sync indexed rule to KB');
       }
     }
+    // SA4E-106: Project this project's Pega symbols as code graph nodes
+    await projectPegaCodeGraph(memoryEngine, projectId);
     return result;
   }
 
@@ -246,18 +257,17 @@ async function createEnrichmentTask(
   }
 }
 
-/** Project rule into graph_nodes + create dependency edges (non-fatal). */
-async function projectToGraph(
-  adapter: any,
-  fqn: string,
-  pxObjClass: string,
+/** Project rule into graph_nodes as a code node (non-fatal). */
+async function projectPegaCodeGraph(
+  memoryEngine: MemoryEngine,
   projectId: string,
-  deps: UnresolvedDependency[],
 ): Promise<void> {
   try {
-    const graphNodeId = await projectRuleToGraphNode(adapter, fqn, pxObjClass, projectId);
-    await createDependencyEdges(adapter, graphNodeId, deps);
+    const { GraphSyncService } = await import('../../engine/graph/graph-sync-service.js');
+    const adapter = memoryEngine.getAdapter();
+    const sync = new GraphSyncService(adapter, adapter, logger);
+    await sync.syncProjectSymbols(projectId);
   } catch (err) {
-    logger.warn({ err }, 'Failed to project rule into graph (non-fatal)');
+    logger.warn({ err }, 'Failed to project Pega symbols into code graph (non-fatal)');
   }
 }

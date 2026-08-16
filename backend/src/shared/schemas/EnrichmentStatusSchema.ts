@@ -12,6 +12,7 @@ export const EnrichmentStateEnum = z.enum(['idle', 'running', 'complete', 'error
 /** Full response schema for enrichment status endpoint. */
 export const EnrichmentStatusResponseSchema = z.object({
   state: EnrichmentStateEnum,
+  projectId: z.string().nullable(),
   totalRules: z.number().int().min(0),
   completedRules: z.number().int().min(0),
   failedRules: z.number().int().min(0),

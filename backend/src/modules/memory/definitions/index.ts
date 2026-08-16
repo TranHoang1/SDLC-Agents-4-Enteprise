@@ -5,6 +5,7 @@ import { EVOLUTION_TOOLS } from './evolution.js';
 import { SMART_INGEST_TOOLS } from './smart-ingest.js';
 import { PROCEDURE_TOOLS } from './procedure.js';
 import { ENRICH_TOOLS } from './enrich.js';
+import { SKILL_TOOLS } from './skills.js';
 
 export { TIER1_TOOLS } from './search.js';
 export { TIER2_TOOLS } from './tier2.js';
@@ -13,5 +14,6 @@ export { EVOLUTION_TOOLS } from './evolution.js';
 export { SMART_INGEST_TOOLS } from './smart-ingest.js';
 export { PROCEDURE_TOOLS } from './procedure.js';
 export { ENRICH_TOOLS } from './enrich.js';
+export { SKILL_TOOLS } from './skills.js';
 
-export const MEMORY_TOOL_DEFINITIONS = [...TIER1_TOOLS, ...TIER2_TOOLS, ...TIER3_TOOLS, ...EVOLUTION_TOOLS, ...SMART_INGEST_TOOLS, ...PROCEDURE_TOOLS, ...ENRICH_TOOLS, ...MEMORY_TOOL_ALIASES];
+export const MEMORY_TOOL_DEFINITIONS = [...TIER1_TOOLS, ...TIER2_TOOLS, ...TIER3_TOOLS, ...EVOLUTION_TOOLS, ...SMART_INGEST_TOOLS, ...PROCEDURE_TOOLS, ...ENRICH_TOOLS, ...SKILL_TOOLS, ...MEMORY_TOOL_ALIASES];

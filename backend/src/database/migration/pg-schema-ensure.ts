@@ -82,6 +82,9 @@ export async function ensurePostgresIndexSchema(adapter: DatabaseAdapter): Promi
     await safeExec(adapter, `CREATE SEQUENCE IF NOT EXISTS pending_tasks_id_seq`);
     await safeExec(adapter, `ALTER TABLE pending_tasks ALTER COLUMN id SET DEFAULT nextval('pending_tasks_id_seq')`);
 
+    // SA4E-171: Drop FK on pending_tasks.entry_id → knowledge_entries(id)
+    // This allows entry_id to store symbolId for CODE_ENRICHMENT tasks (OI-01)
+    await safeExec(adapter, `ALTER TABLE pending_tasks DROP CONSTRAINT IF EXISTS pending_tasks_entry_id_fkey`);
     // 5. Ensure indexes exist
     const indexes = [
       'CREATE INDEX IF NOT EXISTS idx_files_project ON files(project_id)',

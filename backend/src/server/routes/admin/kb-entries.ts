@@ -293,7 +293,7 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
           symbolKind: sym.kind,
           projectId: projectId,
           filePath: filePath,
-          workspaceType: 'standard',
+          workspaceType: sym.kind.startsWith('pega_') ? 'pega' : 'standard',
         }),
         task_type: 'CODE_ENRICHMENT',
         status: 'PENDING',
@@ -377,6 +377,9 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
         }
       }
     } catch (err) { /* body_embeddings table may not exist */ }
+    const isPega = Boolean(detail.language && detail.language.toLowerCase() === 'pega');
+    const codeLabel = isPega ? '**Rule Content:**' : '**Code:**';
+    const codeFence = isPega ? 'text' : (detail.language?.toLowerCase() || 'typescript');
     const contentParts = [
       detail.signature ? `**Signature:** \`${detail.signature}\`` : '',
       detail.docComment ? `**Doc:** ${detail.docComment}` : '',
@@ -385,7 +388,7 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
       detail.module ? `**Module:** ${detail.module}` : '',
       detail.visibility ? `**Visibility:** ${detail.visibility}` : '',
       detail.parentSymbol ? `**Parent:** ${detail.parentSymbol}` : '',
-      bodyCode ? `\n**Code:**\n\`\`\`typescript\n${bodyCode.substring(0, 2000)}\n\`\`\`` : '',
+      bodyCode ? `\n${codeLabel}\n\`\`\`${codeFence}\n${bodyCode.substring(0, 2000)}\n\`\`\`` : '',
     ].filter(Boolean).join('\n');
     return {
       id: `code:${detail.id}`,

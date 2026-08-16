@@ -143,22 +143,51 @@ export class PendingTaskRepository {
   }
 
   /**
-   * SA4E-157: Get earliest created_at timestamp among active tasks (BR-12).
-   * Used for enrichment start time and ETA calculation.
+   * SA4E-157: Get earliest started_at among PROCESSING tasks.
+   * Reflects when enrichment actually began processing (not when tasks were originally created).
+   * Falls back to current time if only PENDING tasks exist (just retried).
    * @returns ISO timestamp string or null if no active tasks
    */
   async getEarliestActiveTimestamp(): Promise<string | null> {
-    const row = await this.db.getAsync<{ started_at: string | null }>(
-      `SELECT MIN(created_at) as started_at FROM pending_tasks WHERE status IN (?, ?)`,
-      [TaskStatus.PENDING, TaskStatus.PROCESSING],
+    // First: check PROCESSING tasks (actually being worked on)
+    const processing = await this.db.getAsync<{ started_at: string | null }>(
+      `SELECT MIN(started_at) as started_at FROM pending_tasks WHERE status = ? AND started_at IS NOT NULL`,
+      [TaskStatus.PROCESSING],
     );
-    return row?.started_at ?? null;
+    if (processing?.started_at) return processing.started_at;
+    // Fallback: if only PENDING tasks exist (freshly retried), use now as start
+    const hasPending = await this.db.getAsync<{ cnt: number }>(
+      `SELECT COUNT(*) as cnt FROM pending_tasks WHERE status = ?`,
+      [TaskStatus.PENDING],
+    );
+    if (hasPending && Number(hasPending.cnt) > 0) return new Date().toISOString();
+    return null;
   }
 
   async listFailed(limit = 20): Promise<PendingTask[]> {
     return this.db.allAsync<PendingTask>(
       `SELECT * FROM pending_tasks WHERE status = ? ORDER BY completed_at DESC LIMIT ?`,
       [TaskStatus.FAILED, limit],
+    );
+  }
+
+  /** Get currently processing tasks with their source info, scoped by project. */
+  async listProcessing(limit = 5, projectId?: string): Promise<Array<{ id: number; source: string; startedAt: string | null }>> {
+    const params: unknown[] = [TaskStatus.PROCESSING];
+    let whereExtra = '';
+    if (projectId) {
+      whereExtra = ' AND pt.project_id = ?';
+      params.push(projectId);
+    }
+    params.push(limit);
+    return this.db.allAsync<{ id: number; source: string; startedAt: string | null }>(
+      `SELECT pt.id, COALESCE(ke.source, s.name, 'entry-' || pt.entry_id) as source, pt.started_at as "startedAt"
+       FROM pending_tasks pt
+       LEFT JOIN knowledge_entries ke ON ke.id = pt.entry_id AND pt.task_type != 'CODE_ENRICHMENT'
+       LEFT JOIN symbols s ON s.id = pt.entry_id AND pt.task_type = 'CODE_ENRICHMENT'
+       WHERE pt.status = ?${whereExtra}
+       ORDER BY pt.started_at DESC LIMIT ?`,
+      params,
     );
   }
 

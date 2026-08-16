@@ -16,7 +16,6 @@ import type { PegaRuleKbSchema } from './strategies/KbDrivenPegaParserStrategy.j
 import { PegaDeclarativeEngine } from './PegaDeclarativeEngine.js';
 import { PegaRuleAstParser } from './PegaRuleAstParser.js';
 import { extractTagValueCsv, pxObjClassToGraphType } from './pega-utils.js';
-import { projectRuleToGraphNode, createDependencyEdges } from './PegaGraphProjector.js';
 import { indexRule, type IndexRuleResult } from './PegaIndexer.js';
 import { syncRuleToKb, syncAllIndexedRules, type SyncRuleResult, type SyncBatchResult } from './PegaKbSync.js';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
@@ -320,11 +319,12 @@ export class PegaService {
       });
     } catch (err) { logger.debug({ err }, '[PegaService] Failed to create AST enrichment task (non-fatal)'); }
 
-    // Project into graph_nodes + create dependency edges
+    // SA4E-106: Pega rules are stored as code symbols (dual-write) — no "pega:" graph nodes.
+    // The rule appears on the graph as a code node after the next project graph sync.
     try {
-      const graphNodeId = await projectRuleToGraphNode(adapter, symbol.fqn, pxObjClass, req.projectId);
-      await createDependencyEdges(adapter, graphNodeId, deps);
-    } catch (err) { logger.warn({ err }, '[PegaService] Failed to project rule into graph (non-fatal)'); }
+      const { syncRuleToSymbols } = await import('./PegaSymbolSync.js');
+      await syncRuleToSymbols(adapter, req.ruleJson, req.projectId, promptCtx);
+    } catch (err) { logger.warn({ err }, '[PegaService] Failed to sync rule to symbols (non-fatal)'); }
 
     return { status: 'success', ruleId: id, unresolvedDependencies: deps };
   }

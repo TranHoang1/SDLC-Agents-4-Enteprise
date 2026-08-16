@@ -1,0 +1,32 @@
+{
+  "ticketKey": "SA4E-127",
+  "summary": "Council - Multi-Voice Decision Making",
+  "status": "done",
+  "currentPhase": "done",
+  "phases": {
+    "implementation": {
+      "status": "done",
+      "completedAt": "2026-07-15T00:00:00.000Z",
+      "artifacts": [
+        ".code-intel/skills/council-decision/SKILL.md"
+      ]
+    }
+  },
+  "deliverables": {
+    "skill_file": {
+      "path": ".code-intel/skills/council-decision/SKILL.md",
+      "language": "English",
+      "covers": [
+        "4-persona council concept (Pragmatist, Purist, Security-minded, User-advocate)",
+        "Trigger conditions for council invocation",
+        "Structured debate format with vote scale (Prefer/Acceptable/Reject)",
+        "Scoring rules with tie-breaking logic",
+        "Full ADR output template (context, options, decision, consequences)",
+        "SM integration during Phase 3 with invokeSubAgent",
+        "Constraints and anti-patterns"
+      ]
+    }
+  },
+  "createdAt": "2026-07-15T00:00:00.000Z",
+  "updatedAt": "2026-07-15T00:00:00.000Z"
+}

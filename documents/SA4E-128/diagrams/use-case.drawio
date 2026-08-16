@@ -1,0 +1,101 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="AgentShield — Use Case Diagram" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="370" y="10" width="300" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="boundary" value="AgentShield Scanner" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="230" y="50" width="520" height="720" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc1" value="UC-1: Scan Steering Files&#xa;for Prompt Injection" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="60" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc2" value="UC-2: Scan Hooks&#xa;for Injection Risks" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="160" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc3" value="UC-3: Scan MCP Config&#xa;for Over-Permissions" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="260" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc4" value="UC-4: Detect&#xa;Hardcoded Secrets" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="360" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc5" value="UC-5: Validate Hook&#xa;Commands (Denylist)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="460" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc6" value="UC-6: Generate&#xa;Severity-Scored Report" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="290" y="160" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc7" value="UC-7: Run as&#xa;Pre-Commit Hook" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="290" y="290" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc8" value="UC-8: CI/CD&#xa;Pipeline Integration" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="290" y="420" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc9" value="UC-9: Configure&#xa;Allowlist/Denylist" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="290" y="560" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="a1" value="Developer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="280" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="a2" value="Security Reviewer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="820" y="200" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="a3" value="CI/CD Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="820" y="440" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="a4" value="Project Lead" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="820" y="600" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a1" target="uc1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a1" target="uc2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a1" target="uc3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a1" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a1" target="uc5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a2" target="uc6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a3" target="uc8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a4" target="uc9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=none;" edge="1" parent="1" source="a1" target="uc7">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="180" y="300"/>
+          <mxPoint x="180" y="375"/>
+          <mxPoint x="520" y="375"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ei1" value="&lt;&lt;include&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="uc1" target="uc6">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="430" y="130"/>
+          <mxPoint x="620" y="130"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ei2" value="&lt;&lt;include&gt;&gt;" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="uc5" target="uc6">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="460" y="550"/>
+          <mxPoint x="620" y="550"/>
+          <mxPoint x="620" y="230"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

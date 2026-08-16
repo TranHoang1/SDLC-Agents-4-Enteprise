@@ -1,0 +1,18 @@
+{
+  "ticket": "SA4E-104",
+  "type": "Bug",
+  "currentPhase": "done",
+  "autonomyLevel": "L3",
+  "phases": {
+    "implementation": { "status": "done", "completedAt": "2026-08-13T10:30:00Z" },
+    "testing": { "status": "done", "completedAt": "2026-08-14T00:25:00Z" },
+    "deployment": { "status": "done", "completedAt": "2026-08-14T00:25:00Z", "note": "Fixes merged to main as v1.24.0" }
+  },
+  "fixes": [
+    "pg-schema-ensure: project_id + UNIQUE constraint on body_embeddings",
+    "relationships table: project_id + remove try/catch inside transactionAsync",
+    "CodeEnrichmentHandler wired into TaskWorker via LLMInitializer.ts"
+  ],
+  "jiraStatus": "Done",
+  "lastUpdated": "2026-08-14T00:25:00Z"
+}

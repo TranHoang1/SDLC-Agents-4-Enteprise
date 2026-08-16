@@ -221,7 +221,34 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
           vscode.window.showErrorMessage('Cannot reach backend. Verify server is running.');
           return;
         }
-        vscode.window.showInformationMessage(formatEnrichmentStatus(status));
+        // Open Enrichment Dashboard WebView Panel (SA4E-169)
+        const { openEnrichmentDashboard } = await import('./panels/enrichment-dashboard-panel');
+        const dashData = enrichmentService.buildDashboardData(status);
+        openEnrichmentDashboard(context.extensionUri, dashData);
+      })
+    );
+
+    // SA4E-160: Retry failed enrichment tasks command
+    context.subscriptions.push(
+      vscode.commands.registerCommand('sa4e.retryFailedEnrichment', async () => {
+        try {
+          const backendUrl = vscode.workspace.getConfiguration('kiroSdlc').get<string>('backendUrl', 'http://localhost:48721').replace(/\/$/, '');
+          const res = await fetch(`${backendUrl}/api/v1/enrichment/retry-failed`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authManager?.getTokenSync() || ''}` },
+          });
+          if (!res.ok) {
+            vscode.window.showErrorMessage(`Retry failed: HTTP ${res.status}`);
+            return;
+          }
+          const json = (await res.json()) as any;
+          const count = json.data?.resetCount ?? 0;
+          vscode.window.showInformationMessage(`${count} failed tasks queued for retry. Enrichment will resume shortly.`);
+          // Force immediate status poll to reflect changes
+          await enrichmentService.pollNow();
+        } catch (err: any) {
+          vscode.window.showErrorMessage(`Retry failed: ${err.message}`);
+        }
       })
     );
   }

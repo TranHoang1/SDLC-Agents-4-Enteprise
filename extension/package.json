@@ -77,6 +77,10 @@
         "title": "SDLC Agents: Open KB Analytics"
       },
       {
+        "command": "sa4e.retryFailedEnrichment",
+        "title": "SDLC Agents: Retry Failed Enrichment"
+      },
+      {
         "command": "kiroSdlc.openWorkflowGraph",
         "title": "SDLC Agents: Open Workflow Graph"
       },
@@ -91,6 +95,10 @@
       {
         "command": "kiroSdlc.impactAnalysis",
         "title": "SDLC Agents: Impact Analysis"
+      },
+      {
+        "command": "kiroSdlc.openPlanCanvas",
+        "title": "SDLC Agents: Open Plan Canvas"
       },
       {
         "command": "kiroSdlc.getAIContext",

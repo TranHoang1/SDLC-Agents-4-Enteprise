@@ -1,0 +1,26 @@
+id,type,content,source,project_id,summary
+1,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-HR"",""pyRuleName"":""ApproveLeave"",""steps"":[]}",Rule-Obj-Activity:Work-HR:ApproveLeave,proj_test_1,Approves leave requests
+2,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Flow"",""pyClassName"":""Work-HR"",""pyRuleName"":""LeaveProcess"",""stages"":[]}",Rule-Obj-Flow:Work-HR:LeaveProcess,proj_test_1,Leave approval workflow
+3,PEGA_DATA,"{""pxObjClass"":""Rule-Obj-DataTransform"",""pyClassName"":""Work-Finance"",""pyRuleName"":""CalcTax"",""actions"":[]}",Rule-Obj-DataTransform:Work-Finance:CalcTax,proj_test_1,Calculates tax amount
+4,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-DecisionTable"",""pyClassName"":""Work-HR"",""pyRuleName"":""LeaveEligibility"",""conditions"":[]}",Rule-Obj-DecisionTable:Work-HR:LeaveEligibility,proj_test_1,Leave eligibility check
+5,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Section"",""pyClassName"":""Work-HR"",""pyRuleName"":""EmployeeDetails"",""fields"":[]}",Rule-Obj-Section:Work-HR:EmployeeDetails,proj_test_1,Employee details section
+6,PEGA_INDEX,"{""pxObjClass"":""Rule-Obj-Harness"",""pyClassName"":""Work-HR"",""pyRuleName"":""MainHarness"",""layout"":{}}",Rule-Obj-Harness:Work-HR:MainHarness,proj_test_1,Main application harness
+7,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-When"",""pyClassName"":""Work-HR"",""pyRuleName"":""IsManager"",""expression"":""true""}",Rule-Obj-When:Work-HR:IsManager,proj_test_1,Checks if user is manager
+8,PEGA_DATA,"{""pxObjClass"":""Rule-Obj-MapValue"",""pyClassName"":""Work-Config"",""pyRuleName"":""CountryMapping"",""entries"":[]}",Rule-Obj-MapValue:Work-Config:CountryMapping,proj_test_1,Country code mapping
+9,PEGA_RULE,"{""pxObjClass"":""Rule-Connect-HTTP"",""pyClassName"":""Work-Integration"",""pyRuleName"":""FetchEmployeeAPI"",""url"":""http://api""}",Rule-Connect-HTTP:Work-Integration:FetchEmployeeAPI,proj_test_1,Employee REST API connector
+10,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-Claims"",""pyRuleName"":""ProcessClaim"",""steps"":[]}",Rule-Obj-Activity:Work-Claims:ProcessClaim,proj_test_1,Processes insurance claim
+11,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-HR"",""pyRuleName"":""RejectLeave"",""steps"":[]}",Rule-Obj-Activity:Work-HR:RejectLeave,proj_test_1,Rejects leave request
+12,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Flow"",""pyClassName"":""Work-Claims"",""pyRuleName"":""ClaimWorkflow"",""stages"":[]}",Rule-Obj-Flow:Work-Claims:ClaimWorkflow,proj_test_1,Claims processing flow
+13,PEGA_DATA,"{""pxObjClass"":""Rule-Declare-Expressions"",""pyClassName"":""Work-Finance"",""pyRuleName"":""TotalAmount"",""expr"":""sum""}",Rule-Declare-Expressions:Work-Finance:TotalAmount,proj_test_1,Calculates total amount
+14,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Validate"",""pyClassName"":""Work-HR"",""pyRuleName"":""ValidateRequest"",""rules"":[]}",Rule-Obj-Validate:Work-HR:ValidateRequest,proj_test_1,Validates leave request
+15,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-Finance"",""pyRuleName"":""ApproveExpense"",""steps"":[]}",Rule-Obj-Activity:Work-Finance:ApproveExpense,proj_test_1,Expense approval
+16,PEGA_INDEX,"{""pxObjClass"":""Rule-Declare-Pages"",""pyClassName"":""Work-Reference"",""pyRuleName"":""CountryList"",""source"":""db""}",Rule-Declare-Pages:Work-Reference:CountryList,proj_test_1,Country reference page
+17,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-DecisionTree"",""pyClassName"":""Work-Claims"",""pyRuleName"":""RouteAssignment"",""branches"":[]}",Rule-Obj-DecisionTree:Work-Claims:RouteAssignment,proj_test_1,Routes claim assignment
+18,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Report-Definition"",""pyClassName"":""Work-Finance"",""pyRuleName"":""ExpenseReport"",""query"":""""}",Rule-Obj-Report-Definition:Work-Finance:ExpenseReport,proj_test_1,Expense report definition
+19,PEGA_DATA,"{""pxObjClass"":""Rule-Obj-ListVw"",""pyClassName"":""Work-HR"",""pyRuleName"":""PendingRequests"",""columns"":[]}",Rule-Obj-ListVw:Work-HR:PendingRequests,proj_test_1,Pending requests list view
+20,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Property"",""pyClassName"":""Work-HR"",""pyRuleName"":""EmployeeName"",""type"":""Text""}",Rule-Obj-Property:Work-HR:EmployeeName,proj_test_1,Employee name property
+21,PEGA_RULE,INVALID_JSON_HERE,bad-source,proj_test_1,Invalid rule for error testing
+22,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-HR"",""pyRuleName"":""ApproveLeave"",""steps"":[]}",Rule-Obj-Activity:Work-HR:ApproveLeave,proj_test_2,Duplicate for cross-project test
+23,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":"""",""pyRuleName"":""NoClass""}",missing-class,proj_test_1,Missing pyClassName test
+24,PEGA_RULE,"{""pxObjClass"":"""",""pyClassName"":""Work"",""pyRuleName"":""NoObjClass""}",missing-objclass,proj_test_1,Missing pxObjClass test
+25,PEGA_RULE,"{""pxObjClass"":""Rule-Obj-Activity"",""pyClassName"":""Work-HR"",""pyRuleName"":""CancelLeave"",""steps"":[]}",Rule-Obj-Activity:Work-HR:CancelLeave,proj_test_1,Cancel leave request

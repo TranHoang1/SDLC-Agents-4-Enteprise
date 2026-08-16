@@ -40,7 +40,8 @@ export const CreateIssueSchema = z.object({
 
 export const UpdateIssueSchema = z.object({
   issue_key: IssueKeySchema,
-  fields: z.record(z.unknown()),
+  /** Fields object to update. Must be an object (NOT a JSON string). Example: {"parent":{"id":"12345"}} */
+  fields: z.record(z.unknown()).describe('Fields object to update (NOT a JSON string). Example: {"summary":"New title","parent":{"id":"12345"}}'),
 });
 
 export const DeleteIssueSchema = z.object({

@@ -47,6 +47,8 @@ export const CodeEnrichmentPayloadSchema = z.object({
   projectId: z.string(),
   filePath: z.string(),
   workspaceType: z.enum(['pega', 'standard']).default('standard'),
+  pegaClass: z.string().optional(),
+  pegaRuleset: z.string().optional(),
 });
 
 export type CodeEnrichmentPayload = z.infer<typeof CodeEnrichmentPayloadSchema>;

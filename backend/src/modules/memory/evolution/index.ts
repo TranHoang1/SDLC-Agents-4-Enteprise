@@ -26,3 +26,11 @@ export { OutcomeStrategy } from './strategies/OutcomeStrategy.js';
 export { PredictiveStrategy } from './strategies/PredictiveStrategy.js';
 export { startScheduler, stopScheduler } from './Scheduler.js';
 export type { SchedulerHandles } from './Scheduler.js';
+
+// SA4E-121: Instincts and Confidence Scoring
+export { InstinctConfigService } from './InstinctConfigService.js';
+export type { InstinctConfig } from './InstinctConfigService.js';
+export { ContradictionService } from './ContradictionService.js';
+export type { ContradictionEntry, ContradictionReport, ResolutionResult } from './ContradictionService.js';
+export { InstinctPromotionService } from './InstinctPromotionService.js';
+export type { PromotionResult } from './InstinctPromotionService.js';
