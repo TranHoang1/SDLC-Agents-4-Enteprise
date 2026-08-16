@@ -1,0 +1,38 @@
+{
+  "ticket": "SA4E-171",
+  "summary": "Migrate Pega Rules from knowledge_entries to symbols table",
+  "currentPhase": "requirements",
+  "autonomyLevel": "L3",
+  "architecturePattern": "monolith",
+  "phases": {
+    "requirements": { "status": "not_started", "file": "BRD.md", "version": null },
+    "specification": { "status": "not_started", "file": "FSD.md", "version": null },
+    "design": { "status": "not_started", "file": "TDD.md", "version": null },
+    "feedback_loop": { "status": "not_started", "iterations": 0, "maxIterations": 5 },
+    "security_design_review": { "status": "not_started" },
+    "test_planning": { "status": "not_started" },
+    "devops_pipeline_setup": { "status": "not_started" },
+    "implementation": { "status": "not_started" },
+    "security_code_review": { "status": "not_started" },
+    "testing": { "status": "not_started" },
+    "pentest": { "status": "not_started" },
+    "security_deploy_review": { "status": "not_started" },
+    "deployment": { "status": "not_started" }
+  },
+  "tokenBudget": {
+    "dailyCap": 500000,
+    "usedToday": 0,
+    "lastReset": "2025-07-18T00:00:00Z",
+    "warningThreshold": 0.8,
+    "mode": "normal"
+  },
+  "circuitBreaker": {},
+  "contextMetrics": {
+    "currentSessionTokens": 0,
+    "phaseTokensUsed": {},
+    "lastCompactionAt": null,
+    "warningLevel": "normal"
+  },
+  "lastUpdated": "2025-07-18T10:00:00Z",
+  "lastCommentProcessed": null
+}
