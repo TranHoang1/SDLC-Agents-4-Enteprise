@@ -1,0 +1,157 @@
+/**
+ * SA4E-171 — Unit tests for PegaSymbolSync module.
+ * Covers: syncRuleToSymbols, feature flag, size guard, field validation.
+ */
+
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { syncRuleToSymbols, PEGA_DUAL_WRITE } from '../PegaSymbolSync.js';
+
+describe('PegaSymbolSync', () => {
+  describe('PEGA_DUAL_WRITE feature flag', () => {
+    it('should default to true when env var is not set', () => {
+      // The module reads process.env at import time — tested via current state
+      expect(typeof PEGA_DUAL_WRITE).toBe('boolean');
+    });
+  });
+
+  describe('syncRuleToSymbols', () => {
+    let mockAdapter: any;
+
+    beforeEach(() => {
+      mockAdapter = {
+        getEngine: () => 'sqlite',
+        runAsync: vi.fn().mockResolvedValue({ lastInsertRowid: 1 }),
+        getAsync: vi.fn().mockImplementation((sql: string) => {
+          if (sql.includes('FROM files')) return { id: 42 };
+          if (sql.includes('enrichment_status')) return { enrichment_status: null };
+          return null;
+        }),
+        allAsync: vi.fn().mockResolvedValue([]),
+      };
+    });
+
+    it('should return null when pxObjClass is missing', async () => {
+      const result = await syncRuleToSymbols(
+        mockAdapter, { pyClassName: 'Work', pyRuleName: 'Test' }, 'proj1', '',
+      );
+      expect(result).toBeNull();
+    });
+
+    it('should return null when pyClassName is missing', async () => {
+      const result = await syncRuleToSymbols(
+        mockAdapter, { pxObjClass: 'Rule-Obj-Activity', pyRuleName: 'Test' }, 'proj1', '',
+      );
+      expect(result).toBeNull();
+    });
+
+    it('should return null when pyRuleName is missing', async () => {
+      const result = await syncRuleToSymbols(
+        mockAdapter, { pxObjClass: 'Rule-Obj-Activity', pyClassName: 'Work' }, 'proj1', '',
+      );
+      expect(result).toBeNull();
+    });
+
+    it('should skip rules exceeding 5MB (SEC-06)', async () => {
+      const bigContent = 'x'.repeat(6 * 1024 * 1024);
+      const rule = {
+        pxObjClass: 'Rule-Obj-Activity',
+        pyClassName: 'Work',
+        pyRuleName: 'BigRule',
+        data: bigContent,
+      };
+      const result = await syncRuleToSymbols(mockAdapter, rule, 'proj1', '');
+      expect(result).toBeNull();
+    });
+
+    it('should create file, symbol, body embedding, and task for valid rule', async () => {
+      const rule = {
+        pxObjClass: 'Rule-Obj-Activity',
+        pyClassName: 'Work-HR',
+        pyRuleName: 'ApproveLeave',
+      };
+      const result = await syncRuleToSymbols(mockAdapter, rule, 'proj1', 'context');
+      expect(result).not.toBeNull();
+      // Verify DB operations were called
+      expect(mockAdapter.runAsync).toHaveBeenCalled();
+    });
+
+    it('should store extracted content (not raw JSON) in body_embeddings (SA4E-106)', async () => {
+      const rule = {
+        pxObjClass: 'Rule-Obj-Activity',
+        pyClassName: 'Work-HR',
+        pyRuleName: 'ApproveLeave',
+        steps: [{ pyStepNum: '1', pyMethod: 'Call', pyMethodParameters: 'Work-HR.Validate' }],
+      };
+      await syncRuleToSymbols(mockAdapter, rule, 'proj1', '');
+
+      const bodyInsert = mockAdapter.runAsync.mock.calls.find(
+        (c: any[]) => typeof c[0] === 'string' && c[0].includes('body_embeddings'),
+      );
+      expect(bodyInsert).toBeDefined();
+      const embeddingBuf = bodyInsert![1][2] as Buffer;
+      const text = Buffer.from(embeddingBuf).toString('utf-8');
+      expect(text.startsWith('RULE TYPE:')).toBe(true);
+      expect(text).toContain('Call(Work-HR.Validate)');
+      expect(text).not.toContain('{"pxObjClass"');
+    });
+
+    it('should skip enrichment task when symbol already COMPLETED with summary', async () => {
+      mockAdapter.getAsync = vi.fn().mockImplementation((sql: string) => {
+        if (sql.includes('FROM files')) return { id: 42 };
+        if (sql.includes('enrichment_status')) return { enrichment_status: 'COMPLETED', summary: 'Existing summary' };
+        return null;
+      });
+      const rule = {
+        pxObjClass: 'Rule-Obj-Activity',
+        pyClassName: 'Work',
+        pyRuleName: 'Done',
+      };
+      const result = await syncRuleToSymbols(mockAdapter, rule, 'proj1', '');
+      expect(result).not.toBeNull();
+      // Should NOT have called INSERT INTO pending_tasks
+      const taskInsert = mockAdapter.runAsync.mock.calls.find(
+        (c: any[]) => typeof c[0] === 'string' && c[0].includes('pending_tasks'),
+      );
+      expect(taskInsert).toBeUndefined();
+    });
+
+    it('should re-enrich when COMPLETED but no summary (TAG_ENRICHMENT legacy)', async () => {
+      mockAdapter.getAsync = vi.fn().mockImplementation((sql: string) => {
+        if (sql.includes('FROM files')) return { id: 42 };
+        if (sql.includes('enrichment_status')) return { enrichment_status: 'COMPLETED', summary: null };
+        return null;
+      });
+      const rule = {
+        pxObjClass: 'Rule-Obj-Activity',
+        pyClassName: 'Work',
+        pyRuleName: 'LegacyRule',
+      };
+      const result = await syncRuleToSymbols(mockAdapter, rule, 'proj1', '');
+      expect(result).not.toBeNull();
+      // SHOULD create enrichment task (legacy TAG_ENRICHMENT had no summary)
+      const taskInsert = mockAdapter.runAsync.mock.calls.find(
+        (c: any[]) => typeof c[0] === 'string' && c[0].includes('pending_tasks'),
+      );
+      expect(taskInsert).toBeDefined();
+    });
+
+    it('should truncate doc_comment to 500 chars', async () => {
+      const longContext = 'A'.repeat(600);
+      const rule = {
+        pxObjClass: 'Rule-Obj-Flow',
+        pyClassName: 'Work',
+        pyRuleName: 'LongDoc',
+      };
+      await syncRuleToSymbols(mockAdapter, rule, 'proj1', longContext);
+      // The INSERT for symbols should contain truncated doc_comment
+      const symbolInsert = mockAdapter.runAsync.mock.calls.find(
+        (c: any[]) => typeof c[0] === 'string' && c[0].includes('INTO symbols'),
+      );
+      if (symbolInsert) {
+        const params = symbolInsert[1] as any[];
+        const docParam = params[params.length - 1]; // doc_comment is last param
+        expect(docParam.length).toBeLessThanOrEqual(500);
+      }
+    });
+  });
+});

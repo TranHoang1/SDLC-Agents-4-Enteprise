@@ -12,6 +12,7 @@ import { CodeEnrichmentPromptBuilder } from './CodeEnrichmentPromptBuilder.js';
 import { CodeEnrichmentPayloadSchema } from './types.js';
 import type { CodeEnrichmentPayload, EnrichmentStrategy, SymbolContext, CodeEnrichmentLLMResponse } from './types.js';
 import { validateTags } from './tag-validator.js';
+import { isPegaKind } from '../../modules/pega/pega-mapping.js';
 
 /** LLM call timeout in milliseconds (BR-02). */
 const LLM_TIMEOUT_MS = 30_000;
@@ -21,7 +22,6 @@ const MAX_PSEUDO_CODE_LENGTH = 2000;
 // Strategy selection: which symbol kinds map to which enrichment strategy
 const CLASS_KINDS = new Set(['class', 'interface', 'enum']);
 const FUNCTION_KINDS = new Set(['function', 'method', 'arrow_function', 'generator']);
-const PEGA_KINDS = new Set(['pega_activity', 'pega_data_transform', 'pega_flow']);
 
 /**
  * Orchestrates LLM enrichment for a single code symbol.
@@ -57,7 +57,8 @@ export class CodeEnrichmentHandler {
   }
 
   private selectStrategy(kind: string, workspaceType: string): EnrichmentStrategy {
-    if (workspaceType === 'pega' && PEGA_KINDS.has(kind)) return 'PEGA_SUMMARY';
+    // SA4E-171: use isPegaKind() for all 16+ pega kinds (replaces static set)
+    if (workspaceType === 'pega' && isPegaKind(kind)) return 'PEGA_SUMMARY';
     if (FUNCTION_KINDS.has(kind)) return 'FUNCTION_SUMMARY';
     if (CLASS_KINDS.has(kind)) return 'CLASS_SUMMARY';
     return 'CLASS_SUMMARY'; // Fallback
@@ -85,6 +86,9 @@ export class CodeEnrichmentHandler {
       bodyText,
       childMembers,
       existingPseudoCode,
+      // SA4E-106: Pega class from payload or parent_symbol; ruleset from payload
+      pegaClass: payload.pegaClass || sym.parent_symbol || undefined,
+      pegaRuleset: payload.pegaRuleset || undefined,
     };
   }
 
@@ -154,7 +158,7 @@ export class CodeEnrichmentHandler {
     const summary = summaryMatch?.[1] ?? raw.slice(0, 200).replace(/["\n]/g, ' ').trim();
     const result: CodeEnrichmentLLMResponse = { summary };
 
-    if (strategy === 'FUNCTION_SUMMARY' && pseudoMatch) {
+    if ((strategy === 'FUNCTION_SUMMARY' || strategy === 'PEGA_SUMMARY') && pseudoMatch) {
       result.pseudo_code = pseudoMatch[1];
     }
     if (tagsMatch) {
@@ -171,8 +175,9 @@ export class CodeEnrichmentHandler {
     const tags = validateTags(response.tags);
     const tagsJson = tags.length > 0 ? JSON.stringify(tags) : null;
 
+    // SA4E-171: store pseudo_code for both FUNCTION and PEGA strategies
     let pseudoCode: string | null = null;
-    if (strategy === 'FUNCTION_SUMMARY' && response.pseudo_code) {
+    if ((strategy === 'FUNCTION_SUMMARY' || strategy === 'PEGA_SUMMARY') && response.pseudo_code) {
       pseudoCode = response.pseudo_code.length > MAX_PSEUDO_CODE_LENGTH
         ? response.pseudo_code.slice(0, MAX_PSEUDO_CODE_LENGTH) + '...'
         : response.pseudo_code;

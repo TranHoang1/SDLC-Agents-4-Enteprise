@@ -77,9 +77,11 @@ Tag values: lowercase, alphanumeric + hyphens only. Max 8 tags.`;
   }
 
   private pegaSystemPrompt(): string {
-    return `You are a Pega platform analyst. Summarize this Pega rule.
-Return JSON only: {"summary":"<1-3 sentences describing business purpose>"}
-Focus on business intent, not technical implementation.`;
+    return `You are a Pega platform analyst. Analyze the business purpose and logic of this Pega rule.
+Return JSON only: {"summary":"<1-3 sentences describing business purpose>","pseudo_code":"<structured pseudo code describing the rule logic, max 2000 chars>","tags":["category:value",...]}
+Valid tag categories: ${VALID_TAG_CATEGORIES.join(', ')}
+Tag values: lowercase, alphanumeric + hyphens only. Max 8 tags.
+Focus on business intent and the main logic flow (steps, decisions, expressions).`;
   }
 
   private buildClassUserPrompt(ctx: SymbolContext): string {
@@ -116,8 +118,14 @@ Focus on business intent, not technical implementation.`;
     const parts = [`[${ctx.kind}] ${ctx.name}`];
     if (ctx.pegaClass) parts.push(`Class: ${ctx.pegaClass}`);
     if (ctx.pegaRuleset) parts.push(`RuleSet: ${ctx.pegaRuleset}`);
+    if (ctx.signature) parts.push(`Signature: ${ctx.signature}`);
+    // SA4E-106: rule body (steps/params/Java) extracted from rule.json
+    if (ctx.bodyText) {
+      const truncated = this.truncateToTokens(ctx.bodyText, MAX_BODY_TOKENS);
+      parts.push(`Rule Content:\n${truncated}`);
+    }
     if (ctx.existingPseudoCode) {
-      parts.push(`Pseudo Code:\n${ctx.existingPseudoCode}`);
+      parts.push(`Existing Pseudo Code:\n${ctx.existingPseudoCode}`);
     }
     return parts.join('\n');
   }
