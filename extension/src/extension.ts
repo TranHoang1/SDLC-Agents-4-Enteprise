@@ -221,7 +221,47 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
           vscode.window.showErrorMessage('Cannot reach backend. Verify server is running.');
           return;
         }
-        vscode.window.showInformationMessage(formatEnrichmentStatus(status));
+        // Show detailed status in Output Channel (persistent, copyable)
+        outputChannel.show(true);
+        outputChannel.appendLine('═══════════════════════════════════════════');
+        outputChannel.appendLine('  LLM Enrichment Status @ ' + new Date().toLocaleTimeString());
+        outputChannel.appendLine('═══════════════════════════════════════════');
+        outputChannel.appendLine('State:      ' + status.state);
+        outputChannel.appendLine('Progress:   ' + status.completedRules + '/' + status.totalRules + ' (' + status.percent + '%)');
+        outputChannel.appendLine('Pending:    ' + status.pendingRules);
+        outputChannel.appendLine('Processing: ' + status.processingRules);
+        outputChannel.appendLine('Failed:     ' + status.failedRules);
+        if (status.startedAt) { outputChannel.appendLine('Started:    ' + status.startedAt); }
+        if (status.activeTasks && status.activeTasks.length > 0) {
+          outputChannel.appendLine('───────────────────────────────────────────');
+          outputChannel.appendLine('Currently processing:');
+          for (const t of status.activeTasks) { outputChannel.appendLine('  ⚡ ' + t.source); }
+        }
+        outputChannel.appendLine('═══════════════════════════════════════════');
+      })
+    );
+
+    // SA4E-160: Retry failed enrichment tasks command
+    context.subscriptions.push(
+      vscode.commands.registerCommand('sa4e.retryFailedEnrichment', async () => {
+        try {
+          const backendUrl = vscode.workspace.getConfiguration('kiroSdlc').get<string>('backendUrl', 'http://localhost:48721').replace(/\/$/, '');
+          const res = await fetch(`${backendUrl}/api/v1/enrichment/retry-failed`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authManager?.getTokenSync() || ''}` },
+          });
+          if (!res.ok) {
+            vscode.window.showErrorMessage(`Retry failed: HTTP ${res.status}`);
+            return;
+          }
+          const json = (await res.json()) as any;
+          const count = json.data?.resetCount ?? 0;
+          vscode.window.showInformationMessage(`${count} failed tasks queued for retry. Enrichment will resume shortly.`);
+          // Force immediate status poll to reflect changes
+          await enrichmentService.pollNow();
+        } catch (err: any) {
+          vscode.window.showErrorMessage(`Retry failed: ${err.message}`);
+        }
       })
     );
   }

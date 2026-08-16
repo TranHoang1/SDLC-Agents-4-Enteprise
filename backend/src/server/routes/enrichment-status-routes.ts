@@ -40,6 +40,23 @@ export function createEnrichmentStatusRoutes(registry: ModuleRegistry, logger: L
     }
   });
 
+  /** POST /api/v1/enrichment/retry-failed — reset all failed tasks to pending for re-processing. */
+  app.post('/enrichment/retry-failed', async (c) => {
+    try {
+      const taskWorker = getTaskWorker(registry);
+      if (!taskWorker) {
+        return c.json({ error: 'Enrichment service unavailable', details: 'TaskWorker not initialized' }, 503);
+      }
+      const repo = taskWorker.getRepository();
+      const resetCount = await repo.retryAllFailed();
+      logger.info({ resetCount }, '[EnrichmentStatus] Retry failed tasks');
+      return c.json({ data: { resetCount, message: `${resetCount} failed tasks reset to pending` }, error: null });
+    } catch (err: any) {
+      logger.error({ err }, '[EnrichmentStatus] Retry failed tasks error');
+      return c.json({ error: 'Failed to retry tasks', details: err.message }, 500);
+    }
+  });
+
   return app;
 }
 
@@ -50,7 +67,7 @@ function getTaskWorker(registry: ModuleRegistry): TaskWorker | null {
 }
 
 /** Build the full enrichment status response from TaskWorker data, scoped to project. */
-async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): Promise<EnrichmentStatusResponse> {
+async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): Promise<EnrichmentStatusResponse & { activeTasks: Array<{ source: string }> }> {
   const repo = taskWorker.getRepository();
   const progress = await taskWorker.getProgress();
 
@@ -89,6 +106,7 @@ async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): P
     estimatedCompletion,
     currentFile: progress?.file ?? null,
     lastPollAt: stats.lastPollAt,
+    activeTasks: await getActiveTasks(repo),
   };
 }
 
@@ -110,4 +128,16 @@ function computeEstimatedCompletion(
   const etaMs = now + msPerTask * remaining;
   if (!isFinite(etaMs)) return null;
   return new Date(etaMs).toISOString();
+}
+
+/** Get currently processing tasks for tooltip display. */
+async function getActiveTasks(
+  repo: InstanceType<typeof import('../../modules/memory/task-queue/PendingTaskRepository.js').PendingTaskRepository>,
+): Promise<Array<{ source: string }>> {
+  try {
+    const tasks = await repo.listProcessing(5);
+    return tasks.map((t) => ({ source: t.source }));
+  } catch {
+    return [];
+  }
 }

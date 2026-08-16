@@ -77,6 +77,10 @@
         "title": "SDLC Agents: Open KB Analytics"
       },
       {
+        "command": "sa4e.retryFailedEnrichment",
+        "title": "SDLC Agents: Retry Failed Enrichment"
+      },
+      {
         "command": "kiroSdlc.openWorkflowGraph",
         "title": "SDLC Agents: Open Workflow Graph"
       },
