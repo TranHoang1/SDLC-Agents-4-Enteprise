@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.27.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.28.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,10 @@ MIT
 ---
 
 ## Changelog
+
+### v1.28.0 (2026-08-16)
+
+- **SA4E-78: Decouple Code Intelligence Indexer from Local Filesystem** — Architectural refactor eliminating tight coupling between IndexingEngine and the local filesystem. New `IndexOperationManager` (SRP: operation lifecycle tracking), `api-index-decoupled.ts` routes (POST /api/index/full, /file-events, /cancel, /progress), cooperative cancellation via AbortSignal at batch boundaries, progress EventEmitter (Observer pattern), cached GraphSyncService, async scan, and `DependencyResolver` cleaned of all `fs` imports (static-only resolution). `FileWatcher` deprecated — file watching moved to Extension side. 4 new files, 4 modified. Full BRD+FSD+TDD+UG documentation.
 
 ### v1.27.0 (2025-08-16)
 
