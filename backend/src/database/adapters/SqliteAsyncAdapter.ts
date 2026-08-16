@@ -7,6 +7,7 @@
 import type Database from 'better-sqlite3';
 import type { AsyncDatabaseAdapter } from './AsyncDatabaseAdapter.js';
 import type { DatabaseEngine, RunResult } from './DatabaseAdapter.js';
+import { normalizeSqlitePlaceholders } from './sqlite-placeholders.js';
 
 export class SqliteAsyncAdapter implements AsyncDatabaseAdapter {
   constructor(private readonly db: Database.Database) {}
@@ -17,18 +18,18 @@ export class SqliteAsyncAdapter implements AsyncDatabaseAdapter {
   getEngine(): DatabaseEngine { return 'sqlite'; }
 
   async run(sql: string, params?: unknown[]): Promise<RunResult> {
-    const stmt = this.db.prepare(sql);
+    const stmt = this.db.prepare(normalizeSqlitePlaceholders(sql));
     const r = params ? stmt.run(...params) : stmt.run();
     return { changes: r.changes, lastInsertRowid: r.lastInsertRowid };
   }
 
   async get<T = unknown>(sql: string, params?: unknown[]): Promise<T | undefined> {
-    const stmt = this.db.prepare(sql);
+    const stmt = this.db.prepare(normalizeSqlitePlaceholders(sql));
     return (params ? stmt.get(...params) : stmt.get()) as T | undefined;
   }
 
   async all<T = unknown>(sql: string, params?: unknown[]): Promise<T[]> {
-    const stmt = this.db.prepare(sql);
+    const stmt = this.db.prepare(normalizeSqlitePlaceholders(sql));
     return (params ? stmt.all(...params) : stmt.all()) as T[];
   }
 

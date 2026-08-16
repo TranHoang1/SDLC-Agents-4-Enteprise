@@ -57,7 +57,9 @@ export async function handleProcedure(
         scope: 'PROJECT',
         user_id: scopeCtx?.userId ?? null,
         project_id: scopeCtx?.projectId ?? null,
-        source: '/procedure',
+        // Name-scoped source: distinct procedures must not collapse into one row
+        // via the (source, project_id) upsert key in MemoryEngineCrud.insert.
+        source: `/procedure/${name}`,
         tags: `procedure,${name},${steps.map(s => s.tool).join(',')}`,
         agent_name: 'system',
       });
@@ -258,7 +260,8 @@ export async function handleSkillCapture(
     scope: 'PROJECT',
     user_id: scopeCtx?.userId ?? null,
     project_id: scopeCtx?.projectId ?? null,
-    source: '/procedure/capture',
+    // Name-scoped source: distinct captured skills must not collapse into one row.
+    source: `/procedure/capture/${name}`,
     tags: tagNames,
     agent_name: 'system',
   });

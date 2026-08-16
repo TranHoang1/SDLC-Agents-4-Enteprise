@@ -91,12 +91,14 @@ async function main(): Promise<void> {
     totalProcessed: 0, migrated: 0, skipped: 0, errors: 0, durationMs: 0, batches: 0,
   };
 
+  const processedProjects = new Set<string>();
   let offset = 0;
   let hasMore = true;
 
   while (hasMore) {
     const batch = await fetchBatch(adapter, args.projectId, args.batchSize, offset);
     if (batch.length === 0) { hasMore = false; break; }
+    for (const row of batch) processedProjects.add(row.project_id);
 
     summary.batches++;
     const batchResult = await processBatch(adapter, batch, args);
@@ -115,10 +117,32 @@ async function main(): Promise<void> {
   console.log(`\n[migrate-pega-symbols] Complete.`);
   console.log(JSON.stringify(summary, null, 2));
 
+  // SA4E-106: Project Pega symbols as code graph nodes (skip in dry-run)
+  if (!args.dryRun && processedProjects.size > 0) {
+    await syncGraphForProjects(adapter, [...processedProjects]);
+  }
+
   // Exit code based on result
   if (summary.errors > 0 && summary.migrated === 0) process.exit(2);
   if (summary.errors > 0) process.exit(1);
   process.exit(0);
+}
+
+/** Project processed projects' Pega symbols into graph_nodes as code nodes. */
+async function syncGraphForProjects(adapter: any, projectIds: string[]): Promise<void> {
+  try {
+    const { GraphSyncService } = await import('../src/engine/graph/graph-sync-service.js');
+    const silent = {
+      info: () => {}, warn: () => {}, error: (o: any, msg?: string) => { console.error(`[graph-sync] ${msg || ''} ${o?.err?.message || ''}`); }, debug: () => {},
+    };
+    for (const pid of projectIds) {
+      const svc = new GraphSyncService(adapter, adapter, silent as any);
+      await svc.syncProjectSymbols(pid);
+      console.log(`  [graph-sync] Projected Pega symbols for project ${pid}`);
+    }
+  } catch (err) {
+    console.error('[migrate-pega-symbols] Graph sync failed (non-fatal):', (err as Error).message);
+  }
 }
 
 /** Fetch a batch of PEGA_RULE/PEGA_DATA entries from knowledge_entries. */

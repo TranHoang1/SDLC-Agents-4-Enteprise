@@ -5,6 +5,8 @@
  * Projects a tenant's code symbols into graph_nodes table in the unified DB so the
  * KB Graph visualization shows per-project code nodes. Scoped + idempotent:
  * only touches rows for the given project_id with `entry_id LIKE 'code:%'`.
+ * SA4E-106: Pega rules are stored as code symbols too — projected the same way,
+ * and the legacy `pega:` nodes are replaced (single code representation).
  */
 
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
@@ -72,7 +74,7 @@ export class GraphSyncService {
     return this.indexAdapter.allAsync<CodeSymbolRow>(
       `SELECT s.id, s.name, s.kind, f.relative_path
        FROM symbols s JOIN files f ON s.file_id = f.id
-       WHERE s.project_id = ? AND s.kind IN (${placeholders})
+       WHERE s.project_id = ? AND (s.kind IN (${placeholders}) OR s.kind LIKE 'pega_%')
        ORDER BY (s.is_exported = 1) DESC, s.complexity DESC`,
       [projectId, ...CODE_KINDS],
     );
@@ -80,9 +82,9 @@ export class GraphSyncService {
 
   private async replaceCodeNodes(projectId: string, symbols: CodeSymbolRow[]): Promise<void> {
     const total = Math.max(symbols.length, 1);
-    // Delete old code nodes — avoid transactionAsync which can cause pool issues with nested awaits
+    // Delete old code + legacy Pega nodes — avoid transactionAsync which can cause pool issues with nested awaits
     await this.adminAdapter.runAsync(
-      "DELETE FROM graph_nodes WHERE project_id = ? AND entry_id LIKE 'code:%'",
+      "DELETE FROM graph_nodes WHERE project_id = ? AND (entry_id LIKE 'code:%' OR entry_id LIKE 'pega:%')",
       [projectId],
     );
     const sql = this.adminDialect.insertIgnore('graph_nodes',
@@ -90,7 +92,7 @@ export class GraphSyncService {
     for (let i = 0; i < symbols.length; i++) {
       const s = symbols[i];
       const pos = fibonacciSphere(i, total);
-      const nodeType = KIND_TO_TYPE[s.kind] || 'CODE_ENTITY';
+      const nodeType = this.nodeTypeFor(s.kind);
       await this.adminAdapter.runAsync(sql, [
         `code:${s.id}`, this.toLabel(s), nodeType, 'CODE',
         projectId, pos.x, pos.y, pos.z, 'micro', `code-${projectId}`,
@@ -98,8 +100,20 @@ export class GraphSyncService {
     }
   }
 
+  /** SA4E-106: Map symbol kind → graph node type, incl. Pega kinds (pega_activity → ACTIVITY). */
+  private nodeTypeFor(kind: string): string {
+    if (!kind.startsWith('pega_')) return KIND_TO_TYPE[kind] || 'CODE_ENTITY';
+    const t = kind.replace('pega_', '').toUpperCase();
+    return t === 'UNKNOWN' ? 'PEGA_RULE' : t;
+  }
+
   private toLabel(s: CodeSymbolRow): string {
-    const file = s.relative_path ? s.relative_path.split('/').pop() ?? '' : '';
+    const path = s.relative_path || '';
+    if (path.startsWith('pega://')) {
+      const [, cls = ''] = path.slice('pega://'.length).split('/');
+      return `${s.name} (${cls})`.substring(0, 60);
+    }
+    const file = path.split('/').pop() ?? '';
     return `${s.name} (${file})`.substring(0, 60);
   }
 }

@@ -145,6 +145,12 @@ export class TaskWorker {
 
   getRepository(): PendingTaskRepository { return this.repo; }
 
+  /** SA4E-169: Expose config for dashboard (concurrency max). */
+  getConfig(): TaskWorkerConfig { return this.config; }
+
+  /** SA4E-169: Expose current active concurrency level. */
+  getActiveConcurrency(): number { return this.activeConcurrency; }
+
   // ── Private ──
 
   private schedulePoll(delayMs: number): void {
@@ -460,6 +466,13 @@ export class TaskWorker {
         `UPDATE knowledge_entries SET structured_map = ? WHERE id = ? AND enrichment_status = 'pending'`,
         [jsonStr, entryId],
       );
+      // SA4E-169: Update summary column (separate from structured_map) for FTS indexing + KB UI display
+      if (structuredMap.summary) {
+        await this.engine.getAdapter().runAsync(
+          `UPDATE knowledge_entries SET summary = ? WHERE id = ? AND enrichment_status = 'pending'`,
+          [structuredMap.summary, entryId],
+        );
+      }
     } catch (err) {
       this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
         'structured_map conditional update failed');

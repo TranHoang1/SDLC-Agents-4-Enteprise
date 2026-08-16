@@ -47,21 +47,71 @@ export class MemoryEngineCrud {
       entry.owner ?? null,
     ];
     let id = 0;
+    // SA4E-FIX: Use upsert when source is non-null to avoid duplicate key violation
+    // on idx_ke_source_project_unique (source, project_id)
+    const hasSource = entry.source != null && entry.source.length > 0;
     if (engine === 'postgresql') {
-      const row = await this.adapter.getAsync<{ id: number }>(`
-        INSERT INTO knowledge_entries
-        (content, summary, type, tier, scope, user_id, project_id, source, source_ref, tags, confidence, agent_name, owner)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-        RETURNING id
-      `, params);
-      id = row?.id ?? 0;
+      if (hasSource) {
+        const row = await this.adapter.getAsync<{ id: number }>(`
+          INSERT INTO knowledge_entries
+          (content, summary, type, tier, scope, user_id, project_id, source, source_ref, tags, confidence, agent_name, owner)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          ON CONFLICT (source, project_id) WHERE source IS NOT NULL DO UPDATE SET
+            content = EXCLUDED.content,
+            summary = EXCLUDED.summary,
+            type = EXCLUDED.type,
+            tier = EXCLUDED.tier,
+            scope = EXCLUDED.scope,
+            tags = EXCLUDED.tags,
+            confidence = EXCLUDED.confidence,
+            agent_name = EXCLUDED.agent_name,
+            owner = EXCLUDED.owner,
+            updated_at = NOW()
+          RETURNING id
+        `, params);
+        id = row?.id ?? 0;
+      } else {
+        const row = await this.adapter.getAsync<{ id: number }>(`
+          INSERT INTO knowledge_entries
+          (content, summary, type, tier, scope, user_id, project_id, source, source_ref, tags, confidence, agent_name, owner)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+          RETURNING id
+        `, params);
+        id = row?.id ?? 0;
+      }
     } else {
-      const result = await this.adapter.runAsync(`
-        INSERT INTO knowledge_entries
-        (content, summary, type, tier, scope, user_id, project_id, source, source_ref, tags, confidence, agent_name, owner)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `, params);
-      id = result.lastInsertRowid as number;
+      if (hasSource) {
+        // SQLite: check-then-update/insert pattern for upsert
+        const existing = await this.adapter.getAsync<{ id: number }>(
+          `SELECT id FROM knowledge_entries WHERE source = ? AND project_id = ?`,
+          [entry.source, entry.project_id ?? null],
+        );
+        if (existing) {
+          await this.adapter.runAsync(`
+            UPDATE knowledge_entries SET
+              content = ?, summary = ?, type = ?, tier = ?, scope = ?,
+              tags = ?, confidence = ?, agent_name = ?, owner = ?, updated_at = datetime('now')
+            WHERE id = ?
+          `, [entry.content, entry.summary, entry.type, entry.tier ?? 'WORKING', entry.scope ?? 'USER',
+              entry.tags ?? '', entry.confidence ?? 1.0, entry.agent_name ?? null, entry.owner ?? null,
+              existing.id]);
+          id = existing.id;
+        } else {
+          const result = await this.adapter.runAsync(`
+            INSERT INTO knowledge_entries
+            (content, summary, type, tier, scope, user_id, project_id, source, source_ref, tags, confidence, agent_name, owner)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `, params);
+          id = result.lastInsertRowid as number;
+        }
+      } else {
+        const result = await this.adapter.runAsync(`
+          INSERT INTO knowledge_entries
+          (content, summary, type, tier, scope, user_id, project_id, source, source_ref, tags, confidence, agent_name, owner)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, params);
+        id = result.lastInsertRowid as number;
+      }
     }
 
     // Project eligible entries into graph_nodes for KB Graph visualization

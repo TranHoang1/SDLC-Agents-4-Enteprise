@@ -171,15 +171,23 @@ export class PendingTaskRepository {
     );
   }
 
-  /** Get currently processing tasks with their source info (for status tooltip). */
-  async listProcessing(limit = 5): Promise<Array<{ id: number; source: string; startedAt: string | null }>> {
+  /** Get currently processing tasks with their source info, scoped by project. */
+  async listProcessing(limit = 5, projectId?: string): Promise<Array<{ id: number; source: string; startedAt: string | null }>> {
+    const params: unknown[] = [TaskStatus.PROCESSING];
+    let whereExtra = '';
+    if (projectId) {
+      whereExtra = ' AND pt.project_id = ?';
+      params.push(projectId);
+    }
+    params.push(limit);
     return this.db.allAsync<{ id: number; source: string; startedAt: string | null }>(
-      `SELECT pt.id, COALESCE(ke.source, 'entry-' || pt.entry_id) as source, pt.started_at as "startedAt"
+      `SELECT pt.id, COALESCE(ke.source, s.name, 'entry-' || pt.entry_id) as source, pt.started_at as "startedAt"
        FROM pending_tasks pt
-       LEFT JOIN knowledge_entries ke ON ke.id = pt.entry_id
-       WHERE pt.status = ?
+       LEFT JOIN knowledge_entries ke ON ke.id = pt.entry_id AND pt.task_type != 'CODE_ENRICHMENT'
+       LEFT JOIN symbols s ON s.id = pt.entry_id AND pt.task_type = 'CODE_ENRICHMENT'
+       WHERE pt.status = ?${whereExtra}
        ORDER BY pt.started_at DESC LIMIT ?`,
-      [TaskStatus.PROCESSING, limit],
+      params,
     );
   }
 

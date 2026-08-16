@@ -2,11 +2,13 @@
  * E2E Integration Test Suite cho Pega Rule & Data Indexing Pipeline.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { Hono } from 'hono';
 import { createPegaApiRoutes } from '../../../server/routes/pega-api.js';
 import { PegaRuleResolver } from '../PegaRuleResolver.js';
 import { PegaDeclarativeEngine } from '../PegaDeclarativeEngine.js';
+import { SqliteAdapter } from '../../../database/adapters/SqliteAdapter.js';
+import { MemoryEngine } from '../../memory/engine/core.js';
 import {
   MOCK_ACTIVITY_JSON,
   MOCK_VALIDATE_DATA_ACTIVITY_JSON,
@@ -15,72 +17,77 @@ import {
   MOCK_DECISION_TABLE_JSON,
 } from './fixtures/pega-samples.js';
 
-class MockMemoryAdapter {
-  private data = new Map<string, { id: number; content: string; updated_at: string }>();
-  private idCounter = 1;
-
-  public async getAsync<T>(query: string, params: any[]): Promise<T | null> {
-    if (query.includes('FROM knowledge_entries WHERE source')) {
-      const source = params[0];
-      const found = this.data.get(source);
-      return (found as unknown as T) || null;
-    }
-    return null;
-  }
-
-  public async allAsync<T>(query: string, _params: any[]): Promise<T[]> {
-    if (query.includes("WHERE type = 'PEGA_SCHEMA'")) {
-      const schemas = Array.from(this.data.values())
-        .filter((item) => item.content.includes('targetClass'))
-        .map((item) => ({ content: item.content }));
-      return schemas as unknown as T[];
-    }
-    return [];
-  }
-
-  public async runAsync(query: string, params: any[]): Promise<void> {
-    if (query.includes('DELETE FROM knowledge_entries WHERE source')) {
-      this.data.delete(params[0]);
-    }
-  }
-
-  public async insertEntry(content: string, source: string): Promise<number> {
-    const id = this.idCounter++;
-    this.data.set(source, { id, content, updated_at: new Date().toISOString() });
-    return id;
-  }
-}
-
-class MockMemoryEngine {
-  public adapter = new MockMemoryAdapter();
-
-  public getAdapter(): any {
-    return this.adapter;
-  }
-
-  public async insert(opts: any): Promise<number> {
-    return this.adapter.insertEntry(opts.content, opts.source);
-  }
-}
+/** Minimal SQLite schema covering the tables the Pega pipeline touches. */
+const E2E_SCHEMA = `
+CREATE TABLE IF NOT EXISTS knowledge_entries (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  content TEXT, summary TEXT, type TEXT, tier TEXT, scope TEXT,
+  user_id TEXT, project_id TEXT, source TEXT, source_ref TEXT,
+  tags TEXT, confidence REAL DEFAULT 1.0, agent_name TEXT, owner TEXT,
+  enrichment_status TEXT, structured_map TEXT, archived INTEGER DEFAULT 0,
+  expires_at TEXT, created_at TEXT DEFAULT (datetime('now')), updated_at TEXT DEFAULT (datetime('now'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_ke_source_project_unique
+  ON knowledge_entries(source, project_id) WHERE source IS NOT NULL;
+CREATE TABLE IF NOT EXISTS pending_tasks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  task_type TEXT, entry_id INTEGER, status TEXT, payload TEXT,
+  max_retries INTEGER DEFAULT 3, project_id TEXT,
+  created_at TEXT DEFAULT (datetime('now')),
+  started_at TEXT, completed_at TEXT, error TEXT, retry_count INTEGER DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS files (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id TEXT, path TEXT, relative_path TEXT, language TEXT, module TEXT,
+  content_hash TEXT, size_bytes INTEGER, line_count INTEGER,
+  UNIQUE(project_id, path)
+);
+CREATE TABLE IF NOT EXISTS symbols (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id TEXT, file_id INTEGER, name TEXT, kind TEXT, signature TEXT,
+  start_line INTEGER, end_line INTEGER, parent_symbol TEXT, visibility TEXT, doc_comment TEXT,
+  enrichment_status TEXT, summary TEXT, pseudo_code TEXT, llm_tags TEXT,
+  complexity INTEGER DEFAULT 0, is_exported INTEGER DEFAULT 0
+);
+CREATE TABLE IF NOT EXISTS body_embeddings (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id TEXT, symbol_id INTEGER, chunk_index INTEGER,
+  embedding BLOB, token_count INTEGER,
+  UNIQUE(project_id, symbol_id, chunk_index)
+);
+CREATE TABLE IF NOT EXISTS graph_nodes (
+  entry_id TEXT PRIMARY KEY,
+  label TEXT, type TEXT, tier TEXT,
+  project_id TEXT, x REAL, y REAL, z REAL, level TEXT, cluster_id TEXT
+);
+`;
 
 describe('Pega Indexing E2E Integration Suite', () => {
   let app: Hono;
-  let mockEngine: MockMemoryEngine;
+  let adapter: SqliteAdapter;
+  let engine: MemoryEngine;
 
-  beforeAll(() => {
-    mockEngine = new MockMemoryEngine();
+  beforeAll(async () => {
+    adapter = new SqliteAdapter(':memory:');
+    await adapter.connect();
+    await adapter.execAsync(E2E_SCHEMA);
+    engine = new MemoryEngine(adapter);
     const mockRegistry = {
       getModule: (name: string) => {
         if (name === 'memory') {
-          return { status: 'ready', getEngine: () => mockEngine };
+          return { status: 'ready', getEngine: () => engine };
         }
         return null;
       },
     } as any;
 
-    const mockLogger = { error: () => {}, info: () => {}, warn: () => {} } as any;
+    const mockLogger = { error: () => {}, info: () => {}, warn: () => {}, debug: () => {} } as any;
     app = new Hono();
     app.route('/api/v1', createPegaApiRoutes(mockRegistry, mockLogger));
+  });
+
+  afterAll(async () => {
+    await adapter.disconnect();
   });
 
   it('TC-01: Check-rule returns cache miss for un-indexed activity', async () => {

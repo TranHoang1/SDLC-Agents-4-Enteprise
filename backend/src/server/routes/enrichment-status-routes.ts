@@ -95,6 +95,7 @@ async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): P
 
   return {
     state,
+    projectId: projectId || null,
     totalRules: total,
     completedRules: stats.completed,
     failedRules: stats.failed,
@@ -106,7 +107,7 @@ async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): P
     estimatedCompletion,
     currentFile: progress?.file ?? null,
     lastPollAt: stats.lastPollAt,
-    activeTasks: await getActiveTasks(repo),
+    activeTasks: await getActiveTasks(repo, projectId),
   };
 }
 
@@ -130,12 +131,13 @@ function computeEstimatedCompletion(
   return new Date(etaMs).toISOString();
 }
 
-/** Get currently processing tasks for tooltip display. */
+/** Get currently processing tasks for tooltip display, scoped by project. */
 async function getActiveTasks(
   repo: InstanceType<typeof import('../../modules/memory/task-queue/PendingTaskRepository.js').PendingTaskRepository>,
+  projectId?: string,
 ): Promise<Array<{ source: string }>> {
   try {
-    const tasks = await repo.listProcessing(5);
+    const tasks = await repo.listProcessing(5, projectId);
     return tasks.map((t) => ({ source: t.source }));
   } catch {
     return [];

@@ -23,6 +23,8 @@ import {
 import { handleOutcome, handleVerify, handleConfigureDecay } from './evolution.js';
 import { handleSmartIngest, handleSmartIngestCleanup } from './smart-ingest.js';
 import { handleProcedure, handleSkillCapture, handleSkillExecute } from './procedure.js';
+import { handleLearn } from './learning.js';
+import { handleFindSkill } from './skills.js';
 
 type Args = Record<string, unknown>;
 
@@ -96,6 +98,8 @@ const HANDLER_REGISTRY: Record<string, ToolHandlerFn> = {
   mem_skill_execute:        (ctx, a) => p(handleSkillExecute(ctx.engine, ctx.scopeCtx, a, ctx.dispatch)),
   mem_skill_share:          (ctx, a) => p(handleProcedure(ctx.engine, ctx.scopeCtx, { action: 'share', ...a })),
   mem_skill_list_shared:    (ctx, a) => p(handleProcedure(ctx.engine, ctx.scopeCtx, { action: 'list_shared', ...a })),
+  mem_learn:                (ctx, a) => p(handleLearn(ctx.engine, ctx.scopeCtx, a)),
+  find_skill:               (ctx, a) => p(handleFindSkill(ctx.workspace, a)),
 };
 
 export class MemoryToolDispatcher {

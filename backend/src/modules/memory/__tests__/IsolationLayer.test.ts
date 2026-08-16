@@ -258,15 +258,15 @@ describe('SA4E-27 UT — createProjectContext', () => {
 describe('SA4E-27 IT — IsolationLayer with Real SQLite', () => {
   let ctx: TempDb;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     ctx = makeTempDb();
     // Seed data
-    ctx.engine.insert({ content: 'A pattern', summary: 'proj-A', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: 'app-A' });
-    ctx.engine.insert({ content: 'B pattern', summary: 'proj-B', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: 'app-B' });
-    ctx.engine.insert({ content: 'Shared pattern', summary: 'shared', type: 'CONTEXT', scope: 'SHARED', user_id: 'u1', project_id: 'app-A' });
-    ctx.engine.insert({ content: 'Legacy pattern', summary: 'legacy', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: null });
-    ctx.engine.insert({ content: 'User1 pattern', summary: 'user1-priv', type: 'CONTEXT', scope: 'USER', user_id: 'u1', project_id: null });
-    ctx.engine.insert({ content: 'User2 pattern', summary: 'user2-priv', type: 'CONTEXT', scope: 'USER', user_id: 'u2', project_id: null });
+    await ctx.engine.insert({ content: 'A pattern', summary: 'proj-A', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: 'app-A' });
+    await ctx.engine.insert({ content: 'B pattern', summary: 'proj-B', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: 'app-B' });
+    await ctx.engine.insert({ content: 'Shared pattern', summary: 'shared', type: 'CONTEXT', scope: 'SHARED', user_id: 'u1', project_id: 'app-A' });
+    await ctx.engine.insert({ content: 'Legacy pattern', summary: 'legacy', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: null });
+    await ctx.engine.insert({ content: 'User1 pattern', summary: 'user1-priv', type: 'CONTEXT', scope: 'USER', user_id: 'u1', project_id: null });
+    await ctx.engine.insert({ content: 'User2 pattern', summary: 'user2-priv', type: 'CONTEXT', scope: 'USER', user_id: 'u2', project_id: null });
   });
   afterEach(() => ctx.close());
 
@@ -285,10 +285,10 @@ describe('SA4E-27 IT — IsolationLayer with Real SQLite', () => {
     expect(summaries).not.toContain('user2-priv');// USER u2
   });
 
-  it('IT-02: buildIngestFileDeleteClause scoped delete works correctly', () => {
+  it('IT-02: buildIngestFileDeleteClause scoped delete works correctly', async () => {
     // Insert two file-based entries in different projects
-    ctx.engine.insert({ content: 'file content A', summary: 'file-A', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: 'app-A', source: '/test/file.md' });
-    ctx.engine.insert({ content: 'file content B', summary: 'file-B', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: 'app-B', source: '/test/file.md' });
+    await ctx.engine.insert({ content: 'file content A', summary: 'file-A', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: 'app-A', source: '/test/file.md' });
+    await ctx.engine.insert({ content: 'file content B', summary: 'file-B', type: 'CONTEXT', scope: 'PROJECT', user_id: 'u1', project_id: 'app-B', source: '/test/file.md' });
 
     const pCtx = createProjectContext('app-A', 'u1');
     const { clause, params } = buildIngestFileDeleteClause(pCtx, '/test/file.md');
