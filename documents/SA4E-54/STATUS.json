@@ -1,0 +1,49 @@
+{
+  "ticket": "SA4E-54",
+  "type": "Bug",
+  "currentPhase": "done",
+  "autonomyLevel": "L3",
+  "jiraStatus": "Done",
+  "architecturePattern": "ai-agent",
+  "phases": {
+    "requirements": { "status": "skipped", "reason": "Bug ticket — no BRD needed" },
+    "specification": { "status": "skipped", "reason": "Bug ticket — no FSD needed" },
+    "design": { "status": "skipped", "reason": "Bug ticket — no TDD needed" },
+    "test_planning": { "status": "skipped", "reason": "Bug ticket — existing tests verify fixes" },
+    "implementation": {
+      "status": "done",
+      "completedAt": "2026-07-23T03:35:00Z",
+      "commits": [
+        "c963ee6 — fix KB graph node count, PostgreSQL insert ID, code symbol limit",
+        "5acc71a — commit all pending changes on branch SA4E-49",
+        "da49fac — fix PostgreSQL events.id (MAX(id)+1)",
+        "edec36e — KnowledgeDb appendEvent explicit ID (hook-amended)"
+      ],
+      "fixes": [
+        "KIND_TO_TYPE mapping in GraphSyncService",
+        "PostgreSQL RETURNING id in engine.insert()",
+        "upsertGraphNode after each engine.insert()",
+        "KB count check before graph sync in GraphService.initialize()",
+        "Stale nodes cleanup before re-index",
+        "Remove LIMIT clause from GraphSyncService SQL",
+        "PostgreSQL events.id explicit MAX(id)+1 for append-only log"
+      ]
+    },
+    "security_code_review": { "status": "skipped", "reason": "Internal graph counter fix, no new endpoints" },
+    "testing": {
+      "status": "done",
+      "completedAt": "2026-08-17T06:50:00Z",
+      "result": "225/226 suites pass, 2641 tests pass, 1 flaky integration test (mcp-tools hookTimeout — unrelated)"
+    },
+    "pentest": { "status": "skipped", "reason": "Internal graph counter fix, no attack surface change" },
+    "deployment": {
+      "status": "done",
+      "completedAt": "2026-08-17T06:55:00Z",
+      "version": "v1.28.0",
+      "tag": "v1.28.0",
+      "mergedTo": "main",
+      "pushedAt": "2026-08-17T06:52:00Z"
+    }
+  },
+  "lastUpdated": "2026-08-17T06:55:00Z"
+}
