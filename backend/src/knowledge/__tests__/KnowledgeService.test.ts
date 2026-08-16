@@ -57,6 +57,27 @@ describe('KnowledgeService', () => {
       expect(await service.getArtifacts(ctx('ws-B'), thread.thread_id)).toBeNull();
     });
 
+    it('saveCheckpoint auto-creates a thread for a fresh UUID it has never seen (LangGraph checkpointer)', async () => {
+      const freshId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+      const saved = await service.saveCheckpoint(ctx('ws-A'), freshId, { checkpoint: { v: 1, channel_values: {} } });
+      expect(saved).not.toBeNull();
+      expect(saved?.thread_id).toBe(freshId);
+      expect(saved?.version).toBe(1);
+      const loaded = await service.getCheckpoint(ctx('ws-A'), freshId);
+      expect(loaded?.checkpoint).toEqual({ v: 1, channel_values: {} });
+      expect(await service.getThread(ctx('ws-A'), freshId)).not.toBeNull();
+      // the new thread is visible to listThreads (multi-IDE hydrate)
+      const threads = await service.listThreads(ctx('ws-A'));
+      expect(threads.some((t) => t.thread_id === freshId)).toBe(true);
+      // a second PUT bumps version (idempotent upsert, IT-HYD-03)
+      await service.saveCheckpoint(ctx('ws-A'), freshId, { checkpoint: { v: 2, channel_values: {} } });
+      expect((await service.getCheckpoint(ctx('ws-A'), freshId))?.version).toBe(2);
+    });
+
+    it('saveCheckpoint rejects a non-UUID thread id (404 path)', async () => {
+      expect(await service.saveCheckpoint(ctx('ws-A'), 'not-a-uuid', { checkpoint: { v: 1 } })).toBeNull();
+    });
+
     it('saveCheckpoint returns null for a thread owned by another workspace', async () => {
       const thread = await service.createThread(ctx('ws-A'), {});
       const saved = await service.saveCheckpoint(ctx('ws-B'), thread.thread_id, { checkpoint: { v: 1 } });
