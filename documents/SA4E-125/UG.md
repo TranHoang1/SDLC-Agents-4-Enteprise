@@ -1,153 +1,103 @@
-# User Guide — Pipeline Refactoring: Hardcoded → Data-Driven Architecture (v2-v6)
+# User Guide — SA4E-125: Context Compaction & Model Tiering
 
-**Ticket:** SA4E-125 | **Version:** 1.0
+## Overview
 
----
+This feature adds intelligent context window management to the SDLC pipeline. Instead of static token estimates, the SM now monitors usage in real-time, compacts at logical breakpoints, and selects appropriate model tiers per task.
 
-## 1. Overview
+## Quick Start
 
-This guide covers setup, configuration, and usage of the new **data-driven pipeline** features:
-- Index-based phase routing (replacing string lookups)
-- Sandboxed hot-swap of agent configurations
-- Orphaned phase detection and skip/cancel
-- Ghost context barrier injection
+The feature is configuration-driven — no code changes required. Once the steering file is loaded, SM automatically applies context optimization rules.
 
----
+### Activation
 
-## 2. Setup
-
-### 2.1 Prerequisites
-
-- Node.js ≥ 18, VS Code extension with LangGraph engine
-- Workspace with `.kiro/agents/*.md` agent spec files
-- `STATUS.json` per ticket in `documents/{TICKET}/`
-
-### 2.2 Configuration
-
-Agent spec files (`.kiro/agents/*.md`) define the pipeline. The new architecture uses **runtime pipeline definition** extracted by LLM from these files:
-
-```yaml
----
-name: ba-agent
----
-## Workflow
-- Phase: requirements
-- Output: BRD.md
-```
-
-The `PipelineExtractor` reads all `.kiro/agents/*.md` files and produces a `PipelineDefinition` with phases and their order.
+The steering file at `.kiro/steering/context-compaction.md` is auto-loaded by SM at session start. No manual activation needed.
 
 ---
 
-## 3. Key Features
+## Features
 
-### 3.1 Index-Based Routing (v2)
+### 1. Context Usage Monitoring
 
-The pipeline no longer uses `order.indexOf(currentPhase)` string lookups. Instead, it reads `pipelineDefinition.phases[currentPhaseIndex]`.
+SM tracks estimated token usage per phase and warns at configurable thresholds:
 
-**What changed for you:** Nothing visible. Routing is deterministic and faster.
+| Level | Threshold | Behavior |
+|-------|-----------|----------|
+| Normal | 0–60% | No action |
+| Warn | 60–80% | SM notifies user |
+| Critical | 80–90% | SM force-compacts before continuing |
+| Emergency | 90%+ | SM compacts immediately, keeps only essentials |
 
-**Check current index:**
-```typescript
-// State channel
-state.currentPhaseIndex  // number, 0-based
-state.pipelineDefinition.phases[state.currentPhaseIndex].id  // current phase ID
-```
+### 2. Strategic Compaction at Breakpoints
 
-### 3.2 Hot-Swap Agent Config (v2)
+After each phase completes, SM automatically:
+- Summarizes key decisions (3-5 points)
+- Lists artifacts produced
+- Drops intermediate reasoning and full document text
+- References KB for retrieval when needed later
 
-You can modify agent `.md` files at runtime. The system validates changes in a sandbox before applying.
+### 3. Model Tiering
 
-**How to use:**
-1. Open `.kiro/agents/{agent}.md`
-2. Edit the file (add/remove phases, change agent IDs)
-3. Save — the system automatically detects the change
-4. If valid: hot-swap succeeds, next `invoke()` uses the new config
-5. If invalid: old config is preserved, error shown in VS Code notification
+Tasks are classified by complexity and routed to appropriate models:
 
-**Validation rules:**
-- Phases list must not be empty
-- Each phase must have non-empty `id` and `agentIds[]`
-- LLM extraction must not throw
+- **Tier 1 (Full):** BRD/FSD/TDD creation, code implementation, security audit
+- **Tier 2 (Medium):** Code review, diagram generation
+- **Tier 3 (Light):** File reads, Jira transitions, DOCX export
 
-**Per-thread isolation:** Thread A's hot-swap does NOT affect Thread B's running pipeline.
+### 4. Budget Advisor
 
-### 3.3 Orphaned Phase Resolution (v4)
-
-When a phase you were currently in gets deleted from the pipeline config:
-
-1. Pipeline **pauses** automatically
-2. VS Code shows: *"Phase '{name}' no longer exists in pipeline config."*
-3. You have 3 choices:
-   - **Skip** — bypass the deleted phase, continue with the phase at the same position
-   - **Reconfigure** — edit the config file to restore or reorder phases
-   - **Cancel** — terminate the pipeline
-
-**Behind the scenes:** `resolvePhaseIndex()` returns `-1`, triggering `pipelineStatus: "paused"`.
-
-### 3.4 Skip Resolution (v5)
-
-When you choose **Skip**:
-1. Pipeline resumes (`pipelineStatus: "running"`)
-2. The index repositions to the phase that now occupies the old position
-3. No infinite loops — the `advancePhaseNode` handles the skip deterministically
-
-### 3.5 Context Barrier (v6)
-
-When a phase is skipped due to orphan, a **context barrier message** is injected into the agent's chat history:
+Before each sub-agent invocation, SM estimates token cost and advises:
 
 ```
-[Context Barrier] Phase 'design' was deleted and SKIPPED.
-Requests related to it are void. Current phase: 'test_planning'.
+💡 Context Advisor:
+- Estimated next action: ~70k tokens
+- Current usage: 320k/500k (64%)
+- Recommendation: proceed
 ```
 
-This prevents downstream agents from acting on stale requests.
+### 5. Tool Count Awareness
 
-**What you see:** Nothing extra. The barrier is internal. Agents automatically read it and ignore stale context.
-
----
-
-## 4. API Reference
-
-### State Channels (new)
-
-| Channel | Type | Description |
-|---------|------|-------------|
-| `currentPhaseIndex` | `number` | Integer pointer to current phase (default 0) |
-| `pipelineDefinition` | `PipelineDefState \| null` | Per-thread pipeline config snapshot |
-| `pipelineStatus` | `"idle" \| "running" \| "paused" \| "cancelled"` | Pipeline lifecycle state |
-| `approvalDecision` | `ApprovalDecision` | Human decision on pause |
-| `approvalRequired` | `boolean` | Whether waiting for human input |
-
-### Routing Functions
-
-| Function | Purpose | Called By |
-|----------|---------|-----------|
-| `resolvePhaseIndex(state)` | Realign index or detect orphan | `routeFromSm`, `getPhaseNode` |
-| `routeFromSm(state)` | Route to current phase agent or `advance_phase` | Conditional edge from SM node |
-| `advancePhaseNode(state)` | Advance index, handle skip/cancel, inject barrier | Graph node |
-| `routeAfterAdvance(state)` | Route to SM or END after advance | Conditional edge from advance_phase |
-| `handleLiveSpecMutation()` | Sandboxed hot-swap with validation | File watcher |
+When >30 MCP tools are loaded, SM suggests disabling unused tools per phase. This saves 5,000–10,000 tokens per invocation.
 
 ---
 
-## 5. Troubleshooting
+## Configuration
 
-| Symptom | Cause | Solution |
-|---------|-------|----------|
-| Pipeline pauses unexpectedly | Orphaned phase detected | Check config — phase may have been deleted. Choose Skip or Reconfigure |
-| "SPEC_COMPILE_ERROR" in notification | Invalid agent spec change | Revert or fix the `.md` file. Old config preserved |
-| Agent seems confused by old requests | Ghost context from skipped phase (pre-v6) | Upgrade to v6 architecture. Barrier auto-injected on skip |
-| Pipeline doesn't advance | `currentPhaseIndex` out of bounds | `resolvePhaseIndex` clamps automatically. Check `pipelineDefinition.phases` |
+### Token Budget (in STATUS.json)
+
+The `tokenBudget` section in STATUS.json controls daily limits:
+
+```json
+{
+  "tokenBudget": {
+    "dailyCap": 500000,
+    "warningThreshold": 0.8,
+    "mode": "normal"
+  }
+}
+```
+
+### Customizing Thresholds
+
+Edit `.kiro/steering/context-compaction.md` section 1 to adjust warning levels.
 
 ---
 
-## 6. Architecture Versions Quick Reference
+## Troubleshooting
 
-| Version | Feature | Key File |
-|---------|---------|----------|
-| v2 | Index routing + PipelineDefinition in state + Sandboxed hot-swap | `pipeline/edges.ts`, `core/state.ts` |
-| v3 | resolvePhaseIndex realignment + State size optimization | `pipeline/edges.ts` |
-| v4 | Orphan detection + Pipeline pause | `pipeline/sdlc-graph.ts` |
-| v5 | 3-layer skip fix (routeFromSm, advancePhaseNode, buildSmTargets) | `pipeline/edges.ts`, `pipeline/sdlc-graph.ts` |
-| v6 | Ghost context barrier injection | `pipeline/sdlc-graph.ts` |
+| Issue | Cause | Solution |
+|-------|-------|----------|
+| SM stops mid-pipeline | Token budget exhausted | Reset budget: "reset budget" command |
+| Context too large after Phase 3 | Compaction not triggered | Manually say "compact context" |
+| Wrong model tier selected | Task misclassified | Override with explicit agent name |
+| Tools still loaded after disable | Toggle not persisted | Re-run `toggle_tool` at session start |
+
+---
+
+## Reference: Token Estimates
+
+| Operation | Typical Cost |
+|-----------|-------------|
+| Full pipeline (no retries) | 500k–700k |
+| Full pipeline (with retries) | 700k–1M |
+| Single phase (average) | 50k–80k |
+| Simple lookup/transition | 3k–8k |

@@ -74,7 +74,7 @@ export class TaskWorker {
    */
   updateConfig(patch: Partial<Pick<TaskWorkerConfig, 'concurrency' | 'baseInterval' | 'maxInterval'>>): void {
     if (patch.concurrency !== undefined) {
-      (this.config as any).concurrency = Math.max(1, Math.min(patch.concurrency, 8));
+      (this.config as any).concurrency = Math.max(1, patch.concurrency);
     }
     if (patch.baseInterval !== undefined) (this.config as any).baseInterval = patch.baseInterval;
     if (patch.maxInterval !== undefined) (this.config as any).maxInterval = patch.maxInterval;

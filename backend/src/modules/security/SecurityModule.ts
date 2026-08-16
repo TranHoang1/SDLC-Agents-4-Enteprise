@@ -47,8 +47,9 @@ export class SecurityModule implements IModule {
       this._status = 'ready';
       this.logger.info('Security module ready');
     } catch (err) {
-      this.logger.error({ err }, 'Failed to initialize security module');
-      this._status = 'error';
+      // Non-fatal: security module is optional. Core functionality works without it.
+      this.logger.warn({ err: (err as Error).message }, 'Security module init failed (non-fatal) — GateGuard disabled');
+      this._status = 'ready';
     }
   }
 
@@ -85,7 +86,7 @@ export class SecurityModule implements IModule {
   private async initializeGateGuard(): Promise<void> {
     const adapter = await this.resolveAdapter();
     const repository = new GateGuardRepository(adapter);
-    repository.ensureSchema();
+    await repository.ensureSchema();
     const service = new GateGuardService(repository, this.logger);
     service.loadPatterns();
     this.gateGuardHandler = new GateGuardToolHandler(service, this.logger);

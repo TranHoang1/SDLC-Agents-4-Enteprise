@@ -1,0 +1,129 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Start (filled circle) -->
+    <mxCell id="n0" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="80" y="370" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <!-- State: Idle -->
+    <mxCell id="n1" value="IDLE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="180" y="360" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <!-- State: Initializing -->
+    <mxCell id="n2" value="INITIALIZING&#xa;(parse config, load rules)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="380" y="360" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- State: Discovering -->
+    <mxCell id="n3" value="DISCOVERING&#xa;(find files)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="620" y="360" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- State: Analyzing -->
+    <mxCell id="n4" value="ANALYZING&#xa;(apply rules per file)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="840" y="360" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- State: Reporting -->
+    <mxCell id="n5" value="REPORTING&#xa;(format output)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="620" y="540" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- State: Done (exit 0 or 1) -->
+    <mxCell id="n6" value="DONE&#xa;(exit 0 / 1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="380" y="540" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- State: Blocked (exit 2) -->
+    <mxCell id="n7" value="BLOCKED&#xa;(exit 2 — Critical/High)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="380" y="650" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- State: Error -->
+    <mxCell id="n8" value="ERROR&#xa;(exit 1 — config/parse)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="180" y="540" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- End (filled circle with ring) -->
+    <mxCell id="n9" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="180" y="660" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Start → Idle -->
+    <mxCell id="e0" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n0" target="n1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Idle → Initializing (scan triggered) -->
+    <mxCell id="e1" value="scan triggered" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Initializing → Discovering (config valid) -->
+    <mxCell id="e2" value="config valid" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Initializing → Error (config invalid) -->
+    <mxCell id="e3" value="config invalid" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="n2" target="n8">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="460" y="480"/>
+          <mxPoint x="250" y="480"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Discovering → Analyzing (files found) -->
+    <mxCell id="e4" value="files found" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Discovering → Done (no files) -->
+    <mxCell id="e5" value="no files" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n3" target="n6">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="690" y="460"/>
+          <mxPoint x="560" y="460"/>
+          <mxPoint x="560" y="540"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Analyzing → Reporting (analysis complete) -->
+    <mxCell id="e6" value="analysis complete" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="920" y="460"/>
+          <mxPoint x="920" y="565"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Reporting → Done (below threshold) -->
+    <mxCell id="e7" value="below threshold" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Reporting → Blocked (above threshold) -->
+    <mxCell id="e8" value="above threshold" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#b85450;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="n5" target="n7">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="690" y="675"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Done → End -->
+    <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="n6" target="n9">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="380" y="675"/>
+          <mxPoint x="240" y="675"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Blocked → End -->
+    <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="n7" target="n9">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="195" y="675"/>
+          <mxPoint x="195" y="700"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Error → End -->
+    <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="n8" target="n9">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="150" y="610"/>
+          <mxPoint x="150" y="675"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

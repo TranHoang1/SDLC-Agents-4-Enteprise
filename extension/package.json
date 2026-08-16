@@ -97,6 +97,10 @@
         "title": "SDLC Agents: Impact Analysis"
       },
       {
+        "command": "kiroSdlc.openPlanCanvas",
+        "title": "SDLC Agents: Open Plan Canvas"
+      },
+      {
         "command": "kiroSdlc.getAIContext",
         "title": "SDLC Agents: Get AI Context for Symbol"
       },

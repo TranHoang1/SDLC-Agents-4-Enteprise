@@ -1,0 +1,135 @@
+<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-171 — Test Coverage Map" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="550" y="10" width="400" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Test Level Swimlanes -->
+    <!-- PBT Level -->
+    <mxCell id="sw_pbt" value="PBT (12 tests)" style="swimlane;startSize=30;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="20" y="60" width="240" height="420" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt1" value="PBT-01..02&#xa;resolveSymbolKind&#xa;invariants" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="sw_pbt">
+      <mxGeometry x="20" y="40" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt2" value="PBT-03..04&#xa;buildVirtualPath/FQN&#xa;format invariants" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="sw_pbt">
+      <mxGeometry x="20" y="100" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt3" value="PBT-05..06&#xa;isPegaKind +&#xa;selectStrategy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="sw_pbt">
+      <mxGeometry x="20" y="160" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt4" value="PBT-07..08&#xa;mergeDedupResults&#xa;invariants" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="sw_pbt">
+      <mxGeometry x="20" y="220" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt5" value="PBT-09..11&#xa;FTS sanitization&#xa;(Security)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_pbt">
+      <mxGeometry x="20" y="280" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pbt6" value="PBT-12&#xa;OOM protection&#xa;(Security)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_pbt">
+      <mxGeometry x="20" y="340" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- UT Level -->
+    <mxCell id="sw_ut" value="UT (28 tests)" style="swimlane;startSize=30;fillColor=none;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="280" y="60" width="240" height="420" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut1" value="UT-01..05&#xa;resolveSymbolKind&#xa;16 mappings + edge" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="sw_ut">
+      <mxGeometry x="20" y="40" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut2" value="UT-06..10&#xa;buildVirtualPath, FQN&#xa;content_hash" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="sw_ut">
+      <mxGeometry x="20" y="100" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut3" value="UT-11..15&#xa;isPegaKind, strategy&#xa;workspaceType" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="sw_ut">
+      <mxGeometry x="20" y="160" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut4" value="UT-16..21&#xa;Migration args,&#xa;mergeDedupResults" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="sw_ut">
+      <mxGeometry x="20" y="220" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut5" value="UT-22..27&#xa;Security: FTS sanitize&#xa;env flag, OOM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_ut">
+      <mxGeometry x="20" y="280" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ut6" value="UT-28&#xa;isPegaKind&#xa;negative cases" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="sw_ut">
+      <mxGeometry x="20" y="340" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- IT Level -->
+    <mxCell id="sw_it" value="IT (18 tests)" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="540" y="60" width="240" height="420" as="geometry"/>
+    </mxCell>
+    <mxCell id="it1" value="IT-01..06&#xa;syncRuleToSymbols&#xa;files + symbols + FTS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_it">
+      <mxGeometry x="20" y="40" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="it2" value="IT-07..10&#xa;Enrichment tasks&#xa;loadContext, payload" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_it">
+      <mxGeometry x="20" y="100" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="it3" value="IT-11..14&#xa;Migration script&#xa;idempotency, batch" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_it">
+      <mxGeometry x="20" y="160" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="it4" value="IT-15..16&#xa;Security: length&#xa;limit, OOM guard" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_it">
+      <mxGeometry x="20" y="220" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="it5" value="IT-17..18&#xa;Project isolation&#xa;archived exclusion" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="sw_it">
+      <mxGeometry x="20" y="280" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- E2E-API Level -->
+    <mxCell id="sw_e2e" value="E2E-API (8 tests)" style="swimlane;startSize=30;fillColor=none;strokeColor=#d6b656;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="800" y="60" width="240" height="420" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e1" value="E2E-API-01..03&#xa;mem_search + code_search&#xa;+ PascalCase" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="sw_e2e">
+      <mxGeometry x="20" y="40" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e2" value="E2E-API-04..05&#xa;Enrichment timeout&#xa;FTS rebuild" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="sw_e2e">
+      <mxGeometry x="20" y="100" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e3" value="E2E-API-06&#xa;Cross-project&#xa;isolation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="sw_e2e">
+      <mxGeometry x="20" y="160" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2e4" value="E2E-API-07..08&#xa;Migration CLI&#xa;dry-run + JSON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="sw_e2e">
+      <mxGeometry x="20" y="220" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- SIT Level -->
+    <mxCell id="sw_sit" value="SIT (6 tests)" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="60" width="240" height="420" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit1" value="SIT-01..02&#xa;Full pipeline:&#xa;ingest→enrich→search" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="sw_sit">
+      <mxGeometry x="20" y="40" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit2" value="SIT-03&#xa;Dual-write/read&#xa;consistency" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="sw_sit">
+      <mxGeometry x="20" y="100" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit3" value="SIT-04&#xa;Performance:&#xa;10k rules &lt;5min" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="sw_sit">
+      <mxGeometry x="20" y="160" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit4" value="SIT-05&#xa;FTS search&#xa;&lt;50ms p50" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="sw_sit">
+      <mxGeometry x="20" y="220" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="sit5" value="SIT-06&#xa;Concurrent&#xa;search + migration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="sw_sit">
+      <mxGeometry x="20" y="280" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="legend" value="Legend" style="swimlane;startSize=20;fillColor=none;strokeColor=#666666;html=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="20" y="510" width="600" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg1" value="Functional" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="10" y="30" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="Integration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="110" y="30" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="Security" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="210" y="30" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="E2E" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="310" y="30" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg5" value="System" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="410" y="30" width="90" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg6" value="PBT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="legend">
+      <mxGeometry x="510" y="30" width="80" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Summary box -->
+    <mxCell id="summary" value="Total: 72 Test Cases&#xa;PBT: 12 | UT: 28 | IT: 18&#xa;E2E-API: 8 | SIT: 6&#xa;Security: 14 dedicated tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1">
+      <mxGeometry x="800" y="520" width="250" height="70" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

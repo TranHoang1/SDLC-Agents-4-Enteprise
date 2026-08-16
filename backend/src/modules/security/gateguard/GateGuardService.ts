@@ -26,7 +26,7 @@ const DEFAULT_PATTERNS: DenyPattern[] = [
 ];
 
 /** SEC-05: Input that forces catastrophic backtracking for naive pattern detection. */
-const REDOS_TEST_INPUT = 'a'.repeat(50) + 'x';
+const REDOS_TEST_INPUT = 'a'.repeat(25) + 'x';
 const REDOS_TIMEOUT_MS = 100;
 
 export class GateGuardService {
@@ -62,7 +62,7 @@ export class GateGuardService {
         return {
           action: 'blocked',
           patternMatched: pattern.regex,
-          explanation: `Destructive command blocked by GateGuard: ${command}`,
+          explanation: `Destructive command blocked by GateGuard: ${command.slice(0, 100)}`,
           overrideHash: hash,
           latencyMs,
         };

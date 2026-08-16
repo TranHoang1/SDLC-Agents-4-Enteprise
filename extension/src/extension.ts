@@ -221,23 +221,10 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
           vscode.window.showErrorMessage('Cannot reach backend. Verify server is running.');
           return;
         }
-        // Show detailed status in Output Channel (persistent, copyable)
-        outputChannel.show(true);
-        outputChannel.appendLine('═══════════════════════════════════════════');
-        outputChannel.appendLine('  LLM Enrichment Status @ ' + new Date().toLocaleTimeString());
-        outputChannel.appendLine('═══════════════════════════════════════════');
-        outputChannel.appendLine('State:      ' + status.state);
-        outputChannel.appendLine('Progress:   ' + status.completedRules + '/' + status.totalRules + ' (' + status.percent + '%)');
-        outputChannel.appendLine('Pending:    ' + status.pendingRules);
-        outputChannel.appendLine('Processing: ' + status.processingRules);
-        outputChannel.appendLine('Failed:     ' + status.failedRules);
-        if (status.startedAt) { outputChannel.appendLine('Started:    ' + status.startedAt); }
-        if (status.activeTasks && status.activeTasks.length > 0) {
-          outputChannel.appendLine('───────────────────────────────────────────');
-          outputChannel.appendLine('Currently processing:');
-          for (const t of status.activeTasks) { outputChannel.appendLine('  ⚡ ' + t.source); }
-        }
-        outputChannel.appendLine('═══════════════════════════════════════════');
+        // Open Enrichment Dashboard WebView Panel (SA4E-169)
+        const { openEnrichmentDashboard } = await import('./panels/enrichment-dashboard-panel');
+        const dashData = enrichmentService.buildDashboardData(status);
+        openEnrichmentDashboard(context.extensionUri, dashData);
       })
     );
 

@@ -67,7 +67,7 @@ function getTaskWorker(registry: ModuleRegistry): TaskWorker | null {
 }
 
 /** Build the full enrichment status response from TaskWorker data, scoped to project. */
-async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): Promise<EnrichmentStatusResponse & { activeTasks: Array<{ source: string }> }> {
+async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): Promise<EnrichmentStatusResponse & { activeTasks: Array<{ source: string }>; recentFailures: Array<{ symbolName: string; error: string; taskId: number }> }> {
   const repo = taskWorker.getRepository();
   const progress = await taskWorker.getProgress();
 
@@ -108,6 +108,7 @@ async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): P
     currentFile: progress?.file ?? null,
     lastPollAt: stats.lastPollAt,
     activeTasks: await getActiveTasks(repo, projectId),
+    recentFailures: await getRecentFailures(repo),
   };
 }
 
@@ -139,6 +140,25 @@ async function getActiveTasks(
   try {
     const tasks = await repo.listProcessing(5, projectId);
     return tasks.map((t) => ({ source: t.source }));
+  } catch {
+    return [];
+  }
+}
+
+/** Get recent failed tasks with error messages for dashboard display. */
+async function getRecentFailures(
+  repo: InstanceType<typeof import('../../modules/memory/task-queue/PendingTaskRepository.js').PendingTaskRepository>,
+): Promise<Array<{ symbolName: string; error: string; taskId: number }>> {
+  try {
+    const tasks = await repo.listFailed(10);
+    return tasks.map((t) => {
+      const payload = typeof t.payload === 'string' ? JSON.parse(t.payload) : t.payload;
+      return {
+        taskId: t.id,
+        symbolName: payload?.symbolName || payload?.filePath || `entry-${t.entry_id}`,
+        error: (t as any).error || 'Unknown error',
+      };
+    });
   } catch {
     return [];
   }

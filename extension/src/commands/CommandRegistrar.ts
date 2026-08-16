@@ -56,6 +56,7 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     vscode.commands.registerCommand("kiroSdlc.openKbQuality", () => panelManager?.openPanel("quality")),
     vscode.commands.registerCommand("kiroSdlc.openKbAnalytics", () => panelManager?.openPanel("analytics")),
     vscode.commands.registerCommand("kiroSdlc.openWorkflowGraph", () => panelManager?.openPanel("workflow")),
+    vscode.commands.registerCommand("kiroSdlc.openPlanCanvas", () => panelManager?.openPanel("planCanvas")),
     vscode.commands.registerCommand("kiroSdlc.restartMcpServer", () => handleRestartServer(mcpManager)),
     vscode.commands.registerCommand("kiroSdlc.stopMcpServer", () => handleStopServer(mcpManager, workspaceRoot)),
     vscode.commands.registerCommand("kiroSdlc.openKbBrowser", () => handleOpenKbBrowser(mcpManager)),

@@ -1,0 +1,118 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Participant: AI Agent -->
+    <mxCell id="h1" value="AI Agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="20" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: Search Dispatcher -->
+    <mxCell id="h2" value="Search&#xa;Dispatcher" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="20" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: CompositeScorer -->
+    <mxCell id="h3" value="Composite&#xa;Scorer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="20" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: knowledge_entries DB -->
+    <mxCell id="h4" value="knowledge_entries&#xa;+ FTS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="720" y="20" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: contradiction_log -->
+    <mxCell id="h5" value="contradiction_log&#xa;(DB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="940" y="20" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Lifelines -->
+    <mxCell id="l1" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="60" as="sourcePoint"/>
+        <mxPoint x="120" y="520" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l2" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="60" as="sourcePoint"/>
+        <mxPoint x="340" y="520" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l3" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="560" y="60" as="sourcePoint"/>
+        <mxPoint x="560" y="520" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l4" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="780" y="60" as="sourcePoint"/>
+        <mxPoint x="780" y="520" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l5" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1000" y="60" as="sourcePoint"/>
+        <mxPoint x="1000" y="520" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Messages -->
+    <mxCell id="m1" value="1. mem_search(query, limit)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="100" as="sourcePoint"/>
+        <mxPoint x="340" y="100" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m2" value="2. FTS query + vector search" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="140" as="sourcePoint"/>
+        <mxPoint x="780" y="140" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m3" value="3. Return candidate entries with fts_rank" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="780" y="180" as="sourcePoint"/>
+        <mxPoint x="340" y="180" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m4" value="4. Score each entry" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="220" as="sourcePoint"/>
+        <mxPoint x="560" y="220" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m5" value="5. fts_rank x temporal x confidence x outcome x predictive" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="560" y="260" as="sourcePoint"/>
+        <mxPoint x="560" y="280" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m6" value="6. Return composite_score per entry" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="560" y="310" as="sourcePoint"/>
+        <mxPoint x="340" y="310" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m7" value="7. Check unresolved contradictions" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="350" as="sourcePoint"/>
+        <mxPoint x="1000" y="350" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m8" value="8. Return contradiction flags" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1000" y="390" as="sourcePoint"/>
+        <mxPoint x="340" y="390" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m9" value="9. Sort DESC, attach warnings" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="420" as="sourcePoint"/>
+        <mxPoint x="340" y="440" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m10" value="10. Return ranked results [{score, confidence, is_instinct, warning}]" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="470" as="sourcePoint"/>
+        <mxPoint x="120" y="470" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

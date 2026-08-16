@@ -1,0 +1,26 @@
+inputType,value,expectedBehavior,finding
+fts_query,"kind:pega_activity",colon stripped to space,SEC-F1
+fts_query,"""unbalanced quote",quotes removed,SEC-F1
+fts_query,"name:value AND type:secret",special ops stripped,SEC-F1
+fts_query,"(nested)(parens)",parens stripped,SEC-F1
+fts_query,"normal search terms",pass through unchanged,SEC-F1
+fts_query,"*wildcard*",wildcards preserved or stripped per impl,SEC-F1
+fts_query,"DROP TABLE symbols;--",sql chars stripped,SEC-F1
+fts_query,"a OR b NOT c",logical ops kept as words,SEC-F1
+fts_query,"",returns * fallback,SEC-F1
+fts_query,"   ",returns * fallback,SEC-F1
+query_length,"a]repeated 1000 chars",truncated to 200,SEC-F2
+query_length,"a repeated 500 chars",truncated to 200,SEC-F2
+query_length,"a repeated 100 chars",not truncated,SEC-F2
+query_length,"a repeated 200 chars",exactly at limit,SEC-F2
+query_length,"a repeated 201 chars",truncated to 200,SEC-F2
+env_flag,false,disabled,SEC-F3
+env_flag,FALSE,disabled,SEC-F3
+env_flag,0,disabled,SEC-F3
+env_flag,no,disabled,SEC-F3
+env_flag,off,disabled,SEC-F3
+env_flag,true,enabled,SEC-F3
+env_flag,undefined,enabled (default),SEC-F3
+oom_size,4194304,accepted (under 5MB),SEC-F4
+oom_size,5242880,rejected (exactly 5MB),SEC-F4
+oom_size,6291456,rejected (over 5MB),SEC-F4

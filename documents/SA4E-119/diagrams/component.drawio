@@ -1,0 +1,147 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-119: Component Diagram — 12 Features by Domain" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="Knowledge Enhancement" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="460" height="220" as="geometry"/>
+    </mxCell>
+    <mxCell id="conf_scorer" value="ConfidenceScorer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d1">
+      <mxGeometry x="20" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="instinct_eng2" value="InstinctEngine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d1">
+      <mxGeometry x="160" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="decay_job" value="ConfidenceDecayJob" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d1">
+      <mxGeometry x="310" y="50" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="pattern_ext2" value="PatternExtractor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d1">
+      <mxGeometry x="20" y="120" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="pattern_dedup" value="PatternDeduplicator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d1">
+      <mxGeometry x="160" y="120" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="mem_module_ref" value="MemoryModule (existing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="d1">
+      <mxGeometry x="310" y="120" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_conf_inst" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;" edge="1" parent="d1" source="conf_scorer" target="instinct_eng2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pat_dedup" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d1" source="pattern_ext2" target="pattern_dedup">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_dedup_mem" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d1" source="pattern_dedup" target="mem_module_ref">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d2" value="Security and Safety" style="swimlane;startSize=30;fillColor=none;strokeColor=#b85450;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="540" y="60" width="480" height="220" as="geometry"/>
+    </mxCell>
+    <mxCell id="shield_scanner" value="AgentShieldScanner" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="d2">
+      <mxGeometry x="20" y="50" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="secret_det" value="SecretDetector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="d2">
+      <mxGeometry x="20" y="120" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="injection_det" value="InjectionDetector" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="d2">
+      <mxGeometry x="150" y="120" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="gateguard2" value="GateGuardHook" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="d2">
+      <mxGeometry x="190" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="denylist2" value="DenylistManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="d2">
+      <mxGeometry x="340" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="audit_client" value="GateGuardAuditClient" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="d2">
+      <mxGeometry x="340" y="120" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_shield_secret" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d2" source="shield_scanner" target="secret_det">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_shield_inj" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d2" source="shield_scanner" target="injection_det">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_gg_deny" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d2" source="gateguard2" target="denylist2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_gg_audit" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d2" source="gateguard2" target="audit_client">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d3" value="Context Management" style="swimlane;startSize=30;fillColor=none;strokeColor=#d6b656;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="60" width="480" height="220" as="geometry"/>
+    </mxCell>
+    <mxCell id="fresh_review" value="FreshContext ReviewNode" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="d3">
+      <mxGeometry x="20" y="50" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="ctx_compact" value="Context CompactionNode" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="d3">
+      <mxGeometry x="170" y="50" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="tier_router2" value="ModelTier RouterNode" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="d3">
+      <mxGeometry x="320" y="50" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="tier_classifier" value="TierClassifier" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="d3">
+      <mxGeometry x="320" y="120" width="130" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_tier_class" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d3" source="tier_router2" target="tier_classifier">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d4" value="Quality Assurance" style="swimlane;startSize=30;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="320" width="460" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="adversarial2" value="AdversarialReviewEngine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="d4">
+      <mxGeometry x="20" y="50" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="council2" value="CouncilEngine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="d4">
+      <mxGeometry x="190" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="voice_persona" value="VoicePersona" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="d4">
+      <mxGeometry x="190" y="120" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_council_voice" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d4" source="council2" target="voice_persona">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d5" value="Developer Productivity" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="540" y="320" width="480" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="skillpack_reg" value="SkillPackRegistry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="d5">
+      <mxGeometry x="20" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="skillpack_loader" value="SkillPackLoader" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="d5">
+      <mxGeometry x="160" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="skillpack_comp" value="SkillPackComposer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="d5">
+      <mxGeometry x="160" y="120" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="plan_canvas2" value="PlanCanvasPanel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="d5">
+      <mxGeometry x="310" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="onboarding2" value="OnboardingSkill" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="d5">
+      <mxGeometry x="310" y="120" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_reg_loader" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d5" source="skillpack_reg" target="skillpack_loader">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_loader_comp" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="d5" source="skillpack_loader" target="skillpack_comp">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d6" value="Data Layer (SQLite)" style="swimlane;startSize=30;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="320" width="480" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="kb_entries" value="knowledge_entries (+confidence)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="d6">
+      <mxGeometry x="20" y="50" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="instincts_tbl" value="instincts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d6">
+      <mxGeometry x="190" y="50" width="100" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="audit_tbl" value="gateguard_audit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d6">
+      <mxGeometry x="310" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="packs_tbl" value="skill_packs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d6">
+      <mxGeometry x="20" y="120" width="100" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="patterns_tbl" value="pattern_extractions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="d6">
+      <mxGeometry x="140" y="120" width="130" height="40" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

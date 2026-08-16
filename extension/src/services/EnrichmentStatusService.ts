@@ -119,6 +119,8 @@ export class EnrichmentStatusService implements vscode.Disposable {
     }
 
     this.updateStatusBar(response);
+    // SA4E-169: Auto-update dashboard panel if open
+    this.updateDashboardPanel(response);
   }
 
   /** Handle state transition — show notifications (BR-06: once per cycle). */
@@ -284,5 +286,55 @@ export class EnrichmentStatusService implements vscode.Disposable {
 
   private log(msg: string): void {
     this.outputChannel.appendLine('[Enrichment] ' + msg);
+  }
+
+  /** SA4E-169: Build DashboardData for WebView panel from current status + sparkline history. */
+  buildDashboardData(response: EnrichmentStatusResponse): import('../panels/enrichment-dashboard-panel').DashboardData {
+    const filled = Math.min(this.sparklineIndex, 12);
+    const chartData: Array<{ time: string; completed: number; failed: number; timestamp: number }> = [];
+    const now = Date.now();
+    for (let i = 0; i < filled; i++) {
+      const idx = (this.sparklineIndex - filled + i) % 12;
+      const buffIdx = idx < 0 ? idx + 12 : idx;
+      const ageMs = (filled - i) * 5000;
+      const ts = now - ageMs;
+      chartData.push({
+        time: new Date(ts).toLocaleTimeString(),
+        completed: this.sparklineBuffer[buffIdx],
+        failed: 0,
+        timestamp: ts,
+      });
+    }
+    const totalInWindow = chartData.reduce((a, b) => a + b.completed, 0);
+    const ratePerSec = filled > 0 ? totalInWindow / (filled * 5) : 0;
+    const remaining = response.totalRules - response.completedRules - response.failedRules;
+    const etaSeconds = ratePerSec > 0 ? remaining / ratePerSec : null;
+
+    return {
+      state: response.state,
+      projectId: (response as any).projectId || null,
+      totalRules: response.totalRules,
+      completedRules: response.completedRules,
+      failedRules: response.failedRules,
+      pendingRules: response.pendingRules,
+      processingRules: response.processingRules,
+      percent: response.percent,
+      activeTasks: response.activeTasks || [],
+      recentFailures: (response as any).recentFailures || [],
+      chartData,
+      ratePerSec,
+      etaSeconds,
+      maxConcurrency: (response as any).maxConcurrency || 20,
+      activeConcurrency: (response as any).activeConcurrency || 0,
+    };
+  }
+
+  /** SA4E-169: Push update to open dashboard panel (called after each poll). */
+  private async updateDashboardPanel(response: EnrichmentStatusResponse): Promise<void> {
+    try {
+      const { getEnrichmentPanel, updatePanel } = await import('../panels/enrichment-dashboard-panel');
+      const panel = getEnrichmentPanel();
+      if (panel) { updatePanel(panel, this.buildDashboardData(response)); }
+    } catch { /* panel module not loaded yet — skip */ }
   }
 }

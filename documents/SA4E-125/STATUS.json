@@ -1,18 +1,65 @@
 {
   "ticketKey": "SA4E-125",
-  "summary": "Pipeline Refactoring: Hardcoded → Data-Driven Architecture (v2-v6)",
-  "status": "all_phases_complete",
+  "summary": "Strategic Context Compaction and Model Tiering",
+  "status": "done",
   "currentPhase": "done",
   "phases": {
-    "requirements": { "status": "done", "artifacts": ["BRD.md", "diagrams/business-flow.drawio", "diagrams/business-flow.png", "diagrams/use-case.drawio", "diagrams/use-case.png"] },
-    "specification": { "status": "done", "artifacts": ["FSD.md", "diagrams/system-context.drawio", "diagrams/system-context.png", "diagrams/sequence.drawio", "diagrams/sequence.png", "diagrams/state.drawio", "diagrams/state.png"] },
-    "design": { "status": "done", "artifacts": ["TDD.md", "diagrams/tdd/normal-flow.drawio", "diagrams/tdd/normal-flow.png", "diagrams/tdd/hot-swap-flow.drawio", "diagrams/tdd/hot-swap-flow.png", "diagrams/tdd/orphan-flow.drawio", "diagrams/tdd/orphan-flow.png", "diagrams/tdd/skip-resolution.drawio", "diagrams/tdd/skip-resolution.png", "diagrams/tdd/context-barrier.drawio", "diagrams/tdd/context-barrier.png", "diagrams/tdd/state-machine.drawio", "diagrams/tdd/state-machine.png", "diagrams/tdd/class-hierarchy.drawio", "diagrams/tdd/class-hierarchy.png", "diagrams/tdd/full-sequence.drawio", "diagrams/tdd/full-sequence.png"] },
-    "test_planning": { "status": "done", "artifacts": ["STP.md", "STC.md"] },
-    "implementation": { "status": "pending", "artifacts": [] },
-    "user_guide": { "status": "done", "artifacts": ["UG.md"] },
-    "testing": { "status": "pending", "artifacts": [] },
-    "deployment": { "status": "done", "artifacts": ["DPG.md"] }
+    "implementation": {
+      "status": "done",
+      "completedAt": "2026-07-14T00:00:00.000Z",
+      "artifacts": [
+        ".kiro/steering/context-compaction.md",
+        ".code-intel/skills/context-optimization/SKILL.md"
+      ]
+    }
+  },
+  "deliverables": {
+    "steering_file": {
+      "path": ".kiro/steering/context-compaction.md",
+      "language": "Vietnamese",
+      "covers": [
+        "Context monitoring rules with threshold levels",
+        "Compaction breakpoints per SDLC phase",
+        "Model tiering guidelines by task complexity",
+        "Budget advisor with proactive warnings",
+        "Tool count awareness and phase-based profiles",
+        "Anti-patterns for context waste"
+      ]
+    },
+    "skill_file": {
+      "path": ".code-intel/skills/context-optimization/SKILL.md",
+      "language": "English",
+      "covers": [
+        "When to compact (patterns with triggers)",
+        "How to compact (summarize decisions, keep references)",
+        "Model tiering table (task → tier mapping)",
+        "Token estimation from real project experience (min/typical/max)",
+        "Anti-patterns with impact quantification",
+        "MCP tool count management and savings estimates"
+      ]
+    }
+  },
+  "tokenBudgetReference": {
+    "note": "Realistic estimates based on actual SA4E pipeline runs",
+    "estimates": {
+      "BA_BRD": "40,000-60,000",
+      "BA_FSD_draft": "50,000-80,000",
+      "TA_FSD_enrichment": "30,000-50,000",
+      "SA_TDD": "60,000-90,000",
+      "SA_TDD_with_diagrams": "65,000-120,000",
+      "QA_STP_STC": "50,000-70,000",
+      "DEV_implementation_small": "50,000-100,000",
+      "DEV_implementation_large": "100,000-180,000",
+      "DEV_UG": "30,000-50,000",
+      "Security_review": "15,000-40,000",
+      "SM_verify": "8,000-25,000",
+      "Jira_transition": "2,000-8,000",
+      "DOCX_export": "3,000-10,000",
+      "Feedback_loop_iteration": "60,000-110,000"
+    },
+    "fullPipelineEstimate": "500,000-700,000 tokens (typical)",
+    "withRetries": "700,000-1,000,000 tokens"
   },
   "createdAt": "2026-07-12T00:00:00.000Z",
-  "updatedAt": "2026-07-13T00:00:00.000Z"
+  "updatedAt": "2026-07-14T00:00:00.000Z"
 }

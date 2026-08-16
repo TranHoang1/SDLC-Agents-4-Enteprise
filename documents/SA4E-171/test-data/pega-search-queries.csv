@@ -1,0 +1,31 @@
+query,expectedKind,expectedName,minResults
+Activity ApproveLeave,pega_activity,ApproveLeave,1
+Flow LeaveProcess,pega_flow,LeaveProcess,1
+DataTransform CalcTax,pega_data_transform,CalcTax,1
+DecisionTable LeaveEligibility,pega_decision_table,LeaveEligibility,1
+Section EmployeeDetails,pega_section,EmployeeDetails,1
+approve leave,pega_activity,ApproveLeave,1
+process claim,pega_activity,ProcessClaim,1
+expense report,pega_report,ExpenseReport,1
+country mapping,pega_map_value,CountryMapping,1
+is manager,pega_when,IsManager,1
+total amount,pega_declare_expression,TotalAmount,1
+validate request,pega_validate,ValidateRequest,1
+fetch employee api,pega_connector,FetchEmployeeAPI,1
+pending requests,pega_list_view,PendingRequests,1
+employee name,pega_property,EmployeeName,1
+Work-HR,pega_activity,,3
+Work-Finance,pega_data_transform,,2
+Work-Claims,pega_activity,,2
+pega_activity,pega_activity,,5
+pega_flow,pega_flow,,3
+harness main,pega_harness,MainHarness,1
+claim workflow,pega_flow,ClaimWorkflow,1
+tax bracket,pega_decision_table,TaxBracket,1
+reject leave,pega_activity,RejectLeave,1
+escalate request,pega_activity,EscalateRequest,1
+onboarding flow,pega_flow,OnboardingFlow,1
+submit timesheet,pega_activity,SubmitTimesheet,1
+close claim,pega_activity,CloseClaim,1
+nonexistent rule xyz123,,, 0
+a]%^&special!chars,,,0

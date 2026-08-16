@@ -1,0 +1,32 @@
+{
+  "test_configs": [
+    {
+      "test_id": "TC-0701",
+      "description": "Config with AWS access key",
+      "file": ".kiro/agents/test-aws.json",
+      "content": "{\"name\": \"aws-agent\", \"api_key\": \"AKIAIOSFODNN7EXAMPLE\"}",
+      "expected_findings": [{"severity": "CRITICAL", "rule": "hardcoded_secret"}]
+    },
+    {
+      "test_id": "TC-0704",
+      "description": "MCP server with HTTP (non-TLS)",
+      "file": "mcp.json",
+      "content": "{\"mcpServers\": {\"remote\": {\"url\": \"http://external.com:8080/mcp\"}}}",
+      "expected_findings": [{"severity": "HIGH", "rule": "http_endpoint"}]
+    },
+    {
+      "test_id": "TC-0706",
+      "description": "Steering with template injection",
+      "file": ".kiro/steering/test.md",
+      "content": "System prompt: ${user_controllable_input}",
+      "expected_findings": [{"severity": "HIGH", "rule": "prompt_injection"}]
+    },
+    {
+      "test_id": "TC-clean",
+      "description": "Clean config - no issues",
+      "file": ".kiro/agents/clean.json",
+      "content": "{\"name\": \"test-agent\", \"model\": \"claude-sonnet-4\"}",
+      "expected_findings": []
+    }
+  ]
+}

@@ -21,35 +21,67 @@ export class GateGuardRepository {
   constructor(private readonly adapter: DatabaseAdapter) {}
 
   /** Create gateguard_audit + gateguard_denylist tables if absent */
-  ensureSchema(): void {
-this.adapter.exec(
-      `CREATE TABLE IF NOT EXISTS gateguard_audit (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        timestamp TEXT NOT NULL DEFAULT (datetime('now')),
-        command TEXT NOT NULL,
-        agent TEXT,
-        pattern_matched TEXT,
-        action TEXT NOT NULL CHECK(action IN ('blocked','overridden','allowed')),
-        override_by TEXT,
-        project_id TEXT,
-        context_json TEXT
-      )`
-    );
-    this.adapter.exec(
-      'CREATE INDEX IF NOT EXISTS idx_gateguard_audit_time ON gateguard_audit(timestamp DESC)'
-    );
-    this.adapter.exec(
-      'CREATE INDEX IF NOT EXISTS idx_gateguard_audit_project ON gateguard_audit(project_id, timestamp DESC)'
-    );
-    this.adapter.exec(
-      `CREATE TABLE IF NOT EXISTS gateguard_denylist (
-        id TEXT PRIMARY KEY,
-        regex TEXT NOT NULL,
-        description TEXT NOT NULL DEFAULT '',
-        is_default INTEGER NOT NULL DEFAULT 0,
-        project_id TEXT
-      )`
-    );
+  async ensureSchema(): Promise<void> {
+    const engine = this.adapter.getEngine();
+    if (engine === 'postgresql') {
+      await this.adapter.execAsync(
+        `CREATE TABLE IF NOT EXISTS gateguard_audit (
+          id SERIAL PRIMARY KEY,
+          timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          command TEXT NOT NULL,
+          agent TEXT,
+          pattern_matched TEXT,
+          action TEXT NOT NULL CHECK(action IN ('blocked','overridden','allowed')),
+          override_by TEXT,
+          project_id TEXT,
+          context_json TEXT
+        )`
+      );
+      await this.adapter.execAsync(
+        'CREATE INDEX IF NOT EXISTS idx_gateguard_audit_time ON gateguard_audit(timestamp DESC)'
+      );
+      await this.adapter.execAsync(
+        'CREATE INDEX IF NOT EXISTS idx_gateguard_audit_project ON gateguard_audit(project_id, timestamp DESC)'
+      );
+      await this.adapter.execAsync(
+        `CREATE TABLE IF NOT EXISTS gateguard_denylist (
+          id TEXT PRIMARY KEY,
+          regex TEXT NOT NULL,
+          description TEXT NOT NULL DEFAULT '',
+          is_default INTEGER NOT NULL DEFAULT 0,
+          project_id TEXT
+        )`
+      );
+    } else {
+      this.adapter.exec(
+        `CREATE TABLE IF NOT EXISTS gateguard_audit (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          timestamp TEXT NOT NULL DEFAULT (datetime('now')),
+          command TEXT NOT NULL,
+          agent TEXT,
+          pattern_matched TEXT,
+          action TEXT NOT NULL CHECK(action IN ('blocked','overridden','allowed')),
+          override_by TEXT,
+          project_id TEXT,
+          context_json TEXT
+        )`
+      );
+      this.adapter.exec(
+        'CREATE INDEX IF NOT EXISTS idx_gateguard_audit_time ON gateguard_audit(timestamp DESC)'
+      );
+      this.adapter.exec(
+        'CREATE INDEX IF NOT EXISTS idx_gateguard_audit_project ON gateguard_audit(project_id, timestamp DESC)'
+      );
+      this.adapter.exec(
+        `CREATE TABLE IF NOT EXISTS gateguard_denylist (
+          id TEXT PRIMARY KEY,
+          regex TEXT NOT NULL,
+          description TEXT NOT NULL DEFAULT '',
+          is_default INTEGER NOT NULL DEFAULT 0,
+          project_id TEXT
+        )`
+      );
+    }
   }
 
   /** BR-1204: Append-only audit insert — never update or delete */
