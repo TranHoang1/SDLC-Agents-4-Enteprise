@@ -134,8 +134,9 @@ function buildDecisionTable(ruleJson: PegaRuleJson): string | null {
   for (let i = 0; i < rows.length && i < MAX_DUMP_ITEMS; i++) {
     const row = rows[i];
     if (typeof row !== 'object' || !row) continue;
-    const when = scalarStr(row.pyWhenCondition, row.pyWhenName, row.pyCondition, row.pyInput);
-    const result = scalarStr(row.pyResult, row.pyResultValue, row.pyValue) || scalar(row.pyOutput);
+    const rec = row as Record<string, unknown>;
+    const when = scalarStr(rec.pyWhenCondition, rec.pyWhenName, rec.pyCondition, rec.pyInput);
+    const result = scalarStr(rec.pyResult, rec.pyResultValue, rec.pyValue) || scalar(rec.pyOutput);
     lines.push(`  - ${when || `Row ${i + 1}`}: ${result || ''}`);
   }
   return lines.join('\n');

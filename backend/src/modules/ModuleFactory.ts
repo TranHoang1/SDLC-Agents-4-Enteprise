@@ -14,6 +14,7 @@ import { AnalyticsModule } from './analytics/AnalyticsModule.js';
 import { KBGraphModule } from './kb-graph/KBGraphModule.js';
 import { UtilityModule } from './utility/UtilityModule.js';
 import { WebModule } from './web/WebModule.js';
+import { SecurityModule } from './security/SecurityModule.js';
 import { KnowledgeModule } from '../knowledge/KnowledgeModule.js';
 import { HttpServer } from '../server/HttpServer.js';
 import { MemoryToolSearchService } from './orchestration/MemoryToolSearchService.js';
@@ -45,6 +46,8 @@ export class ModuleFactory {
     this.registry.register(new UtilityModule(this.logger));
     // SA4E-85 Phase 0: Backend-Driven Knowledge — SSOT for threads/checkpoints/events
     this.registry.register(new KnowledgeModule(this.logger));
+    // SA4E-167: GateGuard — programmatic destructive command prevention
+    this.registry.register(new SecurityModule(this.logger, this.registry));
   }
 
   createToolRouter(): ToolRouter {
