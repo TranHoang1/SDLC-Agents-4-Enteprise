@@ -88,7 +88,6 @@ export async function refreshRuleSymbolBody(
   const fields = extractRequiredFields(ruleJson);
   if (!fields) return;
   const kind = resolveSymbolKind(fields.pxObjClass);
-  const fqn = buildFqn(fields.pxObjClass, fields.pyClassName, fields.pyRuleName);
   const virtualPath = buildVirtualPath(fields.pyClassName, kind, fields.pyRuleName);
 
   // Clear prior enrichment so a fresh CODE_ENRICHMENT task is created

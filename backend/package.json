@@ -62,10 +62,12 @@
     "@types/better-sqlite3": "^7.6.0",
     "@types/express": "^5.0.6",
     "@types/node": "^20.0.0",
+    "eslint": "^10.8.1",
     "fast-check": "^4.9.0",
     "globals": "^17.7.0",
     "tsx": "^4.0.0",
     "typescript": "^5.5.0",
+    "typescript-eslint": "^8.67.0",
     "vitest": "^4.1.9"
   },
   "directories": {

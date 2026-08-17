@@ -85,7 +85,7 @@ export class PegaService {
       [fqn, req.projectId],
     );
     if (!row) return { cached: false };
-    const [, storedClass = '', storedName = ''] = row.signature.split(':');
+    const storedClass = row.signature.split(':')[0] ?? '';
     return {
       cached: true,
       ruleId: row.id,
@@ -101,7 +101,7 @@ export class PegaService {
   public parseRuleToSymbol(ruleJson: Record<string, unknown>): { fqn: string; isRule: boolean } | null {
     try {
       return this.parser.parseSymbol(ruleJson);
-    } catch (err) {
+    } catch {
       return null;
     }
   }

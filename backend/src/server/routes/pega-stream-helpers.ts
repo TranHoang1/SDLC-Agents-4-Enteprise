@@ -33,7 +33,7 @@ export async function processOneLine(
   let obj: Record<string, unknown>;
   try {
     obj = JSON.parse(line);
-  } catch (err) {
+  } catch {
     logger.debug({ line: line.substring(0, 80) }, '[pega-stream] Malformed JSON line — skipping');
     return { isMeta: false, stored: false };
   }

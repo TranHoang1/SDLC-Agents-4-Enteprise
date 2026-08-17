@@ -87,7 +87,7 @@ export function createPegaSyncToKbRoutes(registry: ModuleRegistry, logger: Logge
 }
 
 /** Check how many pending/processing tasks exist for TAG_ENRICHMENT. */
-async function checkPendingTaskCount(registry: ModuleRegistry, projectId: string): Promise<number> {
+async function checkPendingTaskCount(registry: ModuleRegistry, _projectId: string): Promise<number> {
   try {
     const memModule = registry.getModule('memory') as any;
     if (!memModule?.taskWorker) return 0;

@@ -32,7 +32,7 @@ import { PegaDecisionTreeEvaluator } from '../../modules/pega/decision/PegaDecis
 import { PegaSectionRenderer } from '../../modules/pega/ui/PegaSectionRenderer.js';
 import { PegaHarnessAssembler } from '../../modules/pega/ui/PegaHarnessAssembler.js';
 import type { PegaDecisionTableRow, DecisionTreeNode } from '../../modules/pega/decision/PegaEvaluationResult.js';
-import type { PegaSection, PegaLayout, PegaField } from '../../modules/pega/ui/PegaUITypes.js';
+import type { PegaSection } from '../../modules/pega/ui/PegaUITypes.js';
 
 export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): Hono {
   const app = new Hono();
@@ -433,7 +433,6 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
         currentPage?: string;
       }>();
       const ctx = new PegaClipboardContext(body.clipboard || {}, body.currentPage);
-      const sectionRenderer = new PegaSectionRenderer();
       const assembler = new PegaHarnessAssembler();
       const html = assembler.assemble(body.sections, ctx);
       return c.json({ data: { html }, error: null });
