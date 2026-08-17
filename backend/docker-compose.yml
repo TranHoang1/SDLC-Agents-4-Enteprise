@@ -1,12 +1,24 @@
 # SA4E-44 Docker Compose — Local Dev & Test Environment
 
 services:
+  # Base image — OS, draw.io, Electron deps. Build once; rebuild only when system deps change.
+  # Usage: docker compose --profile base build base
+  base:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    image: sa4e-base:latest
+    profiles:
+      - base
+
   # Backend service (Node.js 20 + Hono)
   backend:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
+      args:
+        BASE_IMAGE: sa4e-base:latest
     container_name: sa4e-backend
     environment:
       NODE_ENV: development
