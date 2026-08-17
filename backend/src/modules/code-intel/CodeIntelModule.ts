@@ -15,6 +15,9 @@ import { loadConfig } from '../../engine/config.js';
 import { resolveEngineAdapter } from '../../database/factory/resolveEngineAdapter.js';
 import { CODE_INTEL_TOOL_DEFINITIONS, dispatchCodeIntelTool } from '../../engine/tools/register-tools.js';
 import { withErrorHandling, withTextResult } from '../../tool-router/ToolHandlerDecorators.js';
+import { OnboardingService } from './onboarding/OnboardingService.js';
+import { OnboardingToolHandler } from './onboarding/OnboardingToolHandler.js';
+import { ONBOARDING_TOOL_DEFINITIONS } from './onboarding/definitions.js';
 
 export class CodeIntelModule implements IModule {
   readonly name = 'codeIntel';
@@ -26,6 +29,7 @@ export class CodeIntelModule implements IModule {
   private workspace!: string;
   private queryLayer!: QueryLayer;
   private adapter!: DatabaseAdapter;
+  private onboardingHandler!: OnboardingToolHandler;
 
   constructor(logger: Logger) {
     this.logger = logger.child({ module: this.name });
@@ -54,6 +58,9 @@ export class CodeIntelModule implements IModule {
       this.queryLayer = new QueryLayer(this.adapter);
       this.indexer = new IndexingEngine(this.adapter, config);
       this.indexer.startBackgroundIndexing();
+      // SA4E-166: Initialize onboarding service
+      const onboardingService = new OnboardingService(this.workspace, this.logger);
+      this.onboardingHandler = new OnboardingToolHandler(onboardingService, this.logger);
       this._status = 'ready';
     } catch (error) {
       this.logger.error({ err: error }, 'Failed to initialize code intelligence module');
@@ -87,15 +94,21 @@ export class CodeIntelModule implements IModule {
       handlers.set(def.name, handler);
     }
 
+    // SA4E-166: Register onboarding tool handlers
+    for (const [name, handler] of this.onboardingHandler.getHandlers()) {
+      handlers.set(name, withErrorHandling(this.logger, name)(handler));
+    }
+
     return handlers;
   }
 
   getToolDefinitions(): ToolDefinition[] {
-    return CODE_INTEL_TOOL_DEFINITIONS.map(def => ({
+    const codeIntelDefs = CODE_INTEL_TOOL_DEFINITIONS.map(def => ({
       name: def.name,
       description: def.description,
       inputSchema: def.inputSchema as any,
       category: 'code' as const,
     }));
+    return [...codeIntelDefs, ...ONBOARDING_TOOL_DEFINITIONS];
   }
 }

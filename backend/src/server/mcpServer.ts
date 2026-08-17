@@ -32,7 +32,7 @@ function resolveNotification(toolName: string): string | undefined {
   return NOTIFICATION_PATTERNS.find(p => p.test(toolName))?.method;
 }
 
-export function getMcpServer(registry: ModuleRegistry, logger: Logger): Server {
+export function getMcpServer(registry: ModuleRegistry, logger: Logger, projectContext?: { projectId: string; userId?: string }): Server {
   const server = new Server(
     { name: 'kiro-backend-mcp', version: '1.0.0' },
     { capabilities: { tools: {} } },
@@ -70,7 +70,11 @@ export function getMcpServer(registry: ModuleRegistry, logger: Logger): Server {
     }
 
     try {
-      const result = await handler(args || {});
+      // Inject project context from HTTP request headers (multi-tenant support)
+      const enrichedArgs = projectContext
+        ? { ...(args || {}), _projectContext: projectContext }
+        : (args || {});
+      const result = await handler(enrichedArgs);
 
       if (!result.isError) {
         trackToolUsage(registry, logger, name); // BR-07/BR-12: count only success

@@ -193,7 +193,7 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     });
   });
 
-  /** On-demand enrichment: trigger LLM enrichment for a single unenriched code symbol. */
+  /** On-demand enrichment: trigger LLM enrichment for a single unenriched entry. */
   app.post('/api/admin/kb/entries/:id/enrich', async (c) => {
     const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
@@ -201,17 +201,47 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     if (permCheck instanceof Response) return permCheck;
     const entryId = c.req.param('id');
 
-    // Only code symbols can be enriched on-demand
+    const { getIndexAdapter } = await import('../../../admin/db/core.js');
+    const indexAdapter = getIndexAdapter();
+    const projectId = ctx.getRequestProjectId(c);
+
+    // Branch: Pega/KB entries — enrich via TAG_ENRICHMENT flow
+    if (entryId.startsWith('pega:') || entryId.startsWith('kb-entry:')) {
+      const numericId = entryId.startsWith('kb-entry:') ? parseInt(entryId.replace('kb-entry:', ''), 10) : null;
+      const entry = numericId
+        ? await indexAdapter.getAsync<{ id: number; content: string; summary: string | null; enrichment_status: string | null; structured_map: string | null }>(
+            'SELECT id, content, summary, enrichment_status, structured_map FROM knowledge_entries WHERE id = ?', [numericId])
+        : await indexAdapter.getAsync<{ id: number; content: string; summary: string | null; enrichment_status: string | null; structured_map: string | null }>(
+            'SELECT id, content, summary, enrichment_status, structured_map FROM knowledge_entries WHERE source = ?', [entryId.replace('pega:', '')]);
+      if (!entry) return c.json({ error: 'Entry not found' }, 404);
+      if (entry.enrichment_status === 'done') {
+        const map = entry.structured_map ? JSON.parse(entry.structured_map) : {};
+        return c.json({ status: 'already_enriched', enrichment: { summary: map.summary || entry.summary, pseudoCode: null, llmTags: map.tags || null, status: 'COMPLETED' } });
+      }
+      try {
+        const { PendingTaskRepository } = await import('../../../modules/memory/task-queue/PendingTaskRepository.js');
+        const { TaskType } = await import('../../../modules/memory/task-queue/models.js');
+        const taskRepo = new PendingTaskRepository(indexAdapter);
+        await taskRepo.create({
+          task_type: TaskType.TAG_ENRICHMENT,
+          entry_id: entry.id,
+          payload: { entry_id: entry.id, content: (entry.summary || entry.content || '').slice(0, 2000), existing_tags: '', options: { threshold: 0.6, autoApply: true } },
+        });
+        return c.json({ status: 'queued', message: 'Enrichment task created. Will be processed by background worker.' });
+      } catch (err: any) {
+        return c.json({ status: 'error', message: err.message }, 500);
+      }
+    }
+
+    // Branch: Code symbols (original flow)
     if (!entryId.startsWith('code:') && !entryId.startsWith('sym-')) {
-      return c.json({ error: 'Only code symbols support on-demand enrichment' }, 400);
+      return c.json({ error: 'Unsupported entry type for on-demand enrichment' }, 400);
     }
     const symbolId = entryId.startsWith('code:') ? entryId.replace('code:', '') : entryId.replace('sym-', '');
     const numId = parseInt(symbolId, 10);
     if (isNaN(numId)) return c.json({ error: 'Invalid symbol ID' }, 400);
 
     // Check if already enriched
-    const { getIndexAdapter } = await import('../../../admin/db/core.js');
-    const indexAdapter = getIndexAdapter();
     const sym = await indexAdapter.getAsync<{ enrichment_status: string | null; kind: string; name: string; file_id: number }>(
       'SELECT enrichment_status, kind, name, file_id FROM symbols WHERE id = ?', [numId],
     );
@@ -225,7 +255,6 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
       'SELECT relative_path FROM files WHERE id = ?', [sym.file_id],
     );
     const filePath = fileRow?.relative_path || '';
-    const projectId = ctx.getRequestProjectId(c);
 
     // Try to enrich via backend LLM
     try {
@@ -268,7 +297,7 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
           symbolKind: sym.kind,
           projectId: projectId,
           filePath: filePath,
-          workspaceType: 'standard',
+          workspaceType: sym.kind.startsWith('pega_') ? 'pega' : 'standard',
         }),
         task_type: 'CODE_ENRICHMENT',
         status: 'PENDING',
@@ -352,6 +381,9 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
         }
       }
     } catch (err) { /* body_embeddings table may not exist */ }
+    const isPega = Boolean(detail.language && detail.language.toLowerCase() === 'pega');
+    const codeLabel = isPega ? '**Rule Content:**' : '**Code:**';
+    const codeFence = isPega ? 'text' : (detail.language?.toLowerCase() || 'typescript');
     const contentParts = [
       detail.signature ? `**Signature:** \`${detail.signature}\`` : '',
       detail.docComment ? `**Doc:** ${detail.docComment}` : '',
@@ -360,7 +392,7 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
       detail.module ? `**Module:** ${detail.module}` : '',
       detail.visibility ? `**Visibility:** ${detail.visibility}` : '',
       detail.parentSymbol ? `**Parent:** ${detail.parentSymbol}` : '',
-      bodyCode ? `\n**Code:**\n\`\`\`typescript\n${bodyCode.substring(0, 2000)}\n\`\`\`` : '',
+      bodyCode ? `\n${codeLabel}\n\`\`\`${codeFence}\n${bodyCode.substring(0, 2000)}\n\`\`\`` : '',
     ].filter(Boolean).join('\n');
     return {
       id: `code:${detail.id}`,

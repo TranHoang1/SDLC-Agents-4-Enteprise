@@ -14,7 +14,7 @@ import { DependencyGraphService } from '../dependency-graph-service.js';
 import { TestDetector } from '../test-detector.js';
 import { ImpactAnalysisService } from '../impact-analysis-service.js';
 import { GraphTraverser } from '../traverser.js';
-import { GraphRepository } from '../../database/graph-repository.js';
+import { GraphRepository } from '../graph-repository.js';
 
 let db: Database.Database;
 

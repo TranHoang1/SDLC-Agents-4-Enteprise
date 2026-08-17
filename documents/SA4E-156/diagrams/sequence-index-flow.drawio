@@ -1,0 +1,279 @@
+<mxGraphModel dx="1400" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1200" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Title -->
+    <mxCell id="title" value="Sequence — Full Indexing Flow (SA4E-156)" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="400" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Participant: Extension -->
+    <mxCell id="h1" value="VS Code Extension" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="50" width="150" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- Participant: Pega Server -->
+    <mxCell id="h2" value="Pega Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="380" y="50" width="150" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- Participant: Backend Server -->
+    <mxCell id="h3" value="Backend Server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="50" width="150" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- Participant: Schema -->
+    <mxCell id="h4" value="pega-core-schemas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1000" y="50" width="150" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- Lifeline: Extension -->
+    <mxCell id="l1" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="90" as="sourcePoint"/>
+        <mxPoint x="135" y="1100" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Lifeline: Pega -->
+    <mxCell id="l2" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="455" y="90" as="sourcePoint"/>
+        <mxPoint x="455" y="1100" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Lifeline: Backend -->
+    <mxCell id="l3" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="775" y="90" as="sourcePoint"/>
+        <mxPoint x="775" y="1100" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Lifeline: Schema -->
+    <mxCell id="l4" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1075" y="90" as="sourcePoint"/>
+        <mxPoint x="1075" y="1100" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Phase 0: Project Detection -->
+    <mxCell id="phase0" value="Phase 0: Project Detection" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="110" width="200" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- M1: Read pega-project.json (self) -->
+    <mxCell id="m1" value="1. Read pega-project.json, extract appName" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="140" as="sourcePoint"/>
+        <mxPoint x="135" y="160" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="220" y="140"/>
+          <mxPoint x="220" y="160"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M2: Compute projectId (self) -->
+    <mxCell id="m2" value="2. Compute projectId = SHA256('pega:'+appName).slice(0,12)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="180" as="sourcePoint"/>
+        <mxPoint x="135" y="200" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="220" y="180"/>
+          <mxPoint x="220" y="200"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Phase 1: Enumeration -->
+    <mxCell id="phase1" value="Phase 1: DataPage Enumeration" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="220" width="220" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- M3: POST DataPage -->
+    <mxCell id="m3" value="3. POST D_LatestRules4ExactedApps { ApplicationNames }" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="250" as="sourcePoint"/>
+        <mxPoint x="455" y="250" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M4: Return pxResults -->
+    <mxCell id="m4" value="4. { pxResults: RuleSummary[] }" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="455" y="290" as="sourcePoint"/>
+        <mxPoint x="135" y="290" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M5: Init queue + dedup -->
+    <mxCell id="m5" value="5. Init dedupSet + fetchQueue from pxResults" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="320" as="sourcePoint"/>
+        <mxPoint x="135" y="340" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="270" y="320"/>
+          <mxPoint x="270" y="340"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Phase 2: BFS Loop -->
+    <mxCell id="phase2" value="Phase 2: BFS Fetch + Ingest + Discover (LOOP)" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="370" width="300" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- Loop box -->
+    <mxCell id="loop1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#666666;dashed=1;strokeWidth=1;" vertex="1" parent="1">
+      <mxGeometry x="50" y="400" width="1130" height="520" as="geometry"/>
+    </mxCell>
+    <mxCell id="looplabel" value="loop [while fetchQueue not empty]" style="text;html=1;align=left;verticalAlign=top;fontSize=9;fontStyle=2;fillColor=#f5f5f5;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="55" y="400" width="220" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- M6: Pick batch from queue -->
+    <mxCell id="m6" value="6. Dequeue batch (chunk=50)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="430" as="sourcePoint"/>
+        <mxPoint x="135" y="450" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="250" y="430"/>
+          <mxPoint x="250" y="450"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M7: Fetch rules -->
+    <mxCell id="m7" value="7. GET /rules/{pzInsKey} (parallel)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="470" as="sourcePoint"/>
+        <mxPoint x="455" y="470" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M8: Return rule JSON -->
+    <mxCell id="m8" value="8. Rule JSON content" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="455" y="510" as="sourcePoint"/>
+        <mxPoint x="135" y="510" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M9: Save to disk -->
+    <mxCell id="m9" value="9. Save to ./rules/{class}/{name}.pega.json" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="540" as="sourcePoint"/>
+        <mxPoint x="135" y="560" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="250" y="540"/>
+          <mxPoint x="250" y="560"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M10: POST ingest-rule -->
+    <mxCell id="m10" value="10. POST /api/v1/pega/ingest-rule { projectId, ruleJson }" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="590" as="sourcePoint"/>
+        <mxPoint x="775" y="590" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M11: Backend ingests -->
+    <mxCell id="m11" value="11. ingestRule() to KB + Graph" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="775" y="620" as="sourcePoint"/>
+        <mxPoint x="775" y="640" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="870" y="620"/>
+          <mxPoint x="870" y="640"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M12: Lookup schema -->
+    <mxCell id="m12" value="12. Lookup dependencyPaths for pxObjClass" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="775" y="660" as="sourcePoint"/>
+        <mxPoint x="1075" y="660" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M13: Return paths -->
+    <mxCell id="m13" value="13. dependencyPaths[]" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1075" y="700" as="sourcePoint"/>
+        <mxPoint x="775" y="700" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M14: extractRelatives -->
+    <mxCell id="m14" value="14. extractRelatives(ruleJson, paths)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="775" y="730" as="sourcePoint"/>
+        <mxPoint x="775" y="750" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="900" y="730"/>
+          <mxPoint x="900" y="750"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M15: Return response -->
+    <mxCell id="m15" value="15. { stored: true, relatives: [...] }" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="775" y="780" as="sourcePoint"/>
+        <mxPoint x="135" y="780" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M16: Check dedup + enqueue -->
+    <mxCell id="m16" value="16. For each relative: dedupSet check → enqueue new" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="820" as="sourcePoint"/>
+        <mxPoint x="135" y="840" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="300" y="820"/>
+          <mxPoint x="300" y="840"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Phase 3: Finalize -->
+    <mxCell id="phase3" value="Phase 3: Finalize" style="text;html=1;align=left;verticalAlign=middle;fontSize=10;fontStyle=3;fillColor=#f5f5f5;strokeColor=#666666;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="950" width="150" height="20" as="geometry"/>
+    </mxCell>
+
+    <!-- M17: Query totals -->
+    <mxCell id="m17" value="17. queryPegaTotals()" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="980" as="sourcePoint"/>
+        <mxPoint x="775" y="980" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M18: Return stats -->
+    <mxCell id="m18" value="18. { totalKb, totalGraph }" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="775" y="1020" as="sourcePoint"/>
+        <mxPoint x="135" y="1020" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- M19: Report -->
+    <mxCell id="m19" value="19. Report: Ingested N rules (initial: I, discovered: D)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="135" y="1050" as="sourcePoint"/>
+        <mxPoint x="135" y="1070" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="300" y="1050"/>
+          <mxPoint x="300" y="1070"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

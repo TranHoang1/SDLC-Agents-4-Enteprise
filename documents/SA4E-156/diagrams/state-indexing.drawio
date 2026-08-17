@@ -1,0 +1,170 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Title -->
+    <mxCell id="title" value="State Machine — Indexing Lifecycle (SA4E-156)" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="310" y="20" width="400" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Start (black circle) -->
+    <mxCell id="start" value="" style="ellipse;html=1;shape=mxgraph.flowchart.start_2;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="100" y="100" width="30" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- State: IDLE -->
+    <mxCell id="s1" value="IDLE&#xa;(waiting for command)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="90" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- State: DETECTING -->
+    <mxCell id="s2" value="DETECTING&#xa;(read pega-project.json)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="480" y="90" width="200" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- State: ENUMERATING -->
+    <mxCell id="s3" value="ENUMERATING&#xa;(DataPage call)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="780" y="90" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- State: FETCHING -->
+    <mxCell id="s4" value="FETCHING&#xa;(GET rules from Pega)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="780" y="250" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- State: INGESTING -->
+    <mxCell id="s5" value="INGESTING&#xa;(POST ingest-rule)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="780" y="410" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- State: DISCOVERING -->
+    <mxCell id="s6" value="DISCOVERING&#xa;(check relatives, enqueue)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="480" y="410" width="200" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- State: FINALIZING -->
+    <mxCell id="s7" value="FINALIZING&#xa;(queryTotals, report)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="410" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- State: DONE -->
+    <mxCell id="s8" value="DONE&#xa;(indexing complete)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="580" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- State: ERROR -->
+    <mxCell id="s9" value="ERROR&#xa;(indexing aborted)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="530" y="580" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- End (bullseye) -->
+    <mxCell id="end1" value="" style="ellipse;html=1;shape=mxgraph.flowchart.terminate;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="275" y="690" width="30" height="30" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: Start → IDLE -->
+    <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="start" target="s1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: IDLE → DETECTING -->
+    <mxCell id="e2" value="user triggers&#xa;Index Workspace" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s1" target="s2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: DETECTING → ENUMERATING -->
+    <mxCell id="e3" value="appName found" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s2" target="s3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: ENUMERATING → FETCHING -->
+    <mxCell id="e4" value="pxResults received&#xa;queue seeded" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s3" target="s4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: FETCHING → INGESTING -->
+    <mxCell id="e5" value="batch fetched" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s4" target="s5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: INGESTING → DISCOVERING -->
+    <mxCell id="e6" value="rule stored&#xa;relatives returned" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s5" target="s6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: DISCOVERING → FETCHING (loop back — queue not empty) -->
+    <mxCell id="e7" value="queue NOT empty&#xa;(new relatives enqueued)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s6" target="s4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="580" y="320"/>
+          <mxPoint x="870" y="320"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Edge: DISCOVERING → FINALIZING (queue empty) -->
+    <mxCell id="e8" value="queue EMPTY" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s6" target="s7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: FINALIZING → DONE -->
+    <mxCell id="e9" value="stats reported" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="s7" target="s8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: DONE → End -->
+    <mxCell id="e10" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="s8" target="end1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- Edge: DETECTING → ERROR -->
+    <mxCell id="e11" value="appName not found" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="s2" target="s9">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="580" y="200"/>
+          <mxPoint x="620" y="200"/>
+          <mxPoint x="620" y="580"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Edge: ENUMERATING → ERROR -->
+    <mxCell id="e12" value="DataPage failed" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="s3" target="s9">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="870" y="180"/>
+          <mxPoint x="1020" y="180"/>
+          <mxPoint x="1020" y="560"/>
+          <mxPoint x="620" y="560"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Edge: FETCHING → ERROR -->
+    <mxCell id="e13" value="server error&#xa;(after retry)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="s4" target="s9">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1020" y="275"/>
+          <mxPoint x="1020" y="560"/>
+          <mxPoint x="620" y="560"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Edge: ERROR → End -->
+    <mxCell id="e14" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;" edge="1" parent="1" source="s9" target="end1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="620" y="690"/>
+          <mxPoint x="305" y="690"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Note: BFS Loop -->
+    <mxCell id="note1" value="BFS Loop: FETCHING → INGESTING → DISCOVERING&#xa;repeats until fetchQueue is empty.&#xa;dedupSet prevents infinite cycles." style="text;html=1;align=left;verticalAlign=top;fontSize=9;fillColor=#ffffcc;strokeColor=#d6b656;rounded=1;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="200" y="250" width="280" height="60" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -1,0 +1,56 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Start node -->
+    <mxCell id="start" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="100" y="80" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <!-- States -->
+    <mxCell id="s1" value="INDEXED&#xa;(enrichment_status = NULL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="250" y="60" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="s2" value="ENRICHMENT_PENDING&#xa;(task in pending_tasks)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="250" y="190" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="s3" value="ENRICHING&#xa;(LLM request in-flight)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="250" y="320" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="s4" value="ENRICHED&#xa;(enrichment_status = COMPLETED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="100" y="460" width="210" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="s5" value="ENRICHMENT_FAILED&#xa;(enrichment_status = FAILED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="420" y="460" width="210" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="s6" value="ARCHIVED&#xa;(legacy entry archived)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="100" y="600" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Transitions -->
+    <mxCell id="t0" value="PegaKbSync inserts" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="start" target="s1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t1" value="TaskCreator creates task" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="s1" target="s2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t2" value="TaskWorker picks up" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="s2" target="s3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t3" value="LLM success" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="s3" target="s4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t4" value="LLM timeout / error" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="s3" target="s5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t5" value="manual retry" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;dashed=1;" edge="1" parent="1" source="s5" target="s2">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="650" y="485"/>
+          <mxPoint x="650" y="215"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="t6" value="admin verifies + archives legacy" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;dashed=1;" edge="1" parent="1" source="s4" target="s6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

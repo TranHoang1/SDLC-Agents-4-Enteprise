@@ -8,8 +8,8 @@ import * as fsp from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import type { AppConfig } from '../config.js';
-import type { ScannedFile } from '../scanner/file-scanner.js';
-import { detectLanguage, loadFileMetadata } from '../scanner/file-scanner.js';
+import type { ScannedFile } from './file-scanner.js';
+import { detectLanguage, loadFileMetadata } from './file-scanner.js';
 import { createIgnoreParser } from '../parsers/ignore/index.js';
 
 const CHUNK_SIZE = 50;

@@ -1,0 +1,12 @@
+vector,description,expected
+"../../etc/passwd","Unix parent traversal",VALIDATION_ERROR
+"..\..\windows\system32\config\sam","Windows backslash traversal",VALIDATION_ERROR
+"/etc/shadow","Unix absolute path",VALIDATION_ERROR
+"C:\windows\system32\drivers\etc\hosts","Windows absolute path",VALIDATION_ERROR
+"file:///etc/passwd","Protocol prefix",VALIDATION_ERROR
+"documents/valid/../../../etc/hosts","Mixed traversal",VALIDATION_ERROR
+"documents/file%00.txt../../secret","Null byte injection",VALIDATION_ERROR
+"\\attacker\share\payload","UNC path",VALIDATION_ERROR
+"....//....//etc/passwd","Double-dot slash bypass",VALIDATION_ERROR
+"documents/legit/file.docx","Valid workspace path",SUCCESS
+"test-data/report.pdf","Valid nested path",SUCCESS

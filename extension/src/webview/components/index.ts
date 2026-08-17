@@ -29,6 +29,9 @@ export { default as DeepLinkButton } from './DeepLinkButton.svelte';
 // Phase 8: Diagram rendering
 export { default as DiagramBlock } from './DiagramBlock.svelte';
 
+// SA4E-106: Enrichment progress display
+export { default as EnrichmentProgress } from './EnrichmentProgress.svelte';
+
 export { createStreamBatcher } from './streamBatcher';
 export type { StreamBatcher } from './streamBatcher';
 

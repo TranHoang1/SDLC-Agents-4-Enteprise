@@ -3,7 +3,7 @@
  * Provides transitive call graph analysis with depth control.
  */
 
-import { GraphRepository, CallerResult, CalleeResult } from '../database/graph-repository.js';
+import { GraphRepository, CallerResult, CalleeResult } from './graph-repository.js';
 import { SymbolResolver, ResolvedSymbol } from './symbol-resolver.js';
 
 export interface CallGraphItem {

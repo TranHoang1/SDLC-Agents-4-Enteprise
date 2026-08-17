@@ -1,9 +1,143 @@
-import Database from 'better-sqlite3';
+/**
+ * admin/db/schema.ts — Admin schema initialization and seed data.
+ * SA4E-53: Accepts DatabaseAdapter (sync interface) instead of raw better-sqlite3.
+ */
+
 import * as crypto from 'crypto';
 import { hashPassword } from './password.js';
+import type { SyncDatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 
-export function initSchema(db: Database.Database): void {
+/** Initialize admin schema tables (idempotent CREATE IF NOT EXISTS). */
+export function initSchema(db: SyncDatabaseAdapter): void {
+  db.exec(ADMIN_SCHEMA_SQL);
+
+  // Idempotent migration: add project_id to graph_nodes for existing DBs
+  try {
+    db.exec(`ALTER TABLE graph_nodes ADD COLUMN project_id TEXT NOT NULL DEFAULT ''`);
+  } catch (err) { console.debug('[schema] column already exists :', (err as Error).message); }
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_graph_nodes_project ON graph_nodes(project_id)`);
+
+  // SA4E-50: project_registry — workspace → projectId mapping
   db.exec(`
+    CREATE TABLE IF NOT EXISTS project_registry (
+      project_id TEXT PRIMARY KEY,
+      display_name TEXT NOT NULL DEFAULT '',
+      workspace_path TEXT NOT NULL DEFAULT '',
+      last_seen TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_project_registry_seen ON project_registry(last_seen);
+  `);
+
+  // Idempotent migration: add created_by to project_registry
+  try {
+    db.exec(`ALTER TABLE project_registry ADD COLUMN created_by TEXT NOT NULL DEFAULT ''`);
+  } catch (err) { console.debug('[schema] column already exists :', (err as Error).message); }
+}
+
+/** Seed default access groups and admin user. */
+export function seedDefaults(db: SyncDatabaseAdapter): void {
+  const groupExists = db.get<Record<string, unknown>>(
+    'SELECT 1 FROM access_groups WHERE access_group_id = ?', ['grp-admin'],
+  );
+  if (!groupExists) {
+    seedAccessGroups(db);
+  }
+
+  const userExists = db.get<Record<string, unknown>>(
+    'SELECT 1 FROM users WHERE username = ?', ['admin'],
+  );
+  if (!userExists) {
+    seedAdminUser(db);
+  }
+}
+
+function seedAccessGroups(db: SyncDatabaseAdapter): void {
+  const now = new Date().toISOString();
+  db.run(
+    `INSERT INTO access_groups (access_group_id, access_group_name, is_system_group, created_at, updated_at)
+     VALUES (?, ?, 1, ?, ?)`,
+    ['grp-admin', 'Administrators', now, now],
+  );
+
+  const allPerms = [
+    'DASHBOARD_VIEW', 'KB_READ', 'KB_WRITE', 'KB_PROMOTE', 'KB_IMPORT_EXPORT',
+    'MCP_ACCESS', 'MCP_MANAGE', 'USER_MANAGE', 'RBAC_MANAGE', 'CONFIG_EDIT',
+    'SEARCH_EXPLORE', 'AUDIT_VIEW', 'GRAPH_VIEW', 'ANALYTICS_VIEW',
+  ];
+  for (const perm of allPerms) {
+    db.run(
+      'INSERT INTO group_permissions (access_group_id, permission_id, role_data) VALUES (?, ?, ?)',
+      ['grp-admin', perm, '{}'],
+    );
+  }
+
+  db.run(
+    `INSERT INTO access_groups (access_group_id, access_group_name, is_system_group, created_at, updated_at)
+     VALUES (?, ?, 0, ?, ?)`,
+    ['grp-dev', 'Developers', now, now],
+  );
+  const devPerms = ['DASHBOARD_VIEW', 'KB_READ', 'KB_WRITE', 'MCP_ACCESS', 'SEARCH_EXPLORE', 'GRAPH_VIEW', 'ANALYTICS_VIEW'];
+  for (const perm of devPerms) {
+    db.run(
+      'INSERT INTO group_permissions (access_group_id, permission_id, role_data) VALUES (?, ?, ?)',
+      ['grp-dev', perm, '{}'],
+    );
+  }
+
+  db.run(
+    `INSERT INTO access_groups (access_group_id, access_group_name, is_system_group, created_at, updated_at)
+     VALUES (?, ?, 0, ?, ?)`,
+    ['grp-viewer', 'Viewers', now, now],
+  );
+  const viewerPerms = ['DASHBOARD_VIEW', 'KB_READ', 'SEARCH_EXPLORE', 'GRAPH_VIEW', 'ANALYTICS_VIEW'];
+  for (const perm of viewerPerms) {
+    db.run(
+      'INSERT INTO group_permissions (access_group_id, permission_id, role_data) VALUES (?, ?, ?)',
+      ['grp-viewer', perm, '{}'],
+    );
+  }
+
+  db.run(
+    `INSERT INTO access_groups (access_group_id, access_group_name, is_system_group, created_at, updated_at)
+     VALUES (?, ?, 0, ?, ?)`,
+    ['grp-mcp-ops', 'MCP Operators', now, now],
+  );
+  const mcpPerms = ['DASHBOARD_VIEW', 'MCP_ACCESS', 'MCP_MANAGE'];
+  for (const perm of mcpPerms) {
+    db.run(
+      'INSERT INTO group_permissions (access_group_id, permission_id, role_data) VALUES (?, ?, ?)',
+      ['grp-mcp-ops', perm, '{}'],
+    );
+  }
+}
+
+function seedAdminUser(db: SyncDatabaseAdapter): void {
+  const now = new Date().toISOString();
+  const envPassword = process.env.ADMIN_INITIAL_PASSWORD;
+  const initialPassword = envPassword && envPassword.length >= 12
+    ? envPassword
+    : crypto.randomBytes(18).toString('base64url');
+  const hash = hashPassword(initialPassword);
+  db.run(
+    `INSERT INTO users (user_id, username, email, password_hash, status, access_group_id, force_password_change, created_at)
+     VALUES (?, ?, ?, ?, 'ACTIVE', 'grp-admin', 1, ?)`,
+    ['user-admin-001', 'admin', 'admin@localhost', hash, now],
+  );
+
+  if (!envPassword) {
+    process.stdout.write(
+      '\n============================================================\n' +
+      '  ADMIN ACCOUNT CREATED — generated one-time password:\n' +
+      `  username: admin\n  password: ${initialPassword}\n` +
+      '  You MUST change this on first login. Set ADMIN_INITIAL_PASSWORD\n' +
+      '  env var to control the initial password.\n' +
+      '============================================================\n',
+    );
+  }
+}
+
+/** Full admin schema DDL — extracted for readability. */
+const ADMIN_SCHEMA_SQL = `
     CREATE TABLE IF NOT EXISTS users (
       user_id TEXT PRIMARY KEY,
       username TEXT UNIQUE NOT NULL,
@@ -105,90 +239,4 @@ export function initSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_graph_edges_source ON graph_edges(source);
     CREATE INDEX IF NOT EXISTS idx_graph_edges_target ON graph_edges(target);
     CREATE INDEX IF NOT EXISTS idx_graph_edges_source_target ON graph_edges(source, target);
-  `);
-
-  // Idempotent migration: add project_id to graph_nodes for existing DBs
-  try {
-    db.exec(`ALTER TABLE graph_nodes ADD COLUMN project_id TEXT NOT NULL DEFAULT ''`);
-  } catch (err) { console.debug('[schema] column already exists :', (err as Error).message); }
-  db.exec(`CREATE INDEX IF NOT EXISTS idx_graph_nodes_project ON graph_nodes(project_id)`);
-
-  // SA4E-50: project_registry — workspace → projectId mapping
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS project_registry (
-      project_id TEXT PRIMARY KEY,
-      display_name TEXT NOT NULL DEFAULT '',
-      workspace_path TEXT NOT NULL DEFAULT '',
-      last_seen TEXT NOT NULL DEFAULT (datetime('now'))
-    );
-    CREATE INDEX IF NOT EXISTS idx_project_registry_seen ON project_registry(last_seen);
-  `);
-
-  // Idempotent migration: add created_by to project_registry for ownership-based visibility
-  try {
-    db.exec(`ALTER TABLE project_registry ADD COLUMN created_by TEXT NOT NULL DEFAULT ''`);
-  } catch (err) { console.debug('[schema] column already exists :', (err as Error).message); }
-}
-
-export function seedDefaults(db: Database.Database): void {
-  const groupExists = db.prepare('SELECT 1 FROM access_groups WHERE access_group_id = ?').get('grp-admin');
-  if (!groupExists) {
-    const now = new Date().toISOString();
-    db.prepare(`INSERT INTO access_groups (access_group_id, access_group_name, is_system_group, created_at, updated_at)
-      VALUES (?, ?, 1, ?, ?)`).run('grp-admin', 'Administrators', now, now);
-
-    const allPerms = [
-      'DASHBOARD_VIEW', 'KB_READ', 'KB_WRITE', 'KB_PROMOTE', 'KB_IMPORT_EXPORT',
-      'MCP_ACCESS', 'MCP_MANAGE', 'USER_MANAGE', 'RBAC_MANAGE', 'CONFIG_EDIT',
-      'SEARCH_EXPLORE', 'AUDIT_VIEW', 'GRAPH_VIEW', 'ANALYTICS_VIEW'
-    ];
-    const insertPerm = db.prepare('INSERT INTO group_permissions (access_group_id, permission_id, role_data) VALUES (?, ?, ?)');
-    for (const perm of allPerms) {
-      insertPerm.run('grp-admin', perm, '{}');
-    }
-
-    db.prepare(`INSERT INTO access_groups (access_group_id, access_group_name, is_system_group, created_at, updated_at)
-      VALUES (?, ?, 0, ?, ?)`).run('grp-dev', 'Developers', now, now);
-    const devPerms = ['DASHBOARD_VIEW', 'KB_READ', 'KB_WRITE', 'MCP_ACCESS', 'SEARCH_EXPLORE', 'GRAPH_VIEW', 'ANALYTICS_VIEW'];
-    for (const perm of devPerms) {
-      insertPerm.run('grp-dev', perm, '{}');
-    }
-
-    db.prepare(`INSERT INTO access_groups (access_group_id, access_group_name, is_system_group, created_at, updated_at)
-      VALUES (?, ?, 0, ?, ?)`).run('grp-viewer', 'Viewers', now, now);
-    const viewerPerms = ['DASHBOARD_VIEW', 'KB_READ', 'SEARCH_EXPLORE', 'GRAPH_VIEW', 'ANALYTICS_VIEW'];
-    for (const perm of viewerPerms) {
-      insertPerm.run('grp-viewer', perm, '{}');
-    }
-
-    db.prepare(`INSERT INTO access_groups (access_group_id, access_group_name, is_system_group, created_at, updated_at)
-      VALUES (?, ?, 0, ?, ?)`).run('grp-mcp-ops', 'MCP Operators', now, now);
-    const mcpPerms = ['DASHBOARD_VIEW', 'MCP_ACCESS', 'MCP_MANAGE'];
-    for (const perm of mcpPerms) {
-      insertPerm.run('grp-mcp-ops', perm, '{}');
-    }
-  }
-
-  const userExists = db.prepare('SELECT 1 FROM users WHERE username = ?').get('admin');
-  if (!userExists) {
-    const now = new Date().toISOString();
-    const envPassword = process.env.ADMIN_INITIAL_PASSWORD;
-    const initialPassword = envPassword && envPassword.length >= 12
-      ? envPassword
-      : crypto.randomBytes(18).toString('base64url');
-    const hash = hashPassword(initialPassword);
-    db.prepare(`INSERT INTO users (user_id, username, email, password_hash, status, access_group_id, force_password_change, created_at)
-      VALUES (?, ?, ?, ?, 'ACTIVE', 'grp-admin', 1, ?)`).run('user-admin-001', 'admin', 'admin@localhost', hash, now);
-
-    if (!envPassword) {
-      process.stdout.write(
-        '\n============================================================\n' +
-        '  ADMIN ACCOUNT CREATED — generated one-time password:\n' +
-        `  username: admin\n  password: ${initialPassword}\n` +
-        '  You MUST change this on first login. Set ADMIN_INITIAL_PASSWORD\n' +
-        '  env var to control the initial password.\n' +
-        '============================================================\n'
-      );
-    }
-  }
-}
+`;

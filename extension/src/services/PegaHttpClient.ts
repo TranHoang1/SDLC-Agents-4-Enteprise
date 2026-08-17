@@ -851,4 +851,94 @@ export class PegaHttpClient {
     }
     return [];
   }
+
+  /**
+   * Call Pega DataPage D_LatestRules4ExactedApps to enumerate all rules for an application.
+   * SA4E-156: Single DataPage call replaces multi-RuleSet enumeration.
+   * @param appName - Application name with version (e.g. "TGB:08-01")
+   * @returns DataPage response containing pxResults array
+   * @throws Error if DataPage unreachable after retries
+   */
+  public async callDataPage(appName: string): Promise<Record<string, unknown>> {
+    const base = this.getPegaEndpoint();
+    const authHeader = await this.getAuthHeader();
+    const payload = { ApplicationNames: appName };
+
+    const endpoints = [
+      `${base}/api/v1/data/D_LatestRules4ExactedApps`,
+      `${base}/PRRestService/api/v1/data/D_LatestRules4ExactedApps`,
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const res = await this.fetchWithRetry(url, {
+          method: 'POST',
+          headers: {
+            Authorization: authHeader,
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.status === 401 || res.status === 403) {
+          throw new Error(`HTTP ${res.status} ${res.statusText || 'Auth Error'}`);
+        }
+
+        if (res.ok) {
+          const json = (await res.json()) as Record<string, unknown>;
+          if (json && !json.error) {
+            this.log(`[PegaHttpClient] ✅ DataPage success: ${url}`);
+            return json;
+          }
+        }
+      } catch (err: any) {
+        if (err.message.includes('HTTP 401') || err.message.includes('HTTP 403')) throw err;
+        this.log(`[PegaHttpClient] DataPage attempt failed: ${err.message}`);
+      }
+    }
+
+    throw new Error(`DataPage D_LatestRules4ExactedApps failed on all endpoints for app "${appName}"`);
+  }
+
+  /**
+   * Fetch full class inheritance hierarchy from Pega via D_pzInheritanceListofClass data page.
+   * Returns parent classes (pattern + directed) excluding @baseclass and the class itself.
+   * @param className - Class to resolve hierarchy for (e.g. "Common-Work-Activity")
+   * @returns Array of parent class names to download
+   */
+  public async fetchClassHierarchy(className: string): Promise<string[]> {
+    if (!className || className === '@baseclass') return [];
+    const base = this.getPegaEndpoint();
+    const authHeader = await this.getAuthHeader();
+    const endpoints = [
+      `${base}/api/CodeIntelligence/v1/datapage/list?dataPageName=D_pzInheritanceListofClass`,
+      `${base}/PRRestService/CodeIntelligence/v1/datapage/list?dataPageName=D_pzInheritanceListofClass`,
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const res = await this.fetchWithRetry(url, {
+          method: 'POST',
+          headers: {
+            Authorization: authHeader,
+            Accept: 'application/json',
+            'Content-Type': 'text/plain',
+          },
+          body: JSON.stringify({ classname: className }),
+        });
+        if (!res.ok) continue;
+        const json = (await res.json()) as Record<string, unknown>;
+        const results = json.pxResults as Array<Record<string, unknown>> | undefined;
+        if (!Array.isArray(results)) continue;
+        // Return all parent class names except self and @baseclass
+        return results
+          .map((r) => r.pyClassName as string)
+          .filter((name) => name && name !== className && name !== '@baseclass');
+      } catch (err: any) {
+        this.log(`[PegaHttpClient] fetchClassHierarchy attempt failed: ${err.message}`);
+      }
+    }
+    return [];
+  }
 }

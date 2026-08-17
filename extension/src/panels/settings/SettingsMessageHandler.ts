@@ -7,12 +7,14 @@ import * as vscode from "vscode";
 import { SECRET_KEYS } from "../../models";
 import { LlmTestService } from "../../services/LlmTestService";
 import { ProviderConfigService } from "../../services/ProviderConfigService";
+import { AtlassianCredentialService } from "../../services/AtlassianCredentialService";
 import { ProxyMessageHandler, PROXY_MESSAGE_TYPES } from "../../proxy/ProxyMessageHandler";
 
 export class SettingsMessageHandler {
   private readonly llmTestService: LlmTestService;
   private readonly configService: ProviderConfigService;
   private readonly proxyHandler: ProxyMessageHandler;
+  private readonly atlassianService: AtlassianCredentialService;
 
   constructor(
     private readonly secrets: vscode.SecretStorage,
@@ -21,6 +23,7 @@ export class SettingsMessageHandler {
     this.llmTestService = new LlmTestService(secrets);
     this.configService = new ProviderConfigService(secrets);
     this.proxyHandler = new ProxyMessageHandler(secrets, postMessage);
+    this.atlassianService = new AtlassianCredentialService(secrets);
   }
 
   async handle(msg: any): Promise<void> {
@@ -101,6 +104,12 @@ export class SettingsMessageHandler {
         } catch (err: any) {
           this.postMessage({ type: "pegaContextFetched", success: false, message: `Fetch failed: ${err.message}` });
         }
+        break;
+      case "saveAtlassianConfig":
+        await this.handleSaveAtlassianConfig(msg);
+        break;
+      case "testAtlassianConnection":
+        await this.handleTestAtlassianConnection();
         break;
     }
   }
@@ -243,5 +252,28 @@ export class SettingsMessageHandler {
       success: true,
       message: `Fetched context: App "${result.applicationName}" (${result.caseTypesCount} CaseTypes) → saved ${result.filePath}`
     });
+  }
+
+  private async handleSaveAtlassianConfig(msg: any): Promise<void> {
+    try {
+      await this.atlassianService.saveConfig({
+        baseUrl: msg.baseUrl,
+        email: msg.email,
+        apiToken: msg.apiToken,
+        connectionType: msg.connectionType || "cloud",
+      });
+      this.postMessage({ type: "atlassianSaved", success: true });
+    } catch (err: any) {
+      this.postMessage({ type: "atlassianSaved", success: false, error: err.message });
+    }
+  }
+
+  private async handleTestAtlassianConnection(): Promise<void> {
+    try {
+      const result = await this.atlassianService.testConnection();
+      this.postMessage({ type: "atlassianTestResult", ...result });
+    } catch (err: any) {
+      this.postMessage({ type: "atlassianTestResult", success: false, message: err.message });
+    }
   }
 }

@@ -4,7 +4,7 @@
  */
 
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
-import { GraphRepository } from '../database/graph-repository.js';
+import { GraphRepository } from '../graph/graph-repository.js';
 import { SymbolResolver } from '../graph/symbol-resolver.js';
 import { CallGraphService } from '../graph/call-graph-service.js';
 import { FileResolver } from '../graph/file-resolver.js';

@@ -1,0 +1,138 @@
+<mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- External Actors (top row) -->
+    <mxCell id="a1" value="Developer&#xa;(Admin UI / MCP Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="100" y="30" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="a2" value="LLM Provider&#xa;(Ollama / OpenAI / Gemini)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1300" y="30" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="a3" value="Tree-sitter&#xa;Indexing Engine" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="30" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Code Intelligence MCP Server boundary -->
+    <mxCell id="boundary" value="Code Intelligence MCP Server (backend)" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;strokeWidth=2;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="60" y="130" width="1480" height="650" as="geometry"/>
+    </mxCell>
+    <!-- Task Queue Layer -->
+    <mxCell id="tq" value="Task Queue Layer" style="swimlane;startSize=25;fillColor=none;strokeColor=#666666;dashed=1;html=1;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="40" y="50" width="400" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="n1" value="pending_tasks&#xa;(SQLite/PostgreSQL)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;size=10;" vertex="1" parent="tq">
+      <mxGeometry x="30" y="40" width="150" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="TaskWorker&#xa;(poll + dispatch)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="tq">
+      <mxGeometry x="230" y="50" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Enrichment Pipeline -->
+    <mxCell id="ep" value="Enrichment Pipeline (engine/enrichment/)" style="swimlane;startSize=25;fillColor=none;strokeColor=#82b366;dashed=1;html=1;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="500" y="50" width="500" height="270" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="CodeEnrichment&#xa;TaskCreator" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ep">
+      <mxGeometry x="20" y="40" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="CodeEnrichment&#xa;Handler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ep">
+      <mxGeometry x="200" y="40" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="CodeEnrichment&#xa;PromptBuilder" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ep">
+      <mxGeometry x="200" y="120" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="tag-validator.ts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ep">
+      <mxGeometry x="200" y="200" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="types.ts&#xa;(Zod schemas)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ep">
+      <mxGeometry x="20" y="120" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Changes marker for OI-05 -->
+    <mxCell id="n3fix" value="FIX OI-05:&#xa;copyEnrichment&#xa;FromOtherScope()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;fontStyle=2;" vertex="1" parent="ep">
+      <mxGeometry x="20" y="200" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- MCP Tools -->
+    <mxCell id="tools" value="MCP Tools (engine/tools/)" style="swimlane;startSize=25;fillColor=none;strokeColor=#666666;dashed=1;html=1;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="1060" y="50" width="380" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="code_enrichment_stats" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="tools">
+      <mxGeometry x="20" y="40" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="code_search_by_tag" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="tools">
+      <mxGeometry x="200" y="40" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Data Layer -->
+    <mxCell id="dl" value="Data Layer" style="swimlane;startSize=25;fillColor=none;strokeColor=#9673a6;dashed=1;html=1;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="40" y="380" width="700" height="220" as="geometry"/>
+    </mxCell>
+    <mxCell id="n10" value="symbols table&#xa;(summary, pseudo_code,&#xa;llm_tags, enrichment_status,&#xa;enriched_at)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;size=10;" vertex="1" parent="dl">
+      <mxGeometry x="30" y="40" width="200" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="n11" value="body_embeddings&#xa;(chunk_index=0 = body text)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;size=10;" vertex="1" parent="dl">
+      <mxGeometry x="270" y="40" width="190" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n12" value="files table&#xa;(content_hash for dedup)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;size=10;" vertex="1" parent="dl">
+      <mxGeometry x="500" y="40" width="170" height="80" as="geometry"/>
+    </mxCell>
+    <!-- Admin UI -->
+    <mxCell id="ui" value="Admin UI (Extension Webview)" style="swimlane;startSize=25;fillColor=none;strokeColor=#666666;dashed=1;html=1;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="800" y="380" width="340" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="n13" value="EnrichmentProgress.svelte&#xa;(NEW — SA4E-106)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="ui">
+      <mxGeometry x="20" y="40" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n14" value="Graph Info Card&#xa;(shows summary, tags)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ui">
+      <mxGeometry x="20" y="100" width="200" height="40" as="geometry"/>
+    </mxCell>
+    <!-- TaskWorker fix marker -->
+    <mxCell id="n2fix" value="FIX OI-02:&#xa;+ invalid_payload&#xa;+ symbol_not_found" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;fontStyle=2;" vertex="1" parent="tq">
+      <mxGeometry x="230" y="120" width="140" height="45" as="geometry"/>
+    </mxCell>
+    <!-- LLM Service -->
+    <mxCell id="n15" value="LLMService&#xa;(multi-provider)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="boundary">
+      <mxGeometry x="1100" y="250" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edges: External to internal -->
+    <mxCell id="e1" value="triggers indexing" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="a3" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="views progress" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="a1" target="n13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="LLM API calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="n15" target="a2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Internal edges -->
+    <mxCell id="e4" value="INSERT task" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="boundary" source="n3" target="n1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="poll" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="boundary" source="n2" target="n1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="dispatch" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="boundary" source="n2" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="build prompt" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="boundary" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="validate tags" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="boundary" source="n4" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="call LLM" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="boundary" source="n4" target="n15">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="store results" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="boundary" source="n4" target="n10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="read body" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="boundary" source="n4" target="n11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="check hash" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="boundary" source="n3" target="n12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" value="query stats" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="boundary" source="n8" target="n10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" value="poll progress" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=8;" edge="1" parent="boundary" source="n13" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

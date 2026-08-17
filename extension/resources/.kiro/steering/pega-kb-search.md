@@ -1,3 +1,9 @@
+---
+name: pega-kb-search
+description: Hướng dẫn search cascade cho Pega rules trong KB. Agents PHẢI dùng multi-tool strategy thay vì chỉ mem_search.
+inclusion: auto
+---
+
 # Pega Knowledge Base Search Cascade
 
 ## Purpose
@@ -19,13 +25,39 @@ Do NOT use for: general project KB, code intelligence, or non-Pega searches.
 
 ---
 
+## ⚠️ Current Limitation: Graph Edges = 0
+
+**As of now, graph nodes exist but edges (relationships) have NOT been populated yet.**
+- `mem_graph(action: "neighbors")` will return empty until Edge Population (KB-02) is complete.
+- Until then, use Step 4 (grep_search) as the primary relationship discovery method.
+- After KB-02 completes, Step 3 will become functional.
+
+---
+
+## Quick Path — `get_curated_context`
+
+For simple queries where you need a fast answer combining text + graph:
+
+```
+get_curated_context(query: "GetActionsListForWorkList activity", max_tokens: 4000)
+```
+
+This searches code symbols + KB + graph in one call. Use this FIRST for simple lookups.
+Only use the full 4-step cascade when `get_curated_context` returns insufficient results.
+
+---
+
 ## 4-Step Cascade
 
 ### Step 1: Text Search — `mem_search` (Direct)
 
 ```
-mem_search(query: "ProcessClaim", type: "PEGA_RULE", limit: 10)
+mem_search(query: "ProcessClaim", limit: 10)
 ```
+
+> ⛔ Do NOT use `type: "PEGA_RULE"` — this type does not exist in the schema.
+> Valid types: DECISION, ERROR_PATTERN, ARCHITECTURE, API_DESIGN, REQUIREMENT, LESSON_LEARNED, PROCEDURE, CONTEXT.
+> For Pega rules, omit `type` or use tags-based filtering in results.
 
 If 0 results or insufficient → Step 2.
 
@@ -33,84 +65,107 @@ If 0 results or insufficient → Step 2.
 
 ```
 execute_dynamic_tool(
-  tool_name: "kb_graph_query",
+  toolName: "kb_graph_query",
   arguments: { "query": "ProcessClaim", "type": "FUNCTION", "limit": 20 }
 )
 ```
+
+> ⛔ Note: argument key is `toolName` (camelCase), NOT `tool_name`.
 
 **Node type mapping:**
 
 | Pega Artifact | Graph Type |
 |---------------|------------|
-| Activity / Flow / DT / Data Transform | `FUNCTION` |
+| Activity / Flow / DT / Data Transform | `ACTIVITY` or `FUNCTION` |
 | Class (Work-/Data-) | `CLASS` |
 | Property | `PROPERTY` |
 | Schema/Field docs | `DOCUMENT` |
 
-If nodes found → use node ID for Step 3. If 0 nodes → Step 4.
+If nodes found → note the node `id` (string format like `pega:Rule-Obj-Activity:Assign-:GetActionsListForWorkList`).
+If 0 nodes → Step 4.
 
 ### Step 3: Expand Neighbors — `mem_graph` (Direct)
 
+> ⚠️ **CURRENTLY NON-FUNCTIONAL** — edges=0. Skip to Step 4 until KB-02 (Edge Population) is complete.
+
 ```
-mem_graph(action: "neighbors", node_id: 42)
+mem_graph(action: "neighbors", node_id: <numeric_integer_id>)
 ```
 
-Additional graph tools (via `execute_dynamic_tool`):
-- `kb_graph_community` — detect clusters: `{ "min_cluster_size": 3 }`
-- `kb_graph_pagerank` — rank importance: `{ "top_n": 10 }`
+> Note: `mem_graph` requires a NUMERIC node_id (integer), not the string ID from kb_graph_query.
 
-### Step 4: Fallback — File Search
+### Step 4: Fallback — File Search (PRIMARY for relationships until KB-02)
 
 ```
 grep_search(query: "ProcessClaim", includePattern: "rules/**/*.pega.json")
 ```
 
-Or: `code_search(query: "ProcessClaim", file_pattern: "*.pega.json")`
+**To find callers of an Activity:**
+```
+grep_search(query: "MyActivityName", includePattern: "rules/Rule-Obj-Flow/*.pega.json")
+```
+
+**To find what an Activity references:**
+Read the Activity's own `.pega.json` file → parse `pxRuleReferences[]` array.
+
+---
+
+## Error Handling
+
+| Error | Cause | Action |
+|-------|-------|--------|
+| `mem_search` returns 0 | Rule not in text KB | Continue to Step 2 |
+| `kb_graph_query` returns 0 nodes | Rule not indexed in graph | Continue to Step 4 |
+| `mem_graph` returns empty neighbors | edges=0 (KB-02 pending) | Use Step 4 (grep) |
+| `execute_dynamic_tool` → "Unknown tool" | Tool not discovered | Run `find_tools("kb_graph")` first |
+| `grep_search` returns 0 | Rule not in local workspace | Check if rule is OOTB (platform-only) |
+
+---
+
+## Tool Discovery Prerequisite
+
+Before using nested tools, verify availability:
+
+```
+find_tools(query: "kb_graph", threshold: 0.3, top_k: 5)
+```
+
+If `kb_graph_query` NOT found → Orchestrator may need restart. Check:
+```
+orchestration_status()
+```
 
 ---
 
 ## Common Query Examples
 
-### Find Flow Steps
+### Find Activity by Name
 
 ```
-mem_search(query: "MyClaimFlow Rule-Obj-Flow", limit: 5)
-// If 0 → graph:
-execute_dynamic_tool(tool_name: "kb_graph_query", arguments: { "query": "MyClaimFlow", "type": "FUNCTION" })
-// Expand connected shapes:
-mem_graph(action: "neighbors", node_id: <flow_node_id>)
-```
-
-### Find Activity Relationships
-
-```
-mem_search(query: "ValidateAddress Rule-Obj-Activity", limit: 5)
-// Graph fallback:
-execute_dynamic_tool(tool_name: "kb_graph_query", arguments: { "query": "ValidateAddress" })
-// Get CALLS/CALLED_BY edges:
-mem_graph(action: "neighbors", node_id: <activity_node_id>)
+get_curated_context(query: "GetActionsListForWorkList activity Assign")
+mem_search(query: "GetActionsListForWorkList", limit: 5)
+execute_dynamic_tool(toolName: "kb_graph_query", arguments: { "query": "GetActionsListForWorkList" })
+grep_search(query: "GetActionsListForWorkList", includePattern: "rules/Rule-Obj-Flow/*.pega.json")
 ```
 
 ### Find Class Hierarchy
 
 ```
-execute_dynamic_tool(tool_name: "kb_graph_query", arguments: { "query": "Work-Claim", "type": "CLASS" })
-// Expand INHERITS edges:
-mem_graph(action: "neighbors", node_id: <class_node_id>)
+execute_dynamic_tool(toolName: "kb_graph_query", arguments: { "query": "Work-Claim", "type": "CLASS" })
+grep_search(query: "pyParentClass", includePattern: "rules/Rule-Obj-Class/Work-Claim*.pega.json")
 ```
 
-### Find Decision Table Conditions
+---
 
-```
-mem_search(query: "EligibilityCheck Decision", type: "PEGA_RULE", limit: 5)
-execute_dynamic_tool(tool_name: "kb_graph_query", arguments: { "query": "EligibilityCheck", "type": "FUNCTION" })
-```
+## Edge Types (functional after KB-02)
 
-### Find All Rules in a RuleSet
-
-```
-mem_search(query: "MyApp:01-01", type: "PEGA_RULE", limit: 50)
-```
+| Edge Type | Meaning | Source → Target |
+|-----------|---------|-----------------|
+| CALLS | Flow invokes Activity | Flow → Activity |
+| USES | Rule references Property | Activity → Property |
+| INHERITS | Class extends Class | Child Class → Parent Class |
+| BELONGS_TO | Rule is owned by Class | Activity → Class |
+| REFERENCES | Generic reference | Activity → Class/Property |
 
 ---
 
@@ -119,126 +174,25 @@ mem_search(query: "MyApp:01-01", type: "PEGA_RULE", limit: 50)
 | Tool | Callable | Purpose |
 |------|----------|---------|
 | `mem_search` | Direct | Text/BM25 search across KB entries |
-| `mem_graph` | Direct | Navigate graph edges (neighbors, path) |
+| `mem_graph` | Direct | Navigate graph edges (needs numeric node_id) |
+| `get_curated_context` | Direct | Combined search: code + KB + graph |
 | `kb_graph_query` | `execute_dynamic_tool` | Fuzzy label search on graph nodes |
-| `kb_graph_community` | `execute_dynamic_tool` | Detect clusters of related nodes |
-| `kb_graph_pagerank` | `execute_dynamic_tool` | Rank nodes by connectivity importance |
-| `kb_graph_add_node` | `execute_dynamic_tool` | Add missing node to graph |
 | `kb_graph_add_edge` | `execute_dynamic_tool` | Add relationship between nodes |
-| `code_search` | Direct | Search source code files |
+| `code_search` | Direct | Search source code symbols |
 | `grep_search` | Direct | Regex search on raw rule JSON files |
-
----
-
-## Pega Application Context — Access Group Discovery
-
-### Purpose
-
-Sau khi xác định application context (AppName, AppVersion), agent PHẢI lấy danh sách Access Groups để hiểu permission model và RuleSet stack của app đó.
-
-### Workflow: Application → Access Groups
-
-```
-Step 0: Fetch DPage Rule Definition (MANDATORY before calling ANY Data Page)
-  execute_dynamic_tool(
-    toolName: "pega_get_rule",
-    arguments: { "insKey": "RULE-DECLARE-PAGES D_PZACCESSGROUPSBYAPPLICATION" }
-  )
-  → Returns: rule JSON with pyParameterPage (param names, types, defaults)
-  → Extract: exact parameter names from the rule (e.g., AppName, AppVersion)
-
-Step 1: Get Application Info
-  execute_dynamic_tool(
-    toolName: "pega_get_session_context",
-    arguments: {}
-  )
-  → Returns: { pyAccessGroup, pyUserIdentifier, pyUserName, ... }
-
-Step 2: Fetch Access Groups using CORRECT param names from Step 0
-  execute_dynamic_tool(
-    toolName: "pega_datapage_list",
-    arguments: {
-      "dataPageName": "D_pzAccessGroupsByApplication",
-      "parameters": { "AppName": "{appName}", "AppVersion": "{appVersion}" }
-    }
-  )
-  → Returns: { pxResults: [{ pyAccessGroup: "...", ... }, ...], totalCount: N }
-```
-
-### ⛔ CRITICAL RULE: Always Fetch DPage Rule Before Calling
-
-**Trước khi gọi BẤT KỲ Data Page nào qua `/datapage/list` hoặc `/datapage/single`:**
-
-1. Fetch rule definition: `GET /rules/RULE-DECLARE-PAGES D_{PAGE_NAME_UPPERCASE}`
-2. Parse `pyParameterPage` → extract param names + types
-3. Dùng CHÍNH XÁC param names từ rule definition (case-sensitive)
-4. KHÔNG ĐƯỢC đoán param names — Pega Data Pages rất nhạy cảm với tên tham số
-
-**Ví dụ:**
-- ❌ WRONG: `{ "ApplicationName": "HRAppsV2" }` (đoán tên)
-- ✅ RIGHT: Fetch rule → thấy param `AppName` → `{ "AppName": "HRAppsV2" }`
-
-### Khi nào dùng:
-
-| Trigger | Action |
-|---------|--------|
-| Bắt đầu phiên làm việc Pega mới | Lấy session context → access groups |
-| Trước khi save/checkout rule | Xác định RuleSet version từ access group stack |
-| Trước khi tạo branch | Biết RuleSet name từ access group |
-| Khi agent cần biết permission model | List access groups → xem operator permissions |
-
-### API Details
-
-**Endpoint:** `POST /api/CodeIntelligence/v1/datapage/list`
-
-**Parameters:**
-
-| Param | Location | Value |
-|-------|----------|-------|
-| `dataPageName` | Query string | `D_pzAccessGroupsByApplication` |
-| Body | JSON | `{ "AppName": "HRAppsV2", "AppVersion": "01.01" }` |
-
-**Response format:**
-```json
-{
-  "pxResults": [
-    { "pyAccessGroup": "HRAppsV2:Administrators", "pyRuleSetList": [...] },
-    { "pyAccessGroup": "HRAppsV2:Users", "pyRuleSetList": [...] }
-  ],
-  "totalCount": 2
-}
-```
-
-### Useful Data Pages (all via `/datapage/list`)
-
-| Data Page Name | Purpose | Parameters |
-|----------------|---------|------------|
-| `D_pzAccessGroupsByApplication` | All access groups for an app | `ApplicationName`, `ApplicationVersion` |
-| `D_pyCaseTypeList` | All case types in scope | _(none — uses session context)_ |
-| `D_pzRuleSetsInApplication` | All RuleSets in app stack | `ApplicationName`, `ApplicationVersion` |
-
-### MCP Tool Mapping
-
-Nếu tool `pega_datapage_list` chưa available, dùng `find_tools("pega datapage")` để discover tên chính xác. Fallback HTTP:
-
-```
-POST {pegaEndpoint}/api/CodeIntelligence/v1/datapage/list?dataPageName=D_pzAccessGroupsByApplication
-Authorization: Basic {base64(user:pass)}
-Content-Type: application/json
-
-{ "AppName": "HRAppsV2", "AppVersion": "01.01" }
-```
+| `find_tools` | Direct | Discover nested tool names |
 
 ---
 
 ## Rules for All Agents
 
-1. **ALWAYS start with `mem_search`** — fastest, covers most cases
-2. **NEVER stop at Step 1 if 0 results** — graph has 1,349+ nodes text search may miss
-3. **Use `execute_dynamic_tool` for `kb_graph_*` tools** — they are nested tools
-4. **Use `mem_graph` directly** for neighbor traversal (it is a core tool)
-5. **Cache node IDs** — note relevant IDs for follow-up queries
-6. **Ingest new knowledge** when discovered:
+1. **Try `get_curated_context` first** for simple lookups
+2. **ALWAYS start cascade with `mem_search`** — fastest text search
+3. **NEVER stop at Step 1 if 0 results** — graph has 1,349+ nodes
+4. **Use `toolName` (camelCase)** in `execute_dynamic_tool`
+5. **Step 3 is non-functional until KB-02** — use grep_search for relationships
+6. **Verify tools exist** with `find_tools("kb_graph")` before first use
+7. **Ingest new knowledge** when discovered:
    ```
    mem_ingest(content: "...", type: "CONTEXT", tags: "pega,rule,{class}")
    ```

@@ -24,7 +24,7 @@ export interface TempDb {
 
 /** Create a fresh temp file-backed SQLite DB with full SCHEMA_V1 applied. */
 export function makeTempDb(): TempDb {
-  (DatabaseManager as any).sharedDb = null;
+  (DatabaseManager as any).sharedAdapter = null;
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sa4e18-'));
   const dbPath = path.join(tmpDir, 'index.db');
   const dbManager = new DatabaseManager(dbPath);
@@ -36,7 +36,7 @@ export function makeTempDb(): TempDb {
     tmpDir,
     close() {
       dbManager.close();
-      (DatabaseManager as any).sharedDb = null;
+      (DatabaseManager as any).sharedAdapter = null;
       fs.rmSync(tmpDir, { recursive: true, force: true });
     },
   };

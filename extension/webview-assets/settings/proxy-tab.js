@@ -50,20 +50,42 @@
 
   function updateVisibility() {
     var isManual = currentMode === "manual";
-    manualSection.style.display = isManual ? "block" : "none";
+    var isCurl = currentMode === "curl";
+    var isNone = currentMode === "none";
+    var showConfig = isManual || isCurl;
+    manualSection.style.display = showConfig ? "block" : "none";
     authSection.style.display = isManual ? "block" : "none";
+    // Hide test section when mode = "none" (no proxy to test)
+    var testSection = document.getElementById("proxy-test-section");
+    if (testSection) { testSection.style.display = isNone ? "none" : "block"; }
+    // Hide "Detect System Proxy" button in curl mode (irrelevant)
+    if (detectBtn) { detectBtn.style.display = isCurl ? "none" : ""; }
+    // Curl mode: hide host/port/urlPreview, only show bypass list
+    var hostGroup = hostInput.closest(".form-group");
+    var portGroup = portInput.closest(".form-group");
+    if (hostGroup) { hostGroup.style.display = isCurl ? "none" : ""; }
+    if (portGroup) { portGroup.style.display = isCurl ? "none" : ""; }
+    // Update section title for curl mode
+    var sectionTitle = manualSection.querySelector("h2");
+    if (sectionTitle) {
+      sectionTitle.textContent = isCurl ? "\u2699 Curl Bypass Configuration" : "\u2699 Manual Configuration";
+    }
     updateUrlPreview();
   }
 
   // ── URL Preview ──────────────────────────────────────────────────
 
   function updateUrlPreview() {
-    if (currentMode !== "manual") {
+    if (currentMode !== "manual" && currentMode !== "curl") {
       urlPreview.textContent = "";
       return;
     }
     var host = hostInput.value.trim();
     var port = portInput.value.trim();
+    if (currentMode === "curl") {
+      urlPreview.textContent = "";
+      return;
+    }
     if (host && port) {
       urlPreview.textContent = "Proxy URL: http://" + host + ":" + port;
     } else {
@@ -265,4 +287,7 @@
   setTimeout(function () {
     vscode.postMessage({ type: "getProxyState" });
   }, 100);
+
+  // Apply initial visibility based on default mode
+  updateVisibility();
 })();

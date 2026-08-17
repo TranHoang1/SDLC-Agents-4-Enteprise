@@ -124,6 +124,27 @@ invokeSubAgent(
 
 Re-run code review after fix (max 2 iterations). If still FAIL → escalate to user.
 
+#### Step 6b.5: Fresh-Context Review (OPTIONAL — High-Risk Changes)
+
+**After standard two-axis review, SM MAY run a fresh-context review for high-risk changes.**
+
+**Trigger criteria** (any one met → run fresh review):
+- `git diff --stat` shows >500 lines changed
+- Changes touch auth/authorization/encryption code
+- DB schema or migration files modified
+- >5 files modified (complex refactoring)
+
+**Process:** See `.kiro/steering/fresh-context-review.md` for full details.
+
+**Summary:**
+1. Spawn separate agent with ONLY: git diff + TDD + FSD + code-standards (NO history)
+2. Agent performs independent review — no "as discussed" or "as implemented" bias
+3. SM compares fresh findings vs standard review findings
+4. Blind spots (fresh found, standard missed) → escalate by severity
+
+**This step is OPTIONAL** — it enhances but does not replace the standard review.
+If fresh review is unavailable (budget, time), standard review is sufficient to proceed.
+
 ### Step 6c: QA Runs Automated Tests
 
 Invoke QA agent for test execution:

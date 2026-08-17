@@ -1,5 +1,5 @@
 /**
- * SA4E-85 — KnowledgeService: business logic + workspace binding.
+ * SA4E-85 — KnowledgeService: async business logic + workspace binding.
  * Event Sourcing: every mutation appends to the append-only event log;
  * threads / messages / checkpoints are projections on top of it.
  *
@@ -46,14 +46,14 @@ export class KnowledgeService {
   }
 
   /** Return the thread only if it belongs to the caller's workspace. */
-  private ownedThread(ctx: ProjectContext, threadId: string): Thread | null {
+  private async ownedThread(ctx: ProjectContext, threadId: string): Promise<Thread | null> {
     if (!isUuidV4(threadId)) return null;
-    const thread = this.db.getThread(threadId);
+    const thread = await this.db.getThread(threadId);
     if (!thread || thread.workspace_id !== this.resolveWorkspaceId(ctx)) return null;
     return thread;
   }
 
-  createThread(ctx: ProjectContext, input: CreateThreadInput): Thread {
+  async createThread(ctx: ProjectContext, input: CreateThreadInput): Promise<Thread> {
     const now = new Date().toISOString();
     const thread: Thread = {
       thread_id: crypto.randomUUID(),
@@ -64,8 +64,8 @@ export class KnowledgeService {
       created_at: now,
       updated_at: now,
     };
-    this.db.createThread(thread);
-    this.db.appendEvent(thread.workspace_id, thread.thread_id, 'THREAD_CREATED', {
+    await this.db.createThread(thread);
+    await this.db.appendEvent(thread.workspace_id, thread.thread_id, 'THREAD_CREATED', {
       title: thread.title,
       agent_id: thread.agent_id,
     });
@@ -73,35 +73,56 @@ export class KnowledgeService {
     return thread;
   }
 
-  listThreads(ctx: ProjectContext): Thread[] {
+  async listThreads(ctx: ProjectContext): Promise<Thread[]> {
     return this.db.listThreads(this.resolveWorkspaceId(ctx));
   }
 
-  getThread(ctx: ProjectContext, threadId: string): Thread | null {
+  async getThread(ctx: ProjectContext, threadId: string): Promise<Thread | null> {
     return this.ownedThread(ctx, threadId);
   }
 
-  getMessages(ctx: ProjectContext, threadId: string): Message[] | null {
-    if (!this.ownedThread(ctx, threadId)) return null;
+  async getMessages(ctx: ProjectContext, threadId: string): Promise<Message[] | null> {
+    if (!await this.ownedThread(ctx, threadId)) return null;
     return this.db.listMessages(threadId);
   }
 
-  getCheckpoint(ctx: ProjectContext, threadId: string): Checkpoint | null {
-    if (!this.ownedThread(ctx, threadId)) return null;
+  async getCheckpoint(ctx: ProjectContext, threadId: string): Promise<Checkpoint | null> {
+    if (!await this.ownedThread(ctx, threadId)) return null;
     return this.db.getCheckpoint(threadId);
   }
 
-  /** Save checkpoint (+ optional writes / messages) — projection updated transactionally. */
-  saveCheckpoint(ctx: ProjectContext, threadId: string, input: SaveCheckpointInput): Checkpoint | null {
-    const thread = this.ownedThread(ctx, threadId);
-    if (!thread) return null;
-    const checkpoint = this.db.upsertCheckpoint(thread.workspace_id, threadId, input);
+  /** Save checkpoint (+ optional writes / messages) — projection updated. */
+  async saveCheckpoint(ctx: ProjectContext, threadId: string, input: SaveCheckpointInput): Promise<Checkpoint | null> {
+    const workspaceId = this.resolveWorkspaceId(ctx);
+    let thread = await this.ownedThread(ctx, threadId);
+    if (!thread) {
+      // LangGraph generates arbitrary thread_id UUIDs per run and persists via the
+      // checkpointer without a prior POST /threads — auto-create the thread if it
+      // genuinely does not exist (mock contract, IT-HYD-03). A thread owned by
+      // another workspace is NEVER created or written (SECURITY-REVIEW #18 → 404).
+      const existing = await this.db.getThread(threadId);
+      if (existing) return null;
+      if (!isUuidV4(threadId)) return null;
+      const now = new Date().toISOString();
+      thread = {
+        thread_id: threadId,
+        workspace_id: workspaceId,
+        title: 'Auto thread',
+        agent_id: null,
+        status: 'active',
+        created_at: now,
+        updated_at: now,
+      };
+      await this.db.createThread(thread);
+      await this.db.appendEvent(workspaceId, threadId, 'THREAD_CREATED', { title: thread.title, agent_id: null });
+    }
+    const checkpoint = await this.db.upsertCheckpoint(thread.workspace_id, threadId, input);
     const messages = input.messages ?? [];
-    const seqBase = this.db.countMessages(threadId);
-    messages.forEach((m, i) => {
-      this.db.appendMessage(thread.workspace_id, threadId, m, seqBase + i);
-    });
-    this.db.appendEvent(thread.workspace_id, threadId, 'CHECKPOINT_SAVED', {
+    const seqBase = await this.db.countMessages(threadId);
+    for (let i = 0; i < messages.length; i++) {
+      await this.db.appendMessage(thread.workspace_id, threadId, messages[i], seqBase + i);
+    }
+    await this.db.appendEvent(thread.workspace_id, threadId, 'CHECKPOINT_SAVED', {
       version: checkpoint.version,
       writes: (input.writes ?? input.pendingWrites ?? []).length,
       messages: messages.length,
@@ -110,18 +131,18 @@ export class KnowledgeService {
     return checkpoint;
   }
 
-  getEvents(ctx: ProjectContext, threadId: string): KnowledgeEvent[] | null {
-    if (!this.ownedThread(ctx, threadId)) return null;
+  async getEvents(ctx: ProjectContext, threadId: string): Promise<KnowledgeEvent[] | null> {
+    if (!await this.ownedThread(ctx, threadId)) return null;
     return this.db.listEvents(threadId);
   }
 
-  getArtifacts(ctx: ProjectContext, threadId: string): Artifact[] | null {
-    if (!this.ownedThread(ctx, threadId)) return null;
+  async getArtifacts(ctx: ProjectContext, threadId: string): Promise<Artifact[] | null> {
+    if (!await this.ownedThread(ctx, threadId)) return null;
     return this.db.listArtifacts(threadId);
   }
 
-  addArtifact(ctx: ProjectContext, threadId: string, input: { type: string; name: string; content?: unknown }): Artifact | null {
-    const thread = this.ownedThread(ctx, threadId);
+  async addArtifact(ctx: ProjectContext, threadId: string, input: { type: string; name: string; content?: unknown }): Promise<Artifact | null> {
+    const thread = await this.ownedThread(ctx, threadId);
     if (!thread) return null;
     const artifact: Artifact = {
       id: crypto.randomUUID(),
@@ -132,13 +153,13 @@ export class KnowledgeService {
       content: input.content ?? null,
       created_at: new Date().toISOString(),
     };
-    this.db.addArtifact(artifact);
-    this.db.appendEvent(thread.workspace_id, threadId, 'ARTIFACT_ADDED', { type: input.type, name: input.name });
+    await this.db.addArtifact(artifact);
+    await this.db.appendEvent(thread.workspace_id, threadId, 'ARTIFACT_ADDED', { type: input.type, name: input.name });
     return artifact;
   }
 
-  addToolExecution(ctx: ProjectContext, threadId: string, input: { tool_id: string; name: string; status: ToolExecution['status']; input?: unknown; output?: unknown }): ToolExecution | null {
-    const thread = this.ownedThread(ctx, threadId);
+  async addToolExecution(ctx: ProjectContext, threadId: string, input: { tool_id: string; name: string; status: ToolExecution['status']; input?: unknown; output?: unknown }): Promise<ToolExecution | null> {
+    const thread = await this.ownedThread(ctx, threadId);
     if (!thread) return null;
     const exec: ToolExecution = {
       id: crypto.randomUUID(),
@@ -151,26 +172,26 @@ export class KnowledgeService {
       output: input.output ?? null,
       created_at: new Date().toISOString(),
     };
-    this.db.addToolExecution(exec);
-    this.db.appendEvent(thread.workspace_id, threadId, 'TOOL_EXECUTION', { tool_id: input.tool_id, status: input.status });
+    await this.db.addToolExecution(exec);
+    await this.db.appendEvent(thread.workspace_id, threadId, 'TOOL_EXECUTION', { tool_id: input.tool_id, status: input.status });
     return exec;
   }
 
-  getAgents(): Agent[] {
+  async getAgents(): Promise<Agent[]> {
     return this.db.listAgents();
   }
 
-  upsertAgent(input: Omit<Agent, 'created_at' | 'updated_at'>): Agent {
+  async upsertAgent(input: Omit<Agent, 'created_at' | 'updated_at'>): Promise<Agent> {
     const now = new Date().toISOString();
     const agent: Agent = { ...input, created_at: now, updated_at: now };
     return this.db.upsertAgent(agent);
   }
 
-  deleteThread(ctx: ProjectContext, threadId: string): boolean {
-    const thread = this.ownedThread(ctx, threadId);
+  async deleteThread(ctx: ProjectContext, threadId: string): Promise<boolean> {
+    const thread = await this.ownedThread(ctx, threadId);
     if (!thread) return false;
-    this.db.appendEvent(thread.workspace_id, threadId, 'THREAD_DELETED', {});
-    this.db.deleteThread(threadId);
+    await this.db.appendEvent(thread.workspace_id, threadId, 'THREAD_DELETED', {});
+    await this.db.deleteThread(threadId);
     this.logger.info({ thread_id: threadId }, 'Thread deleted');
     return true;
   }

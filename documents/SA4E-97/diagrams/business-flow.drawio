@@ -1,0 +1,155 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-97: Pega Nodes Hierarchical Layout — Business Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="450" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Swimlane: Backend (Startup) -->
+    <mxCell id="swim1" value="Backend — Server Startup" style="swimlane;startSize=30;fillColor=none;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="50" width="600" height="380" as="geometry"/>
+    </mxCell>
+    <!-- N1: KBGraphModule.initialize() -->
+    <mxCell id="n1" value="KBGraphModule&#10;initialize()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="swim1">
+      <mxGeometry x="20" y="50" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- N2: Detect flat nodes -->
+    <mxCell id="n2" value="Detect flat nodes&#10;(z=0)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="swim1">
+      <mxGeometry x="200" y="45" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <!-- N3: reprojectAllFlatNodes -->
+    <mxCell id="n3" value="reprojectAllFlatNodes()&#10;Group by type →&#10;Fibonacci sphere" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="swim1">
+      <mxGeometry x="380" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <!-- N4: reprojectCodeNodes -->
+    <mxCell id="n4" value="reprojectCodeNodes()&#10;7 types → separate&#10;clusters (r=2000)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="swim1">
+      <mxGeometry x="380" y="130" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <!-- N5: Check edge ratio -->
+    <mxCell id="n5" value="Edge ratio&#10;check (&gt;0.5?)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="swim1">
+      <mxGeometry x="60" y="160" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <!-- N6: reconcileAllEdges -->
+    <mxCell id="n6" value="reconcileAllEdges()&#10;Parse rule JSON →&#10;INSERT edges" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="swim1">
+      <mxGeometry x="60" y="260" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <!-- N7: Skip -->
+    <mxCell id="n7" value="Skip&#10;(edges healthy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="swim1">
+      <mxGeometry x="260" y="170" width="100" height="40" as="geometry"/>
+    </mxCell>
+    <!-- N8: Ready -->
+    <mxCell id="n8" value="Graph Module&#10;READY" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="swim1">
+      <mxGeometry x="380" y="260" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edges within swim1 -->
+    <mxCell id="se1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="se2" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="se3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="se4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim1" source="n1" target="n5">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="85" y="130"/>
+          <mxPoint x="120" y="130"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="se5" value="low" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim1" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="se6" value="healthy" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim1" source="n5" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="se7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim1" source="n4" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="se8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim1" source="n6" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Swimlane: Frontend (User Interaction) -->
+    <mxCell id="swim2" value="Frontend — Graph Visualization (User)" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="460" width="600" height="400" as="geometry"/>
+    </mxCell>
+    <!-- F1: Open Graph View -->
+    <mxCell id="f1" value="User opens&#10;KB Graph View" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="20" y="50" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <!-- F2: Fetch spatial API -->
+    <mxCell id="f2" value="Fetch /api/graph/spatial&#10;→ nodes[] + edges[]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="swim2">
+      <mxGeometry x="190" y="50" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- F3: loadPositions -->
+    <mxCell id="f3" value="loadPositions(nodes)&#10;Build Points geometry&#10;Color by type" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="swim2">
+      <mxGeometry x="400" y="50" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- F4: loadEdges -->
+    <mxCell id="f4" value="loadEdges(edges)&#10;Build LineSegments&#10;Translucent material" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="swim2">
+      <mxGeometry x="400" y="130" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- F5: LOD Decision -->
+    <mxCell id="f5" value="Camera distance&#10;check" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="swim2">
+      <mxGeometry x="60" y="180" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <!-- F6: FAR mode -->
+    <mxCell id="f6" value="FAR Mode (&gt;3000)&#10;Points size=30&#10;Edges opacity=0.15" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="swim2">
+      <mxGeometry x="20" y="290" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <!-- F7: MID mode -->
+    <mxCell id="f7" value="MID Mode (1200-3000)&#10;InstancedMesh 2000&#10;+ Points size=15" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="swim2">
+      <mxGeometry x="200" y="290" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <!-- F8: CLOSE mode -->
+    <mxCell id="f8" value="CLOSE Mode (&lt;1200)&#10;500 Meshes + Labels&#10;+ Points size=12" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="swim2">
+      <mxGeometry x="400" y="290" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Edges within swim2 -->
+    <mxCell id="fe1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim2" source="f1" target="f2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim2" source="f2" target="f3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim2" source="f3" target="f4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim2" source="f4" target="f5">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="475" y="200"/>
+          <mxPoint x="180" y="200"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="fe5" value="&gt;3000" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim2" source="f5" target="f6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe6" value="1200-3000" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim2" source="f5" target="f7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="fe7" value="&lt;1200" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="swim2" source="f5" target="f8">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="120" y="270"/>
+          <mxPoint x="475" y="270"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Cross-swimlane edge: Ready → User opens -->
+    <mxCell id="cross1" value="Server ready" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#666666;fontSize=9;" edge="1" parent="1" source="n8" target="f1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="660" y="360"/>
+          <mxPoint x="660" y="440"/>
+          <mxPoint x="20" y="440"/>
+          <mxPoint x="20" y="535"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

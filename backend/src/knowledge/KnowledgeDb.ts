@@ -1,90 +1,131 @@
 /**
- * SA4E-85 — Knowledge SQLite persistence layer.
- * Internal storage behind KnowledgeService. Not a LangGraph checkpointer —
- * checkpoints are JSON projections stored here. DB perms hardened (Finding #22).
+ * SA4E-85 — Knowledge persistence layer (database-agnostic).
+ * Internal storage behind KnowledgeService. Uses DatabaseAdapter abstraction
+ * to support both SQLite and PostgreSQL. DB perms hardened (Finding #22).
  */
 
-import Database from 'better-sqlite3';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as crypto from 'crypto';
+import Database from 'better-sqlite3';
+import type { QueryDatabaseAdapter } from '../database/adapters/DatabaseAdapter.js';
 import { KNOWLEDGE_SCHEMA } from './schema.js';
-import type { Thread, Message, Checkpoint, ToolExecution, Artifact, KnowledgeEvent, Agent, PendingWrite, SaveCheckpointInput, MessageInput } from './models.js';
+import type {
+  Thread, Message, Checkpoint, ToolExecution, Artifact,
+  KnowledgeEvent, Agent, PendingWrite, SaveCheckpointInput, MessageInput,
+} from './models.js';
 
-type Row = Record<string, any>;
-
+/** Parse JSON safely with fallback. */
 function parse<T>(raw: string | null | undefined, fallback: T): T {
   if (!raw) return fallback;
-  try { return JSON.parse(raw) as T; } catch (err) { return fallback; }
+  try { return JSON.parse(raw) as T; } catch { return fallback; }
 }
 
-function openDb(dbPath?: string): Database.Database {
-  if (!dbPath) throw new Error('KnowledgeDb requires a dbPath');
-  const dir = path.dirname(dbPath);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  const db = new Database(dbPath);
-  db.pragma('journal_mode = WAL'); db.pragma('foreign_keys = ON');
-  try { fs.chmodSync(dbPath, 0o600); } catch (err) { console.debug('[KnowledgeDb] best-effort on Windows :', (err as Error).message); }
-  return db;
-}
-
+/**
+ * KnowledgeDb — adapter-based persistence for LangGraph thread state.
+ * All methods are async to support both SQLite and PostgreSQL engines.
+ */
 export class KnowledgeDb {
-  private db: Database.Database;
+  constructor(private readonly adapter: QueryDatabaseAdapter) {}
 
-  constructor(dbPath?: string, existing?: Database.Database) {
-    this.db = existing ?? openDb(dbPath);
-    this.migrate();
-  }
-
+  /**
+   * Create an in-memory KnowledgeDb for testing.
+   * Uses better-sqlite3 :memory: with sync-to-async wrapper.
+   */
   static createInMemory(): KnowledgeDb {
-    return new KnowledgeDb(undefined, new Database(':memory:'));
+    const raw = new Database(':memory:');
+    raw.pragma('journal_mode = WAL');
+    const adapter: QueryDatabaseAdapter = {
+      async runAsync(sql, params?) { const s = raw.prepare(sql); const r = params ? s.run(...params) : s.run(); return { changes: r.changes, lastInsertRowid: r.lastInsertRowid }; },
+      async getAsync<T>(sql: string, params?: unknown[]) { const s = raw.prepare(sql); return (params ? s.get(...params) : s.get()) as T | undefined; },
+      async allAsync<T>(sql: string, params?: unknown[]) { const s = raw.prepare(sql); return (params ? s.all(...params) : s.all()) as T[]; },
+      async execAsync(sql) { raw.exec(sql); },
+      async transactionAsync<T>(fn: () => Promise<T>) { return fn(); },
+    };
+    raw.exec(KNOWLEDGE_SCHEMA);
+    return new KnowledgeDb(adapter);
   }
 
-  private migrate(): void { this.db.exec(KNOWLEDGE_SCHEMA); }
-
-  close(): void { this.db.close(); }
-
-  // --- threads (projection) ---
-  createThread(t: Thread): void {
-    this.db.prepare('INSERT INTO threads (thread_id, workspace_id, title, agent_id, status, created_at, updated_at) VALUES (@thread_id, @workspace_id, @title, @agent_id, @status, @created_at, @updated_at)')
-      .run(t as unknown as Record<string, unknown>);
+  /** Detect PostgreSQL via runtime duck-typing (composed adapters expose getEngine). */
+  private isPostgres(): boolean {
+    return typeof (this.adapter as { getEngine?: () => string }).getEngine === 'function'
+      && (this.adapter as { getEngine: () => string }).getEngine() === 'postgresql';
   }
 
-  listThreads(workspaceId: string): Thread[] {
-    return this.db.prepare('SELECT * FROM threads WHERE workspace_id = ? ORDER BY updated_at DESC').all(workspaceId) as unknown as Thread[];
+  /** Run schema migration (CREATE IF NOT EXISTS). */
+  async migrate(): Promise<void> {
+    await this.adapter.execAsync(KNOWLEDGE_SCHEMA);
+    // PostgreSQL: events.id has no auto-increment default in the shared DDL
+    // (INTEGER PRIMARY KEY auto-increments only in SQLite). Ensure a sequence
+    // so concurrent LangGraph put/putWrites compute ids atomically (no MAX() race).
+    if (this.isPostgres()) {
+      await this.adapter.execAsync(`
+        CREATE SEQUENCE IF NOT EXISTS knowledge_events_id_seq;
+        SELECT setval('knowledge_events_id_seq', COALESCE((SELECT MAX(id) FROM events), 1));
+        ALTER TABLE events ALTER COLUMN id SET DEFAULT nextval('knowledge_events_id_seq');
+      `);
+    }
   }
 
-  getThread(threadId: string): Thread | null {
-    const row = this.db.prepare('SELECT * FROM threads WHERE thread_id = ?').get(threadId) as Row | undefined;
-    return row ? (row as unknown as Thread) : null;
+  /** No-op for adapter-based lifecycle (adapter manages its own connection). */
+  close(): void { /* adapter lifecycle managed externally */ }
+
+  // --- threads ---
+  async createThread(t: Thread): Promise<void> {
+    await this.adapter.runAsync(
+      'INSERT INTO threads (thread_id, workspace_id, title, agent_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [t.thread_id, t.workspace_id, t.title, t.agent_id, t.status, t.created_at, t.updated_at],
+    );
   }
 
-  deleteThread(threadId: string): void {
-    this.db.transaction(() => {
+  async listThreads(workspaceId: string): Promise<Thread[]> {
+    return this.adapter.allAsync<Thread>(
+      'SELECT * FROM threads WHERE workspace_id = ? ORDER BY updated_at DESC', [workspaceId],
+    );
+  }
+
+  async getThread(threadId: string): Promise<Thread | null> {
+    const row = await this.adapter.getAsync<Thread>(
+      'SELECT * FROM threads WHERE thread_id = ?', [threadId],
+    );
+    return row ?? null;
+  }
+
+  async deleteThread(threadId: string): Promise<void> {
+    await this.adapter.transactionAsync(async () => {
       for (const table of ['threads', 'messages', 'checkpoints', 'tool_executions', 'artifacts', 'events']) {
-        this.db.prepare(`DELETE FROM ${table} WHERE thread_id = ?`).run(threadId);
+        await this.adapter.runAsync(`DELETE FROM ${table} WHERE thread_id = ?`, [threadId]);
       }
-    })();
+    });
   }
 
-  // --- messages (projection) ---
-  appendMessage(workspaceId: string, threadId: string, m: MessageInput, seq: number): void {
-    const row = { id: m.id ?? crypto.randomUUID(), thread_id: threadId, workspace_id: workspaceId, role: m.role, content: m.content, agent_id: m.agent_id ?? null, timestamp: m.timestamp ?? new Date().toISOString(), seq };
-    this.db.prepare('INSERT OR IGNORE INTO messages (id, thread_id, workspace_id, role, content, agent_id, timestamp, seq) VALUES (@id, @thread_id, @workspace_id, @role, @content, @agent_id, @timestamp, @seq)').run(row);
+  // --- messages ---
+  async appendMessage(workspaceId: string, threadId: string, m: MessageInput, seq: number): Promise<void> {
+    const id = m.id ?? crypto.randomUUID();
+    const timestamp = m.timestamp ?? new Date().toISOString();
+    await this.adapter.runAsync(
+      `INSERT INTO messages (id, thread_id, workspace_id, role, content, agent_id, timestamp, seq) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (id) DO NOTHING`,
+      [id, threadId, workspaceId, m.role, m.content, m.agent_id ?? null, timestamp, seq],
+    );
   }
 
-  listMessages(threadId: string): Message[] {
-    return this.db.prepare('SELECT * FROM messages WHERE thread_id = ? ORDER BY seq ASC').all(threadId) as unknown as Message[];
+  async listMessages(threadId: string): Promise<Message[]> {
+    return this.adapter.allAsync<Message>(
+      'SELECT * FROM messages WHERE thread_id = ? ORDER BY seq ASC', [threadId],
+    );
   }
 
-  countMessages(threadId: string): number {
-    const row = this.db.prepare('SELECT COUNT(*) as cnt FROM messages WHERE thread_id = ?').get(threadId) as Row;
+  async countMessages(threadId: string): Promise<number> {
+    const row = await this.adapter.getAsync<{ cnt: number }>(
+      'SELECT COUNT(*) as cnt FROM messages WHERE thread_id = ?', [threadId],
+    );
     return row?.cnt ?? 0;
   }
 
-  // --- checkpoints (projection) ---
-  getCheckpoint(threadId: string): Checkpoint | null {
-    const row = this.db.prepare('SELECT * FROM checkpoints WHERE thread_id = ?').get(threadId) as Row | undefined;
+  // --- checkpoints ---
+  async getCheckpoint(threadId: string): Promise<Checkpoint | null> {
+    const row = await this.adapter.getAsync<Record<string, any>>(
+      'SELECT * FROM checkpoints WHERE thread_id = ?', [threadId],
+    );
     if (!row) return null;
     return {
       thread_id: row.thread_id,
@@ -98,56 +139,85 @@ export class KnowledgeDb {
     };
   }
 
-  upsertCheckpoint(workspaceId: string, threadId: string, input: SaveCheckpointInput): Checkpoint {
-    const existing = this.getCheckpoint(threadId);
+  async upsertCheckpoint(workspaceId: string, threadId: string, input: SaveCheckpointInput): Promise<Checkpoint> {
+    const existing = await this.getCheckpoint(threadId);
     const version = (existing?.version ?? 0) + 1;
     const writes = [...(existing?.pending_writes ?? []), ...(input.writes ?? input.pendingWrites ?? [])];
     const checkpoint = input.checkpoint ?? existing?.checkpoint ?? null;
     const metadata = input.metadata ?? existing?.metadata ?? {};
     const channelVersions = input.newVersions ?? existing?.channel_versions ?? {};
     const updatedAt = new Date().toISOString();
-    this.db.prepare('INSERT INTO checkpoints (thread_id, workspace_id, checkpoint, metadata, channel_versions, pending_writes, version, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (thread_id) DO UPDATE SET checkpoint = excluded.checkpoint, metadata = excluded.metadata, channel_versions = excluded.channel_versions, pending_writes = excluded.pending_writes, version = excluded.version, updated_at = excluded.updated_at')
-      .run(threadId, workspaceId, JSON.stringify(checkpoint), JSON.stringify(metadata), JSON.stringify(channelVersions), JSON.stringify(writes), version, updatedAt);
+    await this.adapter.runAsync(
+      `INSERT INTO checkpoints (thread_id, workspace_id, checkpoint, metadata, channel_versions, pending_writes, version, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (thread_id) DO UPDATE SET
+         checkpoint = excluded.checkpoint, metadata = excluded.metadata,
+         channel_versions = excluded.channel_versions, pending_writes = excluded.pending_writes,
+         version = excluded.version, updated_at = excluded.updated_at`,
+      [threadId, workspaceId, JSON.stringify(checkpoint), JSON.stringify(metadata),
+       JSON.stringify(channelVersions), JSON.stringify(writes), version, updatedAt],
+    );
     return { thread_id: threadId, workspace_id: workspaceId, checkpoint, metadata, channel_versions: channelVersions, pending_writes: writes, version, updated_at: updatedAt };
   }
 
-  // --- tool executions (projection) ---
-  addToolExecution(exec: ToolExecution): void {
-    this.db.prepare('INSERT INTO tool_executions (id, thread_id, workspace_id, tool_id, name, status, input, output, created_at) VALUES (@id, @thread_id, @workspace_id, @tool_id, @name, @status, @input, @output, @created_at)')
-      .run({ ...exec, input: JSON.stringify(exec.input ?? null), output: JSON.stringify(exec.output ?? null) });
+  // --- tool executions ---
+  async addToolExecution(exec: ToolExecution): Promise<void> {
+    await this.adapter.runAsync(
+      'INSERT INTO tool_executions (id, thread_id, workspace_id, tool_id, name, status, input, output, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [exec.id, exec.thread_id, exec.workspace_id, exec.tool_id, exec.name, exec.status, JSON.stringify(exec.input ?? null), JSON.stringify(exec.output ?? null), exec.created_at],
+    );
   }
 
-  // --- artifacts (projection) ---
-  addArtifact(a: Artifact): void {
-    this.db.prepare('INSERT INTO artifacts (id, thread_id, workspace_id, type, name, content, created_at) VALUES (@id, @thread_id, @workspace_id, @type, @name, @content, @created_at)')
-      .run({ ...a, content: JSON.stringify(a.content ?? null) });
+  // --- artifacts ---
+  async addArtifact(a: Artifact): Promise<void> {
+    await this.adapter.runAsync(
+      'INSERT INTO artifacts (id, thread_id, workspace_id, type, name, content, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [a.id, a.thread_id, a.workspace_id, a.type, a.name, JSON.stringify(a.content ?? null), a.created_at],
+    );
   }
 
-  listArtifacts(threadId: string): Artifact[] {
-    return (this.db.prepare('SELECT * FROM artifacts WHERE thread_id = ? ORDER BY created_at ASC').all(threadId) as unknown as Row[])
-      .map((row) => ({ ...row, content: parse(row.content, null) })) as unknown as Artifact[];
+  async listArtifacts(threadId: string): Promise<Artifact[]> {
+    const rows = await this.adapter.allAsync<Record<string, any>>(
+      'SELECT * FROM artifacts WHERE thread_id = ? ORDER BY created_at ASC', [threadId],
+    );
+    return rows.map((row) => ({ ...row, content: parse(row.content, null) })) as unknown as Artifact[];
   }
 
   // --- events (append-only log) ---
-  appendEvent(workspaceId: string, threadId: string, type: string, payload: unknown): void {
-    this.db.prepare('INSERT INTO events (thread_id, workspace_id, type, payload, created_at) VALUES (?, ?, ?, ?, ?)')
-      .run(threadId, workspaceId, type, JSON.stringify(payload ?? {}), new Date().toISOString());
+  async appendEvent(workspaceId: string, threadId: string, type: string, payload: unknown): Promise<void> {
+    // id auto-increments on both engines: SQLite rowid for INTEGER PRIMARY KEY,
+    // PostgreSQL via knowledge_events_id_seq default (see migrate()).
+    await this.adapter.runAsync(
+      'INSERT INTO events (thread_id, workspace_id, type, payload, created_at) VALUES (?, ?, ?, ?, ?)',
+      [threadId, workspaceId, type, JSON.stringify(payload ?? {}), new Date().toISOString()],
+    );
   }
 
-  listEvents(threadId: string): KnowledgeEvent[] {
-    return (this.db.prepare('SELECT * FROM events WHERE thread_id = ? ORDER BY id ASC').all(threadId) as unknown as Row[])
-      .map((row) => ({ ...row, payload: parse(row.payload, null) })) as unknown as KnowledgeEvent[];
+  async listEvents(threadId: string): Promise<KnowledgeEvent[]> {
+    const rows = await this.adapter.allAsync<Record<string, any>>(
+      'SELECT * FROM events WHERE thread_id = ? ORDER BY id ASC', [threadId],
+    );
+    return rows.map((row) => ({ ...row, payload: parse(row.payload, null) })) as unknown as KnowledgeEvent[];
   }
 
   // --- agents (registry) ---
-  upsertAgent(a: Agent): Agent {
-    this.db.prepare('INSERT INTO agents (agent_id, name, description, tools, mcp_servers, auto_approve, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT (agent_id) DO UPDATE SET name = excluded.name, description = excluded.description, tools = excluded.tools, mcp_servers = excluded.mcp_servers, auto_approve = excluded.auto_approve, updated_at = excluded.updated_at')
-      .run(a.agent_id, a.name, a.description, JSON.stringify(a.tools), JSON.stringify(a.mcp_servers), JSON.stringify(a.auto_approve), a.created_at, a.updated_at);
+  async upsertAgent(a: Agent): Promise<Agent> {
+    await this.adapter.runAsync(
+      `INSERT INTO agents (agent_id, name, description, tools, mcp_servers, auto_approve, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (agent_id) DO UPDATE SET
+         name = excluded.name, description = excluded.description, tools = excluded.tools,
+         mcp_servers = excluded.mcp_servers, auto_approve = excluded.auto_approve, updated_at = excluded.updated_at`,
+      [a.agent_id, a.name, a.description, JSON.stringify(a.tools), JSON.stringify(a.mcp_servers), JSON.stringify(a.auto_approve), a.created_at, a.updated_at],
+    );
     return a;
   }
 
-  listAgents(): Agent[] {
-    return (this.db.prepare('SELECT * FROM agents ORDER BY name ASC').all() as unknown as Row[]).map((row) => ({
+  async listAgents(): Promise<Agent[]> {
+    const rows = await this.adapter.allAsync<Record<string, any>>(
+      'SELECT * FROM agents ORDER BY name ASC', [],
+    );
+    return rows.map((row) => ({
       agent_id: row.agent_id,
       name: row.name,
       description: row.description,

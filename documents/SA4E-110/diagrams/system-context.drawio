@@ -1,0 +1,51 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="n1" value="AI Agents&#xa;(SM, BA, QA, DevOps)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="60" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="SA4E Orchestrator&#xa;(McpClientManager)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="430" y="60" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="Atlassian Child Server&#xa;(stdio process)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="430" y="260" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="Jira REST API&#xa;(Cloud / Server / DC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="750" y="200" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="Confluence REST API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="750" y="310" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="VS Code Extension&#xa;(SecretStorage / IPC)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="430" y="450" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="OS Keychain&#xa;(macOS/Windows/Linux)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="750" y="450" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="ONNX Embeddings&#xa;(Local Model)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="80" y="260" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="find_tools / execute_dynamic_tool" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="MCP stdio&#xa;(tools/list, tools/call, ping)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="HTTP REST&#xa;(Basic Auth / PAT)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="HTTP REST" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n3" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="IPC (getCredentials)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n3" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="SecretStorage API" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n6" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="Embedding generation" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n2" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

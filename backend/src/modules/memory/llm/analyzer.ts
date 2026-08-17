@@ -22,6 +22,8 @@ export interface TagAnalysisResult {
   appliedTags: string[];
   suggestedTags: TagSuggestion[];
   fallbackUsed: boolean;
+  /** SA4E-155: Error message when fallback was triggered by LLM failure */
+  fallbackReason?: string;
   /** SA4E-47: 1-3 sentence summary (max 500 chars) */
   summary: string;
   /** SA4E-47: Extracted business entities (max 5) */
@@ -80,7 +82,9 @@ export class TagAnalyzerService {
       return this.applyThresholdWithExtended(normalized, threshold, autoApply, llmResult);
     } catch (err) {
       this.logger?.warn({ err, component: 'TagAnalyzerService' }, 'LLM analysis failed, using fallback');
-      return this.fallbackWithExtended(content, threshold);
+      const fallback = this.fallbackWithExtended(content, threshold);
+      fallback.fallbackReason = err instanceof Error ? err.message : String(err);
+      return fallback;
     }
   }
 
@@ -97,10 +101,13 @@ export class TagAnalyzerService {
       { role: 'user', content: userPrompt },
     ];
     const timeoutMs = this.workerConfig?.llmTimeout ?? 30000;
+    this.logger?.info({ contentLen: content.length, timeoutMs, model: this.llmService.getConfig().model },
+      '[TagAnalyzer] Calling LLM...');
     const response = await Promise.race([
       this.llmService.complete(messages),
       this.timeout(timeoutMs),
     ]);
+    this.logger?.info({ responseLen: response.content.length }, '[TagAnalyzer] LLM responded');
     return this.parseEnhancedResponse(response.content);
   }
 

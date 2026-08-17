@@ -1,0 +1,153 @@
+<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Participant: Developer -->
+    <mxCell id="h1" value="Developer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="20" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: Extension -->
+    <mxCell id="h2" value="VS Code Extension" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="20" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: Backend -->
+    <mxCell id="h3" value="Backend API" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="520" y="20" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: PostgreSQL -->
+    <mxCell id="h4" value="PostgreSQL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="760" y="20" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Lifelines -->
+    <mxCell id="l1" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="60" as="sourcePoint"/>
+        <mxPoint x="120" y="800" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l2" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="350" y="60" as="sourcePoint"/>
+        <mxPoint x="350" y="800" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l3" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="590" y="60" as="sourcePoint"/>
+        <mxPoint x="590" y="800" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l4" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="820" y="60" as="sourcePoint"/>
+        <mxPoint x="820" y="800" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 1: Developer reloads window -->
+    <mxCell id="m1" value="1. Reload Window (Ctrl+Shift+P)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="100" as="sourcePoint"/>
+        <mxPoint x="350" y="100" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Note: activate fires -->
+    <mxCell id="note1" value="activate() fires" style="shape=note;whiteSpace=wrap;html=1;size=14;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="370" y="120" width="100" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Message 3: Extension -> Backend GET progress -->
+    <mxCell id="m3" value="2. GET /api/index/progress [JWT + X-Project-Id]" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="350" y="170" as="sourcePoint"/>
+        <mxPoint x="590" y="170" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 4: Backend -> PostgreSQL query -->
+    <mxCell id="m4" value="3. SELECT WHERE user_id, project_id" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="590" y="220" as="sourcePoint"/>
+        <mxPoint x="820" y="220" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 5: PostgreSQL returns record -->
+    <mxCell id="m5" value="4. Record: {status:running, current:150, total:500}" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="820" y="260" as="sourcePoint"/>
+        <mxPoint x="590" y="260" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 6: Backend returns progress -->
+    <mxCell id="m6" value="5. 200 OK {status:running, phase, current, total}" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="590" y="310" as="sourcePoint"/>
+        <mxPoint x="350" y="310" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 7: Extension shows status bar -->
+    <mxCell id="m7" value="6. Show status bar: Indexing 150/500 (30%)" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="350" y="360" as="sourcePoint"/>
+        <mxPoint x="120" y="360" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 8: Polling loop -->
+    <mxCell id="m8" value="7. Poll (every 2s)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="350" y="410" as="sourcePoint"/>
+        <mxPoint x="590" y="410" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 9: Poll response -->
+    <mxCell id="m9" value="8. 200 OK {status:running, current:200}" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="590" y="450" as="sourcePoint"/>
+        <mxPoint x="350" y="450" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- ALT frame: Interrupted case -->
+    <mxCell id="alt1" value="ALT: status = interrupted" style="swimlane;startSize=20;fillColor=#f8cecc;strokeColor=#b85450;html=1;fontSize=9;fontStyle=1;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="500" width="820" height="140" as="geometry"/>
+    </mxCell>
+    <!-- Message 10: Interrupted shown -->
+    <mxCell id="m10" value="9. Show: Index interrupted at 30%. Click to retry" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;strokeColor=#b85450;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="350" y="540" as="sourcePoint"/>
+        <mxPoint x="120" y="540" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 11: Developer clicks retry -->
+    <mxCell id="m11" value="10. Click retry" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="580" as="sourcePoint"/>
+        <mxPoint x="350" y="580" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 12: Extension -> Backend POST full -->
+    <mxCell id="m12" value="11. POST /api/index/full" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="350" y="620" as="sourcePoint"/>
+        <mxPoint x="590" y="620" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 13: Backend supersedes old, creates new -->
+    <mxCell id="m13" value="12. UPDATE old=superseded, INSERT new=running" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="590" y="670" as="sourcePoint"/>
+        <mxPoint x="820" y="670" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 14: Backend returns 200 -->
+    <mxCell id="m14" value="13. 200 OK — new operation started" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="590" y="720" as="sourcePoint"/>
+        <mxPoint x="350" y="720" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Message 15: Status bar updates -->
+    <mxCell id="m15" value="14. Status bar: Indexing 0/500 (0%) — fresh start" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="350" y="760" as="sourcePoint"/>
+        <mxPoint x="120" y="760" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

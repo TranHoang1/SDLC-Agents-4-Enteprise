@@ -1,0 +1,134 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-157 — Component Diagram (Internal Structure)" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="250" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Extension Components -->
+    <mxCell id="ext_label" value="Extension Layer" style="text;html=1;fontSize=10;fontStyle=5;fontColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="50" width="120" height="20" as="geometry"/>
+    </mxCell>
+    <!-- extension.ts -->
+    <mxCell id="ext_main" value="extension.ts&#xa;(activation lifecycle)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- EnrichmentStatusService -->
+    <mxCell id="ess" value="EnrichmentStatusService&#xa;[NEW]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="230" y="80" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- enrichment-status-schema.ts -->
+    <mxCell id="ext_schema" value="enrichment-status-schema.ts&#xa;(Zod validation) [NEW]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="460" y="80" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- StatusBarItem -->
+    <mxCell id="sbi" value="vscode.StatusBarItem&#xa;(VS Code API)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="690" y="80" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Transport Layer -->
+    <mxCell id="transport_label" value="Transport Layer" style="text;html=1;fontSize=10;fontStyle=5;fontColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="40" y="180" width="120" height="20" as="geometry"/>
+    </mxCell>
+    <!-- IndexerHttpClient -->
+    <mxCell id="ihc" value="IndexerHttpClient&#xa;+ httpGetJson() [MODIFIED]&#xa;+ getEnrichmentStatus() [NEW]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="230" y="200" width="220" height="60" as="geometry"/>
+    </mxCell>
+    <!-- AuthManager -->
+    <mxCell id="auth" value="AuthManager&#xa;getTokenSync()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="500" y="200" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Backend Components -->
+    <mxCell id="be_label" value="Backend Layer" style="text;html=1;fontSize=10;fontStyle=5;fontColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="40" y="320" width="120" height="20" as="geometry"/>
+    </mxCell>
+    <!-- enrichment-status-routes.ts -->
+    <mxCell id="be_route" value="enrichment-status-routes.ts&#xa;[NEW]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="350" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- EnrichmentStatusSchema (backend) -->
+    <mxCell id="be_schema" value="EnrichmentStatusSchema.ts&#xa;(Zod + deriveState) [NEW]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="290" y="350" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- TaskWorker -->
+    <mxCell id="tw" value="TaskWorker&#xa;(existing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="520" y="350" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <!-- PendingTaskRepository -->
+    <mxCell id="ptr" value="PendingTaskRepository&#xa;+ getEarliestActiveTimestamp()&#xa;[MODIFIED]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="690" y="350" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: Data Layer -->
+    <mxCell id="data_label" value="Data Layer" style="text;html=1;fontSize=10;fontStyle=5;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="40" y="460" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <!-- SQLite -->
+    <mxCell id="sqlite" value="SQLite — pending_tasks table&#xa;(no schema change)" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;size=10;" vertex="1" parent="1">
+      <mxGeometry x="690" y="460" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <!-- EDGES -->
+    <!-- ext_main → ess (creates) -->
+    <mxCell id="e1" value="creates + disposes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="ext_main" target="ess">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- ess → ext_schema (validates with) -->
+    <mxCell id="e2" value="safeParse" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="ess" target="ext_schema">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- ess → sbi (updates) -->
+    <mxCell id="e3" value="updates text/tooltip" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="ess" target="sbi">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- ess → ihc (calls) -->
+    <mxCell id="e4" value="getEnrichmentStatus()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="ess" target="ihc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- ihc → auth (gets token) -->
+    <mxCell id="e5" value="getTokenSync()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;fontSize=8;" edge="1" parent="1" source="ihc" target="auth">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- ihc → be_route (HTTP GET) -->
+    <mxCell id="e6" value="HTTP GET /api/v1/enrichment/status" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#0288d1;strokeWidth=2;" edge="1" parent="1" source="ihc" target="be_route">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="340" y="290"/>
+          <mxPoint x="140" y="290"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- be_route → be_schema (uses) -->
+    <mxCell id="e7" value="deriveState()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="be_route" target="be_schema">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- be_route → tw (calls) -->
+    <mxCell id="e8" value="getStats() + getProgress()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="be_route" target="tw">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="140" y="420"/>
+          <mxPoint x="580" y="420"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- tw → ptr (delegates) -->
+    <mxCell id="e9" value="delegates" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="tw" target="ptr">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- ptr → sqlite (queries) -->
+    <mxCell id="e10" value="GROUP BY status" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="ptr" target="sqlite">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="leg1" value="NEW" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=8;" vertex="1" parent="1">
+      <mxGeometry x="40" y="550" width="60" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="MODIFIED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=8;" vertex="1" parent="1">
+      <mxGeometry x="120" y="550" width="80" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="UNCHANGED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=8;" vertex="1" parent="1">
+      <mxGeometry x="220" y="550" width="90" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="EXTERNAL" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=8;" vertex="1" parent="1">
+      <mxGeometry x="330" y="550" width="80" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

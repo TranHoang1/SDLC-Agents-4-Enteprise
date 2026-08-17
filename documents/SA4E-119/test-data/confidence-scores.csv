@@ -1,0 +1,16 @@
+test_id,source_type,corroboration_count,age_days,confidence_override,expected_confidence,expected_source
+TC-0101,user_input,0,0,,0.5,initial
+TC-0101b,verified_doc,0,0,,0.7,initial
+TC-0101c,code_analysis,0,0,,0.8,initial
+TC-0104,verified_doc,3,5,,0.8,corroboration
+TC-0104b,user_input,4,10,,0.85,corroboration
+TC-0104c,user_input,2,5,,0.65,corroboration
+TC-0107,code_analysis,0,37,,0.7,decay
+TC-0107b,user_input,0,44,,0.3,decay
+TC-0107c,user_input,0,51,,0.2,decay
+TC-0109,user_input,0,100,,0.1,decay
+TC-0102,user_input,0,0,0.95,0.95,manual
+TC-0102b,user_input,0,0,0.0,0.0,manual
+TC-0111,user_input,0,0,1.5,1.0,manual
+TC-0112,user_input,0,0,-0.5,0.0,manual
+TC-0112b,user_input,0,0,0.5,0.5,manual

@@ -14,6 +14,7 @@ import type { CompositeScoreOptions } from '../evolution/models.js';
 import { buildReadFilter } from '../IsolationLayer.js';
 import { CompositeScorer } from '../evolution/CompositeScorer.js';
 import { MemoryEngineCrud } from './crud.js';
+import { searchPegaSymbols, mergeDedupResults } from './pega-search.js';
 
 export class MemoryEngine extends MemoryEngineCrud {
   private currentSessionId: string | null = null;
@@ -60,6 +61,8 @@ export class MemoryEngine extends MemoryEngineCrud {
       params.push(...this.buildScopeParams(scopeCtx));
     }
 
+    let legacyResults: SearchResult[] = [];
+
     if (engine === 'sqlite') {
       const ftsQuery = query.replace(/[^\w\s*":.]/g, ' ').trim() || '*';
       const sql = `SELECT ke.*, f.rank FROM
@@ -69,43 +72,43 @@ export class MemoryEngine extends MemoryEngineCrud {
         ORDER BY f.rank LIMIT ?`;
       try {
         const rows = await this.adapter.allAsync<any>(sql, [ftsQuery, ...params, limit]);
-        return this.applyCompositeScoring(rows);
+        legacyResults = this.applyCompositeScoring(rows);
       } catch (e) {
         console.warn('[MemoryEngine] search sqlite fts failed', e);
-        return [];
       }
-    }
-
-    if (engine === 'postgresql') {
+    } else if (engine === 'postgresql') {
       const sanitized = query.replace(/[^\w\s*":.]/g, ' ').trim();
       if (!sanitized) {
         const filtered = await this.findFiltered(tier, type, limit, scopeCtx);
-        return filtered.map(e => ({ entry: e, score: 0, matchType: 'all' }));
+        legacyResults = filtered.map(e => ({ entry: e, score: 0, matchType: 'all' }));
+      } else {
+        const sql = `SELECT ke.*, ts_rank(ke.tsvector_content, plainto_tsquery('english', ?)) as rank
+          FROM knowledge_entries ke
+          WHERE ke.tsvector_content @@ plainto_tsquery('english', ?) AND ${clauses.join(' AND ')}
+          ORDER BY rank DESC LIMIT ?`;
+        try {
+          const rows = await this.adapter.allAsync<any>(sql, [sanitized, sanitized, ...params, limit]);
+          legacyResults = this.applyCompositeScoring(rows);
+        } catch (e) {
+          console.warn('[MemoryEngine] search pg fts failed', e);
+        }
       }
-      const sql = `SELECT ke.*, ts_rank(ke.tsvector_content, plainto_tsquery('english', ?)) as rank
+    } else {
+      const sql = `SELECT ke.*, MATCH(ke.content, ke.summary) AGAINST(? IN NATURAL LANGUAGE MODE) as rank
         FROM knowledge_entries ke
-        WHERE ke.tsvector_content @@ plainto_tsquery('english', ?) AND ${clauses.join(' AND ')}
+        WHERE MATCH(ke.content, ke.summary) AGAINST(? IN NATURAL LANGUAGE MODE) AND ${clauses.join(' AND ')}
         ORDER BY rank DESC LIMIT ?`;
       try {
-        const rows = await this.adapter.allAsync<any>(sql, [sanitized, sanitized, ...params, limit]);
-        return this.applyCompositeScoring(rows);
+        const rows = await this.adapter.allAsync<any>(sql, [query, query, ...params, limit]);
+        legacyResults = this.applyCompositeScoring(rows);
       } catch (e) {
-        console.warn('[MemoryEngine] search pg fts failed', e);
-        return [];
+        console.warn('[MemoryEngine] search mysql fts failed', e);
       }
     }
 
-    const sql = `SELECT ke.*, MATCH(ke.content, ke.summary) AGAINST(? IN NATURAL LANGUAGE MODE) as rank
-      FROM knowledge_entries ke
-      WHERE MATCH(ke.content, ke.summary) AGAINST(? IN NATURAL LANGUAGE MODE) AND ${clauses.join(' AND ')}
-      ORDER BY rank DESC LIMIT ?`;
-    try {
-      const rows = await this.adapter.allAsync<any>(sql, [query, query, ...params, limit]);
-      return this.applyCompositeScoring(rows);
-    } catch (e) {
-      console.warn('[MemoryEngine] search mysql fts failed', e);
-      return [];
-    }
+    // SA4E-171: Dual-read — also search symbols_fts for Pega rules
+    const pegaResults = await searchPegaSymbols(this.adapter, query, limit, scopeCtx);
+    return mergeDedupResults(legacyResults, pegaResults, limit);
   }
 
   private async applyCompositeScoring(rows: any[]): Promise<SearchResult[]> {

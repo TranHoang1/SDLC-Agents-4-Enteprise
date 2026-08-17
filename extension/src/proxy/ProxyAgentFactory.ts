@@ -62,6 +62,8 @@ export class ProxyAgentFactory {
   async getDispatcher(targetUrl: string): Promise<Dispatcher | undefined> {
     const config = this.configService.getConfig();
     if (config.mode === "none") { return undefined; }
+    // Curl mode bypasses undici entirely — HttpClient uses CurlTransport directly
+    if (config.mode === "curl") { return undefined; }
 
     let proxyUrl: string | null;
     if (config.mode === "manual") {

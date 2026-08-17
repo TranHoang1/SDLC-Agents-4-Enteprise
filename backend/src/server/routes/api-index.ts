@@ -189,6 +189,23 @@ async function registerProjectPhase(scope: IndexScope, logger: Logger, createdBy
   }
 }
 
+/** Derive human-readable project name: git repo name > folder name. Pega handled separately. */
+async function deriveDisplayName(workspaceRoot: string): Promise<string> {
+  // 1. Try git repo name from remote URL
+  try {
+    const { execSync } = await import('child_process');
+    const remote = execSync('git remote get-url origin', { cwd: workspaceRoot, encoding: 'utf-8', timeout: 3000 }).trim();
+    if (remote) {
+      // Parse: https://github.com/org/repo-name.git → repo-name
+      // Parse: git@github.com:org/repo-name.git → repo-name
+      const match = remote.match(/\/([^/]+?)(?:\.git)?$/);
+      if (match) return match[1];
+    }
+  } catch { /* no git or no remote — fallback */ }
+  // 2. Fallback: folder name
+  return path.basename(workspaceRoot) || 'Untitled Project';
+}
+
 /** Phase: trigger a scoped background full re-index. Returns whether an indexer ran. */
 function triggerIndexPhase(registry: ModuleRegistry, scope: IndexScope, logger: Logger): boolean {
   const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
@@ -292,12 +309,19 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c, userId);
+<<<<<<< HEAD
     await registerProjectPhase(scope, logger, userId);
+=======
+    const realWorkspaceRoot = c.req.header('X-Workspace-Root') || '';
+    await registerProjectPhase(scope.projectId, scope.workspace, logger, userId, realWorkspaceRoot || undefined);
+>>>>>>> upstream/main
 
     const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
     const indexer = codeIntel?.getIndexer() as any;
 
     const written: string[] = [];
+    const indexed: string[] = [];
+    const indexFailed: string[] = [];
     const skipped: string[] = [];
     const rejected: string[] = [];
     const allDeps: FileDependency[] = [];
@@ -331,22 +355,42 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
       if (indexer) {
         try {
           const result = await indexer.indexSingleFile(file.path, scope.projectId);
-          if (result && result.dependencies) {
-            for (const dep of result.dependencies) {
-              if (!allDeps.some(d => d.path === dep.path)) {
-                allDeps.push(dep);
+          if (result && result.symbolCount > 0) {
+            indexed.push(file.path);
+            if (result.dependencies) {
+              for (const dep of result.dependencies) {
+                if (!allDeps.some(d => d.path === dep.path)) {
+                  allDeps.push(dep);
+                }
               }
             }
+          } else {
+            indexFailed.push(file.path);
           }
         } catch (err) {
-          logger.warn({ err, file: file.path }, '[index] single-file index failed (non-fatal)');
+          indexFailed.push(file.path);
+          logger.warn({ err, file: file.path }, '[index] single-file index failed');
         }
       }
     }
 
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
-    await ensureProjectKbEntry(registry, scope, written.length, logger);
-    return c.json({ written: written.length, skipped: skipped.length, rejected, deps: allDeps, projectId: scope.projectId });
+    if (indexFailed.length > 0) logger.warn({ count: indexFailed.length, projectId: scope.projectId }, '[index] files written but DB index failed');
+    await ensureProjectKbEntry(registry, scope, indexed.length, logger);
+
+    // SA4E-107: Create LLM enrichment tasks for newly indexed symbols (async, non-blocking)
+    if (indexer && indexed.length > 0) {
+      try {
+        const { CodeEnrichmentTaskCreator } = await import('../../engine/enrichment/CodeEnrichmentTaskCreator.js');
+        const creator = new CodeEnrichmentTaskCreator(indexer.adapter, logger);
+        const created = await creator.createTasksForProject(scope.projectId);
+        if (created > 0) logger.info({ created, projectId: scope.projectId }, '[index] Enrichment tasks queued');
+      } catch (err) {
+        logger.warn({ err }, '[index] Enrichment task creation skipped (non-fatal)');
+      }
+    }
+
+    return c.json({ written: written.length, indexed: indexed.length, indexFailed: indexFailed.length, skipped: skipped.length, rejected, deps: allDeps, projectId: scope.projectId });
   } catch (err: any) {
     return indexError(c, err, logger, 'Error writing source batch');
   }

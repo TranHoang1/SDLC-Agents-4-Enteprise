@@ -1,0 +1,161 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-171: Pega Rules Migration — Business Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="20" width="400" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Entry / Sources -->
+    <mxCell id="n1" value="Pega Server&#xa;(Rule Source)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="PegaBfsIndexer&#xa;(Fetch Rules)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="250" y="80" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="PegaParser&#xa;(Parse pxObjClass → Symbol)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="460" y="80" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Current Path (OLD) -->
+    <mxCell id="old_label" value="CURRENT PATH (to be replaced)" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="40" y="180" width="220" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="knowledge_entries&#xa;(PEGA_RULE / PEGA_DATA)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="250" y="200" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="TAG_ENRICHMENT&#xa;(Tags only)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="200" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="knowledge_fts&#xa;(KB FTS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="710" y="200" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: New Path (NEW) -->
+    <mxCell id="new_label" value="NEW PATH (SA4E-171)" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="40" y="310" width="220" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="Virtual File Entry&#xa;(files table, lang=pega)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="100" y="340" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="symbols table&#xa;(kind=pega_*)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="330" y="340" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="CODE_ENRICHMENT&#xa;(Summary + PseudoCode + Tags)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="560" y="340" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n10" value="symbols_fts&#xa;(Unified Code FTS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="830" y="340" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: Migration -->
+    <mxCell id="mig_label" value="MIGRATION SCRIPT" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="40" y="440" width="150" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="n11" value="Migration Script&#xa;(Batch Read from KB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="100" y="470" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n12" value="Parse + Map&#xa;(pxObjClass → kind)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="330" y="470" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n13" value="Insert into symbols&#xa;+ Create Enrichment Tasks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="560" y="470" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n14" value="Archive Legacy KB&#xa;(archived = 1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="810" y="470" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 5: Search/Consumer -->
+    <mxCell id="search_label" value="SEARCH (Consumer)" style="text;html=1;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=9;fontStyle=2;fontColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="580" width="150" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="n15" value="Developer&#xa;(code_search / mem_search)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="100" y="610" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n16" value="Unified Search&#xa;(symbols_fts + dedup)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="380" y="610" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n17" value="Results: Pega + TS + Java&#xa;(Unified code intelligence)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="630" y="610" width="190" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 1 flow -->
+    <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Parser to OLD path -->
+    <mxCell id="e3" value="OLD" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;strokeColor=#b85450;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;strokeColor=#b85450;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;strokeColor=#b85450;" edge="1" parent="1" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Parser to NEW path (via virtual file) -->
+    <mxCell id="e6" value="NEW" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#82b366;strokeWidth=2;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n3" target="n7">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="580" y="160"/>
+          <mxPoint x="180" y="160"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Virtual File to symbols -->
+    <mxCell id="e7" value="file_id FK" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#82b366;" edge="1" parent="1" source="n7" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: symbols to CODE_ENRICHMENT -->
+    <mxCell id="e8" value="Task created" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#82b366;" edge="1" parent="1" source="n8" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: symbols to symbols_fts -->
+    <mxCell id="e9" value="FTS Trigger" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#82b366;" edge="1" parent="1" source="n9" target="n10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Migration reads from old KB -->
+    <mxCell id="e10" value="Read" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#d6b656;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="n11" target="n4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="180" y="420"/>
+          <mxPoint x="180" y="280"/>
+          <mxPoint x="295" y="280"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Migration pipeline -->
+    <mxCell id="e11" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#d6b656;" edge="1" parent="1" source="n11" target="n12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#d6b656;" edge="1" parent="1" source="n12" target="n13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#d6b656;" edge="1" parent="1" source="n13" target="n14">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Migration insert targets symbols table -->
+    <mxCell id="e14" value="Insert" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#d6b656;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="n13" target="n8">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="650" y="430"/>
+          <mxPoint x="410" y="430"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Edge: Search consumer flow -->
+    <mxCell id="e15" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n15" target="n16">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e16" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" edge="1" parent="1" source="n16" target="n17">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: symbols_fts feeds unified search -->
+    <mxCell id="e17" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;strokeColor=#82b366;dashed=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n10" target="n16">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="905" y="560"/>
+          <mxPoint x="460" y="560"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

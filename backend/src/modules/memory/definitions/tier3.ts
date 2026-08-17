@@ -62,4 +62,5 @@ export const MEMORY_TOOL_ALIASES = [
   { name: 'mem_status', description: 'Get memory status (alias for mem_admin status).', inputSchema: { type: 'object', properties: {} }, category: 'memory' },
   { name: 'mem_audit', description: 'Get memory audit log (alias for mem_admin audit).', inputSchema: { type: 'object', properties: { limit: { type: 'number' }, operation: { type: 'string' } } }, category: 'memory' },
   { name: 'mem_sessions', description: 'List memory sessions (alias for mem_admin sessions).', inputSchema: { type: 'object', properties: {} }, category: 'memory' },
+  { name: 'mem_sync_code', description: 'Sync code symbols from indexer into KB knowledge_entries (alias for mem_admin sync_code).', inputSchema: { type: 'object', properties: { kind: { type: 'string', description: 'Symbol kind filter: class, interface, function (default: class+interface)' } } }, category: 'memory' },
 ];

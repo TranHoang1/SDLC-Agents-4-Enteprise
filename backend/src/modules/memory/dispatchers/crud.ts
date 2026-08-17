@@ -21,7 +21,7 @@ import { getAdminAdapter } from '../../../admin/db/core.js';
 import { computePositionByIndex } from '../../kb-graph/service/nodes.js';
 import { EpochService } from '../evolution/EpochService.js';
 import pino from 'pino';
-import { loadFileMetadata } from '../../../engine/scanner/file-scanner.js';
+import { loadFileMetadata } from '../../../engine/indexer/file-scanner.js';
 
 const logger = pino({ name: 'memory-tool-dispatcher' });
 

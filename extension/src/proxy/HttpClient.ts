@@ -7,6 +7,7 @@ import type { Dispatcher } from "undici";
 import type { IAuthManager } from "../types/server-types";
 import { getProjectId } from "../extension";
 import { ProxyAgentFactory } from "./ProxyAgentFactory";
+import { CurlHttpAdapter } from "./CurlHttpAdapter";
 
 export class HttpError extends Error {
   constructor(public readonly statusCode: number, message: string) {
@@ -20,6 +21,8 @@ export interface ToolResult {
 }
 
 export class HttpClient {
+  private readonly curlAdapter = new CurlHttpAdapter();
+
   constructor(
     private _baseUrl: string,
     private readonly authManager: IAuthManager
@@ -52,6 +55,10 @@ export class HttpClient {
       throw new HttpError(401, "Not authenticated — please login to use this feature.");
     }
     const url = this._baseUrl + path;
+    // Curl mode: bypass fetch(), use curl.exe subprocess
+    if (this.isCurlMode() && !this.shouldBypassCurl(url)) {
+      return this.curlRequest<T>(url, "GET", headers, undefined, timeout);
+    }
     const dispatcher = await this.getProxyDispatcher(url);
     const response = await fetch(url, {
       method: "GET",
@@ -75,6 +82,10 @@ export class HttpClient {
       throw new HttpError(401, "Not authenticated — please login to use this feature.");
     }
     const url = this._baseUrl + path;
+    // Curl mode: bypass fetch(), use curl.exe subprocess
+    if (this.isCurlMode() && !this.shouldBypassCurl(url)) {
+      return this.curlRequest<T>(url, "POST", headers, JSON.stringify(body), timeout);
+    }
     const dispatcher = await this.getProxyDispatcher(url);
     const response = await fetch(url, {
       method: "POST",
@@ -103,6 +114,7 @@ export class HttpClient {
       throw new HttpError(401, "Not authenticated — please login to use this feature.");
     }
     const url = this._baseUrl + path;
+    // Note: CurlTransport does not support streaming — fall through to fetch()
     const dispatcher = await this.getProxyDispatcher(url);
     const response = await fetch(url, {
       method: "POST",
@@ -130,6 +142,11 @@ export class HttpClient {
   async healthCheck(timeout?: number): Promise<boolean> {
     try {
       const url = this._baseUrl + "/health";
+      // Curl mode: use curl for health check too (bypassed URLs skip curl)
+      if (this.isCurlMode() && !this.shouldBypassCurl(url)) {
+        const response = await this.curlAdapter.request(url, "GET", {}, undefined, timeout || 5000);
+        return response.ok;
+      }
       const dispatcher = await this.getProxyDispatcher(url);
       const response = await fetch(url, {
         method: "GET",
@@ -160,6 +177,43 @@ export class HttpClient {
       // ProxyAgentFactory not initialized or error — fall back to direct
       return undefined;
     }
+  }
+
+  /**
+   * Check if current proxy mode is "curl" (CurlTransport subprocess).
+   * When true, HttpClient delegates to curl.exe instead of fetch().
+   */
+  private isCurlMode(): boolean {
+    return this.curlAdapter.isCurlMode();
+  }
+
+  /**
+   * Check if a target URL should bypass curl proxy (connect directly via fetch).
+   * Uses the same bypass list as manual/system modes.
+   */
+  private shouldBypassCurl(targetUrl: string): boolean {
+    return this.curlAdapter.shouldBypass(targetUrl);
+  }
+
+  /**
+   * Execute request via CurlTransport (subprocess).
+   * Converts response to parsed JSON or throws HttpError.
+   */
+  private async curlRequest<T>(
+    url: string,
+    method: string,
+    headers: Record<string, string>,
+    body?: string,
+    timeout?: number
+  ): Promise<T> {
+    const response = await this.curlAdapter.request(url, method, headers, body, timeout);
+    if (response.status === 401) {
+      throw new HttpError(401, "Unauthorized");
+    }
+    if (!response.ok) {
+      throw new HttpError(response.status, response.body || response.statusText);
+    }
+    return JSON.parse(response.body) as T;
   }
 }
 

@@ -28,14 +28,13 @@ export async function storeResults(
     const fileId = await findScopedFileId(adapter, filePath, projectId);
     if (!fileId) return;
     await adapter.runAsync('DELETE FROM symbols WHERE file_id = ?', [fileId]);
-    try {
-      await adapter.runAsync(
-        'DELETE FROM relationships WHERE file_path = ? AND project_id = ?',
-        [filePath, projectId],
-      );
-    } catch (err) {
-      logger.warn({ err, filePath, projectId }, '[storage] Failed to clear prior relationships (continuing)');
-    }
+    // SA4E-104: DELETE relationships outside try/catch — PG aborts tx on any error.
+    // Safe: relationships table always exists after migrations. If it somehow doesn't,
+    // the error propagates → transaction rolls back → file re-indexed next cycle.
+    await adapter.runAsync(
+      'DELETE FROM relationships WHERE file_path = ? AND project_id = ?',
+      [filePath, projectId],
+    );
     const insertSymSql = 'INSERT INTO symbols (project_id, file_id, name, kind, signature, start_line, end_line, parent_symbol, visibility, doc_comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
     for (const sym of result.symbols) {
       const info = await adapter.runAsync(insertSymSql, [
@@ -45,20 +44,18 @@ export async function storeResults(
       ]);
       symbolIds.set(sym.name, info.lastInsertRowid as number);
     }
-    try {
-      const insertRelSql = 'INSERT INTO relationships (project_id, source_symbol_id, target_symbol, target_symbol_id, kind, file_path, line, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
-      for (const rel of result.relationships) {
-        const sourceId = symbolIds.get(rel.sourceSymbol);
-        if (!sourceId) continue;
-        const targetId = symbolIds.get(rel.targetSymbol) ?? null;
-        await adapter.runAsync(insertRelSql, [
-          projectId, sourceId, rel.targetSymbol, targetId,
-          rel.kind, filePath, rel.line,
-          rel.metadata ? JSON.stringify(rel.metadata) : null,
-        ]);
-      }
-    } catch (err) {
-      logger.warn({ err, filePath, projectId }, '[storage] Failed to store relationships (symbols kept)');
+    // SA4E-104: Store relationships without try/catch — let errors propagate.
+    // If a relationship INSERT fails, entire tx rolls back (symbols re-inserted next cycle).
+    const insertRelSql = 'INSERT INTO relationships (project_id, source_symbol_id, target_symbol, target_symbol_id, kind, file_path, line, metadata) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    for (const rel of result.relationships) {
+      const sourceId = symbolIds.get(rel.sourceSymbol);
+      if (!sourceId) continue;
+      const targetId = symbolIds.get(rel.targetSymbol) ?? null;
+      await adapter.runAsync(insertRelSql, [
+        projectId, sourceId, rel.targetSymbol, targetId,
+        rel.kind, filePath, rel.line,
+        rel.metadata ? JSON.stringify(rel.metadata) : null,
+      ]);
     }
   });
   return symbolIds;

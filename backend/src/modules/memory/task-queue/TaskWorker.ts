@@ -44,6 +44,9 @@ export class TaskWorker {
   private shutdownResolve: (() => void) | null = null;
   /** SA4E-101: Track current processing task for status bar progress. */
   private currentTaskInfo: { file: string; type: string; current: number; total: number } | null = null;
+  /** SA4E-155: Adaptive concurrency — reduces on LLM errors, recovers on success. */
+  private activeConcurrency: number = 0;
+  private consecutiveErrors = 0;
 
   constructor(
     db: DatabaseAdapter,
@@ -71,7 +74,7 @@ export class TaskWorker {
    */
   updateConfig(patch: Partial<Pick<TaskWorkerConfig, 'concurrency' | 'baseInterval' | 'maxInterval'>>): void {
     if (patch.concurrency !== undefined) {
-      (this.config as any).concurrency = Math.max(1, Math.min(patch.concurrency, 8));
+      (this.config as any).concurrency = Math.max(1, patch.concurrency);
     }
     if (patch.baseInterval !== undefined) (this.config as any).baseInterval = patch.baseInterval;
     if (patch.maxInterval !== undefined) (this.config as any).maxInterval = patch.maxInterval;
@@ -142,6 +145,12 @@ export class TaskWorker {
 
   getRepository(): PendingTaskRepository { return this.repo; }
 
+  /** SA4E-169: Expose config for dashboard (concurrency max). */
+  getConfig(): TaskWorkerConfig { return this.config; }
+
+  /** SA4E-169: Expose current active concurrency level. */
+  getActiveConcurrency(): number { return this.activeConcurrency; }
+
   // ── Private ──
 
   private schedulePoll(delayMs: number): void {
@@ -153,26 +162,56 @@ export class TaskWorker {
     if (!this.running) { this.finishShutdown(); return; }
     this.lastPollAt = new Date().toISOString();
     try {
-      const concurrency = this.config.concurrency ?? 1;
-      const tasks = await this.repo.claimBatch(concurrency);
+      // SA4E-155: Adaptive concurrency — use activeConcurrency (adjusted by LLM error rate)
+      const maxConcurrency = this.config.concurrency ?? 1;
+      if (this.activeConcurrency === 0) this.activeConcurrency = maxConcurrency;
+      const claimCount = this.activeConcurrency;
+      const tasks = await this.repo.claimBatch(claimCount);
       if (tasks.length === 0) {
         this.consecutiveEmpty++;
+        if (this.consecutiveEmpty <= 3 || this.consecutiveEmpty % 10 === 0) {
+          this.logger.info({ consecutiveEmpty: this.consecutiveEmpty, claimCount },
+            '[TaskWorker] poll: no tasks claimed');
+        }
         const delay = Math.min(
           this.config.baseInterval * Math.pow(2, this.consecutiveEmpty),
           this.config.maxInterval);
         this.schedulePoll(delay);
         return;
       }
+      this.logger.info({ claimed: tasks.length, taskIds: tasks.map(t => t.id).slice(0, 3) },
+        '[TaskWorker] poll: claimed tasks');
       this.consecutiveEmpty = 0;
       this.processing = true;
-      // Run all claimed tasks concurrently — keeps GPU busy between token batches
+      // Run all claimed tasks concurrently
+      const errorsBefore = this.consecutiveErrors;
       await Promise.allSettled(tasks.map(task => this.processTask(task)));
+      // SA4E-155: processTask catches errors internally (marks task FAILED).
+      // Detect failures by checking if consecutiveErrors was incremented during processing.
+      const errorsThisCycle = this.consecutiveErrors - errorsBefore;
+      if (errorsThisCycle > 0) {
+        // Halve concurrency on errors, minimum 1
+        this.activeConcurrency = Math.max(1, Math.floor(this.activeConcurrency / 2));
+        this.logger.warn({ failures: errorsThisCycle, activeConcurrency: this.activeConcurrency, component: 'TaskWorker' },
+          'LLM errors detected — reducing concurrency');
+      } else {
+        this.consecutiveErrors = 0;
+        // Recover: increment towards max (slow ramp-up)
+        if (this.activeConcurrency < maxConcurrency) {
+          this.activeConcurrency = Math.min(maxConcurrency, this.activeConcurrency + 1);
+        }
+      }
       this.processing = false;
       if (!this.running) { this.finishShutdown(); return; }
-      this.schedulePoll(this.config.baseInterval);
+      // Backoff delay if errors persist
+      const delay = this.consecutiveErrors >= 3
+        ? this.config.baseInterval * 3
+        : this.config.baseInterval;
+      this.schedulePoll(delay);
     } catch (err) {
       this.processing = false;
       this.logger.error({ err }, 'Poll cycle error');
+      this.activeConcurrency = 1;
       this.schedulePoll(this.config.baseInterval * 2);
     }
   }
@@ -237,6 +276,36 @@ export class TaskWorker {
 
     const result = await this.tagAnalyzer.analyzeTags(payload.content, payload.options, context);
 
+    // SA4E-155: Quality gate — if LLM failed (fallback used), ALWAYS mark failed.
+    // LLM must succeed for enrichment to be considered done.
+    if (result.fallbackUsed) {
+      this.consecutiveErrors++;
+      const reason = result.fallbackReason || 'unknown';
+      const errorMsg = `llm_enrichment_failed: ${reason}`;
+      this.logger.warn({ entry_id: task.entry_id, task_id: task.id, reason, component: 'TaskWorker' },
+        'LLM enrichment failed — marking task FAILED (not done)');
+      await this.repo.markFailed(task.id, errorMsg);
+      // Write error details into structured_map so it's queryable/visible in Admin UI
+      const errorMap = JSON.stringify({
+        error: errorMsg,
+        error_at: new Date().toISOString(),
+        task_id: task.id,
+        retry_count: task.retry_count,
+        fallback_used: true,
+        extraction_meta: {
+          model: this.llmService?.getConfig()?.model || 'unknown',
+          timestamp: new Date().toISOString(),
+          fallback_used: true,
+          error: reason,
+        },
+      });
+      await this.engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET enrichment_status = 'failed', structured_map = ? WHERE id = ? AND enrichment_status = 'pending'`,
+        [errorMap, task.entry_id],
+      );
+      return;
+    }
+
     // TA-08: Re-check status after LLM call — client may have enriched during processing
     const currentEntry = await this.engine.findById(task.entry_id);
     if (!currentEntry || (currentEntry as any).enrichment_status === 'done') {
@@ -273,6 +342,7 @@ export class TaskWorker {
       this.logger.info({ entry_id: task.entry_id }, 'Client enriched during tag/map update — discarding');
     }
 
+    // SA4E-165: Always mark task completed — entry sync is best-effort above
     await this.repo.markCompleted(task.id);
   }
 
@@ -396,6 +466,13 @@ export class TaskWorker {
         `UPDATE knowledge_entries SET structured_map = ? WHERE id = ? AND enrichment_status = 'pending'`,
         [jsonStr, entryId],
       );
+      // SA4E-169: Update summary column (separate from structured_map) for FTS indexing + KB UI display
+      if (structuredMap.summary) {
+        await this.engine.getAdapter().runAsync(
+          `UPDATE knowledge_entries SET summary = ? WHERE id = ? AND enrichment_status = 'pending'`,
+          [structuredMap.summary, entryId],
+        );
+      }
     } catch (err) {
       this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
         'structured_map conditional update failed');
@@ -421,8 +498,12 @@ export class TaskWorker {
   }
 
   private async handleTaskError(task: PendingTask, err: Error): Promise<void> {
+    this.consecutiveErrors++;
+    // SA4E-106: Non-retryable patterns include CODE_ENRICHMENT-specific errors
     const nonRetryable = err.message.includes('invalid_json')
-      || err.message.includes('entry_not_found');
+      || err.message.includes('entry_not_found')
+      || err.message.includes('invalid_payload')
+      || err.message.includes('symbol_not_found');
     if (nonRetryable || task.retry_count + 1 >= task.max_retries) {
       await this.repo.markFailed(task.id, err.message);
     } else {

@@ -21,6 +21,39 @@ export async function handleAdmin(engine: MemoryEngine, a: Args): Promise<string
     case 'audit': return (await engine.listAudit((a.limit as number) ?? 20, a.operation as string)).map((e: any) => `[${e.operation}] ${e.created_at}`).join('\n') || 'Empty';
     case 'sessions': return (await engine.listSessions()).map((s: any) => `[${s.session_id}] ${s.status}`).join('\n') || 'None';
     case 'analytics': case 'popular': return '{}';
+    case 'retry_all_failed': {
+      const { PendingTaskRepository } = await import('../task-queue/PendingTaskRepository.js');
+      const repo = new PendingTaskRepository(engine.getAdapter());
+      const count = await repo.retryAllFailed();
+      return `Reset ${count} FAILED tasks back to PENDING for retry.`;
+    }
+    case 'task_stats': {
+      const { PendingTaskRepository } = await import('../task-queue/PendingTaskRepository.js');
+      const repo = new PendingTaskRepository(engine.getAdapter());
+      const stats = await repo.getStats();
+      return JSON.stringify(stats);
+    }
+    case 'reset_enrichment': {
+      const projectId = a.project_id as string || '';
+      const typeFilter = projectId
+        ? `AND project_id = '${projectId}'`
+        : '';
+      const result = await engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE type IN ('PEGA_RULE', 'PEGA_DATA', 'PEGA_AST') AND enrichment_status = 'done' ${typeFilter}`,
+      );
+      return `Reset ${result.changes} entries enrichment_status from 'done' to 'pending'. TaskWorker will re-process them with LLM.`;
+    }
+    case 'purge_orphan_tasks': {
+      const result = await engine.getAdapter().runAsync(
+        `DELETE FROM pending_tasks WHERE id IN (
+          SELECT pt.id FROM pending_tasks pt
+          LEFT JOIN knowledge_entries ke ON pt.entry_id = ke.id
+          WHERE ke.id IS NULL
+          LIMIT 10000
+        )`,
+      );
+      return `Purged ${result.changes} orphaned tasks (batch, max 10000). Run again if more remain.`;
+    }
     default: return `Admin: "${action}" via portal`;
   }
 }

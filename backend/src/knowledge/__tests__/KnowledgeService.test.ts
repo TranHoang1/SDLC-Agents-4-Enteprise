@@ -27,77 +27,97 @@ describe('KnowledgeService', () => {
   });
 
   describe('createThread', () => {
-    it('returns a UUID v4 thread_id (PBT-HYD-01)', () => {
-      const thread = service.createThread(ctx('ws-A'), { title: 'Hello' });
+    it('returns a UUID v4 thread_id (PBT-HYD-01)', async () => {
+      const thread = await service.createThread(ctx('ws-A'), { title: 'Hello' });
       expect(isUuidV4(thread.thread_id)).toBe(true);
       expect(thread.workspace_id).toBe('ws-A');
       expect(thread.status).toBe('active');
     });
 
-    it('appends THREAD_CREATED event (event sourcing)', () => {
-      const thread = service.createThread(ctx('ws-A'), { title: 'T' });
-      const events = service.getEvents(ctx('ws-A'), thread.thread_id);
+    it('appends THREAD_CREATED event (event sourcing)', async () => {
+      const thread = await service.createThread(ctx('ws-A'), { title: 'T' });
+      const events = await service.getEvents(ctx('ws-A'), thread.thread_id);
       expect(events).toHaveLength(1);
       expect(events?.[0].type).toBe('THREAD_CREATED');
     });
 
-    it('defaults title when omitted', () => {
-      const thread = service.createThread(ctx('ws-A'), {});
+    it('defaults title when omitted', async () => {
+      const thread = await service.createThread(ctx('ws-A'), {});
       expect(thread.title).toBe('New thread');
     });
   });
 
   describe('workspace binding — Finding #18', () => {
-    it('getThread returns null for a thread owned by another workspace', () => {
-      const thread = service.createThread(ctx('ws-A'), {});
-      expect(service.getThread(ctx('ws-B'), thread.thread_id)).toBeNull();
-      expect(service.getMessages(ctx('ws-B'), thread.thread_id)).toBeNull();
-      expect(service.getCheckpoint(ctx('ws-B'), thread.thread_id)).toBeNull();
-      expect(service.getEvents(ctx('ws-B'), thread.thread_id)).toBeNull();
-      expect(service.getArtifacts(ctx('ws-B'), thread.thread_id)).toBeNull();
+    it('getThread returns null for a thread owned by another workspace', async () => {
+      const thread = await service.createThread(ctx('ws-A'), {});
+      expect(await service.getThread(ctx('ws-B'), thread.thread_id)).toBeNull();
+      expect(await service.getMessages(ctx('ws-B'), thread.thread_id)).toBeNull();
+      expect(await service.getCheckpoint(ctx('ws-B'), thread.thread_id)).toBeNull();
+      expect(await service.getEvents(ctx('ws-B'), thread.thread_id)).toBeNull();
+      expect(await service.getArtifacts(ctx('ws-B'), thread.thread_id)).toBeNull();
     });
 
-    it('saveCheckpoint returns null for a thread owned by another workspace', () => {
-      const thread = service.createThread(ctx('ws-A'), {});
-      const saved = service.saveCheckpoint(ctx('ws-B'), thread.thread_id, { checkpoint: { v: 1 } });
+    it('saveCheckpoint auto-creates a thread for a fresh UUID it has never seen (LangGraph checkpointer)', async () => {
+      const freshId = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+      const saved = await service.saveCheckpoint(ctx('ws-A'), freshId, { checkpoint: { v: 1, channel_values: {} } });
+      expect(saved).not.toBeNull();
+      expect(saved?.thread_id).toBe(freshId);
+      expect(saved?.version).toBe(1);
+      const loaded = await service.getCheckpoint(ctx('ws-A'), freshId);
+      expect(loaded?.checkpoint).toEqual({ v: 1, channel_values: {} });
+      expect(await service.getThread(ctx('ws-A'), freshId)).not.toBeNull();
+      // the new thread is visible to listThreads (multi-IDE hydrate)
+      const threads = await service.listThreads(ctx('ws-A'));
+      expect(threads.some((t) => t.thread_id === freshId)).toBe(true);
+      // a second PUT bumps version (idempotent upsert, IT-HYD-03)
+      await service.saveCheckpoint(ctx('ws-A'), freshId, { checkpoint: { v: 2, channel_values: {} } });
+      expect((await service.getCheckpoint(ctx('ws-A'), freshId))?.version).toBe(2);
+    });
+
+    it('saveCheckpoint rejects a non-UUID thread id (404 path)', async () => {
+      expect(await service.saveCheckpoint(ctx('ws-A'), 'not-a-uuid', { checkpoint: { v: 1 } })).toBeNull();
+    });
+
+    it('saveCheckpoint returns null for a thread owned by another workspace', async () => {
+      const thread = await service.createThread(ctx('ws-A'), {});
+      const saved = await service.saveCheckpoint(ctx('ws-B'), thread.thread_id, { checkpoint: { v: 1 } });
       expect(saved).toBeNull();
     });
 
-    it('listThreads only returns caller workspace threads', () => {
-      service.createThread(ctx('ws-A'), { title: 'A1' });
-      service.createThread(ctx('ws-B'), { title: 'B1' });
-      service.createThread(ctx('ws-A'), { title: 'A2' });
-      const threadsA = service.listThreads(ctx('ws-A'));
-      const threadsB = service.listThreads(ctx('ws-B'));
+    it('listThreads only returns caller workspace threads', async () => {
+      await service.createThread(ctx('ws-A'), { title: 'A1' });
+      await service.createThread(ctx('ws-B'), { title: 'B1' });
+      await service.createThread(ctx('ws-A'), { title: 'A2' });
+      const threadsA = await service.listThreads(ctx('ws-A'));
+      const threadsB = await service.listThreads(ctx('ws-B'));
       expect(threadsA).toHaveLength(2);
       expect(threadsB).toHaveLength(1);
     });
 
-    it('uses JWT wid claim when no X-Project-Id header present', () => {
-      // projectId = '' → falls back to workspaceId (wid claim)
-      const thread = service.createThread(ctx('', 'wid-1'), {});
+    it('uses JWT wid claim when no X-Project-Id header present', async () => {
+      const thread = await service.createThread(ctx('', 'wid-1'), {});
       expect(thread.workspace_id).toBe('wid-1');
-      expect(service.getThread(ctx('', 'wid-2'), thread.thread_id)).toBeNull();
+      expect(await service.getThread(ctx('', 'wid-2'), thread.thread_id)).toBeNull();
     });
 
-    it('invalid thread_id is never treated as owned (404 path)', () => {
-      expect(service.getThread(ctx('ws-A'), 'not-a-uuid')).toBeNull();
-      expect(service.getMessages(ctx('ws-A'), 'not-a-uuid')).toBeNull();
-      expect(service.deleteThread(ctx('ws-A'), 'not-a-uuid')).toBe(false);
+    it('invalid thread_id is never treated as owned (404 path)', async () => {
+      expect(await service.getThread(ctx('ws-A'), 'not-a-uuid')).toBeNull();
+      expect(await service.getMessages(ctx('ws-A'), 'not-a-uuid')).toBeNull();
+      expect(await service.deleteThread(ctx('ws-A'), 'not-a-uuid')).toBe(false);
     });
   });
 
   describe('checkpoint roundtrip — IT-HYD-03 (backend logic)', () => {
-    it('PUT then GET returns identical checkpoint + metadata + writes', () => {
-      const thread = service.createThread(ctx('ws-A'), {});
+    it('PUT then GET returns identical checkpoint + metadata + writes', async () => {
+      const thread = await service.createThread(ctx('ws-A'), {});
       const payload = {
         checkpoint: { v: 1, channel_values: { messages: [{ role: 'user', content: 'hello' }] } },
         metadata: { source: 'langgraph', configurable: { thread_id: thread.thread_id } },
         newVersions: { channel: '1' },
         pendingWrites: [{ task_id: 't1', channel: 'messages', value: { role: 'assistant', content: 'hi' } }],
       };
-      const saved = service.saveCheckpoint(ctx('ws-A'), thread.thread_id, payload);
-      const loaded = service.getCheckpoint(ctx('ws-A'), thread.thread_id);
+      const saved = await service.saveCheckpoint(ctx('ws-A'), thread.thread_id, payload);
+      const loaded = await service.getCheckpoint(ctx('ws-A'), thread.thread_id);
       expect(loaded).not.toBeNull();
       expect(loaded?.checkpoint).toEqual(payload.checkpoint);
       expect(loaded?.metadata).toEqual(payload.metadata);
@@ -107,58 +127,57 @@ describe('KnowledgeService', () => {
       expect(saved?.thread_id).toBe(thread.thread_id);
     });
 
-    it('successive writes append pending_writes and bump version', () => {
-      const thread = service.createThread(ctx('ws-A'), {});
-      service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { checkpoint: { v: 1 } });
-      service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { writes: [{ task_id: 'w1', channel: 'x', value: 1 }] });
-      const loaded = service.getCheckpoint(ctx('ws-A'), thread.thread_id);
+    it('successive writes append pending_writes and bump version', async () => {
+      const thread = await service.createThread(ctx('ws-A'), {});
+      await service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { checkpoint: { v: 1 } });
+      await service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { writes: [{ task_id: 'w1', channel: 'x', value: 1 }] });
+      const loaded = await service.getCheckpoint(ctx('ws-A'), thread.thread_id);
       expect(loaded?.version).toBe(2);
       expect(loaded?.checkpoint).toEqual({ v: 1 });
       expect(loaded?.pending_writes).toEqual([{ task_id: 'w1', channel: 'x', value: 1 }]);
     });
 
-    it('messages passed with checkpoint are persisted for hydration', () => {
-      const thread = service.createThread(ctx('ws-A'), {});
-      service.saveCheckpoint(ctx('ws-A'), thread.thread_id, {
+    it('messages passed with checkpoint are persisted for hydration', async () => {
+      const thread = await service.createThread(ctx('ws-A'), {});
+      await service.saveCheckpoint(ctx('ws-A'), thread.thread_id, {
         messages: [
           { id: 'm1', role: 'user', content: 'Hello from IDE 1' },
           { id: 'm2', role: 'assistant', content: 'Hello from IDE 2' },
         ],
       });
-      const messages = service.getMessages(ctx('ws-A'), thread.thread_id);
+      const messages = await service.getMessages(ctx('ws-A'), thread.thread_id);
       expect(messages).toHaveLength(2);
       expect(messages?.[0].content).toBe('Hello from IDE 1');
       expect(messages?.[1].content).toBe('Hello from IDE 2');
       // idempotent — same message id is ignored
-      service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { messages: [{ id: 'm1', role: 'user', content: 'dup' }] });
-      expect(service.getMessages(ctx('ws-A'), thread.thread_id)).toHaveLength(2);
+      await service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { messages: [{ id: 'm1', role: 'user', content: 'dup' }] });
+      expect(await service.getMessages(ctx('ws-A'), thread.thread_id)).toHaveLength(2);
     });
   });
 
   describe('deleteThread', () => {
-    it('removes thread and all related projections', () => {
-      const thread = service.createThread(ctx('ws-A'), { title: 'doomed' });
-      service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { checkpoint: { v: 1 } });
-      service.addArtifact(ctx('ws-A'), thread.thread_id, { type: 'diagram', name: 'arch.png' });
-      expect(service.deleteThread(ctx('ws-A'), thread.thread_id)).toBe(true);
-      // Thread gone → all accessors return null (→404 at route layer)
-      expect(service.getThread(ctx('ws-A'), thread.thread_id)).toBeNull();
-      expect(service.getCheckpoint(ctx('ws-A'), thread.thread_id)).toBeNull();
-      expect(service.getMessages(ctx('ws-A'), thread.thread_id)).toBeNull();
-      expect(service.getEvents(ctx('ws-A'), thread.thread_id)).toBeNull();
-      expect(service.getArtifacts(ctx('ws-A'), thread.thread_id)).toBeNull();
+    it('removes thread and all related projections', async () => {
+      const thread = await service.createThread(ctx('ws-A'), { title: 'doomed' });
+      await service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { checkpoint: { v: 1 } });
+      await service.addArtifact(ctx('ws-A'), thread.thread_id, { type: 'diagram', name: 'arch.png' });
+      expect(await service.deleteThread(ctx('ws-A'), thread.thread_id)).toBe(true);
+      expect(await service.getThread(ctx('ws-A'), thread.thread_id)).toBeNull();
+      expect(await service.getCheckpoint(ctx('ws-A'), thread.thread_id)).toBeNull();
+      expect(await service.getMessages(ctx('ws-A'), thread.thread_id)).toBeNull();
+      expect(await service.getEvents(ctx('ws-A'), thread.thread_id)).toBeNull();
+      expect(await service.getArtifacts(ctx('ws-A'), thread.thread_id)).toBeNull();
     });
 
-    it('returns false for non-owned thread', () => {
-      const thread = service.createThread(ctx('ws-A'), {});
-      expect(service.deleteThread(ctx('ws-B'), thread.thread_id)).toBe(false);
-      expect(service.getThread(ctx('ws-A'), thread.thread_id)).not.toBeNull();
+    it('returns false for non-owned thread', async () => {
+      const thread = await service.createThread(ctx('ws-A'), {});
+      expect(await service.deleteThread(ctx('ws-B'), thread.thread_id)).toBe(false);
+      expect(await service.getThread(ctx('ws-A'), thread.thread_id)).not.toBeNull();
     });
   });
 
   describe('agents registry', () => {
-    it('upsertAgent registers agent and getAgents lists it', () => {
-      service.upsertAgent({
+    it('upsertAgent registers agent and getAgents lists it', async () => {
+      await service.upsertAgent({
         agent_id: 'dev-agent',
         name: 'Dev Agent',
         description: 'General dev agent',
@@ -166,7 +185,7 @@ describe('KnowledgeService', () => {
         mcp_servers: ['fs'],
         auto_approve: ['read'],
       });
-      const agents = service.getAgents();
+      const agents = await service.getAgents();
       expect(agents).toHaveLength(1);
       expect(agents[0].tools).toEqual(['bash']);
       expect(agents[0].auto_approve).toEqual(['read']);
@@ -174,9 +193,9 @@ describe('KnowledgeService', () => {
   });
 
   describe('tool executions + artifacts', () => {
-    it('addToolExecution stores a row scoped to workspace', () => {
-      const thread = service.createThread(ctx('ws-A'), {});
-      const exec = service.addToolExecution(ctx('ws-A'), thread.thread_id, {
+    it('addToolExecution stores a row scoped to workspace', async () => {
+      const thread = await service.createThread(ctx('ws-A'), {});
+      const exec = await service.addToolExecution(ctx('ws-A'), thread.thread_id, {
         tool_id: 'tid-1',
         name: 'read_file',
         status: 'success',
@@ -185,7 +204,7 @@ describe('KnowledgeService', () => {
       });
       expect(exec?.name).toBe('read_file');
       // cross-workspace call is rejected
-      const denied = service.addToolExecution(ctx('ws-B'), thread.thread_id, {
+      const denied = await service.addToolExecution(ctx('ws-B'), thread.thread_id, {
         tool_id: 'tid-2',
         name: 'write_file',
         status: 'running',

@@ -22,6 +22,7 @@ import { AnalyticsPanel } from "./panels/analytics-panel";
 import { WorkflowPanel } from "./panels/workflow-panel";
 import { SecurityPanel } from "./panels/security-panel";
 import { ImpactPanel } from "./panels/impact-panel";
+import { PlanCanvasPanel } from "./panels/plan-canvas";
 import { KbEventBus } from "./kb-event-bus";
 
 /** Factory function type for creating a panel. */
@@ -48,6 +49,7 @@ export class WebviewPanelManager implements IPanelManager, vscode.Disposable {
       ["workflow",  () => new WorkflowPanel(this.mcpManager, this.extensionUri)],
       ["security",  () => new SecurityPanel(this.mcpManager, this.extensionUri)],
       ["impact",    () => new ImpactPanel(this.mcpManager, this.extensionUri)],
+      ["planCanvas", () => new PlanCanvasPanel(this.mcpManager, this.extensionUri)],
     ]);
   }
 

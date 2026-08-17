@@ -9,6 +9,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import { MigrationRunner } from '../MigrationRunner.js';
+import { SqliteDbAdapter } from '../task-queue/SqliteDbAdapter.js';
 
 function createFreshDb(): { db: Database.Database; tmpDir: string; close: () => void } {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sa4e27-mig-'));
@@ -60,7 +61,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
   afterEach(() => testCtx.close());
 
   it('UT-MR-01: creates schema_migrations table on first run', () => {
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     runner.run();
     const tables = testCtx.db.prepare(
       "SELECT name FROM sqlite_master WHERE type='table' AND name='schema_migrations'",
@@ -69,7 +70,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
   });
 
   it('UT-MR-02: applies migration v1 (add project_id column)', () => {
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     const result = runner.run();
     expect(result.applied).toBe(2);
     expect(result.skipped).toBe(0);
@@ -83,7 +84,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
   });
 
   it('UT-MR-03: records migration version in schema_migrations', () => {
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     runner.run();
     const rows = testCtx.db.prepare('SELECT * FROM schema_migrations ORDER BY version').all() as any[];
     expect(rows.length).toBe(2);
@@ -94,7 +95,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
   });
 
   it('UT-MR-04: second run is idempotent (skips already applied)', () => {
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     runner.run();
     const result2 = runner.run();
     expect(result2.applied).toBe(0);
@@ -102,13 +103,13 @@ describe('SA4E-27 UT — MigrationRunner', () => {
   });
 
   it('UT-MR-05: getAppliedVersions returns applied version numbers', () => {
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     runner.run();
     expect(runner.getAppliedVersions()).toEqual([1, 2]);
   });
 
   it('UT-MR-06: getCurrentVersion returns max applied version', () => {
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     expect(runner.getCurrentVersion()).toBe(0);
     runner.run();
     expect(runner.getCurrentVersion()).toBe(2);
@@ -118,7 +119,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
     // Manually add project_id column first (simulating SA4E-26)
     testCtx.db.exec('ALTER TABLE knowledge_entries ADD COLUMN project_id TEXT DEFAULT NULL');
 
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     // Should not throw
     expect(() => runner.run()).not.toThrow();
 
@@ -130,7 +131,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
     // Column already exists
     testCtx.db.exec('ALTER TABLE knowledge_entries ADD COLUMN project_id TEXT DEFAULT NULL');
 
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     runner.run();
 
     const indexes = testCtx.db.prepare(
@@ -142,7 +143,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
   });
 
   it('UT-MR-09: downgrade detection logs warning but continues', () => {
-    const runner = new MigrationRunner(testCtx.db);
+    const runner = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     runner.run();
 
     // Simulate a future migration recorded manually
@@ -151,7 +152,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
     ).run(99, 'future_migration', new Date().toISOString());
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const runner2 = new MigrationRunner(testCtx.db);
+    const runner2 = new MigrationRunner(new SqliteDbAdapter(testCtx.db));
     expect(() => runner2.run()).not.toThrow();
     expect(warnSpy).toHaveBeenCalledWith(
       expect.stringContaining('DB version (99) ahead of code (2)'),
@@ -165,7 +166,7 @@ describe('SA4E-27 UT — MigrationRunner', () => {
     const db2 = new Database(path.join(tmpDir2, 'fresh.db'));
     db2.exec('CREATE TABLE knowledge_entries (id INTEGER PRIMARY KEY, content TEXT)');
 
-    const runner = new MigrationRunner(db2);
+    const runner = new MigrationRunner(new SqliteDbAdapter(db2));
     expect(runner.getAppliedVersions()).toEqual([]);
 
     db2.close();

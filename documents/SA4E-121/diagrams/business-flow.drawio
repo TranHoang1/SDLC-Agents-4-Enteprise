@@ -1,0 +1,124 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-121: Instincts &amp; Confidence Scoring — Business Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Ingestion Flow -->
+    <mxCell id="n1" value="AI Agent&#xa;calls mem_ingest&#xa;(type: INSTINCT)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="Assign Initial&#xa;Confidence (0.5)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="60" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="Auto-tag&#xa;&quot;instinct&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="60" width="130" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="Contradiction&#xa;Detection&#xa;(similarity &gt; 0.85)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="700" y="60" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n15" value="Log Contradiction&#xa;(unresolved)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="920" y="60" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Search Flow -->
+    <mxCell id="n5" value="AI Agent&#xa;calls mem_search" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="200" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="Composite Scoring&#xa;fts_rank × temporal&#xa;× confidence × outcome" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="200" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="Return ranked results&#xa;(verified &gt; instincts)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="200" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Decay & Boost -->
+    <mxCell id="n8" value="Scheduler&#xa;(every 24h)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="40" y="340" width="130" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="Decay Cycle&#xa;confidence × (1 - 0.08)&#xa;floor = 0.3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="240" y="340" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n10" value="AI Agent&#xa;calls mem_outcome&#xa;(success)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="480" y="340" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n11" value="Boost Confidence&#xa;× 1.1 (cap 0.9)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="700" y="340" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: Promotion Decision -->
+    <mxCell id="n12" value="Confidence = 0.9&#xa;AND outcomes ≥ 3?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="460" y="480" width="170" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n13" value="PROMOTE&#xa;confidence → 1.0&#xa;(Verified Knowledge)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="710" y="490" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n14" value="Stay as Instinct&#xa;(continue lifecycle)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="220" y="490" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 1 (Ingestion) -->
+    <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#0288d1;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#d6b656;" edge="1" parent="1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3b" value="detected" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=9;" edge="1" parent="1" source="n4" target="n15">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 2 (Search) -->
+    <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#0288d1;" edge="1" parent="1" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="n6" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 3 (Decay & Boost) -->
+    <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#666666;" edge="1" parent="1" source="n8" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#0288d1;" edge="1" parent="1" source="n10" target="n11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Row 4 (Promotion) -->
+    <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;" edge="1" parent="1" source="n11" target="n12">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;" edge="1" parent="1" source="n12" target="n13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#666666;fontSize=9;" edge="1" parent="1" source="n12" target="n14">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="leg1" value="Legend" style="text;html=1;fontSize=10;fontStyle=1;align=left;" vertex="1" parent="1">
+      <mxGeometry x="40" y="600" width="60" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="630" width="20" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2t" value="Actor (AI Agent)" style="text;html=1;fontSize=9;align=left;" vertex="1" parent="1">
+      <mxGeometry x="70" y="630" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="40" y="660" width="20" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3t" value="New/Created" style="text;html=1;fontSize=9;align=left;" vertex="1" parent="1">
+      <mxGeometry x="70" y="660" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="200" y="630" width="20" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4t" value="Validation/Decision" style="text;html=1;fontSize=9;align=left;" vertex="1" parent="1">
+      <mxGeometry x="230" y="630" width="120" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg5" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="200" y="660" width="20" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg5t" value="Error/Decay" style="text;html=1;fontSize=9;align=left;" vertex="1" parent="1">
+      <mxGeometry x="230" y="660" width="100" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -5,8 +5,8 @@
 
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import type { Logger } from 'pino';
-import type { ExtractedSymbol } from '../scanner/signature-extractor.js';
-import { detectPatterns, inferModulePurpose } from '../scanner/pattern-detector.js';
+import type { ExtractedSymbol } from '../parsers/signature-extractor.js';
+import { detectPatterns, inferModulePurpose } from '../parsers/pattern-detector.js';
 
 /** Detect module from relative file path. */
 export function detectModule(relativePath: string): string {

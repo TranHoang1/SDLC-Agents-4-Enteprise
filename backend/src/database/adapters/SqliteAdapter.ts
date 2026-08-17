@@ -14,19 +14,22 @@ import type {
   ConnectionStatus,
   PreparedStatement,
 } from './DatabaseAdapter.js';
+import { normalizeSqlitePlaceholders } from './sqlite-placeholders.js';
 
 export class SqliteAdapter implements DatabaseAdapter {
   private db: Database.Database | null = null;
   private connected = false;
 
-  constructor(private readonly dbPath: string) {}
+  constructor(private readonly dbPath: string, private readonly nativeBinding?: string) {}
 
   async connect(): Promise<void> {
     const dir = path.dirname(this.dbPath);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    this.db = new Database(this.dbPath);
+    this.db = this.nativeBinding
+      ? new Database(this.dbPath, { nativeBinding: this.nativeBinding })
+      : new Database(this.dbPath);
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('foreign_keys = ON');
     this.connected = true;
@@ -58,18 +61,18 @@ export class SqliteAdapter implements DatabaseAdapter {
   }
 
   run(sql: string, params?: unknown[]): RunResult {
-    const stmt = this.getDb().prepare(sql);
+    const stmt = this.getDb().prepare(normalizeSqlitePlaceholders(sql));
     const result = params ? stmt.run(...params) : stmt.run();
     return { changes: result.changes, lastInsertRowid: result.lastInsertRowid };
   }
 
   get<T = unknown>(sql: string, params?: unknown[]): T | undefined {
-    const stmt = this.getDb().prepare(sql);
+    const stmt = this.getDb().prepare(normalizeSqlitePlaceholders(sql));
     return (params ? stmt.get(...params) : stmt.get()) as T | undefined;
   }
 
   all<T = unknown>(sql: string, params?: unknown[]): T[] {
-    const stmt = this.getDb().prepare(sql);
+    const stmt = this.getDb().prepare(normalizeSqlitePlaceholders(sql));
     return (params ? stmt.all(...params) : stmt.all()) as T[];
   }
 
@@ -82,7 +85,7 @@ export class SqliteAdapter implements DatabaseAdapter {
   }
 
   prepare(sql: string): PreparedStatement {
-    const stmt = this.getDb().prepare(sql);
+    const stmt = this.getDb().prepare(normalizeSqlitePlaceholders(sql));
     return {
       run: (...params: unknown[]) => {
         const r = stmt.run(...params);

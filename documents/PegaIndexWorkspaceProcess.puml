@@ -1,0 +1,38 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+|Extension|
+start
+:Index Source Code;
+:Get Application ID from file\npega-project.json=>appID;
+:Get Project ID from file\n.code-intel\project.json=>projID;
+|Pega|
+    :Process RestAPI\ncurl -X 'POST' '{Pega base url}/datapage/list?\ndataPageName=D_LatestRules4ExactedApps'\n-H 'accept: application/json'\n-H 'Content-Type: text/plain'\n-d '{"ApplicationNames":"HRAppsV2"}'\n--> RuleSummaryList;
+|Extension|
+    :Set finish=false;
+    :Create dedupSet = {};
+    :Create RuleSummaryQueue(RuleSummaryList.pxResults);
+    repeat
+        :set pzInsKey = RuleSummaryQueue.pick().pzInsKey;
+        |Pega|
+        :Process RestAPI\ncurl -X 'GET' \n'{Pega base url}/rules/{pzInsKey}' \n-H 'accept: application/json'\n-->ruleJsonData;
+        |Extension|
+        :Set objClass = ruleJsonData.pxObjClass\nappliedClass = ruleJsonData.pyClassName\npyRuleName = {ruleJsonData.pyRuleName}\nruleFileName = {pyRuleName}.json;
+        if (dedupSet.contains({objClass}!{appliedClass}!{pyRuleName})) is (yes) then
+            :dedupSet.add({objClass}!{appliedClass}!{pyRuleName});
+            :Save ruleJsonData to local workspace at\n ./rules/{appliedClass}/{ruleFileName};
+            :Call MCP tool mem_ingest(ruleJsonData);
+            |Backend Server|
+                :Process RestAPI\ncurl -X 'POST' '{Backend base url}/mcp/mem_ingest{ruleJsonData}\n-->RelativeRuleInfoList;
+            |Extension|
+                repeat
+                    :Create ruleSummaryEL = RuleSummaryEl(RelativeRuleInfoList.next());
+                    if (dedupSet.notContains(\n{ruleSummaryEL.objClass}!{ruleSummaryEL.appliedClass}!{ruleSummaryEL.pyRuleName}\n)) is (yes) then
+                        :Call RuleSummaryQueue.append(RelativeRuleInfoList) ;
+                    endif
+                repeat while (RelativeRuleInfoList.hasNext()) is (yes)
+        endif
+    repeat while (finish=false) is (yes)
+
+stop
+
+@enduml

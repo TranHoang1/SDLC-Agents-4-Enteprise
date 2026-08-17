@@ -1,49 +1,47 @@
 /**
  * MemoryDatabaseManager — initializes memory schema on a dedicated SQLite DB.
  * Uses config-driven path (same as admin-db) for data portability.
+ * SA4E-53: Uses SqliteAdapter instead of raw better-sqlite3.
  */
 
-import Database from 'better-sqlite3';
 import * as path from 'path';
-import * as fs from 'fs';
 import { MEMORY_SCHEMA } from './schema/index.js';
 import { MigrationRunner } from './MigrationRunner.js';
 import { loadConfig, getWorkspacePath } from '../../config/BackendConfig.js';
+import { SqliteAdapter } from '../../database/adapters/SqliteAdapter.js';
+import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 
 const config = loadConfig();
 const DB_PATH = path.resolve(getWorkspacePath(), config.dataDir, config.sqliteDbPath);
 
-let memDb: Database.Database | null = null;
+let memAdapter: SqliteAdapter | null = null;
 
-/** Get or create the memory database instance (singleton). */
-export function getMemoryDb(): Database.Database {
-  if (!memDb) {
-    const dir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    memDb = new Database(DB_PATH);
-    memDb.pragma('journal_mode = WAL');
-    memDb.pragma('foreign_keys = ON');
-    initializeSchema(memDb);
+/** Get or create the memory database adapter instance (singleton). */
+export function getMemoryDb(): DatabaseAdapter {
+  if (!memAdapter) {
+    memAdapter = new SqliteAdapter(DB_PATH);
+    void memAdapter.connect();
+    initializeSchema(memAdapter);
   }
-  return memDb;
+  return memAdapter;
 }
 
 /** Close the memory database (for graceful shutdown). */
 export function closeMemoryDb(): void {
-  if (memDb) {
-    memDb.close();
-    memDb = null;
+  if (memAdapter) {
+    void memAdapter.disconnect();
+    memAdapter = null;
   }
 }
 
-function initializeSchema(db: Database.Database): void {
+function initializeSchema(adapter: SqliteAdapter): void {
   const stmts = MEMORY_SCHEMA.split(';')
     .map(s => s.trim())
     .filter(s => s.length > 0);
 
   for (const stmt of stmts) {
     try {
-      db.exec(stmt + ';');
+      adapter.exec(stmt + ';');
     } catch (err: unknown) {
       const msg = (err as Error).message ?? '';
       if (msg.includes('already exists') || msg.includes('duplicate column')) continue;
@@ -53,6 +51,6 @@ function initializeSchema(db: Database.Database): void {
   }
 
   // Run versioned migrations (replaces legacy migrateProjectId)
-  const runner = new MigrationRunner(db);
+  const runner = new MigrationRunner(adapter);
   runner.run();
 }

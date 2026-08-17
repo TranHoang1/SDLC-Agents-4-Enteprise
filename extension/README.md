@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.25.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.27.1-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -48,10 +48,10 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.16.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.26.0.vsix
 
 # Or VS Code
-code --install-extension sdlc-agents-4-enterprise-1.16.0.vsix
+code --install-extension sdlc-agents-4-enterprise-1.26.0.vsix
 ```
 
 3. **Verify connection**: Command Palette → "SDLC Agents: Settings" → Server Settings → Test Connection
@@ -243,7 +243,7 @@ MIT
 
 ## Changelog
 
-### v1.25.0 (2026-08-14)
+### v1.26.0 (2026-08-14)
 
 - **SA4E-155: On-demand KB Entry Enrichment** — 3-tier LLM fallback chain (kiroSdlc.llmChat → Ollama → LMStudio), EnrichmentFallback class, local LLM probe with configurable timeout, graceful degradation UX toast.
 
@@ -274,7 +274,7 @@ MIT
 
 - **SA4E-77: Pega Knowledge Graph Enhancement** — Pega rules categorized by pxObjClass type (PROCESS, DECISION, DATA_MODEL, UI, TECHNICAL, etc.) with config-driven mapping (`pega-categories.json`). Graph legend auto-switches to Pega mode with 16 category colors. Code/KB split uses entry_id prefix (`code:*`/`pega:*`). Dashboard codeSymbols includes Pega rules.
 
-### v1.16.0 (2026-07-25)
+### v1.26.0 (2026-07-25)
 
 - **Memory Evolution Levels L4-L6** — Replaced stub tools with database-backed services and graph algorithms:
   - **Level 6 (Collective Graph)**: DB-backed graph query, node/edge insertion, PageRank, community detection (label propagation), cross-tenant sync (`kb_graph_cross_sync`, `kb_graph_remove_cross`), and project merge (`kb_graph_merge`).

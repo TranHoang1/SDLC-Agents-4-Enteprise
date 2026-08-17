@@ -1,0 +1,127 @@
+<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-106: LLM Enrichment for Source Code Symbols — Business Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Swimlane: Indexing Pipeline -->
+    <mxCell id="swim1" value="Indexing Pipeline (Existing)" style="swimlane;startSize=30;fillColor=none;strokeColor=#666666;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="30" y="60" width="460" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="n1" value="File Change&#xa;Detected" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="swim1">
+      <mxGeometry x="20" y="50" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="Tree-sitter&#xa;Parse" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="swim1">
+      <mxGeometry x="180" y="50" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="Store symbols +&#xa;body_embeddings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="swim1">
+      <mxGeometry x="340" y="50" width="110" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Swimlane: Enrichment Pipeline (NEW) -->
+    <mxCell id="swim2" value="Code Enrichment Pipeline (NEW — SA4E-106)" style="swimlane;startSize=30;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="30" y="260" width="1530" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4" value="Enqueue&#xa;CODE_ENRICHMENT&#xa;Tasks" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="20" y="50" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="TaskWorker&#xa;Claims Task" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="210" y="50" width="130" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="Assemble&#xa;LLM Prompt&#xa;(symbol + body)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="390" y="50" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="Call LLM&#xa;(Ollama/OpenAI/&#xa;Gemini)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="580" y="50" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="Parse Response&#xa;(summary + pseudo&#xa;+ tags)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="770" y="50" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="Store in&#xa;symbol_enrichments&#xa;Table" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="960" y="50" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n10" value="Mark Task&#xa;COMPLETED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="1150" y="50" width="130" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n11" value="Update&#xa;Progress" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="1330" y="50" width="120" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim2" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim2" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim2" source="n6" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim2" source="n7" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim2" source="n8" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim2" source="n9" target="n10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="swim2" source="n10" target="n11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Cross-boundary edge: indexing → enrichment trigger -->
+    <mxCell id="e_cross1" value="Indexing Complete → Trigger" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontStyle=2;fontSize=9;" edge="1" parent="1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="425" y="240"/>
+          <mxPoint x="120" y="240"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Swimlane: Consumer (Admin UI) -->
+    <mxCell id="swim3" value="Consumers" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="30" y="480" width="900" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="n12" value="Admin UI Graph&#xa;Info Card&#xa;(Summary + Pseudo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim3">
+      <mxGeometry x="20" y="50" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n13" value="Code Search&#xa;(Tag-enhanced&#xa;ranking)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim3">
+      <mxGeometry x="240" y="50" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n14" value="RAG Context&#xa;(Concise summaries&#xa;for LLM context)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim3">
+      <mxGeometry x="450" y="50" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n15" value="Status Bar&#xa;(Enrichment&#xa;Progress)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="swim3">
+      <mxGeometry x="670" y="50" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Cross-boundary edges: enrichment → consumers -->
+    <mxCell id="e_cross2" value="Reads enrichment" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#0288d1;fontSize=9;dashed=1;" edge="1" parent="1" source="n9" target="n12">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1060" y="460"/>
+          <mxPoint x="130" y="460"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e_cross3" value="Search index" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#0288d1;fontSize=9;dashed=1;" edge="1" parent="1" source="n9" target="n13">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1060" y="460"/>
+          <mxPoint x="345" y="460"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Error path -->
+    <mxCell id="n_err" value="Retry / Mark FAILED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="swim2">
+      <mxGeometry x="580" y="130" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_err" value="LLM Error" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=9;fontStyle=2;" edge="1" parent="swim2" source="n7" target="n_err">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

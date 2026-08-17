@@ -199,20 +199,30 @@ export class KnowledgeClient {
 
   /** GET /api/v1/threads/:id/messages — full message history (null if thread missing). */
   async getMessages(threadId: string): Promise<KbMessage[] | null> {
-    const env = await this.withRetry(() =>
-      httpGetJson<ApiEnvelope<KbMessage[]>>(`${this.baseUrl}/api/v1/threads/${encodeURIComponent(threadId)}/messages`, this.httpOptions())
-    );
-    if (env?.error) { return null; }
-    return env?.data ?? [];
+    try {
+      const env = await this.withRetry(() =>
+        httpGetJson<ApiEnvelope<KbMessage[]>>(`${this.baseUrl}/api/v1/threads/${encodeURIComponent(threadId)}/messages`, this.httpOptions())
+      );
+      if (env?.error) { return null; }
+      return env?.data ?? [];
+    } catch (err) {
+      if (isNotFound(err)) { return null; }
+      throw err;
+    }
   }
 
   /** GET /api/v1/threads/:id/checkpoint — saved checkpoint (null if none). */
   async getCheckpoint(threadId: string): Promise<KbCheckpoint | null> {
-    const env = await this.withRetry(() =>
-      httpGetJson<ApiEnvelope<KbCheckpoint>>(`${this.baseUrl}/api/v1/threads/${encodeURIComponent(threadId)}/checkpoint`, this.httpOptions())
-    );
-    if (env?.error || !env?.data) { return null; }
-    return env.data;
+    try {
+      const env = await this.withRetry(() =>
+        httpGetJson<ApiEnvelope<KbCheckpoint>>(`${this.baseUrl}/api/v1/threads/${encodeURIComponent(threadId)}/checkpoint`, this.httpOptions())
+      );
+      if (env?.error || !env?.data) { return null; }
+      return env.data;
+    } catch (err) {
+      if (isNotFound(err)) { return null; }
+      throw err;
+    }
   }
 
   /** PUT /api/v1/threads/:id/checkpoint — persist checkpoint (+ optional messages). */
@@ -226,10 +236,15 @@ export class KnowledgeClient {
 
   /** DELETE /api/v1/threads/:id — remove a thread. */
   async deleteThread(threadId: string): Promise<boolean> {
-    const env = await this.withRetry(() =>
-      httpDeleteJson<ApiEnvelope<{ deleted: boolean }>>(`${this.baseUrl}/api/v1/threads/${encodeURIComponent(threadId)}`, this.httpOptions())
-    );
-    return env?.data?.deleted === true;
+    try {
+      const env = await this.withRetry(() =>
+        httpDeleteJson<ApiEnvelope<{ deleted: boolean }>>(`${this.baseUrl}/api/v1/threads/${encodeURIComponent(threadId)}`, this.httpOptions())
+      );
+      return env?.data?.deleted === true;
+    } catch (err) {
+      if (isNotFound(err)) { return false; }
+      throw err;
+    }
   }
 
   private httpOptions() {
@@ -248,9 +263,16 @@ export class KnowledgeClient {
       } catch (err) {
         lastErr = err;
         const isTimeout = (err as Error).message?.includes("timeout");
+        // Undici fetch surfaces the node errno on `cause.code` (e.g. TypeError: fetch failed).
+        const cause = (err as any)?.cause as NodeJS.ErrnoException | undefined;
+        const isFetchFailure = err instanceof TypeError && /fetch failed/i.test((err as Error).message ?? "");
         const isNetwork = (err as NodeJS.ErrnoException).code === "ECONNREFUSED"
           || (err as NodeJS.ErrnoException).code === "ECONNRESET"
-          || (err as NodeJS.ErrnoException).code === "ENOTFOUND";
+          || (err as NodeJS.ErrnoException).code === "ENOTFOUND"
+          || cause?.code === "ECONNREFUSED"
+          || cause?.code === "ECONNRESET"
+          || cause?.code === "ENOTFOUND"
+          || isFetchFailure;
         // SA4E-104: HTTP 4xx/5xx errors are not retryable — throw immediately
         const httpStatus = (err as any)?.status;
         if (httpStatus && httpStatus >= 400) { throw err; }
@@ -269,4 +291,9 @@ export class KnowledgeClient {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** True when the backend answered HTTP 404 (thread/checkpoint not found contract). */
+function isNotFound(err: unknown): boolean {
+  return (err as { status?: number })?.status === 404;
 }

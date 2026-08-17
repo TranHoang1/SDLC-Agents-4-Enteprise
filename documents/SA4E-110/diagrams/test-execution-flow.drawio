@@ -1,0 +1,158 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-110 — Test Execution Flow" style="text;html=1;align=center;verticalAlign=middle;fontSize=16;fontStyle=1;fillColor=none;strokeColor=none;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="400" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Phase 1: PBT -->
+    <mxCell id="phase1" value="Phase 1: PBT&#xa;(8 cases — parallel)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="80" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Phase 2: UT -->
+    <mxCell id="phase2" value="Phase 2: UT&#xa;(22 cases — parallel)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="200" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Phase 3: IT -->
+    <mxCell id="phase3" value="Phase 3: IT&#xa;(14 cases — sequential)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="320" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Phase 4: SEC -->
+    <mxCell id="phase4" value="Phase 4: SEC&#xa;(7 cases — sequential)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="440" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Phase 5: E2E-API -->
+    <mxCell id="phase5" value="Phase 5: E2E-API&#xa;(9 cases — sequential)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="560" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Report -->
+    <mxCell id="report" value="Test Report&#xa;Generation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="80" y="680" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Flow arrows Phase 1 to 2 -->
+    <mxCell id="e12" value="PASS" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;verticalAlign=bottom;" edge="1" parent="1" source="phase1" target="phase2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Flow arrows Phase 2 to 3 -->
+    <mxCell id="e23" value="PASS" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;verticalAlign=bottom;" edge="1" parent="1" source="phase2" target="phase3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Flow arrows Phase 3 to 4 -->
+    <mxCell id="e34" value="PASS" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;verticalAlign=bottom;" edge="1" parent="1" source="phase3" target="phase4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Flow arrows Phase 4 to 5 -->
+    <mxCell id="e45" value="PASS" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;verticalAlign=bottom;" edge="1" parent="1" source="phase4" target="phase5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Flow arrows Phase 5 to Report -->
+    <mxCell id="e5r" value="PASS" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#82b366;fontSize=9;verticalAlign=bottom;" edge="1" parent="1" source="phase5" target="report">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Gate nodes -->
+    <mxCell id="gate1" value="Gate" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="320" y="90" width="60" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate2" value="Gate" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="320" y="210" width="60" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate3" value="Gate" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="320" y="330" width="60" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate4" value="Gate" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="320" y="450" width="60" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="gate5" value="Gate" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="320" y="570" width="60" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Phase to Gate edges -->
+    <mxCell id="eg1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#999999;" edge="1" parent="1" source="phase1" target="gate1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eg2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#999999;" edge="1" parent="1" source="phase2" target="gate2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eg3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#999999;" edge="1" parent="1" source="phase3" target="gate3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eg4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#999999;" edge="1" parent="1" source="phase4" target="gate4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eg5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#999999;" edge="1" parent="1" source="phase5" target="gate5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Fail node -->
+    <mxCell id="fail" value="FAIL: Fix + Rerun" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="450" y="330" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Gate to fail edges -->
+    <mxCell id="ef1" value="FAIL" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=8;" edge="1" parent="1" source="gate1" target="fail">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="420" y="115"/>
+          <mxPoint x="420" y="355"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ef2" value="FAIL" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=8;" edge="1" parent="1" source="gate2" target="fail">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="410" y="235"/>
+          <mxPoint x="410" y="355"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ef3" value="FAIL" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=8;" edge="1" parent="1" source="gate3" target="fail">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ef4" value="FAIL" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=8;" edge="1" parent="1" source="gate4" target="fail">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="410" y="475"/>
+          <mxPoint x="410" y="355"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="ef5" value="FAIL" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=8;" edge="1" parent="1" source="gate5" target="fail">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="420" y="595"/>
+          <mxPoint x="420" y="355"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Right side: details -->
+    <mxCell id="detail1" value="levenshtein props, rate-limiter&#xa;invariants, path containment,&#xa;schema round-trip, JQL boundary" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="640" y="80" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="detail2" value="credential-mgr, rate-limiter,&#xa;base-client retry, path-validator,&#xa;schemas, MIME, sanitization" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="640" y="200" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="detail3" value="MCP handshake, tool proxy,&#xa;transition fuzzy, attach file,&#xa;reconnect+reindex, IPC flow" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="640" y="320" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="detail4" value="Credential exposure, path traversal&#xa;(OWASP vectors), JQL injection,&#xa;IPC integrity, rate limiter reset" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="640" y="440" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="detail5" value="Full startup discovery, transition&#xa;lifecycle, file attachment, Confluence&#xa;search, reconnect end-to-end" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="640" y="560" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Detail connection edges -->
+    <mxCell id="ed1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#999999;" edge="1" parent="1" source="gate1" target="detail1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ed2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#999999;" edge="1" parent="1" source="gate2" target="detail2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ed3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#999999;" edge="1" parent="1" source="gate3" target="detail3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ed4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#999999;" edge="1" parent="1" source="gate4" target="detail4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ed5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#999999;" edge="1" parent="1" source="gate5" target="detail5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

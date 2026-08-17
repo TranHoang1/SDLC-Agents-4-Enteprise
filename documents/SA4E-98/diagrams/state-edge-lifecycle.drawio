@@ -1,0 +1,55 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="Edge Lifecycle State Diagram" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="20" width="300" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="start" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="80" y="150" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="s1" value="ORPHANED&#10;&#10;Edge exists but target&#10;node NOT in graph_nodes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=0;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="200" y="120" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="s2" value="RESOLVED&#10;&#10;Both source and target&#10;nodes exist in graph_nodes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=0;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="520" y="120" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="s3" value="VALIDATED&#10;&#10;linkReverseEdges() confirmed&#10;edge on target node insert" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=0;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="840" y="120" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="s4" value="DIRECT&#10;&#10;Edge created when both&#10;source and target already exist" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=0;verticalAlign=middle;" vertex="1" parent="1">
+      <mxGeometry x="520" y="300" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="createDependencyEdges()&#10;target NOT in graph_nodes" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="start" target="s1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="target node ingested&#10;(projectRuleToGraphNode)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="s1" target="s2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="linkReverseEdges()&#10;confirms connection" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="s2" target="s3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="createDependencyEdges()&#10;target ALREADY in graph_nodes" style="html=1;verticalAlign=top;endArrow=block;endFill=1;fontSize=8;" edge="1" parent="1" source="start" target="s4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="95" y="340"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e5" value="reconcileAllEdges()&#10;backfills missing edge" style="html=1;verticalAlign=top;endArrow=block;endFill=1;fontSize=8;strokeColor=#9673a6;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="300" y="200" as="sourcePoint"/>
+        <mxPoint x="300" y="280" as="targetPoint"/>
+        <Array as="points">
+          <mxPoint x="300" y="240"/>
+          <mxPoint x="200" y="240"/>
+          <mxPoint x="200" y="280"/>
+          <mxPoint x="300" y="280"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="note1" value="States are CONCEPTUAL &#10;(no state column in DB).&#10;Derived from existence of&#10;source/target in graph_nodes." style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;fontSize=9;align=left;whiteSpace=wrap;rounded=1;" vertex="1" parent="1">
+      <mxGeometry x="840" y="300" width="200" height="70" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

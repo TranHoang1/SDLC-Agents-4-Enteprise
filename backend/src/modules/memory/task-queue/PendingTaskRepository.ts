@@ -18,10 +18,10 @@ export class PendingTaskRepository {
 
   async create(input: CreateTaskInput): Promise<number> {
     const result = await this.db.runAsync(
-      `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, created_at)
-       VALUES (?, ?, ?, ?, ?, ${this.dialect.now()})`,
+      `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, project_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ${this.dialect.now()})`,
       [input.task_type, input.entry_id, TaskStatus.PENDING,
-       JSON.stringify(input.payload), input.max_retries ?? 3],
+       JSON.stringify(input.payload), input.max_retries ?? 3, input.project_id ?? null],
     );
     return result.lastInsertRowid as number;
   }
@@ -125,10 +125,69 @@ export class PendingTaskRepository {
     return stats;
   }
 
+  /** Get task stats scoped to a specific project. SA4E-164: direct WHERE instead of JOIN. */
+  async getStatsByProject(projectId: string): Promise<{ pending: number; processing: number; completed: number; failed: number }> {
+    const rows = await this.db.allAsync<{ status: string; cnt: number }>(
+      `SELECT status, COUNT(*) as cnt
+       FROM pending_tasks
+       WHERE project_id = $1
+       GROUP BY status`,
+      [projectId],
+    );
+    const stats = { pending: 0, processing: 0, completed: 0, failed: 0 };
+    for (const row of rows) {
+      const key = row.status.toLowerCase() as keyof typeof stats;
+      if (key in stats) stats[key] = Number(row.cnt);
+    }
+    return stats;
+  }
+
+  /**
+   * SA4E-157: Get earliest started_at among PROCESSING tasks.
+   * Reflects when enrichment actually began processing (not when tasks were originally created).
+   * Falls back to current time if only PENDING tasks exist (just retried).
+   * @returns ISO timestamp string or null if no active tasks
+   */
+  async getEarliestActiveTimestamp(): Promise<string | null> {
+    // First: check PROCESSING tasks (actually being worked on)
+    const processing = await this.db.getAsync<{ started_at: string | null }>(
+      `SELECT MIN(started_at) as started_at FROM pending_tasks WHERE status = ? AND started_at IS NOT NULL`,
+      [TaskStatus.PROCESSING],
+    );
+    if (processing?.started_at) return processing.started_at;
+    // Fallback: if only PENDING tasks exist (freshly retried), use now as start
+    const hasPending = await this.db.getAsync<{ cnt: number }>(
+      `SELECT COUNT(*) as cnt FROM pending_tasks WHERE status = ?`,
+      [TaskStatus.PENDING],
+    );
+    if (hasPending && Number(hasPending.cnt) > 0) return new Date().toISOString();
+    return null;
+  }
+
   async listFailed(limit = 20): Promise<PendingTask[]> {
     return this.db.allAsync<PendingTask>(
       `SELECT * FROM pending_tasks WHERE status = ? ORDER BY completed_at DESC LIMIT ?`,
       [TaskStatus.FAILED, limit],
+    );
+  }
+
+  /** Get currently processing tasks with their source info, scoped by project. */
+  async listProcessing(limit = 5, projectId?: string): Promise<Array<{ id: number; source: string; startedAt: string | null }>> {
+    const params: unknown[] = [TaskStatus.PROCESSING];
+    let whereExtra = '';
+    if (projectId) {
+      whereExtra = ' AND pt.project_id = ?';
+      params.push(projectId);
+    }
+    params.push(limit);
+    return this.db.allAsync<{ id: number; source: string; startedAt: string | null }>(
+      `SELECT pt.id, COALESCE(ke.source, s.name, 'entry-' || pt.entry_id) as source, pt.started_at as "startedAt"
+       FROM pending_tasks pt
+       LEFT JOIN knowledge_entries ke ON ke.id = pt.entry_id AND pt.task_type != 'CODE_ENRICHMENT'
+       LEFT JOIN symbols s ON s.id = pt.entry_id AND pt.task_type = 'CODE_ENRICHMENT'
+       WHERE pt.status = ?${whereExtra}
+       ORDER BY pt.started_at DESC LIMIT ?`,
+      params,
     );
   }
 
@@ -142,6 +201,20 @@ export class PendingTaskRepository {
     const result = await this.db.runAsync(
       `UPDATE pending_tasks SET status = ?, started_at = NULL, error = NULL, retry_count = 0 WHERE status = ?`,
       [TaskStatus.PENDING, TaskStatus.FAILED],
+    );
+    return result.changes;
+  }
+
+  /**
+   * SA4E-165: Reconcile orphan tasks whose entry_id no longer exists.
+   * Marks them FAILED with 'entry_deleted_orphan' error instead of letting them retry forever.
+   */
+  async reconcileOrphans(): Promise<number> {
+    const result = await this.db.runAsync(
+      `UPDATE pending_tasks SET status = ?, error = 'entry_deleted_orphan'
+       WHERE status IN (?, ?)
+         AND entry_id NOT IN (SELECT id FROM knowledge_entries)`,
+      [TaskStatus.FAILED, TaskStatus.PENDING, TaskStatus.PROCESSING],
     );
     return result.changes;
   }

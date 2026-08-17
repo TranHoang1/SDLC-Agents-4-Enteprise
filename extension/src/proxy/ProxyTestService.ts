@@ -8,6 +8,7 @@ import { ProxyAgent } from "undici";
 import type { ProxyTestInput, ProxyTestResult, ProxyCredentials } from "../models/ProxyModels";
 import type { ProxyDetectionService } from "./ProxyDetectionService";
 import { VscodeProxyResolverService } from "./VscodeProxyResolverService";
+import { CurlTransport } from "./CurlTransport";
 
 const TEST_URL = "https://httpbin.org/get";
 const TEST_TIMEOUT_MS = 10_000;
@@ -30,6 +31,10 @@ export class ProxyTestService {
    */
   async testConnection(input: ProxyTestInput): Promise<ProxyTestResult> {
     const targetUrl = input.testUrl || TEST_URL;
+    // Curl mode: test via curl.exe subprocess
+    if (input.mode === "curl") {
+      return this.testViaCurl(input, targetUrl);
+    }
     const proxyUrl = await this.resolveTestProxyUrl(input);
     if (!proxyUrl) {
       return { success: false, message: "No proxy URL to test" };
@@ -122,5 +127,30 @@ export class ProxyTestService {
       return { success: false, message: "SSL error — proxy may require specific certificate configuration" };
     }
     return { success: false, message: `Connection failed: ${err.message}` };
+  }
+
+  /**
+   * Test connectivity via curl.exe subprocess.
+   * Supports NTLM SSO or explicit proxy credentials.
+   */
+  private async testViaCurl(
+    input: ProxyTestInput,
+    targetUrl: string
+  ): Promise<ProxyTestResult> {
+    const isAvailable = await CurlTransport.isAvailable();
+    if (!isAvailable) {
+      return { success: false, message: "curl.exe not found — install curl or use another proxy mode" };
+    }
+    const proxyUrl = input.host ? `http://${input.host}:${input.port}` : null;
+    const proxyAuth = (input.username && input.password)
+      ? `${input.username}:${input.password}`
+      : null;
+    const transport = new CurlTransport(proxyUrl);
+    try {
+      const latencyMs = await transport.testConnection(targetUrl, proxyUrl || undefined, proxyAuth);
+      return { success: true, message: "Curl proxy connection successful", latencyMs };
+    } catch (err: unknown) {
+      return { success: false, message: (err as Error).message };
+    }
   }
 }

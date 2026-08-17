@@ -208,8 +208,9 @@ describe('SA4E-42 re-index integration', () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL UNIQUE,
       description TEXT NOT NULL, schema_json TEXT NOT NULL, category TEXT, vector BLOB)`);
     db.prepare('INSERT INTO mcp_tools (name, description, schema_json) VALUES (?,?,?)').run('old', 'd', '{}');
-    migrateAddMcpToolsServerColumn(db);
-    migrateAddMcpToolsServerColumn(db); // second run is a safe no-op
+    const dbAdapter = new SqliteDbAdapter(db);
+    migrateAddMcpToolsServerColumn(dbAdapter);
+    migrateAddMcpToolsServerColumn(dbAdapter); // second run is a safe no-op
     const cols = (db.pragma('table_info(mcp_tools)') as any[]).map((c) => c.name);
     expect(cols).toContain('server');
     const idx = db.prepare("SELECT name FROM sqlite_master WHERE type='index' AND name='idx_mcp_tools_server'").get();

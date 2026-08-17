@@ -8,7 +8,7 @@ import { SymbolResolver } from '../graph/symbol-resolver.js';
 import { CallGraphService } from '../graph/call-graph-service.js';
 import { TestDetector } from '../graph/test-detector.js';
 import { GraphTraverser } from '../graph/traverser.js';
-import { GraphRepository } from '../database/graph-repository.js';
+import { GraphRepository } from '../graph/graph-repository.js';
 import { QueryLayer } from '../query/query-layer.js';
 import { AIContextService } from '../context/ai-context-service.js';
 import { EditContextService } from '../context/edit-context-service.js';

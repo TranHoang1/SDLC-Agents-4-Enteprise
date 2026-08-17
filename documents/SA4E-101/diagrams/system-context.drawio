@@ -1,0 +1,70 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Actor: Developer -->
+    <mxCell id="n1" value="Developer" style="shape=mxgraph.basic.person;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="310" width="80" height="100" as="geometry"/>
+    </mxCell>
+    <!-- System Boundary -->
+    <mxCell id="boundary" value="SA4E System Boundary" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="200" y="60" width="740" height="700" as="geometry"/>
+    </mxCell>
+    <!-- VS Code Extension -->
+    <mxCell id="n2" value="VS Code Extension&#xa;(IndexerHttpClient +&#xa;Status Bar)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="40" y="200" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <!-- Backend -->
+    <mxCell id="n3" value="Backend&#xa;(Hono HTTP Server)&#xa;IndexOperationManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="360" y="200" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <!-- IndexingEngine -->
+    <mxCell id="n4" value="IndexingEngine&#xa;(SA4E-78)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="360" y="380" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- In-Memory Map -->
+    <mxCell id="n5" value="In-Memory Map&#xa;(Hot-Path)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="360" y="70" width="140" height="60" as="geometry"/>
+    </mxCell>
+    <!-- PostgreSQL -->
+    <mxCell id="n6" value="PostgreSQL&#xa;index_operations&#xa;(Cold-Path)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="560" y="70" width="150" height="70" as="geometry"/>
+    </mxCell>
+    <!-- Startup Hook -->
+    <mxCell id="n7" value="Backend Startup Hook&#xa;(Interrupt Detection)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="360" y="530" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Cleanup Timer -->
+    <mxCell id="n8" value="Cleanup Timer&#xa;(Every 10 min)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="560" y="530" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Developer -> Extension -->
+    <mxCell id="e1" value="Triggers index /&#xa;Observes status bar" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Extension -> Backend (polls) -->
+    <mxCell id="e2" value="GET /api/index/progress&#xa;POST /api/index/full" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Backend -> In-Memory -->
+    <mxCell id="e3" value="Read/Write&#xa;(fast)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="boundary" source="n3" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Backend -> PostgreSQL -->
+    <mxCell id="e4" value="UPSERT / SELECT&#xa;(persistent)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.75;exitY=0;exitDx=0;exitDy=0;" edge="1" parent="boundary" source="n3" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: IndexingEngine -> Backend -->
+    <mxCell id="e5" value="Batch events&#xa;(progress updates)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="boundary" source="n4" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Startup Hook -> PostgreSQL -->
+    <mxCell id="e6" value="Mark stale as&#xa;interrupted" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="boundary" source="n7" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: Cleanup -> PostgreSQL -->
+    <mxCell id="e7" value="DELETE&#xa;terminal &gt;1h" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="boundary" source="n8" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -1,0 +1,155 @@
+[
+  {
+    "type_id": "java-maven",
+    "display_name": "Java (Maven)",
+    "signals": [{"file": "pom.xml", "confidence": 0.9}, {"file": ".mvn", "confidence": 0.7}],
+    "source_roots": ["src/main/java/", "src/main/resources/"],
+    "test_roots": ["src/test/java/", "src/test/resources/"],
+    "exclude_patterns": ["target/", ".mvn/", ".idea/"],
+    "extensions": [".java", ".xml", ".properties", ".yaml"],
+    "mono_repo_signals": ["<modules>"],
+    "priority": 10
+  },
+  {
+    "type_id": "java-gradle",
+    "display_name": "Java (Gradle)",
+    "signals": [{"file": "build.gradle", "confidence": 0.9}, {"file": "build.gradle.kts", "confidence": 0.9}],
+    "source_roots": ["src/main/java/", "src/main/kotlin/"],
+    "test_roots": ["src/test/java/", "src/test/kotlin/"],
+    "exclude_patterns": ["build/", ".gradle/", ".idea/"],
+    "extensions": [".java", ".kt", ".kts", ".xml", ".properties"],
+    "mono_repo_signals": ["settings.gradle", "settings.gradle.kts"],
+    "priority": 10
+  },
+  {
+    "type_id": "nodejs",
+    "display_name": "Node.js",
+    "signals": [{"file": "package.json", "confidence": 0.9}, {"file": "package-lock.json", "confidence": 0.7}],
+    "source_roots": ["src/", "lib/"],
+    "test_roots": ["test/", "tests/", "__tests__/"],
+    "exclude_patterns": ["node_modules/", "dist/", "build/", ".next/", ".nuxt/"],
+    "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json"],
+    "mono_repo_signals": ["lerna.json", "pnpm-workspace.yaml", "nx.json"],
+    "priority": 10
+  },
+  {
+    "type_id": "python",
+    "display_name": "Python",
+    "signals": [{"file": "pyproject.toml", "confidence": 0.9}, {"file": "setup.py", "confidence": 0.8}, {"file": "requirements.txt", "confidence": 0.7}],
+    "source_roots": ["src/", "app/", "lib/"],
+    "test_roots": ["tests/", "test/"],
+    "exclude_patterns": ["__pycache__/", ".venv/", "venv/", "dist/", ".mypy_cache/"],
+    "extensions": [".py", ".pyi", ".toml", ".cfg"],
+    "priority": 10
+  },
+  {
+    "type_id": "salesforce",
+    "display_name": "Salesforce (SFDX)",
+    "signals": [{"file": "sfdx-project.json", "confidence": 0.95}],
+    "source_roots": ["force-app/main/default/"],
+    "test_roots": ["force-app/test/"],
+    "exclude_patterns": [".sfdx/", ".sf/"],
+    "extensions": [".cls", ".trigger", ".page", ".component", ".xml", ".js"],
+    "priority": 10
+  },
+  {
+    "type_id": "rust",
+    "display_name": "Rust",
+    "signals": [{"file": "Cargo.toml", "confidence": 0.95}],
+    "source_roots": ["src/"],
+    "test_roots": ["tests/"],
+    "exclude_patterns": ["target/"],
+    "extensions": [".rs", ".toml"],
+    "priority": 10
+  },
+  {
+    "type_id": "go",
+    "display_name": "Go",
+    "signals": [{"file": "go.mod", "confidence": 0.95}],
+    "source_roots": ["./"],
+    "test_roots": [],
+    "exclude_patterns": ["vendor/"],
+    "extensions": [".go", ".mod", ".sum"],
+    "priority": 10
+  },
+  {
+    "type_id": "dotnet",
+    "display_name": ".NET / C#",
+    "signals": [{"file": "*.sln", "confidence": 0.9}, {"file": "*.csproj", "confidence": 0.9}],
+    "source_roots": ["src/"],
+    "test_roots": ["tests/", "test/"],
+    "exclude_patterns": ["bin/", "obj/", ".vs/", "packages/"],
+    "extensions": [".cs", ".fs", ".csproj", ".sln", ".razor"],
+    "priority": 10
+  },
+  {
+    "type_id": "c-cpp",
+    "display_name": "C/C++ (CMake)",
+    "signals": [{"file": "CMakeLists.txt", "confidence": 0.9}, {"file": "Makefile", "confidence": 0.7}],
+    "source_roots": ["src/", "include/", "lib/"],
+    "test_roots": ["test/", "tests/"],
+    "exclude_patterns": ["build/", "cmake-build-*/", "out/"],
+    "extensions": [".c", ".cpp", ".h", ".hpp", ".cc", ".cxx"],
+    "priority": 8
+  },
+  {
+    "type_id": "flutter-dart",
+    "display_name": "Flutter / Dart",
+    "signals": [{"file": "pubspec.yaml", "confidence": 0.9}],
+    "source_roots": ["lib/", "bin/"],
+    "test_roots": ["test/"],
+    "exclude_patterns": [".dart_tool/", "build/", ".pub-cache/"],
+    "extensions": [".dart", ".yaml"],
+    "priority": 8
+  },
+  {
+    "type_id": "swift-ios",
+    "display_name": "Swift / iOS",
+    "signals": [{"file": "Package.swift", "confidence": 0.9}, {"file": "*.xcodeproj", "confidence": 0.8}],
+    "source_roots": ["Sources/", "src/"],
+    "test_roots": ["Tests/"],
+    "exclude_patterns": [".build/", "DerivedData/", "Pods/"],
+    "extensions": [".swift", ".m", ".h"],
+    "priority": 8
+  },
+  {
+    "type_id": "php",
+    "display_name": "PHP (Composer)",
+    "signals": [{"file": "composer.json", "confidence": 0.9}],
+    "source_roots": ["src/", "app/", "lib/"],
+    "test_roots": ["tests/"],
+    "exclude_patterns": ["vendor/", ".phpunit.cache/"],
+    "extensions": [".php", ".blade.php", ".twig"],
+    "priority": 8
+  },
+  {
+    "type_id": "ruby",
+    "display_name": "Ruby",
+    "signals": [{"file": "Gemfile", "confidence": 0.9}, {"file": "*.gemspec", "confidence": 0.8}],
+    "source_roots": ["lib/", "app/"],
+    "test_roots": ["spec/", "test/"],
+    "exclude_patterns": ["vendor/bundle/", ".bundle/", "tmp/", "coverage/"],
+    "extensions": [".rb", ".rake", ".erb"],
+    "priority": 8
+  },
+  {
+    "type_id": "kotlin-multiplatform",
+    "display_name": "Kotlin Multiplatform",
+    "signals": [{"file": "build.gradle.kts", "confidence": 0.7}],
+    "source_roots": ["src/commonMain/", "src/jvmMain/", "src/jsMain/"],
+    "test_roots": ["src/commonTest/", "src/jvmTest/"],
+    "exclude_patterns": ["build/", ".gradle/", ".kotlin/"],
+    "extensions": [".kt", ".kts"],
+    "priority": 7
+  },
+  {
+    "type_id": "pega",
+    "display_name": "Pega Platform",
+    "signals": [{"file": "*.pega.json", "confidence": 0.9}],
+    "source_roots": ["rules/"],
+    "test_roots": [],
+    "exclude_patterns": ["__staging__/"],
+    "extensions": [".pega.json", ".json", ".xml"],
+    "priority": 8
+  }
+]

@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.25.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.29.0.vsix
 ```
 
 ### 3. Use
@@ -66,7 +66,22 @@ MIT
 
 ## Changelog
 
-### v1.25.0 (2026-08-14)
+### v1.29.0 (2026-08-16)
+
+- **SA4E-78: Decouple Code Intelligence Indexer from Local Filesystem** — Architectural refactor eliminating tight coupling between IndexingEngine and the local filesystem. New `IndexOperationManager` (SRP: operation lifecycle tracking), `api-index-decoupled.ts` routes (POST /api/index/full, /file-events, /cancel, /progress), cooperative cancellation via AbortSignal at batch boundaries, progress EventEmitter (Observer pattern), cached GraphSyncService, async scan, and `DependencyResolver` cleaned of all `fs` imports (static-only resolution). `FileWatcher` deprecated — file watching moved to Extension side. 4 new files, 4 modified. Full BRD+FSD+TDD+UG documentation.
+
+### v1.28.0 (2026-08-16)
+
+- **SA4E-77: Pega Knowledge Graph — Categorized Node Types, Pega-mode Colors, entry_id-based Code/KB Split** — Enhanced Knowledge Graph visualization with categorized node types (Code symbols vs KB entries), Pega-specific color scheme for graph rendering, and entry_id-based split logic differentiating code-intelligence nodes from knowledge-base entries. Improved graph clarity and developer experience in Pega projects.
+
+### v1.27.0 (2025-08-16)
+
+- **SA4E-171: Migrate Pega Rules from knowledge_entries to symbols table** — Internal data migration moving 1409 Pega rules into structured `symbols` table with proper metadata (class, ruleset, version). Dual-write/dual-read for zero-downtime transition, pega-mapping enrichment, unified pega-search across both stores. 54 new tests, security review clean.
+- **SA4E-132: GateGuard Module** — Denylist, override, audit capabilities for tool approval gate.
+- **SA4E-124: Pega rules as code nodes** — Graph integration for Pega rule symbols.
+- **SA4E-106: Pega content extraction** — LLM enrichment on Pega rule body content.
+
+### v1.26.0 (2026-08-14)
 
 - **SA4E-155: On-demand KB Entry Enrichment** — Priority queue (HIGH/NORMAL), 15s configurable polling timeout, 3-tier LLM fallback (kiroSdlc.llmChat → Ollama → LMStudio), graceful degradation UX, extension-side enrichment save via COALESCE first-write-wins semantics.
 - **SDLC Pipeline Docs** — Full BRD, FSD (TA-enriched with Zod schemas + pseudocode), TDD with 6-phase implementation checklist, 7 draw.io diagrams.

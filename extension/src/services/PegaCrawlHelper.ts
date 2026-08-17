@@ -142,15 +142,19 @@ export async function fetchRuleTypesInParallel(
     // Process results sequentially (visitedKeys mutation needs to be serial)
     for (const { rt, subRules } of ruleTypeResults) {
         if (subRules.length === 0) { continue; }
-        log(`[Pega Indexer] 📌 Class "${targetClassName}": Loaded ${subRules.length} rules of type "${rt}". Saving files & ingesting...`);
+        let newCount = 0;
         for (const sr of subRules) {
             const srInsKey = (sr as any).insKey
                 || `${rt}:${targetClassName}:${(sr as any).pyRuleName || (sr as any).pyPropertyName || ''}`;
             if (!visitedKeys.has(srInsKey)) {
                 visitedKeys.add(srInsKey);
                 results.push({ rule: sr, ruleType: rt });
+                newCount++;
             }
         }
+        const dupCount = subRules.length - newCount;
+        const dupInfo = dupCount > 0 ? ` (${dupCount} duplicates skipped)` : '';
+        log(`[Pega Indexer] 📌 Class "${targetClassName}": ${newCount}/${subRules.length} new rules of type "${rt}"${dupInfo}. Saving & ingesting...`);
     }
 
     return results;

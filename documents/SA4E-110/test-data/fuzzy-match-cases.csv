@@ -1,0 +1,14 @@
+input,target,expected_distance,should_match
+"Review Docs","Review Docs",0,true
+"review docs","Review Docs",0,true
+"Review Doc","Review Docs",1,true
+"Reveiw Docs","Review Docs",2,true
+"Review","Review Docs",5,false
+"Implement","Review Docs",9,false
+"Re","Review Docs",9,false
+"Complete","Review Docs",9,false
+"review code","Review code",0,true
+"Verify","Verify",0,true
+"Verfy","Verify",1,true
+"Deploy","Implement",7,false
+"","Review Docs",11,false

@@ -1,0 +1,21 @@
+test_id,command,expected_action,pattern_matched,project_id
+TC-1201a,git push --force origin main,block,git push --force.*,default
+TC-1201b,rm -rf /,block,rm -rf\s+(/|~|\.\.),default
+TC-1201c,DROP TABLE users,block,DROP\s+TABLE,default
+TC-1201d,DELETE FROM orders;,block,DELETE\s+FROM\s+\w+\s*;?\s*$,default
+TC-1201e,git reset --hard HEAD~5,block,git reset --hard,default
+TC-1201f,git push -f origin main,block,git push -f.*,default
+TC-1201g,kubectl delete namespace prod,block,kubectl delete namespace,default
+TC-1201h,docker system prune -a,block,docker system prune -a,default
+TC-1206a,npm test,allow,,default
+TC-1206b,git status,allow,,default
+TC-1206c,ls -la /home,allow,,default
+TC-1206d,cat package.json,allow,,default
+TC-1206e,git push origin feature-branch,allow,,default
+TC-1206f,echo hello world,allow,,default
+TC-1206g,npm run build,allow,,default
+TC-1206h,git commit -m fix,allow,,default
+TC-1206i,rm single-file.txt,allow,,default
+TC-1206j,docker build . -t app,allow,,default
+TC-1211a,kubectl delete pod prod-api,block,kubectl delete.*prod,project-a
+TC-1211b,kubectl delete pod prod-api,allow,,project-b

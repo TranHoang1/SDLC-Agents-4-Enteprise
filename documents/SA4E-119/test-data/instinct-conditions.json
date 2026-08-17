@@ -1,0 +1,13 @@
+{
+  "conditions": {
+    "valid_simple": {"field": "source", "operator": "eq", "value": "verified_doc"},
+    "valid_numeric": {"field": "age_days", "operator": "lt", "value": 30},
+    "valid_compound": {"field": "age_days", "operator": "lt", "value": 30, "and": [{"field": "confidence", "operator": "gt", "value": 0.7}]},
+    "invalid_field": {"field": "$where", "operator": "exec", "value": "malicious()"},
+    "invalid_operator": {"field": "source", "operator": "drop_table", "value": "x"},
+    "too_deep_nesting": {"field": "a", "operator": "eq", "value": "x", "and": [{"field": "b", "operator": "eq", "value": "x", "and": [{"field": "c", "operator": "eq", "value": "x", "and": [{"field": "d", "operator": "eq", "value": "x"}]}]}]},
+    "proto_pollution": {"__proto__": {"admin": true}},
+    "sql_in_value": {"field": "source", "operator": "eq", "value": "'; DROP TABLE knowledge_entries; --"},
+    "oversized": "A string repeated 3000 times to exceed 2048 char limit"
+  }
+}

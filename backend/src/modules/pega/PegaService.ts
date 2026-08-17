@@ -1,5 +1,6 @@
 /**
  * PegaService — Logic nghiệp vụ cho Pega Rule & Data Indexing & Schema Storage.
+ * SA4E-158: Separated into indexRule (Phase 1) + syncRuleToKb (Phase 2).
  */
 import type { MemoryEngine } from '../memory/engine/core.js';
 import type {
@@ -15,10 +16,63 @@ import type { PegaRuleKbSchema } from './strategies/KbDrivenPegaParserStrategy.j
 import { PegaDeclarativeEngine } from './PegaDeclarativeEngine.js';
 import { PegaRuleAstParser } from './PegaRuleAstParser.js';
 import { extractTagValueCsv, pxObjClassToGraphType } from './pega-utils.js';
-import { projectRuleToGraphNode, createDependencyEdges } from './PegaGraphProjector.js';
+import { indexRule, type IndexRuleResult } from './PegaIndexer.js';
+import { syncRuleToKb, syncAllIndexedRules, type SyncRuleResult, type SyncBatchResult } from './PegaKbSync.js';
+import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'pega-service' });
+
+/** SA4E-163: Upsert params for knowledge_entries. */
+interface UpsertEntryParams {
+  source: string;
+  projectId: string;
+  content: string;
+  summary: string;
+  type: string;
+  tags: string;
+}
+
+/**
+ * SA4E-163: UPSERT a knowledge_entry by (source, project_id).
+ * Preserves the row ID so pending_tasks FK references remain valid.
+ * On conflict: updates content, summary, tags, enrichment_status.
+ * @returns The entry ID (existing or newly inserted).
+ */
+async function upsertKnowledgeEntry(adapter: DatabaseAdapter, p: UpsertEntryParams): Promise<number> {
+  const engine = adapter.getEngine();
+  if (engine === 'postgresql') {
+    const row = await adapter.getAsync<{ id: number }>(`
+      INSERT INTO knowledge_entries
+        (content, summary, type, tier, scope, project_id, source, tags, enrichment_status)
+      VALUES ($1, $2, $3, 'SEMANTIC', 'PROJECT', $4, $5, $6, 'pending')
+      ON CONFLICT (source, project_id) WHERE source IS NOT NULL
+      DO UPDATE SET
+        content = EXCLUDED.content,
+        summary = EXCLUDED.summary,
+        tags = EXCLUDED.tags,
+        enrichment_status = 'pending',
+        updated_at = NOW()
+      RETURNING id
+    `, [p.content, p.summary, p.type, p.projectId, p.source, p.tags]);
+    return row?.id ?? 0;
+  }
+  // SQLite: INSERT...ON CONFLICT with partial unique index
+  const row = await adapter.getAsync<{ id: number }>(`
+    INSERT INTO knowledge_entries
+      (content, summary, type, tier, scope, project_id, source, tags, enrichment_status)
+    VALUES (?, ?, ?, 'SEMANTIC', 'PROJECT', ?, ?, ?, 'pending')
+    ON CONFLICT (source, project_id) WHERE source IS NOT NULL
+    DO UPDATE SET
+      content = excluded.content,
+      summary = excluded.summary,
+      tags = excluded.tags,
+      enrichment_status = 'pending',
+      updated_at = datetime('now')
+    RETURNING id
+  `, [p.content, p.summary, p.type, p.projectId, p.source, p.tags]);
+  return row?.id ?? 0;
+}
 
 export class PegaService {
   private parser: PegaParser;
@@ -149,13 +203,43 @@ export class PegaService {
     return count;
   }
 
+  /**
+   * SA4E-158 Phase 1: Index rule — parse + dedup + store raw.
+   * No KB entries, no graph, no enrichment tasks.
+   */
+  public async indexRuleOnly(req: PegaIngestRuleRequest): Promise<IndexRuleResult> {
+    return indexRule(this.memoryEngine, this.parser, this.astParser, req);
+  }
+
+  /**
+   * SA4E-158 Phase 2: Sync all indexed-but-not-synced rules to KB.
+   * Creates KB entries, AST entries, enrichment tasks, graph nodes.
+   */
+  public async syncIndexedRulesToKb(projectId: string): Promise<SyncBatchResult> {
+    return syncAllIndexedRules(this.memoryEngine, this.parser, this.declarativeEngine, projectId);
+  }
+
+  /** SA4E-158: Expose parser for route-level access. */
+  public getParser(): PegaParser { return this.parser; }
+
+  /** SA4E-158: Expose memoryEngine for route-level access. */
+  public getMemoryEngine(): MemoryEngine { return this.memoryEngine; }
+
+  /**
+   * Legacy ingestRule — backward compatible, runs Phase 1 + Phase 2 in one call.
+   * @deprecated Use indexRuleOnly + syncIndexedRulesToKb for SRP separation.
+   */
   public async ingestRule(req: PegaIngestRuleRequest): Promise<PegaIngestRuleResponse> {
     let symbol: ExtractedPegaSymbol;
     try {
       symbol = this.parser.parseSymbol(req.ruleJson);
     } catch (err) {
-      // Rule type not supported by parser — skip gracefully instead of crashing stream
-      return { status: 'success', ruleId: -1, unresolvedDependencies: [] };
+      // SA4E-155: Log skipped rule type instead of silent skip
+      const ruleClass = (req.ruleJson as any)?.pxObjClass || 'unknown';
+      const ruleName = (req.ruleJson as any)?.pyRuleName || (req.ruleJson as any)?.pyLabel || 'unknown';
+      logger.warn({ ruleClass, ruleName, err: (err as Error).message, component: 'PegaService' },
+        'Rule type not supported by parser — skipped');
+      return { status: 'success', ruleId: -1, reason: `parser_skip: ${ruleClass}`, unresolvedDependencies: [] };
     }
     const deps = this.parser.extractDependencies(req.ruleJson);
 
@@ -181,39 +265,66 @@ export class PegaService {
     const promptCtx = this.astParser.toPromptContext(ast);
 
     const adapter = this.memoryEngine.getAdapter();
-    await adapter.runAsync('DELETE FROM knowledge_entries WHERE source = $1 AND project_id = $2', [symbol.fqn, req.projectId]);
     const summaryText = symbol.logicSummary
       ? `${symbol.fqn}\n${symbol.logicSummary}`
       : `${symbol.isRule ? 'Rule' : 'Data'}: ${symbol.fqn}`;
     // Tags: only meaningful categories — checksum/version stored in content, not as tags
     const baseTags = symbol.isRule ? 'pega,rule' : 'pega,data';
-    const id = await this.memoryEngine.insert({
-      content: JSON.stringify({ ...req.ruleJson, __checksum: req.checksum, __version: req.version }),
+    const contentJson = JSON.stringify({ ...req.ruleJson, __checksum: req.checksum, __version: req.version });
+
+    // SA4E-163: UPSERT instead of DELETE+INSERT to prevent orphan pending_tasks
+    const id = await upsertKnowledgeEntry(adapter, {
+      source: symbol.fqn,
+      projectId: req.projectId,
+      content: contentJson,
       summary: summaryText,
       type: symbol.isRule ? 'PEGA_RULE' : 'PEGA_DATA',
-      tier: 'SEMANTIC', scope: 'PROJECT', project_id: req.projectId,
-      source: symbol.fqn, tags: baseTags,
+      tags: baseTags,
     });
 
-    // Index AST as a separate knowledge entry for LLM querying
+    // Create enrichment task for LLM to generate summary + pseudo code
+    try {
+      const { PendingTaskRepository } = await import('../memory/task-queue/PendingTaskRepository.js');
+      const { TaskType } = await import('../memory/task-queue/models.js');
+      const taskRepo = new PendingTaskRepository(adapter);
+      await taskRepo.create({
+        task_type: TaskType.TAG_ENRICHMENT,
+        entry_id: id,
+        project_id: req.projectId,
+        payload: { entry_id: id, content: promptCtx || summaryText, existing_tags: baseTags, options: { threshold: 0.6, autoApply: true } },
+      });
+    } catch (err) { logger.debug({ err }, '[PegaService] Failed to create enrichment task (non-fatal)'); }
+
+    // SA4E-163: UPSERT AST entry to preserve entry_id for pending_tasks
     const astSource = `pega-ast:${symbol.fqn}`;
-    await adapter.runAsync('DELETE FROM knowledge_entries WHERE source = $1', [astSource]);
-    await this.memoryEngine.insert({
+    const astId = await upsertKnowledgeEntry(adapter, {
+      source: astSource,
+      projectId: req.projectId,
       content: JSON.stringify(ast),
       summary: promptCtx,
       type: 'PEGA_AST',
-      tier: 'SEMANTIC',
-      scope: 'PROJECT',
-      project_id: req.projectId,
-      source: astSource,
       tags: 'pega,ast',
     });
 
-    // Project into graph_nodes + create dependency edges
+    // Create enrichment task for PEGA_AST entry (uses promptCtx as content for LLM)
     try {
-      const graphNodeId = await projectRuleToGraphNode(adapter, symbol.fqn, pxObjClass, req.projectId);
-      await createDependencyEdges(adapter, graphNodeId, deps);
-    } catch (err) { logger.warn({ err }, '[PegaService] Failed to project rule into graph (non-fatal)'); }
+      const { PendingTaskRepository } = await import('../memory/task-queue/PendingTaskRepository.js');
+      const { TaskType } = await import('../memory/task-queue/models.js');
+      const taskRepo = new PendingTaskRepository(adapter);
+      await taskRepo.create({
+        task_type: TaskType.TAG_ENRICHMENT,
+        entry_id: astId,
+        project_id: req.projectId,
+        payload: { entry_id: astId, content: promptCtx || '', existing_tags: 'pega,ast', options: { threshold: 0.6, autoApply: true } },
+      });
+    } catch (err) { logger.debug({ err }, '[PegaService] Failed to create AST enrichment task (non-fatal)'); }
+
+    // SA4E-106: Pega rules are stored as code symbols (dual-write) — no "pega:" graph nodes.
+    // The rule appears on the graph as a code node after the next project graph sync.
+    try {
+      const { syncRuleToSymbols } = await import('./PegaSymbolSync.js');
+      await syncRuleToSymbols(adapter, req.ruleJson, req.projectId, promptCtx);
+    } catch (err) { logger.warn({ err }, '[PegaService] Failed to sync rule to symbols (non-fatal)'); }
 
     return { status: 'success', ruleId: id, unresolvedDependencies: deps };
   }

@@ -1,0 +1,107 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="Business Flow: Project-Type-Aware Workspace Indexing" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+      <mxGeometry x="300" y="10" width="440" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="n1" value="Developer triggers&#10;workspace indexing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="440" y="60" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="Check project_registry&#10;for cached type" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="440" y="160" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="Cache&#10;valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="470" y="260" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3a" value="Use cached&#10;project type" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="700" y="270" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3b" value="Run ProjectType&#10;Detectors (all registered)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="200" y="270" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="d2" value="Confidence&#10;&gt;= 0.5?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="240" y="380" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n4a" value="Apply FALLBACK strategy&#10;(DEFAULT_EXCLUDE +&#10;DEFAULT_EXTENSIONS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="40" y="390" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="d3" value="Mono-repo&#10;detected?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="240" y="510" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5a" value="Enumerate sub-projects&#10;+ detect each type" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="40" y="520" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5b" value="Resolve IndexingStrategy&#10;from Registry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="440" y="520" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="Apply strategy:&#10;source_roots + excludes&#10;+ extensions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="440" y="630" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="Execute async-file-scanner&#10;with resolved config" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="440" y="740" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n8" value="Persist project_type +&#10;source_roots to registry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+      <mxGeometry x="700" y="740" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n1" target="n2" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n2" target="d1" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="d1" target="n3a" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="d1" target="n3b" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n3b" target="d2" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="d2" target="n4a" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="d2" target="d3" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="d3" target="n5a" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="1" source="d3" target="n5b" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n5b" target="n6" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n5a" target="n6" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="120" y="660"/>
+          <mxPoint x="440" y="660"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n4a" target="n6" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="20" y="420"/>
+          <mxPoint x="20" y="660"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n6" target="n7" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n7" target="n8" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;" parent="1" source="n3a" target="n5b" edge="1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="770" y="540"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -19,6 +19,7 @@ export function createStaticRoutes(ctx: AdminContext): Hono {
       const embed = c.req.query('embed');
       if (embed) {
         html = html.replace('</head>', '<style>.sidebar{display:none!important}.main{padding:0!important;height:100vh!important;width:100%!important}</style></head>');
+        html = html.replace('<body>', '<body data-embed="true">');
       }
       if (token) {
         // SEC: sanitize token — only allow alphanumeric, dash, dot, underscore to prevent XSS

@@ -13,6 +13,8 @@ import { ToolRouter } from '../tool-router/ToolRouter.js';
 import { createHealthRoute } from './routes/health.js';
 import { createToolsRoute } from './routes/tools.js';
 import { createApiRoute } from './routes/api.js';
+import { createProjectTypeRoutes } from './routes/project-type-routes.js';
+import { createEnrichmentStatusRoutes } from './routes/enrichment-status-routes.js';
 import { createAdminRoute } from './routes/admin.js';
 import { createMcpConfigRoutes } from '../modules/orchestration/McpConfigRoutes.js';
 import { McpConfigService } from '../modules/orchestration/McpConfigService.js';
@@ -25,7 +27,9 @@ import { validateJwtConfig, jwtAuth } from './middleware/jwt-auth.js';
 import { createKbApiRoutes, createToolsApiRoutes } from './routes/kb-api.js';
 import { createPegaApiRoutes } from './routes/pega-api.js';
 import { createPegaStreamRoutes } from './routes/pega-stream.js';
+import { createIngestRuleRoute } from './routes/pega-ingest-rule.js';
 import { createPegaSchemaRoutes } from './routes/pega-schema-routes.js';
+import { createPegaSyncToKbRoutes } from './routes/pega-sync-to-kb.js';
 import { createKnowledgeApiRoutes } from '../knowledge/routes.js';
 import { bodyLimit } from 'hono/body-limit';
 import { getMcpServer, registerTransport } from './mcpServer.js';
@@ -94,6 +98,14 @@ export class HttpServer {
     const pegaStreamRoutes = createPegaStreamRoutes(this.options.registry, this.logger);
     app.route('/api/v1', pegaStreamRoutes);
 
+    // SA4E-158: Sync indexed Pega rules to KB (Phase 2)
+    const pegaSyncRoutes = createPegaSyncToKbRoutes(this.options.registry, this.logger);
+    app.route('/api/v1', pegaSyncRoutes);
+
+    // SA4E-156: Per-rule ingestion with relative extraction (BFS-compatible)
+    const ingestRuleRoute = createIngestRuleRoute(this.options.registry, this.logger);
+    app.route('/api/v1/pega/ingest-rule', ingestRuleRoute);
+
     // SA4E-95: Schema generation from harness JSON (backend analysis, no Pega API calls)
     const pegaSchemaRoutes = createPegaSchemaRoutes(this.logger);
     app.route('/api/v1', pegaSchemaRoutes);
@@ -108,10 +120,21 @@ export class HttpServer {
     const toolsApiRoutes = createToolsApiRoutes(this.options.registry, this.logger);
     app.route('/api/tools', toolsApiRoutes);
 
+    // SA4E-108: Project type configs endpoint (extension fetches KB type definitions)
+    const projectTypeRoutes = createProjectTypeRoutes(this.options.registry, this.logger);
+    app.route('/api/v1', projectTypeRoutes);
+
+    // SA4E-157: Enrichment status polling endpoint (JWT auth, no admin check)
+    const enrichmentStatusRoutes = createEnrichmentStatusRoutes(this.options.registry, this.logger);
+    app.route('/api/v1', enrichmentStatusRoutes);
+
     app.all('/mcp', async (c) => {
       const transport = new WebStandardStreamableHTTPServerTransport();
       registerTransport(transport);
-      const server = getMcpServer(this.options.registry, this.logger);
+      // Extract project context from HTTP headers for multi-tenant scope isolation
+      const projectId = c.req.header('X-Project-Id') || '';
+      const projectContext = projectId ? { projectId, userId: 'mcp-client' } : undefined;
+      const server = getMcpServer(this.options.registry, this.logger, projectContext);
       await server.connect(transport);
       return transport.handleRequest(c.req.raw);
     });

@@ -33,6 +33,20 @@ interface JobStatusResponse {
   error: { code: string; message: string } | null;
 }
 
+/** SA4E-156: Response from POST /api/v1/pega/ingest-rule */
+export interface IngestSingleRuleResult {
+  status: string;
+  ruleId?: number;
+  unresolvedDependencies: Array<{ insKey?: string | null; ruleType: string; className: string; ruleName: string }>;
+  reason?: string;
+}
+
+/** SA4E-156: Full envelope from POST /api/v1/pega/ingest-rule */
+interface IngestSingleRuleResponse {
+  data: IngestSingleRuleResult | null;
+  error: { code: string; message: string } | null;
+}
+
 type LogFn = (msg: string) => void;
 
 /** Polling interval in milliseconds */
@@ -158,5 +172,40 @@ export class PegaStreamIngester {
   /** Promise-based sleep helper */
   private sleep(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Ingest a single rule via POST /api/v1/pega/ingest-rule.
+   * SA4E-156: Per-rule ingestion returning unresolved dependencies for BFS.
+   * @param projectId - 12-char hex project identifier
+   * @param ruleJson - Full Pega rule JSON
+   * @param checksum - Optional content checksum for dedup
+   * @param version - Optional rule version
+   * @returns Response with status, ruleId, and unresolvedDependencies
+   */
+  async ingestSingleRule(
+    projectId: string,
+    ruleJson: Record<string, unknown>,
+    checksum?: string,
+    version?: string,
+  ): Promise<IngestSingleRuleResult> {
+    const endpoint = `${this.backendUrl}/api/v1/pega/ingest-rule`;
+
+    const body = JSON.stringify({ projectId, ruleJson, checksum, version });
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+    });
+
+    const json = (await res.json()) as IngestSingleRuleResponse;
+    if (json.error) {
+      throw new Error(`Ingest failed: ${json.error.message}`);
+    }
+    if (!json.data) {
+      throw new Error('Ingest returned empty data');
+    }
+
+    return json.data;
   }
 }

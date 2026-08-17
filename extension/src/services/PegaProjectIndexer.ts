@@ -1,6 +1,8 @@
 /**
  * PegaProjectIndexer — Crawl and ingest Pega project rules (SA4E-94).
  * Enumerate-then-fetch pipeline: RuleSet enumeration → chunked content fetch → NDJSON ingest.
+ * @deprecated Replaced by PegaDataPageEnumerator + PegaBfsIndexer (SA4E-156).
+ * Kept for feature-flag rollback only. Will be removed in next major version.
  */
 import * as vscode from "vscode";
 import * as path from "path";
@@ -68,6 +70,9 @@ export class PegaProjectIndexer {
         await calibrateFetchConcurrency(pegaClient, crawlSet.length, this.log);
         const fetchedRules = await this.fetchAllRules(crawlSet, pegaClient, root, report);
 
+        // SA4E-155: Log rules with multiple versions (helps identify Pega API filter issue)
+        this.logDuplicateVersions(fetchedRules);
+
         const result = await this.ingestRules(fetchedRules, pegaClient, projectId, crawlSet);
         const rawName = appName || hierarchy.appName;
         return `🏛️ Pega: "pega:${rawName}" — Ingested ${fetchedRules.length} rules (KB: ${result.kb}, Graph: ${result.graph})`;
@@ -93,6 +98,67 @@ export class PegaProjectIndexer {
             if (ct.includes("-")) { seedSet.add(`RULE-OBJ-CLASS ${ct}`); }
         }
         return Array.from(seedSet);
+    }
+
+    /**
+     * SA4E-155: Log rules that have multiple versions in the fetched set.
+     * Groups by FQN (pxObjClass:pyClassName:ruleName) which is the dedup key used by ingestRule.
+     */
+    private logDuplicateVersions(rules: Record<string, unknown>[]): void {
+        // Group by FQN = pxObjClass:pyClassName:name (same logic as PegaSymbolParser)
+        const versionMap = new Map<string, { versions: string[]; sources: string[] }>();
+        for (const rule of rules) {
+            const ruleType = String(rule.pxObjClass || '');
+            const className = String(rule.pyClassName || '@baseclass');
+            const name = String(rule.pyActivityName || rule.pyModelName || rule.pyRuleName || rule.pyLabel || '');
+            const version = String(rule.pyRuleSetVersion || '');
+            const source = String((rule as any)._sourceClass || className);
+            const fqn = `${ruleType}:${className}:${name}`;
+            if (!versionMap.has(fqn)) { versionMap.set(fqn, { versions: [], sources: [] }); }
+            const entry = versionMap.get(fqn)!;
+            entry.versions.push(version);
+            entry.sources.push(source);
+        }
+
+        const duplicates = Array.from(versionMap.entries())
+            .filter(([, data]) => data.versions.length > 1)
+            .sort((a, b) => b[1].versions.length - a[1].versions.length);
+
+        if (duplicates.length === 0) {
+            this.log(`[Pega Indexer] ✅ No duplicate versions found — all ${versionMap.size} FQNs are unique.`);
+            return;
+        }
+
+        const totalWasted = rules.length - versionMap.size;
+        this.log(`\n=== DUPLICATE VERSIONS REPORT ===`);
+        this.log(`Total fetched rules: ${rules.length}`);
+        this.log(`Unique FQNs: ${versionMap.size}`);
+        this.log(`Rules with multiple occurrences: ${duplicates.length}`);
+        this.log(`Wasted fetches (overwritten by dedup): ${totalWasted}`);
+
+        // Categorize: same-version duplicates (inheritance) vs real multi-version
+        const inherited = duplicates.filter(([, d]) => new Set(d.versions).size === 1);
+        const multiVersion = duplicates.filter(([, d]) => new Set(d.versions).size > 1);
+
+        if (multiVersion.length > 0) {
+            this.log(`\n⚠️ REAL multi-version rules (API not filtering latest): ${multiVersion.length}`);
+            for (const [fqn, data] of multiVersion.slice(0, 20)) {
+                const uniqueVersions = [...new Set(data.versions)].join(', ');
+                this.log(`  ${fqn} — ${data.versions.length} entries, unique versions: [${uniqueVersions}]`);
+            }
+        }
+
+        if (inherited.length > 0) {
+            this.log(`\n📋 Inherited duplicates (same rule fetched from ${inherited.length} class expansions):`);
+            for (const [fqn, data] of inherited.slice(0, 10)) {
+                this.log(`  ${fqn} — fetched ${data.versions.length}x (version: ${data.versions[0]})`);
+            }
+            if (inherited.length > 10) {
+                this.log(`  ... and ${inherited.length - 10} more inherited duplicates`);
+            }
+        }
+
+        this.log(`=== END DUPLICATE VERSIONS REPORT ===\n`);
     }
 
     private resolveProjectId(appName: string): string | null {

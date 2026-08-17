@@ -1,0 +1,99 @@
+<mxGraphModel dx="1200" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- System Boundary -->
+    <mxCell id="boundary" value="SA4E Extension — Proxy Subsystem" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="250" y="40" width="650" height="720" as="geometry"/>
+    </mxCell>
+    <!-- UC-01: Test Proxy Connection -->
+    <mxCell id="uc1" value="UC-01&#xa;Test Proxy Connection" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="80" y="60" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <!-- UC-02: Connect via Undici (Primary) -->
+    <mxCell id="uc2" value="UC-02&#xa;Connect via Undici&#xa;(Primary Path)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="80" y="200" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <!-- UC-03: Fallback to Curl -->
+    <mxCell id="uc3" value="UC-03&#xa;Fallback to Curl&#xa;(EDR Bypass)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="80" y="340" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <!-- UC-04: NTLM SSO Auth -->
+    <mxCell id="uc4" value="UC-04&#xa;Authenticate via&#xa;NTLM SSO" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="360" y="340" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <!-- UC-05: Copy to Manual -->
+    <mxCell id="uc5" value="UC-05&#xa;Copy Detected Proxy&#xa;to Manual Mode" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="80" y="500" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <!-- UC-06: Configure Manual Credentials -->
+    <mxCell id="uc6" value="UC-06&#xa;Configure Manual&#xa;Credentials" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="360" y="500" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <!-- UC-07: Detect System Proxy -->
+    <mxCell id="uc7" value="UC-07&#xa;Detect System&#xa;Proxy Settings" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="360" y="60" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <!-- UC-08: Test Curl Only -->
+    <mxCell id="uc8" value="UC-08&#xa;Test with Curl Only&#xa;(Explicit)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="360" y="200" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <!-- Actor: Developer -->
+    <mxCell id="actor1" value="Developer&#xa;(behind EDR)" style="shape=mxgraph.sysml.actorNode;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="260" width="80" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Actor: Corporate Proxy -->
+    <mxCell id="actor2" value="Corporate Proxy&#xa;(Skyhigh SWG)" style="shape=mxgraph.sysml.actorNode;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1020" y="220" width="80" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Actor: Windows OS -->
+    <mxCell id="actor3" value="Windows OS&#xa;(NTLM Creds)" style="shape=mxgraph.sysml.actorNode;whiteSpace=wrap;html=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="1020" y="420" width="80" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Actor → Use Cases -->
+    <mxCell id="e1" style="endArrow=none;html=1;" edge="1" parent="1" source="actor1" target="uc1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="endArrow=none;html=1;" edge="1" parent="1" source="actor1" target="uc5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="endArrow=none;html=1;" edge="1" parent="1" source="actor1" target="uc8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Actor2 → Use Cases -->
+    <mxCell id="e4" style="endArrow=none;html=1;" edge="1" parent="1" source="actor2" target="uc2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="endArrow=none;html=1;" edge="1" parent="1" source="actor2" target="uc3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Actor3 → NTLM -->
+    <mxCell id="e6" style="endArrow=none;html=1;" edge="1" parent="1" source="actor3" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Include: UC-01 includes UC-02 -->
+    <mxCell id="e7" value="&lt;&lt;include&gt;&gt;" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="uc1" target="uc2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Include: UC-01 includes UC-07 -->
+    <mxCell id="e8" value="&lt;&lt;include&gt;&gt;" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="uc1" target="uc7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Extend: UC-03 extends UC-02 -->
+    <mxCell id="e9" value="&lt;&lt;extend&gt;&gt;&#xa;[undici fails]" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="uc3" target="uc2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Include: UC-03 includes UC-04 -->
+    <mxCell id="e10" value="&lt;&lt;include&gt;&gt;" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="uc3" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Extend: UC-06 extends UC-05 -->
+    <mxCell id="e11" value="&lt;&lt;extend&gt;&gt;&#xa;[add credentials]" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="uc6" target="uc5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Include: UC-08 includes UC-04 -->
+    <mxCell id="e12" value="&lt;&lt;include&gt;&gt;" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="uc8" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
