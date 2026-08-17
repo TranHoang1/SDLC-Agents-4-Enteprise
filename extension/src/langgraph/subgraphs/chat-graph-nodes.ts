@@ -74,10 +74,26 @@ function buildMessagesUnbounded(state: PipelineState, tools: McpToolDefinition[]
   return messages;
 }
 
+/**
+ * Determine if user input explicitly requests code/file inspection.
+ * STRICT matching — only trigger when user clearly wants to read/review code files.
+ * Generic questions (e.g., "review this idea", "xem lại concept") should NOT trigger.
+ */
 function looksLikeCodeRequest(text: string): boolean {
   const lower = text.toLowerCase();
-  const keywords = ["review", "code", "source", "file", "read", "xem", "đọc", "kiểm tra", "check", "analyze", "phân tích"];
-  return keywords.some(k => lower.includes(k));
+
+  // Must contain a code-related keyword AND a file/path-like reference or action verb
+  const codeActionPatterns = [
+    /\b(review|xem|đọc|kiểm tra|check|analyze|phân tích)\s+(code|file|source|module|function|class|component|endpoint)/,
+    /\b(read|open|show|list)\s+(file|directory|folder|code)/,
+    /\b(code|file|source)\s+(review|check|quality|standard)/,
+    /\bsource\s*code\b/,
+    /\b(src|backend|extension|module)\//,   // explicit path reference
+    /\.\w{1,5}\b.*\b(review|check|xem|đọc)/, // file extension + action
+    /\b(review|check|xem)\b.*\.\w{1,5}$/,    // action + file extension at end
+  ];
+
+  return codeActionPatterns.some(p => p.test(lower));
 }
 
 export function createFetchToolsNode(toolRegistry: ToolRegistry | null) {

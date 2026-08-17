@@ -29,7 +29,7 @@ import {
 } from "./rag-grader-nodes";
 import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
 
-const MAX_AGENT_ITERATIONS = 25;
+const MAX_AGENT_ITERATIONS = 12;
 
 const AGENT_SYSTEM_PROMPT = `You are a coding assistant with access to workspace tools. You can read files, search code, and list directories.
 
@@ -121,6 +121,23 @@ function loadAgentInstructions(workspaceRoot: string): string {
     block += "\n\n---\n\n" + ins;
   }
   return block;
+}
+
+/**
+ * SA4E-174: Direct routing for large models — skip verify node entirely.
+ * Text response → END, tool calls → execute_tools.
+ */
+function routeAgentStepDirect(state: PipelineState): string {
+  if (state.pipelineStatus === "failed") {
+    debugLog(`[graph] routeAgentStepDirect: pipeline FAILED -> __end__`);
+    return "__end__";
+  }
+  if (state.toolCalls && state.toolCalls.length > 0) {
+    debugLog(`[graph] routeAgentStepDirect: ${state.toolCalls.length} toolCalls -> execute_tools`);
+    return "execute_tools";
+  }
+  debugLog(`[graph] routeAgentStepDirect: text response -> __end__ (large model, no verify)`);
+  return "__end__";
 }
 
 function routeAgentStep(state: PipelineState): string {

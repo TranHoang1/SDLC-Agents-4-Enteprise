@@ -106,7 +106,7 @@ describe("buildMessages - scratchpad accumulation", () => {
     expect(msgs[3].role).toBe("tool");
   });
 
-  it("adds SYSTEM nudge on first iteration for code requests", () => {
+  it("SA4E-174: tool nudge removed — LLM self-decides tool usage", () => {
     const state = {
       chatHistory: [{ role: "user", content: "review my code" }],
       agentScratchpad: [],
@@ -114,7 +114,9 @@ describe("buildMessages - scratchpad accumulation", () => {
     const tools = [{ name: "list_directory", description: "", inputSchema: {} }];
     const msgs = buildMessages(state, tools, sysPrompt);
     const lastMsg = msgs[msgs.length - 1];
-    expect(lastMsg.content).toContain("MUST call a tool now");
+    // Tool nudge no longer injected — last message is the user message
+    expect(lastMsg.content).not.toContain("MUST call a tool now");
+    expect(lastMsg.content).toBe("review my code");
   });
 
   it("does NOT add nudge when scratchpad already has content", () => {
