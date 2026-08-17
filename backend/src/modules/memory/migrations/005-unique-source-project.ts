@@ -21,6 +21,16 @@ export async function migrate005UniqueSourceProject(db: DatabaseAdapter): Promis
   // Step 2: De-duplicate — keep only the latest entry per (source, project_id)
   if (engine === 'postgresql') {
     await db.execAsync(`
+      DELETE FROM pending_tasks
+      WHERE entry_id NOT IN (
+        SELECT MAX(id) FROM knowledge_entries
+        WHERE source IS NOT NULL
+        GROUP BY source, project_id
+      ) AND entry_id IN (
+        SELECT id FROM knowledge_entries WHERE source IS NOT NULL
+      )
+    `);
+    await db.execAsync(`
       DELETE FROM knowledge_entries
       WHERE id NOT IN (
         SELECT MAX(id) FROM knowledge_entries
