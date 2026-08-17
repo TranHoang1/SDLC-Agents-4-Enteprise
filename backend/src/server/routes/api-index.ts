@@ -309,12 +309,7 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c, userId);
-<<<<<<< HEAD
     await registerProjectPhase(scope, logger, userId);
-=======
-    const realWorkspaceRoot = c.req.header('X-Workspace-Root') || '';
-    await registerProjectPhase(scope.projectId, scope.workspace, logger, userId, realWorkspaceRoot || undefined);
->>>>>>> upstream/main
 
     const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
     const indexer = codeIntel?.getIndexer() as any;
