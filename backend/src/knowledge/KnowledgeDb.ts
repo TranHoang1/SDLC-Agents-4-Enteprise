@@ -47,7 +47,7 @@ export class KnowledgeDb {
   /** Detect PostgreSQL via runtime duck-typing (composed adapters expose getEngine). */
   private isPostgres(): boolean {
     return typeof (this.adapter as { getEngine?: () => string }).getEngine === 'function'
-      && (this.adapter as { getEngine: () => string }).getEngine() === 'postgresql';
+      && (this.adapter as unknown as { getEngine: () => string }).getEngine() === 'postgresql';
   }
 
   /** Run schema migration (CREATE IF NOT EXISTS). */

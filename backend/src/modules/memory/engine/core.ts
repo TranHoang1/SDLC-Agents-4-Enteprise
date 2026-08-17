@@ -72,7 +72,7 @@ export class MemoryEngine extends MemoryEngineCrud {
         ORDER BY f.rank LIMIT ?`;
       try {
         const rows = await this.adapter.allAsync<any>(sql, [ftsQuery, ...params, limit]);
-        legacyResults = this.applyCompositeScoring(rows);
+        legacyResults = await this.applyCompositeScoring(rows);
       } catch (e) {
         console.warn('[MemoryEngine] search sqlite fts failed', e);
       }
@@ -88,7 +88,7 @@ export class MemoryEngine extends MemoryEngineCrud {
           ORDER BY rank DESC LIMIT ?`;
         try {
           const rows = await this.adapter.allAsync<any>(sql, [sanitized, sanitized, ...params, limit]);
-          legacyResults = this.applyCompositeScoring(rows);
+          legacyResults = await this.applyCompositeScoring(rows);
         } catch (e) {
           console.warn('[MemoryEngine] search pg fts failed', e);
         }
@@ -100,7 +100,7 @@ export class MemoryEngine extends MemoryEngineCrud {
         ORDER BY rank DESC LIMIT ?`;
       try {
         const rows = await this.adapter.allAsync<any>(sql, [query, query, ...params, limit]);
-        legacyResults = this.applyCompositeScoring(rows);
+        legacyResults = await this.applyCompositeScoring(rows);
       } catch (e) {
         console.warn('[MemoryEngine] search mysql fts failed', e);
       }

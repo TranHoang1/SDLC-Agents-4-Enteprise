@@ -7,7 +7,7 @@
 import pino from 'pino';
 import type { SyncDatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { SCHEMA_V1 } from './schema.js';
-import { runGraphMigrationsSync } from '../database/migrator.js';
+
 import { applyMigrationV5 } from './migration-v5.js';
 
 const logger = pino({ name: 'migrations' });
@@ -81,7 +81,7 @@ export function runMigrations(db: SyncDatabaseAdapter, legacyProjectId: string =
   // Run V3 graph migrations (KSA-145/153/169) — idempotent
   if (current < 3) {
     try {
-      runGraphMigrationsSync(db);
+      applyGraphMigrationsSync(db);
     } catch (err) {
       logger.error({ err }, '[migrations] V3 graph migration error (graceful):');
     }
