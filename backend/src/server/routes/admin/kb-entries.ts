@@ -165,7 +165,11 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
       });
     }
 
-    const lookupId = entryId.startsWith('doc-') ? entryId.replace('doc-', '') : entryId;
+    const lookupId = entryId.startsWith('doc-')
+      ? entryId.replace('doc-', '')
+      : entryId.startsWith('kb-entry:')
+      ? entryId.replace('kb-entry:', '')
+      : entryId;
     const entry = await getKbEntryById(lookupId);
     if (!entry) return c.json({ error: 'Entry not found' }, 404);
     const allowedTiers = (permCheck.roleData as any)?.allowedTiers;

@@ -120,7 +120,10 @@ function resolveRequestScope(c: Context, sessionUserId?: string): IndexScope {
   // indexTempDir/{userId}/{projectId} for source file writes
   const workspace = path.join(config.indexTempDir, userId, projectId);
   if (!fs.existsSync(workspace)) fs.mkdirSync(workspace, { recursive: true });
-  return { projectId, workspace };
+  const clientPath = c.req.header('X-Workspace-Root');
+  const clientWorkspaceRoot = clientPath ?? projectId;
+  const displayName = (clientPath && basenameFromClientPath(clientPath)) || projectId;
+  return { projectId, workspace, clientWorkspaceRoot, displayName };
 }
 
 
@@ -172,8 +175,7 @@ function writeFilesPhase(workspace: string, files: SourceFile[]): { written: num
  * We store the CLIENT-provided host path (e.g. `/Users/foo/proj`) as the
  * display workspace_path — never the internal `/app/workspaces/...` prefix.
  */
-async function 
-  (scope: IndexScope, logger: Logger, createdBy = ''): Promise<void> {
+async function registerProjectPhase(scope: IndexScope, logger: Logger, createdBy = ''): Promise<void> {
   try {
     const graphRepo = new GraphRepository(getAdminAdapter());
     await graphRepo.registerProject(
@@ -290,7 +292,7 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
     const scope = resolveRequestScope(c, userId);
-    await registerProjectPhase(scope.projectId, scope.workspace, logger, userId);
+    await registerProjectPhase(scope, logger, userId);
 
     const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
     const indexer = codeIntel?.getIndexer() as any;

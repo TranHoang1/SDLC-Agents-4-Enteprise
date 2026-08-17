@@ -191,9 +191,10 @@ export async function handleIngestFile(
   if (scopeCtx) {
     const { clause, params } = buildIngestFileDeleteClause(scopeCtx as ProjectContext, filePath);
     // Delete stale graph nodes before removing KB entries (while IDs still exist)
+    let oldIds: { id: number }[] = [];
     try {
       const adminAdapter = getAdminAdapter();
-      const oldIds = await engine.getAdapter().allAsync<{ id: number }>(
+      oldIds = await engine.getAdapter().allAsync<{ id: number }>(
         'SELECT id FROM knowledge_entries WHERE source = $1 AND project_id = $2',
         [filePath, (scopeCtx as any).projectId ?? ''],
       );
@@ -202,12 +203,17 @@ export async function handleIngestFile(
         await adminAdapter.runAsync(`DELETE FROM graph_nodes WHERE entry_id IN (${idList})`, []);
       }
     } catch (err) { logger.debug({ err }, '[ingest-file] Failed to delete stale graph nodes (non-fatal)'); }
+    if (oldIds.length > 0) {
+      const numericIds = oldIds.map(r => r.id).join(',');
+      await engine.getAdapter().runAsync(`DELETE FROM pending_tasks WHERE entry_id IN (${numericIds})`, []);
+    }
     await engine.getAdapter().runAsync(clause, params);
   } else {
     // Delete stale graph nodes before removing KB entries (while IDs still exist)
+    let oldIds: { id: number }[] = [];
     try {
       const adminAdapter = getAdminAdapter();
-      const oldIds = await engine.getAdapter().allAsync<{ id: number }>(
+      oldIds = await engine.getAdapter().allAsync<{ id: number }>(
         'SELECT id FROM knowledge_entries WHERE source = $1',
         [filePath],
       );
@@ -216,6 +222,10 @@ export async function handleIngestFile(
         await adminAdapter.runAsync(`DELETE FROM graph_nodes WHERE entry_id IN (${idList})`, []);
       }
     } catch (err) { logger.debug({ err }, '[ingest-file] Failed to delete stale graph nodes (non-fatal)'); }
+    if (oldIds.length > 0) {
+      const numericIds = oldIds.map(r => r.id).join(',');
+      await engine.getAdapter().runAsync(`DELETE FROM pending_tasks WHERE entry_id IN (${numericIds})`, []);
+    }
     await engine.getAdapter().runAsync('DELETE FROM knowledge_entries WHERE source = ?', [filePath]);
   }
 
