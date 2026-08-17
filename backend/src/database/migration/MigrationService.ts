@@ -52,7 +52,6 @@ export class MigrationService {
 
     try {
       await target.connect();
-      const preExistingTables = await target.getTableNames();
       const tables = await this.source.getTableNames();
       const migratables = tables.filter(
         t => !t.includes('_fts') && t !== 'schema_version'
@@ -170,7 +169,7 @@ export class MigrationService {
             const ph = cols.map(() => '?').join(', ');
             // SA4E-45: Sanitize values — PG rejects null bytes (0x00) in TEXT columns
             const values = Object.values(row).map(v =>
-              typeof v === 'string' ? v.replace(/\x00/g, '') : v
+              typeof v === 'string' ? v.split('\x00').join('') : v
             );
             await (target as any).runAsync(
               `INSERT INTO "${table}" (${cols.map(c => `"${c}"`).join(', ')}) VALUES (${ph})`,
@@ -184,7 +183,7 @@ export class MigrationService {
             const cols = Object.keys(row);
             const ph = cols.map(() => '?').join(', ');
             const values = Object.values(row).map(v =>
-              typeof v === 'string' ? v.replace(/\x00/g, '') : v
+              typeof v === 'string' ? v.split('\x00').join('') : v
             );
             (target as DatabaseAdapter).run(
               `INSERT INTO "${table}" (${cols.map(c => `"${c}"`).join(', ')}) VALUES (${ph})`,

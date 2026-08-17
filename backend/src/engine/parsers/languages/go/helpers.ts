@@ -1,5 +1,5 @@
 import type { SyntaxNode } from '../../types.js';
-import { getNodeText, getNamedChild } from '../../ast-utils.js';
+import { getNodeText } from '../../ast-utils.js';
 
 export interface ReceiverInfo {
   text: string;

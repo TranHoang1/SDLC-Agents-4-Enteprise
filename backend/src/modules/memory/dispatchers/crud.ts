@@ -60,7 +60,7 @@ export async function handleIngest(
   let content = a.content as string;
   if (!content) return 'Error: content required';
   // SA4E-53: PostgreSQL rejects null bytes in text columns
-  content = content.replace(/\x00/g, '');
+  content = content.split('\x00').join('');
   const type = (a.type as string) ?? 'CONTEXT';
   const source = a.source as string | undefined;
   const tags = Array.isArray(a.tags) ? (a.tags as string[]).join(',') : ((a.tags as string) ?? '');
@@ -219,7 +219,7 @@ export async function handleIngestFile(
   }
 
   // SA4E-53: PostgreSQL rejects null bytes (0x00) in text columns
-  text = text.replace(/\x00/g, '');
+  text = text.split('\x00').join('');
 
   const sections = text.split(/^#{1,3}\s+/m).filter(s => s.trim());
   let created = 0;

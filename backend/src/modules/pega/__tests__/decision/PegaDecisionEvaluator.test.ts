@@ -6,7 +6,7 @@ import { PegaDecisionTreeEvaluator } from '../../decision/PegaDecisionTreeEvalua
 import { PegaStrategyComponentResolver } from '../../decision/PegaStrategyComponentResolver.js';
 import { resolveFieldValue } from '../../decision/fieldResolver.js';
 import { PegaClipboardContext } from '../../expression/PegaClipboardContext.js';
-import type { PegaDecisionTableRow, DecisionTreeNode, PegaEvaluationResult } from '../../decision/PegaEvaluationResult.js';
+import type { PegaDecisionTableRow, DecisionTreeNode } from '../../decision/PegaEvaluationResult.js';
 import type { PegaExpressionEvaluator } from '../../expression/PegaExpressionEvaluator.js';
 
 const context = new PegaClipboardContext({

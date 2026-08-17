@@ -12,13 +12,17 @@ async function columnExists(db: DatabaseAdapter, table: string, column: string):
     );
     if (pg.length > 0) return true;
   } catch (err) {
+    console.debug('[migration-002] PG column introspection failed, falling back to SQLite:', (err as Error).message);
     try {
       const lite = await db.allAsync<{ name: string }>(
         `SELECT name FROM pragma_table_info('${table}') WHERE name = ?`,
         [column],
       );
       return lite.length > 0;
-    } catch (err) { return false; }
+    } catch (err2) {
+      console.debug('[migration-002] SQLite column introspection failed:', (err2 as Error).message);
+      return false;
+    }
   }
   return false;
 }
@@ -32,13 +36,17 @@ async function tableExists(db: DatabaseAdapter, table: string): Promise<boolean>
     );
     if (pg.length > 0) return true;
   } catch (err) {
+    console.debug('[migration-002] PG table introspection failed, falling back to SQLite:', (err as Error).message);
     try {
       const lite = await db.allAsync<{ name: string }>(
         `SELECT name FROM sqlite_master WHERE type='table' AND name=?`,
         [table],
       );
       return lite.length > 0;
-    } catch (err) { return false; }
+    } catch (err2) {
+      console.debug('[migration-002] SQLite table introspection failed:', (err2 as Error).message);
+      return false;
+    }
   }
   return false;
 }

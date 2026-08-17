@@ -29,7 +29,7 @@ export class MysqlAdapter implements DatabaseAdapter {
   constructor(private readonly config: MysqlConfig) {}
 
   async connect(): Promise<void> {
-    // @ts-ignore - mysql2 is optional dependency
+    // @ts-expect-error - mysql2 is optional dependency
     const mysql = await import('mysql2');
     this.pool = mysql.createPool({
       host: this.config.host,

@@ -7,7 +7,6 @@ import { JiraApiClient } from '../clients/jira-client.js';
 import { ConfluenceApiClient } from '../clients/confluence-client.js';
 import { RateLimiter } from '../clients/rate-limiter.js';
 import { AtlassianApiError } from '../clients/base-client.js';
-import { AtlassianErrorCode } from '../models/types.js';
 import type { HttpClientConfig } from '../models/types.js';
 
 function createE2EConfig(): HttpClientConfig {

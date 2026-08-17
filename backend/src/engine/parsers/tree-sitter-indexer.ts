@@ -3,7 +3,7 @@ import * as path from 'path';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { GrammarRegistry } from './grammar-registry.js';
 import { extractSymbols } from './signature-extractor.js';
-import type { ParseResult, IndexResult, FileDependency } from './types.js';
+import type { ParseResult, IndexResult } from './types.js';
 import { storeResults, storeRegexResults, extractAndStoreBodies } from './indexer/storage.js';
 import { DependencyResolver } from './dependency-resolver.js';
 

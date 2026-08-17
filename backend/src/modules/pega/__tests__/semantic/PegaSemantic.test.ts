@@ -2,8 +2,6 @@ import { describe, it, expect } from 'vitest';
 import { PegaSemanticAnalyzer } from '../../semantic/PegaSemanticAnalyzer.js';
 import { PegaRuleSimulator } from '../../semantic/PegaRuleSimulator.js';
 import { PegaClipboardContext } from '../../expression/PegaClipboardContext.js';
-import { PegaExpressionEvaluator } from '../../expression/PegaExpressionEvaluator.js';
-import type { SemanticAnalysis } from '../../semantic/types.js';
 import type { PegaClassDefinition } from '../../metamodel/PegaClassDefinition.js';
 
 describe('PegaSemanticAnalyzer', () => {

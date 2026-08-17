@@ -46,7 +46,8 @@ export class MemoryEngineCrud {
       entry.confidence ?? 1.0, entry.agent_name ?? null,
       entry.owner ?? null,
     ];
-    let id = 0;
+    let id: number;
+
     // SA4E-FIX: Use upsert when source is non-null to avoid duplicate key violation
     // on idx_ke_source_project_unique (source, project_id)
     const hasSource = entry.source != null && entry.source.length > 0;

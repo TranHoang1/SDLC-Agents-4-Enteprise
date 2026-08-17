@@ -4,7 +4,7 @@
  * Supports both TypeScript (.ts/.tsx) and JavaScript (.js/.jsx/.mjs/.cjs).
  */
 
-import type { ILanguageParser, ParseResult, ExtractedSymbol, ExtractedRelationship, ParseError, SyntaxNode } from '../types.js';
+import type { ILanguageParser, ParseResult, ExtractedRelationship, ParseError } from '../types.js';
 import { findNodes } from '../ast-utils.js';
 import { TSSymbolExtractor } from './ts-symbol-extractor.js';
 import { TSCallExtractor } from './ts-call-extractor.js';

@@ -3,7 +3,7 @@ import Database from 'better-sqlite3';
 import { SqliteDbAdapter } from '../../../memory/task-queue/SqliteDbAdapter.js';
 import { PegaSchemaInferrer, PegaSchemaKBService, PegaSchemaAutoLearner } from '../../inference/index.js';
 import { PegaMetaModelRegistry, PegaMetaModelCompiler } from '../../metamodel/index.js';
-import type { PegaClassDefinition, PegaPropertyDef, PegaChildDef } from '../../metamodel/PegaClassDefinition.js';
+import type { PegaClassDefinition } from '../../metamodel/PegaClassDefinition.js';
 import type { PegaRuleKbSchema } from '../../strategies/KbDrivenPegaParserStrategy.js';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -442,7 +442,7 @@ describe('PegaSchemaKBService', () => {
     });
 
     it('async onSchemaInferred callback is awaited', async () => {
-      let order: string[] = [];
+      const order: string[] = [];
 
       const cbInferrer = new PegaSchemaInferrer();
       cbInferrer.onSchemaInferred = async (_def, _json) => {
@@ -465,10 +465,8 @@ describe('PegaSchemaKBService', () => {
     });
 
     it('learnSchema works with async inferrer callback via service', async () => {
-      let callbackFired = false;
-
       const cbInferrer = new PegaSchemaInferrer();
-      cbInferrer.onSchemaInferred = () => { callbackFired = true; };
+      cbInferrer.onSchemaInferred = () => {};
 
       const freshRegistry = PegaMetaModelRegistry.getInstance();
       const freshKbService = new PegaSchemaKBService(adapter, freshRegistry, cbInferrer);

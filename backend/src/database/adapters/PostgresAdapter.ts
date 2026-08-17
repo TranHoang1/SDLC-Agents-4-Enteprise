@@ -69,12 +69,12 @@ export class PostgresAdapter implements DatabaseAdapter {
   }
 
   // Sync stubs — not usable for PG, use async variants
-  run(sql: string, params?: unknown[]): RunResult { throw new Error('Use runAsync'); }
-  get<T = unknown>(sql: string, params?: unknown[]): T | undefined { throw new Error('Use getAsync'); }
-  all<T = unknown>(sql: string, params?: unknown[]): T[] { throw new Error('Use allAsync'); }
-  exec(sql: string): void { throw new Error('Use execAsync'); }
-  transaction<T>(fn: () => T): T { throw new Error('Use transactionAsync'); }
-  prepare(sql: string): PreparedStatement { throw new Error('Use async methods'); }
+  run(_sql: string, _params?: unknown[]): RunResult { throw new Error('Use runAsync'); }
+  get<T = unknown>(_sql: string, _params?: unknown[]): T | undefined { throw new Error('Use getAsync'); }
+  all<T = unknown>(_sql: string, _params?: unknown[]): T[] { throw new Error('Use allAsync'); }
+  exec(_sql: string): void { throw new Error('Use execAsync'); }
+  transaction<T>(_fn: () => T): T { throw new Error('Use transactionAsync'); }
+  prepare(_sql: string): PreparedStatement { throw new Error('Use async methods'); }
 
   /**
    * Get the active query function — either the transaction client (from AsyncLocalStorage)
@@ -102,15 +102,9 @@ export class PostgresAdapter implements DatabaseAdapter {
         // PostgreSQL aborts tx on error, BUT "column does not exist" is a planning error
         // that does NOT actually abort the transaction in all PG versions.
         // If it does abort: the error propagates → transactionAsync() ROLLBACK is correct.
-        try {
-          const r = await queryFn(withReturning, params);
-          const insertedId = r.rows?.[0]?.id ?? 0;
-          return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
-        } catch (err: any) {
-          // Re-throw all errors — let transactionAsync() handle ROLLBACK.
-          // DO NOT attempt fallback inside aborted transaction.
-          throw err;
-        }
+        const r = await queryFn(withReturning, params);
+        const insertedId = r.rows?.[0]?.id ?? 0;
+        return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
       }
       // Outside transaction: attempt RETURNING id with dedicated client fallback.
       // BUG FIX: pool.query() uses implicit transaction — if RETURNING id fails,
@@ -119,7 +113,7 @@ export class PostgresAdapter implements DatabaseAdapter {
         const r = await queryFn(withReturning, params);
         const insertedId = r.rows?.[0]?.id ?? 0;
         return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
-      } catch (err) {
+      } catch {
         // Fallback: table may not have 'id' column — use dedicated client to avoid poisoned connection.
         const client = await this.pool.connect();
         try {

@@ -6,9 +6,6 @@
 
 import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../../database/dialect/DialectHelper.js';
-import pino from 'pino';
-
-const logger = pino({ name: 'outcome-service' });
 
 const VALID_OUTCOMES = ['success', 'fail', 'partial'] as const;
 type Outcome = typeof VALID_OUTCOMES[number];

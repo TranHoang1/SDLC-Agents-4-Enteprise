@@ -5,7 +5,6 @@ import { GenericCodeAnalyzer } from '../artifact-analyzer/analyzers/GenericCodeA
 import { StructureAnalyzer } from '../artifact-analyzer/analyzers/StructureAnalyzer.js';
 import { FallbackAnalyzer } from '../artifact-analyzer/analyzers/FallbackAnalyzer.js';
 import { ArtifactAnalyzerRegistry } from '../artifact-analyzer/ArtifactAnalyzerRegistry.js';
-import type { ArtifactAnalyzer, ArtifactAnalysis, ArtifactType } from '../artifact-analyzer/types.js';
 
 // ─── Fixtures ────────────────────────────────────────────────────────────
 
@@ -79,7 +78,6 @@ int main() {
 }`;
 
 const JSON_OBJECT = '{"name": "test", "value": 42, "nested": {"a": 1, "b": 2}}';
-const JSON_ARRAY = '[1, 2, 3, {"key": "val"}]';
 const XML_CONTENT = '<root><item id="1">value</item><item id="2">other</item></root>';
 const YAML_CONTENT = 'server:\n  port: 8080\n  host: localhost\n  debug: true';
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PegaSchemaInferrer, PegaFieldDocumentor } from '../../inference/index.js';
-import { PegaMetaModelRegistry, PegaMetaModelLoader, PegaMetaModelCompiler } from '../../metamodel/index.js';
+import { PegaMetaModelRegistry, PegaMetaModelCompiler } from '../../metamodel/index.js';
 import { MOCK_ACTIVITY_JSON, MOCK_DATA_TRANSFORM_JSON, MOCK_DECISION_TABLE_JSON, MOCK_OPERATOR_DATA_JSON } from '../fixtures/pega-samples.js';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -440,11 +440,9 @@ describe('PegaFieldDocumentor', () => {
 describe('Integration: Inference + Metamodel', () => {
   let inferrer: PegaSchemaInferrer;
   let registry: PegaMetaModelRegistry;
-  let loader: PegaMetaModelLoader;
 
   beforeEach(async () => {
     inferrer = new PegaSchemaInferrer();
-    loader = new PegaMetaModelLoader();
     registry = PegaMetaModelRegistry.getInstance();
     if (!registry.isKnownClass('@baseclass')) {
       await registry.initialize(schemasDir);

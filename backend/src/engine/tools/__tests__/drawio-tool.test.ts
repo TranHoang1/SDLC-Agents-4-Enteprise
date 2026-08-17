@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { handleDrawioLayout, DRAWIO_TOOL_DEFINITION, detectAllIssues, detectEdgeCrossings } from '../drawio-tool.js';
+import { handleDrawioLayout, DRAWIO_TOOL_DEFINITION, detectAllIssues } from '../drawio-tool.js';
 import { normalizeLayoutArgs } from '../drawio-apply.js';
 import { parseDrawio } from '../drawio-parser.js';
 import * as fs from 'fs';

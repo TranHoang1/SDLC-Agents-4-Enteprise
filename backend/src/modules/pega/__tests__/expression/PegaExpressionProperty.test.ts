@@ -9,7 +9,6 @@ import {
   NumberLiteralNode,
   StringLiteralNode,
   BooleanLiteralNode,
-  NullLiteralNode,
   BinaryOpNode,
   UnaryOpNode,
   FunctionCallNode,
@@ -27,7 +26,7 @@ describe('Lexer properties', () => {
 
   it('produces NUMBER tokens for numeric input with consistent parseFloat values', () => {
     fc.assert(fc.property(
-      fc.integer({ min: -999999, max: 999999 }).filter(n => n !== -0),
+      fc.integer({ min: -999999, max: 999999 }).filter(n => n !== 0),
       (n) => {
         const lexer = new PegaExpressionLexer(String(n));
         const tokens = lexer.tokenize();

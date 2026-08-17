@@ -140,7 +140,7 @@ async function finalizeJob(
   logger: Logger,
 ): Promise<void> {
   let totals = { totalRulesInDb: 0, totalKbEntriesInDb: 0, totalGraphNodesInDb: 0 };
-  let nextBatch: JobResult['nextBatch'] = [];
+  const nextBatch: JobResult['nextBatch'] = []; 
 
   try {
     totals = await queryPegaTotals(service, meta?.projectId || '');
@@ -149,7 +149,6 @@ async function finalizeJob(
   }
 
   // SA4E-94: computeNextBatch removed — enumeration is handled by extension
-  nextBatch = [];
 
   if (meta) await registerPegaProject(service, meta.projectId, ingestedRules);
 

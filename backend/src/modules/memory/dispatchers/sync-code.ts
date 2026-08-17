@@ -23,7 +23,8 @@ export async function handleSyncCode(engine: MemoryEngine, queryLayer: QueryLaye
   const projectCtx = a._projectContext as { userId?: string; projectId?: string } | undefined;
   const userId = (a.__userId as string) ?? projectCtx?.userId ?? null;
 
-  let symbols: any[] = [];
+  let symbols: any[];
+
   if (kind) {
     symbols = await queryLayer.findSymbols(projectId, '', kind, limit);
   } else {

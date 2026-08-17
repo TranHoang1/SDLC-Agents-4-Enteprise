@@ -47,18 +47,6 @@ const DECLARE_RULE_CLASSES = new Set([
   'Rule-Declare-DecisionTree',
 ]);
 
-/** pxObjClass → DeclareType mapping */
-const CLASS_TO_DECLARE_TYPE: Record<string, string> = {
-  'Rule-Declare-Expressions': 'Declare-Expression',
-  'Rule-Declare-OnChange': 'Declare-OnChange',
-  'Rule-Declare-Trigger': 'Declare-Trigger',
-  'Rule-Declare-Pages': 'Declare-Pages',
-  'Rule-Declare-Constraints': 'Declare-Constraints',
-  'Rule-Declare-Index': 'Declare-Index',
-  'Rule-Declare-DecisionTable': 'Declare-DecisionTable',
-  'Rule-Declare-DecisionTree': 'Declare-DecisionTree',
-};
-
 export class PegaDeclareParser implements IPegaRuleParserStrategy {
   private expressionParser = new PegaExpressionParser();
 
@@ -71,12 +59,11 @@ export class PegaDeclareParser implements IPegaRuleParserStrategy {
     const className = (json.pyClassName as string) || '@baseclass';
     const name = (json.pyRuleName as string) || (json.pyLabel as string) || 'UnnamedDeclare';
     const fqn = `${pxObjClass}:${className}:${name}`;
-    const declareType = (CLASS_TO_DECLARE_TYPE[pxObjClass] || pxObjClass) as any;
 
     const dependencies: UnresolvedDependency[] = [];
 
     // Build a logic summary for the symbol
-    let logicSummary = '';
+    let logicSummary: string;
 
     switch (pxObjClass) {
       case 'Rule-Declare-Expressions': {

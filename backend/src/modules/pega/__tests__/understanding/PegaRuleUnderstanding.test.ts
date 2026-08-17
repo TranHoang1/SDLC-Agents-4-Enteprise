@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PegaRuleUnderstandingService } from '../../understanding/PegaRuleUnderstandingService.js';
-import type { PegaRuleUnderstanding } from '../../understanding/PegaRuleUnderstandingService.js';
 import { PegaSchemaInferrer } from '../../inference/PegaSchemaInferrer.js';
 import { PegaFieldDocumentor } from '../../inference/PegaFieldDocumentor.js';
 import { PegaSemanticAnalyzer } from '../../semantic/PegaSemanticAnalyzer.js';

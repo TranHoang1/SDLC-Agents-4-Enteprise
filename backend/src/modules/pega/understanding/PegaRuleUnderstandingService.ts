@@ -74,8 +74,8 @@ export class PegaRuleUnderstandingService {
     let simulation: PegaRuleUnderstanding['simulation'] = null;
     if (options?.simulate) {
       const simInput = options.simulateInput || null;
-      let simResult: SimulationResult | null = null;
-      let simTrace: SimulationTrace[] = [];
+      let simResult: SimulationResult | null;
+      let simTrace: SimulationTrace[];
 
       try {
         simResult = await this.simulator.simulate({

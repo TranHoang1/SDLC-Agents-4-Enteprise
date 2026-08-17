@@ -147,7 +147,7 @@ const PYTHON_PATTERNS: PatternDef[] = [
 ];
 
 const JAVA_PATTERNS: PatternDef[] = [
-  { regex: /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:[\w<>\[\]]+\s+)(\w+)\s*\(/m, kind: 'function', nameGroup: 1 },
+  { regex: /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:[\w<>]+(?:\s*\[\])*\s+)(\w+)\s*\(/m, kind: 'function', nameGroup: 1 },
   { regex: /^\s*(?:(?:public|private|protected)\s+)?(?:abstract\s+)?class\s+(\w+)/m, kind: 'class', nameGroup: 1 },
   { regex: /^\s*(?:(?:public|private|protected)\s+)?interface\s+(\w+)/m, kind: 'interface', nameGroup: 1 },
   { regex: /^\s*(?:(?:public|private|protected)\s+)?enum\s+(\w+)/m, kind: 'enum', nameGroup: 1 },

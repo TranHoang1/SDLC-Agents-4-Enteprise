@@ -6,7 +6,6 @@ import {
   StringLiteralNode,
   NumberLiteralNode,
   BooleanLiteralNode,
-  NullLiteralNode,
   BinaryOpNode,
   UnaryOpNode,
 } from './PegaExpressionAst.js';

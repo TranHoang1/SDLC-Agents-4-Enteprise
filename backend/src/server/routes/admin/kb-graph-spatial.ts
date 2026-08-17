@@ -73,7 +73,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
     const camY = parseFloat(c.req.query('y') || '0');
     const camZ = parseFloat(c.req.query('z') || '0');
     const zoom = parseFloat(c.req.query('zoom') || '500');
-    const graphService = (globalThis as Record<string, unknown>).__sqliteGraphService as { ready?: boolean; spatialQuery?: Function } | undefined;
+    const graphService = (globalThis as Record<string, unknown>).__sqliteGraphService as { ready?: boolean; spatialQuery?: (...args: unknown[]) => Promise<unknown> } | undefined;
     if (graphService && graphService.ready) {
       try { return c.json(await graphService.spatialQuery!({ camX, camY, camZ, zoom }, ctx.getRequestProjectId(c))); }
       catch (err: any) { ctx.logger.warn({ error: err.message }, 'SQLite graph spatial query failed, using inline fallback'); }

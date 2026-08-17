@@ -1,4 +1,4 @@
-import type { TaintSource, TaintSink, TaintPath } from './taint-types.js';
+import type { TaintSource, TaintSink } from './taint-types.js';
 import type { Severity } from './injection-types.js';
 
 export type TrustTier = 'T1' | 'T2' | 'T3';

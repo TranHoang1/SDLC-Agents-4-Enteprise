@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import { execSync } from 'child_process';
 
 let _cachedDrawioCliPath: string | null = null;
@@ -91,7 +90,10 @@ export function hasUpstreamServer(orchestrationEngine: any, serverName: string):
     return status.servers.some((s: any) =>
       s.name?.toLowerCase().includes(serverName.toLowerCase()) && s.state === 'ACTIVE'
     );
-  } catch (err) { return false; }
+  } catch (err) {
+    console.debug('[drawio-renderers] orchestration status check failed, assuming no upstream server:', (err as Error).message);
+    return false;
+  }
 }
 
 export function sleep(ms: number): Promise<void> {

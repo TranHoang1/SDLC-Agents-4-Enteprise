@@ -7,7 +7,7 @@ import type { AdminContext } from './context.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export function createStaticRoutes(ctx: AdminContext): Hono {
+export function createStaticRoutes(_ctx: AdminContext): Hono {
   const app = new Hono();
   const spaPath = path.resolve(__dirname, '../../../viewer/admin/index.html');
 

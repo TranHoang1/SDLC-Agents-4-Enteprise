@@ -300,7 +300,6 @@ describe('PegaMetaModelCompiler', () => {
 
     it('each compiled strategy supports its own pxObjClass', () => {
       const strategies = compiler.compileAll();
-      const knownClasses = metaRegistry.getKnownClasses();
 
       // Check some specific classes
       for (const cls of ['Rule-Obj-Activity', 'Rule-Connect-REST', '@baseclass', 'Rule-', 'Rule-Obj-Model']) {

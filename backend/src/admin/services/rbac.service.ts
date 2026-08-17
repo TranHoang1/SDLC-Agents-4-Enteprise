@@ -25,7 +25,11 @@ export class RBACService {
       const permissionsWithRoles = perms.map((p: any) => {
         let roles: any[] = [];
         if (hasRoles) {
-          try { roles = this.db.prepare('SELECT role_id, role_name, role_data FROM roles WHERE access_group_id = ? AND permission_id = ?').all(g.access_group_id, p.permission_id); } catch (err) { /* roles table query failed — table may not exist */ }
+          try {
+            roles = this.db.prepare('SELECT role_id, role_name, role_data FROM roles WHERE access_group_id = ? AND permission_id = ?').all(g.access_group_id, p.permission_id);
+          } catch (err) {
+            console.debug('[rbac] roles table query failed — table may not exist:', (err as Error).message);
+          }
         }
         return { permissionId: p.permission_id, roleData: JSON.parse(p.role_data || '{}'), roles: roles.map((r: any) => ({ roleId: r.role_id, roleName: r.role_name, roleData: JSON.parse(r.role_data || '{}') })) };
       });

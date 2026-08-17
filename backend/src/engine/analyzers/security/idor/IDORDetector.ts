@@ -109,7 +109,7 @@ export class IDORDetector {
   }
 
   /** Check if there's an authorization check for the given parameter. */
-  private hasAuthorizationCheck(bodyText: string, param: string): boolean {
+  private hasAuthorizationCheck(bodyText: string, _param: string): boolean {
     for (const pattern of AUTHZ_PATTERNS) {
       if (bodyText.includes(pattern)) return true;
     }

@@ -5,7 +5,7 @@
 
 import { Hono } from 'hono';
 import {
-  getKbEntries, getKbEntryById, recordAudit,
+  getKbEntries, recordAudit,
   checkPromotionCooldown, setPromotionCooldown,
 } from '../../../admin/admin-db.js';
 import { containsHtml, sanitizeKbEntry } from '../../../admin/sanitize.js';

@@ -1,7 +1,7 @@
 // KSA-286: RBAC Middleware — Permission enforcement on every /api/admin/* request
 
 import { Request, Response, NextFunction } from 'express';
-import { PermissionId, AdminErrorCode, GroupPermission } from '../types/admin.types.js';
+import { PermissionId, GroupPermission } from '../types/admin.types.js';
 
 // Route → Permission mapping
 const ROUTE_PERMISSIONS: Record<string, PermissionId> = {

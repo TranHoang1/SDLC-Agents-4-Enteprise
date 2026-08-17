@@ -51,7 +51,7 @@ export class DependencyResolver {
     return deps;
   }
 
-  private resolveJava(source: string, filePath: string, workspace: string): FileDependency[] {
+  private resolveJava(source: string, _filePath: string, _workspace: string): FileDependency[] {
     const deps: FileDependency[] = [];
     const importRe = /^import\s+(?:static\s+)?([a-zA-Z0-9_.*]+)\s*;/gm;
     const seen = new Set<string>();
@@ -71,7 +71,7 @@ export class DependencyResolver {
     return deps;
   }
 
-  private resolvePython(source: string, filePath: string, workspace: string): FileDependency[] {
+  private resolvePython(source: string, filePath: string, _workspace: string): FileDependency[] {
     const deps: FileDependency[] = [];
     const importRe = /^(?:from\s+([a-zA-Z0-9_.]+)\s+)?import\s+([a-zA-Z0-9_* ,]+)/gm;
     const seen = new Set<string>();

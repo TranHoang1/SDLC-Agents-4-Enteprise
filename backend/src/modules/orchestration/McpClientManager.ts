@@ -10,7 +10,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import type { ToolDefinition } from '../../types/tool.js';
 import type { ServerConfig } from './McpConfigService.js';
 import type { HealthCheckConfig, ServerStatusEntry, ServerStateChangeCallback, Unsubscribe } from './types/health.js';
-import { DEFAULT_HEALTH_CONFIG, PRODUCTION_HEALTH_CONFIG } from './types/health.js';
+import { PRODUCTION_HEALTH_CONFIG } from './types/health.js';
 import { ConnectionStateTracker } from './health/ConnectionStateTracker.js';
 import { HealthMonitor } from './health/HealthMonitor.js';
 import { ReconnectManager } from './health/ReconnectManager.js';

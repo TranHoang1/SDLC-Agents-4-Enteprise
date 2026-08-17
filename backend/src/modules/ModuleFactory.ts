@@ -13,7 +13,6 @@ import { OrchestrationModule } from './orchestration/OrchestrationModule.js';
 import { AnalyticsModule } from './analytics/AnalyticsModule.js';
 import { KBGraphModule } from './kb-graph/KBGraphModule.js';
 import { UtilityModule } from './utility/UtilityModule.js';
-import { WebModule } from './web/WebModule.js';
 import { SecurityModule } from './security/SecurityModule.js';
 import { KnowledgeModule } from '../knowledge/KnowledgeModule.js';
 import { HttpServer } from '../server/HttpServer.js';

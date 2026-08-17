@@ -86,16 +86,6 @@ async function deriveDisplayName(workspaceRoot: string): Promise<string> {
   return path.basename(workspaceRoot) || 'Untitled Project';
 }
 
-/** Phase: trigger a scoped background full re-index. Returns whether an indexer ran. */
-function triggerIndexPhase(registry: ModuleRegistry, scope: IndexScope, logger: Logger): boolean {
-  const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
-  const indexer = codeIntel?.getIndexer();
-  if (!indexer) return false;
-  indexer.runFullIndex({ projectId: scope.projectId, workspace: scope.workspace })
-    .catch((err: unknown) => logger.error({ err }, 'Background full re-index failed'));
-  return true;
-}
-
 /** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
 /** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
 async function ensureProjectKbEntry(registry: ModuleRegistry, scope: IndexScope, written: number, logger: Logger): Promise<void> {

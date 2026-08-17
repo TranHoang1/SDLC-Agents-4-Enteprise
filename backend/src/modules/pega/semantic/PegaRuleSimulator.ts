@@ -3,7 +3,6 @@ import { PegaClipboardContext } from '../expression/PegaClipboardContext.js';
 import { PegaWorkflowEngine } from '../workflow/PegaWorkflowEngine.js';
 import { PegaFlowGraph, type ShapeNode, type Connector } from '../workflow/PegaFlowGraph.js';
 import { PegaDecisionTableEvaluator } from '../decision/PegaDecisionTableEvaluator.js';
-import { parseDecisionCondition } from '../decision/PegaDecisionConditionParser.js';
 import type { PegaDecisionTableRow } from '../decision/PegaEvaluationResult.js';
 
 export interface SimulationOptions {
@@ -180,7 +179,7 @@ export class PegaRuleSimulator {
     }
 
     trace.push({
-      step: stepCount++,
+      step: stepCount,
       action: 'complete',
       detail: `Activity "${name}" simulation complete (${steps.length} steps processed)`,
       timestamp: Date.now(),
@@ -270,7 +269,7 @@ export class PegaRuleSimulator {
     }
 
     trace.push({
-      step: stepCount++,
+      step: stepCount,
       action: 'complete',
       detail: `Data transform "${name}" simulation complete`,
       timestamp: Date.now(),
@@ -287,7 +286,7 @@ export class PegaRuleSimulator {
   simulateFlow(
     json: Record<string, unknown>,
     context: PegaClipboardContext,
-    options?: SimulationOptions,
+    _options?: SimulationOptions,
   ): SimulationResult {
     const startTime = Date.now();
     const trace: SimulationTrace[] = [];
@@ -341,7 +340,7 @@ export class PegaRuleSimulator {
     }
 
     trace.push({
-      step: stepCount++,
+      step: stepCount,
       action: wfResult.completed ? 'complete' : 'incomplete',
       detail: wfResult.completed
         ? `Flow "${name}" reached END after ${wfResult.history.length} shape(s)`
@@ -360,7 +359,7 @@ export class PegaRuleSimulator {
   simulateDecisionTable(
     json: Record<string, unknown>,
     context: PegaClipboardContext,
-    options?: SimulationOptions,
+    _options?: SimulationOptions,
   ): SimulationResult {
     const startTime = Date.now();
     const trace: SimulationTrace[] = [];
@@ -423,7 +422,7 @@ export class PegaRuleSimulator {
     } catch (err) {
       errors.push(`Decision table evaluation error: ${err}`);
       trace.push({
-        step: stepCount++,
+        step: stepCount,
         action: 'error',
         detail: `Decision table evaluation failed: ${err}`,
         timestamp: Date.now(),

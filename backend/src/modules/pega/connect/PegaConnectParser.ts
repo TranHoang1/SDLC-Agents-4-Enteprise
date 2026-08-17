@@ -1,6 +1,6 @@
 import type { IPegaRuleParserStrategy, ParseResult } from '../strategies/IPegaRuleParserStrategy.js';
 import type { UnresolvedDependency } from '../models.js';
-import type { PegaConnectRule, PegaConnectHeader, PegaServiceRule, ConnectMethod, ConnectType, AuthType } from './PegaConnectTypes.js';
+import type { PegaConnectRule, PegaConnectHeader, PegaServiceRule, ConnectMethod, AuthType } from './PegaConnectTypes.js';
 
 const CONNECT_CLASSES = new Set([
   'Rule-Connect-REST',

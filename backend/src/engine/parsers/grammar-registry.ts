@@ -5,7 +5,6 @@
  */
 
 import { Parser, Language } from 'web-tree-sitter';
-import type { Node } from 'web-tree-sitter';
 import * as path from 'path';
 import * as fs from 'fs';
 import pino from 'pino';

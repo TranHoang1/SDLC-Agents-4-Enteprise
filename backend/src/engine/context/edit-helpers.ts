@@ -60,6 +60,7 @@ export function readSymbolSource(symbol: ResolvedSymbolFull, workspace: string):
     const end = symbol.endLine || start + 50;
     return lines.slice(start, end).join('\n');
   } catch (err) {
+    console.debug('[edit-helpers] Failed to read symbol source, returning empty context:', (err as Error).message);
     return '';
   }
 }
@@ -92,6 +93,7 @@ export function getLineContext(file: string, line: number, surroundingLines: num
     const end = Math.min(lines.length, line + surroundingLines);
     return lines.slice(start, end).join('\n');
   } catch (err) {
+    console.debug('[edit-helpers] Failed to read line context, returning empty:', (err as Error).message);
     return '';
   }
 }

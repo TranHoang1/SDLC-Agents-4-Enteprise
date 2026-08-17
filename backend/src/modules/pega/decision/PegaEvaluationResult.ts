@@ -1,5 +1,3 @@
-import type { PegValue } from '../expression/PegaExpressionAst.js';
-
 export type DecisionOperator =
   | 'EQUALS'
   | 'NOT_EQUALS'

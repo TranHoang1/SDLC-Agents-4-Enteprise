@@ -13,6 +13,7 @@ async function columnExists(db: DatabaseAdapter, table: string, column: string):
     );
     if (pg.length > 0) return true;
   } catch (err) {
+    console.debug('[migration-001] PG introspection failed, falling back to SQLite:', (err as Error).message);
     // SQLite fallback
     try {
       const lite = await db.allAsync<{ name: string }>(
@@ -20,7 +21,10 @@ async function columnExists(db: DatabaseAdapter, table: string, column: string):
         [column],
       );
       return lite.length > 0;
-    } catch (err) { return false; }
+    } catch (err2) {
+      console.debug('[migration-001] SQLite introspection failed:', (err2 as Error).message);
+      return false;
+    }
   }
   return false;
 }

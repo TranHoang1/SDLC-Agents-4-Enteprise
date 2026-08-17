@@ -1,21 +1,5 @@
-import type { PegaRuleAst, AstNode } from '../PegaRuleAst.js';
 import type { PegaClassDefinition } from '../metamodel/PegaClassDefinition.js';
 import type { SemanticAnalysis, SideEffect, SemanticDep, ConditionSummary, DataFlowEntry } from './types.js';
-
-const SIDE_EFFECT_API_CALL = new Set([
-  'Call', 'Connect-REST', 'Connect-SOAP', 'Connect-SQL', 'Connect-File',
-  'Rule-Connect-REST', 'Rule-Connect-SOAP', 'Rule-Connect-SQL',
-]);
-
-const SIDE_EFFECT_DB_WRITE = new Set([
-  'Property-Set', 'Obj-Save', 'Obj-Delete', 'Commit', 'Save',
-  'Obj-Open-And-Update',
-]);
-
-const SIDE_EFFECT_PAGE_UPDATE = new Set([
-  'Property-Set', 'Property-Copy', 'Page-New', 'Page-Copy',
-  'Obj-Open', 'Obj-Open-By-Handle',
-]);
 
 export class PegaSemanticAnalyzer {
   analyze(json: Record<string, unknown>): SemanticAnalysis {

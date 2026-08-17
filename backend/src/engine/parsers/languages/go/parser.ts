@@ -1,7 +1,6 @@
-import type { Parser as ParserType } from 'web-tree-sitter';
 import type { ILanguageParser, ParseResult, ExtractedSymbol, ExtractedRelationship, ParseError, SyntaxNode } from '../../types.js';
 import { findNodes } from '../../ast-utils.js';
-import { extractDeclarations, extractGoCalls } from './members.js';
+import { extractDeclarations } from './members.js';
 
 function isGeneratedFile(source: string, filePath: string): boolean {
   if (filePath.endsWith('_generated.go')) return true;

@@ -4,7 +4,7 @@
  * Wraps execution with a timeout boundary (default 60s) and structured error handling.
  */
 
-import type { ToolHandler, ToolDefinition, ToolResult, ToolCallRequest } from '../types/tool.js';
+import type { ToolDefinition, ToolResult, ToolCallRequest } from '../types/tool.js';
 import type { ModuleRegistry } from '../modules/ModuleRegistry.js';
 import type { Logger } from 'pino';
 

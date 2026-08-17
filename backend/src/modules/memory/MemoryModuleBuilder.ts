@@ -32,13 +32,12 @@ import { migrate005UniqueSourceProject } from './migrations/005-unique-source-pr
 import { migrate006PendingTasksProjectId } from './migrations/006-pending-tasks-project-id.js';
 import { ScopePromotionService } from './promotion/index.js';
 import { TierConsolidationService } from './consolidation/service.js';
-import { startScheduler, stopScheduler } from './evolution/Scheduler.js';
-import type { SchedulerHandles } from './evolution/Scheduler.js';
+import { startScheduler } from './evolution/Scheduler.js';
 import { TaskWorker } from './task-queue/TaskWorker.js';
 import type { TaskWorkerConfig } from './task-queue/TaskWorkerConfig.js';
 import { resolveEngineAdapter } from '../../database/factory/resolveEngineAdapter.js';
 import { initLLMInBackground } from './llm/LLMInitializer.js';
-import type { MemoryModule, MemoryModuleDeps } from './MemoryModule.js';
+import type { MemoryModule } from './MemoryModule.js';
 
 const PROMOTION_SCAN_INTERVAL_MS = 60 * 60 * 1000;
 const CONSOLIDATION_INTERVAL_MS = 30 * 60 * 1000;

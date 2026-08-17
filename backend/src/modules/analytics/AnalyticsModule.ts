@@ -9,7 +9,6 @@ import type { ToolHandler, ToolDefinition } from '../../types/tool.js';
 import type { Logger } from 'pino';
 import { getAdminAdapter } from '../../admin/db/core.js';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
-import { withErrorHandling, withTextResult, compose } from '../../tool-router/ToolHandlerDecorators.js';
 
 /** Summary row returned by analytics_summary tool. */
 interface AnalyticsSummary {

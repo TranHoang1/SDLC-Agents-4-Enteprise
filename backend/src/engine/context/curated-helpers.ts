@@ -2,8 +2,7 @@ import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js
 import { SymbolResolver } from '../graph/symbol-resolver.js';
 import { GraphTraverser } from '../graph/traverser.js';
 import { QueryLayer } from '../query/query-layer.js';
-import { QueryAnalysis } from './types.js';
-import { BudgetAllocator, AllocatedResult } from './budget-allocator.js';
+import { AllocatedResult } from './budget-allocator.js';
 import { ContextSection, ContextItem } from './types.js';
 
 export async function searchCode(
@@ -36,6 +35,7 @@ export async function searchCode(
 
     return { source: 'code', results: combined.slice(0, 20) };
   } catch (err) {
+    console.debug('[curated-helpers] Code search failed, returning empty results:', (err as Error).message);
     return { source: 'code', results: [] };
   }
 }
@@ -72,6 +72,7 @@ export async function searchMemory(
       }))
     };
   } catch (err) {
+    console.debug('[curated-helpers] Memory search failed, returning empty results:', (err as Error).message);
     return { source: 'memory', results: [] };
   }
 }

@@ -2,7 +2,7 @@
  * Unit Tests — ClassifyService (SA4E-38)
  * Covers: buildPrompt, parseResponse, classify, isAvailable.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { ClassifyService } from '../llm/classify-service.js';
 
 function createMockLLMService(response: string, available = true) {

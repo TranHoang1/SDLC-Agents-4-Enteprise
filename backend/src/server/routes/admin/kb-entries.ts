@@ -5,7 +5,7 @@
 
 import { Hono } from 'hono';
 import {
-  getKbEntries, getKbEntryCount, getKbEntryById,
+  getKbEntries, getKbEntryById,
   searchKbEntries, recordQueryLog,
 } from '../../../admin/admin-db.js';
 import type { AdminContext } from './context.js';
@@ -318,7 +318,7 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
           bodyCode = Buffer.from(bodyRow.embedding).toString('utf-8');
         }
       }
-    } catch (err) { /* body_embeddings table may not exist */ }
+    } catch (err) { ctx.logger.debug({ symbolId, err }, 'body_embeddings table may not exist — skipping body code'); }
     const isPega = Boolean(detail.language && detail.language.toLowerCase() === 'pega');
     const codeLabel = isPega ? '**Rule Content:**' : '**Code:**';
     const codeFence = isPega ? 'text' : (detail.language?.toLowerCase() || 'typescript');
@@ -347,7 +347,7 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
       },
     };
   } catch (err) {
-    ctx.logger.warn({ symbolId }, 'Failed to fetch code symbol detail');
+    ctx.logger.warn({ symbolId, err }, 'Failed to fetch code symbol detail');
     return null;
   }
 }

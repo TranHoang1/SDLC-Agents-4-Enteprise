@@ -42,12 +42,12 @@ export class PegaWorkerPool {
       const worker = new Worker(workerPath);
       const pw: PoolWorker = { worker, busy: false, id };
 
-      worker.on('message', (msg) => {
+      worker.on('message', (_msg) => {
         pw.busy = false;
         this.processQueue();
       });
 
-      worker.on('error', (err) => {
+      worker.on('error', (_err) => {
         pw.busy = false;
         this.processQueue();
       });

@@ -2,7 +2,7 @@
  * KSA-165: Pattern Matcher — Base class for injection pattern matching.
  */
 
-import type { TaintPath, InjectionPattern, Finding, Confidence, TaintStep } from '../types/index.js';
+import type { TaintPath, InjectionPattern, Finding, Confidence } from '../types/index.js';
 
 export interface MatchContext {
   filePath: string;
@@ -74,7 +74,7 @@ export abstract class PatternMatcher {
   }
 
   /** Compute confidence based on path characteristics. */
-  protected computeConfidence(path: TaintPath, pattern: InjectionPattern): Confidence {
+  protected computeConfidence(path: TaintPath, _pattern: InjectionPattern): Confidence {
     // Short direct paths = high confidence
     if (path.length <= 3) return 'High';
     // Medium paths

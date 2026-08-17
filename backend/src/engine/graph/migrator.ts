@@ -162,7 +162,7 @@ async function addEnhancedSymbolColumns(adapter: DatabaseAdapter): Promise<void>
         await adapter.execAsync(`ALTER TABLE symbols ADD COLUMN ${col.name} ${col.type}`);
         added++;
       } catch (err) {
-        // Column may already exist
+        logger.debug({ err, col: col.name }, '[migrator] ALTER TABLE failed (column may already exist)');
       }
     }
   }
@@ -174,7 +174,7 @@ async function addEnhancedSymbolColumns(adapter: DatabaseAdapter): Promise<void>
       await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_sym_exported ON symbols(is_exported)');
       await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_sym_file_kind ON symbols(file_id, kind)');
     } catch (err) {
-      // Indexes may already exist
+      logger.debug({ err }, '[migrator] CREATE INDEX failed (index may already exist)');
     }
   }
 }
@@ -190,7 +190,7 @@ async function addEnrichmentColumns(adapter: DatabaseAdapter): Promise<void> {
         await adapter.execAsync(`ALTER TABLE symbols ADD COLUMN ${col.name} ${col.type}`);
         added++;
       } catch (err) {
-        // Column may already exist — idempotent
+        logger.debug({ err, col: col.name }, '[migrator] ALTER TABLE failed (column may already exist)');
       }
     }
   }
@@ -204,7 +204,7 @@ async function addEnrichmentColumns(adapter: DatabaseAdapter): Promise<void> {
     await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_symbols_enrichment_status ON symbols(enrichment_status)');
     await adapter.execAsync('CREATE INDEX IF NOT EXISTS idx_symbols_project_enrichment ON symbols(project_id, enrichment_status)');
   } catch (err) {
-    // Indexes may already exist
+    logger.debug({ err }, '[migrator] CREATE INDEX failed (index may already exist)');
   }
 }
 
@@ -222,7 +222,7 @@ async function getExistingColumns(adapter: DatabaseAdapter, table: string): Prom
       `SELECT name FROM pragma_table_info('${table}')`,
     );
     return new Set(sqlite.map(r => r.name));
-  } catch (err) { return new Set(); }
+  } catch (err) { logger.debug({ err, table }, '[migrator] SQLite column introspection failed'); return new Set(); }
 }
 
 /** Check if graph migrations have been applied. */
@@ -240,5 +240,5 @@ export async function isGraphSchemaReady(adapter: DatabaseAdapter): Promise<bool
       "SELECT name FROM sqlite_master WHERE type='table' AND name='relationships'",
     );
     return !!lite;
-  } catch (err) { return false; }
+  } catch (err) { logger.debug({ err }, '[migrator] SQLite schema introspection failed'); return false; }
 }

@@ -141,7 +141,8 @@ export class McpConfigService {
   }
 
   private cleanConfig(config: ServerConfig): ServerConfig {
-    const { name: _, ...rest } = config;
+    const rest = { ...config };
+    delete rest.name;
     return rest;
   }
 }

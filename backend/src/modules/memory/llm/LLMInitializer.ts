@@ -76,7 +76,7 @@ async function autoDetectModel(baseUrl: string): Promise<string> {
   } catch (err: any) {
     clearTimeout(timeout);
     if (err.message?.includes('LLM_MODEL')) throw err;
-    throw new Error(`LLM_MODEL not configured and cannot auto-detect from ${modelsUrl}: ${err.message}`);
+    throw new Error(`LLM_MODEL not configured and cannot auto-detect from ${modelsUrl}: ${err.message}`, { cause: err });
   }
 }
 

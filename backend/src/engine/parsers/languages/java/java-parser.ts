@@ -1,4 +1,3 @@
-import type { Parser as ParserType } from 'web-tree-sitter';
 import type {
   ILanguageParser, ParseResult, ExtractedSymbol,
   ExtractedRelationship, ParseError,

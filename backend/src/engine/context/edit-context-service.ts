@@ -11,7 +11,6 @@ import { TokenBudgetManager } from './token-budget-manager.js';
 import { GitService } from './git-service.js';
 import { EditContextParams, EditContextResult } from './types.js';
 import {
-  ResolvedSymbolFull,
   resolveSymbolInput,
   readSymbolSource,
   getSignature,
@@ -54,7 +53,6 @@ export class EditContextService {
       symbol: symbolInput,
       include_callers = true,
       include_tests = true,
-      include_memories = false,
       include_git = true,
       token_budget = 4000,
       caller_depth = 1

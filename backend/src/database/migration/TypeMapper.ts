@@ -150,6 +150,7 @@ export class TypeMapper {
       );
       return rows.map(r => r.t.toLowerCase());
     } catch (err) {
+      console.debug('[typemapper] Column type sampling failed:', (err as Error).message);
       return [];
     }
   }
@@ -180,6 +181,7 @@ export class TypeMapper {
       if (samples.length === 0) return false;
       return samples.every(s => ISO_DATE_PATTERN.test(s.v));
     } catch (err) {
+      console.debug('[typemapper] Datetime detection failed:', (err as Error).message);
       return false;
     }
   }
@@ -193,6 +195,7 @@ export class TypeMapper {
       );
       return row?.sql?.toUpperCase().includes('AUTOINCREMENT') ?? false;
     } catch (err) {
+      console.debug('[typemapper] AUTOINCREMENT detection failed:', (err as Error).message);
       return false;
     }
   }

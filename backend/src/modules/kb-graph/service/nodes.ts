@@ -85,7 +85,7 @@ export function rowToNode(row: any): GraphNode {
  * SA4E-53: async for PostgreSQL compatibility.
  * @returns GraphNode or null if not found
  */
-export async function getNode(entryId: string, db: DatabaseAdapter, logger: Logger): Promise<GraphNode | null> {
+export async function getNode(entryId: string, db: DatabaseAdapter, _logger: Logger): Promise<GraphNode | null> {
   const row = await db.getAsync<any>('SELECT * FROM graph_nodes WHERE entry_id = ?', [entryId]);
   if (!row) return null;
   return rowToNode(row);
