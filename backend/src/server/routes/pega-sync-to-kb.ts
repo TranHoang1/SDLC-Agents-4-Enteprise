@@ -1,7 +1,7 @@
 /**
  * SA4E-158 — POST /api/v1/pega/sync-to-kb
- * Triggers Phase 2: sync all indexed-but-not-synced Pega rules to KB + graph + enrichment.
- * LLM enrichment runs INLINE (not background) to ensure user sees results immediately.
+ * Triggers Phase 2: re-project Pega code graph nodes for a project.
+ * SA4E-171: rules already live in symbols (indexed by Phase 1) — no KB writes.
  */
 import { Hono } from 'hono';
 import type { Logger } from 'pino';
@@ -67,20 +67,13 @@ export function createPegaSyncToKbRoutes(registry: ModuleRegistry, logger: Logge
         });
       }
 
-      // Check LLM availability BEFORE syncing
-      const llmReady = isLlmAvailable();
-
-      logger.info({ projectId: body.projectId, llmReady }, '[pega-sync-to-kb] Starting KB sync');
+      logger.info({ projectId: body.projectId }, '[pega-sync-to-kb] Starting graph sync');
       const result = await service.syncIndexedRulesToKb(body.projectId);
 
-      const llmStatus = llmReady
-        ? 'LLM enrichment tasks queued — TaskWorker will process'
-        : '⚠️ LLM NOT AVAILABLE — enrichment tasks created but will NOT be processed. Check LMStudio connection.';
+      logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors },
+        '[pega-sync-to-kb] Graph sync complete');
 
-      logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors, llmReady },
-        '[pega-sync-to-kb] KB sync complete');
-
-      return c.json({ data: { ...result, llmStatus, llmReady }, error: null });
+      return c.json({ data: { ...result }, error: null });
     } catch (err: any) {
       logger.error({ err }, '[pega-sync-to-kb] Sync failed');
       return c.json({

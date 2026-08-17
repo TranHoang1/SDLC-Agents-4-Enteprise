@@ -71,98 +71,20 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     if (user instanceof Response) return user;
     const permCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
     if (permCheck instanceof Response) return permCheck;
-    const entryId = c.req.param('id');
+    let entryId = c.req.param('id');
+
+    // SA4E-171: legacy "pega:FQN" graph node ids → resolve to Pega symbol (code:{symbolId})
+    if (entryId.startsWith('pega:')) {
+      const resolved = await resolvePegaSymbolId(ctx, entryId.replace('pega:', ''));
+      if (!resolved) return c.json({ error: 'Pega rule not found' }, 404);
+      entryId = `code:${resolved}`;
+    }
 
     if (entryId.startsWith('code:') || entryId.startsWith('sym-')) {
       const symbolId = entryId.startsWith('code:') ? entryId.replace('code:', '') : entryId.replace('sym-', '');
       const detail = await getCodeSymbolDetail(symbolId, ctx);
       if (detail) return c.json(detail);
       return c.json({ error: 'Code symbol not found' }, 404);
-    }
-
-    // Pega graph nodes: entry_id = "pega:FQN" → lookup KB entry by source = FQN
-    if (entryId.startsWith('pega:')) {
-      const fqn = entryId.replace('pega:', '');
-      const { getIndexAdapter } = await import('../../../admin/db/core.js');
-      const adapter = getIndexAdapter();
-      // Get the main rule entry
-      const entry = await adapter.getAsync<any>(
-        "SELECT * FROM knowledge_entries WHERE source = ? AND (type = 'PEGA_RULE' OR type = 'PEGA_DATA') LIMIT 1",
-        [fqn],
-      );
-      if (!entry) return c.json({ error: 'Pega rule not found' }, 404);
-      // Parse rule JSON to extract meaningful info
-      let ruleInfo = '';
-      try {
-        const ruleJson = JSON.parse(entry.content);
-        const label = ruleJson.pyLabel || ruleJson.pyDescription || '';
-        const memo = ruleJson.pyDeleteMemo || ruleJson.pyMemo || '';
-        const description = ruleJson.pyDescription || ruleJson.pyDeleteMemo || ruleJson.pyMemo || '';
-        const className = ruleJson.pyClassName || '';
-        const ruleType = ruleJson.pxObjClass || '';
-        const parts: string[] = [];
-        if (label) parts.push(`**${label}**`);
-        if (description) parts.push(`> ${description}`);
-        parts.push(`| Field | Value |\n|---|---|\n| Class | ${className} |\n| Rule Type | ${ruleType} |`);
-        // Extract Steps for Activity rules
-        const steps = ruleJson.steps || ruleJson.pySteps || [];
-        if (Array.isArray(steps) && steps.length > 0) {
-          parts.push('\n**Steps:**');
-          steps.forEach((step: any, i: number) => {
-            // Real Pega Activity step: Embed-ActivitySteps format
-            const method = step.pyStepsActivityName || step.pyMethod || step.pyStepType || '';
-            const desc = step.pyStepsDescription || step.pxStepDefaultDescription || step.pyLabel || step.pyStepDescription || '';
-            const params = step.pyMethodParameters || '';
-            const when = step.pyWhenCondition || step.pyWhenRule || '';
-            const num = step.pyStepNum || step.pyStepNumber || String(i + 1);
-            // Format: "1. **Method** — description [WHEN: condition]"
-            const methodStr = method ? `**${method}**` : '';
-            const paramStr = params ? ` → \`${params}\`` : '';
-            const descStr = desc ? ` — ${desc}` : '';
-            const whenStr = when ? ` [WHEN: ${when}]` : '';
-            // Show call params if available
-            let callParams = '';
-            if (step.pyStepsCallParams && typeof step.pyStepsCallParams === 'object') {
-              const cp = Object.entries(step.pyStepsCallParams).filter(([k]) => k !== 'pyTempPlaceHolder');
-              if (cp.length > 0) callParams = ` (${cp.map(([k, v]) => `${k}=${v}`).join(', ')})`;
-            }
-            if (method || desc) parts.push(`${num}. ${methodStr}${paramStr}${callParams}${descStr}${whenStr}`);
-          });
-        }
-        // Extract When conditions for Decision rules
-        const whens = ruleJson.pyConditions || ruleJson.pyDecisionExpressions || [];
-        if (Array.isArray(whens) && whens.length > 0) {
-          parts.push('\n**Conditions:**');
-          whens.forEach((w: any) => {
-            const expr = w.pyExpression || w.pyCondition || JSON.stringify(w);
-            parts.push(`- ${expr}`);
-          });
-        }
-        // Extract properties for Data/Class rules
-        const props = ruleJson.pyPropertyModes || ruleJson.pyProperties || [];
-        if (Array.isArray(props) && props.length > 0) {
-          parts.push(`\n**Properties:** ${props.length} defined`);
-          props.slice(0, 10).forEach((p: any) => {
-            const name = p.pyPropertyName || p.pyName || p.pyPropertyMode || '';
-            const type = p.pyPropertyType || p.pyType || '';
-            if (name) parts.push(`- \`${name}\` (${type || 'Text'})`);
-          });
-          if (props.length > 10) parts.push(`- ... and ${props.length - 10} more`);
-        }
-        ruleInfo = parts.join('\n');
-      } catch (err) { ruleInfo = entry.summary || fqn; }
-      return c.json({
-        id: entryId,
-        title: fqn.split(':').pop() || fqn,
-        content: ruleInfo,
-        tier: entry.tier || 'SEMANTIC',
-        type: entry.type || 'PEGA_RULE',
-        source: fqn,
-        tags: entry.tags ? entry.tags.split(',').map((t: string) => t.trim()) : [],
-        links: [],
-        createdAt: entry.created_at,
-        updatedAt: entry.updated_at,
-      });
     }
 
     const lookupId = entryId.startsWith('doc-') ? entryId.replace('doc-', '') : entryId;
@@ -195,20 +117,24 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     if (user instanceof Response) return user;
     const permCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
     if (permCheck instanceof Response) return permCheck;
-    const entryId = c.req.param('id');
+    let entryId = c.req.param('id');
 
     const { getIndexAdapter } = await import('../../../admin/db/core.js');
     const indexAdapter = getIndexAdapter();
     const projectId = ctx.getRequestProjectId(c);
 
-    // Branch: Pega/KB entries — enrich via TAG_ENRICHMENT flow
-    if (entryId.startsWith('pega:') || entryId.startsWith('kb-entry:')) {
-      const numericId = entryId.startsWith('kb-entry:') ? parseInt(entryId.replace('kb-entry:', ''), 10) : null;
-      const entry = numericId
-        ? await indexAdapter.getAsync<{ id: number; content: string; summary: string | null; enrichment_status: string | null; structured_map: string | null }>(
-            'SELECT id, content, summary, enrichment_status, structured_map FROM knowledge_entries WHERE id = ?', [numericId])
-        : await indexAdapter.getAsync<{ id: number; content: string; summary: string | null; enrichment_status: string | null; structured_map: string | null }>(
-            'SELECT id, content, summary, enrichment_status, structured_map FROM knowledge_entries WHERE source = ?', [entryId.replace('pega:', '')]);
+    // SA4E-171: legacy "pega:FQN" graph node ids → resolve to Pega symbol, enrich via CODE_ENRICHMENT
+    if (entryId.startsWith('pega:')) {
+      const resolved = await resolvePegaSymbolId(ctx, entryId.replace('pega:', ''));
+      if (!resolved) return c.json({ error: 'Pega rule not found' }, 404);
+      entryId = `code:${resolved}`;
+    }
+
+    // Branch: KB entries (non-symbol) — enrich via TAG_ENRICHMENT flow
+    if (entryId.startsWith('kb-entry:')) {
+      const numericId = parseInt(entryId.replace('kb-entry:', ''), 10);
+      const entry = await indexAdapter.getAsync<{ id: number; content: string; summary: string | null; enrichment_status: string | null; structured_map: string | null }>(
+        'SELECT id, content, summary, enrichment_status, structured_map FROM knowledge_entries WHERE id = ?', [numericId]);
       if (!entry) return c.json({ error: 'Entry not found' }, 404);
       if (entry.enrichment_status === 'done') {
         const map = entry.structured_map ? JSON.parse(entry.structured_map) : {};
@@ -354,6 +280,22 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
   });
 
   return app;
+}
+
+/** SA4E-171: Resolve a Pega rule FQN to its symbol id (rules live in symbols). */
+async function resolvePegaSymbolId(ctx: AdminContext, fqn: string): Promise<string | null> {
+  try {
+    const { getIndexAdapter } = await import('../../../admin/db/core.js');
+    const adapter = getIndexAdapter();
+    const sym = await adapter.getAsync<{ id: number }>(
+      `SELECT s.id FROM symbols s JOIN files f ON f.id = s.file_id
+       WHERE s.signature = ? AND s.kind LIKE 'pega_%' LIMIT 1`,
+      [fqn],
+    );
+    return sym ? String(sym.id) : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Fetch code symbol detail via SymbolRepository for KB Graph node click. */

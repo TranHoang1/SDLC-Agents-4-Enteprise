@@ -78,3 +78,20 @@ export function buildFqn(
 ): string {
   return `${pxObjClass}:${pyClassName}:${pyRuleName}`;
 }
+
+/**
+ * Resolve the canonical rule name from a Pega rule JSON object.
+ * Mirrors PegaRuleAstParser.extractName fallback order (AF-01):
+ * pyRuleName → pyActivityName → pyModelName → pyFlowName → pyLabel.
+ */
+export function resolveRuleNameField(ruleJson: Record<string, unknown>): string {
+  const r = ruleJson as Record<string, unknown>;
+  return String(
+    r.pyRuleName
+    || r.pyActivityName
+    || r.pyModelName
+    || r.pyFlowName
+    || r.pyLabel
+    || '',
+  );
+}

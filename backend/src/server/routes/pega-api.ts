@@ -34,29 +34,14 @@ import { PegaHarnessAssembler } from '../../modules/pega/ui/PegaHarnessAssembler
 import type { PegaDecisionTableRow, DecisionTreeNode } from '../../modules/pega/decision/PegaEvaluationResult.js';
 import type { PegaSection, PegaLayout, PegaField } from '../../modules/pega/ui/PegaUITypes.js';
 
-function extractTagValue(tags: string, key: string): string | null {
-  for (const tag of tags.split(',')) {
-    const trimmed = tag.trim();
-    if (trimmed.startsWith(key + ':')) return trimmed.slice(key.length + 1);
-  }
-  return null;
-}
-
 export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): Hono {
   const app = new Hono();
 
   let pegaService: PegaService | null = null;
-  let reclassified = false;
   const getPegaService = (): PegaService | null => {
     const memModule = registry.getModule('memory') as any;
     if (!memModule || memModule.status !== 'ready') return null;
     if (!pegaService) pegaService = new PegaService(memModule.getEngine());
-    if (!reclassified) {
-      reclassified = true;
-      pegaService.reclassifyExistingGraphNodes().then(n => {
-        if (n > 0) logger.info({ count: n }, '[pega] Reclassified existing graph nodes');
-      }).catch((err) => { logger.debug({ err }, '[pega] Graph node reclassification failed (non-fatal)'); });
-    }
     return pegaService;
   };
 
@@ -155,14 +140,16 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
       for (const key of plan.missing) {
         const fqn = `${key.pxObjClass}:${key.pyClassName}:${key.pyRuleName}`;
         const row = await adapter.getAsync(
-          "SELECT tags FROM knowledge_entries WHERE project_id = $1 AND source = $2 AND (type = 'PEGA_RULE' OR type = 'PEGA_DATA') LIMIT 1",
+          `SELECT f.content_hash
+           FROM symbols s JOIN files f ON f.id = s.file_id
+           WHERE s.project_id = $1 AND s.signature = $2 AND s.kind LIKE 'pega_%'
+           LIMIT 1`,
           [body.projectId, fqn],
-        ) as { tags?: string } | undefined;
+        ) as { content_hash?: string } | undefined;
         if (row) {
           const extChecksum = ruleChecksums[key.insKey];
           if (extChecksum) {
-            const dbChecksum = extractTagValue(row.tags || '', 'checksum');
-            if (dbChecksum === extChecksum) {
+            if (row.content_hash === extChecksum) {
               cachedFromDb.push(key.insKey);
               continue;
             }
@@ -207,18 +194,18 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
       }
 
       let totalRulesInDb = stored;
-      let totalKbEntriesInDb = stored * 2;
+      let totalKbEntriesInDb = stored;
       let totalGraphNodesInDb = stored;
       try {
         const adapter = (service as any).memoryEngine.getAdapter();
         const rowRules = (await adapter.getAsync(
-          "SELECT COUNT(DISTINCT source) as cnt FROM knowledge_entries WHERE project_id = $1 AND type IN ('PEGA_RULE', 'PEGA_DATA')",
+          "SELECT COUNT(*) as cnt FROM symbols WHERE project_id = $1 AND kind LIKE 'pega_%'",
           [body.projectId]
         )) as { cnt?: number } | undefined;
         if (rowRules && typeof rowRules.cnt === 'number') { totalRulesInDb = Number(rowRules.cnt); }
 
         const rowKb = (await adapter.getAsync(
-          "SELECT COUNT(*) as cnt FROM knowledge_entries WHERE project_id = $1",
+          "SELECT COUNT(*) as cnt FROM symbols WHERE project_id = $1",
           [body.projectId]
         )) as { cnt?: number } | undefined;
         if (rowKb && typeof rowKb.cnt === 'number') { totalKbEntriesInDb = Number(rowKb.cnt); }
@@ -271,6 +258,9 @@ export function createPegaApiRoutes(registry: ModuleRegistry, logger: Logger): H
       const adapter = (service as any).memoryEngine.getAdapter();
       const pid = body.projectId || 'PegaCollProj';
       await adapter.runAsync("DELETE FROM knowledge_entries WHERE project_id = $1 OR project_id = 'PegaCollProj'", [pid]);
+      // SA4E-171: rules live in symbols — clear Pega virtual files + symbols
+      await adapter.runAsync("DELETE FROM symbols WHERE project_id = $1 AND kind LIKE 'pega_%'", [pid]);
+      await adapter.runAsync("DELETE FROM files WHERE project_id = $1 AND language = 'pega'", [pid]);
       await adapter.runAsync("DELETE FROM graph_nodes WHERE project_id = $1 OR project_id = 'PegaCollProj'", [pid]);
       return c.json({ data: { success: true, clearedProjectId: pid }, error: null });
     } catch (err: any) {

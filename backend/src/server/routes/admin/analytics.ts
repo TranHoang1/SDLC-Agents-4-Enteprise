@@ -45,15 +45,15 @@ export function createAnalyticsRoutes(ctx: AdminContext): Hono {
     let codeSymbols = 0;
     try { codeSymbols = Number(await ctx.db.symbol.getSymbolCount(currentProjectId)); }
     catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to read code symbols count from index.db'); }
-    // Include Pega rules as code symbols (Pega rules ARE code)
+    // Include Pega rules as code symbols (Pega rules ARE code) — SA4E-171: from symbols
     try {
       const adapter = getIndexAdapter();
       const row = await adapter.getAsync<{ cnt: number }>(
-        `SELECT COUNT(DISTINCT source) as cnt FROM knowledge_entries WHERE project_id = ? AND type IN ('PEGA_RULE', 'PEGA_DATA')`,
+        `SELECT COUNT(*) as cnt FROM symbols WHERE project_id = ? AND kind LIKE 'pega_%'`,
         [currentProjectId],
       );
       codeSymbols += Number(row?.cnt ?? 0);
-    } catch { ctx.logger.debug({ context: 'dashboard' }, 'Failed to count Pega rules as code symbols'); }
+    } catch { ctx.logger.debug({ context: 'dashboard' }, 'Failed to count Pega symbols'); }
     let graphTotalNodes = 0, graphKbNodes = 0, graphCodeNodes = 0;
     try {
       const counts = await ctx.db.graph.getNodeCounts(currentProjectId);

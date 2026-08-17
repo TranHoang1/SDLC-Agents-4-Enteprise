@@ -6,7 +6,7 @@
 
 import { createHash } from 'crypto';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
-import { resolveSymbolKind, buildVirtualPath, buildFqn } from './pega-mapping.js';
+import { resolveSymbolKind, buildVirtualPath, buildFqn, resolveRuleNameField } from './pega-mapping.js';
 import { extractRuleContent } from './PegaContentExtractor.js';
 import { TaskType, TaskStatus } from '../memory/task-queue/models.js';
 import pino from 'pino';
@@ -118,7 +118,8 @@ function resolveRuleSet(ruleJson: Record<string, unknown>): string {
 function extractRequiredFields(ruleJson: Record<string, unknown>) {
   const pxObjClass = String((ruleJson as any)?.pxObjClass || '');
   const pyClassName = String((ruleJson as any)?.pyClassName || '');
-  const pyRuleName = String((ruleJson as any)?.pyRuleName || '');
+  // Name via canonical fallback (pyRuleName → pyActivityName → pyModelName → pyFlowName → pyLabel)
+  const pyRuleName = resolveRuleNameField(ruleJson);
 
   if (!pxObjClass || !pyClassName || !pyRuleName) {
     logger.warn({ pxObjClass, pyClassName, pyRuleName }, 'Missing required Pega fields');

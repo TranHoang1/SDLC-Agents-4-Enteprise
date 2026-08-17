@@ -34,14 +34,16 @@ export async function handleAdmin(engine: MemoryEngine, a: Args): Promise<string
       return JSON.stringify(stats);
     }
     case 'reset_enrichment': {
+      // SA4E-171: Pega rules are enriched via symbols (CODE_ENRICHMENT).
+      // Reset to NULL so CodeEnrichmentTaskCreator re-queues them.
       const projectId = a.project_id as string || '';
       const typeFilter = projectId
         ? `AND project_id = '${projectId}'`
         : '';
       const result = await engine.getAdapter().runAsync(
-        `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE type IN ('PEGA_RULE', 'PEGA_DATA', 'PEGA_AST') AND enrichment_status = 'done' ${typeFilter}`,
+        `UPDATE symbols SET enrichment_status = NULL, enriched_at = NULL WHERE kind LIKE 'pega_%' AND enrichment_status = 'COMPLETED' ${typeFilter}`,
       );
-      return `Reset ${result.changes} entries enrichment_status from 'done' to 'pending'. TaskWorker will re-process them with LLM.`;
+      return `Reset ${result.changes} Pega symbols enrichment to re-eligible for CODE_ENRICHMENT.`;
     }
     case 'purge_orphan_tasks': {
       const result = await engine.getAdapter().runAsync(
