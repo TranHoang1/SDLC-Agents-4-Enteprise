@@ -42,7 +42,7 @@ let sessionManager: SessionManager | undefined;
 let chatEngineAdapter: ChatEngineAdapter | undefined;
 
 /** Project ID for multi-tenant isolation — derived from git remote or user+folder hash. */
-let _projectId = "default";
+let _projectId = "";
 export function getProjectId(): string { return _projectId; }
 export function setProjectId(id: string): void { _projectId = id; }
 
@@ -123,7 +123,7 @@ export async function deriveProjectId(workspaceRoot: string): Promise<string> {
   // 3. User + folder hash (always succeeds)
   if (!projectId) {
     const userId = os.userInfo().username || "unknown";
-    const folderName = pathModule.basename(workspaceRoot) || "default";
+    const folderName = pathModule.basename(workspaceRoot) || "workspace";
     projectId = crypto.createHash("sha256").update(`${userId}:${folderName}`).digest("hex").slice(0, 12);
   }
 
@@ -197,6 +197,62 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
   setupConfigWatcher(context, workspaceRoot, outputChannel);
   setupMcpStatusBroadcast(workspaceRoot);
   await autoSpawnServer(mcpConfig, outputChannel);
+
+  // SA4E-157: Enrichment status polling + StatusBarItem
+  try {
+    const { IndexerHttpClient } = await import('./services/IndexerHttpClient');
+    const { EnrichmentStatusService } = await import('./services/EnrichmentStatusService');
+    const enrichmentClient = new IndexerHttpClient(backendUrl);
+    const enrichmentService = new EnrichmentStatusService(
+      enrichmentClient,
+      () => authManager?.getTokenSync(),
+      outputChannel,
+    );
+    // Only start polling after user authenticates (enrichment data is per-user)
+    if (authManager?.isAuthenticated) {
+      enrichmentService.start();
+    }
+    authManager?.onStateChange((state) => {
+      if (state === "AUTHENTICATED") { enrichmentService.start(); }
+    });
+    context.subscriptions.push(enrichmentService);
+    // SA4E-157: Show enrichment status in Output Channel
+    context.subscriptions.push(
+      vscode.commands.registerCommand('sa4e.showEnrichmentStatus', async () => {
+        const status = await enrichmentService.pollNow();
+        if (!status) {
+          vscode.window.showErrorMessage('Cannot reach backend. Verify server is running.');
+          return;
+        }
+        // Open Enrichment Dashboard WebView panel (SA4E-169)
+        const { openEnrichmentDashboard } = await import('./panels/enrichment-dashboard-panel');
+        openEnrichmentDashboard(context.extensionUri, enrichmentService.buildDashboardData(status));
+      })
+    );
+    // SA4E-160: Retry failed enrichment tasks command
+    context.subscriptions.push(
+      vscode.commands.registerCommand('sa4e.retryFailedEnrichment', async () => {
+        try {
+          const res = await fetch(`${backendUrl}/api/v1/enrichment/retry-failed`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authManager?.getTokenSync() || ''}` },
+          });
+          if (!res.ok) {
+            vscode.window.showErrorMessage(`Retry failed: HTTP ${res.status}`);
+            return;
+          }
+          const json = (await res.json()) as any;
+          const count = json.data?.resetCount ?? 0;
+          vscode.window.showInformationMessage(`${count} failed tasks queued for retry. Enrichment will resume shortly.`);
+          await enrichmentService.pollNow();
+        } catch (err: any) {
+          vscode.window.showErrorMessage(`Retry failed: ${err.message}`);
+        }
+      })
+    );
+  } catch (err) {
+    outputChannel.appendLine(`[EnrichmentStatus] Init failed: ${(err as Error).message}`);
+  }
 
   // Initialize Platform Swap feature (IDE-aware agent config swap)
   await initPlatformSwap(context, workspaceRoot, outputChannel).catch((err) => {

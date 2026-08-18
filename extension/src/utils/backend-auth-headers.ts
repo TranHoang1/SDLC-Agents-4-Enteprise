@@ -21,6 +21,6 @@ export function buildBackendAuthHeaders(authManager?: ITokenProvider): Record<st
   const token = authManager?.getTokenSync();
   if (token) { headers["Authorization"] = `Bearer ${token}`; }
   const projectId = getProjectId();
-  if (projectId && projectId !== "default") { headers["X-Project-Id"] = projectId; }
+  if (projectId) { headers["X-Project-Id"] = projectId; }
   return headers;
 }

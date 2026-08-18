@@ -47,9 +47,9 @@ export class GraphSyncService {
       this.log.info(`[graph-sync] Synced ${symbols.length} code nodes for project ${projectId}`);
       // SA4E-91: Extract and insert code edges (IMPORTS, CALLS, EXTENDS)
       await this.syncCodeEdges(projectId);
-      // SA4E-99: Queue CODE_SUMMARY tasks async (fire-and-forget, non-blocking)
+      // SA4E-99: Queue CODE_ENRICHMENT tasks async (fire-and-forget, non-blocking)
       this.queueCodeSummaryTasks(projectId, symbols).catch(err =>
-        this.log.warn({ err }, '[graph-sync] Code summary queue failed (non-fatal)'));
+        this.log.warn({ err }, '[graph-sync] Code enrichment queue failed (non-fatal)'));
     } catch (err) {
       // Non-fatal: visualization projection must never fail the index run.
       this.log.error({ err }, `[graph-sync] Failed to sync code nodes for ${projectId}`);
@@ -57,7 +57,7 @@ export class GraphSyncService {
   }
 
   /**
-   * SA4E-99: Queue CODE_SUMMARY tasks for symbols that have body text.
+   * SA4E-99: Queue CODE_ENRICHMENT tasks for symbols that have body text.
    * Reads body from body_embeddings, creates pending_tasks for LLM summarization.
    * Runs async — does NOT block code indexing.
    */
@@ -93,12 +93,12 @@ export class GraphSyncService {
       };
 
       // Insert into pending_tasks (use admin adapter — same DB as graph_nodes)
-      // Temporarily disable FK for CODE_SUMMARY (entry_id=0, not a knowledge_entries ref)
+      // Temporarily disable FK for CODE_ENRICHMENT (entry_id=symbolId, not a knowledge_entries ref)
       try {
         await this.adminAdapter.runAsync('PRAGMA foreign_keys = OFF', []);
         await this.adminAdapter.runAsync(
           `INSERT INTO pending_tasks (task_type, entry_id, payload, status, retry_count, max_retries, created_at)
-           VALUES ('CODE_SUMMARY', 0, ?, 'PENDING', 0, 2, ?)`,
+           VALUES ('CODE_ENRICHMENT', 0, ?, 'PENDING', 0, 2, ?)`,
           [JSON.stringify(payload), now],
         );
         await this.adminAdapter.runAsync('PRAGMA foreign_keys = ON', []);
@@ -109,7 +109,7 @@ export class GraphSyncService {
     }
 
     if (queued > 0) {
-      this.log.info(`[graph-sync] Queued ${queued} CODE_SUMMARY tasks for project ${projectId}`);
+      this.log.info(`[graph-sync] Queued ${queued} CODE_ENRICHMENT tasks for project ${projectId}`);
     }
   }
 

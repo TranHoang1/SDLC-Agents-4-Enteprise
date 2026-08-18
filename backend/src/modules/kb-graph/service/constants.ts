@@ -21,6 +21,23 @@ export const KIND_TO_TYPE: Record<string, string> = {
   enum: 'ENUM',
   constant: 'CONSTANT',
   variable: 'VARIABLE',
+  // Pega rule kinds → meaningful graph types
+  pega_activity: 'ACTIVITY',
+  pega_flow: 'FLOW',
+  pega_flow_action: 'FLOW',
+  pega_data_transform: 'DATA_TRANSFORM',
+  pega_declare_expression: 'DECLARE_EXPRESSION',
+  pega_report: 'REPORT',
+  pega_section: 'SECTION',
+  pega_harness: 'HARNESS',
+  pega_property: 'PROPERTY',
+  pega_class: 'PEGA_SCHEMA',
+  pega_decision_table: 'DECISION',
+  pega_decision_tree: 'DECISION',
+  pega_map_value: 'DECISION',
+  pega_when: 'DECISION',
+  pega_validate: 'VALIDATE',
+  pega_unknown: 'PEGA_RULE',
 };
 
 export interface SpatialQueryParams {

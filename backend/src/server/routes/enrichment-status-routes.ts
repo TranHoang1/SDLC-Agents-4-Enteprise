@@ -20,8 +20,8 @@ import type { TaskWorker } from '../../modules/memory/task-queue/TaskWorker.js';
  */
 export function createEnrichmentStatusRoutes(registry: ModuleRegistry, logger: Logger): Hono {
   const app = new Hono();
-  app.use('*', jwtAuth);
 
+  // GET status is read-only, no auth required (extension polls without login)
   app.get('/enrichment/status', async (c) => {
     try {
       const taskWorker = getTaskWorker(registry);
@@ -40,17 +40,22 @@ export function createEnrichmentStatusRoutes(registry: ModuleRegistry, logger: L
     }
   });
 
-  /** POST /api/v1/enrichment/retry-failed — reset all failed tasks to pending for re-processing. */
-  app.post('/enrichment/retry-failed', async (c) => {
+  /** POST /api/v1/enrichment/retry-failed — reconcile orphans first, then reset failed tasks to pending. */
+  app.post('/enrichment/retry-failed', jwtAuth, async (c) => {
     try {
       const taskWorker = getTaskWorker(registry);
       if (!taskWorker) {
         return c.json({ error: 'Enrichment service unavailable', details: 'TaskWorker not initialized' }, 503);
       }
       const repo = taskWorker.getRepository();
+      // Auto-purge orphan tasks before retry (entries deleted but tasks remain)
+      const purgedCount = await repo.reconcileOrphans();
+      if (purgedCount > 0) {
+        logger.info({ purgedCount }, '[EnrichmentStatus] Auto-purged orphan tasks before retry');
+      }
       const resetCount = await repo.retryAllFailed();
-      logger.info({ resetCount }, '[EnrichmentStatus] Retry failed tasks');
-      return c.json({ data: { resetCount, message: `${resetCount} failed tasks reset to pending` }, error: null });
+      logger.info({ resetCount, purgedCount }, '[EnrichmentStatus] Retry failed tasks');
+      return c.json({ data: { resetCount, purgedCount, message: `${purgedCount} orphans purged, ${resetCount} failed tasks reset to pending` }, error: null });
     } catch (err: any) {
       logger.error({ err }, '[EnrichmentStatus] Retry failed tasks error');
       return c.json({ error: 'Failed to retry tasks', details: err.message }, 500);
@@ -58,7 +63,7 @@ export function createEnrichmentStatusRoutes(registry: ModuleRegistry, logger: L
   });
 
   /** POST /api/v1/enrichment/reconcile-orphans — purge orphan tasks whose symbols/entries were deleted. */
-  app.post('/enrichment/reconcile-orphans', async (c) => {
+  app.post('/enrichment/reconcile-orphans', jwtAuth, async (c) => {
     try {
       const taskWorker = getTaskWorker(registry);
       if (!taskWorker) {

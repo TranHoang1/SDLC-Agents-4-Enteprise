@@ -69,8 +69,8 @@ describe("HttpClient", () => {
     expect(headers["X-Project-Id"]).toBe("project-42");
   });
 
-  it("does not add X-Project-Id for default project", async () => {
-    vi.mocked(getProjectId).mockReturnValue("default");
+  it("does not add X-Project-Id when projectId is empty", async () => {
+    vi.mocked(getProjectId).mockReturnValue("");
     const headers = await client.getAuthHeaders();
     expect(headers["X-Project-Id"]).toBeUndefined();
   });

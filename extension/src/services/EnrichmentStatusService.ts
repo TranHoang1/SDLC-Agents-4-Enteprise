@@ -40,12 +40,13 @@ export class EnrichmentStatusService implements vscode.Disposable {
   ) {
     this.outputChannel = outputChannel;
     this.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    this.statusBarItem.show();
+    // Do NOT show until start() is called (requires auth)
     this.updateStatusBarIdle();
   }
 
-  /** Start polling (called on extension activation). Polls immediately, then on interval. */
+  /** Start polling (called after user authenticates). Polls immediately, then on interval. */
   start(): void {
+    this.statusBarItem.show();
     this.executePoll(); // Immediate first poll — don't wait 30s
     this.schedulePoll(this.currentInterval);
   }

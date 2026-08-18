@@ -17,6 +17,13 @@ export class PendingTaskRepository {
   }
 
   async create(input: CreateTaskInput): Promise<number> {
+    // Dedup: skip if a PENDING/PROCESSING task already exists for same entry + type
+    const existing = await this.db.getAsync<{ id: number }>(
+      `SELECT id FROM pending_tasks WHERE entry_id = ? AND task_type = ? AND status IN (?, ?) LIMIT 1`,
+      [input.entry_id, input.task_type, TaskStatus.PENDING, TaskStatus.PROCESSING],
+    );
+    if (existing) return existing.id;
+
     const result = await this.db.runAsync(
       `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, project_id, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ${this.dialect.now()})`,
@@ -223,7 +230,7 @@ export class PendingTaskRepository {
     const kbResult = await this.db.runAsync(
       `DELETE FROM pending_tasks
        WHERE status IN (?, ?, ?)
-         AND task_type != 'CODE_ENRICHMENT'
+         AND task_type NOT IN ('CODE_ENRICHMENT')
          AND entry_id NOT IN (SELECT id FROM knowledge_entries)`,
       [TaskStatus.PENDING, TaskStatus.PROCESSING, TaskStatus.FAILED],
     );

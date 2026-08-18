@@ -43,7 +43,7 @@ export class HttpClient {
       headers["Authorization"] = "Bearer " + token;
     }
     const projectId = getProjectId();
-    if (projectId && projectId !== "default") {
+    if (projectId) {
       headers["X-Project-Id"] = projectId;
     }
     return headers;

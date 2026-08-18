@@ -49,15 +49,14 @@ export class AuthManager implements vscode.Disposable {
   }
 
   /**
-   * Initialize from stored credentials on activation.
+   * Initialize — clear stale session on startup.
+   * User must login explicitly each session (security requirement).
    */
   async initialize(): Promise<void> {
-    const token = await this.secrets.get(SECRET_ACCESS_TOKEN);
-    if (token && !this.isExpired()) {
-      this.cachedToken = token;
-      this.transitionTo("AUTHENTICATED");
-      this.refreshTimer.start();
-    }
+    // Do NOT auto-restore token from SecretStorage.
+    // Enrichment data is per-user — must require explicit login each session.
+    this.cachedToken = null;
+    this.transitionTo("UNAUTHENTICATED");
   }
 
   /**

@@ -93,6 +93,7 @@ async function showIndexOptions(): Promise<string[] | undefined> {
         { label: "$(code) Index Source Code", description: "Re-index all code symbols", id: "code", picked: true },
         { label: "$(book) Index Documents", description: "Index SDLC documents into KB", id: "documents", picked: true },
         { label: "$(sync) Sync Code → Memory", description: "Sync code entities into memory graph", id: "sync", picked: true },
+        { label: "$(cloud-download) Index Jira Project", description: "Sync Jira tickets into KB", id: "jira", picked: false },
     );
 
     const picks = await vscode.window.showQuickPick(items, { canPickMany: true, placeHolder: "Select what to index" });
