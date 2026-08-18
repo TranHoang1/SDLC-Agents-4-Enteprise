@@ -1,6 +1,6 @@
-﻿import { Hono } from 'hono';
+import { Hono } from 'hono';
 import type { Logger } from 'pino';
-import { getAdminAdapter } from '../../../admin/admin-db.js';
+import { getDbAdapter } from '../../../admin/admin-db.js';
 import { createAdminContext } from './context.js';
 import { createStaticRoutes } from './static.js';
 import { createAuthRoutes } from './auth.js';
@@ -27,7 +27,7 @@ function createProjectsRoutes(ctx: AdminContext): Hono {
     const user = await ctx.requireAuth(c);
     if (user instanceof Response) return user;
     try {
-      const adapter = getAdminAdapter();
+      const adapter = getDbAdapter();
       // RBAC_MANAGE (admins) see all workspaces; others only see their own
       const rbacCheck = await ctx.requirePermission(c, user.userId, 'RBAC_MANAGE');
       const isAdmin = !(rbacCheck instanceof Response);

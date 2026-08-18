@@ -2,13 +2,13 @@
  * SA4E-51 — Full sync and bulk node/edge creation for KB Graph.
  * SA4E-53: converted to async API for PostgreSQL compatibility.
  * Accepts DatabaseAdapter so writes go to the active engine (SQLite or PostgreSQL).
- * processCodeSymbols reads symbols via getIndexAdapter() — same engine as the indexer.
+ * processCodeSymbols reads symbols via getDbAdapter() — same engine as the indexer.
  */
 
 import type { Logger } from 'pino';
 import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import { getKbEntries } from '../../../admin/admin-db.js';
-import { getIndexAdapter } from '../../../admin/db/core.js';
+import { getDbAdapter } from '../../../admin/db/core.js';
 import { loadConfig } from '../../../config/index.js';
 import { KIND_TO_TYPE } from './constants.js';
 import { computePositionByIndex } from './nodes.js';
@@ -139,7 +139,7 @@ async function processCodeSymbols(
   ksaGroupMap: Map<string, number>, groupCounter: { value: number }, logger: Logger,
 ): Promise<void> {
   try {
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const INCLUDE_KINDS = ['function', 'class', 'interface', 'method', 'type', 'enum', 'constructor'];
     const placeholders = INCLUDE_KINDS.map(() => '?').join(',');
     const rows = await adapter.allAsync<any>(
@@ -157,6 +157,7 @@ async function processCodeSymbols(
 
 /**
  * Full graph sync: collect all KB entries + code symbols, then bulk-insert.
+ * Deletes stale doc- and sym- nodes first to ensure 1:1 consistency.
  * @param db - DatabaseAdapter to write graph_nodes/graph_edges
  * @param logger - Pino logger
  */
@@ -171,6 +172,10 @@ export async function fullSync(
 
   await processKbEntries(allEntries, sources, ksaGroupMap, groupCounter, logger);
   await processCodeSymbols(allEntries, sources, ksaGroupMap, groupCounter, logger);
+
+  // Delete stale KB and code nodes before re-insert (ensures no orphans)
+  await db.runAsync(`DELETE FROM graph_nodes WHERE entry_id LIKE 'doc-%'`);
+  await db.runAsync(`DELETE FROM graph_nodes WHERE entry_id LIKE 'sym-%'`);
 
   const result = await syncFromEntries(allEntries, db, logger);
   const elapsed = Date.now() - startTime;

@@ -28,6 +28,7 @@ import { StatusBarManager } from "./ui/status-bar";
 import { SettingsPanel } from "./panels/settings/SettingsPanel";
 import { ProxyAgentFactory } from "./proxy/ProxyAgentFactory";
 import { ProxyConfigService } from "./proxy/ProxyConfigService";
+import { getBackendUrl } from "./config/backend-url";
 import { ProxyDetectionService } from "./proxy/ProxyDetectionService";
 import { KnowledgeClient } from "./knowledge-client";
 import { EnrichmentStatusService } from "./services/EnrichmentStatusService";
@@ -47,6 +48,10 @@ let chatEngineAdapter: ChatEngineAdapter | undefined;
 let _projectId = "default";
 export function getProjectId(): string { return _projectId; }
 export function setProjectId(id: string): void { _projectId = id; }
+
+/** Enrichment polling service — exposed for IndexingService to trigger immediate poll. */
+let _enrichmentService: EnrichmentStatusService | null = null;
+export function getEnrichmentService(): EnrichmentStatusService | null { return _enrichmentService; }
 
 export async function activate(context: vscode.ExtensionContext) {
   // Register Settings command early — must work even without a workspace folder.
@@ -149,7 +154,7 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
   context.subscriptions.push(outputChannel);
 
   const mcpConfig = vscode.workspace.getConfiguration("kiroSdlc");
-  const backendUrl = mcpConfig.get<string>("backend.url") || "http://127.0.0.1:48721";
+  const backendUrl = getBackendUrl();
 
   authManager = new AuthManager(context.secrets, backendUrl);
   await authManager.initialize();
@@ -212,6 +217,7 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
       () => authManager?.getTokenSync(),
       outputChannel,
     );
+    _enrichmentService = enrichmentService;
     enrichmentService.start();
     context.subscriptions.push(enrichmentService);
     context.subscriptions.push(

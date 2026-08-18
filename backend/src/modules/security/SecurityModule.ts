@@ -1,7 +1,7 @@
 /**
  * SA4E-167 — SecurityModule: IModule implementation for GateGuard + AgentShield.
  * Facade pattern: encapsulates GateGuard and AgentShield subsystems.
- * DIP: DatabaseAdapter injected via getAdminAdapter() singleton.
+ * DIP: DatabaseAdapter injected via getDbAdapter() singleton.
  */
 
 import type { IModule, ModuleStatus } from '../../types/module.js';
@@ -106,7 +106,7 @@ export class SecurityModule implements IModule {
 
   /** Resolve DatabaseAdapter via admin singleton */
   private async resolveAdapter(): Promise<DatabaseAdapter> {
-    const { getAdminAdapter } = await import('../../admin/db/core.js');
-    return getAdminAdapter();
+    const { getDbAdapter } = await import('../../admin/db/core.js');
+    return getDbAdapter();
   }
 }

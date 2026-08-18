@@ -144,8 +144,10 @@ function parseVerdict(raw: string): VerifyResult {
     return { verdict: "tool_needed", toolName: rest || "list_directory", toolArgs: { path: ".", recursive: true } };
   }
   if (upper.startsWith("INCOMPLETE")) {
-    // Treat INCOMPLETE as TOOL_NEEDED with list_directory fallback
-    return { verdict: "tool_needed", toolName: "list_directory", toolArgs: { path: ".", recursive: true } };
+    // KSA-290 fix: Do NOT auto-fallback to list_directory. INCOMPLETE without
+    // a specific tool suggestion means the verifier couldn't decide — treat as complete
+    // to avoid infinite "review project" loops.
+    return { verdict: "complete" };
   }
   // Default: treat as complete (don't infinite loop)
   return { verdict: "complete" };

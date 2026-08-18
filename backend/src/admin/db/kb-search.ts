@@ -1,15 +1,15 @@
 /**
  * admin/db/kb-search.ts — KB full-text search via DatabaseAdapter.
- * SA4E-50: Uses getIndexAdapter() async methods for PostgreSQL/SQLite support.
+ * SA4E-50: Uses getDbAdapter() async methods for PostgreSQL/SQLite support.
  * TF-IDF scoring runs in-memory after DB fetch; compatible with all engines.
  */
 
-import { getIndexAdapter, getActiveEngine, logger } from './core.js';
+import { getDbAdapter, getActiveEngine, logger } from './core.js';
 import { buildAdminScopeFilter } from './kb-scope-filter.js';
 
 /** Check if knowledge_entries table exists (SQLite only guard). */
 async function tableExists(): Promise<boolean> {
-  const adapter = getIndexAdapter();
+  const adapter = getDbAdapter();
   if (!adapter.isConnected()) return false; // PG not yet connected — skip gracefully
   if (getActiveEngine() !== 'sqlite') return true;
   const row = await adapter.getAsync<{ cnt: number }>(
@@ -99,7 +99,7 @@ export async function searchKbEntries(
 ): Promise<{ items: any[]; total: number }> {
   try {
     if (!(await tableExists())) return { items: [], total: 0 };
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
 
     const queryTerms = query.toLowerCase().split(/\s+/).filter(t => t.length > 1);
     if (queryTerms.length === 0) return { items: [], total: 0 };

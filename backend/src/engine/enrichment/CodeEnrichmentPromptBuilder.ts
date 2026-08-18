@@ -66,7 +66,13 @@ Tag values: lowercase, alphanumeric + hyphens only.`;
 Return JSON only: {"summary":"<1-3 sentences>","pseudo_code":"<structured pseudo code>","tags":["category:value",...]}
 Valid tag categories: ${VALID_TAG_CATEGORIES.join(', ')}
 Tag values: lowercase, alphanumeric + hyphens only.
-Pseudo code: max 2000 chars, describe algorithm steps clearly.`;
+CRITICAL pseudo_code format rules:
+- Use \\n for line breaks between steps
+- Indent nested blocks with 2 spaces
+- Use IF/ELSE/END IF, FOR/END FOR, TRY/CATCH keywords
+- Number the steps (1. 2. 3.) for sequential logic
+- Max 2000 chars
+Example: "1. Parse input params\\n2. IF cache hit THEN\\n  return cached\\nEND IF\\n3. Query database\\n4. Transform result\\n5. Return response"`;
   }
 
   private tagSystemPrompt(): string {
@@ -78,10 +84,17 @@ Tag values: lowercase, alphanumeric + hyphens only. Max 8 tags.`;
 
   private pegaSystemPrompt(): string {
     return `You are a Pega platform analyst. Analyze the business purpose and logic of this Pega rule.
-Return JSON only: {"summary":"<1-3 sentences describing business purpose>","pseudo_code":"<structured pseudo code describing the rule logic, max 2000 chars>","tags":["category:value",...]}
+Return JSON only: {"summary":"<1-3 sentences describing business purpose>","pseudo_code":"<structured pseudo code>","tags":["category:value",...]}
 Valid tag categories: ${VALID_TAG_CATEGORIES.join(', ')}
 Tag values: lowercase, alphanumeric + hyphens only. Max 8 tags.
-Focus on business intent and the main logic flow (steps, decisions, expressions).`;
+Focus on business intent and the main logic flow (steps, decisions, expressions).
+CRITICAL pseudo_code format rules:
+- Use \\n for line breaks between steps
+- Indent nested blocks with 2 spaces
+- Use IF/ELSE/END IF, FOR/END FOR, WHILE/END WHILE keywords
+- Number the steps (1. 2. 3.) for sequential logic
+- Max 2000 chars
+Example: "1. Validate input\\n2. IF condition THEN\\n  2a. Do action A\\n  2b. Do action B\\nELSE\\n  2c. Do fallback\\nEND IF\\n3. Return result"`;
   }
 
   private buildClassUserPrompt(ctx: SymbolContext): string {

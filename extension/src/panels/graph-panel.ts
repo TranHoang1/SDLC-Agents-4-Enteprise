@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { WebviewToExtMessage } from "../types";
 import { IServerManager } from "../types/server-types";
 import { BasePanel } from "./base-panel";
+import { getBackendUrl } from "../config/backend-url";
 
 /** System prompt for extension-side code symbol enrichment (fallback). */
 const CODE_ENRICH_SYSTEM = `You are a code analyst. Given a code symbol's source code, produce a JSON response with:
@@ -60,8 +61,7 @@ export class GraphPanel extends BasePanel {
       const pseudoCode = parsed.pseudo_code || '';
 
       // Save to backend via MCP
-      const config = vscode.workspace.getConfiguration("kiroSdlc");
-      const backendUrl = config.get<string>("backend.url") || "http://127.0.0.1:48721";
+      const backendUrl = getBackendUrl();
       const token = BasePanel.authTokenProvider ? BasePanel.authTokenProvider() : '';
       const numId = msg.symbolId.replace('code:', '').replace('sym-', '');
 

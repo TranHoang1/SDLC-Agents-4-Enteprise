@@ -1,13 +1,13 @@
 /**
  * admin/db/promotion.ts — KB entry promotion cooldown tracking.
- * SA4E-50: All functions are async; use getAdminAdapter() for multi-DB support.
+ * SA4E-50: All functions are async; use getDbAdapter() for multi-DB support.
  */
 
-import { getAdminAdapter } from './core.js';
+import { getDbAdapter } from './core.js';
 
 /** Ensure the promotion_cooldowns table exists (lazy-init). */
 async function ensureTable(): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   await adapter.execAsync(`
     CREATE TABLE IF NOT EXISTS promotion_cooldowns (
       entry_id TEXT NOT NULL,
@@ -26,7 +26,7 @@ async function ensureTable(): Promise<void> {
  */
 export async function setPromotionCooldown(entryId: string, rejectedBy: string): Promise<void> {
   await ensureTable();
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const cooldownUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   await adapter.runAsync(
     'INSERT INTO promotion_cooldowns (entry_id, cooldown_until, rejected_at, rejected_by) VALUES (?, ?, ?, ?)',
@@ -42,7 +42,7 @@ export async function checkPromotionCooldown(
   entryId: string,
 ): Promise<{ onCooldown: boolean; cooldownUntil?: string }> {
   await ensureTable();
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const now = new Date().toISOString();
   const row = await adapter.getAsync<{ cooldown_until: string }>(
     'SELECT cooldown_until FROM promotion_cooldowns WHERE entry_id = ? AND cooldown_until > ? ORDER BY cooldown_until DESC LIMIT 1',

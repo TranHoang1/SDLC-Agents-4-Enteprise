@@ -593,13 +593,80 @@ body {
 
 /* === Tool Call (Kiro-style Activity Card) === */
 /* KSA-247: Isolated container prevents streaming from affecting tool blocks */
+/* KSA-290: Container is collapsible — summary header + expandable body */
 .ksa247-tool-container {
   contain: layout style;
   display: block;
   margin: 8px 0;
+  border-radius: 8px;
+  border: 1px solid rgba(128, 128, 128, 0.12);
+  overflow: hidden;
 }
 .ksa247-tool-container[data-sealed="true"] {
   pointer-events: auto;
+}
+
+/* KSA-290: Collapsible summary header */
+.tool-container-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  background: var(--vscode-sideBar-background, rgba(30, 30, 46, 0.4));
+  border-bottom: 1px solid rgba(128, 128, 128, 0.08);
+  transition: background 0.15s;
+}
+.tool-container-summary:hover {
+  background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.1));
+}
+.tool-container-summary:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder, #6366f1);
+  outline-offset: -2px;
+}
+.tc-chevron {
+  font-size: 10px;
+  opacity: 0.6;
+  transition: transform 0.2s;
+}
+.tc-collapsed .tc-chevron {
+  transform: rotate(-90deg);
+}
+.tc-summary-text {
+  font-weight: 500;
+  opacity: 0.85;
+  color: var(--vscode-foreground);
+}
+.tc-count-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.2);
+  color: #a5b4fc;
+}
+.tc-status-dots {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+.tc-dot {
+  font-weight: 600;
+}
+.tc-dot.running { color: #f59e0b; }
+.tc-dot.completed { color: #10b981; }
+.tc-dot.failed { color: #ef4444; }
+
+/* KSA-290: Body hidden when collapsed */
+.tool-container-body {
+  display: block;
+}
+.tc-collapsed .tool-container-body {
+  display: none;
 }
 
 .tool-call-block {

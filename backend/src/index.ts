@@ -127,8 +127,8 @@ async function main() {
 
   // SA4E-103: Fix graph_nodes type for existing KB entries (one-time migration)
   try {
-    const { getAdminAdapter } = await import('./admin/db/core.js');
-    const adminAdapter = getAdminAdapter();
+    const { getDbAdapter } = await import('./admin/db/core.js');
+    const adminAdapter = getDbAdapter();
     if (adminAdapter.isConnected()) {
       const engine = adminAdapter.getEngine();
       // SA4E-104: Ensure body_embeddings has project_id + UNIQUE constraint on PG

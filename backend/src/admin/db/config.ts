@@ -1,9 +1,9 @@
 /**
  * admin/db/config.ts — Configuration change history tracking.
- * SA4E-50: All functions are async; use getAdminAdapter() for multi-DB support.
+ * SA4E-50: All functions are async; use getDbAdapter() for multi-DB support.
  */
 
-import { getAdminAdapter } from './core.js';
+import { getDbAdapter } from './core.js';
 
 export interface ConfigChange {
   id: number;
@@ -41,7 +41,7 @@ export async function recordConfigChange(
   changedBy: string,
   requiresRestart: boolean,
 ): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   await adapter.runAsync(
     `INSERT INTO config_changes (section, key, old_value, new_value, changed_by, changed_at, requires_restart)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -60,7 +60,7 @@ export async function recordConfigChange(
  * @param limit - Max entries (default 10)
  */
 export async function getConfigChanges(limit = 10): Promise<ConfigChange[]> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const rows = await adapter.allAsync<any>(
     'SELECT * FROM config_changes ORDER BY changed_at DESC LIMIT ?', [limit],
   );
@@ -74,7 +74,7 @@ export async function getConfigChanges(limit = 10): Promise<ConfigChange[]> {
  */
 export async function getLatestConfigValue(section: string, key: string): Promise<string | undefined> {
   try {
-    const adapter = getAdminAdapter();
+    const adapter = getDbAdapter();
     const row = await adapter.getAsync<any>(
       `SELECT new_value FROM config_changes WHERE section = ? AND key = ? ORDER BY changed_at DESC LIMIT 1`,
       [section, key],

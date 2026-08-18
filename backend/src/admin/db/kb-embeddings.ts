@@ -1,16 +1,16 @@
 /**
  * admin/db/kb-embeddings.ts — KB embedding data for visualization.
- * SA4E-50: Uses getIndexAdapter() async methods for PostgreSQL/SQLite support.
+ * SA4E-50: Uses getDbAdapter() async methods for PostgreSQL/SQLite support.
  * Vector parsing (Float32Array) is engine-agnostic; runs on the returned blobs.
  */
 
-import { getIndexAdapter, getActiveEngine } from './core.js';
+import { getDbAdapter, getActiveEngine } from './core.js';
 import type { DatabaseEngine } from '../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../database/dialect/DialectHelper.js';
 
 /** Check if a table exists using cross-engine DialectHelper query. */
 async function hasTable(tableName: string): Promise<boolean> {
-  const adapter = getIndexAdapter();
+  const adapter = getDbAdapter();
   const dialect = new DialectHelper(getActiveEngine() as DatabaseEngine);
   const row = await adapter.getAsync<Record<string, string>>(
     dialect.tableExistsQuery(tableName),
@@ -67,7 +67,7 @@ async function getVectorEmbeddings(
   limit: number,
 ): Promise<{ id: string; label: string; x: number; y: number; type: string }[] | null> {
   if (!(await hasTable('knowledge_vectors'))) return null;
-  const adapter = getIndexAdapter();
+  const adapter = getDbAdapter();
 
   const rows = await adapter.allAsync<any>(
     `SELECT e.id, e.source, e.summary, e.type, e.tier, v.vector
@@ -100,7 +100,7 @@ export async function getKbEmbeddings(
     if (vectorItems) return { items: vectorItems, hasRealData: true };
 
     // Fallback: hash-based positions from knowledge_entries content
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const rows = await adapter.allAsync<any>(
       'SELECT id, source, summary, type, content FROM knowledge_entries ORDER BY created_at DESC LIMIT ?',
       [limit],

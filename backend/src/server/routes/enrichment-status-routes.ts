@@ -32,7 +32,7 @@ export function createEnrichmentStatusRoutes(registry: ModuleRegistry, logger: L
       // Filter by project_id from request context (X-Project-Id header or JWT)
       const projectId = c.req.header('X-Project-Id') || '';
 
-      const response = await buildStatusResponse(taskWorker, projectId);
+      const response = await buildStatusResponse(taskWorker, projectId || null);
       return c.json(response, 200);
     } catch (err: any) {
       logger.error({ err }, '[EnrichmentStatus] Failed to retrieve status');
@@ -57,6 +57,23 @@ export function createEnrichmentStatusRoutes(registry: ModuleRegistry, logger: L
     }
   });
 
+  /** POST /api/v1/enrichment/reconcile-orphans — purge orphan tasks whose symbols/entries were deleted. */
+  app.post('/enrichment/reconcile-orphans', async (c) => {
+    try {
+      const taskWorker = getTaskWorker(registry);
+      if (!taskWorker) {
+        return c.json({ error: 'Enrichment service unavailable', details: 'TaskWorker not initialized' }, 503);
+      }
+      const repo = taskWorker.getRepository();
+      const purgedCount = await repo.reconcileOrphans();
+      logger.info({ purgedCount }, '[EnrichmentStatus] Reconciled orphan tasks');
+      return c.json({ data: { purgedCount, message: `${purgedCount} orphan tasks deleted` }, error: null });
+    } catch (err: any) {
+      logger.error({ err }, '[EnrichmentStatus] Reconcile orphans error');
+      return c.json({ error: 'Failed to reconcile orphans', details: err.message }, 500);
+    }
+  });
+
   return app;
 }
 
@@ -67,7 +84,7 @@ function getTaskWorker(registry: ModuleRegistry): TaskWorker | null {
 }
 
 /** Build the full enrichment status response from TaskWorker data, scoped to project. */
-async function buildStatusResponse(taskWorker: TaskWorker, projectId: string): Promise<EnrichmentStatusResponse & { activeTasks: Array<{ source: string }>; recentFailures: Array<{ symbolName: string; error: string; taskId: number }> }> {
+async function buildStatusResponse(taskWorker: TaskWorker, projectId: string | null): Promise<EnrichmentStatusResponse & { activeTasks: Array<{ source: string }>; recentFailures: Array<{ symbolName: string; error: string; taskId: number }> }> {
   const repo = taskWorker.getRepository();
   const progress = await taskWorker.getProgress();
 

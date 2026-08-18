@@ -207,15 +207,26 @@ export class PendingTaskRepository {
 
   /**
    * SA4E-165: Reconcile orphan tasks whose entry_id no longer exists.
-   * Marks them FAILED with 'entry_deleted_orphan' error instead of letting them retry forever.
+   * DELETES them entirely — they can never succeed and should not inflate failed counts.
+   * Handles both KB tasks (knowledge_entries) and CODE_ENRICHMENT tasks (symbols).
    */
   async reconcileOrphans(): Promise<number> {
-    const result = await this.db.runAsync(
-      `UPDATE pending_tasks SET status = ?, error = 'entry_deleted_orphan'
-       WHERE status IN (?, ?)
+    // KB tasks: entry_id references knowledge_entries
+    const kbResult = await this.db.runAsync(
+      `DELETE FROM pending_tasks
+       WHERE status IN (?, ?, ?)
+         AND task_type != 'CODE_ENRICHMENT'
          AND entry_id NOT IN (SELECT id FROM knowledge_entries)`,
-      [TaskStatus.FAILED, TaskStatus.PENDING, TaskStatus.PROCESSING],
+      [TaskStatus.PENDING, TaskStatus.PROCESSING, TaskStatus.FAILED],
     );
-    return result.changes;
+    // CODE_ENRICHMENT tasks: entry_id references symbols table
+    const codeResult = await this.db.runAsync(
+      `DELETE FROM pending_tasks
+       WHERE status IN (?, ?, ?)
+         AND task_type = 'CODE_ENRICHMENT'
+         AND entry_id NOT IN (SELECT id FROM symbols)`,
+      [TaskStatus.PENDING, TaskStatus.PROCESSING, TaskStatus.FAILED],
+    );
+    return kbResult.changes + codeResult.changes;
   }
 }

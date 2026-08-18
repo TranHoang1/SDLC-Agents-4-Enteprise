@@ -1,4 +1,4 @@
-﻿/**
+/**
  * MemoryModuleBuilder — fluent builder for MemoryModule initialization.
  * Builder pattern: decomposes the 69-line initialize() into focused steps.
  * Each with*() method handles one sub-step, improving testability and SRP.
@@ -125,11 +125,11 @@ export class MemoryModuleBuilder {
     const engine = injectd.engine ?? new MemoryEngine(this.memAdapter!);
     await engine.startSession(this.config.sessionName);
     this.mod.setEngine(engine);
-    // Backfill existing knowledge_entries into graph_nodes (non-blocking)
-    engine.syncExistingEntriesToGraph().then(n => {
-      this.logger.info({ count: n }, '[MemoryModuleBuilder] Backfilled KB entries into graph_nodes');
+    // Reconcile orphan graph nodes on startup (non-blocking)
+    engine.reconcileOrphanGraphNodes().then(orphans => {
+      if (orphans > 0) this.logger.info({ orphans }, '[MemoryModuleBuilder] Removed orphan graph nodes');
     }).catch((err: unknown) => {
-      this.logger.warn({ err }, '[MemoryModuleBuilder] Backfill KB → graph skipped');
+      this.logger.warn({ err }, '[MemoryModuleBuilder] Graph reconciliation skipped');
     });
     return this;
   }
@@ -193,8 +193,8 @@ export class MemoryModuleBuilder {
   /** Load TaskWorker config overrides from config_changes DB table (non-blocking). */
   private async loadPersistedTaskWorkerConfig(worker: TaskWorker): Promise<void> {
     try {
-      const { getAdminAdapter } = await import('../../admin/db/core.js');
-      const adapter = getAdminAdapter();
+      const { getDbAdapter } = await import('../../admin/db/core.js');
+      const adapter = getDbAdapter();
       const rows = await adapter.allAsync<{ key: string; new_value: string }>(
         "SELECT key, new_value FROM config_changes WHERE section = 'taskWorker' ORDER BY changed_at DESC",
       );

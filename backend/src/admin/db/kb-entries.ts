@@ -1,16 +1,16 @@
 /**
  * admin/db/kb-entries.ts — Knowledge base entry queries via DatabaseAdapter.
- * SA4E-50: Uses getIndexAdapter() async methods for PostgreSQL/SQLite support.
+ * SA4E-50: Uses getDbAdapter() async methods for PostgreSQL/SQLite support.
  * sqlite_master checks are SQLite-only and guarded by engine detection.
  */
 
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
-import { getIndexAdapter, getActiveEngine, logger } from './core.js';
+import { getDbAdapter, getActiveEngine, logger } from './core.js';
 import { buildAdminScopeFilter } from './kb-scope-filter.js';
 
 /** Check if knowledge_entries table exists (SQLite only). */
 async function tableExists(): Promise<boolean> {
-  const adapter = getIndexAdapter();
+  const adapter = getDbAdapter();
   // Guard: if PG adapter not yet connected (async connect in progress), skip gracefully
   if (!adapter.isConnected()) return false;
   if (getActiveEngine() !== 'sqlite') return true; // PG: always exists if schema was run
@@ -27,7 +27,7 @@ async function tableExists(): Promise<boolean> {
 export async function getKbEntryById(entryId: string): Promise<any | null> {
   try {
     if (!(await tableExists())) return null;
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const row = await adapter.getAsync<any>('SELECT * FROM knowledge_entries WHERE id = ?', [entryId]);
     return row || null;
   } catch (err) {
@@ -48,7 +48,7 @@ export async function getKbEntryCount(
 ): Promise<number> {
   try {
     if (!(await tableExists())) return 0;
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const filter = buildAdminScopeFilter(projectId, userId);
 
     if (filter) {
@@ -78,7 +78,7 @@ export async function getKbEntryCount(
  * Admin views need accurate counts even if scope metadata is incomplete.
  */
 async function getUnfilteredKbEntryCount(projectId?: string): Promise<number> {
-  const adapter = getIndexAdapter();
+  const adapter = getDbAdapter();
   if (projectId) {
     const row = await adapter.getAsync<{ cnt: number }>(
       'SELECT COUNT(*) as cnt FROM knowledge_entries WHERE project_id = ? OR project_id IS NULL',
@@ -106,7 +106,7 @@ export async function getKbEntries(
 ): Promise<{ items: any[]; total: number }> {
   try {
     if (!(await tableExists())) return { items: [], total: 0 };
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
 
     // Validate sort column to prevent SQL injection
     const validColumns = ['id', 'created_at', 'updated_at', 'source', 'type',

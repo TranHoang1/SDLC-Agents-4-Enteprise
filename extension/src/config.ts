@@ -72,6 +72,27 @@ export const CORE_COMPONENTS: Component[] = [
         description: "Agent instruction files for the Agentic Chat panel",
         sourcePath: ".code-intel/agents",
         targetPath: ".code-intel/agents"
+    },
+    {
+        id: "code-intel-hooks",
+        label: "Code Intelligence Hooks (.code-intel/hooks/)",
+        description: "KB hooks: auto-learn, code indexing, drawio validation, streaming",
+        sourcePath: ".code-intel/hooks",
+        targetPath: ".code-intel/hooks"
+    },
+    {
+        id: "code-intel-skills",
+        label: "Agent Skills (.code-intel/skills/)",
+        description: "Specialized skills: diagrams, jira, code-standards, bug-diagnosis",
+        sourcePath: ".code-intel/skills",
+        targetPath: ".code-intel/skills"
+    },
+    {
+        id: "code-intel-root",
+        label: "Code Intelligence Root Files (.code-intel/AGENTS.md)",
+        description: "Root agent instructions and project configuration",
+        sourcePath: ".code-intel/AGENTS.md",
+        targetPath: ".code-intel/AGENTS.md"
     }
 ];
 

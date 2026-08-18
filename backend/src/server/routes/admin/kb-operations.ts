@@ -138,15 +138,13 @@ export function createKbOperationsRoutes(ctx: AdminContext): Hono {
     const permCheck = await ctx.requirePermission(c, user.userId, 'KB_WRITE');
     if (permCheck instanceof Response) return permCheck;
     try {
-      const { getIndexAdapter } = await import('../../../admin/db/core.js');
-      const adapter = getIndexAdapter();
+      const { getDbAdapter } = await import('../../../admin/db/core.js');
+      const adapter = getDbAdapter();
       const result = await adapter.runAsync('DELETE FROM knowledge_entries');
-      // resetGraph uses sync transaction — use async variant for PG compatibility
-      const { getAdminAdapter } = await import('../../../admin/db/core.js');
-      const adminAdapter = getAdminAdapter();
-      await adminAdapter.transactionAsync(async () => {
-        await adminAdapter.execAsync('DELETE FROM graph_nodes');
-        await adminAdapter.execAsync('DELETE FROM graph_edges');
+      // Clear graph visualization data (same unified DB)
+      await adapter.transactionAsync(async () => {
+        await adapter.execAsync('DELETE FROM graph_nodes');
+        await adapter.execAsync('DELETE FROM graph_edges');
       });
       await recordAudit(user.userId, user.username, 'KB_DELETE_ALL', 'kb', undefined, `Deleted ${result.changes} entries`);
       return c.json({ success: true, deleted: result.changes });

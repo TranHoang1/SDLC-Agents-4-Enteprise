@@ -941,4 +941,89 @@ export class PegaHttpClient {
     }
     return [];
   }
+
+  /**
+   * SA4E-173: Fetch data class pzInsKeys from D_pyDataTypesOfApp DataPage.
+   * @param appName - e.g. "HRAppsV2"
+   * @param appVersion - e.g. "01.01" (dot format, NOT dash)
+   */
+  public async fetchDataTypesOfApp(appName: string, appVersion: string): Promise<string[]> {
+    const base = this.getPegaEndpoint();
+    const authHeader = await this.getAuthHeader();
+    const dotVersion = appVersion.replace(/-/g, '.');
+    const url = `${base}/api/CodeIntelligence/v1/datapage/list?dataPageName=D_pyDataTypesOfApp`;
+    try {
+      const res = await this.fetchWithRetry(url, {
+        method: 'POST',
+        headers: { Authorization: authHeader, Accept: 'application/json', 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ AppVersion: dotVersion, AppName: appName }),
+      });
+      if (!res.ok) return [];
+      const json = await res.json() as Record<string, unknown>;
+      const results = json.pxResults as Array<Record<string, unknown>> | undefined;
+      if (!Array.isArray(results)) return [];
+      return results.map(r => r.pzInsKey as string).filter(Boolean);
+    } catch (err: any) {
+      this.log(`[PegaHttpClient] fetchDataTypesOfApp failed: ${err.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * SA4E-173: Fetch direct children (categories or rules) for a class via CodeIntelligence API.
+   * Level 0: returns first-level categories (pyLabel)
+   * Level 1: returns second-level categories (pyLabel)
+   * Level 2: returns rule info (pyClass, pyClassName, pyRuleName)
+   */
+  public async fetchDirectChildren(
+    className: string, categoryLevel1?: string, categoryLevel2?: string,
+  ): Promise<Array<Record<string, unknown>>> {
+    const base = this.getPegaEndpoint();
+    const authHeader = await this.getAuthHeader();
+    let params = `.ClassName=${encodeURIComponent(className)}`;
+    if (categoryLevel1) params += `&.CategoryLevel1=${encodeURIComponent(categoryLevel1)}`;
+    if (categoryLevel2) params += `&.CategoryLevel2=${encodeURIComponent(categoryLevel2)}`;
+    const url = `${base}/api/CodeIntelligence/v1/rules/directChildren?${params}`;
+    try {
+      const res = await this.fetchWithRetry(url, {
+        method: 'POST',
+        headers: { Authorization: authHeader, Accept: 'application/json' },
+        body: '',
+      });
+      if (!res.ok) return [];
+      const json = await res.json() as Record<string, unknown>;
+      const results = json.pxResults as Array<Record<string, unknown>> | undefined;
+      return Array.isArray(results) ? results : [];
+    } catch (err: any) {
+      this.log(`[PegaHttpClient] fetchDirectChildren failed: ${err.message}`);
+      return [];
+    }
+  }
+
+  /**
+   * SA4E-173: Query rule pzInsKeys by type, appliesTo class, and rule name.
+   */
+  public async queryRuleInsKeys(
+    pxObjClass: string, appliesTo: string, pyRuleName: string,
+  ): Promise<string[]> {
+    const base = this.getPegaEndpoint();
+    const authHeader = await this.getAuthHeader();
+    const params = `pxObjClass=${encodeURIComponent(pxObjClass)}&appliesTo=${encodeURIComponent(appliesTo)}&pyRuleName=${encodeURIComponent(pyRuleName)}`;
+    const url = `${base}/api/CodeIntelligence/v1/rules/query?${params}`;
+    try {
+      const res = await this.fetchWithRetry(url, {
+        method: 'POST',
+        headers: { Authorization: authHeader, Accept: 'application/json' },
+        body: '',
+      });
+      if (!res.ok) return [];
+      const json = await res.json() as Record<string, unknown>;
+      const results = json.pxResults as Array<Record<string, unknown>> | undefined;
+      if (!Array.isArray(results)) return [];
+      return results.map(r => r.pzInsKey as string).filter(Boolean);
+    } catch (err: any) {
+      this.log(`[PegaHttpClient] queryRuleInsKeys failed: ${err.message}`);
+      return [];
+    }
+  }
 }

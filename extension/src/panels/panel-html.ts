@@ -7,13 +7,13 @@ import { PanelType, PANEL_TITLES } from "../types";
 import { BasePanel } from "./base-panel";
 import { getProjectId } from "../extension";
 import { getNonce } from "../mcp-server-manager";
+import { getBackendUrl } from "../config/backend-url";
 
 /**
  * Generates an iframe that embeds the backend server's UI.
  */
 export function getIframeHtml(panelType: PanelType, authTokenProvider?: () => string): string {
-  const config = vscode.workspace.getConfiguration("kiroSdlc");
-  const backendUrl = config.get<string>("backend.url") || "http://127.0.0.1:48721";
+  const backendUrl = getBackendUrl();
   const token = authTokenProvider ? authTokenProvider() : "";
   const encodedToken = encodeURIComponent(token);
   const pageMapping: Record<string, string> = {

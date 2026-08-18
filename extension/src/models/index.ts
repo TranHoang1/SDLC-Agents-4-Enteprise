@@ -9,3 +9,4 @@ export type {
 } from "./PegaSchemaModels";
 export type { RuleSetRuleSummary, CrawlPlanItem } from "./PegaCrawlModels";
 export { summaryToCrawlItem, parseRuleSetEntry } from "./PegaCrawlModels";
+export type { ClassRuleInput, DataTableResolveResult, DataTableRuleInfo } from "./DataTableModels";

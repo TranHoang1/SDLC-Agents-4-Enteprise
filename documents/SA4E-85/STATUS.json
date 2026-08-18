@@ -71,6 +71,7 @@
     "testing": {
       "status": "in_progress",
       "note": "TER.md created: 838 automated tests pass (805 extension + 33 backend KB). 0 failed. 10 todo. SIT-SYNC-01 (multi-IDE 2 real IDEs) + E2E-UI Playwright (UI-HYD-01) pending manual execution. DEF-001 pre-existing (mcp-tools.test.ts missing auth header, out of scope).",
+      "hotfix": "DEF-002 (2026-08-17): 'HTTP 404: Thread not found' khi gửi chat. Layer causes: (1) Contract mismatch — mock upsert thread on PUT checkpoint (LangGraph randomUUID mỗi run không POST /threads) → saveCheckpoint auto-create thread (giữ 404 cho workspace khác, #18). (2) events.id INTEGER PRIMARY KEY không auto-increment trên PG → migrate() tạo sequence knowledge_events_id_seq + ALTER DEFAULT nextval (isPostgres duck-type); appendMessage INSERT OR IGNORE→ON CONFLICT DO NOTHING. (3) Race duplicate threads_pkey → ensureThread (INSERT ON CONFLICT DO NOTHING + re-read), THREAD_CREATED chỉ khi created=true. (4) Race 404 giả — pre-check getThread không lọc workspace làm loser (cùng workspace) bị trả null; bỏ pre-check, dựa ensureThread upsert + ownedThread re-verify (khác workspace vẫn 404). Tests: 38 KB pass, tsc clean, full backend 2659 pass | 4 skip, E2E live 8×concurrent PUT→200 hết, intruder workspace→404.",
       "file": "TER.md"
     },
     "pentest": {

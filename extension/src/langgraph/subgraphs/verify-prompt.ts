@@ -11,30 +11,28 @@ If the agent ASKS THE USER for file paths or information instead of using tools 
 The agent must NEVER ask the user for information it can look up itself.
 
 ## Evaluation:
-- COMPLETE: Agent used tools AND provided a substantive answer with real data/code references
-- TOOL_NEEDED: Agent should call a specific tool (ALWAYS prefer this over INCOMPLETE)
+- COMPLETE: Agent provided a substantive answer to the user's actual question.
+- TOOL_NEEDED: Agent should call a specific tool ONLY if the user explicitly asked about code/files and the agent hasn't read any yet.
 
 ## Your output (EXACTLY one line, no explanation):
 - COMPLETE
-- TOOL_NEEDED: read_file {"path":"<the file path the agent should read>"}
-- TOOL_NEEDED: list_directory {"path":"<the directory the agent should list>","recursive":true}
+- TOOL_NEEDED: read_file {"path":"<specific file path the agent should read>"}
+- TOOL_NEEDED: list_directory {"path":"<specific directory>"}
 
 ## DECISION LOGIC:
-1. If agent said "please provide", "which file", "cho tôi biết", "bạn muốn" → respond:
-   TOOL_NEEDED: list_directory {"path":".","recursive":true}
-2. If agent listed a directory but didn't read any file → respond:
-   TOOL_NEEDED: read_file {"path":"<the most likely entry point it found (e.g. index.ts, main.ts, app.ts, extension.ts, or package.json — infer from the file list the agent already printed)>"}
-3. If agent tried to list a directory that turned out empty → respond:
-   TOOL_NEEDED: list_directory {"path":".","recursive":true}
-4. If agent read files AND gave substantive review with code references → respond:
-   COMPLETE
+1. If user asked a general question (explanation, concept, opinion, help) AND agent answered it → COMPLETE
+2. If agent said "please provide", "which file", "cho tôi biết", "bạn muốn" BUT user asked about specific code → respond:
+   TOOL_NEEDED: list_directory {"path":"."}
+3. If user asked about specific code AND agent only listed directory without reading files → respond:
+   TOOL_NEEDED: read_file {"path":"<entry point from listing>"}
+4. If agent read files AND gave substantive review with code references → COMPLETE
+5. If user did NOT ask about code/files (asked a question, concept, or general help) → COMPLETE regardless of whether tools were used
 
-## IMPORTANT GUIDANCE:
-- Do NOT invent file paths. Only suggest paths that are plausible from the agent's own tool output (its listing of the workspace). A monorepo has no "src" at root; a single-package repo might. If unsure, prefer:
-   TOOL_NEEDED: list_directory {"path":".","recursive":true}
-- Never loop forever. After 2 rounds of the same TOOL_NEEDED with no progress, mark COMPLETE.
-
-## CRITICAL: NEVER respond with just "INCOMPLETE". ALWAYS use TOOL_NEEDED with a specific tool.
+## CRITICAL RULES:
+- Default to COMPLETE when uncertain. Do NOT force tool calls for non-code questions.
+- NEVER use TOOL_NEEDED for general questions like "what is X?", "how does Y work?", "explain Z"
+- Only use TOOL_NEEDED when user EXPLICITLY asked to read/review/check specific code or files
+- Do NOT invent file paths. Only suggest paths from the agent's own tool output.
 `;
 
 export function buildVerifyMessages(

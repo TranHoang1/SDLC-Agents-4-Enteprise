@@ -26,6 +26,7 @@ import { AuthManager } from "../auth/AuthManager";
 import { KiroTreeViewProvider } from "../sidebar/tree-view-provider";
 import { showUserError } from "../utils/panel-utils";
 import { writeJsonFile } from "../utils/mcp-config-file";
+import { getBackendUrl } from "../config/backend-url";
 
 interface CommandDeps {
   mcpManager?: IServerManager;
@@ -165,7 +166,7 @@ async function handleStatus(context: vscode.ExtensionContext): Promise<void> {
 
 async function handleOpenKbBrowser(mcpManager?: IServerManager): Promise<void> {
   if (!mcpManager || mcpManager.status !== "running") { vscode.window.showErrorMessage("MCP server not running."); return; }
-  const backendUrl = vscode.workspace.getConfiguration("kiroSdlc").get<string>("backend.url", "http://127.0.0.1:48721");
+  const backendUrl = getBackendUrl();
   await vscode.env.openExternal(vscode.Uri.parse(`${backendUrl}/admin`));
 }
 

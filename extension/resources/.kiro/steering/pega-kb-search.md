@@ -152,7 +152,7 @@ grep_search(query: "GetActionsListForWorkList", includePattern: "rules/Rule-Obj-
 
 ```
 execute_dynamic_tool(toolName: "kb_graph_query", arguments: { "query": "Work-Claim", "type": "CLASS" })
-grep_search(query: "pyParentClass", includePattern: "rules/Rule-Obj-Class/Work-Claim*.pega.json")
+grep_search(query: "pyDerivesFrom", includePattern: "rules/Rule-Obj-Class/Work-Claim*.pega.json")
 ```
 
 ---

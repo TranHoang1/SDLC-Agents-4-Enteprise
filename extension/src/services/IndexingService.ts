@@ -21,6 +21,8 @@ export class IndexingService {
     private statusBarItem: vscode.StatusBarItem | null = null;
     /** Token refresh callback — set by caller to enable retry-on-401. */
     refreshTokenFn?: () => Promise<string | undefined>;
+    /** Concurrency guard — prevents overlapping indexing operations. */
+    private isProcessing = false;
 
     constructor(
         private readonly httpClient: IndexerHttpClient,
@@ -64,7 +66,15 @@ export class IndexingService {
     }
 
     async indexWorkspace(root: string, options: IndexOptions, token?: string, secrets?: vscode.SecretStorage): Promise<string[]> {
+        // Concurrency guard: abort if already processing
+        if (this.isProcessing) {
+            vscode.window.showWarningMessage("⚠️ Indexing already in progress. Please wait for it to complete.");
+            return ["⚠️ Aborted — indexing already in progress"];
+        }
+        this.isProcessing = true;
         const results: string[] = [];
+
+        try {
 
         // Auto-enable schema generation only for Pega projects without existing schemas
         if (!options.schemas && secrets && this.isPegaProject(root) && !this.hasExistingSchemas(root)) {
@@ -95,6 +105,15 @@ export class IndexingService {
                         this.showProgress("Indexing Pega project rules...");
                         const pegaSummary = await this.runPegaProjectIndexer(root, report, secrets);
                         if (pegaSummary) { results.push(pegaSummary); }
+                        // Auto-sync to symbols table after Pega indexing (Phase 2)
+                        if (!options.sync) {
+                            this.showProgress("Auto-syncing Pega rules to symbols...");
+                            report.report({ message: "Auto-syncing indexed Pega rules to symbols + enrichment..." });
+                            const { getProjectId } = await import("../extension");
+                            const projectId = getProjectId() || "PegaCollProj";
+                            const syncResult = await this.httpClient.syncPegaRulesToKb(projectId, token);
+                            results.push(syncResult.message);
+                        }
                     } else {
                         this.showProgress("Scanning source code...");
                         report.report({ message: "Scanning and uploading source code files..." });
@@ -144,6 +163,11 @@ export class IndexingService {
         );
         // SA4E-101: Start polling backend TaskWorker progress for LLM analysis status bar
         this.pollTaskWorkerProgress();
+        // Force immediate enrichment status poll to update KB status bar
+        import("../extension").then(ext => ext.getEnrichmentService()?.pollNow()).catch(() => {});
+        } finally {
+            this.isProcessing = false;
+        }
         return results;
     }
 

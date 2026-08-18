@@ -46,8 +46,9 @@ export class KnowledgeDb {
 
   /** Detect PostgreSQL via runtime duck-typing (composed adapters expose getEngine). */
   private isPostgres(): boolean {
-    return typeof (this.adapter as { getEngine?: () => string }).getEngine === 'function'
-      && (this.adapter as { getEngine: () => string }).getEngine() === 'postgresql';
+    const withEngine = (this.adapter as unknown as { getEngine?: () => string });
+    return typeof withEngine.getEngine === 'function'
+      && (withEngine.getEngine as () => string)() === 'postgresql';
   }
 
   /** Run schema migration (CREATE IF NOT EXISTS). */
@@ -74,6 +75,35 @@ export class KnowledgeDb {
       'INSERT INTO threads (thread_id, workspace_id, title, agent_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [t.thread_id, t.workspace_id, t.title, t.agent_id, t.status, t.created_at, t.updated_at],
     );
+  }
+
+  /**
+   * Concurrency-safe thread creation for the checkpointer path. LangGraph fires
+   * put/putWrites concurrently for the SAME thread_id — both may observe the
+   * thread absent and both attempt creation. ON CONFLICT DO NOTHING lets one win;
+   * the loser re-reads the winning row. `created` tells the caller whether to
+   * append the THREAD_CREATED event (exactly once).
+   */
+  async ensureThread(t: Thread): Promise<{ created: boolean; thread: Thread }> {
+    const now = new Date().toISOString();
+    const candidate: Thread = {
+      thread_id: t.thread_id,
+      workspace_id: t.workspace_id,
+      title: t.title ?? 'New thread',
+      agent_id: t.agent_id ?? null,
+      status: 'active',
+      created_at: t.created_at ?? now,
+      updated_at: now,
+    };
+    const result = await this.adapter.runAsync(
+      `INSERT INTO threads (thread_id, workspace_id, title, agent_id, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)
+       ON CONFLICT (thread_id) DO NOTHING`,
+      [candidate.thread_id, candidate.workspace_id, candidate.title, candidate.agent_id, candidate.status, candidate.created_at, candidate.updated_at],
+    );
+    const row = await this.adapter.getAsync<Thread>(
+      'SELECT * FROM threads WHERE thread_id = ?', [candidate.thread_id],
+    );
+    return { created: (result.changes ?? 0) > 0, thread: row as Thread };
   }
 
   async listThreads(workspaceId: string): Promise<Thread[]> {
