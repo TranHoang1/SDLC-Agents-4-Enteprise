@@ -1,0 +1,39 @@
+{
+  "description": "SA4E-97: Pega Records tree categories for graph node clustering. Maps pxObjClass keywords to Dev Studio navigation categories.",
+  "categories": [
+    "APPLICATION_DEFINITION",
+    "DATA_MODEL",
+    "DECISION",
+    "GENERATIVE_AI",
+    "INTEGRATION_CONNECTORS",
+    "INTEGRATION_MAPPING",
+    "INTEGRATION_RESOURCES",
+    "INTEGRATION_SERVICES",
+    "ORGANIZATION",
+    "PROCESS",
+    "REPORTS",
+    "SECURITY",
+    "SURVEY",
+    "SYSADMIN",
+    "TECHNICAL",
+    "USER_INTERFACE"
+  ],
+  "rules": [
+    { "keywords": ["Activity", "Flow", "FlowAction", "Obj-Flow", "Obj-Activity"], "category": "PROCESS" },
+    { "keywords": ["Property", "Field-Value", "Obj-Property"], "category": "DATA_MODEL" },
+    { "keywords": ["Decision", "When", "DecisionTable", "DecisionTree", "Map-Value"], "category": "DECISION" },
+    { "keywords": ["HTML", "Section", "Harness", "UIComponent", "Portal", "Skin"], "category": "USER_INTERFACE" },
+    { "keywords": ["Connect-"], "category": "INTEGRATION_CONNECTORS" },
+    { "keywords": ["MappingActivity", "Obj-MappingActivity"], "category": "INTEGRATION_MAPPING" },
+    { "keywords": ["Service-"], "category": "INTEGRATION_SERVICES" },
+    { "keywords": ["Resource", "Obj-Resource", "ServicePackage"], "category": "INTEGRATION_RESOURCES" },
+    { "keywords": ["Report", "ListView", "Obj-Report", "Obj-ListView"], "category": "REPORTS" },
+    { "keywords": ["Access-", "Privilege", "Obj-Privilege"], "category": "SECURITY" },
+    { "keywords": ["Data-Admin-"], "category": "ORGANIZATION" },
+    { "keywords": ["Application", "Rule-Application", "RuleSet"], "category": "APPLICATION_DEFINITION" },
+    { "keywords": ["GenAI", "GenerativeAI", "LLM"], "category": "GENERATIVE_AI" },
+    { "keywords": ["Survey"], "category": "SURVEY" },
+    { "keywords": ["SysAdmin", "System-", "Agent-Schedule"], "category": "SYSADMIN" },
+    { "keywords": ["Data-", "Class-"], "category": "DATA_MODEL" }
+  ]
+}
