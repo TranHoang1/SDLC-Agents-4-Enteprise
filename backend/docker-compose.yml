@@ -1,30 +1,18 @@
 # SA4E-44 Docker Compose — Local Dev & Test Environment
 
 services:
-  # Base image — OS, draw.io, Electron deps. Build once; rebuild only when system deps change.
-  # Usage: docker compose --profile base build base
-  base:
-    build:
-      context: .
-      dockerfile: Dockerfile.base
-    image: sa4e-base:latest
-    profiles:
-      - base
-
   # Backend service (Node.js 20 + Hono)
   backend:
     build:
       context: .
       dockerfile: Dockerfile
       target: production
-      args:
-        BASE_IMAGE: sa4e-base:latest
     container_name: sa4e-backend
     environment:
       NODE_ENV: development
       PORT: 48721
-#      DATABASE_URL: postgresql://sa4e_user:sa4e_local_dev_password@postgres:5432/sa4e_db
-#      DATABASE_ADAPTER: postgresql
+      #      DATABASE_URL: postgresql://sa4e_user:sa4e_local_dev_password@postgres:5432/sa4e_db
+      #      DATABASE_ADAPTER: postgresql
       TASK_WORKER_ENABLED: "true"
       TASK_WORKER_POLL_INTERVAL_MS: "5000"
       TASK_WORKER_MAX_RETRIES: "3"
