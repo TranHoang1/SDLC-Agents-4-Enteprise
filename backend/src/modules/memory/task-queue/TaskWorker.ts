@@ -81,6 +81,21 @@ export class TaskWorker {
   setEmbeddingService(service: EmbeddingService): void { this.embeddingService = service; }
   setLlmService(service: { getConfig(): { model: string }; complete(messages: LLMMessage[]): Promise<{ content: string }> }): void { this.llmService = service; }
 
+  /** SA4E-107: Wire CodeEnrichmentHandler — stores reference for code summary tasks. */
+  setCodeEnrichmentHandler(_handler: unknown): void {
+    // Handler's LLM is already set via setLlmService. This is a no-op wiring point.
+  }
+
+  /** SA4E-99: Get current progress info (file being processed). */
+  async getProgress(): Promise<{ file: string | null } | null> {
+    const active = await this.repo.getFirstByStatus('PROCESSING');
+    if (!active) return null;
+    try {
+      const payload = JSON.parse(active.payload);
+      return { file: payload.filePath || payload.file_path || payload.source || null };
+    } catch { return null; }
+  }
+
   /**
    * Update mutable config fields at runtime — no restart needed.
    * Called when admin changes taskWorker config via Admin UI.

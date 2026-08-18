@@ -124,7 +124,7 @@ async function buildStatusResponse(taskWorker: TaskWorker, projectId: string | n
     estimatedCompletion,
     currentFile: progress?.file ?? null,
     lastPollAt: stats.lastPollAt,
-    activeTasks: await getActiveTasks(repo, projectId),
+    activeTasks: await getActiveTasks(repo, projectId ?? undefined),
     recentFailures: await getRecentFailures(repo),
   };
 }

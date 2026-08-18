@@ -41,6 +41,14 @@ export class PendingTaskRepository {
     return { ...task, status: TaskStatus.PROCESSING };
   }
 
+  /** Get first task with given status (for progress display). */
+  async getFirstByStatus(status: string): Promise<PendingTask | null> {
+    return (await this.db.getAsync<PendingTask>(
+      `SELECT * FROM pending_tasks WHERE status = ? ORDER BY started_at DESC LIMIT 1`,
+      [status],
+    )) ?? null;
+  }
+
   /**
    * Claim up to `count` PENDING tasks atomically.
    * Each task is claimed individually (optimistic lock on status) to avoid

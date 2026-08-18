@@ -8,6 +8,8 @@ export enum TaskType {
   VECTOR_EMBEDDING = 'VECTOR_EMBEDDING',
   /** SA4E-99: LLM summary + pseudo code for code symbols (functions, classes). */
   CODE_SUMMARY = 'CODE_SUMMARY',
+  /** Alias for CODE_SUMMARY — used by CodeEnrichmentTaskCreator and PegaSymbolSync. */
+  CODE_ENRICHMENT = 'CODE_SUMMARY',
 }
 
 export enum TaskStatus {
@@ -36,4 +38,5 @@ export interface CreateTaskInput {
   entry_id: number;
   payload: object;
   max_retries?: number;
+  project_id?: string | null;
 }
