@@ -26,14 +26,13 @@ const SERIAL_TABLES = [
 ] as const;
 
 export async function migrate004ResetSequences(db: DatabaseAdapter): Promise<void> {
-  // Only needed for PostgreSQL — detect by trying pg_get_serial_sequence
-  let isPostgres = false;
+  // Only needed for PostgreSQL — detect by trying information_schema
   try {
     await db.allAsync(`SELECT 1 FROM information_schema.tables LIMIT 1`);
-    isPostgres = true;
-  } catch { return; } // SQLite — skip
-
-  if (!isPostgres) return;
+  } catch (err) {
+    console.debug('[migration-004] Not PostgreSQL — skipping sequence reset:', (err as Error).message);
+    return; // SQLite — skip
+  }
 
   for (const table of SERIAL_TABLES) {
     try {

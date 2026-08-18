@@ -147,7 +147,7 @@ function mapSymbolRow(row: any): SearchResult {
       id: row.id,
       content: row.doc_comment || '',
       summary: row.summary || `${row.kind}: ${row.name}`,
-      type: 'PEGA_RULE',
+      type: row.kind,
       source: row.signature || row.name,
       tags: `pega,${row.kind}`,
       tier: 'SEMANTIC',

@@ -59,16 +59,16 @@ describe('isPegaQuery', () => {
 // --- inferNodeType ---
 
 describe('inferNodeType', () => {
-  it('returns FUNCTION for Activity rules', () => {
-    expect(inferNodeType('Rule-Obj-Activity ValidateData')).toBe('FUNCTION');
+  it('returns ACTIVITY for Activity rules', () => {
+    expect(inferNodeType('Rule-Obj-Activity ValidateData')).toBe('ACTIVITY');
   });
 
-  it('returns FUNCTION for Flow rules', () => {
-    expect(inferNodeType('Rule-Obj-Flow ProcessClaim')).toBe('FUNCTION');
+  it('returns FLOW for Flow rules', () => {
+    expect(inferNodeType('Rule-Obj-Flow ProcessClaim')).toBe('FLOW');
   });
 
-  it('returns FUNCTION for Decision rules', () => {
-    expect(inferNodeType('Rule-Obj-Decision EligibilityCheck')).toBe('FUNCTION');
+  it('returns DECISION_TABLE for Decision rules', () => {
+    expect(inferNodeType('Rule-Obj-Decision EligibilityCheck')).toBe('DECISION_TABLE');
   });
 
   it('returns CLASS for Work- classes', () => {
@@ -106,7 +106,7 @@ describe('graphNodeToResult', () => {
     const result = graphNodeToResult(mockNode);
     expect(result.id).toBe('entry-123');
     expect(result.summary).toBe('ValidateAddress');
-    expect(result.type).toBe('PEGA_RULE');
+    expect(result.type).toBe('FUNCTION');
     expect(result.source).toBe('graph_fallback');
     expect(result.score).toBe(0.5);
     expect(result.tags).toContain('pega');

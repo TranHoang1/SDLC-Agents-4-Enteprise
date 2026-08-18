@@ -2,7 +2,7 @@
   "name": "sdlc-agents-4-enterprise",
   "displayName": "SDLC Agents 4 Enterprise",
   "description": "Multi-agent SDLC pipeline for enterprise — 9 AI agents (SM, BA, TA, SA, QA, DEV, DevOps, Security, UI) orchestrated via MCP",
-  "version": "1.29.0",
+  "version": "1.30.0",
   "publisher": "dnguyenminh",
   "license": "MIT",
   "repository": {
@@ -79,6 +79,10 @@
       {
         "command": "sa4e.retryFailedEnrichment",
         "title": "SDLC Agents: Retry Failed Enrichment"
+      },
+      {
+        "command": "sa4e.showEnrichmentStatus",
+        "title": "SDLC Agents: Show Enrichment Status"
       },
       {
         "command": "kiroSdlc.openWorkflowGraph",

@@ -158,7 +158,8 @@ export class MemoryEngine extends MemoryEngineCrud {
       const opts = { enablePredictive: row?.value === 'true' };
       this.cachedScoringOptions = opts;
       return opts;
-    } catch (e) {
+    } catch (err) {
+      console.debug('[memory-core] Failed to read decay_config, using cached scoring options:', (err as Error).message);
       return this.cachedScoringOptions ?? {};
     }
   }

@@ -2,7 +2,7 @@
  * SA4E-110 — Unit tests for RateLimiter (UT-10, UT-15)
  * Token bucket algorithm and reconnect mode behavior.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, vi, beforeEach, afterEach } from 'vitest';
 import { RateLimiter } from '../clients/rate-limiter.js';
 
 describe('UT-10: RateLimiter — token bucket behavior', () => {

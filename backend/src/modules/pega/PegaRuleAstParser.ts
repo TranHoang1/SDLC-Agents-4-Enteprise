@@ -198,7 +198,7 @@ export class PegaRuleAstParser {
     const props = this.stripSystemFields(json);
     delete props.steps;
     const steps = Array.isArray(json.steps) ? json.steps : [];
-    const children: AstNode[] = steps.map((s: unknown, i: number) => {
+    const children: AstNode[] = steps.map((s: unknown, _i: number) => {
       const step = s as Record<string, unknown>;
       return {
         type: 'Step',
@@ -473,7 +473,7 @@ export class PegaRuleAstParser {
     return lines.join('\n');
   }
 
-  private getSemanticProperties(props: Record<string, unknown>, ruleType: string): Record<string, unknown> {
+  private getSemanticProperties(props: Record<string, unknown>, _ruleType: string): Record<string, unknown> {
     const skip = new Set([
       'pyFormType', 'pyApplet', 'pyAppletHarness', 'pyClassGroupIndicator',
       'pyClassType', 'pyClassAllowState', 'pyClassInheritance',

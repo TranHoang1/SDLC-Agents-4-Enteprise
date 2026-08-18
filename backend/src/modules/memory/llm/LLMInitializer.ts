@@ -76,7 +76,7 @@ async function autoDetectModel(baseUrl: string): Promise<string> {
   } catch (err: any) {
     clearTimeout(timeout);
     if (err.message?.includes('LLM_MODEL')) throw err;
-    throw new Error(`LLM_MODEL not configured and cannot auto-detect from ${modelsUrl}: ${err.message}`);
+    throw new Error(`LLM_MODEL not configured and cannot auto-detect from ${modelsUrl}: ${err.message}`, { cause: err });
   }
 }
 
@@ -123,8 +123,8 @@ export function initLLMInBackground(
       // SA4E-107: Wire CodeEnrichmentHandler into TaskWorker for LLM enrichment of code symbols
       try {
         const { CodeEnrichmentHandler } = await import('../../../engine/enrichment/CodeEnrichmentHandler.js');
-        const { getAdminAdapter } = await import('../../../admin/db/core.js');
-        const adapter = getAdminAdapter();
+        const { getDbAdapter } = await import('../../../admin/db/core.js');
+        const adapter = getDbAdapter();
         const enrichHandler = new CodeEnrichmentHandler(adapter, llmService, logger);
         taskWorker?.setCodeEnrichmentHandler(enrichHandler);
         logger.info('CodeEnrichmentHandler initialized — LLM code enrichment enabled');

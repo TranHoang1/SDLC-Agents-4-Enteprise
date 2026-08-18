@@ -1,6 +1,6 @@
 /**
  * admin/db/core.ts — Central database access layer (unified single DB).
- * SA4E-45: getIndexAdapter() / getAdminAdapter() enable PostgreSQL/MySQL support.
+ * SA4E-45: getDbAdapter() / getDbAdapter() enable PostgreSQL/MySQL support.
  * SA4E-49: Consolidated into single unified DB file (index.db).
  * SA4E-53: Removed raw better-sqlite3 import; uses SqliteAdapter for creation.
  */
@@ -74,51 +74,34 @@ function getUnifiedSqliteAdapter(): SqliteAdapter {
 
 // --- DatabaseAdapter layer (multi-DB support) ---
 
-let indexAdapter: DatabaseAdapter | null = null;
-let adminAdapter: DatabaseAdapter | null = null;
+let dbAdapter: DatabaseAdapter | null = null;
 
 /**
- * Get DatabaseAdapter for index data (knowledge_entries, files, symbols, etc.).
- * SA4E-49: Now shares the same unified DB as admin tables.
- * When engine=sqlite: wraps the unified DB via SqliteAdapter.
- * When engine=postgresql/mysql: connects to the configured remote DB.
+ * Get the unified DatabaseAdapter (single instance for all data).
+ * SA4E-49: All tables (knowledge_entries, files, symbols, graph_nodes, users,
+ * sessions, etc.) live in one database. One adapter, one connection pool.
  */
-export function getIndexAdapter(): DatabaseAdapter {
-  if (!indexAdapter) {
+export function getDbAdapter(): DatabaseAdapter {
+  if (!dbAdapter) {
     const engine = getActiveEngine();
     if (engine === 'sqlite') {
-      indexAdapter = getUnifiedSqliteAdapter();
+      dbAdapter = getUnifiedSqliteAdapter();
     } else {
       const configService = new DatabaseConfigService(DATA_DIR);
       const activeConfig = configService.getActiveConfig();
-      indexAdapter = DatabaseAdapterFactory.create(activeConfig);
-      indexAdapter.connect().catch((err) => {
-        logger.error({ err }, '[admin] Failed to connect index adapter');
+      dbAdapter = DatabaseAdapterFactory.create(activeConfig);
+      dbAdapter.connect().catch((err) => {
+        logger.error({ err }, '[admin] Failed to connect DB adapter');
       });
     }
   }
-  return indexAdapter;
+  return dbAdapter;
 }
 
-export function getAdminAdapter(): DatabaseAdapter {
-  if (!adminAdapter) {
-    const engine = getActiveEngine();
-    if (engine === 'sqlite') {
-      adminAdapter = getUnifiedSqliteAdapter();
-    } else {
-      const configService = new DatabaseConfigService(DATA_DIR);
-      const activeConfig = configService.getActiveConfig();
-      adminAdapter = DatabaseAdapterFactory.create(activeConfig);
-      adminAdapter.connect().catch((err) => {
-        logger.error({ err }, '[admin] Failed to connect admin adapter');
-      });
-    }
-  }
-  return adminAdapter;
-}
+
 
 /**
- * Initialize DB adapters and await connection.
+ * Initialize DB adapter and await connection.
  * MUST be called at startup BEFORE any module initialization.
  * For SQLite: instant (sync). For PostgreSQL/MySQL: awaits pool connection.
  * @throws Error if connection fails (server should not start)
@@ -126,32 +109,22 @@ export function getAdminAdapter(): DatabaseAdapter {
 export async function initAdapters(): Promise<void> {
   const engine = getActiveEngine();
   if (engine === 'sqlite') {
-    // SQLite: create adapters synchronously — nothing async to await
-    getIndexAdapter();
-    getAdminAdapter();
+    getDbAdapter();
     return;
   }
 
   const configService = new DatabaseConfigService(DATA_DIR);
   const activeConfig = configService.getActiveConfig();
+  const adapter = DatabaseAdapterFactory.create(activeConfig);
+  await adapter.connect();
+  dbAdapter = adapter;
 
-  // Create and await both adapters in parallel
-  const idx = DatabaseAdapterFactory.create(activeConfig);
-  const adm = DatabaseAdapterFactory.create(activeConfig);
-
-  await Promise.all([idx.connect(), adm.connect()]);
-
-  // Cache after successful connection
-  indexAdapter = idx;
-  adminAdapter = adm;
-
-  logger.info({ engine }, '[admin] DB adapters connected and ready');
+  logger.info({ engine }, '[admin] DB adapter connected and ready');
 }
 
-/** Reset cached DB instance and adapters (used after DB switch/migration) */
+/** Reset cached DB instance and adapter (used after DB switch/migration) */
 export function resetAdminDb(): void {
-  indexAdapter = null;
-  adminAdapter = null;
+  dbAdapter = null;
   if (sqliteAdapter) {
     void sqliteAdapter.disconnect();
     sqliteAdapter = null;
@@ -160,7 +133,7 @@ export function resetAdminDb(): void {
 
 /**
  * Get the raw better-sqlite3 Database instance.
- * @deprecated Use getAdminAdapter() for new code. Kept for backward compat with tests.
+ * @deprecated Use getDbAdapter() for new code. Kept for backward compat with tests.
  */
 export function getAdminDb(): import('better-sqlite3').Database {
   const adapter = getUnifiedSqliteAdapter();

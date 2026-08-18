@@ -3,8 +3,8 @@
  * UT-01, UT-02, UT-08, UT-09, UT-19, UT-20
  */
 import { describe, it, expect } from 'vitest';
-import { IssueKeySchema, JqlSchema, SearchJqlSchema, CreateIssueSchema } from '../models/jira-schemas.js';
-import { sanitizeJiraError, mapStatusToErrorCode, createErrorResult } from '../models/error-schemas.js';
+import { IssueKeySchema, JqlSchema, SearchJqlSchema } from '../models/jira-schemas.js';
+import { mapStatusToErrorCode, createErrorResult } from '../models/error-schemas.js';
 import { AtlassianErrorCode } from '../models/types.js';
 import { CredentialResponseSchema } from '../credentials/credential-schemas.js';
 

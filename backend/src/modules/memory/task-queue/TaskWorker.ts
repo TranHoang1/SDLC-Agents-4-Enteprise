@@ -9,6 +9,7 @@ import type { Logger } from 'pino';
 import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import type { TagAnalyzerService, TagAnalysisResult } from '../llm/analyzer.js';
 import type { EmbeddingService } from '../../../engine/parsers/embedding/EmbeddingService.js';
+import type { LLMMessage } from '../llm/types.js';
 import { PendingTaskRepository } from './PendingTaskRepository.js';
 import { TaskType } from './models.js';
 import type { PendingTask } from './models.js';
@@ -17,7 +18,28 @@ import { DEFAULT_TASK_WORKER_CONFIG } from './TaskWorkerConfig.js';
 import type { MemoryEngine } from '../engine/index.js';
 import type { ContextChainInput, StructuredMapData } from '../llm/types.js';
 import { safeParseStructuredMap } from '../llm/types.js';
-import type { CodeEnrichmentHandler } from '../../../engine/enrichment/CodeEnrichmentHandler.js';
+
+/** SA4E-99: System prompt for code symbol summary + pseudo code generation. */
+const CODE_SUMMARY_SYSTEM_PROMPT = `You are a code documentation generator. Given a code symbol (function, class, method), produce a concise summary and pseudo code.
+
+## Output Format
+Return ONLY valid JSON (no markdown, no code fences):
+
+{
+  "summary": "1-2 sentence description of what this symbol does, its purpose and key behavior",
+  "pseudo_code": "Simplified pseudo code showing the algorithm/logic flow (max 10 lines)"
+}
+
+## Rules
+- summary: max 200 chars, describe WHAT it does and WHY (business purpose)
+- pseudo_code: simplified logic flow, not the actual code. Use plain English + simple control flow
+- For classes: summary describes responsibility, pseudo_code lists key methods and their roles
+- For functions: summary describes input→output, pseudo_code shows algorithm steps
+
+## Example
+
+Input: function calculateDiscount(order, customer)
+Output: {"summary":"Calculates order discount based on customer loyalty tier and order total.","pseudo_code":"1. Get customer tier (gold/silver/bronze)\\n2. If tier=gold AND total>100: discount=20%\\n3. If tier=silver AND total>50: discount=10%\\n4. Apply max discount cap from config\\n5. Return final discounted price"}`;
 
 export interface TaskWorkerStats {
   pending: number;
@@ -35,18 +57,13 @@ export class TaskWorker {
   private readonly engine: MemoryEngine;
   private tagAnalyzer?: TagAnalyzerService;
   private embeddingService?: EmbeddingService;
-  private llmService?: { getConfig(): { model: string } };
+  private llmService?: { getConfig(): { model: string }; complete(messages: LLMMessage[]): Promise<{ content: string }> };
   private running = false;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private consecutiveEmpty = 0;
   private lastPollAt: string | null = null;
   private processing = false;
   private shutdownResolve: (() => void) | null = null;
-  /** SA4E-101: Track current processing task for status bar progress. */
-  private currentTaskInfo: { file: string; type: string; current: number; total: number } | null = null;
-  /** SA4E-155: Adaptive concurrency — reduces on LLM errors, recovers on success. */
-  private activeConcurrency: number = 0;
-  private consecutiveErrors = 0;
 
   constructor(
     db: DatabaseAdapter,
@@ -62,10 +79,22 @@ export class TaskWorker {
 
   setTagAnalyzer(analyzer: TagAnalyzerService): void { this.tagAnalyzer = analyzer; }
   setEmbeddingService(service: EmbeddingService): void { this.embeddingService = service; }
-  setLlmService(service: { getConfig(): { model: string } }): void { this.llmService = service; }
-  /** SA4E-107: Inject code enrichment handler for CODE_ENRICHMENT tasks. */
-  private codeEnrichmentHandler?: CodeEnrichmentHandler;
-  setCodeEnrichmentHandler(handler: CodeEnrichmentHandler): void { this.codeEnrichmentHandler = handler; }
+  setLlmService(service: { getConfig(): { model: string }; complete(messages: LLMMessage[]): Promise<{ content: string }> }): void { this.llmService = service; }
+
+  /** SA4E-107: Wire CodeEnrichmentHandler — stores reference for code summary tasks. */
+  setCodeEnrichmentHandler(_handler: unknown): void {
+    // Handler's LLM is already set via setLlmService. This is a no-op wiring point.
+  }
+
+  /** SA4E-99: Get current progress info (file being processed). */
+  async getProgress(): Promise<{ file: string | null } | null> {
+    const active = await this.repo.getFirstByStatus('PROCESSING');
+    if (!active) return null;
+    try {
+      const payload = JSON.parse(active.payload);
+      return { file: payload.filePath || payload.file_path || payload.source || null };
+    } catch { return null; }
+  }
 
   /**
    * Update mutable config fields at runtime — no restart needed.
@@ -74,7 +103,7 @@ export class TaskWorker {
    */
   updateConfig(patch: Partial<Pick<TaskWorkerConfig, 'concurrency' | 'baseInterval' | 'maxInterval'>>): void {
     if (patch.concurrency !== undefined) {
-      (this.config as any).concurrency = Math.max(1, patch.concurrency);
+      (this.config as any).concurrency = Math.max(1, Math.min(patch.concurrency, 8));
     }
     if (patch.baseInterval !== undefined) (this.config as any).baseInterval = patch.baseInterval;
     if (patch.maxInterval !== undefined) (this.config as any).maxInterval = patch.maxInterval;
@@ -127,29 +156,7 @@ export class TaskWorker {
     return { ...dbStats, isRunning: this.running, lastPollAt: this.lastPollAt };
   }
 
-  /** SA4E-101: Get current task progress for status bar display. */
-  async getProgress(): Promise<{ phase: string; file: string; current: number; total: number; percent: number } | null> {
-    if (!this.processing || !this.currentTaskInfo) return null;
-    const stats = await this.repo.getStats();
-    const total = stats.pending + stats.processing + stats.completed;
-    const current = stats.completed;
-    const percent = total > 0 ? Math.round((current / total) * 100) : 0;
-    return {
-      phase: this.currentTaskInfo.type,
-      file: this.currentTaskInfo.file,
-      current,
-      total,
-      percent,
-    };
-  }
-
   getRepository(): PendingTaskRepository { return this.repo; }
-
-  /** SA4E-169: Expose config for dashboard (concurrency max). */
-  getConfig(): TaskWorkerConfig { return this.config; }
-
-  /** SA4E-169: Expose current active concurrency level. */
-  getActiveConcurrency(): number { return this.activeConcurrency; }
 
   // ── Private ──
 
@@ -162,56 +169,26 @@ export class TaskWorker {
     if (!this.running) { this.finishShutdown(); return; }
     this.lastPollAt = new Date().toISOString();
     try {
-      // SA4E-155: Adaptive concurrency — use activeConcurrency (adjusted by LLM error rate)
-      const maxConcurrency = this.config.concurrency ?? 1;
-      if (this.activeConcurrency === 0) this.activeConcurrency = maxConcurrency;
-      const claimCount = this.activeConcurrency;
-      const tasks = await this.repo.claimBatch(claimCount);
+      const concurrency = this.config.concurrency ?? 1;
+      const tasks = await this.repo.claimBatch(concurrency);
       if (tasks.length === 0) {
         this.consecutiveEmpty++;
-        if (this.consecutiveEmpty <= 3 || this.consecutiveEmpty % 10 === 0) {
-          this.logger.info({ consecutiveEmpty: this.consecutiveEmpty, claimCount },
-            '[TaskWorker] poll: no tasks claimed');
-        }
         const delay = Math.min(
           this.config.baseInterval * Math.pow(2, this.consecutiveEmpty),
           this.config.maxInterval);
         this.schedulePoll(delay);
         return;
       }
-      this.logger.info({ claimed: tasks.length, taskIds: tasks.map(t => t.id).slice(0, 3) },
-        '[TaskWorker] poll: claimed tasks');
       this.consecutiveEmpty = 0;
       this.processing = true;
-      // Run all claimed tasks concurrently
-      const errorsBefore = this.consecutiveErrors;
+      // Run all claimed tasks concurrently — keeps GPU busy between token batches
       await Promise.allSettled(tasks.map(task => this.processTask(task)));
-      // SA4E-155: processTask catches errors internally (marks task FAILED).
-      // Detect failures by checking if consecutiveErrors was incremented during processing.
-      const errorsThisCycle = this.consecutiveErrors - errorsBefore;
-      if (errorsThisCycle > 0) {
-        // Halve concurrency on errors, minimum 1
-        this.activeConcurrency = Math.max(1, Math.floor(this.activeConcurrency / 2));
-        this.logger.warn({ failures: errorsThisCycle, activeConcurrency: this.activeConcurrency, component: 'TaskWorker' },
-          'LLM errors detected — reducing concurrency');
-      } else {
-        this.consecutiveErrors = 0;
-        // Recover: increment towards max (slow ramp-up)
-        if (this.activeConcurrency < maxConcurrency) {
-          this.activeConcurrency = Math.min(maxConcurrency, this.activeConcurrency + 1);
-        }
-      }
       this.processing = false;
       if (!this.running) { this.finishShutdown(); return; }
-      // Backoff delay if errors persist
-      const delay = this.consecutiveErrors >= 3
-        ? this.config.baseInterval * 3
-        : this.config.baseInterval;
-      this.schedulePoll(delay);
+      this.schedulePoll(this.config.baseInterval);
     } catch (err) {
       this.processing = false;
       this.logger.error({ err }, 'Poll cycle error');
-      this.activeConcurrency = 1;
       this.schedulePoll(this.config.baseInterval * 2);
     }
   }
@@ -224,10 +201,12 @@ export class TaskWorker {
 
   private async processTask(task: PendingTask): Promise<void> {
     try {
-      // SA4E-107: CODE_ENRICHMENT uses symbols table, not knowledge_entries
-      if (task.task_type === TaskType.CODE_ENRICHMENT) {
-        this.currentTaskInfo = { file: `symbol-${task.entry_id}`, type: task.task_type, current: 0, total: 0 };
-        await this.processCodeEnrichment(task);
+      // CODE_SUMMARY tasks don't use knowledge_entries — they use graph_nodes directly
+      if (task.task_type === TaskType.CODE_SUMMARY) {
+        let payload: any;
+        try { payload = JSON.parse(task.payload); }
+        catch { this.repo.markFailed(task.id, 'invalid_json_payload'); return; }
+        await this.processCodeSummary(task, payload);
         return;
       }
       const entry = await this.engine.findById(task.entry_id);
@@ -235,9 +214,6 @@ export class TaskWorker {
       let payload: any;
       try { payload = JSON.parse(task.payload); }
       catch { this.repo.markFailed(task.id, 'invalid_json_payload'); return; }
-      // SA4E-101: Track current task for progress reporting
-      const file = (entry as any).source || `entry-${task.entry_id}`;
-      this.currentTaskInfo = { file, type: task.task_type, current: 0, total: 0 };
       switch (task.task_type) {
         case TaskType.TAG_ENRICHMENT:
           await this.processTagEnrichment(task, payload);
@@ -276,36 +252,6 @@ export class TaskWorker {
 
     const result = await this.tagAnalyzer.analyzeTags(payload.content, payload.options, context);
 
-    // SA4E-155: Quality gate — if LLM failed (fallback used), ALWAYS mark failed.
-    // LLM must succeed for enrichment to be considered done.
-    if (result.fallbackUsed) {
-      this.consecutiveErrors++;
-      const reason = result.fallbackReason || 'unknown';
-      const errorMsg = `llm_enrichment_failed: ${reason}`;
-      this.logger.warn({ entry_id: task.entry_id, task_id: task.id, reason, component: 'TaskWorker' },
-        'LLM enrichment failed — marking task FAILED (not done)');
-      await this.repo.markFailed(task.id, errorMsg);
-      // Write error details into structured_map so it's queryable/visible in Admin UI
-      const errorMap = JSON.stringify({
-        error: errorMsg,
-        error_at: new Date().toISOString(),
-        task_id: task.id,
-        retry_count: task.retry_count,
-        fallback_used: true,
-        extraction_meta: {
-          model: this.llmService?.getConfig()?.model || 'unknown',
-          timestamp: new Date().toISOString(),
-          fallback_used: true,
-          error: reason,
-        },
-      });
-      await this.engine.getAdapter().runAsync(
-        `UPDATE knowledge_entries SET enrichment_status = 'failed', structured_map = ? WHERE id = ? AND enrichment_status = 'pending'`,
-        [errorMap, task.entry_id],
-      );
-      return;
-    }
-
     // TA-08: Re-check status after LLM call — client may have enriched during processing
     const currentEntry = await this.engine.findById(task.entry_id);
     if (!currentEntry || (currentEntry as any).enrichment_status === 'done') {
@@ -329,6 +275,11 @@ export class TaskWorker {
     // NEW-03: Conditional structured_map update — only if still pending
     await this.updateEntryStructuredMapConditional(task.entry_id, result, context);
 
+    // SA4E-99: Propagate LLM summary to knowledge_entries.summary + graph_nodes.label
+    if (result.summary && result.summary.length > 0) {
+      await this.propagateSummary(task.entry_id, result.summary);
+    }
+
     // SA4E-79: Mark entry as enriched by backend LLM (atomic — changes=0 if client won)
     const now = new Date().toISOString();
     const updateResult = await this.engine.getAdapter().runAsync(
@@ -342,7 +293,6 @@ export class TaskWorker {
       this.logger.info({ entry_id: task.entry_id }, 'Client enriched during tag/map update — discarding');
     }
 
-    // SA4E-165: Always mark task completed — entry sync is best-effort above
     await this.repo.markCompleted(task.id);
   }
 
@@ -466,24 +416,112 @@ export class TaskWorker {
         `UPDATE knowledge_entries SET structured_map = ? WHERE id = ? AND enrichment_status = 'pending'`,
         [jsonStr, entryId],
       );
-      // SA4E-169: Update summary column (separate from structured_map) for FTS indexing + KB UI display
-      if (structuredMap.summary) {
-        await this.engine.getAdapter().runAsync(
-          `UPDATE knowledge_entries SET summary = ? WHERE id = ? AND enrichment_status = 'pending'`,
-          [structuredMap.summary, entryId],
-        );
-      }
     } catch (err) {
       this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
         'structured_map conditional update failed');
     }
   }
 
-  /** SA4E-107: Process CODE_ENRICHMENT task via injected handler. */
-  private async processCodeEnrichment(task: PendingTask): Promise<void> {
-    if (!this.codeEnrichmentHandler) { this.repo.resetForRetry(task.id); return; }
-    await this.codeEnrichmentHandler.enrichSymbol(task);
+  // ── SA4E-99: Code Symbol Summary + Pseudo Code ──
+
+  /**
+   * SA4E-99: Generate LLM summary + pseudo code for a code symbol.
+   * Reads symbol body from body_embeddings, calls LLM, updates graph_nodes.label.
+   * Runs async in background queue — does not block code indexing.
+   */
+  private async processCodeSummary(task: PendingTask, payload: any): Promise<void> {
+    if (!this.llmService) { this.repo.resetForRetry(task.id); return; }
+
+    const { symbol_id, name, kind, signature, body, file_path } = payload;
+    if (!body || body.length < 20) {
+      await this.repo.markCompleted(task.id);
+      return;
+    }
+
+    const prompt = this.buildCodeSummaryPrompt(name, kind, signature, body, file_path);
+    try {
+      const timeoutMs = this.config.llmTimeout ?? 30000;
+      const response = await Promise.race([
+        this.llmService.complete([
+          { role: 'system', content: CODE_SUMMARY_SYSTEM_PROMPT },
+          { role: 'user', content: prompt },
+        ]),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
+      ]);
+
+      const parsed = this.parseCodeSummaryResponse(response.content, name, kind);
+
+      // Update graph_nodes.label with the short summary
+      const entryId = `code:${symbol_id}`;
+      const label = parsed.summary.slice(0, 60);
+      await this.engine.getAdapter().runAsync(
+        `UPDATE graph_nodes SET label = ? WHERE entry_id = ?`,
+        [label, entryId],
+      );
+
+      // Store full summary + pseudo code in graph node metadata (JSON in cluster_id or separate)
+      // For now, store in body_embeddings metadata or a simple update to level field
+      // TODO: Consider a dedicated column for code_summary in graph_nodes
+      this.logger.debug({ symbol_id, name, component: 'TaskWorker' },
+        'Code summary generated and propagated');
+    } catch (err) {
+      this.logger.warn({ symbol_id, name, err, component: 'TaskWorker' },
+        'Code summary LLM failed (non-fatal)');
+    }
     await this.repo.markCompleted(task.id);
+  }
+
+  /** Build prompt for code symbol summary generation. */
+  private buildCodeSummaryPrompt(
+    name: string, kind: string, signature: string | null, body: string, filePath: string,
+  ): string {
+    const sig = signature ? `\nSignature: ${signature}` : '';
+    return `/no_think\n\nSymbol: ${name}\nKind: ${kind}\nFile: ${filePath}${sig}\n\nBody:\n\`\`\`\n${body.slice(0, 4000)}\n\`\`\``;
+  }
+
+  /** Parse LLM response for code summary. Falls back to name if parse fails. */
+  private parseCodeSummaryResponse(
+    llmOutput: string, name: string, kind: string,
+  ): { summary: string; pseudoCode: string } {
+    const defaults = { summary: `${kind}: ${name}`, pseudoCode: '' };
+    if (!llmOutput || llmOutput.trim().length === 0) return defaults;
+    try {
+      const jsonMatch = llmOutput.match(/\{[\s\S]*"summary"[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+          summary: (parsed.summary || defaults.summary).slice(0, 300),
+          pseudoCode: (parsed.pseudo_code || parsed.pseudoCode || '').slice(0, 2000),
+        };
+      }
+    } catch { /* fallback */ }
+    // Fallback: treat first line as summary
+    const lines = llmOutput.trim().split('\n');
+    return { summary: lines[0].slice(0, 300), pseudoCode: lines.slice(1).join('\n').slice(0, 2000) };
+  }
+
+  /**
+   * SA4E-99: Propagate LLM-generated summary to knowledge_entries.summary and graph_nodes.label.
+   * Without this, entries display only the first heading line (e.g., "1. What's New").
+   */
+  private async propagateSummary(entryId: number, llmSummary: string): Promise<void> {
+    const truncatedSummary = llmSummary.slice(0, 300);
+    const graphLabel = llmSummary.slice(0, 60);
+    try {
+      await this.engine.getAdapter().runAsync(
+        `UPDATE knowledge_entries SET summary = ? WHERE id = ? AND enrichment_status = 'pending'`,
+        [truncatedSummary, entryId],
+      );
+      await this.engine.getAdapter().runAsync(
+        `UPDATE graph_nodes SET label = ? WHERE entry_id = ?`,
+        [graphLabel, `doc-${entryId}`],
+      );
+      this.logger.debug({ entry_id: entryId, component: 'TaskWorker' },
+        'LLM summary propagated to KB entry + graph node');
+    } catch (err) {
+      this.logger.warn({ entry_id: entryId, err, component: 'TaskWorker' },
+        'Summary propagation failed (non-fatal)');
+    }
   }
 
   private async processVectorEmbedding(task: PendingTask, payload: any): Promise<void> {
@@ -498,11 +536,9 @@ export class TaskWorker {
   }
 
   private async handleTaskError(task: PendingTask, err: Error): Promise<void> {
-    this.consecutiveErrors++;
-    // SA4E-106: Non-retryable patterns include CODE_ENRICHMENT-specific errors
     const nonRetryable = err.message.includes('invalid_json')
-      || err.message.includes('entry_not_found')
       || err.message.includes('invalid_payload')
+      || err.message.includes('entry_not_found')
       || err.message.includes('symbol_not_found');
     if (nonRetryable || task.retry_count + 1 >= task.max_retries) {
       await this.repo.markFailed(task.id, err.message);

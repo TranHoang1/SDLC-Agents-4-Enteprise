@@ -174,6 +174,7 @@ export function fileUriToPath(uri: string): string {
   try {
     return fileURLToPath(uri);
   } catch (err) {
+    console.debug('[config] Non-file URI, falling back to raw path:', (err as Error).message);
     return uri.replace(/^file:\/\/\//, process.platform === 'win32' ? '' : '/');
   }
 }

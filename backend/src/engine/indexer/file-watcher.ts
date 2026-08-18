@@ -52,7 +52,7 @@ export class FileWatcher {
     const ignored = this.config.excludePatterns.map(p => `**/${p}/**`);
 
     this.watcher = chokidar.watch(this.config.workspace, {
-      ignored: [...ignored, /(^|[\/\\])\./],
+      ignored: [...ignored, /(^|[\\/])\./],
       persistent: true,
       ignoreInitial: true,
       awaitWriteFinish: { stabilityThreshold: 200, pollInterval: 50 },

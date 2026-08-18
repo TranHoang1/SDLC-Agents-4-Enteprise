@@ -52,8 +52,6 @@ function extractGraph(xml: string): DiagramGraph {
     cells.push({ attrs, body });
   }
 
-  const cellIds = new Set(cells.map(c => c.attrs['id'] ?? ''));
-
   for (const cell of cells) {
     const id = cell.attrs['id'] ?? '';
     const style = cell.attrs['style'] ?? '';
@@ -78,7 +76,7 @@ function extractGraph(xml: string): DiagramGraph {
   return { nodes, edges, containers };
 }
 
-function parseGeometry(body: string, cellAttrs: Record<string, string>): { x: number; y: number; w: number; h: number } | null {
+function parseGeometry(body: string, _cellAttrs: Record<string, string>): { x: number; y: number; w: number; h: number } | null {
   // Look for mxGeometry in body or as sibling in raw XML
   const geomRegex = /<mxGeometry\s([^>]*?)(?:\/>|>)/;
   const geomMatch = body.match(geomRegex);

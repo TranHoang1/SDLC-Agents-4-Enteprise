@@ -1,6 +1,6 @@
 /**
  * KB Graph Spatial routes — 3D spatial queries for graph visualization.
- * SA4E-45: Uses getIndexAdapter() for multi-DB support.
+ * SA4E-45: Uses getDbAdapter() for multi-DB support.
  * SA4E-49: Counts use graph_nodes table (authoritative) instead of knowledge_entries/symbols.
  */
 
@@ -34,6 +34,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
         const result = await graphService.getAllPositions!(ctx.getRequestProjectId(c));
         if (Array.isArray(allowedTiers)) result.nodes = result.nodes.filter((n: any) => n.tier === 'CODE' || allowedTiers.includes(n.tier));
         result.kbCount = kbCount; result.codeCount = codeCount; result.isPega = isPega;
+        // SA4E-97: edges already included from getAllPositions; pass through to frontend
         return c.json(result);
       } catch (err: any) { ctx.logger.warn({ error: err.message }, 'getAllPositions failed'); }
     }
@@ -61,7 +62,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
         label: ((e.summary || e.tags || '').substring(0, 50)) || (e.source || '').split('/').pop() || `Entry ${i + 1}`,
       };
     });
-    return c.json({ nodes, total: nodes.length, isPega });
+    return c.json({ nodes, edges: [], total: nodes.length, isPega });
   });
 
   app.get('/api/admin/kb/graph/spatial', async (c) => {
@@ -73,7 +74,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
     const camY = parseFloat(c.req.query('y') || '0');
     const camZ = parseFloat(c.req.query('z') || '0');
     const zoom = parseFloat(c.req.query('zoom') || '500');
-    const graphService = (globalThis as Record<string, unknown>).__sqliteGraphService as { ready?: boolean; spatialQuery?: Function } | undefined;
+    const graphService = (globalThis as Record<string, unknown>).__sqliteGraphService as { ready?: boolean; spatialQuery?: (...args: unknown[]) => Promise<unknown> } | undefined;
     if (graphService && graphService.ready) {
       try { return c.json(await graphService.spatialQuery!({ camX, camY, camZ, zoom }, ctx.getRequestProjectId(c))); }
       catch (err: any) { ctx.logger.warn({ error: err.message }, 'SQLite graph spatial query failed, using inline fallback'); }
@@ -114,17 +115,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
       filteredNodes = nodes.filter((nd: any) => nd.x >= camX - r && nd.x <= camX + r && nd.y >= camY - r && nd.y <= camY + r && nd.z >= camZ - r && nd.z <= camZ + r);
     }
     const edges: any[] = [];
-    const clusterMap = new Map<string, any[]>();
-    for (const nd of filteredNodes) {
-      const cid = nd.clusterId || 'default';
-      if (!clusterMap.has(cid)) clusterMap.set(cid, []);
-      clusterMap.get(cid)!.push(nd);
-    }
-    for (const [, members] of clusterMap) {
-      const hub = members[0];
-      for (let i = 1; i < Math.min(members.length, 11); i++) edges.push({ source: hub.id, target: members[i].id, weight: 0.8 });
-      for (let i = 1; i < members.length; i += 3) edges.push({ source: members[i - 1].id, target: members[i].id, weight: 0.5 });
-    }
+    // SA4E-99: Only real edges. No synthetic cluster edges.
     const level = zoom > 500 ? 'macro' : zoom > 200 ? 'mid' : 'micro';
     return c.json({ nodes: filteredNodes, edges, stats: { totalNodes: filteredNodes.length, totalEdges: edges.length, queryTimeMs: 0, level, source: 'sqlite-fallback', totalEntries: await getKbEntryCount(ctx.getRequestProjectId(c)) } });
   });

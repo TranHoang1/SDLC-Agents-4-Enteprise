@@ -40,12 +40,12 @@ export class DashboardService {
     const onlineCount = servers.filter((s: any) => s.status === 'RUNNING').length;
     
     // Count ALL KB entries across all projects when no specific filter is active
-    let kbTotal = 0;
+    let kbTotal: number;
     try {
-      const adapter = (this.db as any);
       const row = this.db.prepare("SELECT COUNT(*) as cnt FROM knowledge_entries").get() as { cnt?: number } | undefined;
       kbTotal = row?.cnt || 0;
-    } catch {
+    } catch (err) {
+      logger.debug({ context: 'dashboard-kb-total', err }, 'knowledge_entries count failed, using getKbEntryCount fallback');
       kbTotal = await getKbEntryCount();
     }
 

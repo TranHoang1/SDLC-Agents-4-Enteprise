@@ -5,5 +5,5 @@
  */
 export function safeError(e: unknown): string {
   const raw = e instanceof Error ? e.message : String(e);
-  return raw.replace(/[\r\n\t\u0000-\u001f]+/g, ' ').slice(0, 500);
+  return raw.replace(/[\r\n\t\p{Cc}]+/gu, ' ').slice(0, 500);
 }

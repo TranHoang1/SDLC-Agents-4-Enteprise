@@ -1,5 +1,5 @@
 import type { SyntaxNode, ExtractedSymbol, ExtractedRelationship, SymbolKind } from '../../types.js';
-import { getNodeText, getNodeRange, findNodes, calculateComplexity, extractDocComment } from '../../ast-utils.js';
+import { getNodeText, getNodeRange, calculateComplexity, extractDocComment } from '../../ast-utils.js';
 import { extractVisibility, extractFunctionModifiers, extractParams, extractReturnType, buildFuncSignature } from './helpers.js';
 import { extractRustCalls } from './calls.js';
 

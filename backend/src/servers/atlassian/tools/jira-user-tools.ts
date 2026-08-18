@@ -4,7 +4,7 @@
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { JiraApiClient } from '../clients/jira-client.js';
-import { UserSearchSchema, WatcherSchema, GetAttachmentsSchema } from '../models/jira-schemas.js';
+import { UserSearchSchema, WatcherSchema } from '../models/jira-schemas.js';
 import { createSuccessResult, createErrorResult } from '../models/error-schemas.js';
 import { AtlassianErrorCode } from '../models/types.js';
 import { AtlassianApiError } from '../clients/base-client.js';

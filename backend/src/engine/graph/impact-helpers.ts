@@ -40,7 +40,7 @@ export interface ImpactResult {
   };
 }
 
-export function classifySeverity(depth: number, action: ImpactAction, type: string): Severity {
+export function classifySeverity(depth: number, action: ImpactAction, _type: string): Severity {
   if (action === 'delete') {
     if (depth <= 1) return 'critical';
     if (depth <= 2) return 'high';

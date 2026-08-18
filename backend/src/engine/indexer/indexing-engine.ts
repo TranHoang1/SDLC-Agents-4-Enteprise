@@ -1,4 +1,4 @@
-﻿/** Indexing Engine — Full scan and incremental indexing. KSA-145. SA4E-53: async. SA4E-78: decoupled. */
+/** Indexing Engine — Full scan and incremental indexing. KSA-145. SA4E-53: async. SA4E-78: decoupled. */
 
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../database/dialect/DialectHelper.js';
@@ -22,7 +22,7 @@ import { FileWatcher } from './file-watcher.js';
 import { IndexScope, resolveScope } from './index-scope.js';
 import { GraphSyncService } from '../graph/graph-sync-service.js';
 import { GraphRepository as AdminGraphRepository } from '../../database/repositories/GraphRepository.js';
-import { getAdminAdapter } from '../../admin/db/core.js';
+import { getDbAdapter } from '../../admin/db/core.js';
 import type { IndexResult } from '../parsers/types.js';
 import type { ProgressPhase } from './types.js';
 import { CodeEnrichmentTaskCreator } from '../enrichment/CodeEnrichmentTaskCreator.js';
@@ -150,8 +150,13 @@ export class IndexingEngine {
   }
 
   /** SA4E-78: Emit progress event via EventEmitter (Observer pattern). */
-  private emitProgress(projectId: string, phase: ProgressPhase, current: number, total: number): void {
-    this.progressEmitter.emit('progress', { projectId, phase, current, total });
+  private emitProgress(projectId: string, phase: ProgressPhase, current: number, total: number, currentFile?: string): void {
+    this.progressEmitter.emit('progress', { projectId, phase, current, total, currentFile });
+  }
+
+  /** SA4E-99: Public method for external callers (e.g., api-index route after batch upload). */
+  async syncGraphNodesPublic(projectId: string): Promise<void> {
+    return this.syncGraphNodes(projectId);
   }
 
   /** Project this tenant's code symbols into graph_nodes in index DB (non-fatal). SA4E-53: async. SA4E-78: cached. */
@@ -175,7 +180,7 @@ export class IndexingEngine {
   /** Register workspace in project_registry so admin dropdown shows it (non-fatal). */
   private registerWorkspace(projectId: string, workspace: string): void {
     try {
-      const repo = new AdminGraphRepository(getAdminAdapter());
+      const repo = new AdminGraphRepository(getDbAdapter());
       repo.registerProject(projectId, path.basename(workspace), workspace);
     } catch (err) {
       logger.warn({ err }, '[indexer] project_registry upsert skipped (non-fatal)');
@@ -269,7 +274,8 @@ export class IndexingEngine {
           ]);
         }
       });
-      this.emitProgress(projectId, 'indexing', Math.min(i + BATCH, files.length), files.length);
+      const lastFile = batch[batch.length - 1]?.relativePath || '';
+      this.emitProgress(projectId, 'indexing', Math.min(i + BATCH, files.length), files.length, lastFile);
       await new Promise<void>(resolve => setImmediate(resolve));
     }
     return { filesToIndex, skippedCount };

@@ -4,7 +4,7 @@
  * scores confidence, and returns DetectionResult.
  */
 import { readdir } from 'fs/promises';
-import { join, relative } from 'path';
+import { join } from 'path';
 import type { Logger } from 'pino';
 import {
   type DetectionResult,

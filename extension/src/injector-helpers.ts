@@ -47,8 +47,16 @@ export function injectComponent(component: Component, root: string, extensionPat
   const target = path.join(root, component.targetPath);
   if (!fs.existsSync(source)) { vscode.window.showWarningMessage(`Source not found: ${component.sourcePath}`); return false; }
   try {
-    if (component.filter) { copySelectedItems(source, target, component.filter); }
-    else { copyDirRecursive(source, target); }
+    const stat = fs.statSync(source);
+    if (stat.isFile()) {
+      // Single file injection — ensure parent dir exists, then copy
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(source, target);
+    } else if (component.filter) {
+      copySelectedItems(source, target, component.filter);
+    } else {
+      copyDirRecursive(source, target);
+    }
     return true;
   } catch (err) { showUserError("Inject " + component.id, err); return false; }
 }

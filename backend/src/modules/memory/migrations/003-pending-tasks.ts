@@ -14,6 +14,7 @@ export async function migrate003PendingTasks(db: DatabaseAdapter): Promise<void>
     );
     exists = pg.length > 0;
   } catch (err) {
+    console.debug('[migration-003] PG table introspection failed, falling back to SQLite:', (err as Error).message);
     try {
       const lite = await db.allAsync<{ name: string }>(
         `SELECT name FROM sqlite_master WHERE type='table' AND name='pending_tasks'`,

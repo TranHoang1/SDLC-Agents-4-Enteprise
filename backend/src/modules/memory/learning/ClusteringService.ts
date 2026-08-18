@@ -11,9 +11,6 @@ import type { ScopeContext, KnowledgeEntry } from '../models.js';
 /** Minimum instincts in a cluster before procedure creation. */
 const MIN_CLUSTER_SIZE = 3;
 
-/** Minimum tag overlap ratio to consider two instincts related. */
-const TAG_OVERLAP_THRESHOLD = 0.4;
-
 /** Result of a clustering run. */
 export interface ClusterResult {
   /** Number of clusters found. */
@@ -79,7 +76,7 @@ export class ClusteringService {
   }
 
   /** Fetch all instincts with 'auto-learned' tag. */
-  private async fetchAutoLearnedInstincts(scopeCtx?: ScopeContext): Promise<KnowledgeEntry[]> {
+  private async fetchAutoLearnedInstincts(_scopeCtx?: ScopeContext): Promise<KnowledgeEntry[]> {
     const adapter = this.engine.getAdapter();
     const rows = await adapter.allAsync<KnowledgeEntry>(
       `SELECT * FROM knowledge_entries

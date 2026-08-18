@@ -17,7 +17,7 @@ import { createSupersessionChain } from './supersession.js';
 import { PendingTaskRepository } from '../task-queue/PendingTaskRepository.js';
 import { TaskType } from '../task-queue/models.js';
 import { GraphRepository } from '../../../database/repositories/GraphRepository.js';
-import { getAdminAdapter } from '../../../admin/db/core.js';
+import { getDbAdapter } from '../../../admin/db/core.js';
 import { computePositionByIndex } from '../../kb-graph/service/nodes.js';
 import { EpochService } from '../evolution/EpochService.js';
 import pino from 'pino';
@@ -30,7 +30,7 @@ type Args = Record<string, unknown>;
 /** Upsert a KB entry as a graph node (non-fatal — graph viz is secondary). */
 async function upsertGraphNode(entryId: number, summary: string, type: string, projectId: string | null): Promise<void> {
   try {
-    const graphRepo = new GraphRepository(getAdminAdapter());
+    const graphRepo = new GraphRepository(getDbAdapter());
     const nodeCount = await graphRepo.getNodeCounts(projectId || '');
     const pos = computePositionByIndex(nodeCount.total, nodeCount.total + 1, type, 0, 1);
     await graphRepo.upsertNode({
@@ -61,7 +61,7 @@ export async function handleIngest(
   let content = a.content as string;
   if (!content) return 'Error: content required';
   // SA4E-53: PostgreSQL rejects null bytes in text columns
-  content = content.replace(/\x00/g, '');
+  content = content.split('\x00').join('');
   const type = (a.type as string) ?? 'CONTEXT';
   const source = a.source as string | undefined;
   const tags = Array.isArray(a.tags) ? (a.tags as string[]).join(',') : ((a.tags as string) ?? '');
@@ -193,7 +193,7 @@ export async function handleIngestFile(
     // Delete stale graph nodes before removing KB entries (while IDs still exist)
     let oldIds: { id: number }[] = [];
     try {
-      const adminAdapter = getAdminAdapter();
+      const adminAdapter = getDbAdapter();
       oldIds = await engine.getAdapter().allAsync<{ id: number }>(
         'SELECT id FROM knowledge_entries WHERE source = $1 AND project_id = $2',
         [filePath, (scopeCtx as any).projectId ?? ''],
@@ -212,7 +212,7 @@ export async function handleIngestFile(
     // Delete stale graph nodes before removing KB entries (while IDs still exist)
     let oldIds: { id: number }[] = [];
     try {
-      const adminAdapter = getAdminAdapter();
+      const adminAdapter = getDbAdapter();
       oldIds = await engine.getAdapter().allAsync<{ id: number }>(
         'SELECT id FROM knowledge_entries WHERE source = $1',
         [filePath],
@@ -230,7 +230,7 @@ export async function handleIngestFile(
   }
 
   // SA4E-53: PostgreSQL rejects null bytes (0x00) in text columns
-  text = text.replace(/\x00/g, '');
+  text = text.split('\x00').join('');
 
   const sections = text.split(/^#{1,3}\s+/m).filter(s => s.trim());
   let created = 0;

@@ -165,7 +165,7 @@ describe('jwtAuth (anonymous mode)', () => {
   it('allows anonymous access with no Authorization header', async () => {
     const { jwtAuth } = await loadAuthModule();
     const headers = { 'X-Project-Id': 'proj-1' };
-    const { c, set } = makeContext(headers);
+    const { c } = makeContext(headers);
     const next = vi.fn();
     await jwtAuth(c, next);
     expect(next).toHaveBeenCalledTimes(1);
@@ -175,7 +175,7 @@ describe('jwtAuth (anonymous mode)', () => {
   it('treats an invalid signature JWT as anonymous in non-strict mode', async () => {
     const { jwtAuth } = await loadAuthModule();
     const token = makeJwt({ sub: 'user-1' }, 'wrong-secret');
-    const { c, set } = makeContext({ Authorization: `Bearer ${token}` });
+    const { c } = makeContext({ Authorization: `Bearer ${token}` });
     await jwtAuth(c, vi.fn());
     expect(mockCreateProjectContext).toHaveBeenCalledWith('', 'anonymous');
   });
@@ -183,7 +183,7 @@ describe('jwtAuth (anonymous mode)', () => {
   it('treats an expired JWT as anonymous in non-strict mode', async () => {
     const { jwtAuth } = await loadAuthModule();
     const token = makeJwt({ sub: 'user-1' }, 'test-secret', true);
-    const { c, set } = makeContext({ Authorization: `Bearer ${token}` });
+    const { c } = makeContext({ Authorization: `Bearer ${token}` });
     await jwtAuth(c, vi.fn());
     expect(mockCreateProjectContext).toHaveBeenCalledWith('', 'anonymous');
   });

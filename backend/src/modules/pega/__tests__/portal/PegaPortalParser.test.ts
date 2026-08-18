@@ -4,7 +4,7 @@ import { PegaSectionRenderer } from '../../ui/PegaSectionRenderer.js';
 import { PegaHarnessAssembler } from '../../ui/PegaHarnessAssembler.js';
 import { PegaClipboardContext } from '../../expression/PegaClipboardContext.js';
 import { PORTAL_RULE_CLASSES } from '../../portal/PegaPortalTypes.js';
-import type { Section, Harness, FlowAction, Portal, Skin, Navigation } from '../../portal/PegaPortalTypes.js';
+import type { Section } from '../../portal/PegaPortalTypes.js';
 
 function createContext(): PegaClipboardContext {
   return new PegaClipboardContext({

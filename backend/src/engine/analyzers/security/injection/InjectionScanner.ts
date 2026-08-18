@@ -12,7 +12,7 @@ import { CommandInjectionMatcher } from './patterns/CommandInjectionMatcher.js';
 import { PathTraversalMatcher } from './patterns/PathTraversalMatcher.js';
 import { DeserializationMatcher } from './patterns/DeserializationMatcher.js';
 import { LDAPXMLMatcher } from './patterns/LDAPXMLMatcher.js';
-import type { Finding, ScanOptions, ScanResult, Severity, TaintPath } from '../types/index.js';
+import type { Finding, ScanOptions, ScanResult, Severity } from '../types/index.js';
 
 export class InjectionScanner {
   private taintAnalyzer: TaintAnalyzer;

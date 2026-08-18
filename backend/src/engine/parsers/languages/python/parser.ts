@@ -1,6 +1,5 @@
-import type { Parser as ParserType } from 'web-tree-sitter';
 import type { ILanguageParser, ParseResult, ExtractedSymbol, ExtractedRelationship, ParseError, SyntaxNode } from '../../types.js';
-import { getNodeText, getNodeRange, findNodes, getNamedChild } from '../../ast-utils.js';
+import { getNodeText, findNodes } from '../../ast-utils.js';
 import { extractDeclarationsNode } from './members.js';
 import { extractModuleName, getImportedIdentifiers } from './helpers.js';
 

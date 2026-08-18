@@ -13,7 +13,6 @@ import {
   buildIngestFileDeleteClause,
 } from '../IsolationLayer.js';
 import { createProjectContext } from '../ProjectContext.js';
-import type { ProjectContext } from '../ProjectContext.js';
 import type { KnowledgeEntry } from '../models.js';
 import { makeTempDb, type TempDb } from '../../../__tests__/sa4e-testkit.js';
 

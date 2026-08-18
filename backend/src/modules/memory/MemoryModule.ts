@@ -17,7 +17,6 @@ import { loadConfig } from '../../engine/config.js';
 import { stopScheduler } from './evolution/Scheduler.js';
 import type { SchedulerHandles } from './evolution/Scheduler.js';
 import { TaskWorker } from './task-queue/TaskWorker.js';
-import type { ScopeContext } from './models.js';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { ScopePromotionService } from './promotion/index.js';
 import { MemoryModuleBuilder } from './MemoryModuleBuilder.js';

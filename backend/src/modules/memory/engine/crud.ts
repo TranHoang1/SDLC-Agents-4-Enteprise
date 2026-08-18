@@ -46,7 +46,8 @@ export class MemoryEngineCrud {
       entry.confidence ?? 1.0, entry.agent_name ?? null,
       entry.owner ?? null,
     ];
-    let id = 0;
+    let id: number;
+
     // SA4E-FIX: Use upsert when source is non-null to avoid duplicate key violation
     // on idx_ke_source_project_unique (source, project_id)
     const hasSource = entry.source != null && entry.source.length > 0;
@@ -114,40 +115,11 @@ export class MemoryEngineCrud {
       }
     }
 
-    // Project eligible entries into graph_nodes for KB Graph visualization
-    // Skip PEGA_RULE/PEGA_DATA (already projected by PegaService.ingestRule)
-    // Skip PEGA_AST (auxiliary — duplicates PEGA_RULE in graph)
-    if (id > 0 && entry.type && !['PEGA_RULE', 'PEGA_DATA', 'PEGA_AST'].includes(entry.type)) {
-      try {
-        const graphType = entry.type || 'CONTEXT';
-        const graphLabel = (entry.summary || entry.source || `entry-${id}`).slice(0, 200);
-        const pid = entry.project_id || '';
-        if (engine === 'postgresql') {
-          await this.adapter.runAsync(
-            `INSERT INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-             ON CONFLICT (entry_id) DO NOTHING`,
-            [`kb-entry:${id}`, graphLabel, graphType, entry.tier ?? 'WORKING', pid,
-             Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 2, null],
-          );
-        } else {
-          await this.adapter.runAsync(
-            `INSERT OR IGNORE INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [`kb-entry:${id}`, graphLabel, graphType, entry.tier ?? 'WORKING', pid,
-             Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 2, null],
-          );
-        }
-      } catch {
-        // graph_nodes table may not exist in test environments — non-fatal
-      }
-    }
-
     // SA4E-91: Extract and insert edges for the new entry (non-blocking)
     if (id > 0 && entry.content) {
       try {
         await extractAndInsertIngestEdges(this.adapter, {
-          entryId: `kb-entry:${id}`,
+          entryId: `doc-${id}`,
           content: entry.content,
           source: entry.source ?? null,
           tags: entry.tags ?? '',
@@ -161,46 +133,37 @@ export class MemoryEngineCrud {
     return id;
   }
 
-  async syncExistingEntriesToGraph(): Promise<number> {
-    const engine = this.adapter.getEngine();
-    let entries;
+  /**
+   * Remove orphan graph nodes whose source entities no longer exist.
+   * Also removes ALL legacy 'kb-entry:*' nodes (replaced by 'doc-{id}' format).
+   * Ensures graph_nodes stays consistent with source tables over time.
+   * Runs on startup (non-fatal).
+   */
+  async reconcileOrphanGraphNodes(): Promise<number> {
     try {
-      entries = await this.adapter.allAsync<{ id: number; type: string; summary: string; source: string; tier: string; project_id: string }>(
-        `SELECT id, type, summary, source, tier, project_id FROM knowledge_entries
-         WHERE type NOT IN ('PEGA_RULE', 'PEGA_DATA', 'PEGA_AST')
-         AND id NOT IN (SELECT CAST(REPLACE(entry_id, 'kb-entry:', '') AS INTEGER) FROM graph_nodes WHERE entry_id LIKE 'kb-entry:%')`,
+      // Remove ALL legacy 'kb-entry:*' nodes — this prefix is no longer used
+      const r1 = await this.adapter.runAsync(
+        `DELETE FROM graph_nodes WHERE entry_id LIKE 'kb-entry:%'`,
       );
+      // Clean orphan 'doc-*' nodes (KB entries that were deleted)
+      const r2 = await this.adapter.runAsync(
+        `DELETE FROM graph_nodes WHERE entry_id LIKE 'doc-%'
+         AND CAST(REPLACE(entry_id, 'doc-', '') AS INTEGER) NOT IN (
+           SELECT id FROM knowledge_entries
+         )`,
+      );
+      // Clean orphan 'sym-*' nodes (symbols that were deleted)
+      const r3 = await this.adapter.runAsync(
+        `DELETE FROM graph_nodes WHERE entry_id LIKE 'sym-%'
+         AND CAST(REPLACE(entry_id, 'sym-', '') AS INTEGER) NOT IN (
+           SELECT id FROM symbols
+         )`,
+      );
+      return (r1.changes ?? 0) + (r2.changes ?? 0) + (r3.changes ?? 0);
     } catch {
-      // graph_nodes table may not exist — non-fatal
+      // Non-fatal: graph_nodes table may not exist in test environments
       return 0;
     }
-    let count = 0;
-    for (const e of entries) {
-      const graphType = e.type === 'PEGA_SCHEMA' ? 'PEGA_SCHEMA' : 'KNOWLEDGE_ENTRY';
-      const label = (e.summary || e.source || `entry-${e.id}`).slice(0, 200);
-      try {
-        if (engine === 'postgresql') {
-          await this.adapter.runAsync(
-            `INSERT INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-             ON CONFLICT (entry_id) DO NOTHING`,
-            [`kb-entry:${e.id}`, label, graphType, e.tier || 'WORKING', e.project_id || '',
-             Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 2, null],
-          );
-        } else {
-          await this.adapter.runAsync(
-            `INSERT OR IGNORE INTO graph_nodes (entry_id, label, type, tier, project_id, x, y, z, level, cluster_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [`kb-entry:${e.id}`, label, graphType, e.tier || 'WORKING', e.project_id || '',
-             Math.floor(Math.random() * 400) - 200, Math.floor(Math.random() * 400) - 200, 0, 2, null],
-          );
-        }
-        count++;
-      } catch {
-        // graph_nodes table issue — skip
-      }
-    }
-    return count;
   }
 
   async findById(id: number): Promise<KnowledgeEntry | undefined> {
@@ -209,6 +172,12 @@ export class MemoryEngineCrud {
 
   async deleteEntry(id: number): Promise<void> {
     await this.adapter.runAsync('DELETE FROM knowledge_entries WHERE id = ?', [id]);
+    // Cascade: remove corresponding graph node (same unified DB — SA4E-49)
+    try {
+      await this.adapter.runAsync(`DELETE FROM graph_nodes WHERE entry_id = ?`, [`doc-${id}`]);
+    } catch {
+      // Non-fatal: graph_nodes table may not exist in test environments
+    }
   }
 
   async updateTags(id: number, tags: string): Promise<void> {

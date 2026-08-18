@@ -3,8 +3,8 @@
  * Provides transitive call graph analysis with depth control.
  */
 
-import { GraphRepository, CallerResult, CalleeResult } from './graph-repository.js';
-import { SymbolResolver, ResolvedSymbol } from './symbol-resolver.js';
+import { GraphRepository } from './graph-repository.js';
+import { SymbolResolver } from './symbol-resolver.js';
 
 export interface CallGraphItem {
   symbol: string;
@@ -197,7 +197,6 @@ export class CallGraphService {
   }
 
   private async symbolNotFoundResponse(symbolName: string): Promise<CallGraphResponse> {
-    const suggestions = await this.symbolResolver.suggest(symbolName);
     return {
       symbol: symbolName,
       resolvedTo: [],

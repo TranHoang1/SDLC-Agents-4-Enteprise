@@ -1,11 +1,11 @@
 /**
  * admin/db/sessions.ts — Session management via DatabaseAdapter async methods.
- * SA4E-50: All functions are async; use getAdminAdapter() for multi-DB support.
+ * SA4E-50: All functions are async; use getDbAdapter() for multi-DB support.
  */
 
 import * as crypto from 'crypto';
 import type { Session } from '../types/rbac.types.js';
-import { getAdminAdapter } from './core.js';
+import { getDbAdapter } from './core.js';
 import { generateToken } from './password.js';
 
 /** Session row shape returned by the DB. */
@@ -36,7 +36,7 @@ export async function createSession(
   device?: string,
   ip?: string,
 ): Promise<Session & { token: string }> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const sessionId = 'sess-' + crypto.randomUUID().slice(0, 8);
   const token = generateToken();
   const now = new Date();
@@ -65,7 +65,7 @@ export async function createSession(
 export async function validateSession(
   token: string,
 ): Promise<{ userId: string; username: string; accessGroupId: string } | null> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const row = await adapter.getAsync<SessionUserRow>(
     `SELECT s.user_id, s.expires_at, s.is_active, u.username, u.access_group_id, u.status
      FROM sessions s JOIN users u ON s.user_id = u.user_id
@@ -88,7 +88,7 @@ export async function validateSession(
 
 /** Invalidate a single session by token. */
 export async function invalidateSession(token: string): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   await adapter.runAsync('UPDATE sessions SET is_active = 0 WHERE token = ?', [token]);
 }
 
@@ -97,7 +97,7 @@ export async function invalidateSession(token: string): Promise<void> {
  * @returns Number of sessions terminated
  */
 export async function invalidateUserSessions(userId: string): Promise<number> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const result = await adapter.runAsync(
     'UPDATE sessions SET is_active = 0 WHERE user_id = ? AND is_active = 1',
     [userId],
@@ -112,7 +112,7 @@ export async function invalidateUserSessions(userId: string): Promise<number> {
 export async function refreshSession(
   token: string,
 ): Promise<{ token: string; expiresAt: string } | null> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const row = await adapter.getAsync<Pick<SessionUserRow, 'user_id' | 'expires_at' | 'is_active' | 'status'>>(
     `SELECT s.user_id, s.expires_at, s.is_active, u.status
      FROM sessions s JOIN users u ON s.user_id = u.user_id
@@ -141,7 +141,7 @@ export async function refreshSession(
  * @returns Array of active Session objects
  */
 export async function getUserSessions(userId: string): Promise<Session[]> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const rows = await adapter.allAsync<Record<string, unknown>>(
     'SELECT * FROM sessions WHERE user_id = ? AND is_active = 1 ORDER BY login_at DESC',
     [userId],

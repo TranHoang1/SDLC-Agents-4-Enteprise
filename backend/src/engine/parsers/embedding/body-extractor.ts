@@ -3,7 +3,7 @@
  * Provides full body text for embedding generation.
  */
 
-import type { Parser, Tree, Node } from 'web-tree-sitter';
+import type { Tree } from 'web-tree-sitter';
 import type { SyntaxNode } from '../types.js';
 import { getNodeText, getNodeRange } from '../ast-utils.js';
 

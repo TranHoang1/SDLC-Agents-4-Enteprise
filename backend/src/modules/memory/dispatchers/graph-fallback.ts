@@ -43,12 +43,13 @@ export function isPegaQuery(query: string): boolean {
 
 /**
  * Infer graph node type from query string for narrower graph search.
+ * Matches GraphSyncService.nodeTypeFor() graph types (pega_* → uppercase, no prefix).
  * Returns undefined if type cannot be inferred (search all types).
  */
 export function inferNodeType(query: string): string | undefined {
-  if (/Rule-Obj-Activity/i.test(query)) return 'FUNCTION';
-  if (/Rule-Obj-Flow/i.test(query)) return 'FUNCTION';
-  if (/Rule-Obj-Decision/i.test(query)) return 'FUNCTION';
+  if (/Rule-Obj-Activity/i.test(query)) return 'ACTIVITY';
+  if (/Rule-Obj-Flow/i.test(query)) return 'FLOW';
+  if (/Rule-Obj-Decision/i.test(query)) return 'DECISION_TABLE';
   if (/Work-|Data-/i.test(query)) return 'CLASS';
   if (/\.py[A-Z]/i.test(query)) return 'PROPERTY';
   return undefined;
@@ -60,7 +61,7 @@ export function graphNodeToResult(node: GraphNode): GraphFallbackResult {
     id: node.id,
     content: `[Graph Node] ${node.label} (${node.type})`,
     summary: node.label,
-    type: 'PEGA_RULE',
+    type: node.type || 'CODE_ENTITY',
     source: 'graph_fallback',
     tags: `pega,graph,${node.type.toLowerCase()}`,
     score: 0.5,

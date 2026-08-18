@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { PegaDecisioningParser } from '../../decisioning/PegaDecisioningParser.js';
 import { PegaStrategyComponentResolver } from '../../decision/PegaStrategyComponentResolver.js';
-import type { Strategy, StrategyComponent, Condition, NBA, Offer, Proposition, Treatment } from '../../decisioning/PegaDecisioningTypes.js';
+import type { Strategy } from '../../decisioning/PegaDecisioningTypes.js';
 
 describe('PegaDecisioningParser', () => {
   const parser = new PegaDecisioningParser();

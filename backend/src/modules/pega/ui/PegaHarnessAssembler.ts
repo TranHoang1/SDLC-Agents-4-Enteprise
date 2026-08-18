@@ -1,7 +1,6 @@
 import type { PegaSection } from './PegaUITypes.js';
 import type { PegaClipboardContext } from '../expression/PegaClipboardContext.js';
 import { PegaSectionRenderer } from './PegaSectionRenderer.js';
-import { PegaHtmlSanitizer } from '../security/PegaHtmlSanitizer.js';
 
 export interface HarnessSections {
   header?: PegaSection;

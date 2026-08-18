@@ -3,9 +3,9 @@
  * Handles all non-text formats as first attempt.
  */
 import * as fs from "fs";
-import * as vscode from "vscode";
 import { IFileConverter, ConversionResult } from "./IFileConverter";
 import { httpPostJson } from "../utils/http-client-utils";
+import { getBackendUrl } from "../config/backend-url";
 
 export class RemoteConverter implements IFileConverter {
     canConvert(_format: string): boolean {
@@ -37,8 +37,7 @@ export class RemoteConverter implements IFileConverter {
     }
 
     private async callRemote(filePath: string, token?: string): Promise<string | null> {
-        const config = vscode.workspace.getConfiguration("kiroSdlc");
-        const backendUrl = config.get<string>("backend.url") || "http://127.0.0.1:48721";
+        const backendUrl = getBackendUrl();
 
         let fileUri = filePath.replace(/\\/g, "/");
         if (!fileUri.startsWith("/")) { fileUri = "/" + fileUri; }

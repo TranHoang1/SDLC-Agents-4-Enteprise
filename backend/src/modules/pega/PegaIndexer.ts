@@ -1,12 +1,15 @@
 /**
  * SA4E-158 — PegaIndexer: Phase 1 of separated ingest pipeline.
- * Parses rule → stores raw index entry (no KB, no graph, no enrichment).
- * Returns ruleId for Phase 2 (syncRuleToKb).
+ * SA4E-171 (cutover): parses rule → stores into symbols table (via PegaSymbolSync).
+ * No longer writes PEGA_INDEX into knowledge_entries — rules live in symbols only.
+ * Returns symbolId for Phase 2 (syncIndexedRulesToKb / graph projection).
  */
 import type { MemoryEngine } from '../memory/engine/core.js';
 import type { PegaIngestRuleRequest, UnresolvedDependency } from './models.js';
 import { PegaParser, type ExtractedPegaSymbol } from './PegaParser.js';
 import { PegaRuleAstParser } from './PegaRuleAstParser.js';
+import { syncRuleToSymbols } from './PegaSymbolSync.js';
+import { buildFqn, resolveRuleNameField } from './pega-mapping.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'pega-indexer' });
@@ -22,8 +25,9 @@ export interface IndexRuleResult {
 }
 
 /**
- * Phase 1: Parse + checksum dedup + store raw rule JSON.
- * Does NOT create KB enrichment tasks, graph nodes, or declare registrations.
+ * Phase 1: Parse + checksum dedup + store into symbols table.
+ * Does NOT create KB entries, TAG_ENRICHMENT tasks, or legacy pega: graph nodes.
+ * CODE_ENRICHMENT task is created by syncRuleToSymbols.
  */
 export async function indexRule(
   memoryEngine: MemoryEngine,
@@ -46,10 +50,16 @@ export async function indexRule(
 
   const deps = parser.extractDependencies(req.ruleJson);
 
-  // Checksum dedup — skip if already indexed with same checksum
+  // Checksum dedup — skip if already indexed in symbols with matching content hash
+  // FQN uses the canonical rule-name fallback (matches PegaSymbolSync signature).
+  const canonicalFqn = buildFqn(
+    String((req.ruleJson as any)?.pxObjClass || ''),
+    String((req.ruleJson as any)?.pyClassName || ''),
+    resolveRuleNameField(req.ruleJson),
+  );
   if (req.checksum) {
     const { exists, checksumMatch } = await checkRuleChecksum(
-      memoryEngine, req.projectId, symbol.fqn, req.checksum,
+      memoryEngine, req.projectId, canonicalFqn, req.checksum,
     );
     if (exists && checksumMatch) {
       return { status: 'skipped', ruleId: -1, fqn: symbol.fqn,
@@ -57,42 +67,30 @@ export async function indexRule(
     }
   }
 
-  // Store raw rule JSON as PEGA_INDEX type (separate from KB entries)
-  const adapter = memoryEngine.getAdapter();
-  const indexSource = `pega-index:${symbol.fqn}`;
-  await adapter.runAsync(
-    'DELETE FROM knowledge_entries WHERE source = $1 AND project_id = $2',
-    [indexSource, req.projectId],
-  );
-
   const ast = astParser.parse(req.ruleJson);
   const promptCtx = astParser.toPromptContext(ast);
-  const summaryText = symbol.logicSummary
-    ? `${symbol.fqn}\n${symbol.logicSummary}`
-    : `${symbol.isRule ? 'Rule' : 'Data'}: ${symbol.fqn}`;
 
-  const id = await memoryEngine.insert({
-    content: JSON.stringify({
-      ...req.ruleJson,
-      __checksum: req.checksum,
-      __version: req.version,
-      __ast: ast,
-      __promptContext: promptCtx,
-    }),
-    summary: summaryText,
-    type: 'PEGA_INDEX',
-    tier: 'SEMANTIC',
-    scope: 'PROJECT',
-    project_id: req.projectId,
-    source: indexSource,
-    tags: symbol.isRule ? 'pega,index,rule' : 'pega,index,data',
-  });
+  // Store rule into symbols table (virtual file + symbol + body + CODE_ENRICHMENT)
+  let result;
+  try {
+    result = await syncRuleToSymbols(
+      memoryEngine.getAdapter(), req.ruleJson, req.projectId, promptCtx,
+    );
+  } catch (err) {
+    logger.warn({ err, fqn: symbol.fqn }, 'Failed to sync rule to symbols — skipped');
+    return { status: 'skipped', ruleId: -1, fqn: symbol.fqn,
+      isRule: symbol.isRule, reason: 'symbol_sync_error', dependencies: deps };
+  }
+  if (!result) {
+    return { status: 'skipped', ruleId: -1, fqn: symbol.fqn,
+      isRule: symbol.isRule, reason: 'symbol_skip', dependencies: deps };
+  }
 
-  return { status: 'success', ruleId: id, fqn: symbol.fqn,
+  return { status: 'success', ruleId: result.symbolId, fqn: symbol.fqn,
     isRule: symbol.isRule, dependencies: deps };
 }
 
-/** Check if rule exists with matching checksum in index or KB. */
+/** Check if rule exists in symbols with matching content hash. */
 async function checkRuleChecksum(
   memoryEngine: MemoryEngine,
   projectId: string,
@@ -100,20 +98,13 @@ async function checkRuleChecksum(
   checksum: string,
 ): Promise<{ exists: boolean; checksumMatch: boolean }> {
   const adapter = memoryEngine.getAdapter();
-  // Check both PEGA_INDEX (new) and PEGA_RULE/PEGA_DATA (legacy)
-  const row = await adapter.getAsync<{ content: string }>(
-    `SELECT content FROM knowledge_entries
-     WHERE project_id = $1
-       AND (source = $2 OR source = $3)
-       AND type IN ('PEGA_INDEX', 'PEGA_RULE', 'PEGA_DATA')
+  const row = await adapter.getAsync<{ content_hash: string | null }>(
+    `SELECT f.content_hash
+     FROM symbols s JOIN files f ON f.id = s.file_id
+     WHERE s.project_id = $1 AND s.signature = $2 AND s.kind LIKE 'pega_%'
      LIMIT 1`,
-    [projectId, `pega-index:${fqn}`, fqn],
+    [projectId, fqn],
   );
   if (!row) return { exists: false, checksumMatch: false };
-  try {
-    const parsed = JSON.parse(row.content);
-    return { exists: true, checksumMatch: parsed.__checksum === checksum };
-  } catch {
-    return { exists: true, checksumMatch: false };
-  }
+  return { exists: true, checksumMatch: row.content_hash === checksum };
 }

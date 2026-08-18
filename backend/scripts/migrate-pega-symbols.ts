@@ -1,6 +1,7 @@
 /**
  * SA4E-171 — Migration script: Migrate Pega rules from knowledge_entries to symbols.
- * Batch processes existing PEGA_RULE/PEGA_DATA entries into the symbols table.
+ * Batch processes existing PEGA_RULE/PEGA_DATA/PEGA_INDEX entries into symbols,
+ * then hard-DELETEs each migrated row (SA4E-171 cutover — approved, not archived).
  * Idempotent: safe to run multiple times (dedup by signature+project_id).
  *
  * Usage: npx tsx backend/scripts/migrate-pega-symbols.ts [options]
@@ -16,7 +17,7 @@
 
 import { parseArgs } from 'node:util';
 import { syncRuleToSymbols, refreshRuleSymbolBody } from '../src/modules/pega/PegaSymbolSync.js';
-import { buildFqn } from '../src/modules/pega/pega-mapping.js';
+import { buildFqn, resolveRuleNameField } from '../src/modules/pega/pega-mapping.js';
 
 /** Migration summary output. */
 interface MigrationSummary {
@@ -92,11 +93,11 @@ async function main(): Promise<void> {
   };
 
   const processedProjects = new Set<string>();
-  let offset = 0;
+  let lastId = 0;
   let hasMore = true;
 
   while (hasMore) {
-    const batch = await fetchBatch(adapter, args.projectId, args.batchSize, offset);
+    const batch = await fetchBatch(adapter, args.projectId, args.batchSize, lastId);
     if (batch.length === 0) { hasMore = false; break; }
     for (const row of batch) processedProjects.add(row.project_id);
 
@@ -106,9 +107,9 @@ async function main(): Promise<void> {
     summary.migrated += batchResult.migrated;
     summary.skipped += batchResult.skipped;
     summary.errors += batchResult.errors;
-    offset += args.batchSize;
+    lastId = Math.max(...batch.map((r: any) => Number(r.id)));
 
-    console.log(`  [batch ${summary.batches}] offset=${offset - args.batchSize} migrated=${batchResult.migrated} skipped=${batchResult.skipped} errors=${batchResult.errors}`);
+    console.log(`  [batch ${summary.batches}] lastId=${lastId} migrated=${batchResult.migrated} skipped=${batchResult.skipped} errors=${batchResult.errors}`);
 
     if (batch.length < args.batchSize) hasMore = false;
   }
@@ -145,19 +146,20 @@ async function syncGraphForProjects(adapter: any, projectIds: string[]): Promise
   }
 }
 
-/** Fetch a batch of PEGA_RULE/PEGA_DATA entries from knowledge_entries. */
+/** Fetch a batch of legacy PEGA_RULE/PEGA_DATA/PEGA_INDEX/PEGA_AST entries using keyset (lastId) pagination. */
 async function fetchBatch(
-  adapter: any, projectId: string, batchSize: number, offset: number,
+  adapter: any, projectId: string, batchSize: number, lastId: number,
 ): Promise<any[]> {
   const params: unknown[] = [];
-  let whereClause = `WHERE type IN ('PEGA_RULE', 'PEGA_DATA')`;
+  let whereClause = `WHERE type IN ('PEGA_RULE', 'PEGA_DATA', 'PEGA_INDEX', 'PEGA_AST') AND id > ?`;
+  params.push(lastId);
   if (projectId) {
     whereClause += ` AND project_id = ?`;
     params.push(projectId);
   }
-  params.push(batchSize, offset);
+  params.push(batchSize);
   return adapter.allAsync(
-    `SELECT id, content, source, project_id FROM knowledge_entries ${whereClause} ORDER BY id LIMIT ? OFFSET ?`,
+    `SELECT id, content, source, project_id FROM knowledge_entries ${whereClause} ORDER BY id LIMIT ?`,
     params,
   );
 }
@@ -175,11 +177,12 @@ async function processBatch(
       const ruleJson = JSON.parse(row.content);
       const pxObjClass = String(ruleJson?.pxObjClass || '');
       const pyClassName = String(ruleJson?.pyClassName || '');
-      const pyRuleName = String(ruleJson?.pyRuleName || '');
+      const pyRuleName = resolveRuleNameField(ruleJson);
 
       if (!pxObjClass || !pyClassName || !pyRuleName) {
         if (args.verbose) console.log(`    SKIP: missing fields, id=${row.id}`);
         skipped++;
+        await removeLegacyRow(adapter, row, args);
         continue;
       }
 
@@ -187,6 +190,7 @@ async function processBatch(
       if (row.content.length > 5 * 1024 * 1024) {
         if (args.verbose) console.log(`    SKIP: oversized rule, id=${row.id}`);
         skipped++;
+        await removeLegacyRow(adapter, row, args);
         continue;
       }
 
@@ -207,10 +211,12 @@ async function processBatch(
           await refreshRuleSymbolBody(adapter, ruleJson, existing.id, row.project_id);
           if (args.verbose) console.log(`    REFRESHED: fqn=${fqn}`);
           migrated++;
+          await removeLegacyRow(adapter, row, args);
           continue;
         }
         if (args.verbose) console.log(`    SKIP: already exists, fqn=${fqn}`);
         skipped++;
+        await removeLegacyRow(adapter, row, args);
         continue;
       }
 
@@ -221,7 +227,10 @@ async function processBatch(
       }
 
       const result = await syncRuleToSymbols(adapter, ruleJson, row.project_id, '');
-      if (result) { migrated++; }
+      if (result) {
+        migrated++;
+        await removeLegacyRow(adapter, row, args);
+      }
       else { skipped++; }
     } catch (err) {
       errors++;
@@ -230,6 +239,16 @@ async function processBatch(
   }
 
   return { migrated, skipped, errors };
+}
+
+/** SA4E-171 cutover: hard-delete a migrated legacy KB row (approved — not archived). */
+async function removeLegacyRow(adapter: any, row: any, args: { dryRun: boolean }): Promise<void> {
+  if (args.dryRun) return;
+  await adapter.runAsync('DELETE FROM knowledge_entries WHERE id = ?', [row.id]);
+  // Drop KB-side enrichment tasks referencing the removed entry (legacy TAG_ENRICHMENT
+  // tasks) so they never orphan. Scoped to task_type to avoid hitting CODE_ENRICHMENT
+  // symbol tasks whose entry_id could collide with a KB row id.
+  await adapter.runAsync('DELETE FROM pending_tasks WHERE entry_id = ? AND task_type = ?', [row.id, 'TAG_ENRICHMENT']);
 }
 
 main().catch(err => {

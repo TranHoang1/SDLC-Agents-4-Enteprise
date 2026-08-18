@@ -1,5 +1,5 @@
-import type { SyntaxNode, ExtractedRelationship } from '../../types.js';
-import { getNodeText, getNamedChild, findNodes, walkTree } from '../../ast-utils.js';
+import type { SyntaxNode } from '../../types.js';
+import { getNodeText, getNamedChild, walkTree } from '../../ast-utils.js';
 
 const APEX_MODIFIERS = ['public', 'private', 'protected', 'global', 'virtual', 'abstract',
   'static', 'final', 'transient', 'webservice',

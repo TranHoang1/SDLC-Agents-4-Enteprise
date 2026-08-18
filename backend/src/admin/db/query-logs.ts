@@ -1,9 +1,9 @@
 /**
  * admin/db/query-logs.ts — KB search query performance logging.
- * SA4E-50: All functions are async; use getAdminAdapter() for multi-DB support.
+ * SA4E-50: All functions are async; use getDbAdapter() for multi-DB support.
  */
 
-import { getAdminAdapter } from './core.js';
+import { getDbAdapter } from './core.js';
 
 /**
  * Ensure the query_logs table and required columns exist (lazy-init).
@@ -13,7 +13,7 @@ import { getAdminAdapter } from './core.js';
  * (SQLSTATE 42601), which broke every `/api/admin/search` request.
  */
 async function ensureTable(): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const idColumn = adapter.getEngine() === 'postgresql'
     ? 'id SERIAL PRIMARY KEY'
     : 'id INTEGER PRIMARY KEY AUTOINCREMENT';
@@ -45,7 +45,7 @@ export async function recordQueryLog(
   userId = '',
 ): Promise<void> {
   await ensureTable();
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   await adapter.runAsync(
     'INSERT INTO query_logs (query, timestamp, response_time_ms, result_count, user_id) VALUES (?, ?, ?, ?, ?)',
     [query, new Date().toISOString(), responseTimeMs, resultCount, userId],
@@ -62,7 +62,7 @@ export async function getQueryLogs(
   userId?: string,
 ): Promise<{ date: string; queries: number; avgResponseTime: number }[]> {
   await ensureTable();
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const since = new Date(Date.now() - days * 86400000).toISOString();
 
   let sql = `
@@ -90,7 +90,7 @@ export async function getQueryLogStats(
   userId?: string,
 ): Promise<{ totalQueries: number; avgResponseTime: number; queriesLast24h: number }> {
   await ensureTable();
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const userFilter = userId ? ' WHERE user_id = ?' : '';
   const totalParams = userId ? [userId] : [];
 

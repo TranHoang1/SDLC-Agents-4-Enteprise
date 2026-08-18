@@ -2,8 +2,8 @@
  * UT-01 to UT-06, UT-09: TagAnalyzerService unit tests
  * Tests for analyzeTags with mocked LLM service.
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { TagAnalyzerService, type TagSuggestion } from '../analyzer.js';
+import { describe, it, expect, vi } from 'vitest';
+import { TagAnalyzerService } from '../analyzer.js';
 import { LLMService } from '../LLMService.js';
 import type { ContextChainInput } from '../types.js';
 
@@ -29,10 +29,6 @@ const validLLMResponse = JSON.stringify({
   business_entities: ['User', 'JWT Token'],
   actors: ['End User', 'System Admin'],
   business_rules: ['JWT expires after 24h', 'Password must be 8+ chars'],
-});
-
-const oldFormatResponse = JSON.stringify({
-  tags: [{ tag: 'auth-flow', category: 'feature', confidence: 0.95, reason: 'login' }],
 });
 
 describe('TagAnalyzerService', () => {

@@ -1,5 +1,7 @@
 // KSA-286: User Service
 import { AdminUser, AdminErrorCode, PaginatedResult, PaginationParams } from '../types/admin.types.js';
+import { randomUUID } from 'crypto';
+import { hash as bcryptHash } from 'bcrypt';
 
 export class UserService {
   constructor(private db: any) {}
@@ -18,9 +20,8 @@ export class UserService {
     if (this.db.prepare('SELECT 1 FROM users WHERE username = ?').get(data.username)) throw { code: AdminErrorCode.DUPLICATE_USERNAME };
     if (this.db.prepare('SELECT 1 FROM users WHERE email = ?').get(data.email)) throw { code: AdminErrorCode.DUPLICATE_EMAIL };
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(data.password)) throw { code: AdminErrorCode.WEAK_PASSWORD };
-    const bcrypt = require('bcrypt');
-    const userId = crypto.randomUUID();
-    const hash = await bcrypt.hash(data.password, 10);
+    const userId = randomUUID();
+    const hash = await bcryptHash(data.password, 10);
     this.db.prepare('INSERT INTO users (user_id, username, email, password_hash, access_group_id) VALUES (?, ?, ?, ?, ?)').run(userId, data.username, data.email, hash, data.accessGroupId);
     return { userId, username: data.username, email: data.email, status: 'ACTIVE', accessGroupId: data.accessGroupId, forcePasswordChange: false, createdAt: new Date().toISOString() };
   }
@@ -45,9 +46,8 @@ export class UserService {
   }
 
   async resetPassword(userId: string): Promise<{ temporaryPassword: string }> {
-    const bcrypt = require('bcrypt');
-    const temp = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
-    const hash = await bcrypt.hash(temp, 10);
+    const temp = randomUUID().replace(/-/g, '').slice(0, 16);
+    const hash = await bcryptHash(temp, 10);
     this.db.prepare('UPDATE users SET password_hash = ?, force_password_change = 1 WHERE user_id = ?').run(hash, userId);
     return { temporaryPassword: temp };
   }

@@ -1,7 +1,6 @@
 import type { SyntaxNode, ExtractedSymbol, ExtractedRelationship, SymbolKind } from '../../types.js';
 import { getNodeText, getNodeRange, getNamedChild, extractDocComment } from '../../ast-utils.js';
-import { buildMethodSignature } from '../common.js';
-import { extractApexModifiers, extractApexAnnotations, calculateApexComplexity } from './helpers.js';
+import { extractApexModifiers, extractApexAnnotations } from './helpers.js';
 import { extractMethod, extractConstructor, extractFields } from './members.js';
 import { extractApexInheritance } from './relationships.js';
 

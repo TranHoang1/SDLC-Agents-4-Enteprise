@@ -9,12 +9,6 @@ const SYSTEM_FIELD_PREFIXES = ['pxCreate', 'pxUpdate', 'pxInstance', 'pxHost', '
   'pxLimitedAccess', 'pzChecksum', 'pzIndex', 'pzReindex', 'pzOriginal',
   'pxAllChangeList', 'pxWarnings', 'pxNamedPageReferences', 'pxAPIMethodReferences'];
 
-const SYSTEM_FIELDS = new Set(['pxObjClass', 'pyClassName', 'pyRuleName', 'pyRuleset', 'pyRulesetVersion',
-  'pyInsKey', 'pzInsKey', 'pxInsId', 'pxInsName',
-  'pyRuleAvailable', 'pyModelName', 'pyActivityName',
-  'pyTransformName', 'pyUserIdentifier', 'pyAccessGroup',
-  'pyRuleSet', 'pyRuleSetVersion']);
-
 const REFERENCE_FIELD_NAMES = new Set([
   'pyClassName', 'pySuperClass', 'pyPatternParent', 'pyDerivesFrom',
   'pyRuleName', 'pyModelName', 'pyActivityName', 'pyTransformName',
@@ -111,10 +105,10 @@ export class PegaMetaModelLoader {
     return filename === '@baseclass.json' || filename.startsWith('Rule-') && filename.indexOf('.') === filename.lastIndexOf('.');
   }
 
-  private parseClassDefinition(json: Record<string, unknown>, filename: string): PegaClassDefinition | null {
+  private parseClassDefinition(json: Record<string, unknown>, _filename: string): PegaClassDefinition | null {
     if (!json || typeof json !== 'object') return null;
 
-    let pxObjClass = '';
+    let pxObjClass: string;
     let baseClass: string | undefined;
     let description: string | undefined;
     let label: string | undefined;

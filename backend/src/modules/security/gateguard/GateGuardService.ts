@@ -129,7 +129,7 @@ const elapsed = performance.now() - start;
       }
     } catch (err) {
       if ((err as Error).message.includes('ReDoS-prone')) throw err;
-      throw new Error(`Invalid regex pattern: ${(err as Error).message}`);
+      throw new Error(`Invalid regex pattern: ${(err as Error).message}`, { cause: err });
     }
   }
 

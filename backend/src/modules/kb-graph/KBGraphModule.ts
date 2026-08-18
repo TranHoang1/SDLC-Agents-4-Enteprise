@@ -1,13 +1,13 @@
 /**
  * SA4E-51 — KB Graph Module.
- * Passes getAdminAdapter() to GraphService so graph_nodes/graph_edges
+ * Passes getDbAdapter() to GraphService so graph_nodes/graph_edges
  * are stored in the active engine (SQLite or PostgreSQL), not hardcoded SQLite.
  */
 
 import type { IModule, ModuleStatus } from '../../types/module.js';
 import type { ToolHandler, ToolDefinition } from '../../types/tool.js';
 import type { Logger } from 'pino';
-import { getAdminAdapter } from '../../admin/db/core.js';
+import { getDbAdapter } from '../../admin/db/core.js';
 import { GraphService } from './service/index.js';
 
 export class KBGraphModule implements IModule {
@@ -22,7 +22,7 @@ export class KBGraphModule implements IModule {
   constructor(logger: Logger) {
     this.logger = logger.child({ module: this.name });
     // DIP: inject DatabaseAdapter so GraphService is engine-agnostic
-    this.graphService = new GraphService(getAdminAdapter(), this.logger);
+    this.graphService = new GraphService(getDbAdapter(), this.logger);
   }
 
   get status(): ModuleStatus { return this._status; }

@@ -32,7 +32,7 @@ export function userRouter(deps: { db: any }): Router {
 
   router.post('/:id/reset-password', async (req, res) => {
     try { const result = await svc.resetPassword(req.params.id); res.json({ success: true, data: result }); }
-    catch (e: any) { res.status(400).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Reset failed' } }); }
+    catch (err) { console.error('[user-router] reset-password failed:', err); res.status(400).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Reset failed' } }); }
   });
 
   return router;

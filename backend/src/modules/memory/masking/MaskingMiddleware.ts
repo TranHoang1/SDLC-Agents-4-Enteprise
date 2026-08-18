@@ -10,13 +10,6 @@ import {
   SensitivityLevel,
 } from './models/MaskingTypes.js';
 
-const ROLE_ACCESS: Record<string, SensitivityLevel[]> = {
-  ADMIN: ['PUBLIC', 'INTERNAL', 'CONFIDENTIAL', 'RESTRICTED'],
-  DEVELOPER: ['PUBLIC'],
-  USER: ['PUBLIC'],
-  EXTERNAL: ['PUBLIC'],
-};
-
 /**
  * Main orchestrator for the masking pipeline.
  */

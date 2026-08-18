@@ -78,8 +78,8 @@ export class DatabaseManager {
   /**
    * Factory using existing global adapter singletons from admin/db/core.
    * SA4E-49: Both adapters may point to the same unified DB file.
-   * @param adminAdapter - Pre-resolved admin adapter (from getAdminAdapter())
-   * @param indexAdapter - Pre-resolved index adapter (from getIndexAdapter())
+   * @param adminAdapter - Pre-resolved admin adapter (from getDbAdapter())
+   * @param indexAdapter - Pre-resolved index adapter (from getDbAdapter())
    * @returns A DatabaseManager wired to the provided adapters
    */
   static createDefault(

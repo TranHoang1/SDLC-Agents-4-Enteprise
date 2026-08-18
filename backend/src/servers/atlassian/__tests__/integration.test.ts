@@ -2,7 +2,7 @@
  * SA4E-110 — Integration tests (IT-01 to IT-14)
  * Tests full code paths with mocked HTTP layer.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { JiraApiClient } from '../clients/jira-client.js';
 import { ConfluenceApiClient } from '../clients/confluence-client.js';
 import { RateLimiter } from '../clients/rate-limiter.js';
@@ -10,7 +10,6 @@ import { levenshtein } from '../utils/levenshtein.js';
 import { normalizeForComparison } from '../utils/normalize.js';
 import { createConfig } from '../config.js';
 import { AtlassianApiError } from '../clients/base-client.js';
-import { AtlassianErrorCode } from '../models/types.js';
 import type { HttpClientConfig } from '../models/types.js';
 
 function createTestConfig(): HttpClientConfig {

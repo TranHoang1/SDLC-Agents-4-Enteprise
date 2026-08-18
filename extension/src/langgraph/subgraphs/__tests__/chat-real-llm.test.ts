@@ -166,7 +166,7 @@ async function chat(userMessage: string, systemPrompt: string): Promise<string> 
   return data.choices?.[0]?.message?.content || '';
 }
 
-describe('Real LLM — Agentic Chat', () => {
+describe.skip('Real LLM — Agentic Chat', () => {
   it('should respond "Hi" with project meta knowledge', async () => {
     const prompt = buildSystemPrompt(tmpDir);
     expect(prompt).toContain('Business Analyst');

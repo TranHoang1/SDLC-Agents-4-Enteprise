@@ -5,7 +5,7 @@
  */
 import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../../database/dialect/DialectHelper.js';
-import type { GitCommit, GitCommitResult, GitIndexSummary } from './types.js';
+import type { GitCommitResult, GitIndexSummary } from './types.js';
 import { parseGitLog, getLastIndexedHash } from './GitLogParser.js';
 import { buildCodeScopeFilter, requireProjectId } from '../../query/code-intel-isolation.js';
 

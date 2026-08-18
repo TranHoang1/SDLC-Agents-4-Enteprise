@@ -20,7 +20,7 @@ function makeContext() {
 
 describe('securityHeaders', () => {
   it('awaits next before applying headers', async () => {
-    let order: string[] = [];
+    const order: string[] = [];
     const { c } = makeContext();
     await securityHeaders(c, vi.fn(async () => { order.push('next'); }));
     order.push('headers');

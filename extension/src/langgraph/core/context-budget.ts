@@ -189,3 +189,90 @@ export function getDynamicToolResultLimits(
 
   return { dirLimit, fileLimit };
 }
+
+/**
+ * SA4E-174: Auto-compact detection.
+ * When context usage >= 95%, returns a compact signal with conversation summary.
+ * The caller (chat engine) should create a new session with the summary.
+ */
+export interface AutoCompactResult {
+  shouldCompact: boolean;
+  usagePercent: number;
+  summary?: string;
+}
+
+/**
+ * Check if context is nearing exhaustion and needs auto-compaction.
+ * @param contextBudget Total context window in tokens
+ * @param systemPromptTokens Estimated system prompt tokens
+ * @param chatHistory Full chat history
+ * @param scratchpad Current agent scratchpad
+ * @returns AutoCompactResult with shouldCompact flag and optional summary
+ */
+export function checkAutoCompact(
+  contextBudget: number,
+  systemPromptTokens: number,
+  chatHistory: Array<{ role: string; content: string }>,
+  scratchpad: LlmMessage[]
+): AutoCompactResult {
+  if (contextBudget <= 0) {
+    return { shouldCompact: false, usagePercent: 0 };
+  }
+
+  const historyTokens = chatHistory.reduce(
+    (sum, m) => sum + estimateTokens(m.content) + 4, 0
+  );
+  const scratchpadTokens = estimateMessagesTokens(scratchpad);
+  const totalUsed = systemPromptTokens + historyTokens + scratchpadTokens;
+  const usagePercent = Math.round((totalUsed / contextBudget) * 100);
+
+  if (usagePercent >= 95) {
+    debugLog(`[context-budget] AUTO-COMPACT triggered: ${usagePercent}% usage (${totalUsed}/${contextBudget})`);
+    const summary = buildConversationSummary(chatHistory, scratchpad);
+    return { shouldCompact: true, usagePercent, summary };
+  }
+
+  if (usagePercent >= 85) {
+    debugLog(`[context-budget] WARNING: ${usagePercent}% context usage`);
+  }
+
+  return { shouldCompact: false, usagePercent };
+}
+
+/**
+ * Build a condensed summary of the conversation for session handoff.
+ * Extracts: user intent, tools used, key findings, current task state.
+ */
+function buildConversationSummary(
+  chatHistory: Array<{ role: string; content: string }>,
+  scratchpad: LlmMessage[]
+): string {
+  const parts: string[] = [];
+
+  // Extract user messages (last 3 for context)
+  const userMessages = chatHistory.filter(m => m.role === "user");
+  const recentUser = userMessages.slice(-3);
+  if (recentUser.length > 0) {
+    parts.push("## User Intent");
+    for (const m of recentUser) {
+      parts.push(`- ${m.content.slice(0, 200)}`);
+    }
+  }
+
+  // Extract tool calls from scratchpad
+  const toolCalls = scratchpad.filter(m => m.role === "tool" && m.toolName);
+  if (toolCalls.length > 0) {
+    parts.push("\n## Tools Used");
+    const uniqueTools = [...new Set(toolCalls.map(m => m.toolName))];
+    parts.push(uniqueTools.join(", "));
+  }
+
+  // Extract last assistant response
+  const lastAssistant = chatHistory.filter(m => m.role === "assistant").pop();
+  if (lastAssistant) {
+    parts.push("\n## Last Response (truncated)");
+    parts.push(lastAssistant.content.slice(0, 500));
+  }
+
+  return parts.join("\n");
+}

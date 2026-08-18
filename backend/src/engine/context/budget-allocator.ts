@@ -3,7 +3,7 @@
  * Top results get full source, middle get signatures, bottom get references.
  */
 
-import { MergedResult, ContextItem } from './types.js';
+import { MergedResult } from './types.js';
 
 export interface AllocatedResult extends MergedResult {
   detail: 'full' | 'signature' | 'reference';

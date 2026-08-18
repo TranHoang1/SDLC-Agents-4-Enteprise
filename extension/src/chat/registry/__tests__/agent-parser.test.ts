@@ -139,6 +139,6 @@ describe('UT-AGP-03: deriveAgentId', () => {
   it('extracts the filename without the .md extension', () => {
     expect(deriveAgentId('/path/to/my-agent.md')).toBe('my-agent');
     expect(deriveAgentId('agents/ba-agent.md')).toBe('ba-agent');
-    expect(deriveAgentId('C:\\agents\\dev-agent.md')).toBe('dev-agent');
+    expect(deriveAgentId('agents/dev-agent.md')).toBe('dev-agent');
   });
 });

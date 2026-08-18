@@ -13,6 +13,8 @@ import * as path from 'path';
 export function isPathSafe(relPath: string): boolean {
   if (!relPath || typeof relPath !== 'string') return false;
   if (relPath.includes('\0')) return false;
+  // Reject Windows absolute paths on any platform (C:\, D:\, etc.)
+  if (/^[A-Za-z]:[/\\]/.test(relPath)) return false;
   const normalized = path.normalize(relPath);
   if (path.isAbsolute(normalized)) return false;
   if (normalized === '..' || normalized.startsWith('..')) return false;

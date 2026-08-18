@@ -1,5 +1,5 @@
 import type { SyntaxNode, ExtractedSymbol, ExtractedRelationship, SymbolKind, RelationshipKind } from '../../types.js';
-import { getNodeText, getNodeRange, getNamedChild, findNodes, extractDocComment } from '../../ast-utils.js';
+import { getNodeText, getNodeRange, getNamedChild, findNodes } from '../../ast-utils.js';
 import { getDecorators, extractPythonReturnType, extractDocstring, calculatePythonComplexity, buildPythonFunctionSignature } from './helpers.js';
 
 export function extractFunction(

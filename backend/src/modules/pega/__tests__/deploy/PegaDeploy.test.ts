@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { PegaConfigProvider, type PegaConfig } from '../../deploy/PegaConfigProvider.js';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { PegaConfigProvider } from '../../deploy/PegaConfigProvider.js';
 import { PegaEvaluationCache } from '../../deploy/PegaEvaluationCache.js';
 import { PegaWorkerPool } from '../../deploy/PegaWorkerPool.js';
 

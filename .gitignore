@@ -50,3 +50,6 @@ CLAUDE.md
 # zcode
 .zcode
 
+# dev server log (keep untracked)
+/backend/dev-server.log
+backend/*.log

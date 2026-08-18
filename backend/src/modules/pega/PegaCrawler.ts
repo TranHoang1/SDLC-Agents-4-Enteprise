@@ -73,7 +73,7 @@ export class PegaCrawler {
   public computeNextBatch(
     ingestedRules: Record<string, unknown>[],
     visitedKeys: Set<string>,
-    projectId: string,
+    _projectId: string,
   ): PegaCrawlKey[] {
     const nextBatch: PegaCrawlKey[] = [];
     const seen = new Set<string>();

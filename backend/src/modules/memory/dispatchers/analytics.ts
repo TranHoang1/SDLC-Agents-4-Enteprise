@@ -21,41 +21,58 @@ export async function handleAdmin(engine: MemoryEngine, a: Args): Promise<string
     case 'audit': return (await engine.listAudit((a.limit as number) ?? 20, a.operation as string)).map((e: any) => `[${e.operation}] ${e.created_at}`).join('\n') || 'Empty';
     case 'sessions': return (await engine.listSessions()).map((s: any) => `[${s.session_id}] ${s.status}`).join('\n') || 'None';
     case 'analytics': case 'popular': return '{}';
-    case 'retry_all_failed': {
-      const { PendingTaskRepository } = await import('../task-queue/PendingTaskRepository.js');
-      const repo = new PendingTaskRepository(engine.getAdapter());
-      const count = await repo.retryAllFailed();
-      return `Reset ${count} FAILED tasks back to PENDING for retry.`;
-    }
-    case 'task_stats': {
-      const { PendingTaskRepository } = await import('../task-queue/PendingTaskRepository.js');
-      const repo = new PendingTaskRepository(engine.getAdapter());
-      const stats = await repo.getStats();
-      return JSON.stringify(stats);
-    }
-    case 'reset_enrichment': {
-      const projectId = a.project_id as string || '';
-      const typeFilter = projectId
-        ? `AND project_id = '${projectId}'`
-        : '';
-      const result = await engine.getAdapter().runAsync(
-        `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE type IN ('PEGA_RULE', 'PEGA_DATA', 'PEGA_AST') AND enrichment_status = 'done' ${typeFilter}`,
-      );
-      return `Reset ${result.changes} entries enrichment_status from 'done' to 'pending'. TaskWorker will re-process them with LLM.`;
-    }
-    case 'purge_orphan_tasks': {
-      const result = await engine.getAdapter().runAsync(
-        `DELETE FROM pending_tasks WHERE id IN (
-          SELECT pt.id FROM pending_tasks pt
-          LEFT JOIN knowledge_entries ke ON pt.entry_id = ke.id
-          WHERE ke.id IS NULL
-          LIMIT 10000
-        )`,
-      );
-      return `Purged ${result.changes} orphaned tasks (batch, max 10000). Run again if more remain.`;
-    }
+    case 're_enrich': return await handleReEnrich(engine, a);
     default: return `Admin: "${action}" via portal`;
   }
+}
+
+/**
+ * SA4E-99: Re-enrich entries with poor summaries.
+ * Resets enrichment_status to 'pending' and re-queues TAG_ENRICHMENT tasks.
+ * Targets entries where summary is just a heading (short, no context).
+ */
+async function handleReEnrich(engine: MemoryEngine, a: Args): Promise<string> {
+  const adapter = engine.getAdapter();
+  const limit = (a.limit as number) ?? 500;
+  const maxSummaryLen = (a.max_summary_len as number) ?? 60;
+  const source = a.source as string | undefined;
+
+  // Find entries with poor summaries (likely just headings)
+  let query = `SELECT id, summary, content FROM knowledge_entries
+    WHERE enrichment_status = 'done' AND LENGTH(summary) <= ?
+    AND LENGTH(content) > 50`;
+  const params: unknown[] = [maxSummaryLen];
+
+  if (source) {
+    query += ' AND source LIKE ?';
+    params.push(`%${source}%`);
+  }
+  query += ` LIMIT ?`;
+  params.push(limit);
+
+  const entries = await adapter.allAsync<{ id: number; summary: string; content: string }>(query, params);
+  if (entries.length === 0) {
+    return JSON.stringify({ status: 'no_entries', message: 'No entries with poor summaries found', limit, maxSummaryLen });
+  }
+
+  // Reset to pending and create tasks
+  let queued = 0;
+  for (const entry of entries) {
+    await adapter.runAsync(
+      `UPDATE knowledge_entries SET enrichment_status = 'pending' WHERE id = ?`,
+      [entry.id],
+    );
+    // Create TAG_ENRICHMENT task for re-processing
+    const now = new Date().toISOString();
+    await adapter.runAsync(
+      `INSERT INTO pending_tasks (task_type, entry_id, payload, status, retry_count, max_retries, created_at)
+       VALUES ('TAG_ENRICHMENT', ?, ?, 'PENDING', 0, 3, ?)`,
+      [entry.id, JSON.stringify({ entry_id: entry.id, content: entry.content.slice(0, 6000), existing_tags: '', options: { threshold: 0.6, autoApply: true } }), now],
+    );
+    queued++;
+  }
+
+  return JSON.stringify({ status: 'queued', queued, total_candidates: entries.length, maxSummaryLen });
 }
 
 export async function handleGraph(engine: MemoryEngine, a: Args): Promise<string> {

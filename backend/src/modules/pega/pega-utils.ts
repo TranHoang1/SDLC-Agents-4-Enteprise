@@ -17,7 +17,10 @@ export function extractTagValueCsv(tags: string, key: string): string | null {
   return null;
 }
 
-type CategoryRule = { keywords: string[]; category: string };
+interface CategoryRule {
+  category: string;
+  keywords: string[];
+}
 
 const CATEGORY_RULES_PATH = path.resolve(__dirname, '../../../.code-intel/pega-categories.json');
 
@@ -27,7 +30,9 @@ function loadCategoryRules(): CategoryRule[] {
       const raw = JSON.parse(fs.readFileSync(CATEGORY_RULES_PATH, 'utf-8'));
       if (Array.isArray(raw.rules) && raw.rules.length > 0) return raw.rules;
     }
-  } catch (err) { console.debug('[pega-utils] ignore :', (err as Error).message); }
+  } catch (err) {
+    console.debug('[pega-utils] ignore :', (err as Error).message);
+  }
   return [];
 }
 
@@ -38,6 +43,7 @@ function autoCategory(shortName: string): string {
 }
 
 let _categoryRules: CategoryRule[] | null = null;
+
 function getCategoryRules(): CategoryRule[] {
   if (_categoryRules === null) _categoryRules = loadCategoryRules();
   return _categoryRules;

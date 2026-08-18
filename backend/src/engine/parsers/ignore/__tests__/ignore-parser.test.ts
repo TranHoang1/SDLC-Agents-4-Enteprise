@@ -8,8 +8,6 @@ import * as os from 'os';
 import * as path from 'path';
 import { IgnoreParser, createIgnoreParser, DEFAULT_IGNORE_PATTERNS } from '../ignore-parser.js';
 
-let dir: string;
-
 describe('IgnoreParser', () => {
   let parser: IgnoreParser;
 

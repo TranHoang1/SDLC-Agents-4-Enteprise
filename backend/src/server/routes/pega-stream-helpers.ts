@@ -33,7 +33,7 @@ export async function processOneLine(
   let obj: Record<string, unknown>;
   try {
     obj = JSON.parse(line);
-  } catch (err) {
+  } catch {
     logger.debug({ line: line.substring(0, 80) }, '[pega-stream] Malformed JSON line — skipping');
     return { isMeta: false, stored: false };
   }
@@ -85,13 +85,13 @@ export async function queryPegaTotals(service: PegaService, projectId: string): 
     const adapter = (service as any).memoryEngine.getAdapter();
 
     const rowRules = await adapter.getAsync(
-      "SELECT COUNT(DISTINCT source) as cnt FROM knowledge_entries WHERE project_id = $1 AND type IN ('PEGA_RULE', 'PEGA_DATA')",
+      "SELECT COUNT(*) as cnt FROM symbols WHERE project_id = $1 AND kind LIKE 'pega_%'",
       [projectId],
     ) as { cnt?: number } | undefined;
     if (rowRules?.cnt) totalRulesInDb = Number(rowRules.cnt);
 
     const rowKb = await adapter.getAsync(
-      "SELECT COUNT(*) as cnt FROM knowledge_entries WHERE project_id = $1",
+      "SELECT COUNT(*) as cnt FROM symbols WHERE project_id = $1",
       [projectId],
     ) as { cnt?: number } | undefined;
     if (rowKb?.cnt) totalKbEntriesInDb = Number(rowKb.cnt);

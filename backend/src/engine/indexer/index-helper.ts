@@ -4,8 +4,7 @@
  * SA4E-53: converted to async API for PostgreSQL compatibility.
  */
 
-import type { DatabaseAdapter, PreparedStatement } from '../../database/adapters/DatabaseAdapter.js';
-import { DialectHelper } from '../../database/dialect/DialectHelper.js';
+import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import * as fs from 'fs';
 import type { Logger } from 'pino';
 import type { ScannedFile } from './file-scanner.js';
@@ -51,7 +50,6 @@ export async function indexFileSymbolsRegex(
  */
 export async function upsertFileInDb(adapter: DatabaseAdapter, file: ScannedFile, projectId: string): Promise<void> {
   const module = detectModule(file.relativePath);
-  const dialect = new DialectHelper(adapter.getEngine());
   const columns = ['project_id', 'path', 'relative_path', 'language', 'module', 'content_hash', 'size_bytes', 'line_count', 'last_indexed'];
   const updateCols = ['content_hash', 'size_bytes', 'line_count', 'last_indexed'];
   // Build upsert with engine-appropriate NOW() expression for last_indexed

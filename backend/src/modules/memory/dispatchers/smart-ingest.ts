@@ -192,7 +192,7 @@ export async function handleSmartIngestCleanup(
     for (const entry of entries) {
       try {
         const outcome = await processCleanupEntry(engine, classifyService, entry, dryRun);
-        outcome === 'ingested' ? ingested++ : deleted++;
+        if (outcome === 'ingested') ingested++; else deleted++;
         processed++;
       } catch {
         // LLM failed mid-batch — stop processing

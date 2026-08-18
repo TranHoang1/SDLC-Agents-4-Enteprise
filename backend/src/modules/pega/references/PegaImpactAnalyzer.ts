@@ -1,4 +1,4 @@
-import type { DependencyGraph, DependencyNode, DependencyEdge } from './PegaReferenceExtractor.js';
+import type { DependencyGraph, DependencyNode } from './PegaReferenceExtractor.js';
 import { PegaReferenceExtractor } from './PegaReferenceExtractor.js';
 
 export interface ImpactAnalysis {
@@ -34,7 +34,6 @@ export class PegaImpactAnalyzer {
 
     const directDependents: string[] = [];
     const allDependents: string[] = [];
-    const visited = new Set<string>();
 
     // Collect direct dependents
     for (const target of targetNodes) {
@@ -95,7 +94,7 @@ export class PegaImpactAnalyzer {
     return results;
   }
 
-  public suggestTests(analysis: ImpactAnalysis, allRules: string[]): string[] {
+  public suggestTests(analysis: ImpactAnalysis, _allRules: string[]): string[] {
     const tests: string[] = [];
 
     if (analysis.risk === 'high') {

@@ -2,7 +2,6 @@ import type { PegaSection, PegaLayout, PegaField } from './PegaUITypes.js';
 import type { LayoutType } from './PegaUITypes.js';
 import type { PegaClipboardContext } from '../expression/PegaClipboardContext.js';
 import { PegaLayoutRenderer } from './layouts/PegaLayoutRenderer.js';
-import type { LayoutRenderFunction } from './layouts/PegaLayoutRenderer.js';
 import { PegaDynamicLayoutRenderer } from './layouts/PegaDynamicLayoutRenderer.js';
 import { PegaTabLayoutRenderer } from './layouts/PegaTabLayoutRenderer.js';
 import { PegaRepeatingLayoutRenderer } from './layouts/PegaRepeatingLayoutRenderer.js';

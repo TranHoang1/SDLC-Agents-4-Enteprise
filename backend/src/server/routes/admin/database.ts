@@ -134,7 +134,8 @@ export function createDatabaseRoutes(ctx: AdminContext): Hono {
     const parsed = connectionSchema.safeParse(body);
     if (!parsed.success) return c.json({ success: false, error: { code: 'VALIDATION', message: parsed.error.message } }, 400);
     if (activeMigration) return c.json({ success: false, error: { code: 'MIGRATION_ACTIVE', message: 'Already migrating' } }, 409);
-    let { engine, host, port, username, password, database, ssl } = parsed.data;
+    const { engine, host, port, username, database, ssl } = parsed.data;
+    let { password } = parsed.data;
     // SA4E-45: If password is placeholder/empty, use saved password from database.json
     if (!password || password === '••••••••••••••••••••' || password.length < 2) {
       const savedConfig = configService.load();

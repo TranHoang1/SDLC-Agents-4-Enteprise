@@ -1,5 +1,5 @@
 import type { SyntaxNode } from '../../types.js';
-import { getNodeText, getNamedChild, findNodes, walkTree } from '../../ast-utils.js';
+import { getNodeText, getNamedChild, walkTree } from '../../ast-utils.js';
 
 export function getDecorators(node: SyntaxNode, source: string): string[] {
   const decorators: string[] = [];

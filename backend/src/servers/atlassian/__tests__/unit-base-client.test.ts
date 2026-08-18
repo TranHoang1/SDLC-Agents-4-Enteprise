@@ -2,7 +2,7 @@
  * SA4E-110 — Unit tests for BaseAtlassianClient (UT-11, UT-12, UT-16, UT-17, UT-22)
  * Retry logic, timeout handling, auth refresh, and error classification.
  */
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { BaseAtlassianClient, AtlassianApiError } from '../clients/base-client.js';
 import { AtlassianErrorCode } from '../models/types.js';
 import type { HttpClientConfig, HttpResponse, RequestOptions } from '../models/types.js';

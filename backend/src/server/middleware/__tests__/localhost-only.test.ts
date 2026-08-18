@@ -57,7 +57,7 @@ describe('localhostOnly', () => {
 
   it('rejects a remote IP host with 403', async () => {
     const next = vi.fn(async () => {});
-    const { c, json } = makeContext('192.168.1.50:8080');
+    const { c } = makeContext('192.168.1.50:8080');
     const res = await localhostOnly(c, next);
     expect(res.status).toBe(403);
     expect(next).not.toHaveBeenCalled();

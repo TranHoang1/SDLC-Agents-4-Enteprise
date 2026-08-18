@@ -152,7 +152,6 @@ describe('PegaFlowGraphBuilder', () => {
     const shapes = [{ type: 'Start' }, { type: 'Action' }];
     const builder = new PegaFlowGraphBuilder();
     const graph = builder.build(shapes, []);
-    const startShapes = graph.getEndShapes();
     expect(graph.getShape('shape_0')).toBeDefined();
     expect(graph.getShape('shape_0')!.type).toBe('Start');
     expect(graph.getShape('shape_1')).toBeDefined();

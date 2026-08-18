@@ -15,10 +15,6 @@ import type { ToolHandler, ToolResult } from '../types/tool.js';
 
 type CoreHandler<T = unknown> = (args: Record<string, unknown>) => T | Promise<T>;
 
-function isToolResult(v: unknown): v is ToolResult {
-  return typeof v === 'object' && v !== null && 'content' in v && 'isError' in v;
-}
-
 function toResult(text: string): ToolResult {
   return { content: [{ type: 'text' as const, text }], isError: false };
 }

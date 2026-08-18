@@ -49,7 +49,7 @@ export interface Issue {
   fix_hint: string;
 }
 
-export interface DrawioIssue extends Issue {}
+export type DrawioIssue = Issue;
 
 export interface LayoutFixResult {
   status: 'fixed' | 'already_good' | 'needs_fix' | 'error';

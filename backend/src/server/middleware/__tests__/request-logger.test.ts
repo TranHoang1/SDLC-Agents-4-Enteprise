@@ -70,7 +70,7 @@ describe('createRequestLogger', () => {
   it('awaits next before producing the log line', async () => {
     const logger = makeLogger();
     const handler = createRequestLogger(logger);
-    let order: string[] = [];
+    const order: string[] = [];
     const c: any = {
       req: { method: 'GET', path: '/x' },
       res: { status: 200 },

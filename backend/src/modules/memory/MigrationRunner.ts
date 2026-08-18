@@ -80,7 +80,7 @@ export class MigrationRunner {
         }
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        throw new Error(`Migration v${m.version} (${m.name}) failed: ${msg}`);
+        throw new Error(`Migration v${m.version} (${m.name}) failed: ${msg}`, { cause: err });
       }
 
       this.db.run(

@@ -2,7 +2,7 @@
  * PegaRuleFetcherService — fetches full Pega Rule Instances from Pega Server.
  * Supports Pega REST APIs, Data Pages, and PRServlet Activities.
  */
-// @ts-ignore
+// @ts-expect-error — xml2js has no bundled ESM types
 import { parseStringPromise } from 'xml2js';
 
 export interface FetchRuleRequest {

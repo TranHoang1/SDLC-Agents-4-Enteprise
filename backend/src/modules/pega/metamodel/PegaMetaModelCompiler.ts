@@ -6,7 +6,7 @@
  * matching, and extracts properties/children/dependencies automatically.
  */
 
-import type { PegaClassDefinition, PegaPropertyDef, PegaChildDef } from './PegaClassDefinition.js';
+import type { PegaClassDefinition } from './PegaClassDefinition.js';
 import type { PegaMetaModelRegistry } from './PegaMetaModelRegistry.js';
 import type { IPegaRuleParserStrategy, ParseResult } from '../strategies/IPegaRuleParserStrategy.js';
 import type { UnresolvedDependency } from '../models.js';

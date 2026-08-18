@@ -6,7 +6,6 @@ import { describe, it, expect } from 'vitest';
 import fc from 'fast-check';
 import { levenshtein } from '../utils/levenshtein.js';
 import { normalizeForComparison } from '../utils/normalize.js';
-import { getMimeType } from '../utils/mime-types.js';
 import { IssueKeySchema, JqlSchema } from '../models/jira-schemas.js';
 
 describe('PBT — Levenshtein distance properties', () => {

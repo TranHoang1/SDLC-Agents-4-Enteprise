@@ -10,7 +10,7 @@ import { TaintRegistry } from './TaintRegistry.js';
 import { TaintPropagator } from './TaintPropagator.js';
 import type { TaintState } from './taint-types.js';
 import type { ControlFlowGraph } from '../cfg/ControlFlowGraph.js';
-import type { TaintResult, TaintPath, TaintSource, TaintSink, TaintStep, TaintOptions, TaintSinkType } from '../types/index.js';
+import type { TaintResult, TaintPath, TaintSource, TaintSink, TaintOptions } from '../types/index.js';
 
 export class TaintAnalyzer {
   private cfgBuilder: CFGBuilder;

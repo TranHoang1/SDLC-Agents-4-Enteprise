@@ -23,7 +23,7 @@ import { createErrorHandler } from './middleware/error-handler.js';
 import { rateLimiter } from './middleware/rate-limiter.js';
 import { securityHeaders } from './middleware/security-headers.js';
 import { apiKeyAuth } from './middleware/api-key-auth.js';
-import { validateJwtConfig, jwtAuth } from './middleware/jwt-auth.js';
+import { jwtAuth } from './middleware/jwt-auth.js';
 import { createKbApiRoutes, createToolsApiRoutes } from './routes/kb-api.js';
 import { createPegaApiRoutes } from './routes/pega-api.js';
 import { createPegaStreamRoutes } from './routes/pega-stream.js';

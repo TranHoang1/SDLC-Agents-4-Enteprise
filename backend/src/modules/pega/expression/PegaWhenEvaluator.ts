@@ -39,7 +39,7 @@ export class PegaWhenEvaluator {
   }
 
   private convertConditionToExpression(conditionText: string): string {
-    let expr = conditionText.trim();
+    const expr = conditionText.trim();
 
     if (expr.includes('.AND.')) {
       const parts = expr.split('.AND.').map(p => p.trim());

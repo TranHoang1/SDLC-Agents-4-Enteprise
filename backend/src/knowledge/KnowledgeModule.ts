@@ -12,7 +12,7 @@ import { KnowledgeDb } from './KnowledgeDb.js';
 import { KnowledgeService } from './KnowledgeService.js';
 
 export interface KnowledgeModuleOptions {
-  /** DatabaseAdapter instance (supports SQLite + PG). If omitted, resolves from getAdminAdapter(). */
+  /** DatabaseAdapter instance (supports SQLite + PG). If omitted, resolves from getDbAdapter(). */
   adapter?: QueryDatabaseAdapter;
   defaultWorkspace?: string;
   /** Pre-built service (for testing). */
@@ -39,11 +39,11 @@ export class KnowledgeModule implements IModule {
       if (this.options.service) {
         this.service = this.options.service;
       } else {
-        // Resolve adapter: explicit > getAdminAdapter() fallback
+        // Resolve adapter: explicit > getDbAdapter() fallback
         let adapter = this.options.adapter;
         if (!adapter) {
-          const { getAdminAdapter } = await import('../admin/db/core.js');
-          adapter = getAdminAdapter();
+          const { getDbAdapter } = await import('../admin/db/core.js');
+          adapter = getDbAdapter();
         }
         const db = new KnowledgeDb(adapter);
         await db.migrate();

@@ -9,7 +9,7 @@ import {
   updateUserStatus, deleteUser, resetUserPassword, changePassword,
   invalidateUserSessions, getUserSessions, recordAudit,
   getGroupById, getGroupPermissionIds,
-  updateUserEmail, getAdminAdapter,
+  updateUserEmail, getDbAdapter,
 } from '../../../admin/admin-db.js';
 import type { AdminContext } from './context.js';
 
@@ -183,14 +183,14 @@ export function createUsersRoutes(ctx: AdminContext): Hono {
       
       // Update user - we'll update fields that were provided
       if (username !== undefined && username !== target.username) {
-        const adapter = getAdminAdapter();
+        const adapter = getDbAdapter();
         await adapter.runAsync('UPDATE users SET username = ? WHERE user_id = ?', [username, targetId]);
       }
       if (email !== undefined && email !== target.email) {
         await updateUserEmail(targetId, email);
       }
       if (accessGroupId !== undefined && accessGroupId !== target.accessGroupId) {
-        const adapter = getAdminAdapter();
+        const adapter = getDbAdapter();
         await adapter.runAsync('UPDATE users SET access_group_id = ? WHERE user_id = ?', [accessGroupId, targetId]);
       }
       

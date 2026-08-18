@@ -1,4 +1,3 @@
-import type { Parser as ParserType } from 'web-tree-sitter';
 import type { ILanguageParser, ParseResult, ExtractedSymbol, ExtractedRelationship, ParseError, SyntaxNode } from '../../types.js';
 import { findNodes, findFirst, getNodeText, getNodeRange } from '../../ast-utils.js';
 import { extractDeclarationsInNode } from './dispatchable.js';

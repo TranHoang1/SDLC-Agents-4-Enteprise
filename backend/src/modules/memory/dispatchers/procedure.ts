@@ -39,7 +39,7 @@ export async function handleProcedure(
       const rawSteps = args.steps;
       const steps = parseSteps(rawSteps);
       if (rawSteps !== undefined && typeof rawSteps === 'string') {
-        try { JSON.parse(rawSteps); } catch (err) {
+        try { JSON.parse(rawSteps); } catch {
           return JSON.stringify({ error: 'steps must be a valid JSON array of {tool, args} objects' });
         }
       }

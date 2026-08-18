@@ -29,7 +29,7 @@ export function extractFunction(
 export function extractClass(
   node: SyntaxNode, source: string, filePath: string,
   parentName: string | null, symbols: ExtractedSymbol[],
-  relationships: ExtractedRelationship[],
+  _relationships: ExtractedRelationship[],
 ): void {
   const nameNode = getNamedChild(node, 'type_identifier') ?? getNamedChild(node, 'identifier');
   if (!nameNode) return;

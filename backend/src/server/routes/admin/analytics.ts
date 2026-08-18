@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Admin analytics routes — dashboard stats and analytics.
  * SA4E-50: All admin-db calls are awaited since they are now async.
  */
@@ -13,7 +13,7 @@ import {
 } from '../../../admin/admin-db.js';
 import { formatUptime, formatBytes } from './utils.js';
 import type { AdminContext } from './context.js';
-import { getIndexAdapter } from '../../../admin/db/core.js';
+import { getDbAdapter } from '../../../admin/db/core.js';
 
 export function createAnalyticsRoutes(ctx: AdminContext): Hono {
   const app = new Hono();
@@ -23,8 +23,6 @@ export function createAnalyticsRoutes(ctx: AdminContext): Hono {
     if (user instanceof Response) return user;
     const permCheck = await ctx.requirePermission(c, user.userId, 'DASHBOARD_VIEW');
     if (permCheck instanceof Response) return permCheck;
-    const kbPerm = await ctx.checkPermission(user.userId, 'KB_READ');
-    const allowedTiers = (kbPerm.roleData as { allowedTiers?: string[] })?.allowedTiers;
     const userCount = await ctx.db.user.getUserCount();
     const cfg = loadConfig();
     const orchPath = path.resolve(getWorkspacePath(), cfg.dataDir, cfg.orchestrationConfigPath);
@@ -35,30 +33,28 @@ export function createAnalyticsRoutes(ctx: AdminContext): Hono {
     }
     const currentProjectId = ctx.getRequestProjectId(c);
     let kbEntries: number;
-    if (Array.isArray(allowedTiers) && kbPerm.has) {
-      const allEntries = await getKbEntries(1, 100000, 'created_at', 'desc', currentProjectId, user.userId);
-      kbEntries = allEntries.items.filter((e: any) => { const t = e.tier || e.scope || 'SHARED'; return allowedTiers.includes(t); }).length;
-    } else kbEntries = Number(await getKbEntryCount(currentProjectId, user.userId));
+    // KB count uses same scope filter as search (USER + PROJECT + SHARED with grants)
+    kbEntries = Number(await getKbEntryCount(currentProjectId, user.userId));
     const uptimeMs = Date.now() - ctx.SERVER_START_TIME;
     const mem = process.memoryUsage();
     const recentActivity = await getRecentActivity(10);
     let codeSymbols = 0;
     try { codeSymbols = Number(await ctx.db.symbol.getSymbolCount(currentProjectId)); }
     catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to read code symbols count from index.db'); }
-    // Include Pega rules as code symbols (Pega rules ARE code)
+    // Include Pega rules as code symbols (Pega rules ARE code) — SA4E-171: from symbols
     try {
-      const adapter = getIndexAdapter();
+      const adapter = getDbAdapter();
       const row = await adapter.getAsync<{ cnt: number }>(
-        `SELECT COUNT(DISTINCT source) as cnt FROM knowledge_entries WHERE project_id = ? AND type IN ('PEGA_RULE', 'PEGA_DATA')`,
+        `SELECT COUNT(*) as cnt FROM symbols WHERE project_id = ? AND kind LIKE 'pega_%'`,
         [currentProjectId],
       );
       codeSymbols += Number(row?.cnt ?? 0);
-    } catch { ctx.logger.debug({ context: 'dashboard' }, 'Failed to count Pega rules as code symbols'); }
+    } catch { ctx.logger.debug({ context: 'dashboard' }, 'Failed to count Pega symbols'); }
     let graphTotalNodes = 0, graphKbNodes = 0, graphCodeNodes = 0;
-    try {
-      const counts = await ctx.db.graph.getNodeCounts(currentProjectId);
-      graphTotalNodes = Number(counts.total); graphCodeNodes = Number(counts.code); graphKbNodes = Number(counts.kb);
-    } catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to query graph node counts from database'); }
+    // Graph Nodes = scoped KB entries + code symbols (same sources, consistent count)
+    graphKbNodes = kbEntries;
+    graphCodeNodes = codeSymbols;
+    graphTotalNodes = graphKbNodes + graphCodeNodes;
     return c.json({
       kbEntries, codeSymbols,
       graphTotalNodes, graphKbNodes, graphCodeNodes,
