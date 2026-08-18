@@ -6,10 +6,13 @@ import * as vscode from "vscode";
 import { IndexingService, IndexOptions } from "./services/IndexingService";
 import { IndexerHttpClient } from "./services/IndexerHttpClient";
 import { detectSfdxProject, countSalesforceMetadata } from "./sf-indexer";
-import { getBackendUrl } from "./config/backend-url";
 
 export { IndexingService } from "./services/IndexingService";
 export { IndexerHttpClient } from "./services/IndexerHttpClient";
+
+function getBackendUrl(): string {
+    return vscode.workspace.getConfiguration("kiroSdlc").get<string>("backend.url") || "http://127.0.0.1:48721";
+}
 
 function getWorkspaceRoot(): string | undefined {
     const folders = vscode.workspace.workspaceFolders;
@@ -26,8 +29,10 @@ function getIndexingOutputChannel(): vscode.OutputChannel {
     return indexingOutputChannel;
 }
 
-function createService(): IndexingService {
-    return new IndexingService(new IndexerHttpClient(getBackendUrl()), getIndexingOutputChannel());
+function createService(tokenRefresher?: () => Promise<string | undefined>): IndexingService {
+    const client = new IndexerHttpClient(getBackendUrl());
+    if (tokenRefresher) { client.setTokenRefresher(tokenRefresher); }
+    return new IndexingService(client, getIndexingOutputChannel());
 }
 
 export async function promptIndexAfterInject(root: string, token?: string): Promise<void> {
@@ -37,13 +42,13 @@ export async function promptIndexAfterInject(root: string, token?: string): Prom
     if (action === "Index Now") { await runIndexWorkspace(root, token); }
 }
 
-export async function handleIndexWorkspace(token?: string, secrets?: vscode.SecretStorage, refreshToken?: () => Promise<string | undefined>): Promise<void> {
+export async function handleIndexWorkspace(token?: string, secrets?: vscode.SecretStorage, tokenRefresher?: () => Promise<string | undefined>): Promise<void> {
     const root = getWorkspaceRoot();
     if (!root) { return; }
-    await runIndexWorkspace(root, token, secrets, refreshToken);
+    await runIndexWorkspace(root, token, secrets, tokenRefresher);
 }
 
-async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.SecretStorage, refreshToken?: () => Promise<string | undefined>): Promise<void> {
+async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.SecretStorage, tokenRefresher?: () => Promise<string | undefined>): Promise<void> {
     const picks = await showIndexOptions();
     if (!picks || picks.length === 0) { return; }
 
@@ -52,14 +57,12 @@ async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.
         documents: picks.includes("documents"),
         sync: picks.includes("sync"),
         schemas: picks.includes("schemas"),
-        jira: picks.includes("jira"),
     };
 
     const channel = getIndexingOutputChannel();
     channel.show(true);
 
-    const service = createService();
-    if (refreshToken) { service.refreshTokenFn = refreshToken; }
+    const service = createService(tokenRefresher);
     const results = await service.indexWorkspace(root, options, token, secrets);
     showIndexResults(results, picks, root, channel);
 }
@@ -72,7 +75,6 @@ function describeSummaryTitle(options: string[]): string {
             case "code": return "Source Code Indexing Summary";
             case "documents": return "Document Indexing Summary";
             case "sync": return "Code Symbol Sync Summary";
-            case "jira": return "Jira Project Indexing Summary";
         }
     }
     return "Workspace Indexing Summary";
@@ -80,15 +82,18 @@ function describeSummaryTitle(options: string[]): string {
 
 async function showIndexOptions(): Promise<string[] | undefined> {
     const root = getWorkspaceRoot();
-    const isPega = root ? require("fs").existsSync(require("path").join(root, "pega-project.json")) : false;
+    const isPega = root ? require('fs').existsSync(require('path').join(root, 'pega-project.json')) : false;
+
     const items: Array<{ label: string; description: string; id: string; picked: boolean }> = [];
     if (isPega) {
         items.push({ label: "$(symbol-class) Index Pega Rule Schemas", description: "Generate JSON Schemas from Pega RuleForms (run first)", id: "schemas", picked: true });
     }
-    items.push({ label: "$(code) Index Source Code", description: "Re-index all code symbols", id: "code", picked: true });
-    items.push({ label: "$(book) Index Documents", description: "Index SDLC documents into KB", id: "documents", picked: true });
-    items.push({ label: "$(sync) Sync Code → Memory", description: "Sync code entities into memory graph", id: "sync", picked: true });
-    items.push({ label: "$(cloud-download) Index Jira Project", description: "Fetch all Jira tickets into KB", id: "jira", picked: false });
+    items.push(
+        { label: "$(code) Index Source Code", description: "Re-index all code symbols", id: "code", picked: true },
+        { label: "$(book) Index Documents", description: "Index SDLC documents into KB", id: "documents", picked: true },
+        { label: "$(sync) Sync Code → Memory", description: "Sync code entities into memory graph", id: "sync", picked: true },
+    );
+
     const picks = await vscode.window.showQuickPick(items, { canPickMany: true, placeHolder: "Select what to index" });
     return picks?.map(p => p.id);
 }
@@ -117,7 +122,6 @@ function showIndexResults(results: string[], options: string[], root: string, ch
     if (options.includes("code")) { channel.appendLine("• Code: MCP server indexes automatically."); }
     if (options.includes("documents")) { channel.appendLine("• Documents: Indexed via HTTP API."); }
     if (options.includes("sync")) { channel.appendLine("• Sync: Code symbols synced to KB automatically."); }
-    if (options.includes("jira")) { channel.appendLine("• Jira: Project tickets ingested into KB for agent context."); }
     vscode.window.showInformationMessage("📋 Indexing complete — see Output panel.", "Open Output")
         .then(action => { if (action === "Open Output") { channel.show(); } });
 }

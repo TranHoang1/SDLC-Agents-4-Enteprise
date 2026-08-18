@@ -115,17 +115,7 @@ export function createKbGraphSpatialRoutes(ctx: AdminContext): Hono {
       filteredNodes = nodes.filter((nd: any) => nd.x >= camX - r && nd.x <= camX + r && nd.y >= camY - r && nd.y <= camY + r && nd.z >= camZ - r && nd.z <= camZ + r);
     }
     const edges: any[] = [];
-    const clusterMap = new Map<string, any[]>();
-    for (const nd of filteredNodes) {
-      const cid = nd.clusterId || 'default';
-      if (!clusterMap.has(cid)) clusterMap.set(cid, []);
-      clusterMap.get(cid)!.push(nd);
-    }
-    for (const [, members] of clusterMap) {
-      const hub = members[0];
-      for (let i = 1; i < Math.min(members.length, 11); i++) edges.push({ source: hub.id, target: members[i].id, weight: 0.8 });
-      for (let i = 1; i < members.length; i += 3) edges.push({ source: members[i - 1].id, target: members[i].id, weight: 0.5 });
-    }
+    // SA4E-99: Only real edges. No synthetic cluster edges.
     const level = zoom > 500 ? 'macro' : zoom > 200 ? 'mid' : 'micro';
     return c.json({ nodes: filteredNodes, edges, stats: { totalNodes: filteredNodes.length, totalEdges: edges.length, queryTimeMs: 0, level, source: 'sqlite-fallback', totalEntries: await getKbEntryCount(ctx.getRequestProjectId(c)) } });
   });

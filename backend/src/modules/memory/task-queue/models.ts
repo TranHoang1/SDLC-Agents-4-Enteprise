@@ -6,7 +6,8 @@
 export enum TaskType {
   TAG_ENRICHMENT = 'TAG_ENRICHMENT',
   VECTOR_EMBEDDING = 'VECTOR_EMBEDDING',
-  CODE_ENRICHMENT = 'CODE_ENRICHMENT',
+  /** SA4E-99: LLM summary + pseudo code for code symbols (functions, classes). */
+  CODE_SUMMARY = 'CODE_SUMMARY',
 }
 
 export enum TaskStatus {
@@ -35,6 +36,4 @@ export interface CreateTaskInput {
   entry_id: number;
   payload: object;
   max_retries?: number;
-  /** SA4E-164: Direct project_id avoids JOIN for per-project stats. */
-  project_id?: string | null;
 }

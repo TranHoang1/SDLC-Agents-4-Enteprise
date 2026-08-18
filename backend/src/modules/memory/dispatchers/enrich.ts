@@ -70,6 +70,16 @@ export async function handleEnrich(
     return `Error: Entry #${entryId} already enriched (status=done)`;
   }
 
+  // SA4E-99: Propagate summary to graph_nodes.label for meaningful KB Graph display
+  if (summary && summary.length > 0) {
+    try {
+      await dbAdapter.runAsync(
+        `UPDATE graph_nodes SET label = ? WHERE entry_id = ?`,
+        [summary.slice(0, 60), `doc-${entryId}`],
+      );
+    } catch { /* non-fatal — graph node may not exist */ }
+  }
+
   // --- Mark related TAG_ENRICHMENT task as COMPLETED ---
   await markRelatedTaskCompleted(dbAdapter, entryId);
   await engine.auditLog('ENRICH_CLIENT', entryId);

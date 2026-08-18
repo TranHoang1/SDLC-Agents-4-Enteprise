@@ -6,7 +6,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { httpPostJson } from "./utils/http-client-utils";
-import { buildBackendAuthHeaders } from "./utils/backend-auth-headers";
 
 function getBackendUrl(): string | undefined {
   return vscode.workspace.getConfiguration("kiroSdlc").get<string>("backend.url");
@@ -26,11 +25,7 @@ export async function ingestDocumentsViaHttp(
   const url = `${backendUrl}/mcp/tools/call`;
   let ingested = 0;
   let errors = 0;
-  // SA4E-103: Use buildBackendAuthHeaders which includes X-Project-Id for proper scoping
-  const authHeaders = buildBackendAuthHeaders();
-  if (token && !authHeaders["Authorization"]) {
-    authHeaders["Authorization"] = `Bearer ${token}`;
-  }
+  const authHeaders: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
 
   try {
     for (let i = 0; i < docs.length; i++) {
@@ -67,11 +62,7 @@ export async function ingestDocumentsViaHttp(
 export async function uploadDocumentFile(relPath: string, content: string, token?: string): Promise<boolean> {
   const backendUrl = getBackendUrl();
   if (!backendUrl) return false;
-  // SA4E-103: Use buildBackendAuthHeaders for X-Project-Id
-  const authHeaders = buildBackendAuthHeaders();
-  if (token && !authHeaders["Authorization"]) {
-    authHeaders["Authorization"] = `Bearer ${token}`;
-  }
+  const authHeaders: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
   return httpPostJson<unknown>(`${backendUrl}/api/index/document`, { path: relPath, content }, { headers: authHeaders })
     .then(() => true)
     .catch(() => false);
@@ -80,24 +71,15 @@ export async function uploadDocumentFile(relPath: string, content: string, token
 export async function uploadSourceFiles(report: vscode.Progress<{ message?: string }>, token?: string): Promise<string> {
   const backendUrl = getBackendUrl();
   if (!backendUrl) return "❌ Backend URL not configured.";
-  const libraryExcludes = "{node_modules,**/node_modules,dist,.git,.kilo,.kiro,.claude,.code-intel,.analysis,.agents,build,out,backend,.opencode,vendor,packages,bower_components}/**";
-  const allFiles = await vscode.workspace.findFiles(
-    "**/*.{ts,js,kt,java,py,go,rs,tsx,jsx}", libraryExcludes
+  const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo,scratch,.code-intel,.analysis}/**";
+  const files = await vscode.workspace.findFiles(
+    "**/*.{ts,tsx,kt,java,py,go,rs}", libraryExcludes
   );
-  // SA4E-104: Post-filter — exclude any file under a dot-folder (e.g. .kilo/, .vscode/)
-  const files = allFiles.filter(f => {
-    const rel = vscode.workspace.asRelativePath(f, false);
-    return !rel.split(/[\\/]/).some(seg => seg.startsWith('.') && seg.length > 1);
-  });
   if (files.length === 0) return "❌ No source files found";
   const url = `${backendUrl}/api/index/source`;
   let uploaded = 0;
   let errors = 0;
-  // SA4E-103: Use buildBackendAuthHeaders for X-Project-Id
-  let authHeaders = buildBackendAuthHeaders();
-  if (token && !authHeaders["Authorization"]) {
-    authHeaders["Authorization"] = `Bearer ${token}`;
-  }
+  const authHeaders: Record<string, string> = token ? { "Authorization": `Bearer ${token}` } : {};
 
   for (let i = 0; i < files.length; i += 50) {
     report.report({ message: `Indexing project code ${i + 1}/${files.length}...` });
@@ -108,33 +90,10 @@ export async function uploadSourceFiles(report: vscode.Progress<{ message?: stri
         return { path: vscode.workspace.asRelativePath(file), content: Buffer.from(content).toString("utf-8") };
       })
     );
-    let success: boolean | string = await httpPostJson<any>(url, { files: entries }, { headers: authHeaders })
-      .then((resp: any) => {
-        // SA4E-104: Detect 401 from response body (httpPostJson resolves all status codes)
-        if (resp?.error === 'Unauthorized' || resp?.error?.code === 'UNAUTHORIZED') {
-          return 'retry_auth';
-        }
-        return true;
-      })
-      .catch((err: any) => {
-        if (err?.message?.includes('401') || err?.message?.includes('Unauthorized')) {
-          return 'retry_auth';
-        }
-        return false;
-      });
-    if (success === 'retry_auth') {
-      // Re-login: refresh token via command, then rebuild headers
-      await vscode.commands.executeCommand('kiroSdlc.refreshToken');
-      authHeaders = buildBackendAuthHeaders();
-      if (token && !authHeaders["Authorization"]) {
-        authHeaders["Authorization"] = `Bearer ${token}`;
-      }
-      // Retry this batch once
-      success = await httpPostJson<unknown>(url, { files: entries }, { headers: authHeaders })
-        .then(() => true)
-        .catch(() => false);
-    }
-    if (success === true) uploaded += batch.length; else errors += batch.length;
+    const success = await httpPostJson<unknown>(url, { files: entries }, { headers: authHeaders })
+      .then(() => true)
+      .catch(() => false);
+    if (success) uploaded += batch.length; else errors += batch.length;
   }
   return `✅ Indexed ${uploaded} project files` + (errors > 0 ? `, ⚠️ Failed: ${errors}` : "");
 }

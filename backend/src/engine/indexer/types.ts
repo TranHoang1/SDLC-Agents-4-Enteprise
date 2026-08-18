@@ -36,6 +36,7 @@ export interface ProgressEvent {
   total: number;
   percentage: number;
   message?: string;
+  currentFile?: string;
   startedAt: string;
   elapsedMs: number;
 }

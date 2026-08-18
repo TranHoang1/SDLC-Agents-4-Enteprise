@@ -191,13 +191,51 @@ export async function getAllPositions(
   const rows = await db.allAsync<PosRow>(
     `SELECT entry_id, x, y, z, type, tier, label FROM graph_nodes${projectFilter}`, projectArgs,
   );
-  const nodes = rows.map(r => ({ id: r.entry_id, x: r.x, y: r.y, z: r.z, type: r.type, tier: r.tier, label: r.label }));
+
+  // SA4E-97: Compute positions on-the-fly grouped by type for proper 3D separation
+  const golden = (1 + Math.sqrt(5)) / 2;
+  const byType = new Map<string, PosRow[]>();
+  for (const r of rows) {
+    const t = r.type || 'UNKNOWN';
+    if (!byType.has(t)) byType.set(t, []);
+    byType.get(t)!.push(r);
+  }
+  const allTypes = Array.from(byType.keys());
+  const totalGroups = allTypes.length;
+  const clusterRadius = 1500;
+
+  const nodes: { id: string; x: number; y: number; z: number; type: string; tier: string; label: string }[] = [];
+  for (let gi = 0; gi < allTypes.length; gi++) {
+    const type = allTypes[gi];
+    const group = byType.get(type)!;
+    // Cluster center on sphere
+    const phi = Math.acos(1 - 2 * (gi + 0.5) / totalGroups);
+    const theta = 2 * Math.PI * gi / golden;
+    const cx = clusterRadius * Math.sin(phi) * Math.cos(theta);
+    const cy = clusterRadius * Math.sin(phi) * Math.sin(theta);
+    const cz = clusterRadius * Math.cos(phi);
+    // Local spread scales with group size
+    const localSpread = Math.max(150, Math.sqrt(group.length) * 20);
+
+    for (let i = 0; i < group.length; i++) {
+      const r = group[i];
+      const lp = Math.acos(1 - 2 * (i + 0.5) / group.length);
+      const lt = 2 * Math.PI * i / golden;
+      const lr = localSpread * Math.cbrt((i + 1) / group.length);
+      nodes.push({
+        id: r.entry_id,
+        x: Math.round((cx + lr * Math.sin(lp) * Math.cos(lt)) * 10) / 10,
+        y: Math.round((cy + lr * Math.sin(lp) * Math.sin(lt)) * 10) / 10,
+        z: Math.round((cz + lr * Math.cos(lp)) * 10) / 10,
+        type: r.type, tier: r.tier, label: r.label,
+      });
+    }
+  }
 
   // SA4E-97: Fetch edges for all nodes in this project
   let edges: { source: string; target: string; weight: number; type: string }[] = [];
   if (nodes.length > 0) {
     const nodeIds = new Set(nodes.map(n => n.id));
-    // Fetch edges where BOTH source and target exist in our node set
     const edgeRows = await db.allAsync<{ source: string; target: string; weight: number; rel_type: string }>(
       `SELECT source, target, weight, rel_type FROM graph_edges${projectFilter ? ' WHERE source IN (SELECT entry_id FROM graph_nodes' + projectFilter + ')' : ''} LIMIT 10000`,
       projectArgs,
@@ -205,6 +243,9 @@ export async function getAllPositions(
     edges = edgeRows
       .filter(e => nodeIds.has(e.source) && nodeIds.has(e.target))
       .map(e => ({ source: e.source, target: e.target, weight: e.weight, type: e.rel_type }));
+
+    // SA4E-99: Only real edges from graph_edges table. No synthetic edges.
+    // KB nodes will have no edges until KB edge extraction is implemented.
   }
 
   return { nodes, edges, total: nodes.length };

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Source/document indexing endpoints — POST /api/index/source|document|documents.
  * SA4E-41: every write is path-safe (SEC-04/05) and tenant-scoped (requireProjectId).
  */
@@ -11,7 +11,7 @@ import * as path from 'path';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
 import type { CodeIntelModule } from '../../modules/code-intel/CodeIntelModule.js';
 import { loadConfig } from '../../config/index.js';
-import { getDbAdapter } from '../../admin/db/core.js';
+import { getAdminAdapter } from '../../admin/db/core.js';
 import { GraphRepository } from '../../database/repositories/GraphRepository.js';
 import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
 import { resolveWithinWorkspace } from '../../shared/path-safety.js';
@@ -29,14 +29,15 @@ interface SourceFile {
 }
 interface IndexScope { projectId: string; workspace: string }
 
-/** Resolve request scope — uses authenticated userId from session for tenant isolation. */
-function resolveRequestScope(c: Context, sessionUserId?: string): IndexScope {
+// SA4E-99: Server-side backpressure — limit concurrent index requests
+const INDEX_CONCURRENCY_LIMIT = 3;
+let activeIndexRequests = 0;
+
+/** Resolve request scope from trusted headers, falling back to boot config. */
+function resolveRequestScope(c: Context): IndexScope {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
-  const userId = sessionUserId || 'default';
-  // indexTempDir/{userId}/{projectId} for source file writes
-  const workspace = path.join(config.indexTempDir, userId, projectId);
-  if (!fs.existsSync(workspace)) fs.mkdirSync(workspace, { recursive: true });
+  const workspace = c.req.header('X-Workspace-Root') || config.workspace;
   return { projectId, workspace };
 }
 
@@ -44,46 +45,54 @@ function resolveRequestScope(c: Context, sessionUserId?: string): IndexScope {
 // NOTE: resolveUserId kept for backward compatibility but auth is now enforced at route level
 
 /** Phase: write files to disk under the workspace, rejecting unsafe paths. */
-function writeFilesPhase(workspace: string, files: SourceFile[]): { written: number; rejected: string[] } {
+function writeFilesPhase(userId: string, projectId: string, files: SourceFile[]): { written: number; rejected: string[] } {
   const rejected: string[] = [];
   let written = 0;
+  // SA4E-99: Consistent temp structure — Temp/{userId}/{projectId}/batch-docs/
+  const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', projectId, 'batch-docs');
+  fs.mkdirSync(tempBase, { recursive: true });
   for (const file of files) {
-    const targetPath = resolveWithinWorkspace(workspace, file.path);
-    if (!targetPath) { rejected.push(file.path); continue; }
-    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-    fs.writeFileSync(targetPath, file.content, 'utf-8');
-    written++;
+    const targetPath = path.join(tempBase, file.path);
+    try {
+      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+      fs.writeFileSync(targetPath, file.content, 'utf-8');
+      written++;
+    } catch { rejected.push(file.path); }
   }
   return { written, rejected };
 }
 
 /** Phase: register/update the project in the admin registry (non-fatal). */
-async function registerProjectPhase(projectId: string, workspace: string, logger: Logger, createdBy = '', realWorkspaceRoot?: string): Promise<void> {
+async function registerProjectPhase(projectId: string, workspace: string, logger: Logger, createdBy = ''): Promise<void> {
   try {
-    const graphRepo = new GraphRepository(getDbAdapter());
-    const displayName = await deriveDisplayName(realWorkspaceRoot || workspace);
-    const displayPath = realWorkspaceRoot || workspace;
-    await graphRepo.registerProject(projectId, displayName, displayPath, createdBy);
+    const graphRepo = new GraphRepository(getAdminAdapter());
+    await graphRepo.registerProject(projectId, path.basename(workspace), workspace, createdBy);
   } catch (err) {
     logger.warn({ err, projectId }, '[index] project registry upsert skipped (non-fatal)');
   }
 }
 
-/** Derive human-readable project name: git repo name > folder name. Pega handled separately. */
-async function deriveDisplayName(workspaceRoot: string): Promise<string> {
-  // 1. Try git repo name from remote URL
+/** Phase: trigger a scoped background full re-index. Returns whether an indexer ran. */
+function triggerIndexPhase(registry: ModuleRegistry, scope: IndexScope, logger: Logger): boolean {
+  const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
+  const indexer = codeIntel?.getIndexer();
+  if (!indexer) return false;
+  indexer.runFullIndex({ projectId: scope.projectId, workspace: scope.workspace })
+    .catch((err: unknown) => logger.error({ err }, 'Background full re-index failed'));
+  return true;
+}
+
+/** SA4E-99: Sync code symbols to graph_nodes after incremental source upload (non-fatal). */
+async function syncGraphAfterUpload(registry: ModuleRegistry, projectId: string, logger: Logger): Promise<void> {
   try {
-    const { execSync } = await import('child_process');
-    const remote = execSync('git remote get-url origin', { cwd: workspaceRoot, encoding: 'utf-8', timeout: 3000 }).trim();
-    if (remote) {
-      // Parse: https://github.com/org/repo-name.git → repo-name
-      // Parse: git@github.com:org/repo-name.git → repo-name
-      const match = remote.match(/\/([^/]+?)(?:\.git)?$/);
-      if (match) return match[1];
-    }
-  } catch { /* no git or no remote — fallback */ }
-  // 2. Fallback: folder name
-  return path.basename(workspaceRoot) || 'Untitled Project';
+    const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
+    const indexer = codeIntel?.getIndexer() as any;
+    if (!indexer || !indexer.syncGraphNodesPublic) return;
+    await indexer.syncGraphNodesPublic(projectId);
+    logger.info({ projectId }, '[index] Graph nodes synced after source upload');
+  } catch (err) {
+    logger.warn({ err }, '[index] Graph sync after upload failed (non-fatal)');
+  }
 }
 
 /** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
@@ -110,7 +119,7 @@ async function ensureProjectKbEntry(registry: ModuleRegistry, scope: IndexScope,
 /** Upsert the project-metadata graph node (INSERT OR REPLACE to fix stale/missing rows). */
 async function upsertProjectGraphNode(entryId: string, displayName: string, projectId: string, logger: Logger): Promise<void> {
   try {
-    const graphRepo = new GraphRepository(getDbAdapter());
+    const graphRepo = new GraphRepository(getAdminAdapter());
     await graphRepo.upsertNode({
       entryId, label: `Project: ${displayName}`, type: 'CONTEXT',
       tier: 'SEMANTIC', projectId, x: 0, y: 0, z: 0, level: 'macro', clusterId: '0',
@@ -134,7 +143,16 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
   app.post('/api/index/source', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleIndexSource(c, registry, logger, session.userId);
+    // SA4E-99: Backpressure — reject with 429 if too many concurrent requests
+    if (activeIndexRequests >= INDEX_CONCURRENCY_LIMIT) {
+      return c.json({ error: 'Server busy', retryAfter: 2 }, 429);
+    }
+    activeIndexRequests++;
+    try {
+      return await handleIndexSource(c, registry, logger, session.userId);
+    } finally {
+      activeIndexRequests--;
+    }
   });
   app.post('/api/index/document', async (c) => {
     const session = await requireAuth(c);
@@ -158,6 +176,12 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
     return handleFileEvents(c, registry, logger);
   });
+  // SA4E-99: Ingest documents from Temp folder into KB
+  app.post('/api/index/ingest-docs', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleIngestDocsFromTemp(c, registry, logger, session.userId);
+  });
   app.post('/api/index/cancel', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
@@ -175,87 +199,34 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
     const body = await c.req.json() as { files: SourceFile[] };
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
-    const scope = resolveRequestScope(c, userId);
-    const realWorkspaceRoot = c.req.header('X-Workspace-Root') || '';
-    await registerProjectPhase(scope.projectId, scope.workspace, logger, userId, realWorkspaceRoot || undefined);
+    const scope = resolveRequestScope(c);
 
-    const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
-    const indexer = codeIntel?.getIndexer() as any;
+    // SA4E-99: Write to temp dir OUTSIDE workspace to avoid triggering Kiro file watcher
+    // Structure: Temp/{userId}/{projectId}/source/files...
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', scope.projectId, 'source');
+    const wsBasename = path.basename(scope.workspace);
+    fs.mkdirSync(tempBase, { recursive: true });
 
     const written: string[] = [];
-    const indexed: string[] = [];
-    const indexFailed: string[] = [];
-    const skipped: string[] = [];
     const rejected: string[] = [];
-    const allDeps: FileDependency[] = [];
 
     for (const file of files) {
-      const targetPath = resolveWithinWorkspace(scope.workspace, file.path);
-      if (!targetPath) { rejected.push(file.path); continue; }
-
-      const fileHash = file.gitHash || file.checksum || '';
-
-      if (indexer && fileHash) {
-        try {
-          const existing = await indexer.adapter.getAsync(
-            'SELECT content_hash FROM files WHERE relative_path = ? AND project_id = ?',
-            [file.path, scope.projectId],
-          ) as { content_hash: string } | undefined;
-          if (existing && existing.content_hash === fileHash.slice(0, 16)) {
-            skipped.push(file.path);
-            continue;
-          }
-        } catch {
-          // Table may not exist yet — proceed with indexing
-        }
+      let filePath = file.path;
+      // Strip workspace prefix if present
+      if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
+        filePath = filePath.substring(wsBasename.length + 1);
       }
-
-      fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-      fs.writeFileSync(targetPath, file.content, 'utf-8');
-      written.push(file.path);
-
-      // Index single file and collect deps
-      if (indexer) {
-        try {
-          const result = await indexer.indexSingleFile(file.path, scope.projectId);
-          if (result && result.symbolCount > 0) {
-            indexed.push(file.path);
-            if (result.dependencies) {
-              for (const dep of result.dependencies) {
-                if (!allDeps.some(d => d.path === dep.path)) {
-                  allDeps.push(dep);
-                }
-              }
-            }
-          } else {
-            indexFailed.push(file.path);
-          }
-        } catch (err) {
-          indexFailed.push(file.path);
-          logger.warn({ err, file: file.path }, '[index] single-file index failed');
-        }
-      }
-    }
-
-    if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
-    if (indexFailed.length > 0) logger.warn({ count: indexFailed.length, projectId: scope.projectId }, '[index] files written but DB index failed');
-    await ensureProjectKbEntry(registry, scope, indexed.length, logger);
-
-    // SA4E-107: Create LLM enrichment tasks for newly indexed symbols (async, non-blocking)
-    if (indexer && indexed.length > 0) {
+      const targetPath = path.join(tempBase, filePath);
       try {
-        const { CodeEnrichmentTaskCreator } = await import('../../engine/enrichment/CodeEnrichmentTaskCreator.js');
-        const creator = new CodeEnrichmentTaskCreator(indexer.adapter, logger);
-        const created = await creator.createTasksForProject(scope.projectId);
-        if (created > 0) logger.info({ created, projectId: scope.projectId }, '[index] Enrichment tasks queued');
-      } catch (err) {
-        logger.warn({ err }, '[index] Enrichment task creation skipped (non-fatal)');
-      }
+        fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+        fs.writeFileSync(targetPath, file.content, 'utf-8');
+        written.push(filePath);
+      } catch { rejected.push(filePath); }
     }
 
-    return c.json({ written: written.length, indexed: indexed.length, indexFailed: indexFailed.length, skipped: skipped.length, rejected, deps: allDeps, projectId: scope.projectId });
+    return c.json({ written: written.length, skipped: 0, rejected, deps: [], projectId: scope.projectId });
   } catch (err: any) {
-    return indexError(c, err, logger, 'Error writing source batch');
+    return indexError(c, err, logger, 'Error processing source batch');
   }
 }
 
@@ -264,9 +235,15 @@ async function handleIndexDocument(c: Context, logger: Logger, userId = '') {
     const body = await c.req.json() as { path: string; content: string };
     const { path: relPath, content } = body;
     if (!relPath || !content) return c.json({ error: 'path and content required' }, 400);
-    const scope = resolveRequestScope(c, userId);
-    const targetPath = resolveWithinWorkspace(scope.workspace, relPath);
-    if (!targetPath) return c.json({ error: 'Invalid path' }, 400);
+    const scope = resolveRequestScope(c);
+    // SA4E-99: Consistent temp structure — Temp/{userId}/{projectId}/documents/
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', scope.projectId, 'documents');
+    const wsBasename = path.basename(scope.workspace);
+    let filePath = relPath;
+    if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
+      filePath = filePath.substring(wsBasename.length + 1);
+    }
+    const targetPath = path.join(tempBase, filePath);
     fs.mkdirSync(path.dirname(targetPath), { recursive: true });
     fs.writeFileSync(targetPath, content, 'utf-8');
     return c.json({ success: true });
@@ -280,12 +257,69 @@ async function handleIndexDocuments(c: Context, logger: Logger, userId = '') {
     const body = await c.req.json() as { files: SourceFile[] };
     const { files } = body;
     if (!files || !Array.isArray(files)) return c.json({ error: 'files array required' }, 400);
-    const scope = resolveRequestScope(c, userId);
-    const { written, rejected } = writeFilesPhase(scope.workspace, files);
+    const scope = resolveRequestScope(c);
+    const { written, rejected } = writeFilesPhase(userId, scope.projectId, files);
     if (rejected.length > 0) logger.warn({ rejected, projectId: scope.projectId }, '[index] rejected unsafe paths');
     return c.json({ indexed: written, rejected });
   } catch (err: any) {
     return indexError(c, err, logger, 'Error writing documents batch');
+  }
+}
+
+/**
+ * SA4E-99: Scan Temp/{userId}/{projectId}/batch-docs/ and ingest all markdown files into KB.
+ * Called ONCE after all document batches are written to Temp.
+ */
+async function handleIngestDocsFromTemp(c: Context, registry: ModuleRegistry, logger: Logger, userId: string) {
+  try {
+    const scope = resolveRequestScope(c);
+    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId, scope.projectId, 'batch-docs');
+
+    if (!fs.existsSync(tempBase)) {
+      return c.json({ ingested: 0, message: 'No documents in Temp folder' });
+    }
+
+    // Recursively find all files in temp docs folder
+    const files: string[] = [];
+    function walk(dir: string) {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const full = path.join(dir, entry.name);
+        if (entry.isDirectory()) { walk(full); }
+        else if (entry.name.endsWith('.md') || entry.name.endsWith('.txt')) { files.push(full); }
+      }
+    }
+    walk(tempBase);
+
+    // Ingest each file via mem_ingest_file handler
+    const mem = registry.getModule('memory') as any;
+    if (!mem || mem.status !== 'ready') {
+      return c.json({ error: 'Memory module not ready' }, 503);
+    }
+    const dispatcher = mem.getDispatcher();
+    let ingested = 0;
+    let errors = 0;
+
+    for (const filePath of files) {
+      const relPath = path.relative(tempBase, filePath).replace(/\\/g, '/');
+      try {
+        const content = fs.readFileSync(filePath, 'utf-8');
+        await dispatcher.dispatch('mem_ingest_file', {
+          file_path: relPath,
+          content,
+          type: 'CONTEXT',
+          scope: 'PROJECT',
+        });
+        ingested++;
+      } catch (err) {
+        errors++;
+        logger.warn({ err, file: relPath }, '[ingest-docs] Failed to ingest document');
+      }
+    }
+
+    logger.info({ ingested, errors, total: files.length }, '[ingest-docs] Document ingest complete');
+    return c.json({ ingested, errors, total: files.length });
+  } catch (err: any) {
+    return indexError(c, err, logger, 'Error ingesting documents from Temp');
   }
 }
 
@@ -297,4 +331,3 @@ function indexError(c: Context, err: any, logger: Logger, context: string) {
   logger.error({ err }, context);
   return c.json({ error: 'Internal error' }, 500);
 }
-

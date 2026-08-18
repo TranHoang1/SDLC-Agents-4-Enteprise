@@ -38,36 +38,112 @@ export interface UploadResult {
 }
 
 export class IndexerHttpClient {
+    private tokenRefresher?: () => Promise<string | undefined>;
+
     constructor(private readonly backendUrl: string) {}
 
+    /** SA4E-99: Set token refresher callback — called on 401 to get a fresh token. */
+    setTokenRefresher(refresher: () => Promise<string | undefined>): void {
+        this.tokenRefresher = refresher;
+    }
     /** Expose backend base URL for other callers. */
     getBaseUrl(): string { return this.backendUrl; }
+
+    /**
+     * SA4E-99: Poll /api/index/progress until idle. Shows status bar progress.
+     * Resolves when indexing completes or times out after maxWaitMs.
+     */
+    async pollIndexProgress(token?: string, maxWaitMs = 300000): Promise<void> {
+        const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
+        statusBar.show();
+        const start = Date.now();
+        try {
+            while (Date.now() - start < maxWaitMs) {
+                await new Promise(r => setTimeout(r, 2000));
+                const headers = await this.buildHeaders(token);
+                const http = await import("http");
+                const url = new URL(`${this.backendUrl}/api/index/progress`);
+                const resp = await new Promise<{ ok: boolean; body: string }>(resolve => {
+                    const req = http.default.request(
+                        { hostname: url.hostname, port: url.port, path: url.pathname, method: 'GET', headers },
+                        (res) => { let d = ''; res.on('data', c => d += c); res.on('end', () => resolve({ ok: res.statusCode === 200, body: d })); },
+                    );
+                    req.on('error', () => resolve({ ok: false, body: '' }));
+                    req.setTimeout(5000, () => { req.destroy(); resolve({ ok: false, body: '' }); });
+                    req.end();
+                });
+                const { ok, body } = resp;
+                if (!ok) { statusBar.text = "$(sync~spin) Indexing..."; statusBar.tooltip = "Code Intelligence: Indexing workspace..."; continue; }
+                try {
+                    const progress = JSON.parse(body);
+                    if (progress.phase === 'idle') {
+                        statusBar.text = "$(check) Index complete";
+                        statusBar.tooltip = "Code Intelligence: Indexing finished successfully";
+                        setTimeout(() => statusBar.dispose(), 5000);
+                        return;
+                    }
+                    const elapsed = Math.round((progress.elapsedMs || 0) / 1000);
+                    statusBar.text = `$(sync~spin) Indexing: ${progress.percentage}%`;
+                    statusBar.tooltip = `Code Intelligence — ${progress.phase}\n`
+                        + `Progress: ${progress.current}/${progress.total} files (${progress.percentage}%)\n`
+                        + `Elapsed: ${elapsed}s\n`
+                        + (progress.currentFile ? `Current: ${progress.currentFile}` : '');
+                } catch { statusBar.text = "$(sync~spin) Indexing..."; statusBar.tooltip = "Code Intelligence: Processing..."; }
+            }
+            statusBar.text = "$(warning) Index timeout";
+            setTimeout(() => statusBar.dispose(), 5000);
+        } catch { statusBar.dispose(); }
+    }
 
     async ingestDocuments(
         docs: DocEntry[],
         report: vscode.Progress<{ message?: string }>,
         token?: string
     ): Promise<IngestResult> {
-        // SA4E-30: Use REST API endpoint instead of /mcp/tools/call
-        const url = `${this.backendUrl}/api/v1/memory/ingest-file`;
+        // SA4E-99: Unified approach — write docs to Temp (same as source), then batch ingest
         let ingested = 0;
         let errors = 0;
-
         const unconvertible: UnconvertibleEntry[] = [];
-        for (let i = 0; i < docs.length; i++) {
-            const d = docs[i];
-            if (i % 10 === 0) { report.report({ message: `Ingesting ${i + 1}/${docs.length} files...` }); }
+        const channel = vscode.window.createOutputChannel("Kiro Doc Indexer");
+        const batchSize = 20;
 
-            let fileContent = d.content;
-            if (!fileContent) { fileContent = await this.readFileContent(d.path); }
-            if (fileContent) { await this.uploadDocumentFile(d.path, fileContent, token); }
+        for (let i = 0; i < docs.length; i += batchSize) {
+            const batch = docs.slice(i, i + batchSize);
+            const batchNum = Math.floor(i / batchSize) + 1;
+            const totalBatches = Math.ceil(docs.length / batchSize);
+            const pct = Math.round((i / docs.length) * 100);
+            report.report({ message: `Ingesting documents: ${pct}% (${i + 1}/${docs.length} files, batch ${batchNum}/${totalBatches})` });
+            if (i > 0) { await new Promise(r => setTimeout(r, 200)); }
 
-            const payload = { file_path: d.path, type: d.type, format: "markdown", ...(fileContent ? { content: fileContent } : {}) };
-            const { ok, body } = await this.httpPostJson(url, payload, token);
-            if (!ok) { errors++; continue; }
+            const entries: FileEntry[] = [];
+            for (const d of batch) {
+                let fileContent = d.content;
+                if (!fileContent) { fileContent = await this.readFileContent(d.path); }
+                if (!fileContent) { errors++; channel.appendLine(`⚠️ ${d.path}: no content`); continue; }
+                entries.push({ path: d.path, content: fileContent });
+            }
 
-            const result = parseIngestResponse(body, d.path);
-            if (result.entry) { unconvertible.push(result.entry); } else { ingested++; }
+            if (entries.length === 0) continue;
+
+            // Write to Temp via /api/index/documents (batch write to disk)
+            const writeResult = await this.sendBatchWithRetry(
+                `${this.backendUrl}/api/index/documents`,
+                { files: entries }, token, 3,
+            );
+            if (writeResult.ok) {
+                ingested += entries.length;
+            } else {
+                errors += entries.length;
+                channel.appendLine(`⚠️ Doc batch ${Math.floor(i / batchSize) + 1}: ${writeResult.error}`);
+            }
+        }
+
+        if (errors > 0) { channel.show(true); }
+
+        // Trigger KB ingest from Temp files (single call)
+        if (ingested > 0) {
+            report.report({ message: "Running document KB ingest..." });
+            await this.triggerDocumentIngest(token);
         }
 
         const parts = [`✅ Indexed: ${ingested} files`];
@@ -76,84 +152,141 @@ export class IndexerHttpClient {
         return { ingested, errors, summary: parts.join(", "), unconvertible };
     }
 
+    /** SA4E-99: Trigger backend to ingest documents from Temp folder into KB. */
+    private async triggerDocumentIngest(token?: string): Promise<void> {
+        try {
+            await this.httpPostWithDetail(`${this.backendUrl}/api/index/ingest-docs`, {}, token);
+        } catch { /* non-fatal */ }
+    }
+
     async uploadSourceFiles(
-        report: vscode.Progress<{ message?: string }>,
+        report: vscode.Progress<{ message?: string; increment?: number }>,
         token?: string,
-        /** Optional: token provider for refresh-on-401. Returns fresh token. */
-        refreshToken?: () => Promise<string | undefined>
+        log?: (msg: string) => void
     ): Promise<UploadResult> {
-        // SA4E-108: Detect project type → use type-aware file patterns
-        const { ProjectTypeDetector } = await import('./ProjectTypeDetector');
-        const detector = new ProjectTypeDetector(this.backendUrl);
-        const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '';
-        const detection = await detector.detect(workspaceRoot);
-
-        // Use detected type patterns (or fallback to hardcoded defaults)
-        const includeGlob = detector.getFileGlob(detection);
-        const excludeGlob = detector.getExcludeGlob(detection);
-        const allProjectFiles = await vscode.workspace.findFiles(includeGlob, excludeGlob);
-
-        // SA4E-104: Post-filter — exclude any file under a dot-folder (e.g. .kilo/, .vscode/)
-        const projectFiles = allProjectFiles.filter(f => {
-            const rel = vscode.workspace.asRelativePath(f, false);
-            return !rel.split(/[\\/]/).some(seg => seg.startsWith('.') && seg.length > 1);
-        });
+        // Priority 1: Project source code (exclude all library/vendor directories at ANY depth)
+        const libraryExcludes = "**/{node_modules,dist,.git,build,out,.opencode,vendor,packages,bower_components,.kilo,scratch,.code-intel,.analysis,SDLC-Agents-4-Enterprise}/**";
+        const projectFiles = await vscode.workspace.findFiles(
+            "**/*.{ts,tsx,kt,java,py,go,rs}", libraryExcludes
+        );
 
         if (projectFiles.length === 0) { return { uploaded: 0, errors: 0, summary: "ℹ️ No source files found" }; }
 
         const url = `${this.backendUrl}/api/index/source`;
         let uploaded = 0;
         let errors = 0;
-        let currentToken = token;
+        const totalFiles = projectFiles.length;
+        const batchSize = 20; // SA4E-99: reduced from 50 to avoid timeout on large files
+        const totalBatches = Math.ceil(totalFiles / batchSize);
+        const incrementPerBatch = 100 / totalBatches;
 
         // Create output channel for detailed error reporting
         const channel = vscode.window.createOutputChannel("Kiro Indexer");
 
         // Upload project code first (high priority)
-        for (let i = 0; i < projectFiles.length; i += 50) {
-            const batchNum = Math.floor(i / 50) + 1;
-            const totalBatches = Math.ceil(projectFiles.length / 50);
-            report.report({ message: `Indexing project code ${i + 1}/${projectFiles.length} (batch ${batchNum}/${totalBatches})...` });
-            const batch = projectFiles.slice(i, i + 50);
+        for (let i = 0; i < totalFiles; i += batchSize) {
+            const batchNum = Math.floor(i / batchSize) + 1;
+            const pct = Math.round((i / totalFiles) * 100);
+            const progressMsg = `Indexing source code: ${pct}% (${i + 1}/${totalFiles} files, batch ${batchNum}/${totalBatches})`;
+            report.report({ message: progressMsg, increment: incrementPerBatch });
+            if (log) { log(progressMsg); }
+            // SA4E-99: Delay between batches to prevent server overload (PG pool exhaustion)
+            if (i > 0) { await new Promise(r => setTimeout(r, 500)); }
+            const batch = projectFiles.slice(i, i + batchSize);
             const entries = await Promise.all(
                 batch.map(async (file) => {
                     const content = await vscode.workspace.fs.readFile(file);
-                    return { path: vscode.workspace.asRelativePath(file), content: Buffer.from(content).toString("utf-8") };
+                    // SA4E-99: Strip workspace folder prefix to avoid nested folder creation
+                    const folder = vscode.workspace.getWorkspaceFolder(file);
+                    let relPath: string;
+                    if (folder) {
+                        relPath = file.fsPath.substring(folder.uri.fsPath.length + 1).replace(/\\/g, '/');
+                    } else {
+                        // Fallback: strip first workspace folder path manually
+                        const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || '';
+                        relPath = file.fsPath.startsWith(root)
+                            ? file.fsPath.substring(root.length + 1).replace(/\\/g, '/')
+                            : file.fsPath.replace(/\\/g, '/');
+                    }
+                    return { path: relPath, content: Buffer.from(content).toString("utf-8") };
                 })
             );
-
-            // Refresh token before each batch to prevent mid-indexing expiry
-            if (refreshToken) {
-                const freshToken = await refreshToken();
-                if (freshToken) { currentToken = freshToken; }
-            }
-
-            let result = await this.httpPostWithDetail(url, { files: entries }, currentToken);
-
-            // Retry once on 401: refresh token then retry the same batch
-            if (result.status === 401 && refreshToken) {
-                const freshToken = await refreshToken();
-                if (freshToken) {
-                    currentToken = freshToken;
-                    result = await this.httpPostWithDetail(url, { files: entries }, currentToken);
-                }
-            }
-
+            // SA4E-99: Retry with exponential backoff for 429/5xx/network errors
+            const result = await this.sendBatchWithRetry(url, { files: entries }, token, 3);
             if (result.ok) {
                 uploaded += batch.length;
+            } else if (result.status === 401 && this.tokenRefresher) {
+                const freshToken = await this.tokenRefresher();
+                if (freshToken) {
+                    token = freshToken;
+                    const retry = await this.sendBatchWithRetry(url, { files: entries }, token, 2);
+                    if (retry.ok) { uploaded += batch.length; }
+                    else {
+                        errors += batch.length;
+                        channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED after token refresh`);
+                        channel.appendLine(`   Error: ${retry.error}`);
+                        channel.show(true);
+                    }
+                } else {
+                    errors += batch.length;
+                    channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED — no token`);
+                    channel.show(true);
+                }
             } else {
                 errors += batch.length;
-                const batchFiles = batch.map(f => vscode.workspace.asRelativePath(f)).join(", ");
                 channel.appendLine(`\n⚠️ Batch ${batchNum}/${totalBatches} FAILED (${batch.length} files)`);
-                channel.appendLine(`   Error: ${result.error}`);
-                channel.appendLine(`   HTTP status: ${result.status}`);
-                channel.appendLine(`   Files in batch: ${batchFiles.length > 200 ? batchFiles.slice(0, 200) + "..." : batchFiles}`);
+                channel.appendLine(`   Error: ${result.error} | Status: ${result.status}`);
                 channel.show(true);
             }
+        }
+        report.report({ message: `Indexing source code: 100% complete`, increment: 0 });
+
+        // SA4E-99: Trigger full re-index ONCE after all files written (not per-batch)
+        if (uploaded > 0) {
+            report.report({ message: "Running full index on uploaded files..." });
+            await this.triggerFullIndex(token);
+            // SA4E-99: Poll backend progress until index + LLM enrichment complete
+            this.pollIndexProgress(token).catch(() => {}); // fire-and-forget, shows status bar
         }
 
         const summary = `✅ Indexed ${uploaded} project files` + (errors > 0 ? `, ⚠️ Failed: ${errors} (see Output > Kiro Indexer for details)` : "");
         return { uploaded, errors, summary };
+    }
+
+    /** SA4E-99: Trigger a full re-index on backend after all source files are written. */
+    private async triggerFullIndex(token?: string): Promise<void> {
+        try {
+            const url = `${this.backendUrl}/api/index/full`;
+            await this.httpPostWithDetail(url, {}, token);
+        } catch { /* non-fatal */ }
+    }
+
+    /**
+     * SA4E-99: Send batch with exponential backoff retry.
+     * Retries on: 429 (server busy), 5xx, network errors (ECONNRESET, ECONNREFUSED, timeout).
+     * Does NOT retry on 401 (handled by caller with token refresh).
+     */
+    private async sendBatchWithRetry(
+        url: string, payload: unknown, token: string | undefined, maxRetries: number,
+    ): Promise<{ ok: boolean; error: string; status: number }> {
+        let lastResult = { ok: false, error: 'no attempt', status: 0 };
+        for (let attempt = 0; attempt <= maxRetries; attempt++) {
+            if (attempt > 0) {
+                // Exponential backoff: 2s, 4s, 8s (longer to allow server recovery)
+                const delay = Math.min(2000 * Math.pow(2, attempt - 1), 10000);
+                await new Promise(r => setTimeout(r, delay));
+            }
+            lastResult = await this.httpPostWithDetail(url, payload, token);
+            if (lastResult.ok) return lastResult;
+            // Don't retry on 401 (auth issue) or 400 (client error)
+            if (lastResult.status === 401 || lastResult.status === 400) return lastResult;
+            // Retry on: 429, 5xx, network errors (status 0)
+            const shouldRetry = lastResult.status === 429
+                || lastResult.status >= 500
+                || lastResult.status === 0;
+            if (!shouldRetry) return lastResult;
+        }
+        return lastResult;
     }
 
     /**
@@ -169,13 +302,13 @@ export class IndexerHttpClient {
             params: { name: "mem_sync_code", arguments: {} },
         };
         try {
-            const headers = await this.buildHeaders(undefined);
+            // MCP Streamable HTTP requires Accept header
             const body = JSON.stringify(payload);
             const parsedUrl = new URL(url);
             const http = await import("http");
             const result = await new Promise<{ ok: boolean; body: string }>((resolve) => {
                 const req = http.default.request(
-                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname, method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json, text/event-stream", "Content-Length": Buffer.byteLength(body).toString(), ...headers } },
+                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname, method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json, text/event-stream", "Content-Length": Buffer.byteLength(body).toString() } },
                     (res) => { let data = ""; res.on("data", (c: any) => { data += c; }); res.on("end", () => resolve({ ok: res.statusCode === 200, body: data })); },
                 );
                 req.on("error", () => resolve({ ok: false, body: "" }));
@@ -184,96 +317,12 @@ export class IndexerHttpClient {
                 req.end();
             });
             if (!result.ok) { return null; }
-            // MCP Streamable HTTP returns SSE format: "event: message\ndata: {...}\n"
-            let jsonText = result.body;
-            const dataMatch = result.body.match(/^data:\s*(.+)$/m);
-            if (dataMatch) { jsonText = dataMatch[1]; }
-            const parsed = JSON.parse(jsonText);
+            const parsed = JSON.parse(result.body);
             const text = parsed?.result?.content?.[0]?.text;
             return typeof text === "string" ? text : null;
         } catch {
             return null;
         }
-    }
-
-    /**
-     * SA4E-157: GET enrichment status from backend.
-     * Lightweight polling — 10s timeout, no retry (next poll handles failures).
-     * @param token JWT auth token
-     * @returns ok flag + raw body string
-     */
-    async getEnrichmentStatus(token?: string): Promise<{ ok: boolean; body: string }> {
-        const url = this.backendUrl + "/api/v1/enrichment/status";
-        return this.httpGetJson(url, token);
-    }
-
-    /**
-     * SA4E-158: Trigger Phase 2 — sync indexed Pega rules to KB + graph + enrichment.
-     * Calls POST /api/v1/pega/sync-to-kb with projectId.
-     * @param projectId Pega project identifier
-     * @param token JWT auth token
-     * @returns Sync result with counts (synced, errors)
-     */
-    async syncPegaRulesToKb(projectId: string, token?: string): Promise<{ ok: boolean; synced: number; errors: number; message: string }> {
-        const url = `${this.backendUrl}/api/v1/pega/sync-to-kb`;
-        const { ok, body } = await this.httpPostJson(url, { projectId }, token);
-        if (!ok) {
-            return { ok: false, synced: 0, errors: 0, message: `Sync failed: ${body || 'unknown error'}` };
-        }
-        try {
-            const parsed = JSON.parse(body);
-            const data = parsed?.data;
-            // Duplicate prevention: backend returns alreadyRunning if tasks pending
-            if (data?.alreadyRunning) {
-                return {
-                    ok: true,
-                    synced: 0,
-                    errors: 0,
-                    message: `⚠️ Enrichment already in progress (${data.pendingCount} tasks pending). Check status bar for progress.`,
-                };
-            }
-            const llmWarning = data?.llmReady === false
-                ? `\n⚠️ LLM NOT AVAILABLE — tasks created but enrichment will NOT run. Start LMStudio and restart backend.`
-                : '';
-            return {
-                ok: true,
-                synced: data?.synced ?? 0,
-                errors: data?.errors ?? 0,
-                message: `✅ Synced ${data?.synced ?? 0} rules to KB (${data?.errors ?? 0} errors)${llmWarning}`,
-            };
-        } catch {
-            return { ok: true, synced: 0, errors: 0, message: "Sync completed (could not parse response)" };
-        }
-    }
-
-    /**
-     * SA4E-157: Generic HTTP GET with JSON response.
-     * Reusable for future GET endpoints. 10s timeout for lightweight status queries.
-     */
-    private async httpGetJson(url: string, token: string | undefined): Promise<{ ok: boolean; body: string }> {
-        const headers = await this.buildHeaders(token);
-        const parsedUrl = new URL(url);
-        const http = await import("http");
-        return new Promise((resolve) => {
-            const req = http.default.request(
-                {
-                    hostname: parsedUrl.hostname,
-                    port: parsedUrl.port || undefined,
-                    path: parsedUrl.pathname + parsedUrl.search,
-                    method: "GET",
-                    headers: { "Accept": "application/json", ...headers },
-                },
-                (res) => {
-                    let data = "";
-                    res.on("data", (chunk: any) => { data += chunk; });
-                    res.on("end", () => resolve({ ok: res.statusCode === 200, body: data }));
-                }
-            );
-            req.on("error", () => resolve({ ok: false, body: "" }));
-            // 10s timeout — enrichment status is a lightweight aggregate query
-            req.setTimeout(10000, () => { req.destroy(); resolve({ ok: false, body: '{"error":"timeout"}' }); });
-            req.end();
-        });
     }
 
     private async uploadDocumentFile(relPath: string, content: string, token?: string): Promise<boolean> {
@@ -338,36 +387,15 @@ export class IndexerHttpClient {
     /** POST with detailed error info for user-facing error reporting. */
     private async httpPostWithDetail(url: string, payload: unknown, token: string | undefined): Promise<{ ok: boolean; error: string; status: number }> {
         const headers = await this.buildHeaders(token);
-        const body = JSON.stringify(payload);
-        const parsedUrl = new URL(url);
-        const http = await import("http");
-        return new Promise((resolve) => {
-            const reqHeaders: Record<string, string> = {
-                "Content-Type": "application/json",
-                "Content-Length": Buffer.byteLength(body).toString(),
-                ...headers,
-            };
-            const req = http.default.request(
-                { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname + parsedUrl.search, method: "POST", headers: reqHeaders },
-                (res) => {
-                    let data = "";
-                    res.on("data", (chunk: any) => { data += chunk; });
-                    res.on("end", () => {
-                        const status = res.statusCode || 0;
-                        const ok = status === 200 || status === 201;
-                        let error = ok ? "" : `HTTP ${status}`;
-                        if (!ok && data) {
-                            try { error = JSON.parse(data).error || JSON.parse(data).message || error; } catch { error = data.slice(0, 200); }
-                        }
-                        resolve({ ok, error, status });
-                    });
-                }
-            );
-            req.on("error", (err: Error) => resolve({ ok: false, error: `Network error: ${err.message}`, status: 0 }));
-            req.setTimeout(30000, () => { req.destroy(); resolve({ ok: false, error: "Request timeout (30s) — batch may be too large", status: 0 }); });
-            req.write(body);
-            req.end();
-        });
+        try {
+            const result = await utilHttpPostJson<any>(url, payload, { headers, timeoutMs: 60000 });
+            return { ok: true, error: "", status: 200 };
+        } catch (err: any) {
+            const status = err?.statusCode || err?.status || 0;
+            const msg = err?.message || String(err);
+            if (status === 401) return { ok: false, error: "Unauthorized", status: 401 };
+            return { ok: false, error: msg.slice(0, 200), status };
+        }
     }
 
     /** Build standard auth + project-id headers. */
@@ -376,8 +404,7 @@ export class IndexerHttpClient {
         if (token) { headers["Authorization"] = `Bearer ${token}`; }
         const { getProjectId } = await import("../extension");
         const pid = getProjectId();
-        // SA4E-103: Always send X-Project-Id (even "default") so backend can scope entries correctly
-        if (pid) { headers["X-Project-Id"] = pid; }
+        if (pid && pid !== "default") { headers["X-Project-Id"] = pid; }
         // Send workspace root so server registers correct display_name
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (workspaceFolders && workspaceFolders.length > 0) {

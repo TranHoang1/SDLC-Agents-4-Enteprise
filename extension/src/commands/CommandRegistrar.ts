@@ -26,7 +26,6 @@ import { AuthManager } from "../auth/AuthManager";
 import { KiroTreeViewProvider } from "../sidebar/tree-view-provider";
 import { showUserError } from "../utils/panel-utils";
 import { writeJsonFile } from "../utils/mcp-config-file";
-import { getBackendUrl } from "../config/backend-url";
 
 interface CommandDeps {
   mcpManager?: IServerManager;
@@ -45,9 +44,9 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     vscode.commands.registerCommand("kiroSdlc.update", () => handleUpdate(context)),
     vscode.commands.registerCommand("kiroSdlc.status", () => handleStatus(context)),
     vscode.commands.registerCommand("kiroSdlc.indexWorkspace", () => handleIndexWorkspace(
-      authManager?.getTokenSync(),
-      context.secrets,
-      async () => { await authManager?.refreshToken(); return authManager?.getTokenSync() || undefined; }
+        authManager?.getTokenSync(),
+        context.secrets,
+        async () => { await authManager?.refreshToken(); return authManager?.getTokenSync() || undefined; }
     )),
     vscode.commands.registerCommand("kiroSdlc.login", () => handleLogin(context, authManager, treeProvider)),
     vscode.commands.registerCommand("kiroSdlc.logout", () => handleLogout(authManager, panelManager)),
@@ -57,7 +56,6 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     vscode.commands.registerCommand("kiroSdlc.openKbQuality", () => panelManager?.openPanel("quality")),
     vscode.commands.registerCommand("kiroSdlc.openKbAnalytics", () => panelManager?.openPanel("analytics")),
     vscode.commands.registerCommand("kiroSdlc.openWorkflowGraph", () => panelManager?.openPanel("workflow")),
-    vscode.commands.registerCommand("kiroSdlc.openPlanCanvas", () => panelManager?.openPanel("planCanvas")),
     vscode.commands.registerCommand("kiroSdlc.restartMcpServer", () => handleRestartServer(mcpManager)),
     vscode.commands.registerCommand("kiroSdlc.stopMcpServer", () => handleStopServer(mcpManager, workspaceRoot)),
     vscode.commands.registerCommand("kiroSdlc.openKbBrowser", () => handleOpenKbBrowser(mcpManager)),
@@ -166,8 +164,7 @@ async function handleStatus(context: vscode.ExtensionContext): Promise<void> {
 
 async function handleOpenKbBrowser(mcpManager?: IServerManager): Promise<void> {
   if (!mcpManager || mcpManager.status !== "running") { vscode.window.showErrorMessage("MCP server not running."); return; }
-  const backendUrl = getBackendUrl();
-  await vscode.env.openExternal(vscode.Uri.parse(`${backendUrl}/admin`));
+  await vscode.env.openExternal(vscode.Uri.parse(`http://localhost:${mcpManager.port}/`));
 }
 
 async function handleRestartServer(mcpManager?: IServerManager): Promise<void> {
