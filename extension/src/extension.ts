@@ -46,6 +46,9 @@ let _projectId = "default";
 export function getProjectId(): string { return _projectId; }
 export function setProjectId(id: string): void { _projectId = id; }
 
+/** SA4E-99: Enrichment service accessor for IndexingService cross-module call. */
+export function getEnrichmentService(): { pollNow(): void } | null { return null; }
+
 export async function activate(context: vscode.ExtensionContext) {
   // SA4E-99: Removed duplicate createStatusBar() — StatusBarManager handles status display
 

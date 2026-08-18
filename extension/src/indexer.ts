@@ -57,6 +57,7 @@ async function runIndexWorkspace(root: string, token?: string, secrets?: vscode.
         documents: picks.includes("documents"),
         sync: picks.includes("sync"),
         schemas: picks.includes("schemas"),
+        jira: picks.includes("jira"),
     };
 
     const channel = getIndexingOutputChannel();

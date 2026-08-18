@@ -412,6 +412,20 @@ export class IndexerHttpClient {
         }
         return headers;
     }
+
+    /** SA4E-99: Sync Pega rules to KB (POST /api/index/sync-pega-rules). */
+    async syncPegaRulesToKb(projectId: string, token?: string): Promise<{ message: string }> {
+        const url = `${this.backendUrl}/api/index/sync-pega-rules`;
+        const { ok, body } = await this.httpPostJson(url, { projectId }, token);
+        if (!ok) return { message: `Pega sync failed: ${body}` };
+        try { return JSON.parse(body); } catch { return { message: body || "Pega rules synced" }; }
+    }
+
+    /** SA4E-99: Get enrichment status (GET /api/enrichment/status). */
+    async getEnrichmentStatus(token?: string): Promise<{ ok: boolean; body: string }> {
+        const url = `${this.backendUrl}/api/enrichment/status`;
+        return this.httpPostJson(url, {}, token);
+    }
 }
 
 /**
