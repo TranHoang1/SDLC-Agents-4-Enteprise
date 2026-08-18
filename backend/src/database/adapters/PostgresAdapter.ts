@@ -97,18 +97,10 @@ export class PostgresAdapter implements DatabaseAdapter {
     if (isInsert && !hasReturning) {
       const withReturning = translated + ' RETURNING id';
       if (inTransaction) {
-        try {
-          const r = await queryFn(withReturning, params);
-          const insertedId = r.rows?.[0]?.id ?? 0;
-          return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
-        } catch (err: any) {
-          if (err?.code === '42703') {
-            // Table has no 'id' column — retry without RETURNING on same tx client
-            const r = await queryFn(translated, params);
-            return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
-          }
-          throw err;
-        }
+        // Don't attempt RETURNING id inside a transaction — a 42703 error aborts
+        // the entire transaction block, making all subsequent statements fail with 25P02.
+        const r = await queryFn(translated, params);
+        return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
       }
       // Outside transaction: attempt RETURNING id with dedicated client fallback.
       // BUG FIX: pool.query() uses implicit transaction — if RETURNING id fails,
