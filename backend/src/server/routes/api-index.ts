@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Source/document indexing endpoints — POST /api/index/source|document|documents.
  * SA4E-41: every write is path-safe (SEC-04/05) and tenant-scoped (requireProjectId).
  */
@@ -11,7 +11,7 @@ import * as path from 'path';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
 import type { CodeIntelModule } from '../../modules/code-intel/CodeIntelModule.js';
 import { loadConfig } from '../../config/index.js';
-import { getAdminAdapter } from '../../admin/db/core.js';
+import { getDbAdapter } from '../../admin/db/core.js';
 import { GraphRepository } from '../../database/repositories/GraphRepository.js';
 import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
 import { resolveWithinWorkspace } from '../../shared/path-safety.js';
@@ -65,7 +65,7 @@ function writeFilesPhase(userId: string, projectId: string, files: SourceFile[])
 /** Phase: register/update the project in the admin registry (non-fatal). */
 async function registerProjectPhase(projectId: string, workspace: string, logger: Logger, createdBy = ''): Promise<void> {
   try {
-    const graphRepo = new GraphRepository(getAdminAdapter());
+    const graphRepo = new GraphRepository(getDbAdapter());
     await graphRepo.registerProject(projectId, path.basename(workspace), workspace, createdBy);
   } catch (err) {
     logger.warn({ err, projectId }, '[index] project registry upsert skipped (non-fatal)');
@@ -119,7 +119,7 @@ async function ensureProjectKbEntry(registry: ModuleRegistry, scope: IndexScope,
 /** Upsert the project-metadata graph node (INSERT OR REPLACE to fix stale/missing rows). */
 async function upsertProjectGraphNode(entryId: string, displayName: string, projectId: string, logger: Logger): Promise<void> {
   try {
-    const graphRepo = new GraphRepository(getAdminAdapter());
+    const graphRepo = new GraphRepository(getDbAdapter());
     await graphRepo.upsertNode({
       entryId, label: `Project: ${displayName}`, type: 'CONTEXT',
       tier: 'SEMANTIC', projectId, x: 0, y: 0, z: 0, level: 'macro', clusterId: '0',
