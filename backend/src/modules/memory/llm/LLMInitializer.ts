@@ -130,8 +130,8 @@ export function initLLMInBackground(
       // SA4E-107: Wire CodeEnrichmentHandler into TaskWorker for LLM enrichment of code symbols
       try {
         const { CodeEnrichmentHandler } = await import('../../../engine/enrichment/CodeEnrichmentHandler.js');
-        const { getAdminAdapter } = await import('../../../admin/db/core.js');
-        const adapter = getAdminAdapter();
+        const { getDbAdapter } = await import('../../../admin/db/core.js');
+        const adapter = getDbAdapter();
         const enrichHandler = new CodeEnrichmentHandler(adapter, llmService, logger);
         taskWorker?.setCodeEnrichmentHandler(enrichHandler);
         logger.info('CodeEnrichmentHandler initialized — LLM code enrichment enabled');

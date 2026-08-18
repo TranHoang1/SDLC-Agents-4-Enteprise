@@ -1,11 +1,11 @@
 /**
  * admin/db/groups.ts — Access group and permission management.
- * SA4E-50: All functions are async; use getAdminAdapter() for multi-DB support.
+ * SA4E-50: All functions are async; use getDbAdapter() for multi-DB support.
  */
 
 import * as crypto from 'crypto';
 import type { AccessGroup, GroupPermission } from '../types/rbac.types.js';
-import { getAdminAdapter } from './core.js';
+import { getDbAdapter } from './core.js';
 
 /** Parse raw permission rows into typed GroupPermission objects. */
 function parsePermRows(
@@ -37,7 +37,7 @@ function buildGroup(
  * @returns Array of AccessGroup objects ordered by system-first then name
  */
 export async function getGroups(): Promise<AccessGroup[]> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const groups = await adapter.allAsync<Record<string, unknown>>(
     'SELECT * FROM access_groups ORDER BY is_system_group DESC, access_group_name ASC',
   );
@@ -58,7 +58,7 @@ export async function getGroups(): Promise<AccessGroup[]> {
  * @returns AccessGroup or null if not found
  */
 export async function getGroupById(groupId: string): Promise<AccessGroup | null> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const g = await adapter.getAsync<Record<string, unknown>>(
     'SELECT * FROM access_groups WHERE access_group_id = ?', [groupId],
   );
@@ -79,7 +79,7 @@ export async function createGroup(
   name: string,
   permissions: GroupPermission[],
 ): Promise<AccessGroup> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const id = 'grp-' + crypto.randomUUID().slice(0, 8);
   const now = new Date().toISOString();
 
@@ -107,7 +107,7 @@ export async function updateGroup(
   name: string | undefined,
   permissions: GroupPermission[],
 ): Promise<AccessGroup> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const existing = await adapter.getAsync<Record<string, unknown>>(
     'SELECT * FROM access_groups WHERE access_group_id = ?', [groupId],
   );
@@ -144,7 +144,7 @@ export async function updateGroup(
  * @throws Error if group is a system group or has assigned users
  */
 export async function deleteGroup(groupId: string): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const g = await adapter.getAsync<{ is_system_group: number }>(
     'SELECT is_system_group FROM access_groups WHERE access_group_id = ?', [groupId],
   );
@@ -164,7 +164,7 @@ export async function deleteGroup(groupId: string): Promise<void> {
  * @returns Array of GroupPermission objects
  */
 export async function getUserPermissions(userId: string): Promise<GroupPermission[]> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const user = await adapter.getAsync<{ access_group_id: string }>(
     'SELECT access_group_id FROM users WHERE user_id = ?', [userId],
   );
@@ -182,7 +182,7 @@ export async function getUserPermissions(userId: string): Promise<GroupPermissio
  * @returns Array of permission ID strings
  */
 export async function getGroupPermissionIds(groupId: string): Promise<string[]> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const rows = await adapter.allAsync<{ permission_id: string }>(
     'SELECT permission_id FROM group_permissions WHERE access_group_id = ?', [groupId],
   );

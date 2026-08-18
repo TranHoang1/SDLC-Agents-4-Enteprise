@@ -1,0 +1,81 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-172: Component Diagram — DataTableResolver Class Relationships" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="200" y="10" width="600" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Swimlane: extension/src/services/ -->
+    <mxCell id="sw1" value="extension/src/services/" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="50" width="700" height="420" as="geometry"/>
+    </mxCell>
+    <!-- DataTableResolver (NEW) -->
+    <mxCell id="c1" value="DataTableResolver (NEW)&#10;————————————&#10;- pegaClient: PegaHttpClient&#10;- ingester: PegaStreamIngester&#10;- log: LogFn&#10;————————————&#10;+ resolve(projectId, root, report)&#10;- scanClassFiles(root)&#10;- computeDataTableKey(classRule)&#10;- computeDatabaseKey(dbName)&#10;- fetchAndSaveRule(insKey, dir)&#10;- ingestRule(projectId, ruleJson)&#10;- isCriticalError(err)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;spacingTop=5;" vertex="1" parent="sw1">
+      <mxGeometry x="220" y="50" width="250" height="180" as="geometry"/>
+    </mxCell>
+    <!-- PegaHttpClient (existing) -->
+    <mxCell id="c2" value="PegaHttpClient (existing)&#10;————————————&#10;+ getRuleByInsKey(insKey)&#10;+ fetchWithRetry(url, init)&#10;+ getAuthHeader()" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;spacingTop=5;" vertex="1" parent="sw1">
+      <mxGeometry x="30" y="290" width="220" height="100" as="geometry"/>
+    </mxCell>
+    <!-- PegaStreamIngester (existing) -->
+    <mxCell id="c3" value="PegaStreamIngester (existing)&#10;————————————&#10;+ ingestSingleRule(projectId,&#10;  ruleJson, checksum, version)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;spacingTop=5;" vertex="1" parent="sw1">
+      <mxGeometry x="290" y="290" width="240" height="100" as="geometry"/>
+    </mxCell>
+    <!-- PegaProjectIndexer (modified) -->
+    <mxCell id="c4" value="PegaProjectIndexer (MODIFIED)&#10;————————————&#10;+ run(root, report, secrets)&#10;  calls DataTableResolver.resolve()&#10;  AFTER BFS completes" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;spacingTop=5;" vertex="1" parent="sw1">
+      <mxGeometry x="30" y="60" width="160" height="100" as="geometry"/>
+    </mxCell>
+    <!-- PegaBfsIndexer (unchanged) -->
+    <mxCell id="c5" value="PegaBfsIndexer (unchanged)&#10;————————————&#10;+ run(projectId, fetchQueue,&#10;  dedupSet, report, root)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;spacingTop=5;" vertex="1" parent="sw1">
+      <mxGeometry x="540" y="290" width="140" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Edges inside swimlane -->
+    <mxCell id="e1" value="creates" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;" edge="1" parent="sw1" source="c4" target="c1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sw1" source="c1" target="c2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sw1" source="c1" target="c3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="runs first" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;strokeColor=#999999;fontSize=9;exitX=1;exitY=0.8;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sw1" source="c4" target="c5">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="610" y="140"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Swimlane: extension/src/models/ -->
+    <mxCell id="sw2" value="extension/src/models/" style="swimlane;startSize=30;fillColor=none;strokeColor=#9673a6;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="780" y="50" width="350" height="420" as="geometry"/>
+    </mxCell>
+    <!-- DataTableModels (NEW) -->
+    <mxCell id="m1" value="DataTableModels.ts (NEW)&#10;————————————&#10;ClassRuleInput&#10;DataTableResolveResult&#10;DataTableRuleInfo" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;spacingTop=5;" vertex="1" parent="sw2">
+      <mxGeometry x="30" y="50" width="290" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Cross-boundary edge: DataTableResolver imports DataTableModels -->
+    <mxCell id="e5" value="imports types" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="c1" target="m1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="750" y="190"/>
+          <mxPoint x="750" y="170"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="leg1" value="NEW (SA4E-172)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="500" width="120" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="Existing (reused)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="180" y="500" width="120" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="Modified" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="320" y="500" width="120" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="Unchanged" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="460" y="500" width="120" height="25" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

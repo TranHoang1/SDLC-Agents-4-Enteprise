@@ -47,6 +47,10 @@ export class TaskWorker {
   /** SA4E-155: Adaptive concurrency — reduces on LLM errors, recovers on success. */
   private activeConcurrency: number = 0;
   private consecutiveErrors = 0;
+  /** Periodic orphan reconciliation: tracks polls since last reconcile. */
+  private pollsSinceReconcile = 0;
+  /** Non-retryable failures since last reconcile (triggers early reconcile). */
+  private orphanFailuresSinceReconcile = 0;
 
   constructor(
     db: DatabaseAdapter,
@@ -109,11 +113,15 @@ export class TaskWorker {
    * Reset ALL tasks stuck in PROCESSING to PENDING on startup.
    * Called once at start() — handles server restart/crash recovery immediately,
    * no need to wait for staleThreshold timeout.
+   * Also reconciles orphan tasks (symbols/entries deleted while tasks pending).
    */
   async resetProcessingOnStartup(): Promise<number> {
     const result = await this.repo.resetAllProcessing();
     if (result > 0) this.logger.info({ reset: result }, 'TaskWorker: reset stuck PROCESSING tasks on startup');
-    return result;
+    // SA4E-165: Purge orphan tasks whose referenced entity no longer exists
+    const orphans = await this.repo.reconcileOrphans();
+    if (orphans > 0) this.logger.info({ orphans }, 'TaskWorker: reconciled orphan tasks on startup');
+    return result + orphans;
   }
 
   async recoverStaleTasks(): Promise<number> {
@@ -203,6 +211,11 @@ export class TaskWorker {
       }
       this.processing = false;
       if (!this.running) { this.finishShutdown(); return; }
+      // Self-healing: periodic orphan reconciliation
+      this.pollsSinceReconcile++;
+      if (this.orphanFailuresSinceReconcile >= 10 || this.pollsSinceReconcile >= 50) {
+        this.reconcileOrphansAsync();
+      }
       // Backoff delay if errors persist
       const delay = this.consecutiveErrors >= 3
         ? this.config.baseInterval * 3
@@ -498,18 +511,43 @@ export class TaskWorker {
   }
 
   private async handleTaskError(task: PendingTask, err: Error): Promise<void> {
-    this.consecutiveErrors++;
     // SA4E-106: Non-retryable patterns include CODE_ENRICHMENT-specific errors
     const nonRetryable = err.message.includes('invalid_json')
       || err.message.includes('entry_not_found')
       || err.message.includes('invalid_payload')
       || err.message.includes('symbol_not_found');
-    if (nonRetryable || task.retry_count + 1 >= task.max_retries) {
+
+    if (nonRetryable) {
+      // Data-integrity errors — NOT LLM failures. Don't increment consecutiveErrors
+      // to avoid false "LLM errors detected" warnings and concurrency reduction.
+      this.orphanFailuresSinceReconcile++;
+      await this.repo.markFailed(task.id, err.message);
+    } else if (task.retry_count + 1 >= task.max_retries) {
+      this.consecutiveErrors++;
       await this.repo.markFailed(task.id, err.message);
     } else {
+      this.consecutiveErrors++;
       await this.repo.markFailed(task.id, err.message);
       await this.repo.resetForRetry(task.id);
     }
+  }
+
+  /**
+   * Self-healing: periodically purge orphan tasks whose symbols/entries were deleted.
+   * Runs async (fire-and-forget) to avoid blocking poll cycle.
+   * Triggered when 10+ orphan failures accumulate or every 50 polls.
+   */
+  private reconcileOrphansAsync(): void {
+    this.pollsSinceReconcile = 0;
+    this.orphanFailuresSinceReconcile = 0;
+    this.repo.reconcileOrphans().then(purged => {
+      if (purged > 0) {
+        this.logger.info({ purged, component: 'TaskWorker' },
+          'Self-healing: reconciled orphan tasks mid-session');
+      }
+    }).catch(err => {
+      this.logger.warn({ err, component: 'TaskWorker' }, 'Self-healing reconcile failed (non-fatal)');
+    });
   }
 }
 

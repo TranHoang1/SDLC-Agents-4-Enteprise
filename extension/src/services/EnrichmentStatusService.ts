@@ -44,8 +44,9 @@ export class EnrichmentStatusService implements vscode.Disposable {
     this.updateStatusBarIdle();
   }
 
-  /** Start polling (called on extension activation). */
+  /** Start polling (called on extension activation). Polls immediately, then on interval. */
   start(): void {
+    this.executePoll(); // Immediate first poll — don't wait 30s
     this.schedulePoll(this.currentInterval);
   }
 
@@ -74,23 +75,28 @@ export class EnrichmentStatusService implements vscode.Disposable {
   private async executePoll(): Promise<EnrichmentStatusResponse | null> {
     try {
       const token = this.tokenProvider();
+      this.log('[EnrichmentPoll] Polling... token=' + (token ? 'present' : 'NONE'));
       const { ok, body } = await this.httpClient.getEnrichmentStatus(token);
+      this.log('[EnrichmentPoll] Response ok=' + ok + ' bodyLen=' + (body?.length ?? 0));
 
       if (!ok) {
+        this.log('[EnrichmentPoll] FAIL: non-200. body=' + (body || '').slice(0, 200));
         this.handlePollFailure('Backend returned non-200');
         return null;
       }
 
       const parsed = EnrichmentStatusResponseSchema.safeParse(JSON.parse(body));
       if (!parsed.success) {
-        this.log('Zod validation failed: ' + parsed.error.message);
+        this.log('[EnrichmentPoll] Zod FAIL: ' + parsed.error.message);
         return null;
       }
 
+      this.log('[EnrichmentPoll] OK state=' + parsed.data.state + ' pending=' + parsed.data.pendingRules + ' failed=' + parsed.data.failedRules);
       this.consecutiveFailures = 0;
       this.processResponse(parsed.data);
       return parsed.data;
     } catch (err: any) {
+      this.log('[EnrichmentPoll] EXCEPTION: ' + err.message);
       this.handlePollFailure(err.message);
       return null;
     }

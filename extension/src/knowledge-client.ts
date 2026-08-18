@@ -133,28 +133,25 @@ export interface KnowledgeClientOptions {
 
 const DEFAULT_TIMEOUT_MS = 10000;
 const DEFAULT_RETRIES = 2;
-const DEFAULT_BACKEND_URL = "http://127.0.0.1:48721";
 
 /** Resolve the Backend KB base URL (no trailing slash). */
 export function resolveKbBaseUrl(): string {
-  let baseUrl = DEFAULT_BACKEND_URL;
-  try {
-    const cfg = vscode.workspace?.getConfiguration?.("kiroSdlc");
-    const configured = cfg?.get?.("backend.url");
-    if (typeof configured === "string" && configured.length > 0) {
-      baseUrl = configured;
-    }
-  } catch {
-    // vscode unavailable (unit tests) — fall back to env/default
-  }
+  // Check env override first (used in tests and when port differs)
   const envPort = process.env.CODE_INTEL_PORT;
   if (envPort) {
     const port = parseInt(envPort, 10);
     if (Number.isInteger(port) && port >= 1024 && port <= 65535) {
-      baseUrl = `http://127.0.0.1:${port}`;
+      return `http://127.0.0.1:${port}`;
     }
   }
-  return baseUrl.replace(/\/+$/, "");
+  try {
+    // Delegate to shared config utility (reads package.json default)
+    const { getBackendUrl } = require("./config/backend-url");
+    return getBackendUrl();
+  } catch {
+    // vscode unavailable (unit tests) — fall back to default
+    return "http://127.0.0.1:48721";
+  }
 }
 
 /**

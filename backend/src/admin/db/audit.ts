@@ -1,11 +1,11 @@
 /**
  * admin/db/audit.ts — Audit log recording and retrieval.
- * SA4E-50: All functions are async; use getAdminAdapter() for multi-DB support.
+ * SA4E-50: All functions are async; use getDbAdapter() for multi-DB support.
  */
 
 import * as crypto from 'crypto';
 import type { AuditEntry } from '../types/rbac.types.js';
-import { getAdminAdapter } from './core.js';
+import { getDbAdapter } from './core.js';
 
 /** Map a raw DB row to a typed AuditEntry. */
 function rowToAudit(r: Record<string, unknown>): AuditEntry {
@@ -35,7 +35,7 @@ export async function recordAudit(
   changes?: string,
   ip?: string,
 ): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const auditId = 'aud-' + crypto.randomUUID().slice(0, 8);
   await adapter.runAsync(
     `INSERT INTO audit_log (audit_id, user_id, username, action, resource, resource_id, changes, timestamp, ip_address)
@@ -53,7 +53,7 @@ export async function getAuditLogs(
   page = 1,
   pageSize = 50,
 ): Promise<{ items: AuditEntry[]; total: number }> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   let where = 'WHERE 1=1';
   const params: unknown[] = [];
 
@@ -80,7 +80,7 @@ export async function getAuditLogs(
  * @param limit - Max entries to return (default 10)
  */
 export async function getRecentActivity(limit = 10): Promise<AuditEntry[]> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const rows = await adapter.allAsync<Record<string, unknown>>(
     'SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?', [limit],
   );

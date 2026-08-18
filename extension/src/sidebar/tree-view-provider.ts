@@ -6,6 +6,7 @@
 import * as vscode from "vscode";
 import { ServerStatus } from "../types";
 import { McpServerManager } from "../mcp-server-manager";
+import { getBackendUrl } from "../config/backend-url";
 
 export class KiroTreeViewProvider implements vscode.TreeDataProvider<KiroTreeItem> {
   private _onDidChangeTreeData = new vscode.EventEmitter<KiroTreeItem | undefined>();
@@ -72,7 +73,7 @@ export class KiroTreeViewProvider implements vscode.TreeDataProvider<KiroTreeIte
     // Show warning banner when KB system is inactive
     const items: KiroTreeItem[] = [];
     const config = vscode.workspace.getConfiguration("kiroSdlc");
-    const backendUrl = config.get<string>("backend.url") || "http://127.0.0.1:48721";
+    const backendUrl = getBackendUrl();
 
     if (this.isKbInactive()) {
       const warningItem = new KiroTreeItem(

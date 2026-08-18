@@ -12,7 +12,7 @@ import {
 } from '../../../admin/admin-db.js';
 import { loadConfig } from '../../../config/index.js';
 import { DatabaseManager } from '../../../database/DatabaseManager.js';
-import { getAdminAdapter, getIndexAdapter } from '../../../admin/db/core.js';
+import { getDbAdapter } from '../../../admin/db/core.js';
 
 export interface AdminContext {
   logger: Logger;
@@ -91,7 +91,7 @@ export function createAdminContext(logger: Logger, registry?: any): AdminContext
   };
 
   // SA4E-50: Wire DatabaseManager with pre-resolved adapters
-  const db = DatabaseManager.createDefault(getAdminAdapter(), getIndexAdapter());
+  const db = DatabaseManager.createDefault(getDbAdapter(), getDbAdapter());
 
   return {
     logger,

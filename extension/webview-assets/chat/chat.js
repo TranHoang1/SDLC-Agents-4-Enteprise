@@ -1075,22 +1075,126 @@
 
   // === Tool Calls (Collapsible) — Isolated Container ===
   // KSA-247: Tool call blocks render in their own scoped container
-  // completely isolated from streaming DOM manipulation
+  // completely isolated from streaming DOM manipulation.
+  // KSA-290: Container is itself collapsible — shows summary header,
+  // user clicks to expand/collapse all tool rows inside.
   var activeToolContainer = null;
+  var TOOL_COLLAPSE_THRESHOLD = 3; // Auto-collapse after N tool calls
 
   function getOrCreateToolContainer() {
     if (!activeToolContainer || !activeToolContainer.parentNode) {
       activeToolContainer = document.createElement("div");
       activeToolContainer.className = "ksa247-tool-container";
       activeToolContainer.setAttribute("data-turn", "turn-" + Date.now());
+      activeToolContainer.setAttribute("data-tool-count", "0");
+
+      // KSA-290: Summary header — collapsible toggle for the entire group
+      var summaryHeader = document.createElement("div");
+      summaryHeader.className = "tool-container-summary";
+      summaryHeader.setAttribute("role", "button");
+      summaryHeader.setAttribute("aria-expanded", "true");
+      summaryHeader.setAttribute("tabindex", "0");
+      summaryHeader.innerHTML =
+        '<span class="tc-chevron">&#x25BC;</span>' +
+        '<span class="tc-summary-text">Tool calls</span>' +
+        '<span class="tc-count-badge">0</span>' +
+        '<span class="tc-status-dots"></span>';
+
+      summaryHeader.addEventListener("click", function () {
+        var container = this.parentNode;
+        var isCollapsed = container.classList.toggle("tc-collapsed");
+        this.setAttribute("aria-expanded", isCollapsed ? "false" : "true");
+      });
+      summaryHeader.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          this.click();
+        }
+      });
+
+      activeToolContainer.appendChild(summaryHeader);
+
+      // KSA-290: Body wrapper for tool call blocks
+      var bodyWrap = document.createElement("div");
+      bodyWrap.className = "tool-container-body";
+      activeToolContainer.appendChild(bodyWrap);
+
       messagesEl.appendChild(activeToolContainer);
     }
     return activeToolContainer;
   }
 
+  /** Update the container summary header with current counts */
+  function updateToolContainerSummary(container) {
+    if (!container) return;
+    var body = container.querySelector(".tool-container-body");
+    var blocks = body ? body.querySelectorAll(".tool-call-block") : [];
+    var count = blocks.length;
+    container.setAttribute("data-tool-count", count.toString());
+
+    // Count categories for summary
+    var cats = {};
+    for (var i = 0; i < blocks.length; i++) {
+      var catEl = blocks[i].querySelector(".tool-cat");
+      var catLabel = catEl ? catEl.textContent : "TOOL";
+      cats[catLabel] = (cats[catLabel] || 0) + 1;
+    }
+
+    // Build summary text: "5 FILE, 3 MEM, 2 CMD"
+    var parts = [];
+    for (var key in cats) {
+      parts.push(cats[key] + " " + key);
+    }
+
+    var summaryEl = container.querySelector(".tc-summary-text");
+    var countBadge = container.querySelector(".tc-count-badge");
+    if (summaryEl) {
+      summaryEl.textContent = parts.length > 0
+        ? parts.join(", ")
+        : "Tool calls";
+    }
+    if (countBadge) countBadge.textContent = count.toString();
+
+    // Count statuses for dots indicator
+    var running = 0, completed = 0, failed = 0;
+    for (var j = 0; j < blocks.length; j++) {
+      var statusEl = blocks[j].querySelector(".tool-status");
+      if (statusEl) {
+        if (statusEl.classList.contains("running")) running++;
+        else if (statusEl.classList.contains("completed")) completed++;
+        else if (statusEl.classList.contains("failed")) failed++;
+      }
+    }
+    var dotsEl = container.querySelector(".tc-status-dots");
+    if (dotsEl) {
+      var dotHtml = "";
+      if (running > 0) dotHtml += '<span class="tc-dot running"></span>';
+      if (completed > 0) dotHtml += '<span class="tc-dot completed">' + completed + ' \u2713</span>';
+      if (failed > 0) dotHtml += '<span class="tc-dot failed">' + failed + ' \u2717</span>';
+      dotsEl.innerHTML = dotHtml;
+    }
+
+    // Auto-collapse when tool count reaches threshold
+    if (count >= TOOL_COLLAPSE_THRESHOLD && !container.classList.contains("tc-collapsed") &&
+        !container.hasAttribute("data-sealed")) {
+      container.classList.add("tc-collapsed");
+      var header = container.querySelector(".tool-container-summary");
+      if (header) header.setAttribute("aria-expanded", "false");
+    }
+  }
+
   function finalizeToolContainer() {
     if (activeToolContainer) {
       activeToolContainer.setAttribute("data-sealed", "true");
+      updateToolContainerSummary(activeToolContainer);
+      // KSA-290: Auto-collapse sealed containers with 3+ tool calls
+      var body = activeToolContainer.querySelector(".tool-container-body");
+      var count = body ? body.querySelectorAll(".tool-call-block").length : 0;
+      if (count >= TOOL_COLLAPSE_THRESHOLD && !activeToolContainer.classList.contains("tc-collapsed")) {
+        activeToolContainer.classList.add("tc-collapsed");
+        var header = activeToolContainer.querySelector(".tool-container-summary");
+        if (header) header.setAttribute("aria-expanded", "false");
+      }
       activeToolContainer = null;
     }
   }
@@ -1255,10 +1359,12 @@
     block.appendChild(header);
     block.appendChild(body);
 
-    // KSA-247: Append to isolated tool container (NOT messagesEl directly)
+    // KSA-290: Append inside tool-container-body wrapper (not container root)
     var container = getOrCreateToolContainer();
-    container.appendChild(block);
+    var bodyWrap = container.querySelector(".tool-container-body");
+    bodyWrap.appendChild(block);
     toolCalls[tc.id] = block;
+    updateToolContainerSummary(container);
     scrollToBottom();
 
     // KSA-240: Persist tool call into active tab so it survives re-renders/reload
@@ -1329,6 +1435,10 @@
         existingDur.textContent = formatDuration(msg.duration);
       }
     }
+
+    // KSA-290: Update container summary to reflect new status counts
+    var container = block.closest(".ksa247-tool-container");
+    if (container) updateToolContainerSummary(container);
 
     // Update persisted state in tab
     var currentTab = getTab(activeTabId);

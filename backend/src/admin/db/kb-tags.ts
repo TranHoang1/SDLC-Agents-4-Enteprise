@@ -1,14 +1,14 @@
 /**
  * admin/db/kb-tags.ts — KB tag management via DatabaseAdapter.
- * SA4E-50: All functions are async; use getIndexAdapter() for multi-DB support.
+ * SA4E-50: All functions are async; use getDbAdapter() for multi-DB support.
  */
 
-import { getIndexAdapter, getActiveEngine, logger } from './core.js';
+import { getDbAdapter, getActiveEngine, logger } from './core.js';
 import { buildAdminScopeFilter } from './kb-scope-filter.js';
 
 /** Check if knowledge_entries table exists (SQLite only guard). */
 async function tableExists(): Promise<boolean> {
-  const adapter = getIndexAdapter();
+  const adapter = getDbAdapter();
   if (!adapter.isConnected()) return false; // PG not yet connected — skip gracefully
   if (getActiveEngine() !== 'sqlite') return true;
   const row = await adapter.getAsync<{ cnt: number }>(
@@ -33,7 +33,7 @@ export async function getAllKbTags(
   const tagCounts: Record<string, { count: number; lastUsed: string }> = {};
   try {
     if (!(await tableExists())) return tagCounts;
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const filter = buildAdminScopeFilter(projectId, userId);
     let rows: { tags: string; created_at: string }[];
 
@@ -72,7 +72,7 @@ export async function getAllKbTags(
 export async function updateKbEntryTags(entryId: string, tags: string[]): Promise<void> {
   try {
     if (!(await tableExists())) return;
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     await adapter.runAsync(
       'UPDATE knowledge_entries SET tags = ? WHERE id = ?',
       [tags.join(','), entryId],
@@ -90,7 +90,7 @@ export async function renameKbTag(oldName: string, newName: string): Promise<num
   let renamed = 0;
   try {
     if (!(await tableExists())) return 0;
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const rows = await adapter.allAsync<{ id: string; tags: string }>(
       'SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?',
       [`%${oldName}%`],
@@ -119,7 +119,7 @@ export async function deleteKbTag(tagName: string): Promise<number> {
   let removed = 0;
   try {
     if (!(await tableExists())) return 0;
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const rows = await adapter.allAsync<{ id: string; tags: string }>(
       'SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?',
       [`%${tagName}%`],
@@ -148,7 +148,7 @@ export async function mergeKbTags(sourceTag: string, targetTag: string): Promise
   let merged = 0;
   try {
     if (!(await tableExists())) return 0;
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const rows = await adapter.allAsync<{ id: string; tags: string }>(
       'SELECT id, tags FROM knowledge_entries WHERE tags LIKE ?',
       [`%${sourceTag}%`],
@@ -181,7 +181,7 @@ export async function getKbEntriesByTag(
 ): Promise<any[]> {
   try {
     if (!(await tableExists())) return [];
-    const adapter = getIndexAdapter();
+    const adapter = getDbAdapter();
     const filter = buildAdminScopeFilter(projectId, userId);
     let rows: Record<string, unknown>[];
 

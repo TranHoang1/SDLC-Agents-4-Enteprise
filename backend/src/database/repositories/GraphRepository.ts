@@ -8,7 +8,7 @@ import type { IGraphRepository } from './interfaces.js';
 import type { GraphNodeCounts, UpsertNodeParams } from './types.js';
 import { translateError } from '../errors/index.js';
 
-const CODE_ENTRY_PREFIXES = ["'code:%'", "'pega:%'"];
+const CODE_ENTRY_PREFIXES = ["'code:%'", "'pega:%'", "'sym-%'"];
 
 export class GraphRepository implements IGraphRepository {
   constructor(private readonly adapter: DatabaseAdapter) {}

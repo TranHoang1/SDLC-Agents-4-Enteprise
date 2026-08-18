@@ -4,7 +4,7 @@
  * checkpoint PUT→GET roundtrip (IT-HYD-03 backend logic), DELETE cascade.
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import pino from 'pino';
 import { KnowledgeDb } from '../KnowledgeDb.js';
 import { KnowledgeService } from '../KnowledgeService.js';
@@ -76,6 +76,36 @@ describe('KnowledgeService', () => {
 
     it('saveCheckpoint rejects a non-UUID thread id (404 path)', async () => {
       expect(await service.saveCheckpoint(ctx('ws-A'), 'not-a-uuid', { checkpoint: { v: 1 } })).toBeNull();
+    });
+
+    it('concurrent saveCheckpoint on the same fresh thread creates it exactly once (LangGraph put race)', async () => {
+      const freshId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+      const results = await Promise.all([
+        service.saveCheckpoint(ctx('ws-A'), freshId, { checkpoint: { v: 1 } }),
+        service.saveCheckpoint(ctx('ws-A'), freshId, { checkpoint: { v: 1 } }),
+        service.saveCheckpoint(ctx('ws-A'), freshId, { checkpoint: { v: 1 } }),
+        service.saveCheckpoint(ctx('ws-A'), freshId, { checkpoint: { v: 1 } }),
+      ]);
+      expect(results.every((r) => r !== null)).toBe(true);
+      expect(await service.getThread(ctx('ws-A'), freshId)).not.toBeNull();
+      const events = await service.getEvents(ctx('ws-A'), freshId);
+      const createdEvents = events?.filter((e) => e.type === 'THREAD_CREATED') ?? [];
+      expect(createdEvents).toHaveLength(1);
+    });
+
+    it('saveCheckpoint does NOT 404 when a same-workspace thread appears between ownedThread read and upsert (race loser, fix for recurring "Thread not found")', async () => {
+      const thread = await service.createThread(ctx('ws-A'), { title: 'Won by concurrent request' });
+      // B's ownedThread read happened BEFORE A's INSERT committed → stale null,
+      // even though A's thread already exists by the time B reaches the upsert.
+      // Old pre-check `if (existing) return null` turned this into a false 404.
+      const getSpy = vi.spyOn(db, 'getThread').mockImplementationOnce(async () => null);
+      const saved = await service.saveCheckpoint(ctx('ws-A'), thread.thread_id, { checkpoint: { v: 1 } });
+      getSpy.mockRestore();
+      expect(saved).not.toBeNull();
+      expect(saved?.thread_id).toBe(thread.thread_id);
+      // no duplicate THREAD_CREATED for the race loser
+      const events = await service.getEvents(ctx('ws-A'), thread.thread_id);
+      expect(events?.filter((e) => e.type === 'THREAD_CREATED')).toHaveLength(1);
     });
 
     it('saveCheckpoint returns null for a thread owned by another workspace', async () => {

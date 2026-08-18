@@ -6,13 +6,10 @@ import * as vscode from "vscode";
 import { IndexingService, IndexOptions } from "./services/IndexingService";
 import { IndexerHttpClient } from "./services/IndexerHttpClient";
 import { detectSfdxProject, countSalesforceMetadata } from "./sf-indexer";
+import { getBackendUrl } from "./config/backend-url";
 
 export { IndexingService } from "./services/IndexingService";
 export { IndexerHttpClient } from "./services/IndexerHttpClient";
-
-function getBackendUrl(): string {
-    return vscode.workspace.getConfiguration("kiroSdlc").get<string>("backend.url") || "http://127.0.0.1:48721";
-}
 
 function getWorkspaceRoot(): string | undefined {
     const folders = vscode.workspace.workspaceFolders;

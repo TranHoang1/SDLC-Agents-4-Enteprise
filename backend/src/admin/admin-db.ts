@@ -5,7 +5,7 @@
 
 export {
   getAdminDb, getIndexDbPath, getActiveEngine, getActiveDbConfig,
-  resetAdminDb, getIndexAdapter, getAdminAdapter,
+  resetAdminDb, getDbAdapter, initAdapters,
   hashPassword, verifyPassword, generateToken,
 } from './db/core.js';
 

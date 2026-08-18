@@ -7,7 +7,7 @@
 import type { IModule, ModuleStatus } from '../../types/module.js';
 import type { ToolHandler, ToolDefinition } from '../../types/tool.js';
 import type { Logger } from 'pino';
-import { getAdminAdapter } from '../../admin/db/core.js';
+import { getDbAdapter } from '../../admin/db/core.js';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 
 /** Summary row returned by analytics_summary tool. */
@@ -48,7 +48,7 @@ export class AnalyticsModule implements IModule {
   async initialize(): Promise<void> {
     this.logger.info('Initializing analytics module');
     try {
-      this.adapter = getAdminAdapter();
+      this.adapter = getDbAdapter();
       this._status = 'ready';
       this.logger.info('Analytics module ready');
     } catch (err) {

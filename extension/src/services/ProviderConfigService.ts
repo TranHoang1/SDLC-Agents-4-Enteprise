@@ -6,6 +6,7 @@
 import * as vscode from "vscode";
 import { getStaticModels, fetchGatewayModels, getDefaultModel } from "../chat-panel/chat-models";
 import { SECRET_KEYS, PROVIDER_BASE_URL_KEYS, PROVIDER_BASE_URL_DEFAULTS } from "../models";
+import { getBackendUrl } from "../config/backend-url";
 
 export class ProviderConfigService {
   constructor(private readonly secrets: vscode.SecretStorage) {}
@@ -27,7 +28,7 @@ export class ProviderConfigService {
     const ollamaUrl = config.get<string>("ollamaUrl", "http://localhost:11434");
 
     const baseUrl = this.getBaseUrlForProvider(provider);
-    const backendUrl = config.get<string>("backend.url", "http://127.0.0.1:48721");
+    const backendUrl = getBackendUrl();
     const mcpServerPort = config.get<number>("mcpServerPort", 9181);
     const enableMcpServer = config.get<boolean>("enableMcpServer", true);
 

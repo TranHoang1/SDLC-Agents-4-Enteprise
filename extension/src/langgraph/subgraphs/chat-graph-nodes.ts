@@ -130,7 +130,11 @@ export function createAgentStepNode(
     }
 
     if (llmProvider.chatWithTools && tools.length > 0) {
-      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, 10), sysPrompt);
+      // KSA-290: Pass all available tools to LLM (large models handle 50+ tools fine).
+      // For small models (context < 32k), limit to 15 most important tools.
+      const contextWindow = state.maxContextTokens || 0;
+      const toolLimit = contextWindow > 0 && contextWindow < 32000 ? 15 : tools.length;
+      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, toolLimit), sysPrompt);
     }
     return await agentStepStreaming(state, llmProvider, streamHandler, streamId, sysPrompt, tools);
   };

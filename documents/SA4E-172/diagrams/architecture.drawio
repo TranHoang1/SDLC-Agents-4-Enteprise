@@ -1,0 +1,91 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-172: DataTableResolver — Architecture Pipeline" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Trigger Layer -->
+    <mxCell id="n1" value="IndexingService&#xa;(Orchestrator)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="80" y="60" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="PegaProjectIndexer&#xa;(Crawl Pipeline)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="340" y="60" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="PegaBfsIndexer&#xa;(BFS Loop)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="600" y="60" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: New Component -->
+    <mxCell id="n4" value="DataTableResolver&#xa;(NEW — Post-Processing)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="340" y="200" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Shared Infrastructure -->
+    <mxCell id="n5" value="PegaHttpClient&#xa;(REST Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="130" y="360" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n6" value="PegaStreamIngester&#xa;(KB Ingest Client)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="380" y="360" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="File System&#xa;(rules/*.pega.json)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="650" y="360" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: External Systems -->
+    <mxCell id="n8" value="Pega Server&#xa;(REST API)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="130" y="510" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="KB Backend&#xa;(SQLite/PostgreSQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="380" y="510" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edges Row 1 -->
+    <mxCell id="e1" value="delegates" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="runs BFS" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edge: PegaProjectIndexer → DataTableResolver (after BFS) -->
+    <mxCell id="e3" value="after BFS&#xa;completes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n2" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edges: DataTableResolver → shared infra -->
+    <mxCell id="e4" value="getRuleByInsKey()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="ingestSingleRule()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n4" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="read class files&#xa;save rules" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n4" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Edges: Shared infra → External -->
+    <mxCell id="e7" value="HTTP GET /rules/{insKey}" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n5" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="POST /api/v1/pega/ingest-rule" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;fontSize=9;" edge="1" parent="1" source="n6" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- BFS also uses same infra (dashed to show shared) -->
+    <mxCell id="e9" value="shared" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;dashed=1;strokeColor=#999999;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="n3" target="n5">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="680" y="160"/>
+          <mxPoint x="240" y="160"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="leg1" value="Existing (unchanged)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="830" y="200" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value="NEW (SA4E-172)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="830" y="240" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value="External systems" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="830" y="280" width="130" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value="Data/Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="830" y="320" width="130" height="30" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

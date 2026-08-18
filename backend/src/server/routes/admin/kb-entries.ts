@@ -119,8 +119,8 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     if (permCheck instanceof Response) return permCheck;
     let entryId = c.req.param('id');
 
-    const { getIndexAdapter } = await import('../../../admin/db/core.js');
-    const indexAdapter = getIndexAdapter();
+    const { getDbAdapter } = await import('../../../admin/db/core.js');
+    const indexAdapter = getDbAdapter();
     const projectId = ctx.getRequestProjectId(c);
 
     // SA4E-171: legacy "pega:FQN" graph node ids → resolve to Pega symbol, enrich via CODE_ENRICHMENT
@@ -268,8 +268,8 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     const { summary, pseudoCode } = await c.req.json();
     if (!summary && !pseudoCode) return c.json({ error: 'At least summary or pseudoCode required' }, 400);
 
-    const { getIndexAdapter } = await import('../../../admin/db/core.js');
-    const indexAdapter = getIndexAdapter();
+    const { getDbAdapter } = await import('../../../admin/db/core.js');
+    const indexAdapter = getDbAdapter();
     const now = new Date().toISOString();
     await indexAdapter.runAsync(
       `UPDATE symbols SET summary = COALESCE(?, summary), pseudo_code = COALESCE(?, pseudo_code),
@@ -285,8 +285,8 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
 /** SA4E-171: Resolve a Pega rule FQN to its symbol id (rules live in symbols). */
 async function resolvePegaSymbolId(ctx: AdminContext, fqn: string): Promise<string | null> {
   try {
-    const { getIndexAdapter } = await import('../../../admin/db/core.js');
-    const adapter = getIndexAdapter();
+    const { getDbAdapter } = await import('../../../admin/db/core.js');
+    const adapter = getDbAdapter();
     const sym = await adapter.getAsync<{ id: number }>(
       `SELECT s.id FROM symbols s JOIN files f ON f.id = s.file_id
        WHERE s.signature = ? AND s.kind LIKE 'pega_%' LIMIT 1`,
@@ -309,8 +309,8 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
     try {
       const numId = parseInt(symbolId, 10);
       if (!isNaN(numId)) {
-        const { getIndexAdapter } = await import('../../../admin/db/core.js');
-        const indexAdapter = getIndexAdapter();
+        const { getDbAdapter } = await import('../../../admin/db/core.js');
+        const indexAdapter = getDbAdapter();
         const bodyRow = await indexAdapter.getAsync<{ embedding: Buffer | Uint8Array }>(
           'SELECT embedding FROM body_embeddings WHERE symbol_id = ? AND chunk_index = 0', [numId],
         );

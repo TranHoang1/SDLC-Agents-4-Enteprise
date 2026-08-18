@@ -1,12 +1,12 @@
 /**
  * admin/db/users.ts — User CRUD operations via DatabaseAdapter async methods.
- * SA4E-50: All functions are async and use getAdminAdapter() so they work with
+ * SA4E-50: All functions are async and use getDbAdapter() so they work with
  * both SQLite (sync-under-the-hood) and PostgreSQL.
  */
 
 import * as crypto from 'crypto';
 import type { User, UserStatus } from '../types/rbac.types.js';
-import { getAdminAdapter } from './core.js';
+import { getDbAdapter } from './core.js';
 import { hashPassword } from './password.js';
 import { invalidateUserSessions } from './sessions.js';
 
@@ -35,7 +35,7 @@ export async function getUsers(
   page = 1,
   pageSize = 50,
 ): Promise<{ items: any[]; total: number }> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   let where = 'WHERE 1=1';
   const params: unknown[] = [];
 
@@ -72,7 +72,7 @@ export async function getUsers(
  * @returns User or null if not found
  */
 export async function getUserById(userId: string): Promise<User | null> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const r = await adapter.getAsync<Record<string, unknown>>(
     'SELECT * FROM users WHERE user_id = ?', [userId],
   );
@@ -86,7 +86,7 @@ export async function getUserById(userId: string): Promise<User | null> {
 export async function getUserByUsername(
   username: string,
 ): Promise<(User & { passwordHash: string }) | null> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const r = await adapter.getAsync<Record<string, unknown>>(
     'SELECT * FROM users WHERE username = ?', [username],
   );
@@ -104,7 +104,7 @@ export async function createUser(
   password: string,
   accessGroupId: string,
 ): Promise<User> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const userId = 'user-' + crypto.randomUUID().slice(0, 8);
   const now = new Date().toISOString();
   const hash = hashPassword(password);
@@ -123,7 +123,7 @@ export async function createUser(
  * @returns Number of sessions terminated
  */
 export async function updateUserStatus(userId: string, status: UserStatus): Promise<number> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   await adapter.runAsync('UPDATE users SET status = ? WHERE user_id = ?', [status, userId]);
   if (status === 'DISABLED') {
     return invalidateUserSessions(userId);
@@ -136,7 +136,7 @@ export async function updateUserStatus(userId: string, status: UserStatus): Prom
  * @throws Error if user is admin or not found
  */
 export async function deleteUser(userId: string): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const user = await adapter.getAsync<{ username: string }>(
     'SELECT username FROM users WHERE user_id = ?', [userId],
   );
@@ -150,7 +150,7 @@ export async function deleteUser(userId: string): Promise<void> {
  * @returns Plain-text temporary password
  */
 export async function resetUserPassword(userId: string): Promise<string> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const tempPwd = crypto.randomBytes(6).toString('base64url');
   const hash = hashPassword(tempPwd);
   await adapter.runAsync(
@@ -164,7 +164,7 @@ export async function resetUserPassword(userId: string): Promise<string> {
  * Change a user's password and clear the force_password_change flag.
  */
 export async function changePassword(userId: string, newPassword: string): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const hash = hashPassword(newPassword);
   await adapter.runAsync(
     'UPDATE users SET password_hash = ?, force_password_change = 0 WHERE user_id = ?',
@@ -174,7 +174,7 @@ export async function changePassword(userId: string, newPassword: string): Promi
 
 /** Record the current timestamp as last_login for a user. */
 export async function updateLastLogin(userId: string): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   await adapter.runAsync(
     'UPDATE users SET last_login = ? WHERE user_id = ?',
     [new Date().toISOString(), userId],
@@ -183,7 +183,7 @@ export async function updateLastLogin(userId: string): Promise<void> {
 
 /** Update user email address. */
 export async function updateUserEmail(userId: string, email: string): Promise<void> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   await adapter.runAsync('UPDATE users SET email = ? WHERE user_id = ?', [email, userId]);
 }
 
@@ -195,7 +195,7 @@ export async function updateUser(
   userId: string,
   updates: { username?: string; email?: string; accessGroupId?: string }
 ): Promise<User> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
 
   // Validate username uniqueness if changing
   if (updates.username) {
@@ -234,7 +234,7 @@ export async function updateUser(
 
 /** Count total active users (used by dashboard stats). */
 export async function getUserCount(): Promise<number> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const row = await adapter.getAsync<{ cnt: number }>(
     "SELECT COUNT(*) as cnt FROM users WHERE status = 'ACTIVE'",
   );
@@ -243,7 +243,7 @@ export async function getUserCount(): Promise<number> {
 
 /** Count users belonging to a specific access group. */
 export async function getUserCountByGroup(groupId: string): Promise<number> {
-  const adapter = getAdminAdapter();
+  const adapter = getDbAdapter();
   const row = await adapter.getAsync<{ cnt: number }>(
     'SELECT COUNT(*) as cnt FROM users WHERE access_group_id = ?', [groupId],
   );

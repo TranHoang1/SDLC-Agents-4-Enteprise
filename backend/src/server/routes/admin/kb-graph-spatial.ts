@@ -1,6 +1,6 @@
 /**
  * KB Graph Spatial routes — 3D spatial queries for graph visualization.
- * SA4E-45: Uses getIndexAdapter() for multi-DB support.
+ * SA4E-45: Uses getDbAdapter() for multi-DB support.
  * SA4E-49: Counts use graph_nodes table (authoritative) instead of knowledge_entries/symbols.
  */
 

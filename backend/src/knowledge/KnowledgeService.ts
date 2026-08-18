@@ -96,25 +96,32 @@ export class KnowledgeService {
     const workspaceId = this.resolveWorkspaceId(ctx);
     let thread = await this.ownedThread(ctx, threadId);
     if (!thread) {
-      // LangGraph generates arbitrary thread_id UUIDs per run and persists via the
-      // checkpointer without a prior POST /threads — auto-create the thread if it
-      // genuinely does not exist (mock contract, IT-HYD-03). A thread owned by
-      // another workspace is NEVER created or written (SECURITY-REVIEW #18 → 404).
-      const existing = await this.db.getThread(threadId);
-      if (existing) return null;
+      // LangGraph fires put/putWrites concurrently for the SAME thread_id — two
+      // requests may both observe the thread absent and both attempt creation.
+      // ensureThread upserts (ON CONFLICT DO NOTHING) so exactly one wins; the
+      // loser reads the winner's row and re-uses it (SAME workspace → re-verify
+      // below succeeds, no 404). A thread owned by ANOTHER workspace is never
+      // inserted or overwritten by ensureThread, and the re-verify below rejects
+      // it with 404 (SECURITY-REVIEW #18). No pre-check: a same-workspace thread
+      // that appeared between ownedThread and here is NOT an error.
       if (!isUuidV4(threadId)) return null;
-      const now = new Date().toISOString();
-      thread = {
+      const { created } = await this.db.ensureThread({
         thread_id: threadId,
         workspace_id: workspaceId,
         title: 'Auto thread',
         agent_id: null,
         status: 'active',
-        created_at: now,
-        updated_at: now,
-      };
-      await this.db.createThread(thread);
-      await this.db.appendEvent(workspaceId, threadId, 'THREAD_CREATED', { title: thread.title, agent_id: null });
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+      // Re-verify ownership AFTER the upsert: the loser of the race reads the
+      // winner's row. If a concurrent request from another workspace won first,
+      // the thread is not ours → 404 (no write, no enumeration).
+      thread = await this.ownedThread(ctx, threadId);
+      if (!thread) return null;
+      if (created) {
+        await this.db.appendEvent(workspaceId, threadId, 'THREAD_CREATED', { title: thread.title, agent_id: null });
+      }
     }
     const checkpoint = await this.db.upsertCheckpoint(thread.workspace_id, threadId, input);
     const messages = input.messages ?? [];

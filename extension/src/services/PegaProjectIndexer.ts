@@ -11,6 +11,7 @@ import * as crypto from "crypto";
 import type { IndexerHttpClient } from "./IndexerHttpClient";
 import { fetchRulesInParallel, fetchRuleTypesInParallel, saveRuleFile, calibrateFetchConcurrency } from "./PegaCrawlHelper";
 import { enumerateAllRuleSets } from "./PegaRuleSetEnumerator";
+import { discoverAppClasses, fetchCategoryRules } from "./PegaAppClassDiscovery";
 import { summaryToCrawlItem } from "../models";
 import { setProjectId } from "../extension";
 
@@ -52,6 +53,11 @@ export class PegaProjectIndexer {
         report.report({ message: `Enumerating rules from ${hierarchy.ruleSets.length} RuleSets...` });
         const enumeratedMap = await enumerateAllRuleSets(hierarchy.ruleSets, pegaClient, this.log);
 
+        // SA4E-173: Discover additional classes from Application rule
+        report.report({ message: `Discovering classes from Application rule...` });
+        const appClasses = await discoverAppClasses(pegaClient, hierarchy, root, this.log);
+        this.log(`[Pega Indexer] 📋 App classes discovered: ${appClasses.length} (work + data)`);
+
         if (enumeratedMap.size === 0 && seeds.length > 0) {
             this.log(`[Pega Indexer] ⚠️ Enumeration 0 rules. Fallback to seeds.`);
             const plan = await pegaClient.crawlPlan({ projectId, ruleKeys: seeds, visitedKeys: [] });
@@ -60,6 +66,17 @@ export class PegaProjectIndexer {
                     pzInsKey: item.insKey, pxObjClass: item.pxObjClass,
                     pyClassName: item.pyClassName, pyRuleName: item.pyRuleName,
                     pyRuleSet: '', pyRuleSetVersion: '',
+                });
+            }
+        }
+
+        // SA4E-173: Merge discovered app classes into enumeratedMap
+        for (const classKey of appClasses) {
+            if (!enumeratedMap.has(classKey)) {
+                enumeratedMap.set(classKey, {
+                    pzInsKey: classKey, pxObjClass: 'Rule-Obj-Class',
+                    pyClassName: classKey.replace('RULE-OBJ-CLASS ', ''),
+                    pyRuleName: '', pyRuleSet: '', pyRuleSetVersion: '',
                 });
             }
         }
@@ -75,7 +92,31 @@ export class PegaProjectIndexer {
 
         const result = await this.ingestRules(fetchedRules, pegaClient, projectId, crawlSet);
         const rawName = appName || hierarchy.appName;
+
+        // SA4E-172: Resolve DataTable + Database rules from indexed class definitions
+        const dtResult = await this.resolveDataTables(pegaClient, projectId, root, report);
+        this.log(`[Pega Indexer] 📊 DataTable resolution: ${dtResult.dataTablesResolved} tables, ${dtResult.databasesResolved} databases`);
+
         return `🏛️ Pega: "pega:${rawName}" — Ingested ${fetchedRules.length} rules (KB: ${result.kb}, Graph: ${result.graph})`;
+    }
+
+    /**
+     * SA4E-172: Post-BFS step — resolve DataTable and Database rules.
+     * Uses dynamic import to avoid circular dependency.
+     */
+    private async resolveDataTables(
+        pegaClient: any, projectId: string, root: string, report: ProgressReporter,
+    ): Promise<{ dataTablesResolved: number; databasesResolved: number }> {
+        try {
+            const { DataTableResolver } = await import("./DataTableResolver");
+            const { PegaStreamIngester } = await import("./PegaStreamIngester");
+            const ingester = new PegaStreamIngester(pegaClient.getBackendUrlPublic());
+            const resolver = new DataTableResolver(pegaClient, ingester, this.log);
+            return await resolver.resolve(projectId, root, report);
+        } catch (err: any) {
+            this.log(`[Pega Indexer] ⚠️ DataTable resolution failed: ${err.message}`);
+            return { dataTablesResolved: 0, databasesResolved: 0 };
+        }
     }
 
     private async detectProject(root: string) {
@@ -189,7 +230,12 @@ export class PegaProjectIndexer {
                     if (className) {
                         const subs = await fetchRuleTypesInParallel(className, pegaClient, visitedKeys, this.log);
                         for (const sr of subs) { saveRuleFile(sr.rule, root, this.log, sr.ruleType); fetched.push(sr.rule); }
+                        // SA4E-173: Category-based rule discovery via directChildren
+                        const catRules = await fetchCategoryRules(className, pegaClient, visitedKeys, root, this.log);
+                        fetched.push(...catRules);
                     }
+                    // SA4E-172: Resolve DataTable + Database for this class inline
+                    await this.resolveDataTableForClass(ruleObj, pegaClient, root);
                 }
             }
         }
@@ -199,6 +245,78 @@ export class PegaProjectIndexer {
     private isClassRule(item: any, ruleObj: any): boolean {
         return item.pxObjClass === "Rule-OBJ-CLASS" || item.pxObjClass === "Rule-Obj-Class"
             || ruleObj.pxObjClass === "Rule-Obj-Class";
+    }
+
+    /**
+     * SA4E-172: Resolve DataTable + Database rule for a single class inline during fetch.
+     * SA4E-160: Also fetches full class hierarchy via D_pzInheritanceListofClass.
+     */
+    private async resolveDataTableForClass(
+        classJson: Record<string, unknown>, pegaClient: any, root: string,
+    ): Promise<void> {
+        try {
+            const { computeDataTableKey, computeDatabaseKey, isCriticalError } = await import("./DataTableKeyComputer");
+            const className = String(classJson.pyClassName || "");
+            const classRule = {
+                pzInsKey: String(classJson.pzInsKey || ""),
+                pyClassName: className,
+                pyClassType: String(classJson.pyClassType || ""),
+                pyClassGroupIndicator: String(classJson.pyClassGroupIndicator || ""),
+                pyClassGroup: classJson.pyClassGroup ? String(classJson.pyClassGroup) : undefined,
+            };
+
+            // SA4E-160: Fetch full class hierarchy via D_pzInheritanceListofClass
+            if (className) {
+                try {
+                    const parents = await pegaClient.fetchClassHierarchy(className);
+                    if (parents.length > 0) {
+                        this.log(`[PegaHierarchy] 🔗 Class "${className}" hierarchy: [${parents.join(" → ")}]`);
+                        for (const parentName of parents) {
+                            const parentInsKey = `RULE-OBJ-CLASS ${parentName.toUpperCase()}`;
+                            try {
+                                const parentRule = await pegaClient.getRuleByInsKey(parentInsKey);
+                                saveRuleFile(parentRule, root, this.log, "Rule-Obj-Class");
+                                this.log(`[PegaHierarchy] ✅ Parent class downloaded: ${parentName}`);
+                            } catch {
+                                this.log(`[PegaHierarchy] ⚠️ Parent class "${parentName}" not fetchable. Skipping.`);
+                            }
+                        }
+                    }
+                } catch (hierErr: any) {
+                    this.log(`[PegaHierarchy] ⚠️ D_pzInheritanceListofClass failed for "${className}": ${hierErr.message}`);
+                }
+            }
+
+            // SA4E-172: Resolve DataTable + Database
+            const dtKey = computeDataTableKey(classRule);
+            if (!dtKey) { return; } // Abstract or unknown indicator
+
+            // Fetch DataTable rule
+            try {
+                const dtRule = await pegaClient.getRuleByInsKey(dtKey);
+                saveRuleFile(dtRule, root, this.log, "Data-Admin-DB-Table");
+                this.log(`[DataTableResolver] ✅ DataTable fetched: ${dtKey}`);
+
+                // Fetch Database rule from DataTable
+                const dbName = dtRule.pyDatabaseName ? String(dtRule.pyDatabaseName) : "";
+                const dbKey = computeDatabaseKey(dbName);
+                if (dbKey) {
+                    try {
+                        const dbRule = await pegaClient.getRuleByInsKey(dbKey);
+                        saveRuleFile(dbRule, root, this.log, "Data-Admin-DB-Name");
+                        this.log(`[DataTableResolver] ✅ Database fetched: ${dbKey}`);
+                    } catch (dbErr: any) {
+                        if (isCriticalError(dbErr)) { throw dbErr; }
+                        this.log(`[DataTableResolver] ⚠️ Database not found: ${dbKey}. Skipping.`);
+                    }
+                }
+            } catch (dtErr: any) {
+                if (isCriticalError(dtErr)) { throw dtErr; }
+                this.log(`[DataTableResolver] ⚠️ DataTable not found: ${dtKey}. Skipping.`);
+            }
+        } catch (err: any) {
+            this.log(`[DataTableResolver] ⚠️ Error resolving DataTable for class: ${err.message}`);
+        }
     }
 
     private async ingestRules(

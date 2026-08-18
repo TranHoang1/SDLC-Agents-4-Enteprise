@@ -1,4 +1,4 @@
-﻿/** Indexing Engine — Full scan and incremental indexing. KSA-145. SA4E-53: async. SA4E-78: decoupled. */
+/** Indexing Engine — Full scan and incremental indexing. KSA-145. SA4E-53: async. SA4E-78: decoupled. */
 
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../database/dialect/DialectHelper.js';
@@ -22,7 +22,7 @@ import { FileWatcher } from './file-watcher.js';
 import { IndexScope, resolveScope } from './index-scope.js';
 import { GraphSyncService } from '../graph/graph-sync-service.js';
 import { GraphRepository as AdminGraphRepository } from '../../database/repositories/GraphRepository.js';
-import { getAdminAdapter } from '../../admin/db/core.js';
+import { getDbAdapter } from '../../admin/db/core.js';
 import type { IndexResult } from '../parsers/types.js';
 import type { ProgressPhase } from './types.js';
 import { CodeEnrichmentTaskCreator } from '../enrichment/CodeEnrichmentTaskCreator.js';
@@ -175,7 +175,7 @@ export class IndexingEngine {
   /** Register workspace in project_registry so admin dropdown shows it (non-fatal). */
   private registerWorkspace(projectId: string, workspace: string): void {
     try {
-      const repo = new AdminGraphRepository(getAdminAdapter());
+      const repo = new AdminGraphRepository(getDbAdapter());
       repo.registerProject(projectId, path.basename(workspace), workspace);
     } catch (err) {
       logger.warn({ err }, '[indexer] project_registry upsert skipped (non-fatal)');

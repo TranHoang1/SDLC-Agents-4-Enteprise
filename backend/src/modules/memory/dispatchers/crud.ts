@@ -17,7 +17,7 @@ import { createSupersessionChain } from './supersession.js';
 import { PendingTaskRepository } from '../task-queue/PendingTaskRepository.js';
 import { TaskType } from '../task-queue/models.js';
 import { GraphRepository } from '../../../database/repositories/GraphRepository.js';
-import { getAdminAdapter } from '../../../admin/db/core.js';
+import { getDbAdapter } from '../../../admin/db/core.js';
 import { computePositionByIndex } from '../../kb-graph/service/nodes.js';
 import { EpochService } from '../evolution/EpochService.js';
 import pino from 'pino';
@@ -30,7 +30,7 @@ type Args = Record<string, unknown>;
 /** Upsert a KB entry as a graph node (non-fatal — graph viz is secondary). */
 async function upsertGraphNode(entryId: number, summary: string, type: string, projectId: string | null): Promise<void> {
   try {
-    const graphRepo = new GraphRepository(getAdminAdapter());
+    const graphRepo = new GraphRepository(getDbAdapter());
     const nodeCount = await graphRepo.getNodeCounts(projectId || '');
     const pos = computePositionByIndex(nodeCount.total, nodeCount.total + 1, type, 0, 1);
     await graphRepo.upsertNode({
@@ -191,7 +191,7 @@ export async function handleIngestFile(
     const { clause, params } = buildIngestFileDeleteClause(scopeCtx as ProjectContext, filePath);
     // Delete stale graph nodes before removing KB entries (while IDs still exist)
     try {
-      const adminAdapter = getAdminAdapter();
+      const adminAdapter = getDbAdapter();
       const oldIds = await engine.getAdapter().allAsync<{ id: number }>(
         'SELECT id FROM knowledge_entries WHERE source = $1 AND project_id = $2',
         [filePath, (scopeCtx as any).projectId ?? ''],
@@ -205,7 +205,7 @@ export async function handleIngestFile(
   } else {
     // Delete stale graph nodes before removing KB entries (while IDs still exist)
     try {
-      const adminAdapter = getAdminAdapter();
+      const adminAdapter = getDbAdapter();
       const oldIds = await engine.getAdapter().allAsync<{ id: number }>(
         'SELECT id FROM knowledge_entries WHERE source = $1',
         [filePath],
