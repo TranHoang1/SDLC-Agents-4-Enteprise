@@ -97,14 +97,18 @@ export class PostgresAdapter implements DatabaseAdapter {
     if (isInsert && !hasReturning) {
       const withReturning = translated + ' RETURNING id';
       if (inTransaction) {
-        // Inside transaction: attempt RETURNING id — if table has no 'id' column,
-        // suppress that specific error and retry without RETURNING on same client.
-        // PostgreSQL aborts tx on error, BUT "column does not exist" is a planning error
-        // that does NOT actually abort the transaction in all PG versions.
-        // If it does abort: the error propagates → transactionAsync() ROLLBACK is correct.
-        const r = await queryFn(withReturning, params);
-        const insertedId = r.rows?.[0]?.id ?? 0;
-        return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
+        try {
+          const r = await queryFn(withReturning, params);
+          const insertedId = r.rows?.[0]?.id ?? 0;
+          return { changes: r.rowCount ?? 0, lastInsertRowid: insertedId };
+        } catch (err: any) {
+          if (err?.code === '42703') {
+            // Table has no 'id' column — retry without RETURNING on same tx client
+            const r = await queryFn(translated, params);
+            return { changes: r.rowCount ?? 0, lastInsertRowid: 0 };
+          }
+          throw err;
+        }
       }
       // Outside transaction: attempt RETURNING id with dedicated client fallback.
       // BUG FIX: pool.query() uses implicit transaction — if RETURNING id fails,
