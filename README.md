@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.28.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.30.0.vsix
 ```
 
 ### 3. Use
@@ -66,7 +66,7 @@ MIT
 
 ## Changelog
 
-### v1.28.0 (2026-08-18)
+### v1.30.0 (2026-08-18)
 
 - **SA4E-174: Simplify LangGraph Chat Agent Loop** — Remove verify node for large models, remove aggressive tool nudge, reduce max iterations 25→12, inject all MCP tools (not just 10), add auto-compact at 95% context usage. Chat agent now behaves like OpenCode — LLM decides when to use tools.
 - **KSA-290: Collapsible Tool Call Groups in Chat UI** — Tool calls grouped into collapsible containers with summary header (category counts + status dots). Auto-collapses after 3+ calls.
