@@ -17,6 +17,7 @@ import type {
 import { SlashMenuView } from './SlashMenuView';
 import {
   SLASH_AGENTS,
+  SLASH_COMMANDS,
   agentsToMenuItems,
   steeringToMenuItems,
   parseSteeringRules,
@@ -57,7 +58,7 @@ export class SlashMenuController {
   constructor(options: SlashMenuOptions) {
     this.options = options;
     this.view = new SlashMenuView(options.container);
-    this.agentItems = agentsToMenuItems(SLASH_AGENTS);
+    this.agentItems = [...agentsToMenuItems(SLASH_AGENTS), ...SLASH_COMMANDS];
     this.visibleAgents = [...this.agentItems];
     this.setupAnnouncer();
   }
@@ -226,6 +227,13 @@ export class SlashMenuController {
         this.options.onSteeringSelect(rule);
         this.announce(`Steering rule attached: ${item.label}`);
       }
+    } else if (item.itemType === 'command') {
+      this.transition('AGENT_SELECTED');
+      this.view.destroy();
+      if (this.options.onCommandSelect) {
+        this.options.onCommandSelect(item.id.replace('command-', ''));
+      }
+      this.announce(`Command executed: ${item.label}`);
     }
     this.filterText = '';
     this.triggerIndex = -1;

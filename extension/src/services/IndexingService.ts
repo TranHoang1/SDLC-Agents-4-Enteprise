@@ -23,6 +23,8 @@ export class IndexingService {
     refreshTokenFn?: () => Promise<string | undefined>;
     /** Concurrency guard — prevents overlapping indexing operations. */
     private isProcessing = false;
+    /** Current auth token — captured from indexWorkspace args (AuthManager/SecretStorage). */
+    private token?: string;
 
     constructor(
         private readonly httpClient: IndexerHttpClient,
@@ -72,6 +74,7 @@ export class IndexingService {
             return ["⚠️ Aborted — indexing already in progress"];
         }
         this.isProcessing = true;
+        this.token = token;
         const results: string[] = [];
 
         try {
@@ -175,27 +178,28 @@ export class IndexingService {
     private pollTaskWorkerProgress(): void {
         const backendUrl = this.httpClient.getBaseUrl();
         if (!backendUrl) return;
+        const headersOf = (current: string | undefined): Record<string, string> =>
+            current ? { "Authorization": `Bearer ${current}` } : {};
         const poll = async () => {
             try {
-                const res = await fetch(`${backendUrl}/api/admin/taskworker/progress`, {
-                    headers: { "Authorization": `Bearer ${this.getToken()}` },
-                });
+                let token = this.token;
+                let res = await fetch(`${backendUrl}/api/admin/taskworker/progress`, { headers: headersOf(token) });
+                if (res.status === 401 && this.refreshTokenFn) {
+                    const fresh = await this.refreshTokenFn();
+                    if (fresh) { token = fresh; res = await fetch(`${backendUrl}/api/admin/taskworker/progress`, { headers: headersOf(token) }); }
+                }
                 if (!res.ok) { this.hideProgress(); return; }
-                const data = await res.json() as { active: boolean; phase?: string; file?: string; current?: number; total?: number; percent?: number };
+                const data = await res.json() as { active: boolean; file?: string; current?: number; total?: number; percent?: number };
                 if (!data.active) { this.hideProgress(); return; }
                 const fileName = data.file ? data.file.split('/').pop() || data.file : '';
-                const pct = data.percent ?? 0;
-                this.showProgress(`Analyzing ${fileName} (${data.current}/${data.total} — ${pct}%)`);
+                const detail = (typeof data.current === 'number' && typeof data.total === 'number')
+                    ? ` (${data.current}/${data.total} — ${data.percent ?? 0}%)`
+                    : '';
+                this.showProgress(`Analyzing ${fileName}${detail}`);
                 setTimeout(poll, 3000);
             } catch { this.hideProgress(); }
         };
         setTimeout(poll, 2000);
-    }
-
-    /** Get auth token from storage (best-effort). */
-    private getToken(): string {
-        try { return vscode.workspace.getConfiguration("kiroSdlc").get<string>("authToken") || ""; }
-        catch { return ""; }
     }
 
     /** Delegate to PegaSchemaIndexer — batch generate all RuleForm schemas. */

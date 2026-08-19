@@ -62,6 +62,42 @@ export class LangGraphEngine {
     this.llmProvider = provider;
     this.graph = null;
   }
+
+  /**
+   * SA4E-182: Get detected context window from the LLM provider.
+   * Returns 0 if provider not set or context window unknown.
+   * Call after ensureGraph() has run (which triggers detectContextWindow).
+   */
+  getDetectedContextWindow(): number {
+    return this.llmProvider?.getContextWindow?.() || 0;
+  }
+
+  /**
+   * SA4E-182: Trigger early context window detection without building the full graph.
+   * Called at panel ready time to get accurate maxTokens before first invoke.
+   * Fast: single HTTP call to /v1/models (local) or no-op (cloud).
+   */
+  async detectContextWindowEarly(): Promise<void> {
+    if (this.llmProvider && (this.llmProvider as any).detectContextWindow) {
+      try { await (this.llmProvider as any).detectContextWindow(); }
+      catch { /* non-fatal — will retry in ensureGraph */ }
+    }
+  }
+
+  /**
+   * SA4E-182: List available MCP + VS Code tools for token counting.
+   * Returns tool definitions array (cached by ToolRegistry after first fetch).
+   * Non-blocking: returns empty array if MCP unavailable.
+   */
+  async listAvailableTools(): Promise<Array<{ name: string; description: string; inputSchema: Record<string, unknown> }>> {
+    try {
+      const tools = await this.mcpBridge.listTools();
+      const { VSCODE_TOOL_DEFINITIONS } = await import("../vscode/vscode-tool-definitions");
+      return [...VSCODE_TOOL_DEFINITIONS, ...tools];
+    } catch {
+      return [];
+    }
+  }
   /**
    * Sandboxed Hot-Swap: validate and apply a live pipeline spec mutation.
    * Re-runs PipelineExtractor on current agent .md files with LLM,
@@ -145,6 +181,10 @@ export class LangGraphEngine {
   private async ensureGraph(): Promise<CompiledGraph> {
     if (!this.graph) {
       if (this.llmProvider) {
+        // SA4E-182: Detect actual context window from model server before building graph
+        if ((this.llmProvider as any).detectContextWindow) {
+          try { await (this.llmProvider as any).detectContextWindow(); } catch { /* non-fatal */ }
+        }
         // LLM-based pipeline extraction is best-effort: if it fails (LLM
         // timeout, malformed JSON, provider offline), fall back to the
         // static agent registry phases instead of crashing the engine.

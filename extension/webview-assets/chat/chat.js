@@ -65,7 +65,7 @@
   // === Context Usage Icon Logic (KSA-240) ===
   var ARC_CIRCUMFERENCE = 50.27; // 2*PI*8
 
-  function updateContextIcon(tokenCount, maxTokens) {
+  function updateContextIcon(tokenCount, maxTokens, breakdown) {
     if (maxTokens <= 0) return;
     var pct = Math.min(100, Math.round((tokenCount / maxTokens) * 100));
     var offset = ARC_CIRCUMFERENCE - (ARC_CIRCUMFERENCE * pct / 100);
@@ -84,9 +84,16 @@
     // Update color class
     arcEl.className.baseVal = "arc-progress " + threshold;
 
-    // Tooltip
-    var formatted = tokenCount.toLocaleString() + " / " + maxTokens.toLocaleString() + " tokens (" + pct + "%)";
-    contextTooltip.textContent = formatted;
+    // Tooltip — Kiro-style breakdown
+    if (breakdown) {
+      contextTooltip.innerHTML =
+        '<div style="font-weight:600;margin-bottom:4px;">Context Usage<span style="float:right">' + pct + '%</span></div>' +
+        '<div>Conversation<span style="float:right">' + (breakdown.conversation || 0) + '%</span></div>' +
+        '<div>MCP tools<span style="float:right">' + (breakdown.mcpTools || 0) + '%</span></div>' +
+        '<div>Steering files<span style="float:right">' + (breakdown.steering || 0) + '%</span></div>';
+    } else {
+      contextTooltip.textContent = tokenCount.toLocaleString() + " / " + maxTokens.toLocaleString() + " tokens (" + pct + "%)";
+    }
 
     // Pulse animation when crossing 80% boundary
     if (threshold === "critical" && lastThreshold !== "critical" && lastThreshold !== "full") {
@@ -172,7 +179,7 @@
 
     if (tab) {
       // Update context icon for this tab
-      updateContextIcon(tab.tokenCount, tab.maxTokens);
+      updateContextIcon(tab.tokenCount, tab.maxTokens, tab.breakdown);
       lastThreshold = "safe"; // Reset to avoid false pulse
     }
     renderTabBar();
@@ -818,6 +825,7 @@
         handleTabsUpdated(msg.payload);
         break;
       case "tab:contextUpdate":
+        console.log("[chat.js] tab:contextUpdate received:", JSON.stringify(msg.payload));
         handleContextUpdate(msg.payload);
         break;
       case "chat:steeringLoaded":
@@ -1749,15 +1757,15 @@
   function handleContextUpdate(payload) {
     if (!payload) return;
     // Update local tab data
-    var tab = getTab(payload.tabId);
+    var targetTabId = payload.tabId || activeTabId;
+    var tab = getTab(targetTabId);
+    if (!tab) tab = getTab(activeTabId);
     if (tab) {
       tab.tokenCount = payload.tokenCount;
       tab.maxTokens = payload.maxTokens;
     }
-    // Only update icon if this is the active tab
-    if (payload.tabId === activeTabId) {
-      updateContextIcon(payload.tokenCount, payload.maxTokens);
-    }
+    // Always update icon for active tab when data arrives
+    updateContextIcon(payload.tokenCount, payload.maxTokens, payload.breakdown);
   }
 
   // === State Persistence (KSA-240) ===

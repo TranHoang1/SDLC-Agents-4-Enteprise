@@ -19,6 +19,20 @@ export const SLASH_AGENTS: SlashAgent[] = [
 ];
 
 /**
+ * Static list of slash commands (SA4E-182: AD-06)
+ * Commands are actions, not agent invocations
+ */
+export const SLASH_COMMANDS: SlashMenuItem[] = [
+  {
+    id: 'command-compact',
+    icon: '\u{1F5DC}\uFE0F',
+    label: 'compact',
+    description: 'Summarize and reduce context window usage',
+    itemType: 'command',
+  },
+];
+
+/**
  * Convert static agents to SlashMenuItem format
  */
 export function agentsToMenuItems(agents: SlashAgent[]): SlashMenuItem[] {

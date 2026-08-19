@@ -60,7 +60,10 @@ export type ExtensionMessageType =
   | 'SYNC_AVAILABLE_AGENTS'
   | 'IPC_STATUS'
   | 'CONTEXT_UPDATE'
-  | 'SYNC_CHAT_HISTORY';
+  | 'SYNC_CHAT_HISTORY'
+  | 'COMPACT_START'
+  | 'COMPACT_COMPLETE'
+  | 'COMPACT_ERROR';
 
 /** A hydrated chat message from Backend KB history (SYNC_CHAT_HISTORY). */
 export interface HydratedMessagePayload {
@@ -92,7 +95,10 @@ export type ExtensionMessage =
   | { type: 'SYNC_AVAILABLE_AGENTS'; agents: AgentMeta[] }
   | { type: 'IPC_STATUS'; service: string; status: ServiceStatus; endpoint?: string }
   | { type: 'CONTEXT_UPDATE'; tokenCount: number; maxTokens: number; files: ContextFile[] }
-  | { type: 'SYNC_CHAT_HISTORY'; threadId: string; messages: HydratedMessagePayload[]; context: HydrationContext };
+  | { type: 'SYNC_CHAT_HISTORY'; threadId: string; messages: HydratedMessagePayload[]; context: HydrationContext }
+  | { type: 'COMPACT_START'; trigger: 'manual' | 'auto'; currentUsagePercent: number }
+  | { type: 'COMPACT_COMPLETE'; method: 'summary' | 'truncation'; beforeUsagePercent: number; afterUsagePercent: number; summary: string }
+  | { type: 'COMPACT_ERROR'; error: string; fallbackApplied: boolean };
 
 // --- Webview → Extension Host Messages ---
 
