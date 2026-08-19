@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.30.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.30.1.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,14 @@ MIT
 ---
 
 ## Changelog
+
+### v1.30.1 (2026-08-19)
+
+- **SA4E-175: KB Offline resilience** — graceful fallback + user notification when MCP server unreachable
+- **SA4E-176: Auth gate signaling** — explicit GRANTED/DENIED in preToolUse hook response, prevents infinite retry loops
+- **SA4E-178: Orphan task cleanup** — cascade cancellation of child tasks when parent job terminates
+- **SA4E-179: CODE_ENRICHMENT rename** — updated all references to new constant name across codebase
+- **Index Jira Project in QuickPick** — added missing "Index Jira Project" option to workspace indexer UI
 
 ### v1.30.0 (2026-08-18)
 

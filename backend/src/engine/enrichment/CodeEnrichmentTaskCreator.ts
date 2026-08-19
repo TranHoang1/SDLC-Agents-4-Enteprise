@@ -243,10 +243,11 @@ export class CodeEnrichmentTaskCreator {
       workspaceType: isPegaKind(kind) ? 'pega' : 'standard',
     });
 
+    const now = new Date().toISOString();
     await this.adapter.runAsync(
-      `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, created_at)
-       VALUES (?, ?, ?, ?, ?, ${this.dialect.now()})`,
-      [TaskType.CODE_ENRICHMENT, symbolId, TaskStatus.PENDING, payload, 3],
+      `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, project_id, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [TaskType.CODE_ENRICHMENT, symbolId, TaskStatus.PENDING, payload, 3, projectId, now],
     );
   }
 }

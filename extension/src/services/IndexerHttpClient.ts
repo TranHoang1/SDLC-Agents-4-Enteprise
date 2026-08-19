@@ -404,7 +404,7 @@ export class IndexerHttpClient {
         if (token) { headers["Authorization"] = `Bearer ${token}`; }
         const { getProjectId } = await import("../extension");
         const pid = getProjectId();
-        if (pid && pid !== "default") { headers["X-Project-Id"] = pid; }
+        if (pid) { headers["X-Project-Id"] = pid; }
         // Send workspace root so server registers correct display_name
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (workspaceFolders && workspaceFolders.length > 0) {
@@ -421,10 +421,35 @@ export class IndexerHttpClient {
         try { return JSON.parse(body); } catch { return { message: body || "Pega rules synced" }; }
     }
 
-    /** SA4E-99: Get enrichment status (GET /api/enrichment/status). */
+    /** SA4E-99: Get enrichment status (GET /api/v1/enrichment/status). */
     async getEnrichmentStatus(token?: string): Promise<{ ok: boolean; body: string }> {
-        const url = `${this.backendUrl}/api/enrichment/status`;
-        return this.httpPostJson(url, {}, token);
+        const url = `${this.backendUrl}/api/v1/enrichment/status`;
+        return this.httpGet(url, token);
+    }
+
+    /** GET request returning raw body + ok status. */
+    private async httpGet(url: string, token: string | undefined): Promise<{ ok: boolean; body: string }> {
+        const headers = await this.buildHeaders(token);
+        try {
+            const parsedUrl = new URL(url);
+            const http = await import("http");
+            return new Promise((resolve) => {
+                const req = http.default.request(
+                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname + parsedUrl.search, method: "GET", headers },
+                    (res) => {
+                        let data = "";
+                        res.on("data", (chunk: any) => { data += chunk; });
+                        res.on("end", () => resolve({ ok: res.statusCode === 200, body: data }));
+                    }
+                );
+                req.on("error", () => resolve({ ok: false, body: "" }));
+                req.setTimeout(10000, () => { req.destroy(); resolve({ ok: false, body: '{"error":"timeout"}' }); });
+                req.end();
+            });
+        } catch (err) {
+            console.debug(`[IndexerHttpClient] httpGet failed (non-fatal): ${(err as Error).message}`);
+            return { ok: false, body: "" };
+        }
     }
 }
 

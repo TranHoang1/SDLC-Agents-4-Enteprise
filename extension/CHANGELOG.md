@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.30.1] - 2026-08-19
+
+### Fixed
+- **SA4E-175: KB Offline resilience** — graceful fallback + user notification when MCP server unreachable
+- **SA4E-176: Auth gate signaling** — explicit GRANTED/DENIED in preToolUse hook response, prevents infinite retry loops
+- **SA4E-178: Orphan task cleanup** — cascade cancellation of child tasks when parent job terminates
+- **SA4E-179: CODE_ENRICHMENT rename** — updated all references to new constant name across codebase
+
+### Added
+- **Index Jira Project in QuickPick** — added "Index Jira Project" option to workspace indexer command picker (was missing from UI despite backend support being ready)
+
 ## [1.23.0] - 2026-08-09
 
 ### Added

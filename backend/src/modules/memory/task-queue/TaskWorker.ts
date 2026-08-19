@@ -20,7 +20,7 @@ import type { ContextChainInput, StructuredMapData } from '../llm/types.js';
 import { safeParseStructuredMap } from '../llm/types.js';
 
 /** SA4E-99: System prompt for code symbol summary + pseudo code generation. */
-const CODE_SUMMARY_SYSTEM_PROMPT = `You are a code documentation generator. Given a code symbol (function, class, method), produce a concise summary and pseudo code.
+const CODE_ENRICHMENT_SYSTEM_PROMPT = `You are a code documentation generator. Given a code symbol (function, class, method), produce a concise summary and pseudo code.
 
 ## Output Format
 Return ONLY valid JSON (no markdown, no code fences):
@@ -182,10 +182,15 @@ export class TaskWorker {
       this.consecutiveEmpty = 0;
       this.processing = true;
       // Run all claimed tasks concurrently — keeps GPU busy between token batches
+      const batchStart = Date.now();
       await Promise.allSettled(tasks.map(task => this.processTask(task)));
+      const batchDuration = Date.now() - batchStart;
       this.processing = false;
       if (!this.running) { this.finishShutdown(); return; }
-      this.schedulePoll(this.config.baseInterval);
+      // Fast-path: if batch completed in <500ms (skipped/cached), poll immediately
+      // This avoids wasting 2s delay between already-enriched entries
+      const delay = batchDuration < 500 ? 0 : this.config.baseInterval;
+      this.schedulePoll(delay);
     } catch (err) {
       this.processing = false;
       this.logger.error({ err }, 'Poll cycle error');
@@ -201,8 +206,8 @@ export class TaskWorker {
 
   private async processTask(task: PendingTask): Promise<void> {
     try {
-      // CODE_SUMMARY tasks don't use knowledge_entries — they use graph_nodes directly
-      if (task.task_type === TaskType.CODE_SUMMARY) {
+      // CODE_ENRICHMENT tasks use symbols table, not knowledge_entries
+      if (task.task_type === TaskType.CODE_ENRICHMENT) {
         let payload: any;
         try { payload = JSON.parse(task.payload); }
         catch { this.repo.markFailed(task.id, 'invalid_json_payload'); return; }
@@ -443,7 +448,7 @@ export class TaskWorker {
       const timeoutMs = this.config.llmTimeout ?? 30000;
       const response = await Promise.race([
         this.llmService.complete([
-          { role: 'system', content: CODE_SUMMARY_SYSTEM_PROMPT },
+          { role: 'system', content: CODE_ENRICHMENT_SYSTEM_PROMPT },
           { role: 'user', content: prompt },
         ]),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
@@ -461,7 +466,7 @@ export class TaskWorker {
 
       // Store full summary + pseudo code in graph node metadata (JSON in cluster_id or separate)
       // For now, store in body_embeddings metadata or a simple update to level field
-      // TODO: Consider a dedicated column for code_summary in graph_nodes
+      // TODO: Consider a dedicated column for code_enrichment in graph_nodes
       this.logger.debug({ symbol_id, name, component: 'TaskWorker' },
         'Code summary generated and propagated');
     } catch (err) {

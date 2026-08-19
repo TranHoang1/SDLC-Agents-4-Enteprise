@@ -43,4 +43,6 @@ export async function migrate003PendingTasks(db: DatabaseAdapter): Promise<void>
   `);
   try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_pending_tasks_status_created ON pending_tasks(status, created_at)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
   try { await db.execAsync(`CREATE INDEX IF NOT EXISTS idx_pending_tasks_entry_id ON pending_tasks(entry_id)`); } catch (err) { console.debug('[migration] DDL statement failed (expected if already applied):', (err as Error).message); }
+  // Rename legacy CODE_SUMMARY → CODE_ENRICHMENT (idempotent)
+  try { await db.execAsync(`UPDATE pending_tasks SET task_type = 'CODE_ENRICHMENT' WHERE task_type = 'CODE_SUMMARY'`); } catch (err) { console.debug('[migration] CODE_SUMMARY rename failed (non-fatal):', (err as Error).message); }
 }

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.30.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.30.1-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -242,6 +242,14 @@ MIT
 ---
 
 ## Changelog
+
+### v1.30.1 (2026-08-19)
+
+- **SA4E-175: KB Offline resilience** — graceful fallback when MCP server unreachable
+- **SA4E-176: Auth gate signaling** — explicit GRANTED/DENIED in hook response
+- **SA4E-178: Orphan task cleanup** — cascade cancellation of child tasks
+- **SA4E-179: CODE_ENRICHMENT rename** — all references updated
+- **Index Jira Project in QuickPick** — added missing option to indexer UI
 
 ### v1.26.0 (2026-08-14)
 

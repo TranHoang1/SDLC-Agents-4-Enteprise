@@ -16,6 +16,7 @@ import { PegaMcpTools } from "./mcp/PegaMcpTools";
 import { registerPegaLocalTools } from "./mcp/pega-local-tools";
 import { AtlassianCredentialService } from "./services/AtlassianCredentialService";
 import { registerAtlassianLocalTools } from "./mcp/atlassian/index";
+import { registerDevtoolsTools } from "./mcp/devtools-bridge";
 
 /** Health check timeout in milliseconds */
 const HEALTH_TIMEOUT_MS = 5000;
@@ -65,6 +66,10 @@ export class RemoteBackendClient implements vscode.Disposable {
       } catch (err) {
         console.warn(`[RemoteBackendClient] Atlassian tools registration failed: ${(err as Error).message}`);
       }
+      // Register Chrome DevTools MCP tools (in-process, lazy browser init)
+      registerDevtoolsTools().catch((err) => {
+        console.warn(`[RemoteBackendClient] DevTools tools registration failed: ${(err as Error).message}`);
+      });
     }
   }
 
