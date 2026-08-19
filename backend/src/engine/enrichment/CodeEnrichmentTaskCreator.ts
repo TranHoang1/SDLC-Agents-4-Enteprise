@@ -7,6 +7,7 @@
 
 import type { Logger } from 'pino';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
+import { DialectHelper } from '../../database/dialect/DialectHelper.js';
 import { TaskType, TaskStatus } from '../../modules/memory/task-queue/models.js';
 import { isPegaKind } from '../../modules/pega/pega-mapping.js';
 
@@ -21,10 +22,13 @@ const ENRICHABLE_KINDS = new Set([
  * Injected into IndexingEngine, called after storeResults().
  */
 export class CodeEnrichmentTaskCreator {
+  private readonly dialect: DialectHelper;
   constructor(
     private readonly adapter: DatabaseAdapter,
     private readonly logger: Logger,
-  ) {}
+  ) {
+    this.dialect = new DialectHelper(adapter.getEngine());
+  }
 
   /**
    * Create enrichment tasks for symbols that haven't been enriched yet.
@@ -197,7 +201,7 @@ export class CodeEnrichmentTaskCreator {
            pseudo_code = COALESCE(?, pseudo_code),
            llm_tags = ?,
            enrichment_status = 'COMPLETED',
-           enriched_at = datetime('now')
+           enriched_at = ${this.dialect.now()}
          WHERE file_id = ? AND name = ? AND kind = ?
            AND (enrichment_status IS NULL OR enrichment_status != 'COMPLETED')`,
         [src.summary, src.pseudo_code, src.llm_tags, targetFileId, src.name, src.kind],
@@ -241,7 +245,7 @@ export class CodeEnrichmentTaskCreator {
 
     await this.adapter.runAsync(
       `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, created_at)
-       VALUES (?, ?, ?, ?, ?, datetime('now'))`,
+       VALUES (?, ?, ?, ?, ?, ${this.dialect.now()})`,
       [TaskType.CODE_ENRICHMENT, symbolId, TaskStatus.PENDING, payload, 3],
     );
   }

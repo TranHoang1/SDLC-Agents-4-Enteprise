@@ -116,6 +116,7 @@ export function createConfigRoutes(ctx: AdminContext): Hono {
     anthropic: 'claude-sonnet-4',
     openrouter: 'openai/gpt-4o-mini',
     lmstudio: 'local-model',
+    'llm-server': 'bocalan/Qwen2.5-Coder-3B-Instruct-Q4_K_M-GGUF',
     gemini: 'gemini-2.0-flash',
     copilot: 'copilot',
     opencode: 'deepseek-v4-flash',

@@ -9,6 +9,7 @@
 import type { Context } from 'hono';
 import type { Logger } from 'pino';
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
 import type { CodeIntelModule } from '../../modules/code-intel/CodeIntelModule.js';
@@ -44,8 +45,8 @@ function resolveScope(c: Context, sessionUserId?: string) {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
   const userId = sessionUserId || 'default';
-  // indexTempDir/{userId}/{projectId} for source file writes
-  const workspace = path.join(config.indexTempDir, userId, projectId);
+  const kiroTempDir = process.env.KIRO_TEMP_DIR || path.join(os.tmpdir(), 'kiro');
+  const workspace = path.join(kiroTempDir, userId, projectId);
   if (!fs.existsSync(workspace)) fs.mkdirSync(workspace, { recursive: true });
   return { projectId, workspace };
 }
@@ -54,9 +55,9 @@ function resolveScope(c: Context, sessionUserId?: string) {
  * POST /api/index/full — Trigger async full index.
  * @returns 202 with operationId, or 409 if already running.
  */
-export async function handleFullIndex(c: Context, registry: ModuleRegistry, logger: Logger) {
+export async function handleFullIndex(c: Context, registry: ModuleRegistry, logger: Logger, userId?: string) {
   try {
-    const scope = resolveScope(c);
+    const scope = resolveScope(c, userId);
     const manager = getManager(registry);
     if (!manager) return c.json({ error: 'Code intelligence not ready' }, 503);
 

@@ -7,6 +7,7 @@ import { Hono } from 'hono';
 import type { Context } from 'hono';
 import type { Logger } from 'pino';
 import * as fs from 'fs';
+import * as os from 'os';
 import * as path from 'path';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
 import type { CodeIntelModule } from '../../modules/code-intel/CodeIntelModule.js';
@@ -112,6 +113,10 @@ function basenameFromClientPath(hostPath: string): string {
   return parts[parts.length - 1] || '';
 }
 
+function resolveKiroTempDir(): string {
+  return process.env.KIRO_TEMP_DIR || path.join(os.tmpdir(), 'kiro');
+}
+
 // SA4E-99: Server-side backpressure — limit concurrent index requests
 const INDEX_CONCURRENCY_LIMIT = 3;
 let activeIndexRequests = 0;
@@ -162,7 +167,7 @@ function writeFilesPhase(userId: string, projectId: string, files: SourceFile[])
   const rejected: string[] = [];
   let written = 0;
   // SA4E-99: Consistent temp structure — Temp/{userId}/{projectId}/batch-docs/
-  const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', projectId, 'batch-docs');
+  const tempBase = path.join(resolveKiroTempDir(), userId || 'local-dev', projectId, 'batch-docs');
   fs.mkdirSync(tempBase, { recursive: true });
   for (const file of files) {
     const targetPath = path.join(tempBase, file.path);
@@ -290,7 +295,7 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
   app.post('/api/index/full', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
-    return handleFullIndex(c, registry, logger);
+    return handleFullIndex(c, registry, logger, session.userId);
   });
   app.post('/api/index/file-events', async (c) => {
     const session = await requireAuth(c);
@@ -325,7 +330,7 @@ async function handleIndexSource(c: Context, registry: ModuleRegistry, logger: L
 
     // SA4E-99: Write to temp dir OUTSIDE workspace to avoid triggering Kiro file watcher
     // Structure: Temp/{userId}/{projectId}/source/files...
-    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', scope.projectId, 'source');
+    const tempBase = path.join(resolveKiroTempDir(), userId || 'local-dev', scope.projectId, 'source');
     const wsBasename = path.basename(scope.workspace);
     fs.mkdirSync(tempBase, { recursive: true });
 
@@ -359,7 +364,7 @@ async function handleIndexDocument(c: Context, logger: Logger, userId = '') {
     if (!relPath || !content) return c.json({ error: 'path and content required' }, 400);
     const scope = resolveRequestScope(c);
     // SA4E-99: Consistent temp structure — Temp/{userId}/{projectId}/documents/
-    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId || 'local-dev', scope.projectId, 'documents');
+    const tempBase = path.join(resolveKiroTempDir(), userId || 'local-dev', scope.projectId, 'documents');
     const wsBasename = path.basename(scope.workspace);
     let filePath = relPath;
     if (filePath.startsWith(wsBasename + '/') || filePath.startsWith(wsBasename + '\\')) {
@@ -395,7 +400,7 @@ async function handleIndexDocuments(c: Context, logger: Logger, userId = '') {
 async function handleIngestDocsFromTemp(c: Context, registry: ModuleRegistry, logger: Logger, userId: string) {
   try {
     const scope = resolveRequestScope(c);
-    const tempBase = path.join('C:\\projects\\kiro\\Temp', userId, scope.projectId, 'batch-docs');
+    const tempBase = path.join(resolveKiroTempDir(), userId, scope.projectId, 'batch-docs');
 
     if (!fs.existsSync(tempBase)) {
       return c.json({ ingested: 0, message: 'No documents in Temp folder' });

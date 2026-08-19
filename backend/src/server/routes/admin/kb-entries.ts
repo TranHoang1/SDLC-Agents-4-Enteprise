@@ -90,8 +90,8 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     // Pega graph nodes: entry_id = "pega:FQN" → lookup KB entry by source = FQN
     if (entryId.startsWith('pega:')) {
       const fqn = entryId.replace('pega:', '');
-      const { getIndexAdapter } = await import('../../../admin/db/core.js');
-      const adapter = getIndexAdapter();
+      const { getDbAdapter } = await import('../../../admin/db/core.js');
+      const adapter = getDbAdapter();
       const entry = await adapter.getAsync<any>(
         "SELECT * FROM knowledge_entries WHERE source = ? AND (type = 'PEGA_RULE' OR type = 'PEGA_DATA') LIMIT 1",
         [fqn],
