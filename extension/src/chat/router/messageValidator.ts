@@ -22,6 +22,7 @@ const EXTENSION_MESSAGE_TYPES = new Set<string>([
   'IPC_STATUS',
   'CONTEXT_UPDATE',
   'SYNC_CHAT_HISTORY',
+  'AGENT_SWITCHED',
 ]);
 
 /** All valid Webview → Extension Host message types */
@@ -36,6 +37,7 @@ const WEBVIEW_MESSAGE_TYPES = new Set<string>([
   'CONTEXT_UNPIN_FILE',
   'CONTEXT_CLEAR',
   'REQUEST_SYNC_STATE',
+  'SELECT_AGENT',
 ]);
 
 /** Combined set for fast O(1) lookup */

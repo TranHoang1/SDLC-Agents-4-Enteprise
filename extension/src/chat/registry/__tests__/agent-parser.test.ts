@@ -81,7 +81,8 @@ describe('UT-AGP-02: Defaults and Fallback Behavior', () => {
     expect(meta!.id).toBe('fallback-agent');
     expect(meta!.name).toBe('fallback-agent');
     expect(meta!.description).toBe('');
-    expect(meta!.tools).toEqual([]);
+    // SA4E-186: tools undefined = omitted (unrestricted), not [] (text-only)
+    expect(meta!.tools).toBeUndefined();
     expect(meta!.mcpServers).toEqual([]);
     expect(meta!.autoApprove).toEqual([]);
   });
@@ -105,7 +106,8 @@ describe('UT-AGP-02: Defaults and Fallback Behavior', () => {
     const content = frontmatter('unknownField: value');
     const meta = parseAgentFile(content, '/agents/unknown-field.md');
     expect(meta!.id).toBe('unknown-field');
-    expect(meta!.tools).toEqual([]);
+    // SA4E-186: tools undefined = omitted (unrestricted)
+    expect(meta!.tools).toBeUndefined();
   });
 
   it('logs a warning when frontmatter is missing', () => {

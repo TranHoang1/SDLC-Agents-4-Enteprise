@@ -138,15 +138,17 @@ export function createAgentStepNode(
       tools = filterTools(tools, agentConfig.toolPatterns);
     }
 
+    // SA4E-186: Resolve model override for both tool and streaming paths
+    const llmOptions = agentConfig?.model ? { model: agentConfig.model } : undefined;
+
     if (llmProvider.chatWithTools && tools.length > 0) {
       // KSA-290: Pass all available tools to LLM (large models handle 50+ tools fine).
       // For small models (context < 32k), limit to 15 most important tools.
       const contextWindow = state.maxContextTokens || 0;
       const toolLimit = contextWindow > 0 && contextWindow < 32000 ? 15 : tools.length;
-      const llmOptions = agentConfig?.model ? { model: agentConfig.model } : undefined;
       return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, toolLimit), sysPrompt, llmOptions);
     }
-    return await agentStepStreaming(state, llmProvider, streamHandler, streamId, sysPrompt, tools);
+    return await agentStepStreaming(state, llmProvider, streamHandler, streamId, sysPrompt, tools, llmOptions);
   };
 }
 
@@ -203,13 +205,15 @@ async function agentStepWithTools(
 
 async function agentStepStreaming(
   state: PipelineState, llm: LlmProvider, sh: StreamHandler,
-  streamId: string, sysPrompt: string, tools: McpToolDefinition[]
+  streamId: string, sysPrompt: string, tools: McpToolDefinition[],
+  llmOptions?: { model?: string }
 ) {
   sh.emitStatus("chat", "active", streamId);
   try {
     const messages = buildMessages(state, tools, sysPrompt);
+    const chatOptions = { maxTokens: 8192, ...(llmOptions?.model ? { model: llmOptions.model } : {}) };
     let full = "";
-    for await (const token of llm.chatStream(messages, { maxTokens: 8192 })) { full += token; sh.emitToken("chat", token, streamId); }
+    for await (const token of llm.chatStream(messages, chatOptions)) { full += token; sh.emitToken("chat", token, streamId); }
     sh.emitComplete("chat", 0, streamId);
     return { agentOutputs: [{ nodeId: "chat", content: full, timestamp: new Date().toISOString() }], pipelineStatus: "completed" as const, toolCalls: null, lastUpdatedAt: new Date().toISOString() };
   } catch (error) {

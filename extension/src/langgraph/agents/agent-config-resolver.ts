@@ -113,17 +113,13 @@ export class AgentConfigResolver {
   }
 
   /**
-   * Normalize tool patterns from AgentMeta.tools array.
-   * - Empty array with original frontmatter having no `tools` field → undefined (unrestricted)
-   * - Explicit empty array in frontmatter → [] (text-only mode)
-   * - Non-empty array → the patterns as-is
-   *
-   * Note: We use tools.length > 0 to detect explicit patterns.
-   * The AgentMeta parser sets tools=[] both for "omitted" and "tools: []".
-   * To differentiate, we treat empty array as text-only (per FSD spec).
+   * Normalize tool patterns from AgentMeta.tools.
+   * SA4E-186: Parser now distinguishes omitted vs explicit empty:
+   * - undefined = frontmatter omits `tools` key → unrestricted (all tools)
+   * - [] = frontmatter has `tools: []` → text-only (no tools allowed)
+   * - string[] = specific tool patterns
    */
-  private resolveToolPatterns(tools: string[]): string[] | undefined {
-    if (tools.length > 0) return tools;
-    return undefined;
+  private resolveToolPatterns(tools: string[] | undefined): string[] | undefined {
+    return tools;
   }
 }
