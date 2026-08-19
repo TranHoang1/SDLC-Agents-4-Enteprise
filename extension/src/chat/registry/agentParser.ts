@@ -18,6 +18,8 @@ interface RawAgentFrontmatter {
   tools?: string[];
   mcpServers?: string[];
   autoApprove?: string[];
+  /** SA4E-186: LLM model identifier for per-agent model routing */
+  model?: string;
 }
 
 /**
@@ -130,6 +132,11 @@ function stripQuotes(value: string): string {
 /**
  * Build a complete AgentMeta from parsed frontmatter with safe defaults.
  * ID derives from filename if not specified in frontmatter.
+ *
+ * SA4E-186: tools field semantics:
+ * - frontmatter has NO tools key → undefined (unrestricted, all tools allowed)
+ * - frontmatter has `tools: []` → [] (text-only, no tools)
+ * - frontmatter has `tools: [patterns...]` → patterns array
  */
 function buildMeta(raw: RawAgentFrontmatter, filePath: string): AgentMeta {
   const filename = path.basename(filePath, '.md');
@@ -137,9 +144,10 @@ function buildMeta(raw: RawAgentFrontmatter, filePath: string): AgentMeta {
     id: raw.id ?? filename,
     name: raw.name ?? filename,
     description: raw.description ?? '',
-    tools: Array.isArray(raw.tools) ? raw.tools : [],
+    tools: 'tools' in raw ? (Array.isArray(raw.tools) ? raw.tools : []) : undefined,
     mcpServers: Array.isArray(raw.mcpServers) ? raw.mcpServers : [],
     autoApprove: Array.isArray(raw.autoApprove) ? raw.autoApprove : [],
+    model: raw.model || undefined,
     filePath,
   };
 }

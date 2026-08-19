@@ -164,8 +164,10 @@ export class KiroAgentRegistry implements IAgentRegistry {
   }
 }
 
-/** Compare two string arrays for equality */
-function arraysEqual(a: string[], b: string[]): boolean {
+/** Compare two string arrays (or undefined) for equality */
+function arraysEqual(a: string[] | undefined, b: string[] | undefined): boolean {
+  if (a === b) return true;
+  if (a === undefined || b === undefined) return false;
   if (a.length !== b.length) return false;
   return a.every((val, i) => val === b[i]);
 }

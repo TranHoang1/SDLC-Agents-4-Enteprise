@@ -98,11 +98,13 @@ describe("AgentConfigResolver", () => {
     expect(config!.systemPromptBody).toContain("You are the DEV agent");
   });
 
-  // UT-13: empty tools array → undefined (unrestricted)
-  it("normalizes empty tools array to undefined (unrestricted)", () => {
+  // UT-13: tools field semantics (SA4E-186 fix)
+  // tools: undefined (omitted in frontmatter) → toolPatterns: undefined (unrestricted)
+  // tools: [] (explicit empty in frontmatter) → toolPatterns: [] (text-only)
+  it("passes through undefined tools as unrestricted (undefined toolPatterns)", () => {
     const agentNoTools: AgentMeta = {
       ...mockAgent,
-      tools: [],
+      tools: undefined,
     };
     findAgentMeta.mockReturnValue(agentNoTools);
     vi.mocked(fs.readFileSync).mockReturnValue(agentFileContent);
@@ -111,6 +113,20 @@ describe("AgentConfigResolver", () => {
     const config = resolver.getActiveConfig();
 
     expect(config!.toolPatterns).toBeUndefined();
+  });
+
+  it("passes through explicit empty tools as text-only ([] toolPatterns)", () => {
+    const agentTextOnly: AgentMeta = {
+      ...mockAgent,
+      tools: [],
+    };
+    findAgentMeta.mockReturnValue(agentTextOnly);
+    vi.mocked(fs.readFileSync).mockReturnValue(agentFileContent);
+
+    resolver.selectAgent("dev-agent");
+    const config = resolver.getActiveConfig();
+
+    expect(config!.toolPatterns).toEqual([]);
   });
 
   // UT-14: model undefined when not specified
