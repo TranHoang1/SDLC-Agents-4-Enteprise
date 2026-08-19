@@ -15,6 +15,8 @@ import { debugLog, debugError } from "../../debug-logger";
 import { buildBudgetAwareMessages, estimateMessagesTokens, getDynamicToolResultLimits } from "../core/context-budget";
 import { requiresApproval } from "../../chat/engine/ToolApprovalClassifier";
 import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import type { ActiveAgentConfig } from "../agents/agent-config-resolver";
+import { filterTools, isToolAllowed, buildToolBlockedMessage } from "../agents/tool-filter";
 
 const LLM_CALL_TIMEOUT_MS = 300_000;
 
@@ -112,6 +114,7 @@ export function createFetchToolsNode(toolRegistry: ToolRegistry | null) {
 export function createAgentStepNode(
   llmProvider: LlmProvider | undefined, streamHandler: StreamHandler,
   getSystemPrompt: (state: PipelineState) => string,
+  getAgentConfig?: () => ActiveAgentConfig | null,
 ) {
   return async (state: PipelineState) => {
     if (!llmProvider) {
@@ -129,12 +132,19 @@ export function createAgentStepNode(
       tools = [];
     }
 
+    // SA4E-186: Filter tools based on active agent config
+    const agentConfig = getAgentConfig?.() ?? null;
+    if (agentConfig) {
+      tools = filterTools(tools, agentConfig.toolPatterns);
+    }
+
     if (llmProvider.chatWithTools && tools.length > 0) {
       // KSA-290: Pass all available tools to LLM (large models handle 50+ tools fine).
       // For small models (context < 32k), limit to 15 most important tools.
       const contextWindow = state.maxContextTokens || 0;
       const toolLimit = contextWindow > 0 && contextWindow < 32000 ? 15 : tools.length;
-      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, toolLimit), sysPrompt);
+      const llmOptions = agentConfig?.model ? { model: agentConfig.model } : undefined;
+      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, toolLimit), sysPrompt, llmOptions);
     }
     return await agentStepStreaming(state, llmProvider, streamHandler, streamId, sysPrompt, tools);
   };
@@ -142,20 +152,22 @@ export function createAgentStepNode(
 
 async function agentStepWithTools(
   state: PipelineState, llm: LlmProvider, sh: StreamHandler,
-  streamId: string, tools: McpToolDefinition[], sysPrompt: string
+  streamId: string, tools: McpToolDefinition[], sysPrompt: string,
+  llmOptions?: { model?: string }
 ) {
   try {
     const messages = buildMessages(state, tools, sysPrompt);
 
     // Log LLM request
-    debugLog(`[LLM-REQ] iteration=${state.agentIterations || 0}, messages=${messages.length}, tools=${tools.length}`);
+    debugLog(`[LLM-REQ] iteration=${state.agentIterations || 0}, messages=${messages.length}, tools=${tools.length}${llmOptions?.model ? `, model=${llmOptions.model}` : ""}`);
     for (const m of messages) {
       const preview = m.content.slice(0, 150).replace(/\n/g, " ");
       debugLog(`  [${m.role}] ${preview}${m.content.length > 150 ? "..." : ""}`);
       if ((m as any).toolCalls) { debugLog(`  [assistant.toolCalls] ${JSON.stringify((m as any).toolCalls.map((tc: any) => tc.name))}`); }
     }
 
-    const llmPromise = llm.chatWithTools!(messages, tools, { maxTokens: 8192 });
+    const chatOptions = { maxTokens: 8192, ...(llmOptions?.model ? { model: llmOptions.model } : {}) };
+    const llmPromise = llm.chatWithTools!(messages, tools, chatOptions);
     const timeoutPromise = new Promise<never>((_, rej) => { const t = setTimeout(() => rej(new Error("LLM timeout")), LLM_CALL_TIMEOUT_MS); if (t.unref) t.unref(); });
     const response = await Promise.race([llmPromise, timeoutPromise]);
 
@@ -215,7 +227,8 @@ async function agentStepStreaming(
 }
 
 export function createExecuteToolsNode(
-  mcpBridge: McpBridge | undefined, sh: StreamHandler, hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate
+  mcpBridge: McpBridge | undefined, sh: StreamHandler, hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate,
+  getAgentConfig?: () => ActiveAgentConfig | null
 ) {
   return async (state: PipelineState) => {
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
@@ -223,7 +236,21 @@ export function createExecuteToolsNode(
     const results: Array<{ toolCallId: string; name: string; content: string }> = [];
     sh.emitComplete("chat", 0, streamId);
 
+    // SA4E-186: Get active agent config for tool enforcement
+    const agentConfig = getAgentConfig?.() ?? null;
+
     for (const call of calls) {
+      // SA4E-186: Enforce tool filter at execution time (safety net)
+      if (agentConfig && !isToolAllowed(call.name, agentConfig.toolPatterns)) {
+        const blockedMsg = buildToolBlockedMessage(
+          call.name,
+          agentConfig.agentId,
+          agentConfig.toolPatterns || []
+        );
+        results.push({ toolCallId: call.id, name: call.name, content: blockedMsg });
+        continue;
+      }
+
       const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate);
       results.push(r);
     }

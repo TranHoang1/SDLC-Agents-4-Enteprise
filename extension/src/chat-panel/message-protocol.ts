@@ -78,6 +78,7 @@ export type ChatWebviewToExtMessage =
   | { type: "tab:rename"; payload: { tabId: string; newName: string } }
   | { type: "chat:openWorkflowGraph" }
   | { type: "chat:saveState"; payload: { tabs: unknown[]; activeTabId: string } }
+  | { type: "chat:selectAgent"; agentId: string | null }
   | { type: "ready" }
   | { type: "refresh" };
 
@@ -104,4 +105,5 @@ export type ChatExtToWebviewMessage =
   | { type: "chat:steeringLoaded"; rules: Array<{ name: string; file: string }> }
   | { type: "chat:hookTriggered"; hook: { name: string; type: string; status: "running" | "completed" | "skipped" } }
   | { type: "chat:contextUsage"; payload: ContextUsagePayload }
+  | { type: "chat:agentSwitched"; agentId: string | null; agentName: string }
   | { type: "serverStatus"; status: "connected" | "disconnected" | "failed" };

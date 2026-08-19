@@ -29,6 +29,8 @@ export interface AgentMeta {
   name: string;
   description: string;
   tools: string[];
+  /** SA4E-186: LLM model identifier for per-agent model routing */
+  model?: string;
   mcpServers: string[];
   autoApprove: string[];
   filePath: string;

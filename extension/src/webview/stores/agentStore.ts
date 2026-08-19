@@ -51,6 +51,17 @@ export function syncAgents(agents: AgentMeta[]): void {
 /** Select a specific agent by ID */
 export function selectAgent(agentId: string): void {
   agentState.update((s) => ({ ...s, selectedAgentId: agentId }));
+
+  // SA4E-186: Notify Extension Host of agent selection for runtime routing
+  try {
+    const vscodeApi = (globalThis as any).acquireVsCodeApi?.() ??
+      (globalThis as any).__vscodeApi;
+    if (vscodeApi?.postMessage) {
+      vscodeApi.postMessage({ type: "chat:selectAgent", agentId });
+    }
+  } catch {
+    // Silently ignore if not in VS Code webview context (e.g., tests)
+  }
 }
 
 /** Reset to initial loading state */

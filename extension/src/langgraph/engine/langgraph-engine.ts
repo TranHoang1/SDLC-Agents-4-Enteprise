@@ -14,6 +14,8 @@ import type { LlmProvider } from "../core/llm-provider";
 import { executeChat } from "./engine-chat-handler";
 import { agentRegistry } from "../agents/registry";
 import { PipelineExtractor } from "../agents/pipeline-extractor";
+import { AgentConfigResolver } from "../agents/agent-config-resolver";
+import type { FindAgentMetaFn } from "../agents/agent-config-resolver";
 import {
   PipelineState,
   SDLCPhase,
@@ -40,12 +42,14 @@ export class LangGraphEngine {
   private chatHistoryByTab: Map<string, ChatMessage[]> = new Map();
   private activeTabId: string = "";
   readonly hookEngine: HookEngine;
+  readonly agentConfigResolver: AgentConfigResolver;
 
   constructor(
     private readonly mcpManager: IServerManager,
     private readonly workspaceRoot: string,
     private readonly onEvent: (msg: ChatExtToWebviewMessage) => void,
-    llmProvider?: LlmProvider
+    llmProvider?: LlmProvider,
+    findAgentMeta?: FindAgentMetaFn
   ) {
     // [v3.1] Persistence is backend-driven: RemoteCheckpointer talks to the
     // Backend Knowledge Service over HTTP (no local state files).
@@ -55,12 +59,26 @@ export class LangGraphEngine {
     this.llmProvider = llmProvider;
     this.hookEngine = new HookEngine(workspaceRoot);
 
+    // SA4E-186: Agent config resolver for per-agent runtime routing
+    this.agentConfigResolver = new AgentConfigResolver(
+      workspaceRoot,
+      findAgentMeta || (() => undefined)
+    );
+
     agentRegistry.load(workspaceRoot);
   }
   /** Set or replace the LLM provider at runtime (e.g., after settings change). */
   setLlmProvider(provider: LlmProvider | undefined): void {
     this.llmProvider = provider;
     this.graph = null;
+  }
+
+  /**
+   * SA4E-186: Select an agent for per-agent runtime routing.
+   * Delegates to AgentConfigResolver. Returns confirmation payload.
+   */
+  selectAgent(agentId: string | null): { agentId: string | null; agentName: string } {
+    return this.agentConfigResolver.selectAgent(agentId);
   }
 
   /**
@@ -201,7 +219,7 @@ export class LangGraphEngine {
           });
         }
       }
-      this.graph = await buildPipelineGraph(this.mcpBridge, this.streamHandler, this.checkpointer, this.llmProvider, this.hookEngine);
+      this.graph = await buildPipelineGraph(this.mcpBridge, this.streamHandler, this.checkpointer, this.llmProvider, this.hookEngine, this.agentConfigResolver);
     }
     return this.graph;
   }
