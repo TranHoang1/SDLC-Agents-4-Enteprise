@@ -31,7 +31,7 @@
 
 | Category | Coverage |
 |---|---|
-| **Agents** (10 agents: BA, SM, SA, TA, DEV, QA, DevOps, Security, UI, UI/UX) | ✅ Full — `.opencode/agents/*.md` |
-| **Steering** (35+ rule files) | ✅ Full — `AGENTS.md` (always-on) + `.opencode/skills/` (focused) |
+| **Agents** (9 agents: BA, SM, SA, TA, DEV, QA, DevOps, Security, UI) | ✅ Full — `.opencode/agents/*.md` |
+| **Steering** (38 rule files) | ✅ Full — `AGENTS.md` (always-on) + `.opencode/skills/` (31 focused skills) |
 | **Hooks** (event-driven) | ❌ Partial — documented as rules in AGENTS.md |
-| **MCP config** | ✅ Full — `opencode.json` `mcpServers` |
+| **MCP config** | ✅ Full — `opencode.json` `mcp` (code-intelligence `:9181`, atlassian `:3062`) |

@@ -1,0 +1,132 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="Business Flow — Compact Session (SA4E-182)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="400" y="10" width="400" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Start -->
+    <mxCell id="start" value="" style="ellipse;fillColor=#333333;strokeColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="580" y="50" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <!-- N1: User chatting -->
+    <mxCell id="n1" value="User chatting&#xa;in session" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="110" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- N2: Context usage monitored -->
+    <mxCell id="n2" value="IdeContextManager&#xa;monitors usagePercent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="200" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Decision: Trigger type -->
+    <mxCell id="d1" value="Trigger?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="550" y="290" width="100" height="80" as="geometry"/>
+    </mxCell>
+    <!-- N3a: Manual /compact -->
+    <mxCell id="n3a" value="User types&#xa;/compact" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="300" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- N3b: Auto threshold 95% -->
+    <mxCell id="n3b" value="usagePercent &gt;= 95%&#xa;(auto-trigger)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="780" y="300" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- N4: Collect messages -->
+    <mxCell id="n4" value="Collect conversation&#xa;messages from state" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="420" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- N5: Send to LLM -->
+    <mxCell id="n5" value="Send summarization&#xa;prompt to LLM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="510" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Decision: Success? -->
+    <mxCell id="d2" value="Success?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="555" y="600" width="90" height="70" as="geometry"/>
+    </mxCell>
+    <!-- N6: Replace messages -->
+    <mxCell id="n6" value="Replace message history&#xa;with summary message" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="720" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- N7: Fallback truncation -->
+    <mxCell id="n7" value="Fallback: truncate&#xa;oldest 50% messages" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="780" y="610" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- N8: Notify user -->
+    <mxCell id="n8" value="Display compact&#xa;notification inline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="530" y="810" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- End -->
+    <mxCell id="end" value="" style="ellipse;fillColor=#333333;strokeColor=#333333;strokeWidth=3;" vertex="1" parent="1">
+      <mxGeometry x="580" y="890" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Edges -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="start" target="n1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n2" target="d1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="Manual" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="d1" target="n3a">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="450" y="330"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e5" value="Auto (&gt;=95%)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="d1" target="n3b">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="750" y="330"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n3a" target="n4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="350" y="390"/>
+          <mxPoint x="600" y="390"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n3b" target="n4">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="850" y="390"/>
+          <mxPoint x="600" y="390"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n5" target="d2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="d2" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="No (fail)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;fontSize=9;" edge="1" parent="1" source="d2" target="n7">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="750" y="635"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n6" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;strokeColor=#b85450;" edge="1" parent="1" source="n7" target="n8">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="850" y="835"/>
+          <mxPoint x="670" y="835"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="n8" target="end">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

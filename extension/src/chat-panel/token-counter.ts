@@ -85,6 +85,16 @@ export class TokenCounter {
       "gpt-4-turbo": 128000,
       "deepseek-chat": 64000,
       "deepseek-coder": 64000,
+      "qwen2.5-coder-7b-instruct": 8192,
+      "qwen2.5-coder-14b-instruct": 32768,
+      "qwen2.5-coder-32b-instruct": 32768,
+      "qwen2.5-7b-instruct": 8192,
+      "qwen2.5-14b-instruct": 32768,
+      "qwen2.5-72b-instruct": 131072,
+      "llama3.1-8b": 8192,
+      "llama3.1-70b": 128000,
+      "mistral-7b": 8192,
+      "codestral": 32768,
     };
 
     // Check exact match first
