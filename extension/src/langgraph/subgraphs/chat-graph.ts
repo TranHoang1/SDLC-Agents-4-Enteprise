@@ -28,6 +28,7 @@ import {
   routeAfterHallucinationGrade, getDefaultRagGraderConfig,
 } from "./rag-grader-nodes";
 import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import type { AgentConfigResolver } from "../agents/agent-config-resolver";
 
 const MAX_AGENT_ITERATIONS = 12;
 
@@ -176,7 +177,8 @@ export async function buildChatSubgraph(
   mcpBridge?: McpBridge,
   workspaceRoot?: string,
   hookEngine?: HookEngine,
-  approvalGate?: ToolApprovalGate
+  approvalGate?: ToolApprovalGate,
+  agentConfigResolver?: AgentConfigResolver
 ) {
   const toolRegistry = mcpBridge ? new ToolRegistry(mcpBridge) : null;
   const wsRoot = workspaceRoot || require("vscode").workspace.workspaceFolders?.[0]?.uri.fsPath || "";
@@ -213,13 +215,36 @@ export async function buildChatSubgraph(
     enrichedSystemPrompt = `${enrichedSystemPrompt}\n\n# Agent Instructions\n${agentInstructions}`;
   }
 
-  // SA4E-85 v3.1: Factory-supplied function that builds final LLM-ready system prompt
-  // from base + steering + KB context + user prompt (kbContext from state).
+  // SA4E-85 v3.1 + SA4E-186: Factory-supplied function that builds final LLM-ready system prompt.
+  // Per-agent mode: use only the selected agent's body.
+  // Fallback mode: use concatenated all-agents instructions (existing behavior).
   function buildFinalSystemPrompt(state: PipelineState): string {
-    if (state.kbContext) {
-      return `${enrichedSystemPrompt}\n\n---\n${state.kbContext}\n---`;
+    let prompt = enrichedSystemPrompt;
+
+    // SA4E-186: Dynamic per-agent prompt switching
+    const activeConfig = agentConfigResolver?.getActiveConfig();
+    if (activeConfig && activeConfig.systemPromptBody) {
+      // Per-agent mode — replace concatenated instructions with selected agent body
+      prompt = `${AGENT_SYSTEM_PROMPT}`;
+      // Re-inject steering rules (already computed above)
+      try {
+        if (wsRoot) {
+          // Steering already in enrichedSystemPrompt, but for per-agent mode we
+          // start from base + steering only (remove all-agent instructions).
+          const steeringPart = enrichedSystemPrompt.replace(
+            /\n\n# Agent Instructions\n[\s\S]*$/,
+            ""
+          );
+          prompt = steeringPart;
+        }
+      } catch { /* use enrichedSystemPrompt as-is */ }
+      prompt += `\n\n# Agent Instructions\n\n${activeConfig.systemPromptBody}`;
     }
-    return enrichedSystemPrompt;
+
+    if (state.kbContext) {
+      return `${prompt}\n\n---\n${state.kbContext}\n---`;
+    }
+    return prompt;
   }
 
   const verifyNode = createVerifyResponseNode(llmProvider, streamHandler);
@@ -243,10 +268,11 @@ export async function buildChatSubgraph(
 
   if (ragConfig.enableHallucinationGrade) {
     // Graph with Corrective RAG nodes for small models
+    const getAgentConfig = () => agentConfigResolver?.getActiveConfig() ?? null;
     const graph = new StateGraph(PipelineAnnotation)
       .addNode("fetch_tools", fetchToolsWithBudget)
-      .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt))
-      .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate))
+      .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt, getAgentConfig))
+      .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate, getAgentConfig))
       .addNode("verify_response", verifyNode)
       .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, buildFinalSystemPrompt))
       .addNode("hallucination_grader", createHallucinationGraderNode(llmProvider, streamHandler, ragConfig))
@@ -262,10 +288,11 @@ export async function buildChatSubgraph(
   }
 
   // Standard graph without RAG grading (large models)
+  const getAgentConfig = () => agentConfigResolver?.getActiveConfig() ?? null;
   const graph = new StateGraph(PipelineAnnotation)
     .addNode("fetch_tools", fetchToolsWithBudget)
-    .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt))
-    .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate))
+    .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt, getAgentConfig))
+    .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate, getAgentConfig))
     .addNode("verify_response", verifyNode)
     .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, buildFinalSystemPrompt))
     .addEdge("__start__", "fetch_tools")

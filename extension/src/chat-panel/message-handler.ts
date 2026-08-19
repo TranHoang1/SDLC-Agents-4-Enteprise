@@ -73,6 +73,9 @@ export class MessageHandler {
       case "chat:insertCode":
         if (this.onInsertCode) { this.onInsertCode(msg.code); }
         break;
+      case "chat:selectAgent":
+        this.handleSelectAgent((msg as any).agentId);
+        break;
       case "tab:create":
         if (this.onTurnComplete) { this.onTurnComplete(); }
         break;
@@ -119,5 +122,15 @@ export class MessageHandler {
     const nodes = this.getEngine().getCurrentNodeStates();
     const node = nodes.find(n => n.id === nodeId);
     if (node) { this.sendToWebview({ type: "chat:nodeDetails", node, recentOutputs: [] }); }
+  }
+
+  /** SA4E-186: Route SELECT_AGENT to engine and confirm to webview. */
+  private handleSelectAgent(agentId: string | null): void {
+    const result = this.getEngine().selectAgent(agentId);
+    this.sendToWebview({
+      type: "chat:agentSwitched",
+      agentId: result.agentId,
+      agentName: result.agentName,
+    });
   }
 }
