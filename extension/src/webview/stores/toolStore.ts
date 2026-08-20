@@ -25,12 +25,15 @@ interface ToolState {
   sessionApprovals: Set<string>;
   /** Session-level approvals by tool type (BR-04) */
   sessionTypeApprovals: Set<string>;
+  /** Session-level command pattern approvals (e.g., "npm *", "git status") */
+  sessionCommandPatterns: Set<string>;
 }
 
 const initialState: ToolState = {
   activeTools: new Map(),
   sessionApprovals: new Set(),
   sessionTypeApprovals: new Set(),
+  sessionCommandPatterns: new Set(),
 };
 
 /** Core writable store for tool state */
@@ -135,4 +138,43 @@ export function isSessionTypeApproved(toolType: string): boolean {
 /** Reset tool store */
 export function resetTools(): void {
   toolState.set(initialState);
+}
+
+/** Add a command pattern to session-level auto-approve set */
+export function addSessionCommandPattern(pattern: string): void {
+  toolState.update((s) => {
+    const next = new Set(s.sessionCommandPatterns);
+    next.add(pattern);
+    return { ...s, sessionCommandPatterns: next };
+  });
+}
+
+/** Check if a command matches any session-approved pattern */
+export function matchesSessionPattern(command: string): boolean {
+  let matched = false;
+  toolState.subscribe((s) => {
+    for (const pattern of s.sessionCommandPatterns) {
+      const regex = new RegExp("^" + pattern.replace(/[.+^${}()|[\]\\]/g, "\\$&").replace(/\*/g, ".*") + "$", "i");
+      if (regex.test(command.trim())) { matched = true; break; }
+    }
+  })();
+  return matched;
+}
+
+/** Get all session command patterns */
+export function getSessionCommandPatterns(): string[] {
+  let patterns: string[] = [];
+  toolState.subscribe((s) => { patterns = Array.from(s.sessionCommandPatterns); })();
+  return patterns;
+}
+
+/**
+ * Suggest a pattern from a concrete command.
+ * Keeps first token (binary), wildcards the rest.
+ * @example "npm run test" → "npm *"
+ */
+export function suggestCommandPattern(command: string): string {
+  const parts = command.trim().split(/\s+/);
+  if (parts.length <= 1) return parts[0] || command;
+  return `${parts[0]} *`;
 }

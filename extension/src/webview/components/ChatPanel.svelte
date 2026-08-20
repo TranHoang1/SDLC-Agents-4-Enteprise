@@ -10,11 +10,17 @@
   import ServiceOfflineWarning from './ServiceOfflineWarning.svelte';
   import ChatMessageList from './ChatMessageList.svelte';
   import ChatInput from './ChatInput.svelte';
+  import PermissionGuard from './PermissionGuard.svelte';
   import { addUserMessage } from '../stores/chatStore';
-  import { sendPrompt, dispatchCommand, requestSyncState } from '../postMessage';
+  import { activeToolsList, addSessionTypeApproval, addSessionCommandPattern } from '../stores/toolStore';
+  import { sendPrompt, dispatchCommand, requestSyncState, respondToolCall } from '../postMessage';
   import { createStreamBatcher } from './streamBatcher';
   import type { StreamBatcher } from './streamBatcher';
   import { appendToken } from '../stores/chatStore';
+  import { suggestCommandPattern } from '../stores/toolStore';
+
+  /** First pending tool requiring approval (if any) */
+  $: pendingTool = $activeToolsList.find(t => t.status === 'pending' && t.requiresApproval);
 
   /**
    * RAF batcher for stream tokens — coalesces rapid token arrivals
@@ -53,6 +59,28 @@
     batcher = null;
   }
 
+  /** Handle tool approval */
+  function handleToolApprove(event: CustomEvent<{ toolId: string }>): void {
+    respondToolCall(event.detail.toolId, 'APPROVE');
+  }
+
+  /** Handle tool denial */
+  function handleToolDeny(event: CustomEvent<{ toolId: string }>): void {
+    respondToolCall(event.detail.toolId, 'REJECT');
+  }
+
+  /** Handle session-level type approval */
+  function handleToolApproveSession(event: CustomEvent<{ toolId: string; toolType: string }>): void {
+    addSessionTypeApproval(event.detail.toolType);
+    respondToolCall(event.detail.toolId, 'APPROVE');
+  }
+
+  /** Handle pattern-based approval for shell commands */
+  function handleToolApprovePattern(event: CustomEvent<{ toolId: string; pattern: string }>): void {
+    addSessionCommandPattern(event.detail.pattern);
+    respondToolCall(event.detail.toolId, 'APPROVE', event.detail.pattern);
+  }
+
   /** Handle send event from ChatInput */
   function handleSend(event: CustomEvent<{ text: string; agentId: string }>): void {
     const { text, agentId } = event.detail;
@@ -84,6 +112,19 @@
   <ServiceOfflineWarning />
   <ChatMessageList />
   <ChatInput on:send={handleSend} on:command={handleCommand} />
+
+  {#if pendingTool}
+    <PermissionGuard
+      toolId={pendingTool.toolId}
+      name={pendingTool.name}
+      args={pendingTool.args}
+      toolType={pendingTool.toolType}
+      on:approve={handleToolApprove}
+      on:deny={handleToolDeny}
+      on:approveSession={handleToolApproveSession}
+      on:approvePattern={handleToolApprovePattern}
+    />
+  {/if}
 </div>
 
 <style>

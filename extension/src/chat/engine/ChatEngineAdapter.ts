@@ -11,13 +11,13 @@ import type { IPostMessageBridge } from '../bridge/IPostMessageBridge';
 import type { IContextManager } from '../context/types';
 import type { IToolHandler, DiffBlock } from '../tools/diffTypes';
 import type { WebviewMessage, ExtensionMessage } from '../types';
-import type { IDiffTracker, DiffSummaryPayload, ChangeEntryPayload } from '../diff/IDiffTracker';
 import type { IChatEngineAdapter } from './IChatEngineAdapter';
 import type { IStreamProtocolAdapter, EngineStreamEvent } from './IStreamProtocolAdapter';
 import type { ISessionManager } from './ISessionManager';
 import type { LangGraphEngine } from '../../langgraph/engine/langgraph-engine';
 import type { ChatExtToWebviewMessage } from '../../chat-panel/message-protocol';
 import type { ToolApprovalGate } from './ToolApprovalGate';
+import type { CommandPatternMatcher } from './CommandPatternMatcher';
 
 /**
  * Dependencies injected into ChatEngineAdapter (DIP).
@@ -32,7 +32,7 @@ export interface ChatEngineAdapterDeps {
   toolHandler: IToolHandler;
   sessionManager: ISessionManager;
   approvalGate?: ToolApprovalGate;
-  diffTracker?: IDiffTracker;
+  commandPatternMatcher?: CommandPatternMatcher;
 }
 
 /**
@@ -83,8 +83,6 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
     router.registerHandler('SELECT_AGENT', async (msg) => this.handleSelectAgent(msg));
     // SA4E-85 v3.1: webview mounts → request state hydration from Backend KB
     router.registerHandler('REQUEST_SYNC_STATE', () => this.handleRequestSyncState());
-    // SA4E-183: Handle diff file open requests from webview
-    router.registerHandler('DIFF_OPEN_FILE', (msg) => this.handleDiffOpenFile(msg));
   }
 
   /** Forward translated ExtensionMessages to webview via bridge */
@@ -162,6 +160,11 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
     const msg = payload as Extract<WebviewMessage, { type: 'TOOL_CALL_RESPONSE' }>;
     const decision = msg.decision === 'APPROVE' ? 'approve' : 'reject';
 
+    // Store pattern for future auto-approve if user opted in
+    if (decision === 'approve' && msg.rememberPattern && this.deps.commandPatternMatcher) {
+      this.deps.commandPatternMatcher.addPattern(msg.rememberPattern);
+    }
+
     // SA4E-85: Resolve pending approval gate if available (unblocks executeSingleTool)
     if (this.deps.approvalGate) {
       this.deps.approvalGate.resolveApproval(msg.toolId, decision);
@@ -172,17 +175,6 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
 
   private async handleCommandDispatch(payload: unknown): Promise<void> {
     const msg = payload as Extract<WebviewMessage, { type: 'COMMAND_DISPATCH' }>;
-    // SA4E-183: Handle /diff command — return summary to webview
-    if (msg.command === 'diff') {
-      if (this.deps.diffTracker) {
-        const summary = this.deps.diffTracker.getSummary();
-        this.deps.bridge.postToWebview({
-          type: 'DIFF_SUMMARY_RESPONSE',
-          summary: this.toSummaryPayload(summary),
-        });
-      }
-      return;
-    }
     await vscode.commands.executeCommand(msg.command, msg.args);
   }
 
@@ -235,68 +227,6 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
       agentId: result.agentId,
       agentName: result.agentName,
     }]);
-  }
-
-  /**
-   * SA4E-183: Handle DIFF_OPEN_FILE — open VS Code diff editor or show file.
-   * Validates file path is within workspace bounds (path traversal protection).
-   */
-  private async handleDiffOpenFile(payload: unknown): Promise<void> {
-    const msg = payload as Extract<WebviewMessage, { type: 'DIFF_OPEN_FILE' }>;
-    const wsFolder = vscode.workspace.workspaceFolders?.[0];
-    if (!wsFolder) return;
-
-    // Security: resolve within workspace to prevent path traversal
-    const fileUri = vscode.Uri.joinPath(wsFolder.uri, msg.filePath);
-    if (!fileUri.fsPath.startsWith(wsFolder.uri.fsPath)) {
-      vscode.window.showWarningMessage(`Path outside workspace: ${msg.filePath}`);
-      return;
-    }
-
-    if (msg.operation === 'deleted') {
-      vscode.window.showInformationMessage(`File has been deleted: ${msg.filePath}`);
-      return;
-    }
-
-    if (msg.operation === 'added') {
-      try {
-        const doc = await vscode.workspace.openTextDocument(fileUri);
-        await vscode.window.showTextDocument(doc);
-      } catch {
-        vscode.window.showWarningMessage(`File not found: ${msg.filePath}`);
-      }
-      return;
-    }
-
-    // operation === 'modified' → open VS Code diff editor
-    const originalUri = vscode.Uri.parse(`diff-original:${msg.filePath}`);
-    const title = `${msg.filePath} (Original ↔ Modified)`;
-    try {
-      await vscode.commands.executeCommand('vscode.diff', originalUri, fileUri, title);
-    } catch (err) {
-      vscode.window.showErrorMessage(`Failed to open diff: ${(err as Error).message}`);
-    }
-  }
-
-  /** Convert DiffSummary to webview payload (strips originalContent) */
-  private toSummaryPayload(summary: import('../diff/IDiffTracker').DiffSummary): DiffSummaryPayload {
-    const entries: ChangeEntryPayload[] = summary.entries.map((e) => ({
-      filePath: e.filePath,
-      operation: e.operation,
-      linesAdded: e.linesAdded,
-      linesRemoved: e.linesRemoved,
-      diffContent: e.diffContent,
-      timestamp: e.timestamp,
-    }));
-    return {
-      totalFiles: summary.totalFiles,
-      totalAdded: summary.totalAdded,
-      totalModified: summary.totalModified,
-      totalDeleted: summary.totalDeleted,
-      totalLinesAdded: summary.totalLinesAdded,
-      totalLinesRemoved: summary.totalLinesRemoved,
-      entries,
-    };
   }
 
   /** Convert ChatExtToWebviewMessage to EngineStreamEvent (or null) */

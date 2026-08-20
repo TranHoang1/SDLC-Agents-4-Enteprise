@@ -134,7 +134,7 @@ export type WebviewMessageType =
 
 export type WebviewMessage =
   | { type: 'SEND_PROMPT'; text: string; agentId: string; contextFiles?: string[] }
-  | { type: 'TOOL_CALL_RESPONSE'; toolId: string; decision: 'APPROVE' | 'REJECT' }
+  | { type: 'TOOL_CALL_RESPONSE'; toolId: string; decision: 'APPROVE' | 'REJECT'; rememberPattern?: string }
   | { type: 'COMMAND_DISPATCH'; command: string; args?: Record<string, unknown> }
   | { type: 'RUN_TERMINAL_COMMAND'; command: string; terminalName: string }
   | { type: 'ACTION_ACCEPT_DIFF'; diffId: string; filePath: string; patch: string }

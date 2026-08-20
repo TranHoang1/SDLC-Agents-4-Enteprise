@@ -284,13 +284,16 @@ export class LangGraphEngine {
 
     const tuple = await this.checkpointer.getTuple({ configurable: { thread_id: threadId } });
     if (!tuple) {
-      this.onEvent({ type: "chat:error", code: "NO_CHECKPOINT", message: `No saved state for thread ${threadId}`, retryable: false });
+      this.onEvent({ type: "chat:error", code: "NO_CHECKPOINT", message: `No saved state for thread "${threadId}". The conversation may have expired or the backend is unavailable. Try starting a new conversation.`, retryable: false });
+      this.onEvent({ type: "chat:workingStatus", working: false });
       return;
     }
     try {
       await graph.invoke(null, { configurable: { thread_id: threadId } });
     } catch (error) {
       this.onEvent({ type: "chat:error", code: "RESUME_ERROR", message: (error as Error).message, retryable: true });
+    } finally {
+      this.onEvent({ type: "chat:workingStatus", working: false });
     }
   }
   /** Handle human approval decision — update state and resume */

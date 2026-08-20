@@ -32,9 +32,9 @@ export function sendPrompt(text: string, agentId: string, contextFiles?: string[
   postToExtension({ type: 'SEND_PROMPT', text, agentId, contextFiles });
 }
 
-/** Respond to a tool call approval request */
-export function respondToolCall(toolId: string, decision: 'APPROVE' | 'REJECT'): void {
-  postToExtension({ type: 'TOOL_CALL_RESPONSE', toolId, decision });
+/** Respond to a tool call approval request. Optional rememberPattern auto-approves future matching commands. */
+export function respondToolCall(toolId: string, decision: 'APPROVE' | 'REJECT', rememberPattern?: string): void {
+  postToExtension({ type: 'TOOL_CALL_RESPONSE', toolId, decision, rememberPattern });
 }
 
 /** Dispatch a command to the Extension Host */

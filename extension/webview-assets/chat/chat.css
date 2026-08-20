@@ -595,12 +595,12 @@ body {
 /* KSA-247: Isolated container prevents streaming from affecting tool blocks */
 /* KSA-290: Container is collapsible — summary header + expandable body */
 .ksa247-tool-container {
-  contain: layout style;
+  contain: style;
   display: block;
   margin: 8px 0;
   border-radius: 8px;
   border: 1px solid rgba(128, 128, 128, 0.12);
-  overflow: hidden;
+  overflow: visible;
 }
 .ksa247-tool-container[data-sealed="true"] {
   pointer-events: auto;
@@ -1166,6 +1166,10 @@ body {
   color: var(--vscode-foreground);
   opacity: 0.7;
   cursor: pointer;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .model-selector:hover { opacity: 1; background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.1)); }

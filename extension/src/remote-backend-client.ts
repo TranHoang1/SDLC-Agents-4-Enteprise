@@ -160,18 +160,13 @@ export class RemoteBackendClient implements vscode.Disposable {
   }
 
   private async checkHealth(): Promise<void> {
-    // health probe — intentional: any error = service unavailable
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod: typeof import("http") = this.backendUrl.startsWith("https") ? require("https") : require("http");
-    return new Promise((resolve, reject) => {
-      const req = mod.get(`${this.backendUrl}/health`, (res) => {
-        res.resume();
-        if (res.statusCode === 200) { resolve(); }
-        else { reject(new Error(`Health check failed: ${res.statusCode}`)); }
-      });
-      req.on("error", reject);
-      req.setTimeout(HEALTH_TIMEOUT_MS, () => { req.destroy(); reject(new Error("Health check timed out")); });
+    // Health probe — uses fetch() which is globally proxy-patched
+    const response = await fetch(`${this.backendUrl}/health`, {
+      signal: AbortSignal.timeout(HEALTH_TIMEOUT_MS),
     });
+    if (response.status !== 200) {
+      throw new Error(`Health check failed: ${response.status}`);
+    }
   }
 
   private setStatus(status: ServerStatus) {
