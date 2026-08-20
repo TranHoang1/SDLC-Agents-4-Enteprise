@@ -5,6 +5,7 @@
  */
 
 import * as vscode from "vscode";
+import * as path from "path";
 import { classifyTool, extractFilePath } from "../hooks/hook-tool-matcher";
 import { debugLog, debugError } from "../../debug-logger";
 import type {
@@ -313,37 +314,37 @@ export class DiagnosticsFeedService implements vscode.Disposable {
     if (!absPath) return null;
 
     // Normalize: handle file:// URIs, drive letters, backslashes
-    let path = absPath;
-    if (path.startsWith("file://")) {
+    let p = absPath;
+    if (p.startsWith("file://")) {
       try {
-        path = new URL(path).pathname;
+        p = new URL(p).pathname;
         // Windows: /C:/path → C:/path
-        if (process.platform === "win32" && path.startsWith("/") && path[2] === ":") {
-          path = path.slice(1);
+        if (process.platform === "win32" && p.startsWith("/") && p[2] === ":") {
+          p = p.slice(1);
         }
       } catch {
         return null;
       }
     }
-    path = path.replace(/\\/g, "/");
+    p = p.replace(/\\/g, "/");
 
     const wsRoot = this.workspaceRoot.replace(/\\/g, "/");
     const wsRootNorm = wsRoot.endsWith("/") ? wsRoot : wsRoot + "/";
 
     // Reject absolute paths outside workspace
-    if (path.startsWith("/") || /^[A-Za-z]:/.test(path)) {
-      if (!path.startsWith(wsRootNorm)) return null; // C-3: escape
-      const rel = path.slice(wsRootNorm.length);
+    if (path.isAbsolute(p) || /^[A-Za-z]:/.test(p)) {
+      if (!p.startsWith(wsRootNorm)) return null; // C-3: escape
+      const rel = p.slice(wsRootNorm.length);
       // Reject traversal segments inside workspace prefix (e.g. C:/ws/test/../../etc/passwd)
       if (rel.split("/").includes("..")) return null; // C-3: escape via .. inside root
       return rel;
     }
 
     // Reject relative traversal (../ etc.)
-    if (path.startsWith("..") || path.includes("/..")) return null;
+    if (p.startsWith("..") || p.includes("/..")) return null;
 
     // Already relative and inside workspace
-    return path;
+    return p;
   }
 
   /** Get file line count for clamping (returns undefined if unknown). */
