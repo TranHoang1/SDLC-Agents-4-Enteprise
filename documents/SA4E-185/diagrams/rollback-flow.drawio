@@ -1,0 +1,78 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;SA4E-185 Rollback Flow — LSP Diagnostics Feed&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="10" width="840" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_trigger" value="Issue Detected&lt;br&gt;(agent loop error / &lt;br&gt;feed misbehavior)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="340" y="60" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d_sev" value="Severity?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="380" y="170" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_minor" value="Minor (log noise,&lt;br&gt;wording)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="700" y="190" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_hotfix" value="Hotfix — next PATCH,&lt;br&gt;no immediate action" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="700" y="300" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_stop" value="Step 1 — Stop / disable feed&lt;br&gt;kiroSdlc.enableDiagnosticsFeed = false" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="330" y="320" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="d_reload" value="Reload &lt;br&gt;resolved?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="370" y="440" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_keep" value="Keep disabled —&lt;br&gt;feature flag off (BR-9/10)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="700" y="460" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_vsix_prev" value="Step 2 — Release rollback&lt;br&gt;reinstall previous VSIX&lt;br&gt;(v1.31.0 &lt; v1.32.0)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="330" y="580" width="240" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_verify" value="Verify rollback&lt;br&gt;(health check + smoke test +&lt;br&gt;no [DD-FEED] errors)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="330" y="720" width="240" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="d_verify" value="Rollback &lt;br&gt;success?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#f57c00;" vertex="1" parent="1">
+      <mxGeometry x="370" y="860" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_ok" value="Rollback complete —&lt;br&gt;incident reported" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="880" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_escalate" value="Escalate —&lt;br&gt;Dev/QA investigation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="1">
+      <mxGeometry x="40" y="880" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_trigger_sev" edge="1" parent="1" source="n_trigger" target="d_sev" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_sev_minor" value="Minor" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_sev" target="n_minor">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_minor_hotfix" edge="1" parent="1" source="n_minor" target="n_hotfix" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_sev_stop" value="Critical" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;strokeColor=#c62828;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_sev" target="n_stop">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_stop_reload" edge="1" parent="1" source="n_stop" target="d_reload" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_reload_keep" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_reload" target="n_keep">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_reload_vsix" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;strokeColor=#c62828;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_reload" target="n_vsix_prev">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_vsix_verify" edge="1" parent="1" source="n_vsix_prev" target="n_verify" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_verify_dv" edge="1" parent="1" source="n_verify" target="d_verify" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_dv_ok" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_verify" target="n_ok">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_dv_esc" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;strokeColor=#c62828;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_verify" target="n_escalate">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

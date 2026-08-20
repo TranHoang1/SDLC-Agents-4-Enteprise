@@ -1,0 +1,90 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-182 — Compact Session Component Diagram" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="320" y="10" width="420" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="pkg_compact" value="extension/src/chat/compact/" style="swimlane;startSize=30;fillColor=#d5e8d4;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="30" y="50" width="500" height="380" as="geometry"/>
+    </mxCell>
+    <mxCell id="types" value="types.ts&#10;&#10;CompactTrigger&#10;CompactMethod&#10;CompactRequest&#10;CompactResult&#10;CompactEvent&#10;CompactMonitorState" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;size=15;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_compact">
+      <mxGeometry x="20" y="40" width="140" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="config" value="CompactConfig.ts&#10;&#10;+ getSettings()&#10;+ dispose()&#10;&#10;Subscribes:&#10;onDidChangeConfiguration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_compact">
+      <mxGeometry x="20" y="210" width="170" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="service" value="CompactService.ts&#10;&#10;+ executeCompact(trigger, state)&#10;- buildSummarizationPrompt()&#10;- validateSummary()&#10;- createSummaryMessage()&#10;- executeFallbackTruncation()&#10;- persistCompactEvent()&#10;- serializeChatHistory()&#10;- replaceState()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_compact">
+      <mxGeometry x="190" y="40" width="190" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="monitor" value="CompactMonitor.ts&#10;&#10;+ start(): void&#10;+ stop(): void&#10;+ getState()&#10;+ setCompacting(v)&#10;- onContextStateChange()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_compact">
+      <mxGeometry x="190" y="220" width="190" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="command" value="CompactCommand.ts&#10;&#10;+ execute(): Promise&lt;void&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_compact">
+      <mxGeometry x="400" y="40" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="factory" value="index.ts&#10;&#10;createCompactModule(deps)&#10;Returns: CompactModule" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_compact">
+      <mxGeometry x="400" y="120" width="170" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="pkg_deps" value="Dependencies (Existing)" style="swimlane;startSize=30;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="580" y="50" width="540" height="380" as="geometry"/>
+    </mxCell>
+    <mxCell id="dep_llm" value="LlmProvider&#10;&#10;call(prompt, opts)&#10;getContextWindow()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_deps">
+      <mxGeometry x="20" y="40" width="150" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="dep_ctx" value="IContextManager&#10;&#10;getState(): ContextState&#10;onContextChanged: Event" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_deps">
+      <mxGeometry x="200" y="40" width="160" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="dep_stream" value="StreamHandler&#10;&#10;emitDirect(event)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_deps">
+      <mxGeometry x="390" y="40" width="130" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="dep_session" value="ISessionManager&#10;&#10;getSession(): SessionData" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_deps">
+      <mxGeometry x="20" y="150" width="150" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="dep_kb" value="KnowledgeClient&#10;&#10;createMessage(threadId, msg)&#10;listThreads()&#10;getMessages(threadId)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_deps">
+      <mxGeometry x="200" y="150" width="180" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="dep_graph" value="CompiledStateGraph&#10;&#10;updateState(config, update)&#10;invoke(input, config)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_deps">
+      <mxGeometry x="20" y="260" width="180" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="dep_vscode" value="vscode.workspace&#10;&#10;getConfiguration()&#10;onDidChangeConfiguration" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_deps">
+      <mxGeometry x="230" y="270" width="170" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="dep_slash" value="SlashMenuController&#10;&#10;onCommandSelect callback" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=5;" vertex="1" parent="pkg_deps">
+      <mxGeometry x="390" y="150" width="130" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cmd_svc" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="command" target="service">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mon_svc" value="triggers" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="monitor" target="service">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mon_cfg" value="reads" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="monitor" target="config">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_svc_llm" value="summarize" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="service" target="dep_llm">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_svc_ctx" value="getState()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="service" target="dep_ctx">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_svc_stream" value="emit" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="service" target="dep_stream">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_svc_kb" value="persist" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;fontSize=9;" edge="1" parent="1" source="service" target="dep_kb">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_svc_graph" value="updateState()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="service" target="dep_graph">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_mon_ctx" value="subscribe" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="monitor" target="dep_ctx">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_cfg_vsc" value="read config" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="config" target="dep_vscode">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_slash_cmd" value="dispatch" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="dep_slash" target="command">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -69,10 +69,15 @@ export class OpenAIProvider extends BaseLlmProvider {
         signal: AbortSignal.timeout(5000),
       });
       if (response.ok) {
-        const data = await response.json() as { data?: Array<{ id: string; context_length?: number }> };
+        const data = await response.json() as { data?: Array<{ id: string; context_length?: number; meta?: { n_ctx?: number } }> };
         const model = data.data?.[0];
+        // Standard OpenAI field
         if (model?.context_length && model.context_length > 0) {
           this.contextWindowTokens = model.context_length;
+        }
+        // llama-server uses meta.n_ctx instead
+        else if (model?.meta?.n_ctx && model.meta.n_ctx > 0) {
+          this.contextWindowTokens = model.meta.n_ctx;
         }
       }
     } catch (err) {

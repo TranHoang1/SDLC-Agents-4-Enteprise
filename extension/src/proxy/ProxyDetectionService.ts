@@ -82,7 +82,7 @@ export class ProxyDetectionService {
 
   /**
    * Detect proxy URL from OS-native configuration.
-   * Cross-platform: Windows (netsh), macOS (scutil), Linux (gsettings).
+   * Cross-platform: Windows (PowerShell .NET), macOS (scutil), Linux (gsettings).
    */
   private detectOsNativeProxy(): string | null {
     switch (process.platform) {
@@ -103,17 +103,39 @@ export class ProxyDetectionService {
     }
   }
 
-  // --- Windows: netsh winhttp ---
+  // --- Windows: PowerShell .NET WebRequest proxy resolution ---
 
   private detectWindowsProxy(): string | null {
     try {
+      // Use PowerShell to call .NET WebRequest.GetSystemWebProxy()
+      // This detects WPAD/PAC auto-configured proxies that netsh misses
+      const script = [
+        "$proxy = [System.Net.WebRequest]::GetSystemWebProxy()",
+        "$uri = [Uri]'https://www.google.com'",
+        "$proxyUri = $proxy.GetProxy($uri)",
+        "if ($proxyUri.AbsoluteUri -eq $uri.AbsoluteUri) { Write-Output 'DIRECT' }",
+        "else { Write-Output $proxyUri.AbsoluteUri }",
+      ].join("; ");
+      const output = this.execQuiet(
+        `powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "${script.replace(/"/g, '\\"')}"`
+      );
+      const result = output.trim();
+      if (!result || result === "DIRECT") { return null; }
+      return result;
+    } catch {
+      // Fallback to netsh if PowerShell fails
+      return this.detectWindowsProxyNetsh();
+    }
+  }
+
+  /** Fallback: netsh winhttp (only works when proxy is explicitly set) */
+  private detectWindowsProxyNetsh(): string | null {
+    try {
       const output = this.execQuiet("netsh winhttp show proxy");
-      // Parse: "Proxy Server(s) :  192.168.1.1:8080"
       const match = output.match(/Proxy Server\(s\)\s*:\s*(.+)/i);
       if (!match) { return null; }
       const server = match[1].trim();
       if (server.toLowerCase().includes("direct access")) { return null; }
-      // Handle per-protocol: "http=host:port;https=host2:port2"
       if (server.includes("=")) { return this.parsePerProtocolProxy(server); }
       return `http://${server}`;
     } catch {

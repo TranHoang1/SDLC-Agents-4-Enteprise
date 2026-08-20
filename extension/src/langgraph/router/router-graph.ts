@@ -6,6 +6,8 @@ import { StreamHandler } from "../core/stream-handler";
 import { RemoteCheckpointer } from "../core/remote-checkpointer";
 import type { LlmProvider } from "../core/llm-provider";
 import type { HookEngine } from "../hooks/hook-engine";
+import type { AgentConfigResolver } from "../agents/agent-config-resolver";
+import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
 import { classifyIntent } from "./intent-classifier";
 
 export async function buildRouterGraph(
@@ -13,7 +15,9 @@ export async function buildRouterGraph(
   streamHandler: StreamHandler,
   checkpointer: RemoteCheckpointer,
   llmProvider?: LlmProvider,
-  hookEngine?: HookEngine
+  hookEngine?: HookEngine,
+  agentConfigResolver?: AgentConfigResolver,
+  diagnosticsFeed?: DiagnosticsFeedService
 ) {
   // Lazy-load subgraph invokers (only imported when needed)
   const subgraphCache = new Map<PipelineIntent, (state: PipelineState) => Promise<Partial<PipelineState>>>();
@@ -75,7 +79,7 @@ export async function buildRouterGraph(
       default: {
         const { buildChatSubgraph } = await import("../subgraphs/chat-graph");
         const wsRoot = require("vscode").workspace.workspaceFolders?.[0]?.uri.fsPath || "";
-        const graph = await buildChatSubgraph(streamHandler, llmProvider, mcpBridge, wsRoot, hookEngine);
+        const graph = await buildChatSubgraph(streamHandler, llmProvider, mcpBridge, wsRoot, hookEngine, undefined, agentConfigResolver, diagnosticsFeed);
         invoker = async (state) => {
           const result = await graph.invoke(state);
           return result as Partial<PipelineState>;

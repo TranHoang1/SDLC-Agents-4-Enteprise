@@ -1,0 +1,18 @@
+test_case_id,file_path,severity,code,message,line,source,dedupe_key,expected_result,description
+STC-01,ws-root-a/src/a.ts,error,TS2322,Type error message 1000 chars..,42,typescript,a.ts:42:TS2322,PASS,Summary <= 8000 chars even with long messages
+STC-02,ws-root-a/src/a.ts,error,TS2304,Cannot find name 'x',10,typescript,a.ts:10:TS2304,PASS,Per-file cap 20 enforced
+STC-02,ws-root-a/src/b.ts,error,TS2304,Cannot find name 'x',11,typescript,b.ts:11:TS2304,PASS,Total cap 50 enforced across files
+STC-03,ws-root-a/src/a.ts,error,TS2304,Cannot find name 'x',10,typescript,a.ts:10:TS2304,PASS,Dedupe removes exact duplicate
+STC-03,ws-root-a/src/a.ts,error,TS2304,Cannot find name 'x',10,typescript,a.ts:10:TS2304,PASS,Duplicate kept only once
+STC-04,ws-root-b/src/util.ts,warning,TS6133,Unused variable,5,typescript,util.ts:5:TS6133,PASS,Filtered out — file not touched
+STC-05,ws-root-a/src/a.ts,hint,ESLINT-2001,Formatting suggestion,7,eslint,a.ts:7:ESLINT-2001,PASS,All severities eligible for summary
+STC-08,ws-root-a/src/big.ts,error,TS1005,Line 9999 clamp test,9999,typescript,big.ts:9999:TS1005,PASS,lineCountSafe clamps 9999 to file length
+STC-10,ws-root-a/src/a.ts,error,TS2304,Burst event A,1,typescript,a.ts:1:TS2304,PASS,200 events in 100 ms -> one batch
+STC-10,ws-root-a/src/a.ts,error,TS2304,Burst event B,1,typescript,a.ts:1:TS2304,PASS,200 events in 100 ms -> one batch
+STC-12,ws-root-a/../outside.ts,error,ESLINT-1001,Outside file,3,eslint,outside.ts:3:ESLINT-1001,SKIP,Out-of-workspace URI excluded
+STC-13,ws-root-a/src/a.ts,warning,TS6133,Untouched file diagnostic,9,typescript,a.ts:9:TS6133,SKIP,Filter drops non-touched file
+STC-16,ws-root-a/src/a.ts,error,TS2304,Five-field entry check,42,typescript,a.ts:42:TS2304,PASS,Entry renders file|line|severity|code|message
+STC-18,ws-root-a/src/a.ts,error,TS1005,Storm entry,3,typescript,a.ts:3:TS1005,PASS,Event storm capped at 50 entries
+STC-19,ws-root-a/src/a.ts,error,TS2304,Budget near limit,88,typescript,a.ts:88:TS2304,PASS,8000-char budget honored
+STC-59,ws-root-a/src/a.ts,error,TS1005,Real pipeline cap check,4,typescript,a.ts:4:TS1005,PASS,Caps enforced in full pipeline
+STC-65,ws-root-a/src/a.ts,error,TS2304,No per-event LLM round-trip,5,typescript,a.ts:5:TS2304,PASS,E2E-API NFR check

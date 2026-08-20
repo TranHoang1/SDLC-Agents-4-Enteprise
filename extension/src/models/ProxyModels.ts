@@ -4,7 +4,7 @@
  */
 
 /** Proxy operating mode */
-export type ProxyMode = "none" | "system" | "manual" | "curl";
+export type ProxyMode = "none" | "system" | "manual" | "curl" | "powershell";
 
 /** Persisted proxy configuration (VS Code settings) */
 export interface ProxyConfig {

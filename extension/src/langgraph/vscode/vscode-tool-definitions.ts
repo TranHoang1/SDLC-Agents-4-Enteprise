@@ -35,6 +35,16 @@ export const VSCODE_TOOL_DEFINITIONS: McpToolDefinition[] = [
     description: "Get the list of currently open files in the editor.",
     inputSchema: { type: "object", properties: {} },
   },
+  {
+    name: "web_search",
+    description: "Search the web using SearXNG/DuckDuckGo. Returns structured results with title, URL, and snippet.",
+    inputSchema: { type: "object", properties: { query: { type: "string", description: "Search query" }, num_results: { type: "number", description: "Max results 1-10 (default 5)" }, category: { type: "string", description: "Search category (default: general)" }, language: { type: "string", description: "Language code (default: en)" } }, required: ["query"] },
+  },
+  {
+    name: "fetch_url",
+    description: "Fetch and extract text content from a web URL. Strips HTML, returns plain text.",
+    inputSchema: { type: "object", properties: { url: { type: "string", description: "URL to fetch (http/https)" }, mode: { type: "string", description: "full (default) or truncated" }, max_length: { type: "number", description: "Max chars to return (default 50000)" } }, required: ["url"] },
+  },
 ];
 
 const VSCODE_TOOL_NAMES = new Set(VSCODE_TOOL_DEFINITIONS.map(t => t.name));

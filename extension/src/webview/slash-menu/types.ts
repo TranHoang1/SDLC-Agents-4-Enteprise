@@ -33,7 +33,7 @@ export interface SlashSteeringRule {
   icon: string;
 }
 
-export type SlashItemType = 'agent' | 'steering';
+export type SlashItemType = 'agent' | 'steering' | 'command';
 
 export interface SlashMenuItem {
   id: string;
@@ -52,6 +52,7 @@ export interface SlashMenuOptions {
   inputElement: HTMLElement;
   onAgentSelect: (agentName: string) => void;
   onSteeringSelect: (rule: SlashSteeringRule) => void;
+  onCommandSelect?: (commandId: string) => void;
   onClose: () => void;
 }
 

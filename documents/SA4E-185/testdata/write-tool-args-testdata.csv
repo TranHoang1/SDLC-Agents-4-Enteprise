@@ -1,0 +1,14 @@
+test_case_id,toolName,args_path,expected_classification,description
+STC-14,write_file,{workspace}/src/a.ts,write,OI-1 regression — write_file must classify as write
+STC-14,fs_write,{workspace}/src/b.ts,write,fs_write must classify as write
+STC-14,stream_write_file,{workspace}/src/c.ts,write,stream_write_file must classify as write
+STC-15,str_replace,{workspace}/src/a.ts,write,str_replace must classify as write (DANGEROUS_TOOL_PATTERNS C-2)
+STC-15,fs_append,{workspace}/src/a.ts,write,fs_append must classify as write
+STC-14,read_file,{workspace}/src/a.ts,read,Read tool must NOT mark touched
+STC-14,get_diagnostics,{workspace}/src/a.ts,read,Pull tool must NOT mark touched — fallback unchanged
+STC-14,apply_edit,{workspace}/src/a.ts,unknown,Unknown tool -> allowlist fallback write? per DR-1 classification
+STC-39,write_file,{workspace}/src/a.ts,write,IT regression — HookEngine classification fixed after DR-1
+STC-39,write_file,{workspace}/src/b.ts,write,IT regression — second write marks second file touched
+STC-38,write_file,{workspace}/src/a.ts,write,IT — HookEngine call sequence verified
+STC-53,write_file,{workspace}/src/a.ts,write,IT — full hook suite after DR-1 (C-8), no command hook auto-fire
+STC-61,write_file,{workspace}/src/a.ts,write,Approval gate required before auto-fix write proceeds

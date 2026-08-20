@@ -22,16 +22,26 @@ import {
   createFetchToolsNode, createAgentStepNode,
   createExecuteToolsNode, createSynthesizeNode,
 } from "./chat-graph-nodes";
+import { createInjectDiagnosticsNode } from "../diagnostics/inject-diagnostics-node";
+import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
 import { createVerifyResponseNode, routeAfterVerify } from "./verify-node";
 import {
   createRetrieveEvaluatorNode, createHallucinationGraderNode,
   routeAfterHallucinationGrade, getDefaultRagGraderConfig,
 } from "./rag-grader-nodes";
 import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import type { AgentConfigResolver } from "../agents/agent-config-resolver";
 
 const MAX_AGENT_ITERATIONS = 12;
 
-const AGENT_SYSTEM_PROMPT = `You are a coding assistant with access to workspace tools. You can read files, search code, and list directories.
+const AGENT_SYSTEM_PROMPT = `You are a coding assistant with access to workspace tools and web tools. You can read files, search code, list directories, search the web (web_search), and fetch URL content (fetch_url).
+
+## TOOL USAGE RULES (MANDATORY):
+- When user asks to search the web, find information online, or look up anything external → ALWAYS call web_search tool. Never say "I cannot search the web".
+- When user asks to read a URL or webpage → ALWAYS call fetch_url tool.
+- When user asks about files/code → use read_file, search_text, list_directory.
+- When user asks about project knowledge → use mem_search.
+- NEVER refuse to use a tool that is in your tool list. If user asks you to use a specific tool, CALL IT.
 
 ## PROJECT OVERVIEW:
 - **SDLC-Agents-4-Enterprise** — multi-agent SDLC pipeline (agents: SM, BA, TA, SA, QA, DEV, DevOps, Security, UI).
@@ -167,7 +177,7 @@ function routeAfterToolExec(state: PipelineState): string {
   // Stop if pipeline failed (LLM crash during tool execution cycle)
   if (state.pipelineStatus === "failed") return "synthesize";
   if ((state.agentIterations || 0) >= MAX_AGENT_ITERATIONS) return "synthesize";
-  return "agent_step";
+  return "inject_diagnostics"; // BR-7: re-enter feed node each iteration
 }
 
 export async function buildChatSubgraph(
@@ -176,7 +186,9 @@ export async function buildChatSubgraph(
   mcpBridge?: McpBridge,
   workspaceRoot?: string,
   hookEngine?: HookEngine,
-  approvalGate?: ToolApprovalGate
+  approvalGate?: ToolApprovalGate,
+  agentConfigResolver?: AgentConfigResolver,
+  diagnosticsFeed?: DiagnosticsFeedService
 ) {
   const toolRegistry = mcpBridge ? new ToolRegistry(mcpBridge) : null;
   const wsRoot = workspaceRoot || require("vscode").workspace.workspaceFolders?.[0]?.uri.fsPath || "";
@@ -213,13 +225,43 @@ export async function buildChatSubgraph(
     enrichedSystemPrompt = `${enrichedSystemPrompt}\n\n# Agent Instructions\n${agentInstructions}`;
   }
 
-  // SA4E-85 v3.1: Factory-supplied function that builds final LLM-ready system prompt
-  // from base + steering + KB context + user prompt (kbContext from state).
+  // SA4E-85 v3.1 + SA4E-186: Factory-supplied function that builds final LLM-ready system prompt.
+  // Per-agent mode: use only the selected agent's body.
+  // Fallback mode: use concatenated all-agents instructions (existing behavior).
   function buildFinalSystemPrompt(state: PipelineState): string {
-    if (state.kbContext) {
-      return `${enrichedSystemPrompt}\n\n---\n${state.kbContext}\n---`;
+    let prompt = enrichedSystemPrompt;
+
+    // SA4E-186: Dynamic per-agent prompt switching
+    const activeConfig = agentConfigResolver?.getActiveConfig();
+    if (activeConfig && activeConfig.systemPromptBody) {
+      // Per-agent mode — replace concatenated instructions with selected agent body
+      prompt = `${AGENT_SYSTEM_PROMPT}`;
+      // Re-inject steering rules (already computed above)
+      try {
+        if (wsRoot) {
+          // Steering already in enrichedSystemPrompt, but for per-agent mode we
+          // start from base + steering only (remove all-agent instructions).
+          const steeringPart = enrichedSystemPrompt.replace(
+            /\n\n# Agent Instructions\n[\s\S]*$/,
+            ""
+          );
+          prompt = steeringPart;
+        }
+      } catch { /* use enrichedSystemPrompt as-is */ }
+      prompt += `\n\n# Agent Instructions\n\n${activeConfig.systemPromptBody}`;
     }
-    return enrichedSystemPrompt;
+
+    if (state.kbContext) {
+      prompt = `${prompt}\n\n---\n${state.kbContext}\n---`;
+    }
+    if (state.diagnosticsContext) {
+      prompt += `\n\n<<<BEGIN_DIAGNOSTICS_DATA>>>\n${state.diagnosticsContext}\n<<<END_DIAGNOSTICS_DATA>>>`;
+      // BR-11: auto-fix advisory when ≥1 error entry for a touched file
+      if (/\berror\b/.test(state.diagnosticsContext)) {
+        prompt += `\n\nYou may attempt to fix the errors above using your write tools. This is advisory — decide what to change. Existing approval gates still apply.`;
+      }
+    }
+    return prompt;
   }
 
   const verifyNode = createVerifyResponseNode(llmProvider, streamHandler);
@@ -243,17 +285,21 @@ export async function buildChatSubgraph(
 
   if (ragConfig.enableHallucinationGrade) {
     // Graph with Corrective RAG nodes for small models
+    const getAgentConfig = () => agentConfigResolver?.getActiveConfig() ?? null;
+    const injectDiag = createInjectDiagnosticsNode(diagnosticsFeed ?? null);
     const graph = new StateGraph(PipelineAnnotation)
       .addNode("fetch_tools", fetchToolsWithBudget)
-      .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt))
-      .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate))
+      .addNode("inject_diagnostics", injectDiag)
+      .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt, getAgentConfig))
+      .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate, getAgentConfig, diagnosticsFeed))
       .addNode("verify_response", verifyNode)
       .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, buildFinalSystemPrompt))
       .addNode("hallucination_grader", createHallucinationGraderNode(llmProvider, streamHandler, ragConfig))
       .addEdge("__start__", "fetch_tools")
-      .addEdge("fetch_tools", "agent_step")
+      .addEdge("fetch_tools", "inject_diagnostics")
+      .addEdge("inject_diagnostics", "agent_step")
       .addConditionalEdges("agent_step", routeAgentStep, { execute_tools: "execute_tools", verify_response: "verify_response" })
-      .addConditionalEdges("execute_tools", routeAfterToolExec, { agent_step: "agent_step", synthesize: "synthesize" })
+      .addConditionalEdges("execute_tools", routeAfterToolExec, { inject_diagnostics: "inject_diagnostics", synthesize: "synthesize" })
       .addConditionalEdges("verify_response", routeAfterVerify, { execute_tools: "execute_tools", agent_step: "agent_step", __end__: "hallucination_grader" })
       .addConditionalEdges("hallucination_grader", routeAfterHallucinationGrade, { agent_step: "agent_step", __end__: END })
       .addEdge("synthesize", END);
@@ -262,17 +308,21 @@ export async function buildChatSubgraph(
   }
 
   // Standard graph without RAG grading (large models)
+  const getAgentConfig = () => agentConfigResolver?.getActiveConfig() ?? null;
+  const injectDiag = createInjectDiagnosticsNode(diagnosticsFeed ?? null);
   const graph = new StateGraph(PipelineAnnotation)
     .addNode("fetch_tools", fetchToolsWithBudget)
-    .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt))
-    .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate))
+    .addNode("inject_diagnostics", injectDiag)
+    .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt, getAgentConfig))
+    .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate, getAgentConfig, diagnosticsFeed))
     .addNode("verify_response", verifyNode)
     .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, buildFinalSystemPrompt))
     .addEdge("__start__", "fetch_tools")
-    .addEdge("fetch_tools", "agent_step")
+    .addEdge("fetch_tools", "inject_diagnostics")
+    .addEdge("inject_diagnostics", "agent_step")
     .addConditionalEdges("agent_step", routeAgentStep, { execute_tools: "execute_tools", verify_response: "verify_response" })
     .addConditionalEdges("verify_response", routeAfterVerify, { execute_tools: "execute_tools", agent_step: "agent_step", __end__: END })
-    .addConditionalEdges("execute_tools", routeAfterToolExec, { agent_step: "agent_step", synthesize: "synthesize" })
+    .addConditionalEdges("execute_tools", routeAfterToolExec, { inject_diagnostics: "inject_diagnostics", synthesize: "synthesize" })
     .addEdge("synthesize", END);
 
   return graph.compile();

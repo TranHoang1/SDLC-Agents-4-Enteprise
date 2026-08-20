@@ -128,11 +128,12 @@ export class GraphSyncService {
   }
 
   private async readTopSymbols(projectId: string): Promise<CodeSymbolRow[]> {
+    // Standard code kinds + all pega_* kinds (pattern match)
     const placeholders = CODE_KINDS.map(() => '?').join(',');
     return this.indexAdapter.allAsync<CodeSymbolRow>(
       `SELECT s.id, s.name, s.kind, f.relative_path
        FROM symbols s JOIN files f ON s.file_id = f.id
-       WHERE s.project_id = ? AND s.kind IN (${placeholders})
+       WHERE s.project_id = ? AND (s.kind IN (${placeholders}) OR s.kind LIKE 'pega_%')
        ORDER BY (s.is_exported = 1) DESC, s.complexity DESC`,
       [projectId, ...CODE_KINDS],
     );

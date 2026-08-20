@@ -9,6 +9,7 @@ import type { ProxyTestInput, ProxyTestResult, ProxyCredentials } from "../model
 import type { ProxyDetectionService } from "./ProxyDetectionService";
 import { VscodeProxyResolverService } from "./VscodeProxyResolverService";
 import { CurlTransport } from "./CurlTransport";
+import { PowerShellTransport } from "./PowerShellTransport";
 
 const TEST_URL = "https://httpbin.org/get";
 const TEST_TIMEOUT_MS = 10_000;
@@ -34,6 +35,10 @@ export class ProxyTestService {
     // Curl mode: test via curl.exe subprocess
     if (input.mode === "curl") {
       return this.testViaCurl(input, targetUrl);
+    }
+    // PowerShell mode: test via Invoke-WebRequest subprocess
+    if (input.mode === "powershell") {
+      return this.testViaPowerShell(input, targetUrl);
     }
     const proxyUrl = await this.resolveTestProxyUrl(input);
     if (!proxyUrl) {
@@ -149,6 +154,28 @@ export class ProxyTestService {
     try {
       const latencyMs = await transport.testConnection(targetUrl, proxyUrl || undefined, proxyAuth);
       return { success: true, message: "Curl proxy connection successful", latencyMs };
+    } catch (err: unknown) {
+      return { success: false, message: (err as Error).message };
+    }
+  }
+
+  /**
+   * Test connectivity via PowerShell Invoke-WebRequest subprocess.
+   * Supports NTLM/Kerberos SSO via -ProxyUseDefaultCredentials.
+   */
+  private async testViaPowerShell(
+    input: ProxyTestInput,
+    targetUrl: string
+  ): Promise<ProxyTestResult> {
+    const isAvailable = await PowerShellTransport.isAvailable();
+    if (!isAvailable) {
+      return { success: false, message: "PowerShell not found — use another proxy mode" };
+    }
+    const proxyUrl = input.host ? `http://${input.host}:${input.port}` : null;
+    const transport = new PowerShellTransport(proxyUrl);
+    try {
+      const latencyMs = await transport.testConnection(targetUrl, proxyUrl);
+      return { success: true, message: "PowerShell proxy connection successful", latencyMs };
     } catch (err: unknown) {
       return { success: false, message: (err as Error).message };
     }

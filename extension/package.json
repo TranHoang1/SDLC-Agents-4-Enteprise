@@ -2,7 +2,7 @@
   "name": "sdlc-agents-4-enterprise",
   "displayName": "SDLC Agents 4 Enterprise",
   "description": "Multi-agent SDLC pipeline for enterprise — 9 AI agents (SM, BA, TA, SA, QA, DEV, DevOps, Security, UI) orchestrated via MCP",
-  "version": "1.30.1",
+  "version": "1.32.1",
   "publisher": "dnguyenminh",
   "license": "MIT",
   "repository": {
@@ -219,6 +219,11 @@
           "default": true,
           "description": "Enable/disable the local MCP wrapper server on startup"
         },
+        "kiroSdlc.enableDiagnosticsFeed": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable the realtime LSP diagnostics feed into the agent loop (batched, agent-touched files only)"
+        },
         "kiroSdlc.mcpServerUrl": {
           "type": "string",
           "default": "",
@@ -328,15 +333,17 @@
             "none",
             "system",
             "manual",
-            "curl"
+            "curl",
+            "powershell"
           ],
           "default": "system",
-          "description": "Proxy mode: none (direct), system (auto-detect), manual (user-configured), curl (curl.exe subprocess for NTLM/EDR)",
+          "description": "Proxy mode: none (direct), system (auto-detect), manual (user-configured), curl (curl.exe subprocess for NTLM/EDR), powershell (Invoke-WebRequest with NTLM/SSO)",
           "enumDescriptions": [
             "Direct connection — no proxy",
             "Auto-detect via VS Code proxy settings (http.proxy, http.proxySupport, http.noProxy, env vars) with OS-native fallback",
             "Manual configuration — specify proxy host and port",
-            "Curl subprocess — uses curl.exe with NTLM SSO for corporate EDR environments where node.exe is blocked"
+            "Curl subprocess — uses curl.exe with NTLM SSO for corporate EDR environments where node.exe is blocked",
+            "PowerShell subprocess — uses Invoke-WebRequest with -ProxyUseDefaultCredentials for corporate NTLM/Kerberos SSO"
           ]
         },
         "kiroSdlc.proxy.host": {

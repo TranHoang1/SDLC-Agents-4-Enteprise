@@ -64,6 +64,8 @@ export class ProxyAgentFactory {
     if (config.mode === "none") { return undefined; }
     // Curl mode bypasses undici entirely — HttpClient uses CurlTransport directly
     if (config.mode === "curl") { return undefined; }
+    // PowerShell mode bypasses undici entirely — HttpClient uses PowerShellTransport directly
+    if (config.mode === "powershell") { return undefined; }
 
     let proxyUrl: string | null;
     if (config.mode === "manual") {

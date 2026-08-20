@@ -1,0 +1,14 @@
+test_case_id,path_input,workspace_root,expected_contained,description
+STC-07,src/app.ts,ws-root-a,true,Relative path inside workspace — allowed
+STC-07,../outside.ts,ws-root-a,false,Traversal up — rejected
+STC-07,../..//etc/passwd,ws-root-a,false,Deep traversal escape — rejected
+STC-07,/abs/path.ts,ws-root-a,false,Absolute POSIX path outside — rejected
+STC-07,C:\Users\evil\file.ts,ws-root-a,false,Windows absolute path — rejected
+STC-07,ws-root-a/src/victim.ts,ws-root-a,true,Subdirectory reference inside root — allowed
+STC-63,C:\ws-root-a\src\ok.ts,ws-root-a,true,Windows-relative inside same drive root — allowed
+STC-63,C:\ws-root-a\..\secret.txt,ws-root-a,false,Windows traversal with backslash — rejected
+STC-63,//server/share/evil.ts,ws-root-a,false,UNC path — rejected
+STC-63,C:\OTHER\file.ts,ws-root-a,false,Drive-letter case / other drive — rejected
+STC-63,c:\ws-root-a\src\ok.ts,ws-root-a,true,Lowercase drive letter same root — allowed (case-insensitive)
+STC-07,file:///ws-root-a/src/ok.ts,ws-root-a,true,file:// URI decode then containment
+STC-07,file:///ws-root-a/../evil.ts,ws-root-a,false,file:// URI traversal — rejected

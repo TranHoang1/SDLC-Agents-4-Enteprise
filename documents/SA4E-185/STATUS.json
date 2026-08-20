@@ -1,0 +1,31 @@
+{
+  "ticket": "SA4E-185",
+  "summary": "LSP Diagnostics Feed — Realtime errors into agent loop",
+  "autonomyLevel": "L3",
+"currentPhase": "implementation",
+  "architecturePattern": "plugin",
+  "phases": {
+    "requirements": { "status": "done", "file": "BRD.md", "version": 1, "completedAt": "2026-08-20T00:04:00Z" },
+    "specification": { "status": "done", "file": "FSD.md", "version": 1, "completedAt": "2026-08-20T06:02:00Z" },
+    "design": { "status": "done", "file": "TDD.md", "version": 1, "completedAt": "2026-08-20T06:15:00Z" },
+    "feedback_loop": { "status": "not_started", "iterations": 0, "maxIterations": 5 },
+    "security_design_review": { "status": "done", "file": "SECURITY-DESIGN-REVIEW.md", "completedAt": "2026-08-20T06:23:00Z" },
+    "test_planning": { "status": "done", "file": "STP.md", "version": 1, "completedAt": "2026-08-20T06:44:00Z" },
+    "devops_pipeline_setup": { "status": "done", "file": "ci-sa4e-185.yml", "completedAt": "2026-08-20T06:50:00Z", "securityGates": ["F-01", "F-02", "F-03"], "autonomyLevel": "L3", "testRun": { "status": "completed", "passed": 1310, "failed": 12, "note": "12 pre-existing failures in auth/slash-menu, unrelated to SA4E-185" } },
+    "implementation": { "status": "in_progress", "startedAt": "2026-08-20T07:00:00Z" },
+    "security_code_review": { "status": "not_started" },
+    "testing": { "status": "not_started" },
+    "pentest": { "status": "not_started" },
+    "security_deploy_review": { "status": "not_started" },
+    "deployment": { "status": "not_started" }
+  },
+  "tokenBudget": {
+    "dailyCap": 500000,
+    "usedToday": 0,
+    "lastReset": "2026-08-19T00:00:00Z",
+    "warningThreshold": 0.8,
+    "mode": "normal"
+  },
+  "circuitBreaker": {},
+  "lastUpdated": "2026-08-20T06:50:00Z"
+}

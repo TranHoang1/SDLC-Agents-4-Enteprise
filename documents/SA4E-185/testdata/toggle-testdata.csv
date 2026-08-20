@@ -1,0 +1,18 @@
+test_case_id,setting_value,event_sequence,expected_behavior,description
+STC-20,false,single_event_ignored,NO_SUMMARY,Disabled — event in -> no batch, no summary
+STC-20,false,burst_during_disabled,NO_SUMMARY,Disabled — 5 events -> no flush
+STC-21,true,event_then_flush,SUMMARY,Resume — summary injected after re-enable
+STC-21,true,false_resume_true,SUMMARY,Immediate apply — no reload required (BR-9)
+STC-22,true,burst_then_disable_before_flush,DISCARD,Discard pending on disable before debounce elapses
+STC-22,true,disable_during_batch,DISCARD,Batch in flight stopped on disable
+STC-23,true,initial_activation,ENABLED,Default on when setting undefined (BR-8)
+STC-25,headless,get_config_throws,HEADLESS_DISABLED,Headless read -> feed disabled (TC-19)
+STC-27,true,buffer_then_epoch_change,STALE_DISCARDED,Epoch guard discards stale debounce flush (RC-1)
+STC-34,true,summary_with_toggle_indicator,HEADER_PRESENT,Header shows toggle state
+STC-45,false,graph_invoke,NO_INJECT,IT — disabled feed never injects in graph
+STC-57,true,false_true_rapid,RESUMES,DISPOSE_EVENT>INSIDE_WINDOW=Epoch,STALE flush from disposed instance ignored
+STC-58,true,multi_toggle_race,LAST_FLUSH_WINS,Rapid toggle — only last flush timestamp survives (RC-5)
+STC-66,true,schema_inspection,REGISTERED,Setting registered in package.json contributes.configuration
+STC-67,true,onDidChangeConfiguration,APPLIED_INSTANTLY,Live toggle applied without reload
+STC-70,false,normal_task,STATUS_QUO,Disabled -> loop behavior unchanged; fallback get_diagnostics works
+STC-71,restart,dispose_session,STATE_CLEARED,Extension restart clears touch set and buffer (RC-6)

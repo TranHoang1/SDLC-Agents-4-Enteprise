@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.30.1-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.32.1-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -242,6 +242,15 @@ MIT
 ---
 
 ## Changelog
+
+### v1.32.0 (2026-08-19)
+
+- **SA4E-186: Agent Runtime Routing** — Dynamic slash menu from `.kiro/agents/*.md`, per-agent model/tool config, AgentSelector dropdown in ChatHeader.
+- **SA4E-184: Web Search native in Extension** — `web_search` + `fetch_url` as native VS Code tools (DuckDuckGo Lite, no SearXNG needed).
+
+### v1.31.0 (2026-08-19)
+
+- **SA4E-196: Fix GraphSyncService drops Pega symbols on re-index** — `readTopSymbols()` now includes `pega_*` kinds. Prevents stale graph_nodes causing "No content available" in detail panel.
 
 ### v1.30.1 (2026-08-19)
 
