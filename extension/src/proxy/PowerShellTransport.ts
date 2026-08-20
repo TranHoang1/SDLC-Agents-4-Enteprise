@@ -135,6 +135,16 @@ export class PowerShellTransport {
     });
   }
 
+  /** Quick connectivity test — returns latency in ms */
+  async testConnection(url: string, proxyUrl?: string | null): Promise<number> {
+    const start = Date.now();
+    const response = await this.request(url, { method: "GET", timeout: 10000 });
+    if (!response.ok && response.status !== 301 && response.status !== 302) {
+      throw new PowerShellTransportError(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return Date.now() - start;
+  }
+
   /** Check if PowerShell is available */
   static async isAvailable(): Promise<boolean> {
     try {
