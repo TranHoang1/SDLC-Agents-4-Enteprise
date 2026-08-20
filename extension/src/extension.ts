@@ -389,6 +389,9 @@ function openAgenticChat(context: vscode.ExtensionContext, workspaceRoot: string
       contextManager,
       toolHandler,
       sessionManager: sessionManager!,
+      // SA4E-185 C-2 (B1): share the engine's approval gate so webview
+      // TOOL_CALL_RESPONSE resolves the same gate the LangGraph chat path blocks on.
+      approvalGate: (engine as any).approvalGate,
     });
 
     chatEngineAdapter.initialize();

@@ -333,7 +333,10 @@ export class DiagnosticsFeedService implements vscode.Disposable {
     // Reject absolute paths outside workspace
     if (path.startsWith("/") || /^[A-Za-z]:/.test(path)) {
       if (!path.startsWith(wsRootNorm)) return null; // C-3: escape
-      return path.slice(wsRootNorm.length);
+      const rel = path.slice(wsRootNorm.length);
+      // Reject traversal segments inside workspace prefix (e.g. C:/ws/test/../../etc/passwd)
+      if (rel.split("/").includes("..")) return null; // C-3: escape via .. inside root
+      return rel;
     }
 
     // Reject relative traversal (../ etc.)
