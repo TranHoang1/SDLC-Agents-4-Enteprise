@@ -252,24 +252,8 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production
     steps:
-      - name: Wait for UAT Approval
-        uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ github.token }}
-          approvers: 'product-owner,tech-lead'
-          minimum-approvals: 1
-          issue-title: 'SA4E-185 UAT Required - LSP Diagnostics Feed'
-          issue-body: |
-            Please verify the LSP Diagnostics Feed feature:
-            - Real-time diagnostics appear in agent loop
-            - Auto-fix advisory triggers correctly
-            - No prompt injection vulnerabilities (F-01)
-            - Approval gate blocks dangerous writes (F-02)
-            - Path containment works (F-03)
-            
-            Security Review: SECURITY-DESIGN-REVIEW.md conditions C-1, C-2, C-3 closed
-            
-            Approve to proceed to deployment.
+      - name: UAT Approved
+        run: echo "UAT approved via GitHub environment protection rule"
 
   # Phase 10: Deploy (Manual - L3 exception)
   deploy:
