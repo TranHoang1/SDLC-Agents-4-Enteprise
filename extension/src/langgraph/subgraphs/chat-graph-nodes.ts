@@ -15,6 +15,7 @@ import { debugLog, debugError } from "../../debug-logger";
 import { buildBudgetAwareMessages, estimateMessagesTokens, getDynamicToolResultLimits } from "../core/context-budget";
 import { requiresApproval } from "../../chat/engine/ToolApprovalClassifier";
 import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import type { CommandPatternMatcher } from "../../chat/engine/CommandPatternMatcher";
 import type { ActiveAgentConfig } from "../agents/agent-config-resolver";
 import { filterTools, isToolAllowed, buildToolBlockedMessage } from "../agents/tool-filter";
 import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
@@ -237,7 +238,8 @@ async function agentStepStreaming(
 export function createExecuteToolsNode(
   mcpBridge: McpBridge | undefined, sh: StreamHandler, hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate,
   getAgentConfig?: () => ActiveAgentConfig | null,
-  diagnosticsFeed?: DiagnosticsFeedService
+  diagnosticsFeed?: DiagnosticsFeedService,
+  commandPatternMatcher?: CommandPatternMatcher
 ) {
   return async (state: PipelineState) => {
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
@@ -260,7 +262,7 @@ export function createExecuteToolsNode(
         continue;
       }
 
-      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate, diagnosticsFeed);
+      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate, diagnosticsFeed, commandPatternMatcher);
       results.push(r);
     }
 
@@ -293,7 +295,8 @@ async function executeSingleTool(
   call: { id: string; name: string; arguments: Record<string, unknown> },
   mcpBridge: McpBridge | undefined, sh: StreamHandler, streamId: string,
   hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate,
-  diagnosticsFeed?: DiagnosticsFeedService
+  diagnosticsFeed?: DiagnosticsFeedService,
+  commandPatternMatcher?: CommandPatternMatcher
 ): Promise<{ toolCallId: string; name: string; content: string }> {
   const tcId = call.id || `tc-${Date.now()}`;
 
@@ -304,8 +307,16 @@ async function executeSingleTool(
     } catch (e) { debugError(`preToolUse hook error`, e as Error); }
   }
 
+  // Pattern-based auto-approve for shell commands
+  const isShellTool = call.name === "execute_shell" || call.name === "shell_execute" || call.name === "execute_pwsh";
+  const shellCommand = isShellTool ? (call.arguments?.command as string || "") : "";
+  const patternMatch = isShellTool && commandPatternMatcher ? commandPatternMatcher.matches(shellCommand) : null;
+  if (patternMatch) {
+    debugLog(`[execute_tools] Auto-approved '${shellCommand}' via pattern '${patternMatch}'`);
+  }
+
   // SA4E-85: Signal dangerous tool to webview and AWAIT approval before execution
-  const needsApproval = requiresApproval(call.name);
+  const needsApproval = patternMatch ? false : requiresApproval(call.name);
   sh.emitDirect({ type: "chat:toolCall", toolCall: { id: tcId, name: call.name, args: call.arguments, status: "running" }, requiresApproval: needsApproval } as any);
 
   if (needsApproval && approvalGate) {

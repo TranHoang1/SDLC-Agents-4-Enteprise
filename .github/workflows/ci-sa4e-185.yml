@@ -206,9 +206,8 @@ jobs:
       - name: Run Security Agent Code Review
         run: |
           echo "Running security code review for SA4E-185..."
-          # This would invoke the security-agent to review implemented code
-          # against SECURITY-DESIGN-REVIEW.md conditions C-1, C-2, C-3
-          npx tsx .opencode/scripts/security-code-review.ts SA4E-185 || true
+          echo "Verifying C-1 (fencing), C-2 (approval gate), C-3 (path containment) against source..."
+          npx tsx scripts/security-code-review.ts SA4E-185
 
   # Phase 8: Deploy Readiness - Package extension
   package:
@@ -290,7 +289,7 @@ jobs:
           path: ./vsix
 
       - name: Publish to VS Code Marketplace
-        run: npx vsce publish -p ${{ secrets.VSCE_PAT }} ./vsix/*.vsix
+        run: npx vsce publish -p "$VSCE_PAT" ./vsix/*.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 

@@ -1,96 +1,59 @@
 /**
  * Diagnostics Context Channel Tests — SA4E-185
  * Covers STC-31: diagnosticsContext channel reducer + consume-once
+ *
+ * NOTE: rewritten for @langchain/langgraph >= 1.4 (Annotation.Root no longer
+ * exposes .State / .channels accessors). Channel semantics (default "",
+ * last-write-wins, clear-to-"") are exercised through a real compiled graph.
  */
 
 import { describe, it, expect } from "vitest";
-import { Annotation } from "@langchain/langgraph";
-import type { PipelineState } from "../core/state";
+import { Annotation, StateGraph, START, END } from "@langchain/langgraph";
 
-// Re-create the annotation locally for testing (mirrors state.ts)
+// Mirrors the channel contracts in core/state.ts (kbContext pattern, BR-7).
 const TestPipelineAnnotation = Annotation.Root({
   kbContext: Annotation<string>({ reducer: (_e, u) => u, default: () => "" }),
   diagnosticsContext: Annotation<string>({ reducer: (_e, u) => u, default: () => "" }),
 });
 
-type TestState = typeof TestPipelineAnnotation.State;
+type TestState = { kbContext: string; diagnosticsContext: string };
+
+/** Run a single-node graph whose node returns the given channel patch. */
+async function runPatch(patch: Record<string, unknown>, input: Record<string, unknown>): Promise<TestState> {
+  const graph = new StateGraph(TestPipelineAnnotation)
+    .addNode("apply", () => patch)
+    .addEdge(START, "apply")
+    .addEdge("apply", END);
+  return (await graph.compile().invoke(input)) as unknown as TestState;
+}
 
 describe("diagnosticsContext channel (STC-31)", () => {
-  it("default value is empty string", () => {
-    const initial = TestPipelineAnnotation.State.default();
-    expect(initial.diagnosticsContext).toBe("");
+  it("default value is empty string", async () => {
+    // Omit diagnosticsContext from input -> reducer default "" fills the channel
+    const state = await runPatch({}, { kbContext: "" });
+    expect(state.diagnosticsContext).toBe("");
   });
 
-  it("last-write-wins reducer", () => {
-    const state: TestState = {
-      diagnosticsContext: "",
-      kbContext: "",
-      ticketKey: "",
-      threadId: "",
-      currentPhase: "chat" as any,
-      intent: "chat" as any,
-      pipelineStatus: "running" as any,
-      resumePoint: null,
-      documents: {},
-      agentOutputs: [],
-      currentStreamId: null,
-      approvalRequired: false,
-      approvalDecision: null,
-      userFeedback: null,
-      pendingApprovals: [],
-      chatHistory: [],
-      errors: [],
-      retryCount: {},
-      createdAt: "",
-      lastUpdatedAt: "",
-      lastCheckpointAt: null,
-      feedbackIterations: 0,
-      maxFeedbackIterations: 5,
-      discrepancyFound: false,
-      previousNode: null,
-      parallelResults: {},
-      qualityGateResults: {},
-      toolCalls: null,
-      toolResults: [],
-      agentScratchpad: [],
-      agentIterations: 0,
-      verifyPassed: true,
-      verifyFeedback: null,
-      verifyAttempts: {},
-      maxVerifyAttempts: 2,
-      activeStrategy: {},
-      strategyHistory: [],
-      maxContextTokens: 0,
-      autonomyLevel: "L2" as any,
-      rawHumanInput: null,
-      analyzedIntent: null,
-      currentPhaseIndex: 0,
-      pipelineDefinition: null,
-    };
-
-    // Apply update "S1"
-    const reducer = TestPipelineAnnotation.channels.diagnosticsContext.reducer;
-    let updated = reducer(state.diagnosticsContext, "S1");
-    expect(updated).toBe("S1");
-
-    // Apply update "S2" - should win
-    updated = reducer(updated, "S2");
-    expect(updated).toBe("S2");
+  it("last-write-wins reducer", async () => {
+    // "S1" in input is replaced by "S2" returned by the node (reducer (_e,u)=>u)
+    const state = await runPatch({ diagnosticsContext: "S2" }, { kbContext: "", diagnosticsContext: "S1" });
+    expect(state.diagnosticsContext).toBe("S2");
   });
 
-  it("can be cleared to empty string (consume-once writable)", () => {
-    const reducer = TestPipelineAnnotation.channels.diagnosticsContext.reducer;
-    let value = reducer("some summary", "");
-    expect(value).toBe("");
+  it("can be cleared to empty string (consume-once writable)", async () => {
+    const state = await runPatch({ diagnosticsContext: "" }, { kbContext: "", diagnosticsContext: "some summary" });
+    expect(state.diagnosticsContext).toBe("");
   });
 
-  it("fresh default per invocation (no cross-invocation leak)", () => {
-    const defaultVal = TestPipelineAnnotation.State.default();
-    expect(defaultVal.diagnosticsContext).toBe("");
+  it("fresh default per invocation (no cross-invocation leak)", async () => {
+    const graph = new StateGraph(TestPipelineAnnotation)
+      .addNode("apply", () => ({}))
+      .addEdge(START, "apply")
+      .addEdge("apply", END)
+      .compile();
 
-    // Simulate two separate graph invocations
-    const invocation1 = TestPipelineAnnotation.State.default();
-    const invocation2 = TestPipelineAnnotation.State.default();
+    const invocation1 = (await graph.invoke({ kbContext: "" })) as unknown as TestState;
+    const invocation2 = (await graph.invoke({ kbContext: "" })) as unknown as TestState;
     expect(invocation1.diagnosticsContext).toBe("");
     expect(invocation2.diagnosticsContext).toBe("");
   });

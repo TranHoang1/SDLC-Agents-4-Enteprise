@@ -17,6 +17,8 @@ import { PipelineExtractor } from "../agents/pipeline-extractor";
 import { AgentConfigResolver } from "../agents/agent-config-resolver";
 import type { FindAgentMetaFn } from "../agents/agent-config-resolver";
 import { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
+import { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import { CommandPatternMatcher } from "../../chat/engine/CommandPatternMatcher";
 import {
   PipelineState,
   SDLCPhase,
@@ -45,6 +47,8 @@ export class LangGraphEngine {
   readonly hookEngine: HookEngine;
   readonly agentConfigResolver: AgentConfigResolver;
   readonly diagnosticsFeed: DiagnosticsFeedService;
+  readonly approvalGate: ToolApprovalGate;
+  readonly commandPatternMatcher: CommandPatternMatcher;
 
   constructor(
     private readonly mcpManager: IServerManager,
@@ -62,6 +66,10 @@ export class LangGraphEngine {
     this.llmProvider = llmProvider;
     this.hookEngine = new HookEngine(workspaceRoot);
     this.diagnosticsFeed = diagnosticsFeed ?? new DiagnosticsFeedService(workspaceRoot);
+    // SA4E-185 C-2 (B1): single approval gate shared by the LangGraph chat path
+    // and the ChatEngineAdapter webview TOOL_CALL_RESPONSE resolver (extension.ts).
+    this.approvalGate = new ToolApprovalGate();
+    this.commandPatternMatcher = new CommandPatternMatcher();
 
     // SA4E-186: Agent config resolver for per-agent runtime routing
     this.agentConfigResolver = new AgentConfigResolver(
@@ -223,7 +231,7 @@ export class LangGraphEngine {
           });
         }
       }
-      this.graph = await buildPipelineGraph(this.mcpBridge, this.streamHandler, this.checkpointer, this.llmProvider, this.hookEngine, this.agentConfigResolver, this.diagnosticsFeed);
+      this.graph = await buildPipelineGraph(this.mcpBridge, this.streamHandler, this.checkpointer, this.llmProvider, this.hookEngine, this.agentConfigResolver, this.diagnosticsFeed, this.approvalGate, this.commandPatternMatcher);
     }
     return this.graph;
   }
@@ -389,6 +397,7 @@ export class LangGraphEngine {
   dispose(): void {
     this.streamHandler.dispose();
     this.hookEngine.dispose();
+    this.approvalGate.dispose();
     this.activeThread = null;
   }
 }

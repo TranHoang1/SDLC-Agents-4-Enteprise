@@ -8,7 +8,11 @@
 const DANGEROUS_TOOL_PATTERNS: ReadonlySet<string> = new Set([
   'write_file',
   'stream_write_file',
+  'fs_write',
+  'str_replace',
+  'fs_append',
   'shell_execute',
+  'execute_shell',
   'delete_file',
   'git_commit',
   'git_push',

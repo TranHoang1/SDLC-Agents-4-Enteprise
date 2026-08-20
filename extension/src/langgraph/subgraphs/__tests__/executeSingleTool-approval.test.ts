@@ -134,4 +134,38 @@ describe('executeSingleTool — approval gate integration', () => {
     expect(result.toolResults[0].content).toBe('search results');
     expect(gate.pendingCount).toBe(0);
   });
+
+  // SA4E-185 B1/C-2: fs_write / str_replace / fs_append moved from default-safe to DANGEROUS.
+  it.each(['fs_write', 'str_replace', 'fs_append'])(
+    'should WAIT for approval before executing %s (auto-fix write family)',
+    async (toolName) => {
+      const sh = createMockStreamHandler();
+      const mcp = createMockMcpBridge('write result');
+      const executeNode = createExecuteToolsNode(mcp as any, sh as any, undefined, '/ws', gate);
+
+      const state = {
+        toolCalls: [{ id: `tc-write-${toolName}`, name: toolName, arguments: { file_path: '/ws/a.ts', content: 'x' } }],
+        currentStreamId: `stream-write-${toolName}`,
+        agentScratchpad: [],
+        maxContextTokens: 0,
+      } as any;
+
+      const resultPromise = executeNode(state);
+      let resolved = false;
+      resultPromise.then(() => { resolved = true; });
+
+      // Tool must NOT run before approval
+      await vi.advanceTimersByTimeAsync(10);
+      expect(mcp.callTool).not.toHaveBeenCalled();
+      expect(resolved).toBe(false);
+
+      // Approve → tool executes
+      gate.resolveApproval(`tc-write-${toolName}`, 'approve');
+      await vi.advanceTimersByTimeAsync(10);
+
+      const result = await resultPromise;
+      expect(mcp.callTool).toHaveBeenCalledWith(toolName, { file_path: '/ws/a.ts', content: 'x' });
+      expect(result.toolResults[0].content).toBe('write result');
+    }
+  );
 });

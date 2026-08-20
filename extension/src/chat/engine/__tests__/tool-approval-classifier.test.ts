@@ -15,6 +15,9 @@ describe('UT-TAC-01: Tool Approval Classification', () => {
     const dangerous = [
       'write_file',
       'stream_write_file',
+      'fs_write',
+      'str_replace',
+      'fs_append',
       'shell_execute',
       'delete_file',
       'git_commit',
@@ -64,10 +67,13 @@ describe('UT-TAC-02: Tool Set Accessors', () => {
   it('returns the dangerous tool set with expected members', () => {
     const tools = getDangerousTools();
     expect(tools.has('write_file')).toBe(true);
+    expect(tools.has('fs_write')).toBe(true);
+    expect(tools.has('str_replace')).toBe(true);
+    expect(tools.has('fs_append')).toBe(true);
     expect(tools.has('shell_execute')).toBe(true);
     expect(tools.has('git_push')).toBe(true);
     expect(tools.has('read_file')).toBe(false);
-    expect(tools.size).toBeGreaterThanOrEqual(9);
+    expect(tools.size).toBeGreaterThanOrEqual(12);
   });
 
   it('returns the safe tool set with expected members', () => {
