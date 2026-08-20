@@ -255,7 +255,7 @@ export async function buildChatSubgraph(
       prompt = `${prompt}\n\n---\n${state.kbContext}\n---`;
     }
     if (state.diagnosticsContext) {
-      prompt += `\n\n${state.diagnosticsContext}`;
+      prompt += `\n\n<<<BEGIN_DIAGNOSTICS_DATA>>>\n${state.diagnosticsContext}\n<<<END_DIAGNOSTICS_DATA>>>`;
       // BR-11: auto-fix advisory when ≥1 error entry for a touched file
       if (/\berror\b/.test(state.diagnosticsContext)) {
         prompt += `\n\nYou may attempt to fix the errors above using your write tools. This is advisory — decide what to change. Existing approval gates still apply.`;
