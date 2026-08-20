@@ -328,15 +328,17 @@
             "none",
             "system",
             "manual",
-            "curl"
+            "curl",
+            "powershell"
           ],
           "default": "system",
-          "description": "Proxy mode: none (direct), system (auto-detect), manual (user-configured), curl (curl.exe subprocess for NTLM/EDR)",
+          "description": "Proxy mode: none (direct), system (auto-detect), manual (user-configured), curl (curl.exe subprocess for NTLM/EDR), powershell (Invoke-WebRequest with NTLM/SSO)",
           "enumDescriptions": [
             "Direct connection — no proxy",
             "Auto-detect via VS Code proxy settings (http.proxy, http.proxySupport, http.noProxy, env vars) with OS-native fallback",
             "Manual configuration — specify proxy host and port",
-            "Curl subprocess — uses curl.exe with NTLM SSO for corporate EDR environments where node.exe is blocked"
+            "Curl subprocess — uses curl.exe with NTLM SSO for corporate EDR environments where node.exe is blocked",
+            "PowerShell subprocess — uses Invoke-WebRequest with -ProxyUseDefaultCredentials for corporate NTLM/Kerberos SSO"
           ]
         },
         "kiroSdlc.proxy.host": {

@@ -51,8 +51,9 @@
   function updateVisibility() {
     var isManual = currentMode === "manual";
     var isCurl = currentMode === "curl";
+    var isPwsh = currentMode === "powershell";
     var isNone = currentMode === "none";
-    var showConfig = isManual || isCurl;
+    var showConfig = isManual || isCurl || isPwsh;
     manualSection.style.display = showConfig ? "block" : "none";
     authSection.style.display = isManual ? "block" : "none";
     // Hide test section when mode = "none" (no proxy to test)
@@ -76,7 +77,7 @@
   // ── URL Preview ──────────────────────────────────────────────────
 
   function updateUrlPreview() {
-    if (currentMode !== "manual" && currentMode !== "curl") {
+    if (currentMode !== "manual" && currentMode !== "curl" && currentMode !== "powershell") {
       urlPreview.textContent = "";
       return;
     }
@@ -87,7 +88,10 @@
       return;
     }
     if (host && port) {
-      urlPreview.textContent = "Proxy URL: http://" + host + ":" + port;
+      var prefix = currentMode === "powershell" ? "PowerShell Proxy: " : "Proxy URL: ";
+      urlPreview.textContent = prefix + "http://" + host + ":" + port;
+    } else if (currentMode === "powershell") {
+      urlPreview.textContent = "PowerShell: using Windows SSO (no explicit proxy)";
     } else {
       urlPreview.textContent = "";
     }
