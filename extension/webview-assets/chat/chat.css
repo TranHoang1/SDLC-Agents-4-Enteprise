@@ -164,15 +164,15 @@ body {
 .context-usage-tooltip {
   display: none;
   position: absolute;
-  top: 50%;
-  left: calc(100% + 8px);
-  transform: translateY(-50%);
+  top: calc(100% + 6px);
+  left: 0;
   background: var(--vscode-editorWidget-background, #1e1e2e);
   border: 1px solid var(--vscode-panel-border, #333);
-  border-radius: 4px;
-  padding: 4px 8px;
+  border-radius: 6px;
+  padding: 8px 12px;
   font-size: 11px;
   white-space: nowrap;
+  min-width: 180px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   z-index: 200;
   pointer-events: none;

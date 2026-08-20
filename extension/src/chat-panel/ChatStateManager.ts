@@ -74,6 +74,49 @@ export class ChatStateManager {
     }
   }
 
+  /**
+   * SA4E-186: Send available agents to webview (dynamic, from .kiro/agents/*.md).
+   * Reads frontmatter to extract name + description for slash menu display.
+   */
+  sendAgentsInfo(): void {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const agentsDir = path.join(this.workspaceRoot, ".kiro", "agents");
+      if (!fs.existsSync(agentsDir)) { return; }
+
+      const agents: Array<{ id: string; name: string; description: string }> = [];
+      const files = fs.readdirSync(agentsDir).filter((f: string) => f.endsWith(".md"));
+
+      for (const file of files) {
+        const id = path.basename(file, ".md");
+        const content = fs.readFileSync(path.join(agentsDir, file), "utf-8");
+        const meta = this.parseAgentFrontmatter(content, id);
+        agents.push(meta);
+      }
+
+      if (agents.length > 0) {
+        this.sendToWebview({ type: "chat:agentsLoaded", agents } as any);
+      }
+    } catch (err) {
+      debugError("[ChatPanel] sendAgentsInfo failed", err as Error);
+    }
+  }
+
+  /** Extract name + description from agent frontmatter. */
+  private parseAgentFrontmatter(content: string, fallbackId: string): { id: string; name: string; description: string } {
+    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+    if (!match) { return { id: fallbackId, name: fallbackId, description: "" }; }
+    const yaml = match[1];
+    const nameMatch = yaml.match(/^(?:label|name):\s*(.+)$/m);
+    const descMatch = yaml.match(/^description:\s*(.+)$/m);
+    return {
+      id: fallbackId,
+      name: nameMatch ? nameMatch[1].trim().replace(/^["']|["']$/g, "") : fallbackId,
+      description: descMatch ? descMatch[1].trim().replace(/^["'>]|["']$/g, "").slice(0, 80) : "",
+    };
+  }
+
   private shouldIncludeSteeringFile(fullPath: string, validInclusions: Set<string>): boolean {
     try {
       const fs = require("fs");

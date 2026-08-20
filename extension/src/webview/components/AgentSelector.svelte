@@ -5,8 +5,7 @@
   WCAG 2.1 AA: full keyboard nav, ARIA listbox pattern.
 -->
 <script lang="ts">
-  import { agents, selectedAgentId } from '../stores/agentStore';
-  import { dispatchCommand } from '../postMessage';
+  import { agents, selectedAgentId, selectAgent as storeSelectAgent } from '../stores/agentStore';
 
   let isOpen = false;
   let buttonRef: HTMLButtonElement;
@@ -25,9 +24,9 @@
     isOpen = false;
   }
 
-  /** Select agent and dispatch swap command */
+  /** Select agent via store (SA4E-186: triggers runtime routing) */
   function selectAgent(agentId: string): void {
-    dispatchCommand('/agent swap', { agentId });
+    storeSelectAgent(agentId);
     close();
     buttonRef?.focus();
   }
@@ -133,10 +132,10 @@
   }
   .dropdown-list {
     position: absolute;
-    bottom: 100%;
+    top: 100%;
     left: 0;
     right: 0;
-    margin: 0 0 4px;
+    margin: 4px 0 0;
     padding: 4px 0;
     list-style: none;
     background: var(--vscode-dropdown-background, #252526);

@@ -1,0 +1,19 @@
+{
+  "ticket": "SA4E-186",
+  "summary": "Agent Runtime Routing — Frontmatter (tools, model), per-agent prompt switching",
+  "autonomyLevel": "L3",
+  "currentPhase": "deployment",
+  "phases": {
+    "requirements": { "status": "done", "file": "BRD.md", "version": 1, "completedAt": "2025-01-27T10:00:00Z" },
+    "specification": { "status": "done", "file": "FSD.md", "version": 1, "completedAt": "2025-01-27T11:00:00Z" },
+    "design": { "status": "done", "file": "TDD.md", "version": 1, "completedAt": "2025-01-27T12:00:00Z" },
+    "feedback_loop": { "status": "done", "iterations": 0, "maxIterations": 5 },
+    "test_planning": { "status": "done", "file": "STP.md", "version": 1, "completedAt": "2025-01-27T13:00:00Z" },
+    "implementation": { "status": "done", "completedAt": "2025-01-28T10:00:00Z" },
+    "testing": { "status": "done", "completedAt": "2025-01-28T14:00:00Z" },
+    "uat": { "status": "done", "completedAt": "2025-07-14T10:00:00Z", "result": "PASS", "notes": "User confirmed: agent selection, prompt isolation, dynamic slash menu all working" },
+    "deployment": { "status": "done", "completedAt": "2025-07-14T10:00:00Z", "version": "1.31.0", "notes": "Code merged to main, VSIX 1.31.0 packaged and installed" }
+  },
+  "jiraStatus": "Done",
+  "lastUpdated": "2025-07-14T10:00:00Z"
+}

@@ -1,0 +1,6 @@
+scenario_id,initial_agent,switch_to,messages_before,expected_model,expected_tools_count
+SC-01,code-reviewer,text-only,3,undefined,0
+SC-02,text-only,code-reviewer,2,claude-sonnet-4-20250514,3
+SC-03,code-reviewer,null,5,undefined,all
+SC-04,null,no-tools,0,gpt-4o,all
+SC-05,no-model,code-reviewer,1,claude-sonnet-4-20250514,3

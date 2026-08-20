@@ -1,0 +1,12 @@
+[
+  { "name": "mem_search", "description": "Search memory" },
+  { "name": "mem_ingest", "description": "Ingest to memory" },
+  { "name": "code_search", "description": "Search code" },
+  { "name": "code_symbols", "description": "Find symbols" },
+  { "name": "grep_search", "description": "Grep search" },
+  { "name": "read_file", "description": "Read a file" },
+  { "name": "fs_write", "description": "Write a file" },
+  { "name": "execute_pwsh", "description": "Run shell command" },
+  { "name": "find_tools", "description": "Find tools" },
+  { "name": "agent_log", "description": "Log agent action" }
+]

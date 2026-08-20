@@ -1,0 +1,111 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-182 — Compact Session Architecture" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="380" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor" value="Developer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#e1f5fe;strokeColor=#0288d1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="180" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="boundary" value="Extension — Compact Session Module" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="130" y="60" width="780" height="460" as="geometry"/>
+    </mxCell>
+    <mxCell id="ui_layer" value="UI Layer (Modified)" style="swimlane;startSize=24;fillColor=#f5f5f5;strokeColor=#666666;html=1;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="40" width="740" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="slash_menu" value="SlashMenuController&#10;/compact command" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ui_layer">
+      <mxGeometry x="20" y="30" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="chat_panel" value="ChatPanel.svelte&#10;Compact Notification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ui_layer">
+      <mxGeometry x="200" y="30" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="stream_adapter" value="StreamProtocolAdapter&#10;COMPACT_* events" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="ui_layer">
+      <mxGeometry x="560" y="30" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="engine_layer" value="Engine Layer (NEW — SA4E-182)" style="swimlane;startSize=24;fillColor=#d5e8d4;strokeColor=#82b366;html=1;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="140" width="740" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="compact_cmd" value="CompactCommand" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="engine_layer">
+      <mxGeometry x="20" y="35" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="compact_svc" value="CompactService&#10;(Orchestrator)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="engine_layer">
+      <mxGeometry x="240" y="35" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="compact_mon" value="CompactMonitor&#10;(Hysteresis)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="engine_layer">
+      <mxGeometry x="480" y="35" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="existing_layer" value="Existing Infrastructure (Unchanged)" style="swimlane;startSize=24;fillColor=#f5f5f5;strokeColor=#666666;html=1;fontSize=10;fontStyle=1;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="280" width="740" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="context_mgr" value="IdeContextManager&#10;(token tracking)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="existing_layer">
+      <mxGeometry x="20" y="35" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="pipeline_state" value="PipelineState&#10;chatHistory channel" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="existing_layer">
+      <mxGeometry x="210" y="35" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="session_mgr" value="SessionManager&#10;(KB threads)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="existing_layer">
+      <mxGeometry x="400" y="35" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="llm_provider" value="LlmProvider&#10;(Anthropic)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="existing_layer">
+      <mxGeometry x="580" y="35" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="compact_config" value="CompactConfig&#10;(VS Code Settings)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="existing_layer">
+      <mxGeometry x="20" y="100" width="150" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="kb_service" value="Knowledge Service&#10;(Backend KB)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="existing_layer">
+      <mxGeometry x="400" y="100" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="/compact" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="actor" target="slash_menu">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="dispatch" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="slash_menu" target="compact_cmd">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="executeCompact('manual')" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="compact_cmd" target="compact_svc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="executeCompact('auto')" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="compact_mon" target="compact_svc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="onContextChanged" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="context_mgr" target="compact_mon">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="summarize" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="compact_svc" target="llm_provider">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="updateState()" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="compact_svc" target="pipeline_state">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="emit COMPACT_*" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="compact_svc" target="stream_adapter">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="notification" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="stream_adapter" target="chat_panel">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="persistEvent" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;fontSize=9;" edge="1" parent="1" source="compact_svc" target="session_mgr">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="POST /threads/{id}/messages" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="session_mgr" target="kb_service">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e12" value="threshold config" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="compact_config" target="compact_mon">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend_title" value="Legend" style="text;html=1;fontSize=10;fontStyle=1;align=left;" vertex="1" parent="1">
+      <mxGeometry x="940" y="540" width="60" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend_new" value="New (SA4E-182)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="940" y="560" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend_existing" value="Existing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="940" y="600" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend_external" value="External" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="940" y="640" width="120" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="legend_modified" value="Modified" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="940" y="680" width="120" height="30" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

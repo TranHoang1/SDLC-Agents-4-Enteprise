@@ -5,6 +5,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
 export { VSCODE_TOOL_DEFINITIONS, isVscodeTool } from "./vscode-tool-definitions";
+export { isWebTool } from "./web-tools";
+import { executeWebTool, isWebTool as checkWebTool } from "./web-tools";
 
 export async function executeVscodeTool(name: string, args: Record<string, unknown>, workspaceRoot: string): Promise<string> {
   const wsRoot = workspaceRoot || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || "";
@@ -15,6 +17,9 @@ export async function executeVscodeTool(name: string, args: Record<string, unkno
     case "write_file": return writeFile(args, wsRoot);
     case "get_diagnostics": return getDiagnostics(args, wsRoot);
     case "get_open_files": return getOpenFiles();
+    case "web_search":
+    case "fetch_url":
+      return executeWebTool(name, args);
     default: return `Error: Unknown VS Code tool '${name}'`;
   }
 }

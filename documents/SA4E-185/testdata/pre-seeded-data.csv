@@ -1,0 +1,7 @@
+test_case_id,file_path,severity,code,message,source,line_count,status,description
+STC-09,ws-root-a/src/app.ts,error,TS2322,Type 'string' is not assignable to type 'number',typescript,420,ACTIVE,Baseline fixture — valid subscription target
+STC-12,ws-root-b/src/util.ts,warning,TS6133,'unused' is declared but its value is never read,typescript,180,ACTIVE,Second workspace — must NOT be injected when scope is ws-root-a
+STC-12,ws-root-a/../outside.ts,error,ESLINT-1001,Out-of-workspace file,eslint,50,ACTIVE,Path escapes ws-root-a — must be filtered by workspace scope
+STC-54,ws-root-a/src/broken.ts,error,TS2304,Cannot find name 'foo',typescript,95,ACTIVE,Pipeline fixture — produces real LSP error
+STC-68,ws-root-a/src/broken.ts,error,TS2304,Cannot find name 'foo',typescript,95,ACTIVE,Real LSP scenario for Extension Host test
+STC-35,ws-root-a/src/big.ts,error,TS1005,';' expected,typescript,5000,ACTIVE,Fixture with many lines — used for lineCountSafe clamp

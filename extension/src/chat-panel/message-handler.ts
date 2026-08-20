@@ -20,7 +20,8 @@ export class MessageHandler {
     private readonly onPickAttachment?: () => void,
     private readonly onApplyCode?: (code: string, filePath?: string) => void,
     private readonly onInsertCode?: (code: string) => void,
-    private readonly onSetModel?: (model: string) => void
+    private readonly onSetModel?: (model: string) => void,
+    private readonly onTurnComplete?: () => void
   ) {}
 
   async handle(msg: ChatWebviewToExtMessage): Promise<void> {
@@ -72,9 +73,15 @@ export class MessageHandler {
       case "chat:insertCode":
         if (this.onInsertCode) { this.onInsertCode(msg.code); }
         break;
-      case "tab:create": break;
+      case "chat:selectAgent":
+        this.handleSelectAgent((msg as any).agentId);
+        break;
+      case "tab:create":
+        if (this.onTurnComplete) { this.onTurnComplete(); }
+        break;
       case "tab:switch":
         this.getEngine().switchActiveTab((msg as any).payload.tabId);
+        if (this.onTurnComplete) { this.onTurnComplete(); }
         break;
       case "tab:close": break;
       case "tab:rename": break;
@@ -102,7 +109,7 @@ export class MessageHandler {
       // Hooks must never break main execution, but failures must be visible.
       debugLog(`[MessageHandler] promptSubmit hook error (non-fatal): ${(hookErr as Error).message}`);
     }
-    await routeUserMessage(text, enrichedText, this.getEngine, this.sendToWebview);
+    await routeUserMessage(text, enrichedText, this.getEngine, this.sendToWebview, this.onTurnComplete);
   }
 
   private async handleApproval(decision: string, feedback?: string): Promise<void> {
@@ -115,5 +122,15 @@ export class MessageHandler {
     const nodes = this.getEngine().getCurrentNodeStates();
     const node = nodes.find(n => n.id === nodeId);
     if (node) { this.sendToWebview({ type: "chat:nodeDetails", node, recentOutputs: [] }); }
+  }
+
+  /** SA4E-186: Route SELECT_AGENT to engine and confirm to webview. */
+  private handleSelectAgent(agentId: string | null): void {
+    const result = this.getEngine().selectAgent(agentId);
+    this.sendToWebview({
+      type: "chat:agentSwitched",
+      agentId: result.agentId,
+      agentName: result.agentName,
+    });
   }
 }

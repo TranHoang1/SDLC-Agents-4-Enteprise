@@ -1,6 +1,6 @@
 /**
  * HookLoader --- KSA-242
- * Reads .kiro/hooks/*.json and *.kiro.hook files at runtime,
+ * Reads .code-intel/hooks/*.json and *.kiro.hook files at runtime,
  * parses hook definitions, and provides trigger methods for LangGraph nodes.
  */
 
@@ -44,12 +44,12 @@ function getHookOutputChannel(): vscode.OutputChannel {
 }
 
 /**
- * Load all hook definitions from .kiro/hooks/ directory.
+ * Load all hook definitions from .code-intel/hooks/ directory.
  * Validates schema; invalid hooks are skipped with logged errors.
  */
 export async function loadHooks(workspaceRoot: string, forceReload = false): Promise<HookDefinition[]> {
   if (cachedHooks && !forceReload) return cachedHooks;
-  const hooksDir = path.join(workspaceRoot, ".kiro", "hooks");
+  const hooksDir = path.join(workspaceRoot, ".code-intel", "hooks");
   const hooks: HookDefinition[] = [];
   const channel = getHookOutputChannel();
   try {
@@ -66,21 +66,25 @@ export async function loadHooks(workspaceRoot: string, forceReload = false): Pro
         const parsed = JSON.parse(content);
         const validationErrors = validateHookSchema(parsed, name);
         if (validationErrors.length > 0) {
-          for (const err of validationErrors) { channel.appendLine(`[WARN] ${err.file}: ${err.field} --- ${err.message}`); }
+          for (const err of validationErrors) {
+            channel.appendLine(`[WARN] ${err.file}: ${err.field} --- ${err.message}`);
+          }
           continue;
         }
         const hook: HookDefinition = {
           name: parsed.name, version: parsed.version, description: parsed.description,
           enabled: parsed.enabled !== false, when: parsed.when, then: parsed.then,
-          filePath: `.kiro/hooks/${name}`,
+          filePath: `.code-intel/hooks/${name}`,
         };
         if (hook.enabled) { hooks.push(hook); }
-      } catch (err) { channel.appendLine(`[ERROR] Failed to parse ${name}: ${(err as Error).message}`); }
+      } catch (err) {
+        channel.appendLine(`[ERROR] Failed to parse ${name}: ${(err as Error).message}`);
+      }
     }
-  } catch (err) {
-    console.debug(`[hook-loader] hooks directory not found or unreadable (non-fatal): ${(err as Error).message}`);
+  } catch {
+    // Directory not found — non-fatal, skip silently
   }
-  channel.appendLine(`[INFO] Loaded ${hooks.length} valid hooks`);
+  channel.appendLine(`[INFO] Loaded ${hooks.length} valid hooks from .code-intel/hooks/`);
   cachedHooks = hooks;
   return hooks;
 }

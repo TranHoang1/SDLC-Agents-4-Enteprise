@@ -1,0 +1,66 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="dev" value="Developer&#xa;(VS Code user)" style="shape=actor;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="80" y="280" width="40" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="agent" value="Agent&#xa;(LLM / LangGraph)" style="shape=actor;whiteSpace=wrap;html=1;verticalLabelPosition=bottom;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="1000" y="280" width="40" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="boundary" value="Kiro Extension — LSP Diagnostics Feed (SA4E-185)" style="swimlane;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;startSize=28;fontStyle=1;fontSize=11;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="220" y="40" width="680" height="640" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc1" value="Subscribe to LSP diagnostics changes&#xa;(onDidChangeDiagnostics)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="60" width="250" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc2" value="Batch diagnostics&#xa;(300ms debounce)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="390" y="60" width="250" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc3" value="Filter diagnostics to&#xa;agent-touched files" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="160" width="250" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc4" value="Inject diagnostics summary&#xa;into agent context" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="390" y="160" width="250" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc5" value="See diagnostics detail&#xa;(file, line, severity, message, code)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="260" width="250" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc6" value="Toggle: enable / disable&#xa;diagnostics feed" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="390" y="260" width="250" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc7" value="Attempt auto-fix of&#xa;detected errors" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="30" y="360" width="250" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-dev-uc5" value="" style="html=1;endArrow=none;rounded=0;" edge="1" parent="1" source="dev" target="uc5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-dev-uc6" value="" style="html=1;endArrow=none;rounded=0;" edge="1" parent="1" source="dev" target="uc6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-agent-uc1" value="" style="html=1;endArrow=none;rounded=0;" edge="1" parent="1" source="agent" target="uc1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-agent-uc4" value="" style="html=1;endArrow=none;rounded=0;" edge="1" parent="1" source="agent" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-agent-uc7" value="" style="html=1;endArrow=none;rounded=0;" edge="1" parent="1" source="agent" target="uc7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-include-1" value="«include»" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;rounded=0;" edge="1" parent="boundary" source="uc4" target="uc1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-include-2" value="«include»" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;rounded=0;" edge="1" parent="boundary" source="uc4" target="uc2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-include-3" value="«include»" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;rounded=0;" edge="1" parent="boundary" source="uc4" target="uc3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-include-4" value="«include»" style="html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;rounded=0;" edge="1" parent="boundary" source="uc7" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="note1" value="«include» = the source use case always executes the target use case (UML).&#xa;e.g. Inject summary always includes subscribe + batch + filter." style="shape=note;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;" vertex="1" parent="1">
+      <mxGeometry x="40" y="740" width="420" height="50" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

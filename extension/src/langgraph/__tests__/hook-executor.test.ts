@@ -30,7 +30,7 @@ function makeHook(overrides: Partial<HookDefinition> = {}): HookDefinition {
     enabled: true,
     when: { type: "preToolUse" },
     then: { type: "askAgent", prompt: "Hello {{toolName}}" },
-    filePath: ".kiro/hooks/test.json",
+    filePath: ".code-intel/hooks/test.json",
     ...overrides,
   };
 }

@@ -76,6 +76,7 @@ function describeSummaryTitle(options: string[]): string {
             case "code": return "Source Code Indexing Summary";
             case "documents": return "Document Indexing Summary";
             case "sync": return "Code Symbol Sync Summary";
+            case "jira": return "Jira Project Indexing Summary";
         }
     }
     return "Workspace Indexing Summary";
@@ -124,6 +125,7 @@ function showIndexResults(results: string[], options: string[], root: string, ch
     if (options.includes("code")) { channel.appendLine("• Code: MCP server indexes automatically."); }
     if (options.includes("documents")) { channel.appendLine("• Documents: Indexed via HTTP API."); }
     if (options.includes("sync")) { channel.appendLine("• Sync: Code symbols synced to KB automatically."); }
+    if (options.includes("jira")) { channel.appendLine("• Jira: Project tickets ingested into KB for agent context."); }
     vscode.window.showInformationMessage("📋 Indexing complete — see Output panel.", "Open Output")
         .then(action => { if (action === "Open Output") { channel.show(); } });
 }

@@ -77,6 +77,8 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
     router.registerHandler('CONTEXT_CLEAR', () => this.handleClearContext());
     router.registerHandler('RUN_TERMINAL_COMMAND', (msg) => this.handleRunTerminal(msg));
     router.registerHandler('REGENERATE_PATCH', (msg) => this.handleRegenerate(msg));
+    // SA4E-186: Dual-path agent selection — ChatEngineAdapter handles SELECT_AGENT
+    router.registerHandler('SELECT_AGENT', async (msg) => this.handleSelectAgent(msg));
     // SA4E-85 v3.1: webview mounts → request state hydration from Backend KB
     router.registerHandler('REQUEST_SYNC_STATE', () => this.handleRequestSyncState());
   }
@@ -204,6 +206,20 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
   private async handleRegenerate(payload: unknown): Promise<void> {
     const msg = payload as Extract<WebviewMessage, { type: 'REGENERATE_PATCH' }>;
     await this.deps.toolHandler.regeneratePatch(msg.diffId, msg.filePath);
+  }
+
+  /**
+   * SA4E-186: Handle SELECT_AGENT — dual-path routing.
+   * Delegates to engine.selectAgent() and sends AGENT_SWITCHED confirmation to webview.
+   */
+  private handleSelectAgent(payload: unknown): void {
+    const msg = payload as Extract<WebviewMessage, { type: 'SELECT_AGENT' }>;
+    const result = this.deps.engine.selectAgent(msg.agentId);
+    this.sendToWebview([{
+      type: 'AGENT_SWITCHED',
+      agentId: result.agentId,
+      agentName: result.agentName,
+    }]);
   }
 
   /** Convert ChatExtToWebviewMessage to EngineStreamEvent (or null) */

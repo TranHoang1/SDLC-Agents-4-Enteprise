@@ -1,6 +1,10 @@
 # Dependencies
 node_modules/
-.code-intel/
+
+.code-intel/*.db
+.code-intel/.dbkey
+.code-intel/database.json
+.code-intel/project.json
 
 # Build
 dist/
@@ -26,8 +30,8 @@ coverage/
 
 # Antigravity
 .agents
-skills
-GEMINI.md
+./skills
+./GEMINI.md
 
 # OpenCode
 .OpenCode

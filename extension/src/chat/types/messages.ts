@@ -28,7 +28,15 @@ export interface AgentMeta {
   id: string;
   name: string;
   description: string;
-  tools: string[];
+  /**
+   * SA4E-186: Tool patterns for per-agent tool filtering.
+   * - undefined = field omitted in frontmatter (unrestricted, all tools allowed)
+   * - [] = explicit empty in frontmatter (text-only, no tools)
+   * - string[] = specific tool patterns allowed
+   */
+  tools: string[] | undefined;
+  /** SA4E-186: LLM model identifier for per-agent model routing */
+  model?: string;
   mcpServers: string[];
   autoApprove: string[];
   filePath: string;
@@ -60,7 +68,11 @@ export type ExtensionMessageType =
   | 'SYNC_AVAILABLE_AGENTS'
   | 'IPC_STATUS'
   | 'CONTEXT_UPDATE'
-  | 'SYNC_CHAT_HISTORY';
+  | 'SYNC_CHAT_HISTORY'
+  | 'COMPACT_START'
+  | 'COMPACT_COMPLETE'
+  | 'COMPACT_ERROR'
+  | 'AGENT_SWITCHED';
 
 /** A hydrated chat message from Backend KB history (SYNC_CHAT_HISTORY). */
 export interface HydratedMessagePayload {
@@ -92,7 +104,11 @@ export type ExtensionMessage =
   | { type: 'SYNC_AVAILABLE_AGENTS'; agents: AgentMeta[] }
   | { type: 'IPC_STATUS'; service: string; status: ServiceStatus; endpoint?: string }
   | { type: 'CONTEXT_UPDATE'; tokenCount: number; maxTokens: number; files: ContextFile[] }
-  | { type: 'SYNC_CHAT_HISTORY'; threadId: string; messages: HydratedMessagePayload[]; context: HydrationContext };
+  | { type: 'SYNC_CHAT_HISTORY'; threadId: string; messages: HydratedMessagePayload[]; context: HydrationContext }
+  | { type: 'COMPACT_START'; trigger: 'manual' | 'auto'; currentUsagePercent: number }
+  | { type: 'COMPACT_COMPLETE'; method: 'summary' | 'truncation'; beforeUsagePercent: number; afterUsagePercent: number; summary: string }
+  | { type: 'COMPACT_ERROR'; error: string; fallbackApplied: boolean }
+  | { type: 'AGENT_SWITCHED'; agentId: string | null; agentName: string };
 
 // --- Webview → Extension Host Messages ---
 
@@ -106,7 +122,8 @@ export type WebviewMessageType =
   | 'REGENERATE_PATCH'
   | 'CONTEXT_UNPIN_FILE'
   | 'CONTEXT_CLEAR'
-  | 'REQUEST_SYNC_STATE';
+  | 'REQUEST_SYNC_STATE'
+  | 'SELECT_AGENT';
 
 export type WebviewMessage =
   | { type: 'SEND_PROMPT'; text: string; agentId: string; contextFiles?: string[] }
@@ -118,7 +135,8 @@ export type WebviewMessage =
   | { type: 'REGENERATE_PATCH'; diffId: string; filePath: string }
   | { type: 'CONTEXT_UNPIN_FILE'; filePath: string }
   | { type: 'CONTEXT_CLEAR' }
-  | { type: 'REQUEST_SYNC_STATE' };
+  | { type: 'REQUEST_SYNC_STATE' }
+  | { type: 'SELECT_AGENT'; agentId: string | null };
 
 /** Union of all message type discriminants */
 export type MessageType = ExtensionMessageType | WebviewMessageType;

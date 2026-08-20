@@ -63,6 +63,9 @@ export const PipelineAnnotation = Annotation.Root({
   currentPhaseIndex: Annotation<number>({ reducer: (_e, u) => u, default: () => 0 }),
   pipelineDefinition: Annotation<PipelineDefState | null>({ reducer: (_e, u) => u, default: () => null }),
   kbContext: Annotation<string>({ reducer: (_e, u) => u, default: () => "" }),
+
+  // SA4E-185: realtime LSP diagnostics feed summary; consumed once per turn (BR-7)
+  diagnosticsContext: Annotation<string>({ reducer: (_e, u) => u, default: () => "" }),
 });
 
 export type PipelineState = typeof PipelineAnnotation.State;
