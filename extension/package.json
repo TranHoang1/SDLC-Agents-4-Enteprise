@@ -393,6 +393,7 @@
     "gen-checksums": "node scripts/gen-checksums.js",
     "test": "vitest run",
     "test:unit": "vitest run",
+    "test:integration": "vitest run src/langgraph/__tests__/chat-graph-diagnostics.integration.test.ts",
     "test:e2e": "vitest run src/__tests__/cross-process.e2e.test.ts src/__tests__/drawio-convert.e2e.test.ts",
     "test:watch": "vitest watch",
     "lint": "npx eslint src/ --ext .ts",
@@ -400,6 +401,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/diff": "^5.2.3",
     "@types/express": "^5.0.6",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.6",
@@ -433,6 +435,7 @@
     "chrome-devtools-frontend": "^1.0.1625079",
     "core-js": "^3.49.0",
     "debug": "^4.4.3",
+    "diff": "^5.2.2",
     "filetomarkdown": "^0.6.9",
     "puppeteer-core": "^24.43.0",
     "semver": "^7.7.4",
