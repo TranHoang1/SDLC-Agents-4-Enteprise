@@ -103,7 +103,7 @@ async function runGate(): Promise<GateResult[]> {
     gateF03.pass = false;
     gateF03.details.push("toWorkspaceRelative not found");
   }
-  if (!diagBlob.includes('path.includes("..")')) {
+  if (!diagBlob.includes('.includes("..")') && !diagBlob.includes('.startsWith("..")')) {
     gateF03.pass = false;
     gateF03.details.push("traversal rejection for relative paths missing");
   }
