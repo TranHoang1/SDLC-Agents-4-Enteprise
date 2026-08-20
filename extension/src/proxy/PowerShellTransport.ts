@@ -1,14 +1,8 @@
 /**
  * PowerShellTransport — PowerShell subprocess HTTP driver for corporate proxy environments.
  *
- * Uses Invoke-WebRequest (PowerShell 5.1+) or .NET HttpClient (PowerShell 7+)
- * to make HTTP requests through corporate proxies. PowerShell inherits system
- * proxy settings and NTLM credentials automatically on Windows.
- *
- * Key benefits over Node.js native HTTP:
- * - Inherits IE/WinHTTP proxy settings (WPAD, PAC)
- * - NTLM/Kerberos SSO via Windows credential store
- * - Not blocked by EDR policies targeting node.exe
+ * Uses Invoke-WebRequest (PowerShell 5.1+) to make HTTP requests through corporate proxies.
+ * PowerShell inherits system proxy settings and NTLM credentials automatically on Windows.
  */
 
 import { execFile, spawn } from "child_process";
@@ -21,6 +15,7 @@ export interface PwshResponse {
   status: number;
   statusText: string;
   ok: boolean;
+  headers: Record<string, string>;
   body: string;
 }
 
@@ -45,7 +40,7 @@ export class PowerShellTransport {
 
   /**
    * Detect system proxy via PowerShell .NET WebRequest.GetSystemWebProxy().
-   * Returns proxy URL or null if direct connection.
+   * Returns proxy URL, or null if direct connection or DIRECT.
    */
   static async detectSystemProxy(): Promise<string | null> {
     const script = `
@@ -54,6 +49,8 @@ export class PowerShellTransport {
       $proxyUri = $proxy.GetProxy($testUrl)
       if ($proxyUri -and $proxyUri.AbsoluteUri -ne $testUrl.AbsoluteUri) {
         Write-Output $proxyUri.AbsoluteUri
+      } else {
+        Write-Output 'DIRECT'
       }
     `;
     try {
@@ -62,8 +59,9 @@ export class PowerShellTransport {
         ["-NoProfile", "-NonInteractive", "-Command", script],
         { timeout: 10000 }
       );
-      const url = stdout.trim();
-      return url.length > 0 ? url : null;
+      const result = stdout.trim();
+      if (!result || result === "DIRECT") { return null; }
+      return result;
     } catch {
       return null;
     }
@@ -74,7 +72,6 @@ export class PowerShellTransport {
     const method = (options.method || "GET").toUpperCase();
     const timeout = options.timeout || 10000;
     const timeoutSec = Math.ceil(timeout / 1000);
-
     const script = this.buildRequestScript(url, method, timeoutSec, options);
 
     try {
@@ -85,22 +82,16 @@ export class PowerShellTransport {
       );
       return this.parseOutput(stdout);
     } catch (err: unknown) {
-      const error = err as Error;
-      throw new PowerShellTransportError(
-        this.interpretError(error)
-      );
+      const error = err as Error & { stderr?: string };
+      throw new PowerShellTransportError(this.interpretError(error));
     }
   }
 
-  /**
-   * Execute streaming HTTP request via .NET HttpClient in PowerShell.
-   * Returns a ReadableStream that pipes response chunks.
-   */
+  /** Execute streaming HTTP request via .NET HttpClient in PowerShell */
   streamRequest(url: string, options: PwshRequestOptions = {}): ReadableStream<Uint8Array> {
     const method = (options.method || "POST").toUpperCase();
     const timeout = options.timeout || 120000;
     const timeoutSec = Math.ceil(timeout / 1000);
-
     const script = this.buildStreamScript(url, method, timeoutSec, options);
     const encoder = new TextEncoder();
 
@@ -111,32 +102,21 @@ export class PowerShellTransport {
           ["-NoProfile", "-NonInteractive", "-Command", script],
           { stdio: ["pipe", "pipe", "pipe"] }
         );
-
         proc.stdout.on("data", (chunk: Buffer) => {
           controller.enqueue(encoder.encode(chunk.toString("utf-8")));
         });
-
-        proc.on("close", () => {
-          controller.close();
+        proc.on("close", () => { controller.close(); });
+        proc.on("error", (e) => {
+          controller.error(new PowerShellTransportError(`Stream error: ${e.message}`));
         });
-
-        proc.on("error", (err) => {
-          controller.error(new PowerShellTransportError(`Stream error: ${err.message}`));
-        });
-
-        // Send body via stdin if present
-        if (options.body) {
-          proc.stdin.write(options.body);
-          proc.stdin.end();
-        } else {
-          proc.stdin.end();
-        }
+        if (options.body) { proc.stdin.write(options.body); }
+        proc.stdin.end();
       },
     });
   }
 
   /** Quick connectivity test — returns latency in ms */
-  async testConnection(url: string, proxyUrl?: string | null): Promise<number> {
+  async testConnection(url: string, _proxyUrl?: string | null): Promise<number> {
     const start = Date.now();
     const response = await this.request(url, { method: "GET", timeout: 10000 });
     if (!response.ok && response.status !== 301 && response.status !== 302) {
@@ -154,174 +134,144 @@ export class PowerShellTransport {
         { timeout: 5000 }
       );
       return true;
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
-  /** Build Invoke-WebRequest script for standard requests */
+  /** Build Invoke-WebRequest script with structured output delimiters */
   private buildRequestScript(
-    url: string,
-    method: string,
-    timeoutSec: number,
-    options: PwshRequestOptions
+    url: string, method: string, timeoutSec: number, options: PwshRequestOptions
   ): string {
+    const escapedUrl = url.replace(/'/g, "''");
     const lines: string[] = [];
-
-    // Suppress progress bar (speeds up significantly)
     lines.push("$ProgressPreference = 'SilentlyContinue'");
-
-    // Build headers hashtable
-    if (options.headers && Object.keys(options.headers).length > 0) {
-      const entries = Object.entries(options.headers)
-        .map(([k, v]) => `'${k}'='${v.replace(/'/g, "''")}'`)
-        .join(";");
-      lines.push(`$headers = @{${entries}}`);
-    }
-
-    // Build Invoke-WebRequest command
-    lines.push("try {");
-    let cmd = `  $r = Invoke-WebRequest -Uri '${url}' -Method ${method} -TimeoutSec ${timeoutSec} -UseBasicParsing`;
-
+    lines.push("[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12");
+    lines.push("$params = @{");
+    lines.push(`  Uri = '${escapedUrl}'`);
+    lines.push(`  Method = '${method}'`);
+    lines.push(`  TimeoutSec = ${timeoutSec}`);
+    lines.push("  UseBasicParsing = $true");
     if (this.proxyUrl) {
-      cmd += ` -Proxy '${this.proxyUrl}' -ProxyUseDefaultCredentials`;
+      lines.push(`  Proxy = '${this.proxyUrl}'`);
+      lines.push("  ProxyUseDefaultCredentials = $true");
     }
-
+    lines.push("}");
     if (options.headers && Object.keys(options.headers).length > 0) {
-      cmd += " -Headers $headers";
+      lines.push("$params.Headers = @{");
+      for (const [k, v] of Object.entries(options.headers)) {
+        if (k.toLowerCase() === "content-type") { continue; }
+        lines.push(`  '${k}' = '${v.replace(/'/g, "''")}'`);
+      }
+      lines.push("}");
     }
-
     if (options.body && method !== "GET" && method !== "HEAD") {
-      // Pass body via stdin to avoid escaping issues
-      cmd += " -Body ([System.Console]::In.ReadToEnd())";
+      lines.push(`$params.Body = '${options.body.replace(/'/g, "''")}'`);
+      const ct = options.headers?.["Content-Type"] || options.headers?.["content-type"];
+      if (ct) { lines.push(`$params.ContentType = '${ct}'`); }
     }
-
-    lines.push(cmd);
-    lines.push("  Write-Output \"STATUS:$($r.StatusCode)\"");
-    lines.push("  Write-Output \"STATUSTEXT:$($r.StatusDescription)\"");
-    lines.push("  Write-Output \"BODY:$($r.Content)\"");
+    lines.push("try {");
+    lines.push("  $r = Invoke-WebRequest @params");
+    lines.push("  Write-Output '---PWSH_STATUS---'");
+    lines.push("  Write-Output $r.StatusCode");
+    lines.push("  Write-Output '---PWSH_STATUS_TEXT---'");
+    lines.push("  Write-Output $r.StatusDescription");
+    lines.push("  Write-Output '---PWSH_HEADERS---'");
+    lines.push("  foreach ($h in $r.Headers.GetEnumerator()) { Write-Output \"$($h.Key): $($h.Value)\" }");
+    lines.push("  Write-Output '---PWSH_BODY---'");
+    lines.push("  Write-Output $r.Content");
     lines.push("} catch {");
     lines.push("  $ex = $_.Exception");
     lines.push("  if ($ex.Response) {");
-    lines.push("    $code = [int]$ex.Response.StatusCode");
-    lines.push("    Write-Output \"STATUS:$code\"");
-    lines.push("    Write-Output \"STATUSTEXT:$($ex.Response.StatusDescription)\"");
-    lines.push("    Write-Output \"BODY:$($ex.Message)\"");
+    lines.push("    Write-Output '---PWSH_STATUS---'");
+    lines.push("    Write-Output ([int]$ex.Response.StatusCode)");
+    lines.push("    Write-Output '---PWSH_STATUS_TEXT---'");
+    lines.push("    Write-Output $ex.Response.StatusDescription");
+    lines.push("    Write-Output '---PWSH_HEADERS---'");
+    lines.push("    Write-Output ''");
+    lines.push("    Write-Output '---PWSH_BODY---'");
+    lines.push("    Write-Output $ex.Message");
     lines.push("  } else {");
     lines.push("    Write-Error $ex.Message");
     lines.push("    exit 1");
     lines.push("  }");
     lines.push("}");
-
     return lines.join("\n");
   }
 
   /** Build streaming script using .NET HttpClient */
   private buildStreamScript(
-    url: string,
-    method: string,
-    timeoutSec: number,
-    options: PwshRequestOptions
+    url: string, method: string, timeoutSec: number, options: PwshRequestOptions
   ): string {
     const lines: string[] = [];
     lines.push("$ProgressPreference = 'SilentlyContinue'");
-    lines.push(`$client = [System.Net.Http.HttpClient]::new()`);
-    lines.push(`$client.Timeout = [TimeSpan]::FromSeconds(${timeoutSec})`);
-
+    lines.push("$handler = [System.Net.Http.HttpClientHandler]::new()");
     if (this.proxyUrl) {
-      lines.push(`$handler = [System.Net.Http.HttpClientHandler]::new()`);
       lines.push(`$handler.Proxy = [System.Net.WebProxy]::new('${this.proxyUrl}')`);
-      lines.push(`$handler.UseDefaultCredentials = $true`);
-      lines.push(`$client = [System.Net.Http.HttpClient]::new($handler)`);
-      lines.push(`$client.Timeout = [TimeSpan]::FromSeconds(${timeoutSec})`);
+      lines.push("$handler.UseDefaultCredentials = $true");
     }
-
-    lines.push(`$request = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::${this.dotNetMethod(method)}, '${url}')`);
-
+    lines.push("$client = [System.Net.Http.HttpClient]::new($handler)");
+    lines.push(`$client.Timeout = [TimeSpan]::FromSeconds(${timeoutSec})`);
+    lines.push(`$req = [System.Net.Http.HttpRequestMessage]::new([System.Net.Http.HttpMethod]::${this.dotNetMethod(method)}, '${url}')`);
     if (options.headers) {
       for (const [k, v] of Object.entries(options.headers)) {
-        lines.push(`$request.Headers.TryAddWithoutValidation('${k}', '${v.replace(/'/g, "''")}') | Out-Null`);
+        lines.push(`$req.Headers.TryAddWithoutValidation('${k}', '${v.replace(/'/g, "''")}') | Out-Null`);
       }
     }
-
-    // Body from stdin
     lines.push("$body = [System.Console]::In.ReadToEnd()");
-    lines.push("if ($body.Length -gt 0) {");
-    lines.push("  $request.Content = [System.Net.Http.StringContent]::new($body, [System.Text.Encoding]::UTF8, 'application/json')");
-    lines.push("}");
-
-    // Stream response
-    lines.push("$response = $client.SendAsync($request, [System.Net.Http.HttpCompletionOption]::ResponseHeadersRead).Result");
-    lines.push("$stream = $response.Content.ReadAsStreamAsync().Result");
+    lines.push("if ($body.Length -gt 0) { $req.Content = [System.Net.Http.StringContent]::new($body, [System.Text.Encoding]::UTF8, 'application/json') }");
+    lines.push("$resp = $client.SendAsync($req, [System.Net.Http.HttpCompletionOption]::ResponseHeadersRead).Result");
+    lines.push("$stream = $resp.Content.ReadAsStreamAsync().Result");
     lines.push("$reader = [System.IO.StreamReader]::new($stream)");
-    lines.push("while (-not $reader.EndOfStream) {");
-    lines.push("  $line = $reader.ReadLine()");
-    lines.push("  [Console]::WriteLine($line)");
-    lines.push("}");
-    lines.push("$reader.Dispose()");
-    lines.push("$client.Dispose()");
-
+    lines.push("while (-not $reader.EndOfStream) { [Console]::WriteLine($reader.ReadLine()) }");
+    lines.push("$reader.Dispose(); $client.Dispose()");
     return lines.join("\n");
   }
 
-  /** Parse PowerShell output into response object */
+  /** Parse structured PowerShell output into response object */
   private parseOutput(stdout: string): PwshResponse {
     const lines = stdout.split(/\r?\n/);
     let status = 0;
     let statusText = "";
+    const headers: Record<string, string> = {};
     const bodyLines: string[] = [];
-    let inBody = false;
+    let section: "none" | "status" | "statusText" | "headers" | "body" = "none";
 
     for (const line of lines) {
-      if (line.startsWith("STATUS:")) {
-        status = parseInt(line.slice(7), 10) || 0;
-      } else if (line.startsWith("STATUSTEXT:")) {
-        statusText = line.slice(11);
-      } else if (line.startsWith("BODY:")) {
-        inBody = true;
-        bodyLines.push(line.slice(5));
-      } else if (inBody) {
-        bodyLines.push(line);
+      if (line === "---PWSH_STATUS---") { section = "status"; continue; }
+      if (line === "---PWSH_STATUS_TEXT---") { section = "statusText"; continue; }
+      if (line === "---PWSH_HEADERS---") { section = "headers"; continue; }
+      if (line === "---PWSH_BODY---") { section = "body"; continue; }
+      switch (section) {
+        case "status": status = parseInt(line.trim(), 10) || 0; break;
+        case "statusText": statusText = line.trim(); break;
+        case "headers": {
+          const idx = line.indexOf(":");
+          if (idx > 0) { headers[line.slice(0, idx).trim().toLowerCase()] = line.slice(idx + 1).trim(); }
+          break;
+        }
+        case "body": bodyLines.push(line); break;
       }
     }
-
-    return {
-      status,
-      statusText,
-      ok: status >= 200 && status < 300,
-      body: bodyLines.join("\n"),
-    };
+    while (bodyLines.length > 0 && bodyLines[bodyLines.length - 1] === "") { bodyLines.pop(); }
+    return { status, statusText, ok: status >= 200 && status < 300, headers, body: bodyLines.join("\n") };
   }
 
   /** Map HTTP method to .NET HttpMethod property name */
   private dotNetMethod(method: string): string {
-    const map: Record<string, string> = {
-      GET: "Get", POST: "Post", PUT: "Put",
-      DELETE: "Delete", PATCH: "Patch", HEAD: "Head",
-      OPTIONS: "Options",
-    };
-    return map[method] || "Post";
+    return ({ GET: "Get", POST: "Post", PUT: "Put", DELETE: "Delete", PATCH: "Patch", HEAD: "Head" })[method] || "Post";
   }
 
   /** Interpret PowerShell errors into user-friendly messages */
-  private interpretError(err: Error): string {
-    const msg = err.message || "";
-    if (msg.includes("timed out") || msg.includes("TimeoutSec")) {
-      return "Connection timed out — proxy may be unreachable";
-    }
-    if (msg.includes("Unable to connect")) {
-      return "Connection refused — verify proxy host and port";
-    }
-    if (msg.includes("resolve")) {
-      return "Cannot resolve hostname";
-    }
-    if (msg.includes("SSL") || msg.includes("certificate")) {
-      return "SSL certificate error — proxy may require CA trust";
-    }
-    return `PowerShell error: ${msg}`;
+  private interpretError(err: Error & { stderr?: string }): string {
+    const s = err.stderr || err.message || "";
+    if (s.includes("407")) { return "Proxy authentication failed — 407 Proxy Authentication Required"; }
+    if (s.includes("timed out") || s.includes("TimeoutSec")) { return "Connection timed out — proxy may be unreachable"; }
+    if (s.includes("Unable to connect")) { return "Connection refused — verify proxy host and port"; }
+    if (s.includes("503")) { return "HTTP 503 — Service Unavailable"; }
+    if (s.includes("SSL") || s.includes("certificate")) { return "SSL certificate error"; }
+    return `PowerShell error: ${s}`;
   }
 
-  /** Get PowerShell binary path — prefer pwsh (PS7+), fallback to powershell.exe */
+  /** Get PowerShell binary */
   private static getPwshBinary(): string {
     return process.platform === "win32" ? "powershell.exe" : "pwsh";
   }

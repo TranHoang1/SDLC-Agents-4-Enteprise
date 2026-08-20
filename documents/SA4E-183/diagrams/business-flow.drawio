@@ -1,0 +1,100 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="Business Flow — File Change Tracking (SA4E-183)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="420" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Start + User Action -->
+    <mxCell id="n1" value="Session Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n2" value="DiffTracker&#xa;Initializes&#xa;(empty state)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="260" y="60" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n3" value="User Sends&#xa;Prompt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="480" y="60" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Engine Processing -->
+    <mxCell id="n4" value="LangGraph Engine&#xa;Processes Request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="480" y="170" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n5" value="Tool Call Executes&#xa;File Modification" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="480" y="280" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Tracking -->
+    <mxCell id="n6" value="DiffTracker Records&#xa;Change Entry" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="480" y="390" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n7" value="Badge Updates&#xa;(file count)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="260" y="390" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: User Views -->
+    <mxCell id="n8" value="User Invokes&#xa;/diff Command&#xa;(or clicks badge)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="390" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n9" value="Diff Summary Panel&#xa;Renders" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="500" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n10" value="User Clicks&#xa;File Path" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="280" y="500" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n11" value="VS Code Opens&#xa;Diff Editor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="480" y="500" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Session Reset Path -->
+    <mxCell id="n12" value="New Session&#xa;Starts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="730" y="170" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="n13" value="DiffTracker.&#xa;clearSession()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="730" y="280" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Edges -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n1" target="n2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n2" target="n3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n3" target="n4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n4" target="n5">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n5" target="n6">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n6" target="n7">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n8" target="n9">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n9" target="n10">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n10" target="n11">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="n12" target="n13">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Backward edge: clearSession resets to init -->
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#b85450;fontSize=9;" edge="1" parent="1" source="n13" target="n2">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="790" y="360"/>
+          <mxPoint x="900" y="360"/>
+          <mxPoint x="900" y="40"/>
+          <mxPoint x="330" y="40"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- Badge to /diff command link -->
+    <mxCell id="e12" value="clicks badge" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;fontSize=8;" edge="1" parent="1" source="n7" target="n8">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
