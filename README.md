@@ -66,6 +66,10 @@ MIT
 
 ## Changelog
 
+### v1.33.0 (2026-08-20)
+
+- **SA4E-185: LSP Diagnostics Feed — realtime errors into agent loop** — New `DiagnosticsFeedService` streams LSP diagnostics into LangGraph via `diagnosticsContext` channel (consume-once). Auto-fix advisory fires on severity-token lines. Security-hardened: prompt-injection fencing (fence delimiters + untrusted-data boundary), full approval gate for `fs_write`/`str_replace`/`fs_append`, path-containment for traversal (incl. in-root `..`). Full SDLC doc set (BRD/FSD/TDD/STP/STC/security review/pentest).
+
 ### v1.32.0 (2026-08-19)
 
 - **SA4E-186: Agent Runtime Routing** — Dynamic slash menu from `.kiro/agents/*.md`, per-agent model/tool config, AgentSelector dropdown in ChatHeader, dual-path message protocol (runtime vs default).
