@@ -4,6 +4,8 @@
  * Extension Host and Svelte Webview. Type field serves as discriminant.
  */
 
+import type { DiffSummaryPayload } from '../diff/IDiffTracker';
+
 // --- Supporting Types ---
 
 /** Stream error payload with structured error information */
@@ -72,7 +74,9 @@ export type ExtensionMessageType =
   | 'COMPACT_START'
   | 'COMPACT_COMPLETE'
   | 'COMPACT_ERROR'
-  | 'AGENT_SWITCHED';
+  | 'AGENT_SWITCHED'
+  | 'DIFF_COUNT_UPDATED'
+  | 'DIFF_SUMMARY_RESPONSE';
 
 /** A hydrated chat message from Backend KB history (SYNC_CHAT_HISTORY). */
 export interface HydratedMessagePayload {
@@ -108,7 +112,9 @@ export type ExtensionMessage =
   | { type: 'COMPACT_START'; trigger: 'manual' | 'auto'; currentUsagePercent: number }
   | { type: 'COMPACT_COMPLETE'; method: 'summary' | 'truncation'; beforeUsagePercent: number; afterUsagePercent: number; summary: string }
   | { type: 'COMPACT_ERROR'; error: string; fallbackApplied: boolean }
-  | { type: 'AGENT_SWITCHED'; agentId: string | null; agentName: string };
+  | { type: 'AGENT_SWITCHED'; agentId: string | null; agentName: string }
+  | { type: 'DIFF_COUNT_UPDATED'; count: number }
+  | { type: 'DIFF_SUMMARY_RESPONSE'; summary: DiffSummaryPayload };
 
 // --- Webview → Extension Host Messages ---
 
@@ -123,7 +129,8 @@ export type WebviewMessageType =
   | 'CONTEXT_UNPIN_FILE'
   | 'CONTEXT_CLEAR'
   | 'REQUEST_SYNC_STATE'
-  | 'SELECT_AGENT';
+  | 'SELECT_AGENT'
+  | 'DIFF_OPEN_FILE';
 
 export type WebviewMessage =
   | { type: 'SEND_PROMPT'; text: string; agentId: string; contextFiles?: string[] }
@@ -136,7 +143,8 @@ export type WebviewMessage =
   | { type: 'CONTEXT_UNPIN_FILE'; filePath: string }
   | { type: 'CONTEXT_CLEAR' }
   | { type: 'REQUEST_SYNC_STATE' }
-  | { type: 'SELECT_AGENT'; agentId: string | null };
+  | { type: 'SELECT_AGENT'; agentId: string | null }
+  | { type: 'DIFF_OPEN_FILE'; filePath: string; operation: 'added' | 'modified' | 'deleted' };
 
 /** Union of all message type discriminants */
 export type MessageType = ExtensionMessageType | WebviewMessageType;
