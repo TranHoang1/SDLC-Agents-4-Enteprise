@@ -340,7 +340,7 @@ export class DiagnosticsFeedService implements vscode.Disposable {
     }
 
     // Reject relative traversal (../ etc.)
-    if (path.includes("..")) return null;
+    if (path.startsWith("..") || path.includes("/..")) return null;
 
     // Already relative and inside workspace
     return path;
