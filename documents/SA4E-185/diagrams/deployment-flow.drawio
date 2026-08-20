@@ -1,0 +1,126 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;SA4E-185 Deployment Flow — VS Code Extension (in-process)&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="10" width="1160" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_predeploy" value="Manual — Pre-Deploy" style="swimlane;horizontal=0;startSize=110;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="1160" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_ci" value="Automated — CI Pipeline (ci-sa4e-185.yml)" style="swimlane;horizontal=0;startSize=110;fillColor=#d5e8d4;strokeColor=#82b366;html=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="230" width="1160" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_release" value="Automated — Release &amp; Publish (publish.yml)" style="swimlane;horizontal=0;startSize=110;fillColor=#d5e8d4;strokeColor=#82b366;html=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="400" width="1160" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_verify" value="Manual — Verification" style="swimlane;horizontal=0;startSize=110;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="570" width="1160" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_rollback" value="Manual — Rollback (user-level first, release-level fallback)" style="swimlane;horizontal=0;startSize=110;fillColor=#fce4ec;strokeColor=#c62828;html=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="740" width="1160" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_pr" value="Raise PR&lt;br&gt;SA4E-185 → main" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="lane_predeploy">
+      <mxGeometry x="120" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_manualreview" value="Manual review&lt;br&gt;verify hook defs (DR-1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="lane_predeploy">
+      <mxGeometry x="340" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_lint" value="Lint&lt;br&gt;npm run lint" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#82b366;" vertex="1" parent="lane_ci">
+      <mxGeometry x="120" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_compile" value="Compile&lt;br&gt;tsc -p ./" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#82b366;" vertex="1" parent="lane_ci">
+      <mxGeometry x="340" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_test" value="Tests&lt;br&gt;vitest (PBT/UT/IT/E2E-API)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#82b366;" vertex="1" parent="lane_ci">
+      <mxGeometry x="560" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_package" value="Package&lt;br&gt;vsce VSIX" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#82b366;" vertex="1" parent="lane_ci">
+      <mxGeometry x="790" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="d_gate1" value="CI&lt;br&gt;green?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="lane_ci">
+      <mxGeometry x="1000" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_bump" value="Bump minor&lt;br&gt;v1.31.0 → v1.32.0&lt;br&gt;git tag v1.32.0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#82b366;" vertex="1" parent="lane_release">
+      <mxGeometry x="120" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_publish" value="Publish&lt;br&gt;Marketplace + Open VSX" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#82b366;" vertex="1" parent="lane_release">
+      <mxGeometry x="340" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_install" value="Install / Auto-update&lt;br&gt;VSIX v1.32.0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="lane_verify">
+      <mxGeometry x="120" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_toggle" value="Smoke: toggle&lt;br&gt;enableDiagnosticsFeed" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="lane_verify">
+      <mxGeometry x="340" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_health" value="Health check&lt;br&gt;[DD-FEED] logs, no ERROR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="lane_verify">
+      <mxGeometry x="560" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="d_gate2" value="Sanity&lt;br&gt;pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="lane_verify">
+      <mxGeometry x="780" y="35" width="140" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_done" value="Release complete" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="lane_verify">
+      <mxGeometry x="990" y="45" width="150" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_rb1" value="User rollback&lt;br&gt;set enableDiagnosticsFeed&lt;br&gt;= false (no reload)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="lane_rollback">
+      <mxGeometry x="120" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_rb2" value="Release rollback&lt;br&gt;reinstall v1.31.0 VSIX" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="lane_rollback">
+      <mxGeometry x="340" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_verify_rb" value="Verify rollback&lt;br&gt;loop unaffected, no [DD-FEED]" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fce4ec;strokeColor=#c62828;" vertex="1" parent="lane_rollback">
+      <mxGeometry x="560" y="45" width="160" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pr_rev" edge="1" parent="1" source="n_pr" target="n_manualreview" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_rev_lint" edge="1" parent="1" source="n_manualreview" target="n_lint" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_lint_comp" edge="1" parent="1" source="n_lint" target="n_compile" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_comp_test" edge="1" parent="1" source="n_compile" target="n_test" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_test_pkg" edge="1" parent="1" source="n_test" target="n_package" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pkg_gate1" edge="1" parent="1" source="n_package" target="d_gate1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_g1_bump" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_gate1" target="n_bump">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_g1_rb" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;html=1;endArrow=classic;endSize=6;strokeColor=#c62828;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_gate1" target="n_rb1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_bump_pub" edge="1" parent="1" source="n_bump" target="n_publish" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_pub_install" edge="1" parent="1" source="n_publish" target="n_install" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_inst_tog" edge="1" parent="1" source="n_install" target="n_toggle" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_tog_health" edge="1" parent="1" source="n_toggle" target="n_health" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_health_g2" edge="1" parent="1" source="n_health" target="d_gate2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_g2_done" value="Yes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_gate2" target="n_done">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_g2_rb" value="No" style="edgeStyle=orthogonalEdgeStyle;rounded=1;dashed=1;html=1;endArrow=classic;endSize=6;strokeColor=#c62828;labelBackgroundColor=#ffffff;fontSize=10;" edge="1" parent="1" source="d_gate2" target="n_rb1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_rb1_rb2" edge="1" parent="1" source="n_rb1" target="n_rb2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_rb2_rv" edge="1" parent="1" source="n_rb2" target="n_verify_rb" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

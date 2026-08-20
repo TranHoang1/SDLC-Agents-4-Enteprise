@@ -14,6 +14,9 @@ import type { LlmProvider } from "../core/llm-provider";
 import { executeChat } from "./engine-chat-handler";
 import { agentRegistry } from "../agents/registry";
 import { PipelineExtractor } from "../agents/pipeline-extractor";
+import { AgentConfigResolver } from "../agents/agent-config-resolver";
+import type { FindAgentMetaFn } from "../agents/agent-config-resolver";
+import { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
 import {
   PipelineState,
   SDLCPhase,
@@ -40,12 +43,16 @@ export class LangGraphEngine {
   private chatHistoryByTab: Map<string, ChatMessage[]> = new Map();
   private activeTabId: string = "";
   readonly hookEngine: HookEngine;
+  readonly agentConfigResolver: AgentConfigResolver;
+  readonly diagnosticsFeed: DiagnosticsFeedService;
 
   constructor(
     private readonly mcpManager: IServerManager,
     private readonly workspaceRoot: string,
     private readonly onEvent: (msg: ChatExtToWebviewMessage) => void,
-    llmProvider?: LlmProvider
+    llmProvider?: LlmProvider,
+    findAgentMeta?: FindAgentMetaFn,
+    diagnosticsFeed?: DiagnosticsFeedService
   ) {
     // [v3.1] Persistence is backend-driven: RemoteCheckpointer talks to the
     // Backend Knowledge Service over HTTP (no local state files).
@@ -54,6 +61,13 @@ export class LangGraphEngine {
     this.mcpBridge = new McpBridge(mcpManager);
     this.llmProvider = llmProvider;
     this.hookEngine = new HookEngine(workspaceRoot);
+    this.diagnosticsFeed = diagnosticsFeed ?? new DiagnosticsFeedService(workspaceRoot);
+
+    // SA4E-186: Agent config resolver for per-agent runtime routing
+    this.agentConfigResolver = new AgentConfigResolver(
+      workspaceRoot,
+      findAgentMeta || (() => undefined)
+    );
 
     agentRegistry.load(workspaceRoot);
   }
@@ -61,6 +75,50 @@ export class LangGraphEngine {
   setLlmProvider(provider: LlmProvider | undefined): void {
     this.llmProvider = provider;
     this.graph = null;
+  }
+
+  /**
+   * SA4E-186: Select an agent for per-agent runtime routing.
+   * Delegates to AgentConfigResolver. Returns confirmation payload.
+   */
+  selectAgent(agentId: string | null): { agentId: string | null; agentName: string } {
+    return this.agentConfigResolver.selectAgent(agentId);
+  }
+
+  /**
+   * SA4E-182: Get detected context window from the LLM provider.
+   * Returns 0 if provider not set or context window unknown.
+   * Call after ensureGraph() has run (which triggers detectContextWindow).
+   */
+  getDetectedContextWindow(): number {
+    return this.llmProvider?.getContextWindow?.() || 0;
+  }
+
+  /**
+   * SA4E-182: Trigger early context window detection without building the full graph.
+   * Called at panel ready time to get accurate maxTokens before first invoke.
+   * Fast: single HTTP call to /v1/models (local) or no-op (cloud).
+   */
+  async detectContextWindowEarly(): Promise<void> {
+    if (this.llmProvider && (this.llmProvider as any).detectContextWindow) {
+      try { await (this.llmProvider as any).detectContextWindow(); }
+      catch { /* non-fatal — will retry in ensureGraph */ }
+    }
+  }
+
+  /**
+   * SA4E-182: List available MCP + VS Code tools for token counting.
+   * Returns tool definitions array (cached by ToolRegistry after first fetch).
+   * Non-blocking: returns empty array if MCP unavailable.
+   */
+  async listAvailableTools(): Promise<Array<{ name: string; description: string; inputSchema: Record<string, unknown> }>> {
+    try {
+      const tools = await this.mcpBridge.listTools();
+      const { VSCODE_TOOL_DEFINITIONS } = await import("../vscode/vscode-tool-definitions");
+      return [...VSCODE_TOOL_DEFINITIONS, ...tools];
+    } catch {
+      return [];
+    }
   }
   /**
    * Sandboxed Hot-Swap: validate and apply a live pipeline spec mutation.
@@ -145,6 +203,10 @@ export class LangGraphEngine {
   private async ensureGraph(): Promise<CompiledGraph> {
     if (!this.graph) {
       if (this.llmProvider) {
+        // SA4E-182: Detect actual context window from model server before building graph
+        if ((this.llmProvider as any).detectContextWindow) {
+          try { await (this.llmProvider as any).detectContextWindow(); } catch { /* non-fatal */ }
+        }
         // LLM-based pipeline extraction is best-effort: if it fails (LLM
         // timeout, malformed JSON, provider offline), fall back to the
         // static agent registry phases instead of crashing the engine.
@@ -161,7 +223,7 @@ export class LangGraphEngine {
           });
         }
       }
-      this.graph = await buildPipelineGraph(this.mcpBridge, this.streamHandler, this.checkpointer, this.llmProvider, this.hookEngine);
+      this.graph = await buildPipelineGraph(this.mcpBridge, this.streamHandler, this.checkpointer, this.llmProvider, this.hookEngine, this.agentConfigResolver, this.diagnosticsFeed);
     }
     return this.graph;
   }
@@ -269,6 +331,9 @@ export class LangGraphEngine {
     this.cancelled = false;
 
     if (!this.activeTabId) this.activeTabId = "default";
+
+    // SA4E-185: Clear diagnostics feed session state at new chat session start (BR-5)
+    this.diagnosticsFeed.clearSession();
 
     // SA4E-85 v3.1: Pre-search Backend KB for relevant context (OpenCode style)
     const kbContext = await this.searchKb(chatInput);

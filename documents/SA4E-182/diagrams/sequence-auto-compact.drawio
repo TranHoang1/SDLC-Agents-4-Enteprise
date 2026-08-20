@@ -1,0 +1,152 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="Sequence: Auto-Compact (Threshold Trigger)" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="350" y="10" width="450" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Participant: IdeContextManager -->
+    <mxCell id="h1" value="IdeContext&#xa;Manager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="60" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: CompactMonitor -->
+    <mxCell id="h2" value="Compact&#xa;Monitor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: CompactService -->
+    <mxCell id="h3" value="Compact&#xa;Service" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: LlmProvider -->
+    <mxCell id="h4" value="LLM&#xa;Provider" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="720" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: StreamAdapter -->
+    <mxCell id="h5" value="Stream&#xa;Adapter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="940" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Participant: Developer -->
+    <mxCell id="h6" value="Developer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1140" y="50" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Lifelines -->
+    <mxCell id="l1" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="90" as="sourcePoint"/>
+        <mxPoint x="120" y="820" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l2" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="90" as="sourcePoint"/>
+        <mxPoint x="340" y="820" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l3" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="560" y="90" as="sourcePoint"/>
+        <mxPoint x="560" y="820" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l4" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="780" y="90" as="sourcePoint"/>
+        <mxPoint x="780" y="820" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l5" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1000" y="90" as="sourcePoint"/>
+        <mxPoint x="1000" y="820" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="l6" value="" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1200" y="90" as="sourcePoint"/>
+        <mxPoint x="1200" y="820" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Messages -->
+    <mxCell id="m1" value="1. stateChange(usagePercent=95)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="130" as="sourcePoint"/>
+        <mxPoint x="340" y="130" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m2" value="2. check: autoCompact=true, !debounce, !compacting" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="180" as="sourcePoint"/>
+        <mxPoint x="340" y="210" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m3" value="3. set debounceActive=true, isCompacting=true" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="230" as="sourcePoint"/>
+        <mxPoint x="340" y="260" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m4" value="4. executeCompact('auto')" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="280" as="sourcePoint"/>
+        <mxPoint x="560" y="280" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m5" value="5. emit COMPACT_START" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="560" y="320" as="sourcePoint"/>
+        <mxPoint x="1000" y="320" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m6" value="6. summarize(prompt + chatHistory)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="560" y="370" as="sourcePoint"/>
+        <mxPoint x="780" y="370" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m7" value="7. structured summary" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="780" y="420" as="sourcePoint"/>
+        <mxPoint x="560" y="420" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m8" value="8. replace chatHistory, reset state" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="560" y="470" as="sourcePoint"/>
+        <mxPoint x="560" y="500" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m9" value="9. emit COMPACT_COMPLETE" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="560" y="530" as="sourcePoint"/>
+        <mxPoint x="1000" y="530" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m10" value="10. 🗜️ Auto-compacted: 95% → 12%" style="html=1;verticalAlign=bottom;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="1000" y="580" as="sourcePoint"/>
+        <mxPoint x="1200" y="580" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Later: debounce reset -->
+    <mxCell id="m11" value="11. stateChange(usagePercent=80)" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;strokeColor=#82b366;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="120" y="660" as="sourcePoint"/>
+        <mxPoint x="340" y="660" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m12" value="12. usage &lt; (threshold-10) → reset debounce" style="html=1;verticalAlign=bottom;endArrow=block;endFill=1;fontSize=9;strokeColor=#82b366;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="340" y="700" as="sourcePoint"/>
+        <mxPoint x="340" y="730" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Notes -->
+    <mxCell id="note1" value="Debounce prevents re-trigger&#xa;until usage drops below&#xa;(threshold - 10%)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="60" y="750" width="220" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="note2" value="⚠️ If step 6-7 fail:&#xa;→ Fallback: truncate oldest 50%&#xa;→ Notify user with warning" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="600" y="750" width="250" height="60" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

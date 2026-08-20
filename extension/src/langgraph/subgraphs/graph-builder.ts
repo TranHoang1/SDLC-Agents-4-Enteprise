@@ -18,6 +18,8 @@ import { StreamHandler } from "./core/stream-handler";
 import { RemoteCheckpointer } from "./core/checkpointer";
 import type { LlmProvider } from "./core/llm-provider";
 import type { HookEngine } from "./hooks/hook-engine";
+import type { AgentConfigResolver } from "../agents/agent-config-resolver";
+import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
 import { buildRouterGraph } from "../router/router-graph";
 
 /**
@@ -30,7 +32,9 @@ export async function buildPipelineGraph(
   streamHandler: StreamHandler,
   checkpointer: RemoteCheckpointer,
   llmProvider?: LlmProvider,
-  hookEngine?: HookEngine
+  hookEngine?: HookEngine,
+  agentConfigResolver?: AgentConfigResolver,
+  diagnosticsFeed?: DiagnosticsFeedService
 ) {
-  return buildRouterGraph(mcpBridge, streamHandler, checkpointer, llmProvider, hookEngine);
+  return buildRouterGraph(mcpBridge, streamHandler, checkpointer, llmProvider, hookEngine, agentConfigResolver, diagnosticsFeed);
 }

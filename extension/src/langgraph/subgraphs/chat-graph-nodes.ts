@@ -15,6 +15,9 @@ import { debugLog, debugError } from "../../debug-logger";
 import { buildBudgetAwareMessages, estimateMessagesTokens, getDynamicToolResultLimits } from "../core/context-budget";
 import { requiresApproval } from "../../chat/engine/ToolApprovalClassifier";
 import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import type { ActiveAgentConfig } from "../agents/agent-config-resolver";
+import { filterTools, isToolAllowed, buildToolBlockedMessage } from "../agents/tool-filter";
+import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
 
 const LLM_CALL_TIMEOUT_MS = 300_000;
 
@@ -104,7 +107,7 @@ export function createFetchToolsNode(toolRegistry: ToolRegistry | null) {
       catch (err) { console.debug(`[chat-graph-nodes] getTools failed (non-fatal): ${(err as Error).message}`); mcpTools = []; }
     }
     const allTools = [...VSCODE_TOOL_DEFINITIONS, ...mcpTools];
-    debugLog(`[graph] fetch_tools: ${allTools.length} total tools`);
+    debugLog(`[graph] fetch_tools: ${allTools.length} total tools: ${allTools.map(t => t.name).join(', ')}`);
     return { parallelResults: { toolsJson: JSON.stringify(allTools) }, lastUpdatedAt: new Date().toISOString() };
   };
 }
@@ -112,12 +115,14 @@ export function createFetchToolsNode(toolRegistry: ToolRegistry | null) {
 export function createAgentStepNode(
   llmProvider: LlmProvider | undefined, streamHandler: StreamHandler,
   getSystemPrompt: (state: PipelineState) => string,
+  getAgentConfig?: () => ActiveAgentConfig | null,
 ) {
   return async (state: PipelineState) => {
     if (!llmProvider) {
       return {
         agentOutputs: [{ nodeId: "chat", content: "No LLM configured.", timestamp: new Date().toISOString() }],
         pipelineStatus: "completed" as const, toolCalls: null, lastUpdatedAt: new Date().toISOString(),
+        diagnosticsContext: "",
       };
     }
     const sysPrompt = getSystemPrompt(state);
@@ -129,33 +134,44 @@ export function createAgentStepNode(
       tools = [];
     }
 
+    // SA4E-186: Filter tools based on active agent config
+    const agentConfig = getAgentConfig?.() ?? null;
+    if (agentConfig) {
+      tools = filterTools(tools, agentConfig.toolPatterns);
+    }
+
+    // SA4E-186: Resolve model override for both tool and streaming paths
+    const llmOptions = agentConfig?.model ? { model: agentConfig.model } : undefined;
+
     if (llmProvider.chatWithTools && tools.length > 0) {
       // KSA-290: Pass all available tools to LLM (large models handle 50+ tools fine).
       // For small models (context < 32k), limit to 15 most important tools.
       const contextWindow = state.maxContextTokens || 0;
       const toolLimit = contextWindow > 0 && contextWindow < 32000 ? 15 : tools.length;
-      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, toolLimit), sysPrompt);
+      return await agentStepWithTools(state, llmProvider, streamHandler, streamId, tools.slice(0, toolLimit), sysPrompt, llmOptions);
     }
-    return await agentStepStreaming(state, llmProvider, streamHandler, streamId, sysPrompt, tools);
+    return await agentStepStreaming(state, llmProvider, streamHandler, streamId, sysPrompt, tools, llmOptions);
   };
 }
 
 async function agentStepWithTools(
   state: PipelineState, llm: LlmProvider, sh: StreamHandler,
-  streamId: string, tools: McpToolDefinition[], sysPrompt: string
+  streamId: string, tools: McpToolDefinition[], sysPrompt: string,
+  llmOptions?: { model?: string }
 ) {
   try {
     const messages = buildMessages(state, tools, sysPrompt);
 
     // Log LLM request
-    debugLog(`[LLM-REQ] iteration=${state.agentIterations || 0}, messages=${messages.length}, tools=${tools.length}`);
+    debugLog(`[LLM-REQ] iteration=${state.agentIterations || 0}, messages=${messages.length}, tools=${tools.length}${llmOptions?.model ? `, model=${llmOptions.model}` : ""}`);
     for (const m of messages) {
       const preview = m.content.slice(0, 150).replace(/\n/g, " ");
       debugLog(`  [${m.role}] ${preview}${m.content.length > 150 ? "..." : ""}`);
       if ((m as any).toolCalls) { debugLog(`  [assistant.toolCalls] ${JSON.stringify((m as any).toolCalls.map((tc: any) => tc.name))}`); }
     }
 
-    const llmPromise = llm.chatWithTools!(messages, tools, { maxTokens: 8192 });
+    const chatOptions = { maxTokens: 8192, ...(llmOptions?.model ? { model: llmOptions.model } : {}) };
+    const llmPromise = llm.chatWithTools!(messages, tools, chatOptions);
     const timeoutPromise = new Promise<never>((_, rej) => { const t = setTimeout(() => rej(new Error("LLM timeout")), LLM_CALL_TIMEOUT_MS); if (t.unref) t.unref(); });
     const response = await Promise.race([llmPromise, timeoutPromise]);
 
@@ -167,11 +183,11 @@ async function agentStepWithTools(
       sh.emitToken("chat", response.text || "", streamId);
       sh.emitComplete("chat", 0, streamId);
       // NOTE: Do NOT set working=false here — verify may loop back. Engine handler sets it on graph completion.
-      return { agentOutputs: [{ nodeId: "chat", content: response.text || "", timestamp: new Date().toISOString() }], pipelineStatus: "completed" as const, toolCalls: null, lastUpdatedAt: new Date().toISOString() };
+      return { agentOutputs: [{ nodeId: "chat", content: response.text || "", timestamp: new Date().toISOString() }], pipelineStatus: "completed" as const, toolCalls: null, lastUpdatedAt: new Date().toISOString(), diagnosticsContext: "" };
     }
     debugLog(`[LLM-RES] type=tool_use, calls=${(response.toolCalls || []).map(tc => `${tc.name}(${JSON.stringify(tc.arguments).slice(0, 50)})`).join(", ")}`);
     const tcJson = JSON.stringify((response.toolCalls || []).map(tc => ({ type: "tool_use", id: tc.id, name: tc.name, input: tc.arguments })));
-    return { toolCalls: response.toolCalls || null, parallelResults: { lastToolCallsJson: tcJson }, lastUpdatedAt: new Date().toISOString() };
+    return { toolCalls: response.toolCalls || null, parallelResults: { lastToolCallsJson: tcJson }, lastUpdatedAt: new Date().toISOString(), diagnosticsContext: "" };
   } catch (error) {
     const errMsg = (error as Error).message;
     debugLog(`[LLM-ERR] ${errMsg}`);
@@ -185,21 +201,24 @@ async function agentStepWithTools(
       pipelineStatus: "failed" as const,
       toolCalls: null,
       lastUpdatedAt: new Date().toISOString(),
+      diagnosticsContext: "",
     };
   }
 }
 
 async function agentStepStreaming(
   state: PipelineState, llm: LlmProvider, sh: StreamHandler,
-  streamId: string, sysPrompt: string, tools: McpToolDefinition[]
+  streamId: string, sysPrompt: string, tools: McpToolDefinition[],
+  llmOptions?: { model?: string }
 ) {
   sh.emitStatus("chat", "active", streamId);
   try {
     const messages = buildMessages(state, tools, sysPrompt);
+    const chatOptions = { maxTokens: 8192, ...(llmOptions?.model ? { model: llmOptions.model } : {}) };
     let full = "";
-    for await (const token of llm.chatStream(messages, { maxTokens: 8192 })) { full += token; sh.emitToken("chat", token, streamId); }
+    for await (const token of llm.chatStream(messages, chatOptions)) { full += token; sh.emitToken("chat", token, streamId); }
     sh.emitComplete("chat", 0, streamId);
-    return { agentOutputs: [{ nodeId: "chat", content: full, timestamp: new Date().toISOString() }], pipelineStatus: "completed" as const, toolCalls: null, lastUpdatedAt: new Date().toISOString() };
+    return { agentOutputs: [{ nodeId: "chat", content: full, timestamp: new Date().toISOString() }], pipelineStatus: "completed" as const, toolCalls: null, lastUpdatedAt: new Date().toISOString(), diagnosticsContext: "" };
   } catch (error) {
     const errMsg = (error as Error).message;
     sh.emitError("chat", errMsg, streamId);
@@ -210,12 +229,15 @@ async function agentStepStreaming(
       pipelineStatus: "failed" as const,
       toolCalls: null,
       lastUpdatedAt: new Date().toISOString(),
+      diagnosticsContext: "",
     };
   }
 }
 
 export function createExecuteToolsNode(
-  mcpBridge: McpBridge | undefined, sh: StreamHandler, hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate
+  mcpBridge: McpBridge | undefined, sh: StreamHandler, hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate,
+  getAgentConfig?: () => ActiveAgentConfig | null,
+  diagnosticsFeed?: DiagnosticsFeedService
 ) {
   return async (state: PipelineState) => {
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
@@ -223,8 +245,22 @@ export function createExecuteToolsNode(
     const results: Array<{ toolCallId: string; name: string; content: string }> = [];
     sh.emitComplete("chat", 0, streamId);
 
+    // SA4E-186: Get active agent config for tool enforcement
+    const agentConfig = getAgentConfig?.() ?? null;
+
     for (const call of calls) {
-      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate);
+      // SA4E-186: Enforce tool filter at execution time (safety net)
+      if (agentConfig && !isToolAllowed(call.name, agentConfig.toolPatterns)) {
+        const blockedMsg = buildToolBlockedMessage(
+          call.name,
+          agentConfig.agentId,
+          agentConfig.toolPatterns || []
+        );
+        results.push({ toolCallId: call.id, name: call.name, content: blockedMsg });
+        continue;
+      }
+
+      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate, diagnosticsFeed);
       results.push(r);
     }
 
@@ -256,7 +292,8 @@ export function createExecuteToolsNode(
 async function executeSingleTool(
   call: { id: string; name: string; arguments: Record<string, unknown> },
   mcpBridge: McpBridge | undefined, sh: StreamHandler, streamId: string,
-  hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate
+  hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate,
+  diagnosticsFeed?: DiagnosticsFeedService
 ): Promise<{ toolCallId: string; name: string; content: string }> {
   const tcId = call.id || `tc-${Date.now()}`;
 
@@ -300,11 +337,18 @@ async function executeSingleTool(
     sh.emitDirect({ type: "chat:toolCallUpdate", id: tcId, status: "completed", result: result.slice(0, 500), duration: dur } as any);
     if (hookEngine) {
       try {
-        await hookEngine.firePostToolUse(call.name, call.arguments || {}, result, sh, streamId);
+        const hookResult = await hookEngine.firePostToolUse(call.name, call.arguments || {}, result, sh, streamId);
+        // SA4E-185 OI-2: hookResult.injectedPrompts is intentionally NOT replayed into the loop.
+        // Diagnostics feed is channel-authoritative (diagnosticsContext, single-writer node) to
+        // guarantee consume-once (BR-7). If askAgent/other hooks later require prompt injection,
+        // fold ONLY non-feed outputs here — feed summaries must never duplicate (dedupe rule, RC-2).
       } catch (hookErr) {
         // postToolUse hook failures are non-fatal but must be visible
         debugError(`[chat-graph-nodes] postToolUse hook error for '${call.name}'`, hookErr as Error);
       }
+    }
+    if (diagnosticsFeed) {
+      diagnosticsFeed.markTouchedFromTool(call.name, call.arguments || {}); // BR-5 (handles write_file — DR-1)
     }
     return { toolCallId: call.id, name: call.name, content: result };
   } catch (error) {

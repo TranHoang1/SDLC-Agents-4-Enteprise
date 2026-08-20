@@ -1,0 +1,126 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-186 — Test Execution Flow" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="380" y="10" width="350" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Phase 1: Setup -->
+    <mxCell id="start" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="500" y="50" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="setup" value="Test Setup&#xa;(Fixtures + Mocks)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="470" y="120" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Phase 2: PBT -->
+    <mxCell id="pbt" value="PBT Level&#xa;(fast-check)&#xa;2 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="470" y="200" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Phase 3: UT -->
+    <mxCell id="ut" value="Unit Tests&#xa;(Vitest)&#xa;17 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="470" y="290" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Decision: UT Pass? -->
+    <mxCell id="ut_check" value="UT Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="490" y="380" width="100" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Phase 4: IT -->
+    <mxCell id="it" value="Integration Tests&#xa;(Vitest)&#xa;14 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="470" y="480" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Decision: IT Pass? -->
+    <mxCell id="it_check" value="IT Pass?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="490" y="570" width="100" height="60" as="geometry"/>
+    </mxCell>
+    <!-- Phase 5: E2E-API -->
+    <mxCell id="e2e_api" value="E2E API Tests&#xa;(Vitest + Mock LLM)&#xa;14 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="470" y="670" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Phase 6: E2E-UI -->
+    <mxCell id="e2e_ui" value="E2E UI Tests&#xa;(Playwright)&#xa;3 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="470" y="760" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Phase 7: SIT -->
+    <mxCell id="sit" value="SIT&#xa;(Manual + Perf)&#xa;3 tests" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="470" y="850" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- End -->
+    <mxCell id="end_pass" value="All Pass&#xa;✓" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="940" width="80" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Fail nodes -->
+    <mxCell id="fix_ut" value="Fix &amp; Re-run" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="680" y="390" width="100" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="fix_it" value="Fix &amp; Re-run" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="680" y="580" width="100" height="40" as="geometry"/>
+    </mxCell>
+    <!-- Edges -->
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="start" target="setup">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="setup" target="pbt">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="pbt" target="ut">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="ut" target="ut_check">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="ut_check" target="it">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="ut_check" target="fix_ut">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#b85450;" edge="1" parent="1" source="fix_ut" target="ut">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="730" y="310"/>
+          <mxPoint x="610" y="310"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="it" target="it_check">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="Yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="it_check" target="e2e_api">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="No" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#b85450;" edge="1" parent="1" source="it_check" target="fix_it">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#b85450;" edge="1" parent="1" source="fix_it" target="it">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="730" y="500"/>
+          <mxPoint x="610" y="500"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="e2e_api" target="e2e_ui">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="e2e_ui" target="sit">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;" edge="1" parent="1" source="sit" target="end_pass">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Annotations -->
+    <mxCell id="ann1" value="Automated (CI)" style="text;html=1;align=left;verticalAlign=middle;fontSize=9;fontColor=#6c8ebf;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="330" y="300" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="ann2" value="Automated (CI)" style="text;html=1;align=left;verticalAlign=middle;fontSize=9;fontColor=#82b366;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="330" y="490" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="ann3" value="Automated (CI)" style="text;html=1;align=left;verticalAlign=middle;fontSize=9;fontColor=#d6b656;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="330" y="680" width="100" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="ann4" value="Manual" style="text;html=1;align=left;verticalAlign=middle;fontSize=9;fontColor=#666666;fontStyle=2;" vertex="1" parent="1">
+      <mxGeometry x="330" y="860" width="80" height="20" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

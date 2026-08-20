@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.30.1.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.32.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,15 @@ MIT
 ---
 
 ## Changelog
+
+### v1.32.0 (2026-08-19)
+
+- **SA4E-186: Agent Runtime Routing** — Dynamic slash menu from `.kiro/agents/*.md`, per-agent model/tool config, AgentSelector dropdown in ChatHeader, dual-path message protocol (runtime vs default).
+- **SA4E-184: Web Search native in Extension** — Removed SearXNG dependency, ported `web_search` + `fetch_url` as native VS Code tools (DuckDuckGo Lite POST, no external service needed). Stronger system prompt for mandatory tool usage.
+
+### v1.31.0 (2026-08-19)
+
+- **SA4E-196: Fix GraphSyncService drops Pega symbols on re-index** — `readTopSymbols()` now includes `pega_*` kinds via `OR s.kind LIKE 'pega_%'` pattern. Prevents graph_nodes stale references causing "No content available" in KB Graph detail panel. 696 stale nodes cleaned, 1731 Pega nodes restored.
 
 ### v1.30.1 (2026-08-19)
 

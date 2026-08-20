@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Auto-Learn from Session",
+  "description": "When agent session ends, analyze transcript for learnable patterns and ingest as instincts.",
+  "version": "1",
+  "when": {
+    "type": "agentStop"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Session just ended. Use the mem_learn MCP tool with action='analyze' to extract patterns from this session. Pass the last 10 messages as the transcript parameter. This runs in the background — do NOT add commentary or interrupt the user."
+  }
+}

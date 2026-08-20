@@ -44,7 +44,8 @@ export async function routeUserMessage(
   text: string,
   enrichedText: string,
   getEngine: () => LangGraphEngine,
-  sendToWebview: (msg: ChatExtToWebviewMessage) => void
+  sendToWebview: (msg: ChatExtToWebviewMessage) => void,
+  onTurnComplete?: () => void
 ): Promise<void> {
   const textTrimmed = text.trim().toLowerCase();
 
@@ -63,6 +64,7 @@ export async function routeUserMessage(
     debugLog(` handleUserMessage: routed to AGENT "${agentName}"`);
     sendToWebview({ type: "chat:workingStatus", working: true, label: `${agentName} --- working...` });
     await getEngine().invokeChat(`[Agent: ${agentName}] ${agentTask}`);
+    if (onTurnComplete) { onTurnComplete(); }
     sendToWebview({ type: "chat:workingStatus", working: false });
     return;
   }
@@ -76,6 +78,7 @@ export async function routeUserMessage(
     debugLog(` handleUserMessage: routed to SDLC ticket=${ticketKey} phase=${phase}`);
     sendToWebview({ type: "chat:workingStatus", working: true, label: `${ticketKey} --- ${phase}` });
     await getEngine().invoke(ticketKey, phase, enrichedText);
+    if (onTurnComplete) { onTurnComplete(); }
     sendToWebview({ type: "chat:workingStatus", working: false });
     return;
   }
@@ -90,6 +93,10 @@ export async function routeUserMessage(
     // agentStop hook failures are non-fatal but must be logged for observability
     debugLog(`[MessageRouting] agentStop hook error (non-fatal): ${(hookErr as Error).message}`);
   }
+
+  // SA4E-182: Update context usage after chat completes
+  if (onTurnComplete) { onTurnComplete(); }
+
   sendToWebview({ type: "chat:workingStatus", working: false });
 }
 

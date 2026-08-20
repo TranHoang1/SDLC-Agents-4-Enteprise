@@ -8,6 +8,7 @@
   import { selectedAgent } from '../stores/agentStore';
   import { isStreaming } from '../stores/chatStore';
   import ContextBadge from './ContextBadge.svelte';
+  import AgentSelector from './AgentSelector.svelte';
 </script>
 
 <header class="chat-header" aria-label="Chat header">
@@ -21,7 +22,8 @@
   </div>
 
   <div class="header-right">
-    <!-- Placeholder: AgentSelector (Phase 3) -->
+    <!-- SA4E-186: Agent selector dropdown for per-agent runtime routing -->
+    <AgentSelector />
     <div class="context-badge-wrapper" style="position: relative;">
       <ContextBadge />
     </div>

@@ -167,4 +167,61 @@ describe("ContextUsageTracker (KSA-249)", () => {
       expect(payload.total.threshold).toBe("full");
     });
   });
+
+  // TC-CUG-010: SA4E-182 — setMaxTokens syncs detected context window
+  describe("TC-CUG-010: setMaxTokens sync (SA4E-182)", () => {
+    it("updates maxTokens from default 128000 to detected 32768", () => {
+      tracker.setMaxTokens(32768);
+      const payload = tracker.getUsagePayload("tab1");
+      expect(payload.maxTokens).toBe(32768);
+    });
+
+    it("recalculates percentages after maxTokens change", () => {
+      // 8000 tokens conversation → 32000 chars
+      tracker.updateFromMessages("tab1", [{ content: "a".repeat(32000) }]);
+      // With default 128000: 8000/128000 = 6%
+      expect(tracker.getUsagePayload("tab1").total.percentage).toBe(6);
+
+      // After sync to 32768: 8000/32768 = 24%
+      tracker.setMaxTokens(32768);
+      expect(tracker.getUsagePayload("tab1").total.percentage).toBe(24);
+    });
+
+    it("threshold changes when maxTokens shrinks context window", () => {
+      // 25000 tokens → 100000 chars. Under 128000: 20% = safe
+      tracker.updateFromMessages("tab1", [{ content: "a".repeat(100000) }]);
+      expect(tracker.getUsagePayload("tab1").total.threshold).toBe("safe");
+
+      // Same tokens under 32768: 25000/32768 = 76% = warning
+      tracker.setMaxTokens(32768);
+      expect(tracker.getUsagePayload("tab1").total.threshold).toBe("warning");
+    });
+  });
+
+  // TC-CUG-011: SA4E-182 — Tool definitions count as mcpTools tokens
+  describe("TC-CUG-011: Tool definitions counting (SA4E-182)", () => {
+    it("counts tool definitions with name + description + schema", () => {
+      const toolSchema = JSON.stringify({ type: "object", properties: { query: { type: "string" } } });
+      const toolText = `mem_search: Search KB ${toolSchema}\ncode_search: Search code ${toolSchema}`;
+      tracker.addToolTokens("tab1", toolText);
+
+      const payload = tracker.getUsagePayload("tab1");
+      // toolText.length / 4 = estimated tokens
+      expect(payload.mcpTools.tokens).toBe(Math.ceil(toolText.length / 4));
+      expect(payload.mcpTools.tokens).toBeGreaterThan(0);
+    });
+
+    it("tool tokens affect total and percentage correctly with 32768 window", () => {
+      tracker.setMaxTokens(32768);
+      // Simulate 18 tools × ~390 chars each ≈ 7000 chars → ~1750 tokens
+      const toolText = "x".repeat(7000);
+      tracker.addToolTokens("tab1", toolText);
+
+      const payload = tracker.getUsagePayload("tab1");
+      expect(payload.mcpTools.tokens).toBe(1750);
+      // 1750/32768 ≈ 5%
+      expect(payload.mcpTools.percentage).toBe(5);
+      expect(payload.total.tokens).toBe(1750);
+    });
+  });
 });

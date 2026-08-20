@@ -1,0 +1,11 @@
+test_case_id,summary_content,severity_present,iteration_count,expected_behavior,description
+STC-32,contains_error_token,error,1,advisory_added,Summary with >=1 error -> auto-fix advisory appended
+STC-32,contains_error_token,error,2,advisory_added,Advisory must appear in system prompt near diagnostics block
+STC-43,warnings_only,warning,1,no_advisory,Only warnings -> no auto-fix directive
+STC-43,no_diagnostics,NO_SEVERITY,1,no_advisory,Empty/clean summary -> no directive
+STC-44,contains_error_token,error,12,forced_stop,Iteration limit reached -> loop must stop (BR-12)
+STC-44,contains_error_token,error,13,blocked,Exceed MAX_AGENT_ITERATIONS -> construct blocks
+STC-55,contains_error_token,error,1,refeed_no_errors,After fix, re-feed shows no error entries -> no further fix
+STC-56,contains_error_token,error,12,fixed_flag_only,EF-02: agent modifies file but errors remain -> only fixed flag set, loop stops
+STC-61,contains_error_token,error,1,approval_required,write_file fix tool blocked until approval (C-2)
+STC-62,contains_error_token,error,1,dangerous_pattern_matches,fs_write/str_replace/fs_append matched as dangerous (C-2)
