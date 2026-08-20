@@ -20,6 +20,8 @@ import type { LlmProvider } from "./core/llm-provider";
 import type { HookEngine } from "./hooks/hook-engine";
 import type { AgentConfigResolver } from "../agents/agent-config-resolver";
 import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
+import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import type { CommandPatternMatcher } from "../../chat/engine/CommandPatternMatcher";
 import { buildRouterGraph } from "../router/router-graph";
 
 /**
@@ -34,7 +36,9 @@ export async function buildPipelineGraph(
   llmProvider?: LlmProvider,
   hookEngine?: HookEngine,
   agentConfigResolver?: AgentConfigResolver,
-  diagnosticsFeed?: DiagnosticsFeedService
+  diagnosticsFeed?: DiagnosticsFeedService,
+  approvalGate?: ToolApprovalGate,
+  commandPatternMatcher?: CommandPatternMatcher
 ) {
-  return buildRouterGraph(mcpBridge, streamHandler, checkpointer, llmProvider, hookEngine, agentConfigResolver, diagnosticsFeed);
+  return buildRouterGraph(mcpBridge, streamHandler, checkpointer, llmProvider, hookEngine, agentConfigResolver, diagnosticsFeed, approvalGate, commandPatternMatcher);
 }

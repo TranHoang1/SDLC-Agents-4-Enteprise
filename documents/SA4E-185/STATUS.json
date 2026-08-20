@@ -2,7 +2,7 @@
   "ticket": "SA4E-185",
   "summary": "LSP Diagnostics Feed — Realtime errors into agent loop",
   "autonomyLevel": "L3",
-"currentPhase": "implementation",
+"currentPhase": "security_deploy_review",
   "architecturePattern": "plugin",
   "phases": {
     "requirements": { "status": "done", "file": "BRD.md", "version": 1, "completedAt": "2026-08-20T00:04:00Z" },
@@ -11,12 +11,12 @@
     "feedback_loop": { "status": "not_started", "iterations": 0, "maxIterations": 5 },
     "security_design_review": { "status": "done", "file": "SECURITY-DESIGN-REVIEW.md", "completedAt": "2026-08-20T06:23:00Z" },
     "test_planning": { "status": "done", "file": "STP.md", "version": 1, "completedAt": "2026-08-20T06:44:00Z" },
-    "devops_pipeline_setup": { "status": "done", "file": "ci-sa4e-185.yml", "completedAt": "2026-08-20T06:50:00Z", "securityGates": ["F-01", "F-02", "F-03"], "autonomyLevel": "L3", "testRun": { "status": "completed", "passed": 1310, "failed": 12, "note": "12 pre-existing failures in auth/slash-menu, unrelated to SA4E-185" } },
-    "implementation": { "status": "in_progress", "startedAt": "2026-08-20T07:00:00Z" },
-    "security_code_review": { "status": "not_started" },
-    "testing": { "status": "not_started" },
-    "pentest": { "status": "not_started" },
-    "security_deploy_review": { "status": "not_started" },
+    "devops_pipeline_setup": { "status": "done", "file": "ci-sa4e-185.yml", "completedAt": "2026-08-20T06:50:00Z", "securityGates": ["F-01", "F-02", "F-03"], "autonomyLevel": "L3", "testRun": { "status": "completed", "passed": 1310, "failed": 12, "note": "12 pre-existing failures in auth/slash-menu, unrelated to SA4E-185" }, "preFlight": { "status": "done", "completedAt": "2026-08-20T20:40:00Z", "P1": "OPEN - security fixes uncommitted (B1/B2/B3/V7)", "P2": "CLOSED - VSCE_PAT uses env var, not inlined in run command", "P3": "CLOSED - security-code-review now real gate (.opencode/scripts/security-code-review.ts, no || true), verified PASS exit=0" } },
+    "implementation": { "status": "done", "startedAt": "2026-08-20T07:00:00Z", "completedAt": "2026-08-20T19:05:00Z", "file": "extension/src/langgraph/diagnostics/diagnostics-feed-service.ts", "commit": "3514222", "note": "DiagnosticsFeedService + inject-diagnostics-node + chat-graph fence delimiter F-01. 41/46 diagnostics tests pass, 5 pre-existing annotation-API failures." },
+    "security_code_review": { "status": "done", "file": "SECURITY-CODE-REVIEW.md", "verdict": "APPROVED-WITH-CONDITIONS", "completedAt": "2026-08-20T19:30:00Z", "note": "Re-check 2026-08-20T19:31Z: B1-B3 FIXED (approval gate wired end-to-end, fs_write/str_replace/fs_append added to DANGEROUS_TOOL_PATTERNS, severity-token trigger, fence boundary sentence). Diagnostics 46/46 pass on recheck. B4 (product decision) pending SM. B5 (full hook suite) runs at QA gate." },
+    "testing": { "status": "done", "file": "TEST-EXECUTION-REPORT-SA4E-185.md", "completedAt": "2026-08-20T19:45:00Z", "results": { "verdict": "CONDITIONAL-PASS", "fullSuite": { "passed": 1444, "failed": 31, "note": "31 failures pre-existing (powershell-transport 14, slash-menu 10, proxy 4, auth 2, real-llm 1) + 2 e2e suites blocked by missing backend/tsx — 0 SA4E-185 related" }, "typeCheck": "PASS", "diagnosticsSuite": { "passed": 57, "skipped": 5, "files": 6 }, "hookSuite": { "passed": 25, "failed": 0, "note": "Blocker B5 closed — no command hook auto-fires on write_file" }, "securityBlockers": { "B1": "CLOSED", "B2": "CLOSED", "B3": "CLOSED", "B4": "OPEN (SM product decision C-6/SIT-76)", "B5": "CLOSED" }, "defects": { "total": 8, "critical": 0, "major": 4, "minor": 4 }, "rtmCoverage": "99/100 rows (99%) — RC-4/STC-47 uncovered", "stcParity": { "plannedAuto": 71, "executingMeaningful": 50, "fullPass": 26, "skipped": 5, "missing": 15, "vacuous": 1 }, "stcLevelVerdicts": { "PBT": "NOT-AS-SPECIFIED", "UT": "CONDITIONAL", "IT": "CONDITIONAL", "E2E-API": "GAP", "E2E-UI": "NOT-DELIVERED", "SIT": "NOT-RUN" } }, "recheck": { "status": "done", "completedAt": "2026-08-20T20:14:00Z", "note": "D1-D4 FIXED by DEV: STC-45 real assertions, 5 skip blocks implemented (debounce tests), E2E-API tests added (diagnostics-feed-api.test.ts 5 cases incl STC-47/65), E2E-UI smoke + manifest stubs (feed-extension-host.test.ts). Diagnostics+API+host suites 61 pass/1 todo. Defects D1-D4 CLOSED. D5-D8 minor remain open (non-blocking). B4 OPEN (product decision)." } },
+    "pentest": { "status": "done", "file": "SECURITY-PENTEST-SA4E-185.md", "completedAt": "2026-08-20T20:30:00Z", "verdict": "CONDITIONAL-APPROVE", "note": "11 vectors tested. V7 FAIL (Major): toWorkspaceRelative allowed .. traversal inside workspace-root absolute path (C:\\ws\\test\\..\\..\\etc\\passwd escaped). FIXED on-site (reject .. segments after prefix slice) + regression test. Retest 37/37 PASS. V10 approval-gate PASS. B4 (default-ON) OPEN pending SM." },
+    "security_deploy_review": { "status": "done", "file": "SECURITY-DEPLOY-REVIEW-SA4E-185.md", "completedAt": "2026-08-20T21:10:00Z", "verdict": "RELEASE-READY", "note": "C-1..C-3 all CLOSED; B1-B5 all CLOSED/RESOLVED (B4 default-ON per SM); D1-D4 closed by DEV recheck, D5-D8 minor non-blocking. CI findings: 3 Medium (VSCE_PAT in run arg ci-sa4e-185.yml:293, security-code-review step non-enforcing ||true + missing script, security fixes uncommitted — must commit pre-deploy), 3 Low, 3 Info. Pre-flight P-1 commit fixes, P-2 PAT via env, P-3 enforce CI review gate." },
     "deployment": { "status": "not_started" }
   },
   "tokenBudget": {
@@ -27,5 +27,5 @@
     "mode": "normal"
   },
   "circuitBreaker": {},
-  "lastUpdated": "2026-08-20T06:50:00Z"
+  "lastUpdated": "2026-08-20T20:31:00Z", "decisions": { "B4": "default-ON kept per SM — user approved", "autoFix": "severity-token trigger only" }
 }

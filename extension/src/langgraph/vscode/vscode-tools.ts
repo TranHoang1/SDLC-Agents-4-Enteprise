@@ -20,6 +20,7 @@ export async function executeVscodeTool(name: string, args: Record<string, unkno
     case "web_search":
     case "fetch_url":
       return executeWebTool(name, args);
+    case "execute_shell": return executeShell(args, wsRoot);
     default: return `Error: Unknown VS Code tool '${name}'`;
   }
 }
@@ -150,6 +151,32 @@ async function getOpenFiles(): Promise<string> {
   const tabs = vscode.window.tabGroups.all.flatMap(g => g.tabs);
   const files = tabs.filter(t => t.input instanceof vscode.TabInputText).map(t => vscode.workspace.asRelativePath((t.input as vscode.TabInputText).uri));
   return files.length > 0 ? files.join("\n") : "No files open";
+}
+
+/** Execute a shell command using child_process.exec. Requires approval via ToolApprovalClassifier. */
+async function executeShell(args: Record<string, unknown>, workspaceRoot: string): Promise<string> {
+  const command = args.command as string;
+  if (!command) return "Error: 'command' is required";
+  const cwd = (args.cwd as string) ? path.isAbsolute(args.cwd as string) ? (args.cwd as string) : path.join(workspaceRoot, args.cwd as string) : workspaceRoot;
+  const timeout = (args.timeout as number) || 120_000;
+  const { exec } = require("child_process");
+
+  return new Promise<string>((resolve) => {
+    const child = exec(
+      command,
+      { cwd, maxBuffer: 10 * 1024 * 1024, timeout },
+      (error: Error | null, stdout: string, stderr: string) => {
+        if (error) {
+          const output = stderr?.trim() || error.message;
+          resolve(`Exit code: ${(error as any).code || 1}\n${stdout?.trim() ? "STDOUT:\n" + stdout.trim() + "\n" : ""}STDERR:\n${output}`);
+        } else {
+          const result = stdout?.trim() || "(no output)";
+          resolve(result.length > 50000 ? result.substring(0, 50000) + "\n\n[... truncated at 50KB ...]" : result);
+        }
+      }
+    );
+    child.unref?.();
+  });
 }
 
 

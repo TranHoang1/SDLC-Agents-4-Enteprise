@@ -13,6 +13,7 @@ const TOOL_CATEGORIES: Record<string, string> = {
   delete_file: "write", stream_write_file: "write",
   write_file: "write",            // ← SA4E-185 OI-1: primary VS Code write tool
   execute_pwsh: "shell", control_pwsh_process: "shell",
+  execute_shell: "shell",
   web_search: "web", fetch_url: "web",
 };
 
