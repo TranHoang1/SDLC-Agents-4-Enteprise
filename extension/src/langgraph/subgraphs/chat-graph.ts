@@ -291,6 +291,7 @@ export async function buildChatSubgraph(
 
   if (ragConfig.enableHallucinationGrade) {
     // Graph with Corrective RAG nodes for small models
+    // Small models: skip verify_response (unreliable with <8B params), use direct routing
     const getAgentConfig = () => agentConfigResolver?.getActiveConfig() ?? null;
     const injectDiag = createInjectDiagnosticsNode(diagnosticsFeed ?? null);
     const graph = new StateGraph(PipelineAnnotation)
@@ -298,15 +299,13 @@ export async function buildChatSubgraph(
       .addNode("inject_diagnostics", injectDiag)
       .addNode("agent_step", createAgentStepNode(llmProvider, streamHandler, buildFinalSystemPrompt, getAgentConfig))
       .addNode("execute_tools", createExecuteToolsNode(mcpBridge, streamHandler, hookEngine, wsRoot, approvalGate, getAgentConfig, diagnosticsFeed, commandPatternMatcher))
-      .addNode("verify_response", verifyNode)
       .addNode("synthesize", createSynthesizeNode(llmProvider, streamHandler, buildFinalSystemPrompt))
       .addNode("hallucination_grader", createHallucinationGraderNode(llmProvider, streamHandler, ragConfig))
       .addEdge("__start__", "fetch_tools")
       .addEdge("fetch_tools", "inject_diagnostics")
       .addEdge("inject_diagnostics", "agent_step")
-      .addConditionalEdges("agent_step", routeAgentStep, { execute_tools: "execute_tools", verify_response: "verify_response" })
+      .addConditionalEdges("agent_step", routeAgentStepDirect, { execute_tools: "execute_tools", __end__: "hallucination_grader" })
       .addConditionalEdges("execute_tools", routeAfterToolExec, { inject_diagnostics: "inject_diagnostics", synthesize: "synthesize" })
-      .addConditionalEdges("verify_response", routeAfterVerify, { execute_tools: "execute_tools", agent_step: "agent_step", __end__: "hallucination_grader" })
       .addConditionalEdges("hallucination_grader", routeAfterHallucinationGrade, { agent_step: "agent_step", __end__: END })
       .addEdge("synthesize", END);
 

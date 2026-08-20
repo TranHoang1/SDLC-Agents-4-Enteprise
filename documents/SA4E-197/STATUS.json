@@ -1,12 +1,12 @@
 {
   "ticket": "SA4E-197",
-  "currentPhase": "requirements",
+  "currentPhase": "design",
   "autonomyLevel": "L3",
   "architecturePattern": "plugin",
   "phases": {
-    "requirements": { "status": "in_progress", "startedAt": "2025-07-27T10:00:00Z" },
-    "specification": { "status": "not_started" },
-    "design": { "status": "not_started" },
+    "requirements": { "status": "done", "file": "BRD.md", "version": 1, "completedAt": "2025-07-27T10:05:00Z" },
+    "specification": { "status": "done", "file": "FSD.md", "version": 1, "completedAt": "2025-07-27T10:10:00Z" },
+    "design": { "status": "done", "file": "TDD.md", "version": 1, "completedAt": "2025-07-27T10:15:00Z" },
     "feedback_loop": { "status": "not_started", "iterations": 0, "maxIterations": 5 },
     "security_design_review": { "status": "not_started" },
     "test_planning": { "status": "not_started" },
@@ -20,10 +20,10 @@
   },
   "tokenBudget": {
     "dailyCap": 500000,
-    "usedToday": 0,
+    "usedToday": 50000,
     "lastReset": "2025-07-27T00:00:00Z",
     "warningThreshold": 0.8,
     "mode": "normal"
   },
-  "lastUpdated": "2025-07-27T10:00:00Z"
+  "lastUpdated": "2025-07-27T10:15:00Z"
 }

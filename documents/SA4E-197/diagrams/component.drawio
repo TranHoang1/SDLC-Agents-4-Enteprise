@@ -1,0 +1,43 @@
+<mxGraphModel dx="1100" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="600" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="c1" value="CommandPatternMatcher&#10;&#10;+ addPattern(pattern)&#10;+ matches(command): string|null&#10;+ clear()&#10;+ static suggestPattern(cmd)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="240" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2" value="ToolApprovalGate&#10;&#10;+ requestApproval(tcId): Promise&#10;+ resolve(tcId, decision)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="340" y="40" width="220" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3" value="executeShell(args, wsRoot)&#10;&#10;- resolve cwd&#10;- child_process.exec&#10;- return stdout or stderr&#10;- truncate at 50KB" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="620" y="40" width="200" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="c4" value="executeSingleTool()&#10;&#10;1. preToolUse hook&#10;2. isShellTool check&#10;3. patternMatcher.matches()&#10;4. if no match → gate&#10;5. execute tool&#10;6. postToolUse hook" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="40" y="220" width="220" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="c5" value="PermissionGuard.svelte&#10;&#10;Props: toolId, name, args, toolType&#10;Events: approve, deny, approveSession&#10;60s countdown, WCAG focus trap" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;verticalAlign=top;spacingLeft=5;" vertex="1" parent="1">
+      <mxGeometry x="340" y="220" width="240" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="c4" target="c1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="uses" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="c4" target="c2">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="150" y="200"/>
+          <mxPoint x="450" y="200"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e3" value="calls" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="c4" target="c3">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="150" y="190"/>
+          <mxPoint x="720" y="190"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e4" value="resolves" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="c5" target="c2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
