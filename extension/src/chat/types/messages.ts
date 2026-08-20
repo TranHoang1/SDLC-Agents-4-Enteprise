@@ -73,7 +73,6 @@ export type ExtensionMessageType =
   | 'COMPACT_COMPLETE'
   | 'COMPACT_ERROR'
   | 'AGENT_SWITCHED';
->>>>>>> SA4E-182
 
 /** A hydrated chat message from Backend KB history (SYNC_CHAT_HISTORY). */
 export interface HydratedMessagePayload {
