@@ -92,25 +92,37 @@ describe("ProxyDetectionService", () => {
   });
 
   it("detectWindowsProxy parses a single proxy server", () => {
-    execSyncMock.mockReturnValue("Proxy Server(s) :  192.168.1.1:8080\r\n");
+    execSyncMock.mockImplementation((cmd: unknown) => {
+      if (String(cmd).includes("powershell")) { throw new Error("mock: no PowerShell"); }
+      return "Proxy Server(s) :  192.168.1.1:8080\r\n";
+    });
     const raw = service as unknown as { detectWindowsProxy: () => string | null };
     expect(raw.detectWindowsProxy()).toBe("http://192.168.1.1:8080");
   });
 
   it("detectWindowsProxy returns null for direct access", () => {
-    execSyncMock.mockReturnValue("Proxy Server(s) :  (Direct access)\r\n");
+    execSyncMock.mockImplementation((cmd: unknown) => {
+      if (String(cmd).includes("powershell")) { throw new Error("mock: no PowerShell"); }
+      return "Proxy Server(s) :  (Direct access)\r\n";
+    });
     const raw = service as unknown as { detectWindowsProxy: () => string | null };
     expect(raw.detectWindowsProxy()).toBeNull();
   });
 
   it("detectWindowsProxy prefers https in per-protocol config", () => {
-    execSyncMock.mockReturnValue("Proxy Server(s) :  http=hp:80;https=sp:443\r\n");
+    execSyncMock.mockImplementation((cmd: unknown) => {
+      if (String(cmd).includes("powershell")) { throw new Error("mock: no PowerShell"); }
+      return "Proxy Server(s) :  http=hp:80;https=sp:443\r\n";
+    });
     const raw = service as unknown as { detectWindowsProxy: () => string | null };
     expect(raw.detectWindowsProxy()).toBe("http://sp:443");
   });
 
   it("detectWindowsProxy falls back to http in per-protocol config", () => {
-    execSyncMock.mockReturnValue("Proxy Server(s) :  http=hp:80\r\n");
+    execSyncMock.mockImplementation((cmd: unknown) => {
+      if (String(cmd).includes("powershell")) { throw new Error("mock: no PowerShell"); }
+      return "Proxy Server(s) :  http=hp:80\r\n";
+    });
     const raw = service as unknown as { detectWindowsProxy: () => string | null };
     expect(raw.detectWindowsProxy()).toBe("http://hp:80");
   });

@@ -1,0 +1,120 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-183 — Class Diagram: DiffTracker Module" style="text;html=1;fontSize=14;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="500" height="30" as="geometry"/>
+    </mxCell>
+    <!-- IDiffTracker Interface -->
+    <mxCell id="iface" value="&lt;&lt;interface&gt;&gt;&#xa;IDiffTracker" style="swimlane;fontStyle=1;align=center;startSize=40;fontSize=11;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="80" y="60" width="260" height="210" as="geometry"/>
+    </mxCell>
+    <mxCell id="iface-methods" value="+recordChange(input: RecordChangeInput): void&#xa;+getSummary(): DiffSummary&#xa;+getFileCount(): number&#xa;+getOriginalContent(path: string): string | undefined&#xa;+clearSession(): void&#xa;+dispose(): void" style="text;align=left;fontSize=9;verticalAlign=top;spacingLeft=4;" vertex="1" parent="iface">
+      <mxGeometry y="40" width="260" height="170" as="geometry"/>
+    </mxCell>
+    <!-- DiffTracker Class -->
+    <mxCell id="impl" value="DiffTracker" style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="80" y="340" width="310" height="290" as="geometry"/>
+    </mxCell>
+    <mxCell id="impl-fields" value="- entries: Map&lt;string, ChangeEntry&gt;&#xa;- originalContents: Map&lt;string, string&gt;&#xa;- debounceTimer: NodeJS.Timeout | null&#xa;- bridge: IPostMessageBridge&#xa;- readonly MAX_FILES = 100&#xa;- readonly DEBOUNCE_MS = 100&#xa;- readonly MAX_DIFF_SIZE = 2_097_152&#xa;───────────────────────────&#xa;+recordChange(input): void&#xa;+getSummary(): DiffSummary&#xa;+getFileCount(): number&#xa;+getOriginalContent(path): string | undefined&#xa;+clearSession(): void&#xa;+dispose(): void&#xa;-scheduleBadgeUpdate(): void&#xa;-evictOldest(): void&#xa;-isNetZero(existing, new): boolean&#xa;-truncateDiff(content: string): string" style="text;align=left;fontSize=9;verticalAlign=top;spacingLeft=4;" vertex="1" parent="impl">
+      <mxGeometry y="30" width="310" height="260" as="geometry"/>
+    </mxCell>
+    <!-- ChangeEntry Type -->
+    <mxCell id="entry" value="&lt;&lt;type&gt;&gt;&#xa;ChangeEntry" style="swimlane;fontStyle=1;align=center;startSize=35;fontSize=11;fillColor=#f3e5f5;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="470" y="60" width="220" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="entry-fields" value="+filePath: string&#xa;+operation: OperationType&#xa;+linesAdded: number&#xa;+linesRemoved: number&#xa;+diffContent: string&#xa;+timestamp: number&#xa;+originalContent?: string" style="text;align=left;fontSize=9;verticalAlign=top;spacingLeft=4;" vertex="1" parent="entry">
+      <mxGeometry y="35" width="220" height="165" as="geometry"/>
+    </mxCell>
+    <!-- DiffSummary Type -->
+    <mxCell id="summary" value="&lt;&lt;type&gt;&gt;&#xa;DiffSummary" style="swimlane;fontStyle=1;align=center;startSize=35;fontSize=11;fillColor=#f3e5f5;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="740" y="60" width="220" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="summary-fields" value="+totalFiles: number&#xa;+totalAdded: number&#xa;+totalModified: number&#xa;+totalDeleted: number&#xa;+totalLinesAdded: number&#xa;+totalLinesRemoved: number&#xa;+entries: ChangeEntry[]" style="text;align=left;fontSize=9;verticalAlign=top;spacingLeft=4;" vertex="1" parent="summary">
+      <mxGeometry y="35" width="220" height="165" as="geometry"/>
+    </mxCell>
+    <!-- RecordChangeInput Type -->
+    <mxCell id="input" value="&lt;&lt;type&gt;&gt;&#xa;RecordChangeInput" style="swimlane;fontStyle=1;align=center;startSize=35;fontSize=11;fillColor=#f3e5f5;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="470" y="310" width="220" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="input-fields" value="+filePath: string&#xa;+operation: OperationType&#xa;+linesAdded: number&#xa;+linesRemoved: number&#xa;+diffContent: string&#xa;+originalContent?: string" style="text;align=left;fontSize=9;verticalAlign=top;spacingLeft=4;" vertex="1" parent="input">
+      <mxGeometry y="35" width="220" height="145" as="geometry"/>
+    </mxCell>
+    <!-- OperationType Enum -->
+    <mxCell id="optype" value="&lt;&lt;enum&gt;&gt;&#xa;OperationType" style="swimlane;fontStyle=1;align=center;startSize=35;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="740" y="310" width="160" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="optype-vals" value="'added'&#xa;'modified'&#xa;'deleted'" style="text;align=left;fontSize=9;verticalAlign=top;spacingLeft=4;" vertex="1" parent="optype">
+      <mxGeometry y="35" width="160" height="75" as="geometry"/>
+    </mxCell>
+    <!-- SessionLifecycleEmitter -->
+    <mxCell id="emitter" value="SessionLifecycleEmitter" style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="470" y="540" width="260" height="130" as="geometry"/>
+    </mxCell>
+    <mxCell id="emitter-methods" value="+emitSessionCreated(threadId: string): void&#xa;+emitSessionHydrated(threadId: string): void&#xa;+on(event, listener): this" style="text;align=left;fontSize=9;verticalAlign=top;spacingLeft=4;" vertex="1" parent="emitter">
+      <mxGeometry y="30" width="260" height="100" as="geometry"/>
+    </mxCell>
+    <!-- DiffOriginalProvider -->
+    <mxCell id="provider" value="DiffOriginalProvider" style="swimlane;fontStyle=1;align=center;startSize=30;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="80" y="680" width="280" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="provider-methods" value="-diffTracker: IDiffTracker&#xa;+provideTextDocumentContent(uri): string" style="text;align=left;fontSize=9;verticalAlign=top;spacingLeft=4;" vertex="1" parent="provider">
+      <mxGeometry y="30" width="280" height="70" as="geometry"/>
+    </mxCell>
+    <!-- Relationships -->
+    <!-- DiffTracker implements IDiffTracker -->
+    <mxCell id="r1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="impl" target="iface">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- DiffTracker contains ChangeEntry (1:N) -->
+    <mxCell id="r2" value="0..100" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=diamond;endFill=1;fontSize=9;" edge="1" parent="1" source="entry" target="impl">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="440" y="160"/>
+          <mxPoint x="440" y="400"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- DiffSummary contains ChangeEntry -->
+    <mxCell id="r3" value="contains" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=diamond;endFill=0;fontSize=9;" edge="1" parent="1" source="entry" target="summary">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- ChangeEntry uses OperationType -->
+    <mxCell id="r4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="entry" target="optype">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="700" y="250"/>
+          <mxPoint x="700" y="330"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- DiffTracker observes SessionLifecycleEmitter -->
+    <mxCell id="r5" value="subscribes to&#xa;session:created" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;strokeColor=#82b366;" edge="1" parent="1" source="impl" target="emitter">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="235" y="640"/>
+          <mxPoint x="600" y="640"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- DiffOriginalProvider depends on IDiffTracker -->
+    <mxCell id="r6" value="depends" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="provider" target="iface">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="40" y="730"/>
+          <mxPoint x="40" y="165"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <!-- DiffTracker uses RecordChangeInput -->
+    <mxCell id="r7" value="param" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;fontSize=9;" edge="1" parent="1" source="impl" target="input">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="420" y="485"/>
+          <mxPoint x="420" y="400"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

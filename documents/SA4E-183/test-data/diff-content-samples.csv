@@ -1,0 +1,13 @@
+scenario,contentSizeBytes,lineCount,description,triggersTruncation,triggersCollapse
+small,50,3,Single line change,false,false
+medium,5120,80,Typical function rewrite,false,false
+large,102400,1500,Module refactor,false,true
+huge,3145728,50000,Over 2MB cap — triggers truncation,true,true
+empty,0,0,Edge case — empty diff content,false,false
+binary-like,1024,10,Non-UTF8 content with null bytes,false,false
+threshold-500,25000,500,Exactly at collapse threshold,false,false
+threshold-501,25100,501,Just over collapse threshold — triggers collapse,false,true
+single-addition,20,1,One line added,false,false
+single-removal,20,1,One line removed,false,false
+context-only,500,20,Only context lines no changes,false,false
+mixed-large,50000,800,Mixed additions and removals above collapse,false,true

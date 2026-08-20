@@ -81,15 +81,15 @@ describe('IT — Slash Menu Open/Close Lifecycle', () => {
 describe('IT — Slash Menu Two-Section Rendering', () => {
   beforeEach(() => { setupDOM(); });
 
-  it('IT-03: Agents section header + 6 items rendered', () => {
+  it('IT-03: Agents section header + 9 items rendered', () => {
     const { ctrl, container } = createController();
     ctrl.open(0);
     const headers = container.querySelectorAll('.slash-menu__section-header');
     expect(headers.length).toBeGreaterThanOrEqual(1);
     expect(headers[0].textContent).toBe('AGENTS');
     const items = container.querySelectorAll('.context-menu-item');
-    // 6 agents + 3 steering = 9 items
-    expect(items.length).toBe(9);
+    // 9 agents + 1 command + 3 steering = 13 items
+    expect(items.length).toBe(13);
     ctrl.dispose();
   });
 
@@ -147,7 +147,7 @@ describe('IT — Slash Menu Filter + DOM', () => {
     ctrl.filter('qa');
     ctrl.filter('');
     const items = container.querySelectorAll('.context-menu-item');
-    expect(items.length).toBe(9); // 6 agents + 3 steering
+    expect(items.length).toBe(13); // 9 agents + 1 command + 3 steering
     ctrl.dispose();
   });
 });
@@ -162,8 +162,8 @@ describe('IT — Slash Menu Keyboard Navigation', () => {
     const { ctrl, container } = createController();
     ctrl.open(0);
     // First item (agent 0) is highlighted by default
-    // Move down through all 6 agents to reach first steering item
-    for (let i = 0; i < 6; i++) {
+    // Move down through all 9 agents + 1 command to reach first steering item
+    for (let i = 0; i < 10; i++) {
       ctrl.handleKeyDown({ key: 'ArrowDown', preventDefault: vi.fn() } as unknown as KeyboardEvent);
     }
     // Should be on first steering item (index 6)
@@ -175,23 +175,23 @@ describe('IT — Slash Menu Keyboard Navigation', () => {
   it('IT-10: ArrowUp from first wraps to last', () => {
     const { ctrl, container } = createController();
     ctrl.open(0);
-    // At index 0, press ArrowUp -> should wrap to last (index 8)
+    // At index 0, press ArrowUp -> should wrap to last (index 12)
     ctrl.handleKeyDown({ key: 'ArrowUp', preventDefault: vi.fn() } as unknown as KeyboardEvent);
     const highlighted = container.querySelector('.context-menu-item--highlighted');
     expect(highlighted).not.toBeNull();
-    // Last item should have data-index="8"
-    expect(highlighted?.getAttribute('data-index')).toBe('8');
+    // Last item should have data-index="12"
+    expect(highlighted?.getAttribute('data-index')).toBe('12');
     ctrl.dispose();
   });
 
   it('IT-11: ArrowDown from last wraps to first', () => {
     const { ctrl, container } = createController();
     ctrl.open(0);
-    // Move to last item (8 moves down from index 0)
-    for (let i = 0; i < 8; i++) {
+    // Move to last item (12 moves down from index 0)
+    for (let i = 0; i < 12; i++) {
       ctrl.handleKeyDown({ key: 'ArrowDown', preventDefault: vi.fn() } as unknown as KeyboardEvent);
     }
-    // Now at index 8, press ArrowDown -> wrap to 0
+    // Now at index 12, press ArrowDown -> wrap to 0
     ctrl.handleKeyDown({ key: 'ArrowDown', preventDefault: vi.fn() } as unknown as KeyboardEvent);
     const highlighted = container.querySelector('.context-menu-item--highlighted');
     expect(highlighted?.getAttribute('data-index')).toBe('0');
@@ -208,9 +208,9 @@ describe('IT — Slash Menu Agent Selection', () => {
   it('IT-12: Enter on agent -> onAgentSelect callback fires with agentName', () => {
     const { ctrl, onAgentSelect } = createController();
     ctrl.open(0);
-    // First item is QA Agent (index 0, already highlighted)
+    // First item is BA Agent (index 0, already highlighted)
     ctrl.handleKeyDown({ key: 'Enter', preventDefault: vi.fn() } as unknown as KeyboardEvent);
-    expect(onAgentSelect).toHaveBeenCalledWith('qa-agent');
+    expect(onAgentSelect).toHaveBeenCalledWith('ba-agent');
     ctrl.dispose();
   });
 
@@ -233,8 +233,8 @@ describe('IT — Slash Menu Steering Selection', () => {
   it('IT-14: Enter on steering -> onSteeringSelect callback fires with rule', () => {
     const { ctrl, onSteeringSelect } = createController();
     ctrl.open(0);
-    // Navigate to first steering item (index 6 = 6 ArrowDowns from start)
-    for (let i = 0; i < 6; i++) {
+    // Navigate to first steering item (index 10 = 10 ArrowDowns from start)
+    for (let i = 0; i < 10; i++) {
       ctrl.handleKeyDown({ key: 'ArrowDown', preventDefault: vi.fn() } as unknown as KeyboardEvent);
     }
     ctrl.handleKeyDown({ key: 'Enter', preventDefault: vi.fn() } as unknown as KeyboardEvent);
@@ -248,7 +248,7 @@ describe('IT — Slash Menu Steering Selection', () => {
   it('IT-15: After steering select, state=CLOSED and popup removed', () => {
     const { ctrl, container } = createController();
     ctrl.open(0);
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 10; i++) {
       ctrl.handleKeyDown({ key: 'ArrowDown', preventDefault: vi.fn() } as unknown as KeyboardEvent);
     }
     ctrl.handleKeyDown({ key: 'Enter', preventDefault: vi.fn() } as unknown as KeyboardEvent);
