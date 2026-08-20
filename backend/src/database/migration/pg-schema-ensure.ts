@@ -82,6 +82,11 @@ export async function ensurePostgresIndexSchema(adapter: DatabaseAdapter): Promi
     await safeExec(adapter, `CREATE SEQUENCE IF NOT EXISTS pending_tasks_id_seq`);
     await safeExec(adapter, `ALTER TABLE pending_tasks ALTER COLUMN id SET DEFAULT nextval('pending_tasks_id_seq')`);
 
+    // Ensure relationships has serial ID (table may have been created without SERIAL default)
+    await safeExec(adapter, `CREATE SEQUENCE IF NOT EXISTS relationships_id_seq`);
+    await safeExec(adapter, `ALTER TABLE relationships ALTER COLUMN id SET DEFAULT nextval('relationships_id_seq')`);
+    await safeExec(adapter, `SELECT setval('relationships_id_seq', COALESCE((SELECT MAX(id) FROM relationships WHERE id IS NOT NULL), 0) + 1, false)`);
+
     // SA4E-171: Drop FK on pending_tasks.entry_id → knowledge_entries(id)
     // This allows entry_id to store symbolId for CODE_ENRICHMENT tasks (OI-01)
     await safeExec(adapter, `ALTER TABLE pending_tasks DROP CONSTRAINT IF EXISTS pending_tasks_entry_id_fkey`);
