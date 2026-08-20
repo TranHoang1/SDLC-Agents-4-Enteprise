@@ -34,7 +34,9 @@ describe("Simple callback test", () => {
     svc.start();
     
     const callback = vscode.languages.onDidChangeDiagnostics.mock.calls[0][0];
-    callback([{ scheme: "file", fsPath: "C:\\ws\\test\\src\\a.ts" }]);
+    // onDidChangeDiagnostics callbacks receive a DiagnosticChangeEvent (has .uris),
+    // not a bare URI array (diagnostics-feed-service.ts:134-135)
+    callback({ uris: [{ scheme: "file", fsPath: "C:\\ws\\test\\src\\a.ts" }] });
     
     vi.advanceTimersByTime(300);
     

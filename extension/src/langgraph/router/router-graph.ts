@@ -8,6 +8,8 @@ import type { LlmProvider } from "../core/llm-provider";
 import type { HookEngine } from "../hooks/hook-engine";
 import type { AgentConfigResolver } from "../agents/agent-config-resolver";
 import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
+import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import type { CommandPatternMatcher } from "../../chat/engine/CommandPatternMatcher";
 import { classifyIntent } from "./intent-classifier";
 
 export async function buildRouterGraph(
@@ -17,7 +19,9 @@ export async function buildRouterGraph(
   llmProvider?: LlmProvider,
   hookEngine?: HookEngine,
   agentConfigResolver?: AgentConfigResolver,
-  diagnosticsFeed?: DiagnosticsFeedService
+  diagnosticsFeed?: DiagnosticsFeedService,
+  approvalGate?: ToolApprovalGate,
+  commandPatternMatcher?: CommandPatternMatcher
 ) {
   // Lazy-load subgraph invokers (only imported when needed)
   const subgraphCache = new Map<PipelineIntent, (state: PipelineState) => Promise<Partial<PipelineState>>>();
@@ -79,7 +83,8 @@ export async function buildRouterGraph(
       default: {
         const { buildChatSubgraph } = await import("../subgraphs/chat-graph");
         const wsRoot = require("vscode").workspace.workspaceFolders?.[0]?.uri.fsPath || "";
-        const graph = await buildChatSubgraph(streamHandler, llmProvider, mcpBridge, wsRoot, hookEngine, undefined, agentConfigResolver, diagnosticsFeed);
+        // SA4E-185 C-2 (B1): pass the real approval gate — never undefined.
+        const graph = await buildChatSubgraph(streamHandler, llmProvider, mcpBridge, wsRoot, hookEngine, approvalGate, agentConfigResolver, diagnosticsFeed, commandPatternMatcher);
         invoker = async (state) => {
           const result = await graph.invoke(state);
           return result as Partial<PipelineState>;

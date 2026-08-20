@@ -80,24 +80,8 @@ describe("DiagnosticsFeedService", () => {
     });
   });
 
-  describe.skip("STC-10: Debounce merges burst to ONE batch (requires integration env)", () => {
-    it("10 events in < 300ms -> single flush with all URIs", () => {
-      // Skipped: requires reliable vscode mock for debounce/flush
-      // Covered by integration tests (STC-38..STC-53)
-    });
-  });
-
-  describe.skip("STC-11: No flush before 300ms quiet (requires integration env)", () => {
-    it("event at 0ms, no flush at 299ms, flush at 300ms", () => {
-      // Skipped: requires reliable vscode mock for debounce/flush
-    });
-  });
-
-  describe.skip("STC-12: Workspace/file-scheme filter (requires integration env)", () => {
-    it("excludes out-of-workspace and non-file URIs", () => {
-      // Skipped: requires reliable vscode mock for workspace filtering
-    });
-  });
+  // STC-10/STC-11 (debounce) and STC-12 (scope filter) are fully implemented in
+  // diagnostics-feed-debounce.test.ts — UT level with mocked emitter + fake timers.
 
   describe("STC-13: Touched-file filter", () => {
     it("keeps only touched files", () => {
@@ -257,11 +241,8 @@ describe("DiagnosticsFeedService", () => {
     });
   });
 
-  describe.skip("STC-21: Toggle resume false->true mid-session (requires integration env)", () => {
-    it("resumes immediately on next event", () => {
-      // Skipped: requires reliable vscode mock for debounce/flush
-    });
-  });
+  // STC-21 (toggle resume false->true) is fully implemented in
+  // diagnostics-feed-debounce.test.ts — UT level with mocked emitter + fake timers.
 
   describe("STC-22: Toggle discards pending debounce batch", () => {
     it("discards 5 URIs when toggled off, fresh window on toggle back", () => {
@@ -390,11 +371,8 @@ describe("DiagnosticsFeedService", () => {
     });
   });
 
-  describe.skip("STC-35: Buffer caps - pendingUris overflow (requires integration env)", () => {
-    it("triggers immediate flush when pendingUris exceeds MAX_PENDING_URIS", () => {
-      // Skipped: requires reliable vscode mock for overflow flush
-    });
-  });
+  // STC-35 (buffer caps / overflow + touchedFiles bound) is fully implemented in
+  // diagnostics-feed-debounce.test.ts — UT level with mocked emitter + fake timers.
 
   describe("STC-36: Secret-pattern shielding in buildSummary", () => {
     it("redacts OpenAI API keys", () => {
@@ -436,6 +414,13 @@ describe("DiagnosticsFeedService", () => {
     it("accepts relative path inside workspace", () => {
       const svc = createService({ enabled: true });
       expect(svc.toWorkspaceRelative("C:\\ws\\test\\src\\file.ts")).toBe("src/file.ts");
+    });
+
+    it("rejects absolute path with .. traversal inside workspace root (C-3 escape)", () => {
+      const svc = createService({ enabled: true });
+      expect(svc.toWorkspaceRelative("C:\\ws\\test\\..\\..\\etc\\passwd")).toBeNull();
+      expect(svc.toWorkspaceRelative("C:\\ws\\test\\..\\secret.txt")).toBeNull();
+      expect(svc.toWorkspaceRelative("C:/ws/test/src/../config/app.ts")).toBeNull();
     });
   });
 });
