@@ -1,0 +1,39 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="boundary" value="Chat Agent Extension" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="200" y="20" width="500" height="460" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor1" value="Developer" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="60" y="200" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor2" value="LLM Agent" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="800" y="200" width="40" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc1" value="UC-1: Execute Shell Command" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="100" y="50" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc2" value="UC-2: Approve/Deny&#10;Tool Execution" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="100" y="140" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc3" value="UC-3: Auto-Approve&#10;via Pattern Match" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="100" y="230" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc4" value="UC-4: Store Command&#10;Pattern (session)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="100" y="320" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc5" value="UC-5: Suggest Pattern&#10;from Command" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="100" y="400" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea1" style="html=1;endArrow=none;" edge="1" parent="1" source="actor1" target="uc2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea2" style="html=1;endArrow=none;" edge="1" parent="1" source="actor1" target="uc4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ea3" style="html=1;endArrow=none;" edge="1" parent="1" source="actor2" target="uc1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

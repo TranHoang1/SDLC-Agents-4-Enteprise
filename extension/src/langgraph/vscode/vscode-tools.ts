@@ -153,18 +153,27 @@ async function getOpenFiles(): Promise<string> {
   return files.length > 0 ? files.join("\n") : "No files open";
 }
 
-/** Execute a shell command using child_process.exec. Requires approval via ToolApprovalClassifier. */
+/**
+ * Execute a shell command with hybrid approach:
+ * 1. Shows command in VS Code integrated terminal (user can watch real-time)
+ * 2. Captures output via child_process for LLM consumption
+ * Uses the default shell profile configured in VS Code/Kiro.
+ */
 async function executeShell(args: Record<string, unknown>, workspaceRoot: string): Promise<string> {
   const command = args.command as string;
   if (!command) return "Error: 'command' is required";
   const cwd = (args.cwd as string) ? path.isAbsolute(args.cwd as string) ? (args.cwd as string) : path.join(workspaceRoot, args.cwd as string) : workspaceRoot;
   const timeout = (args.timeout as number) || 120_000;
-  const { exec } = require("child_process");
 
+  // 1. Show in VS Code terminal (visible to user)
+  showCommandInTerminal(command, cwd);
+
+  // 2. Capture output via child_process (for LLM)
+  const { exec } = require("child_process");
   return new Promise<string>((resolve) => {
     const child = exec(
       command,
-      { cwd, maxBuffer: 10 * 1024 * 1024, timeout },
+      { cwd, maxBuffer: 10 * 1024 * 1024, timeout, shell: getDefaultShell() },
       (error: Error | null, stdout: string, stderr: string) => {
         if (error) {
           const output = stderr?.trim() || error.message;
@@ -177,6 +186,40 @@ async function executeShell(args: Record<string, unknown>, workspaceRoot: string
     );
     child.unref?.();
   });
+}
+
+/** Reuse or create a dedicated terminal and send the command for user visibility */
+function showCommandInTerminal(command: string, cwd: string): void {
+  const terminalName = "Agent Shell";
+  // Find existing terminal or create new one
+  let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+  if (!terminal) {
+    terminal = vscode.window.createTerminal({ name: terminalName, cwd });
+  }
+  terminal.show(/* preserveFocus */ true);
+  terminal.sendText(command);
+}
+
+/** Get the default shell path from VS Code settings */
+function getDefaultShell(): string | undefined {
+  const platform = process.platform;
+  const configKey = platform === "win32"
+    ? "terminal.integrated.defaultProfile.windows"
+    : platform === "darwin"
+      ? "terminal.integrated.defaultProfile.osx"
+      : "terminal.integrated.defaultProfile.linux";
+  const profile = vscode.workspace.getConfiguration().get<string>(configKey);
+  // If profile is set, resolve to shell path from profiles
+  if (profile) {
+    const profilesKey = platform === "win32"
+      ? "terminal.integrated.profiles.windows"
+      : platform === "darwin"
+        ? "terminal.integrated.profiles.osx"
+        : "terminal.integrated.profiles.linux";
+    const profiles = vscode.workspace.getConfiguration().get<Record<string, { path?: string }>>(profilesKey);
+    if (profiles?.[profile]?.path) return profiles[profile].path;
+  }
+  return undefined; // Use system default
 }
 
 
