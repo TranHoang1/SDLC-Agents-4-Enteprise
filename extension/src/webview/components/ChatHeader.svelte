@@ -9,6 +9,7 @@
   import { isStreaming } from '../stores/chatStore';
   import ContextBadge from './ContextBadge.svelte';
   import AgentSelector from './AgentSelector.svelte';
+  import ChangeBadge from './ChangeBadge.svelte';
 </script>
 
 <header class="chat-header" aria-label="Chat header">
@@ -27,6 +28,8 @@
     <div class="context-badge-wrapper" style="position: relative;">
       <ContextBadge />
     </div>
+    <!-- SA4E-183: File change count badge -->
+    <ChangeBadge />
 
     {#if $isStreaming}
       <span class="streaming-badge" aria-live="polite">

@@ -33,6 +33,13 @@ export const SLASH_COMMANDS: SlashMenuItem[] = [
     description: 'Summarize and reduce context window usage',
     itemType: 'command',
   },
+  {
+    id: 'command-diff',
+    icon: '\u{1F4C4}',
+    label: 'diff',
+    description: 'Show session file changes',
+    itemType: 'command',
+  },
 ];
 
 /**
