@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import { ProxyConfigService } from "./ProxyConfigService";
 import { ProxyDetectionService } from "./ProxyDetectionService";
 import { ProxyTestService } from "./ProxyTestService";
+import { PowerShellHttpAdapter } from "./PowerShellHttpAdapter";
 import { ProxyAgentFactory } from "./ProxyAgentFactory";
 import type { ProxyMode } from "../models/ProxyModels";
 
@@ -184,11 +185,51 @@ export class ProxyMessageHandler {
   }
 
   private async handleDetectSystemProxy(): Promise<void> {
+    // Try sync detection first (env vars, VS Code settings, PowerShell .NET)
     const detected = this.detectionService.detect();
+    if (detected.url) {
+      this.postMessage({
+        type: "systemProxyDetected",
+        url: detected.url,
+        bypass: detected.bypass,
+      });
+      return;
+    }
+    // Fallback 1: async PowerShell detection (handles WPAD/PAC better)
+    try {
+      const { PowerShellTransport } = await import("./PowerShellTransport");
+      const proxyUrl = await PowerShellTransport.detectSystemProxy();
+      if (proxyUrl) {
+        this.postMessage({
+          type: "systemProxyDetected",
+          url: proxyUrl,
+          bypass: detected.bypass,
+        });
+        return;
+      }
+    } catch {
+      // PowerShell unavailable or failed — continue to next fallback
+    }
+    // Fallback 2: Corporate proxy discovery (DNS + TCP port probe)
+    // Detects McAfee/Skyhigh Web Gateway and similar inline proxies
+    try {
+      const { discoverCorporateProxy } = await import("./CorporateProxyDiscovery");
+      const discovered = await discoverCorporateProxy();
+      if (discovered) {
+        this.postMessage({
+          type: "systemProxyDetected",
+          url: discovered.url,
+          bypass: detected.bypass,
+        });
+        return;
+      }
+    } catch {
+      // Discovery failed — report no proxy
+    }
     this.postMessage({
       type: "systemProxyDetected",
-      url: detected.url,
-      bypass: detected.bypass,
+      url: null,
+      bypass: null,
     });
   }
 
@@ -199,5 +240,7 @@ export class ProxyMessageHandler {
     } catch {
       // Factory not yet initialized — ignore
     }
+    // Also invalidate PowerShell adapter's cached system proxy
+    PowerShellHttpAdapter.invalidateCache();
   }
 }
