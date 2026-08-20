@@ -21,6 +21,7 @@
     approve: { toolId: string };
     deny: { toolId: string };
     approveSession: { toolId: string; toolType: ToolType };
+    approvePattern: { toolId: string; pattern: string };
   }>();
 
   const TIMEOUT_SECONDS = 60;
@@ -32,6 +33,9 @@
   $: riskIcon = getRiskIcon(riskLevel);
   $: riskLabel = getRiskLabel(riskLevel);
   $: argsSummary = formatArgs(args);
+  $: isShellTool = name === 'execute_shell' || name === 'shell_execute' || name === 'execute_pwsh';
+  $: shellCommand = isShellTool ? (args.command as string || '') : '';
+  $: suggestedPattern = isShellTool ? suggestPattern(shellCommand) : '';
 
   onMount(() => {
     startCountdown();
@@ -72,6 +76,18 @@
   function handleApproveSession(): void {
     stopCountdown();
     dispatch('approveSession', { toolId, toolType });
+  }
+
+  function handleApprovePattern(): void {
+    stopCountdown();
+    dispatch('approvePattern', { toolId, pattern: suggestedPattern });
+  }
+
+  /** Suggest a glob pattern from a command: keep first token, wildcard rest */
+  function suggestPattern(command: string): string {
+    const parts = command.trim().split(/\s+/);
+    if (parts.length <= 1) return parts[0] || command;
+    return `${parts[0]} *`;
   }
 
   function handleKeydown(event: KeyboardEvent): void {
@@ -184,6 +200,12 @@
     <button class="session-link" on:click={handleApproveSession}>
       Allow all {toolType} tools this session
     </button>
+
+    {#if isShellTool && suggestedPattern}
+      <button class="session-link pattern-link" on:click={handleApprovePattern}>
+        Allow all <code>{suggestedPattern}</code> commands
+      </button>
+    {/if}
   </div>
 </div>
 
@@ -322,5 +344,12 @@
   .session-link:focus-visible {
     outline: 1px solid var(--vscode-focusBorder);
     outline-offset: 1px;
+  }
+  .pattern-link code {
+    font-family: var(--vscode-editor-font-family, monospace);
+    font-size: 11px;
+    background: var(--vscode-textBlockQuote-background, #2a2a2a);
+    padding: 1px 4px;
+    border-radius: 2px;
   }
 </style>

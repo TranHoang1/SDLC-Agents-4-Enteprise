@@ -30,6 +30,7 @@ import { SettingsPanel } from "./panels/settings/SettingsPanel";
 import { ProxyAgentFactory } from "./proxy/ProxyAgentFactory";
 import { ProxyConfigService } from "./proxy/ProxyConfigService";
 import { ProxyDetectionService } from "./proxy/ProxyDetectionService";
+import { applyGlobalFetchPatch } from "./proxy/global-fetch-patch";
 import { KnowledgeClient } from "./knowledge-client";
 import { DiffTracker } from "./chat/diff/DiffTracker";
 import { DiffOriginalProvider } from "./chat/diff/DiffOriginalProvider";
@@ -69,6 +70,8 @@ export async function activate(context: vscode.ExtensionContext) {
   const proxyConfigService = new ProxyConfigService(context.secrets);
   const proxyDetectionService = new ProxyDetectionService();
   ProxyAgentFactory.initialize(proxyConfigService, proxyDetectionService);
+  // Patch globalThis.fetch so ALL fetch() callers in this process route through proxy
+  applyGlobalFetchPatch();
 
   const workspaceRoot = getWorkspaceRoot();
   if (workspaceRoot) {

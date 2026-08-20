@@ -719,12 +719,22 @@
         return lbl;
       }
     }
-    return model;
+    // For local models with long paths, extract just the filename
+    var shortName = model;
+    if (model.indexOf("/") !== -1 || model.indexOf("\\") !== -1) {
+      var parts = model.replace(/\\/g, "/").split("/");
+      shortName = parts[parts.length - 1] || parts[parts.length - 2] || model;
+    }
+    // Remove .gguf extension for cleaner display
+    shortName = shortName.replace(/\.gguf$/i, "");
+    return shortName;
   }
 
   function setModel(model) {
     currentModel = model;
     modelLabel.textContent = labelForModel(model);
+    // Set full model path as tooltip for hover display
+    modelBtn.title = model;
     var allBtns = modelDropdown.querySelectorAll("button");
     for (var i = 0; i < allBtns.length; i++) {
       allBtns[i].classList.toggle("active", allBtns[i].getAttribute("data-model") === model);

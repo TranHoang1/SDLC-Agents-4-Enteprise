@@ -44,7 +44,11 @@ export class MessageHandler {
         break;
       case "chat:resumePipeline":
         this.sendToWebview({ type: "chat:workingStatus", working: true, label: "Resuming..." });
-        await this.getEngine().resume(msg.threadId);
+        try {
+          await this.getEngine().resume(msg.threadId);
+        } finally {
+          this.sendToWebview({ type: "chat:workingStatus", working: false });
+        }
         break;
       case "chat:clearHistory": break;
       case "chat:startFresh": break;

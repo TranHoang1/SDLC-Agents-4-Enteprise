@@ -4,7 +4,7 @@
  */
 import * as vscode from "vscode";
 import * as path from "path";
-import { httpPostJson as utilHttpPostJson, HttpPostOptions } from "../utils/http-client-utils";
+import { httpPostJson as utilHttpPostJson } from "../utils/http-client-utils";
 
 export interface DocEntry {
     path: string;
@@ -61,17 +61,18 @@ export class IndexerHttpClient {
             while (Date.now() - start < maxWaitMs) {
                 await new Promise(r => setTimeout(r, 2000));
                 const headers = await this.buildHeaders(token);
-                const http = await import("http");
-                const url = new URL(`${this.backendUrl}/api/index/progress`);
-                const resp = await new Promise<{ ok: boolean; body: string }>(resolve => {
-                    const req = http.default.request(
-                        { hostname: url.hostname, port: url.port, path: url.pathname, method: 'GET', headers },
-                        (res) => { let d = ''; res.on('data', c => d += c); res.on('end', () => resolve({ ok: res.statusCode === 200, body: d })); },
-                    );
-                    req.on('error', () => resolve({ ok: false, body: '' }));
-                    req.setTimeout(5000, () => { req.destroy(); resolve({ ok: false, body: '' }); });
-                    req.end();
-                });
+                const url = `${this.backendUrl}/api/index/progress`;
+                let resp: { ok: boolean; body: string };
+                try {
+                    const response = await fetch(url, {
+                        method: "GET",
+                        headers,
+                        signal: AbortSignal.timeout(5000),
+                    });
+                    resp = { ok: response.status === 200, body: await response.text() };
+                } catch {
+                    resp = { ok: false, body: "" };
+                }
                 const { ok, body } = resp;
                 if (!ok) { statusBar.text = "$(sync~spin) Indexing..."; statusBar.tooltip = "Code Intelligence: Indexing workspace..."; continue; }
                 try {
@@ -302,23 +303,15 @@ export class IndexerHttpClient {
             params: { name: "mem_sync_code", arguments: {} },
         };
         try {
-            // MCP Streamable HTTP requires Accept header
-            const body = JSON.stringify(payload);
-            const parsedUrl = new URL(url);
-            const http = await import("http");
-            const result = await new Promise<{ ok: boolean; body: string }>((resolve) => {
-                const req = http.default.request(
-                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname, method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json, text/event-stream", "Content-Length": Buffer.byteLength(body).toString() } },
-                    (res) => { let data = ""; res.on("data", (c: any) => { data += c; }); res.on("end", () => resolve({ ok: res.statusCode === 200, body: data })); },
-                );
-                req.on("error", () => resolve({ ok: false, body: "" }));
-                req.setTimeout(60000, () => { req.destroy(); resolve({ ok: false, body: "" }); });
-                req.write(body);
-                req.end();
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Accept": "application/json, text/event-stream" },
+                body: JSON.stringify(payload),
+                signal: AbortSignal.timeout(60000),
             });
-            if (!result.ok) { return null; }
-            const parsed = JSON.parse(result.body);
-            const text = parsed?.result?.content?.[0]?.text;
+            if (!response.ok) { return null; }
+            const result = await response.json() as any;
+            const text = result?.result?.content?.[0]?.text;
             return typeof text === "string" ? text : null;
         } catch {
             return null;
@@ -342,34 +335,18 @@ export class IndexerHttpClient {
         return undefined;
     }
 
-    /** POST JSON and return raw body + ok status. Delegates to http-client-utils. */
+    /** POST JSON and return raw body + ok status. Uses fetch() (proxy-patched globally). */
     private async httpPostJson(url: string, payload: unknown, token: string | undefined): Promise<{ ok: boolean; body: string }> {
         const headers = await this.buildHeaders(token);
         try {
-            // Use the utility but we need the raw response body, so wrap with a raw request
-            const body = JSON.stringify(payload);
-            const parsedUrl = new URL(url);
-            const http = await import("http");
-            return new Promise((resolve) => {
-                const reqBody = body;
-                const reqHeaders: Record<string, string> = {
-                    "Content-Type": "application/json",
-                    "Content-Length": Buffer.byteLength(reqBody).toString(),
-                    ...headers,
-                };
-                const req = http.default.request(
-                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname + parsedUrl.search, method: "POST", headers: reqHeaders },
-                    (res) => {
-                        let data = "";
-                        res.on("data", (chunk: any) => { data += chunk; });
-                        res.on("end", () => resolve({ ok: res.statusCode === 200 || res.statusCode === 201, body: data }));
-                    }
-                );
-                req.on("error", () => resolve({ ok: false, body: "" }));
-                req.setTimeout(30000, () => { req.destroy(); resolve({ ok: false, body: '{"error":"timeout"}' }); });
-                req.write(reqBody);
-                req.end();
+            const response = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", ...headers },
+                body: JSON.stringify(payload),
+                signal: AbortSignal.timeout(30000),
             });
+            const body = await response.text();
+            return { ok: response.status === 200 || response.status === 201, body };
         } catch (err) {
             console.debug(`[IndexerHttpClient] httpPostJson failed (non-fatal): ${(err as Error).message}`);
             return { ok: false, body: "" };
@@ -427,25 +404,17 @@ export class IndexerHttpClient {
         return this.httpGet(url, token);
     }
 
-    /** GET request returning raw body + ok status. */
+    /** GET request returning raw body + ok status. Uses fetch() (proxy-patched globally). */
     private async httpGet(url: string, token: string | undefined): Promise<{ ok: boolean; body: string }> {
         const headers = await this.buildHeaders(token);
         try {
-            const parsedUrl = new URL(url);
-            const http = await import("http");
-            return new Promise((resolve) => {
-                const req = http.default.request(
-                    { hostname: parsedUrl.hostname, port: parsedUrl.port || undefined, path: parsedUrl.pathname + parsedUrl.search, method: "GET", headers },
-                    (res) => {
-                        let data = "";
-                        res.on("data", (chunk: any) => { data += chunk; });
-                        res.on("end", () => resolve({ ok: res.statusCode === 200, body: data }));
-                    }
-                );
-                req.on("error", () => resolve({ ok: false, body: "" }));
-                req.setTimeout(10000, () => { req.destroy(); resolve({ ok: false, body: '{"error":"timeout"}' }); });
-                req.end();
+            const response = await fetch(url, {
+                method: "GET",
+                headers,
+                signal: AbortSignal.timeout(10000),
             });
+            const body = await response.text();
+            return { ok: response.status === 200, body };
         } catch (err) {
             console.debug(`[IndexerHttpClient] httpGet failed (non-fatal): ${(err as Error).message}`);
             return { ok: false, body: "" };
