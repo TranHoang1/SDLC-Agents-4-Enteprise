@@ -18,6 +18,7 @@ import type { LangGraphEngine } from '../../langgraph/engine/langgraph-engine';
 import type { ChatExtToWebviewMessage } from '../../chat-panel/message-protocol';
 import type { ToolApprovalGate } from './ToolApprovalGate';
 import type { CommandPatternMatcher } from './CommandPatternMatcher';
+import type { IDiffTracker } from '../diff/IDiffTracker';
 
 /**
  * Dependencies injected into ChatEngineAdapter (DIP).
@@ -33,6 +34,7 @@ export interface ChatEngineAdapterDeps {
   sessionManager: ISessionManager;
   approvalGate?: ToolApprovalGate;
   commandPatternMatcher?: CommandPatternMatcher;
+  diffTracker?: IDiffTracker;
 }
 
 /**
