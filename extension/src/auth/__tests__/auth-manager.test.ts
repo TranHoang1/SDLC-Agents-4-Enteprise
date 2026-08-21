@@ -49,11 +49,11 @@ describe("AuthManager", () => {
     expect(auth.getTokenSync()).toBe("");
   });
 
-  it("initialize restores session from stored token", async () => {
+  it("initialize stays unauthenticated even with stored token (explicit login required)", async () => {
     await secrets.store(SECRET_ACCESS, "stored-tok");
     await auth.initialize();
-    expect(auth.currentState).toBe("AUTHENTICATED");
-    expect(auth.getTokenSync()).toBe("stored-tok");
+    expect(auth.currentState).toBe("UNAUTHENTICATED");
+    expect(auth.getTokenSync()).toBe("");
   });
 
   it("initialize stays unauthenticated without a stored token", async () => {
@@ -92,9 +92,9 @@ describe("AuthManager", () => {
     await expect(auth.getAccessToken()).resolves.toBeNull();
   });
 
-  it("getAccessToken returns token when authenticated", async () => {
-    await secrets.store(SECRET_ACCESS, "tok");
-    await auth.initialize();
+  it("getAccessToken returns token when authenticated via login", async () => {
+    fetchMock.mockResolvedValue(okJson({ token: "tok", user: { name: "u" }, expiresAt: new Date(Date.now() + 3600_000).toISOString() }));
+    await auth.login("user1", "pass1");
     await expect(auth.getAccessToken()).resolves.toBe("tok");
   });
 
