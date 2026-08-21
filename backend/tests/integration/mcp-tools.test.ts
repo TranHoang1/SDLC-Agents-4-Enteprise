@@ -166,6 +166,10 @@ describe('MCP Integration — Core Memory Tools', () => {
     });
     expect(res.status).toBe(200);
     const data = (await res.json()) as any;
+    if (data.isError) {
+      // Print to stderr so CI always shows it (vitest suppresses stdout on pass)
+      process.stderr.write(`[mem_delete DIAG] id=${seededId} body=${JSON.stringify(data)}\n`);
+    }
     expect(data.isError).toBe(false);
   });
 });
