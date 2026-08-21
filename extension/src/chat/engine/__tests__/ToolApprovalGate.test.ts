@@ -255,11 +255,11 @@ describe('ToolApprovalGate — Backward Compatibility', () => {
     gate.dispose();
   });
 
-  it('should default to 30s timeout with no args', () => {
+  it('should default to 120s timeout with no args', () => {
     vi.useFakeTimers();
     const gate = new ToolApprovalGate();
     const p = gate.requestApproval('tc-def');
-    vi.advanceTimersByTime(30_001);
+    vi.advanceTimersByTime(120_001);
     // Should have auto-rejected
     expect(gate.hasPending('tc-def')).toBe(false);
     gate.dispose();
