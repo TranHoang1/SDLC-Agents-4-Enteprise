@@ -138,10 +138,7 @@ describe('MCP Integration — Core Memory Tools', () => {
     expect(data.content[0].text).toContain('Test Entry');
   });
 
-  // Skip on CI: mem_delete has an env-specific failure on GitHub Actions SQLite
-  // that cannot be reproduced locally (PostgreSQL works fine).
-  // Root cause: likely graph_nodes or audit table not available in CI's SQLite setup.
-  it.skipIf(!!process.env.CI)('mem_delete accepts id', async () => {
+  it('mem_delete accepts id', async () => {
     // Seed an entry first so we can delete a real numeric id.
     const seedRes = await app.request('/mcp/tools/call', {
       method: 'POST',
@@ -153,11 +150,13 @@ describe('MCP Integration — Core Memory Tools', () => {
     });
     expect(seedRes.status).toBe(200);
     const seedData = (await seedRes.json()) as any;
+    console.log('[mem_delete] seed response:', JSON.stringify(seedData));
     expect(seedData.isError).toBe(false);
     const seedText: string = seedData.content?.[0]?.text || '';
     const idMatch = seedText.match(/id=(\d+)/);
     expect(idMatch).toBeTruthy();
     const seededId = Number(idMatch![1]);
+    console.log('[mem_delete] seeded id:', seededId);
 
     const res = await app.request('/mcp/tools/call', {
       method: 'POST',
@@ -167,11 +166,10 @@ describe('MCP Integration — Core Memory Tools', () => {
         arguments: { id: seededId },
       }),
     });
-    expect(res.status).toBe(200);
+    console.log('[mem_delete] response status:', res.status);
     const data = (await res.json()) as any;
-    const text: string = data.content?.[0]?.text || '';
-    // Accept either: successful delete OR "Not found" (entry may have been cleaned up by prior test)
-    expect(data.isError === false || text.includes('Deleted') || text.includes('Not found')).toBe(true);
+    console.log('[mem_delete] response body:', JSON.stringify(data));
+    expect(data.isError).toBe(false);
   });
 });
 
