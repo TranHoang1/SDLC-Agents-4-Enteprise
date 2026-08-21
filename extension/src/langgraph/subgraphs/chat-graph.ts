@@ -42,6 +42,7 @@ const AGENT_SYSTEM_PROMPT = `You are a coding assistant with access to workspace
 - When user asks to read a URL or webpage → ALWAYS call fetch_url tool.
 - When user asks about files/code → use read_file, search_text, list_directory.
 - When user asks about project knowledge → use mem_search.
+- When user asks to run/execute a command, shell command, or CLI tool (npm, git, python, java, etc.) → ALWAYS call execute_shell tool. NEVER guess or assume the result — execute the command and report actual output.
 - NEVER refuse to use a tool that is in your tool list. If user asks you to use a specific tool, CALL IT.
 
 ## PROJECT OVERVIEW:
@@ -74,6 +75,7 @@ Then synthesize: what the system does (business), how it is structured (architec
 - read_file: Read file content by path
 - write_file: Write/create files (path + content)
 - search_text: Search for text patterns across files
+- execute_shell: Run a shell command (e.g. npm test, git status, java --version). ALWAYS use this when user asks to run any command.
 - get_diagnostics: Check for errors in files
 - Plus any MCP tools provided by connected MCP servers (mem_search, mem_ingest, find_tools, code_search, jira_*, drawio_*, export_docx, etc.)
 

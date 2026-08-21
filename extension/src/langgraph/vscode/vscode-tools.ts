@@ -190,14 +190,21 @@ async function executeShell(args: Record<string, unknown>, workspaceRoot: string
 
 /** Reuse or create a dedicated terminal and send the command for user visibility */
 function showCommandInTerminal(command: string, cwd: string): void {
-  const terminalName = "Agent Shell";
-  // Find existing terminal or create new one
-  let terminal = vscode.window.terminals.find(t => t.name === terminalName);
-  if (!terminal) {
-    terminal = vscode.window.createTerminal({ name: terminalName, cwd });
+  try {
+    const terminalName = "Agent Shell";
+    // Find existing terminal or create new one
+    let terminal = vscode.window.terminals.find(t => t.name === terminalName);
+    if (!terminal) {
+      terminal = vscode.window.createTerminal({ name: terminalName, cwd });
+    }
+    // sendText first, then show — ensures command is queued even if show has delay
+    terminal.sendText(command);
+    // preserveFocus=false to guarantee terminal panel opens visibly
+    terminal.show(/* preserveFocus */ false);
+  } catch (err) {
+    // Non-fatal: terminal display is best-effort, command still runs via child_process
+    console.debug(`[vscode-tools] showCommandInTerminal failed (non-fatal): ${(err as Error).message}`);
   }
-  terminal.show(/* preserveFocus */ true);
-  terminal.sendText(command);
 }
 
 /** Get the default shell path from VS Code settings */
