@@ -38,6 +38,7 @@ const WEBVIEW_MESSAGE_TYPES = new Set<string>([
   'CONTEXT_CLEAR',
   'REQUEST_SYNC_STATE',
   'SELECT_AGENT',
+  'DIFF_OPEN_FILE', // SA4E-183: File Change Tracking
 ]);
 
 /** Combined set for fast O(1) lookup */

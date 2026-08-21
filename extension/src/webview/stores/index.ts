@@ -35,3 +35,9 @@ export {
   updateServiceStatus, removeService, resetConnections,
 } from './connectionStore';
 export type { ServiceConnection } from './connectionStore';
+
+export {
+  diffTrackerState, diffFileCount, diffSummary, isDiffExpanded,
+  updateDiffCount, setDiffSummary, toggleDiffPanel, resetDiffTracker,
+} from './diffTrackerStore';
+export type { DiffSummaryPayload, ChangeEntryPayload } from './diffTrackerStore';

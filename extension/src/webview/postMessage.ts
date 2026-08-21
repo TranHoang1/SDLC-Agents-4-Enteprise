@@ -32,9 +32,9 @@ export function sendPrompt(text: string, agentId: string, contextFiles?: string[
   postToExtension({ type: 'SEND_PROMPT', text, agentId, contextFiles });
 }
 
-/** Respond to a tool call approval request */
-export function respondToolCall(toolId: string, decision: 'APPROVE' | 'REJECT'): void {
-  postToExtension({ type: 'TOOL_CALL_RESPONSE', toolId, decision });
+/** Respond to a tool call approval request. Optional rememberPattern auto-approves future matching commands. */
+export function respondToolCall(toolId: string, decision: 'APPROVE' | 'REJECT', rememberPattern?: string): void {
+  postToExtension({ type: 'TOOL_CALL_RESPONSE', toolId, decision, rememberPattern });
 }
 
 /** Dispatch a command to the Extension Host */
@@ -78,4 +78,22 @@ export function clearContext(): void {
  */
 export function requestSyncState(): void {
   postToExtension({ type: 'REQUEST_SYNC_STATE' });
+}
+
+/**
+ * SA4E-183: Request diff summary from extension host.
+ * Extension replies with DIFF_SUMMARY_RESPONSE message.
+ */
+export function requestDiffSummary(): void {
+  postToExtension({ type: 'COMMAND_DISPATCH', command: 'diff' });
+}
+
+/**
+ * SA4E-183: Request to open a file in the diff editor.
+ * Extension handles opening the file or showing diff view.
+ * @param filePath - Workspace-relative file path
+ * @param operation - File operation type for display logic
+ */
+export function openDiffFile(filePath: string, operation: 'added' | 'modified' | 'deleted'): void {
+  postToExtension({ type: 'DIFF_OPEN_FILE', filePath, operation });
 }

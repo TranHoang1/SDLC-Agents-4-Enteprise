@@ -1,0 +1,16 @@
+filePath,operation,linesAdded,linesRemoved,description
+src/services/AuthService.ts,modified,15,3,Normal modification
+src/models/User.ts,added,42,0,New file creation
+src/deprecated/old.ts,deleted,0,120,File deletion
+src/a.ts,modified,5,2,First edit (cumulative test)
+src/a.ts,modified,10,7,Second edit same file (cumulative)
+src/a.ts,modified,8,4,Third edit same file (final cumulative)
+.env,modified,1,1,Sensitive file — should be redacted
+server.pem,added,30,0,Sensitive file — certificate
+src/utils/deep/nested/path/file.ts,modified,3,1,Deep nested path
+file with spaces.ts,modified,2,1,Space in filename
+CHANGELOG.md,modified,5,0,Root-level file
+src/index.ts,added,100,0,Large new file
+src/config.yaml,modified,2,2,Config file
+src/services/PaymentService.ts,modified,25,10,Complex modification
+src/models/Order.ts,added,80,0,New model file

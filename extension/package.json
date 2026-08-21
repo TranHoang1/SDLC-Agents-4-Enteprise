@@ -2,7 +2,7 @@
   "name": "sdlc-agents-4-enterprise",
   "displayName": "SDLC Agents 4 Enterprise",
   "description": "Multi-agent SDLC pipeline for enterprise — 9 AI agents (SM, BA, TA, SA, QA, DEV, DevOps, Security, UI) orchestrated via MCP",
-  "version": "1.32.1",
+  "version": "1.33.0",
   "publisher": "dnguyenminh",
   "license": "MIT",
   "repository": {
@@ -396,7 +396,9 @@
     "watch": "tsc -watch -p ./",
     "copy-resources": "node scripts/copy-resources.js",
     "gen-checksums": "node scripts/gen-checksums.js",
-    "test": "vitest run --exclude '**/*.e2e.test.ts'",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:integration": "vitest run src/langgraph/__tests__/chat-graph-diagnostics.integration.test.ts",
     "test:e2e": "vitest run src/__tests__/cross-process.e2e.test.ts src/__tests__/drawio-convert.e2e.test.ts",
     "test:watch": "vitest watch",
     "lint": "npx eslint src/ --ext .ts",
@@ -404,6 +406,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/diff": "^5.2.3",
     "@types/express": "^5.0.6",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.6",
@@ -421,6 +424,7 @@
     "sinon": "^17.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.0",
+    "typescript-eslint": "^8.67.0",
     "uuid": "^14.0.1",
     "vitest": "^4.1.8"
   },
@@ -436,6 +440,7 @@
     "chrome-devtools-frontend": "^1.0.1625079",
     "core-js": "^3.49.0",
     "debug": "^4.4.3",
+    "diff": "^5.2.2",
     "filetomarkdown": "^0.6.9",
     "puppeteer-core": "^24.43.0",
     "semver": "^7.7.4",

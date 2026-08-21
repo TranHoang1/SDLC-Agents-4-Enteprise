@@ -50,8 +50,8 @@ export interface PendingApproval {
   attemptCount: number;
 }
 
-/** Default timeout before auto-rejecting (30 seconds) */
-export const DEFAULT_TIMEOUT_MS = 30_000;
+/** Default timeout before auto-rejecting (120 seconds — gives user time to review) */
+export const DEFAULT_TIMEOUT_MS = 120_000;
 
 /** Maximum retry attempts per toolCallId */
 export const MAX_RETRY_ATTEMPTS = 3;

@@ -79,6 +79,7 @@ export type ChatWebviewToExtMessage =
   | { type: "chat:openWorkflowGraph" }
   | { type: "chat:saveState"; payload: { tabs: unknown[]; activeTabId: string } }
   | { type: "chat:selectAgent"; agentId: string | null }
+  | { type: "chat:toolApproval"; toolId: string; decision: string; rememberPattern?: string }
   | { type: "ready" }
   | { type: "refresh" };
 

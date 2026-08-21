@@ -105,6 +105,7 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
   private readonly modelManager: ChatModelManager;
   private readonly stateManager: ChatStateManager;
   private diagnosticsFeedService: DiagnosticsFeedService | null = null;
+  private diffTracker: import('../chat/diff/IDiffTracker').IDiffTracker | null = null;
 
   constructor(
     private readonly extensionUri: vscode.Uri,
@@ -121,6 +122,11 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
   /** SA4E-185: Set the diagnostics feed service for the engine. */
   setDiagnosticsFeedService(feed: DiagnosticsFeedService): void {
     this.diagnosticsFeedService = feed;
+  }
+
+  /** SA4E-183: Set the DiffTracker for file change tracking. */
+  setDiffTracker(tracker: import('../chat/diff/IDiffTracker').IDiffTracker): void {
+    this.diffTracker = tracker;
   }
 
   resolveWebviewView(webviewView: vscode.WebviewView, _context: vscode.WebviewViewResolveContext, _token: vscode.CancellationToken): void {

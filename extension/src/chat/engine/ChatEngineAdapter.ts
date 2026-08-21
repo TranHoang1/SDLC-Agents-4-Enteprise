@@ -17,6 +17,8 @@ import type { ISessionManager } from './ISessionManager';
 import type { LangGraphEngine } from '../../langgraph/engine/langgraph-engine';
 import type { ChatExtToWebviewMessage } from '../../chat-panel/message-protocol';
 import type { ToolApprovalGate } from './ToolApprovalGate';
+import type { CommandPatternMatcher } from './CommandPatternMatcher';
+import type { IDiffTracker } from '../diff/IDiffTracker';
 
 /**
  * Dependencies injected into ChatEngineAdapter (DIP).
@@ -31,6 +33,8 @@ export interface ChatEngineAdapterDeps {
   toolHandler: IToolHandler;
   sessionManager: ISessionManager;
   approvalGate?: ToolApprovalGate;
+  commandPatternMatcher?: CommandPatternMatcher;
+  diffTracker?: IDiffTracker;
 }
 
 /**
@@ -157,6 +161,11 @@ export class ChatEngineAdapter implements IChatEngineAdapter {
   private async handleToolCallResponse(payload: unknown): Promise<void> {
     const msg = payload as Extract<WebviewMessage, { type: 'TOOL_CALL_RESPONSE' }>;
     const decision = msg.decision === 'APPROVE' ? 'approve' : 'reject';
+
+    // Store pattern for future auto-approve if user opted in
+    if (decision === 'approve' && msg.rememberPattern && this.deps.commandPatternMatcher) {
+      this.deps.commandPatternMatcher.addPattern(msg.rememberPattern);
+    }
 
     // SA4E-85: Resolve pending approval gate if available (unblocks executeSingleTool)
     if (this.deps.approvalGate) {

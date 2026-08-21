@@ -171,6 +171,12 @@ export class MemoryEngineCrud {
   }
 
   async deleteEntry(id: number): Promise<void> {
+    // Delete FK-dependent records first (CASCADE may not work in all SQLite configurations)
+    try { await this.adapter.runAsync('DELETE FROM knowledge_vectors WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
+    try { await this.adapter.runAsync('DELETE FROM knowledge_graph_edges WHERE source_id = ? OR target_id = ?', [id, id]); } catch { /* non-fatal */ }
+    try { await this.adapter.runAsync('DELETE FROM consolidation_log WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
+    try { await this.adapter.runAsync('DELETE FROM citations WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
+    try { await this.adapter.runAsync('DELETE FROM entry_quality_scores WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
     await this.adapter.runAsync('DELETE FROM knowledge_entries WHERE id = ?', [id]);
     // Cascade: remove corresponding graph node (same unified DB — SA4E-49)
     try {

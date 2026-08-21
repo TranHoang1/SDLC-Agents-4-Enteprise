@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.32.1-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.33.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -48,7 +48,7 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.26.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.33.0.vsix
 
 # Or VS Code
 code --install-extension sdlc-agents-4-enterprise-1.26.0.vsix
@@ -124,6 +124,8 @@ Built-in chat interface with LLM integration. Supports 135+ providers:
 | Enterprise | Azure OpenAI, AWS Bedrock, Databricks, SAP AI Core, Snowflake Cortex |
 | Gateways | OpenRouter (200+ models), Cloudflare AI, Vercel AI, Kiro Gateway |
 | Local | Ollama, LM Studio, llama.cpp, vLLM, ONNX Runtime |
+
+**Shell Execution**: Chat agent can run terminal commands (`npm test`, `git status`, etc.) via `execute_shell` tool. Commands show in "Agent Shell" terminal tab. User approval required for safety — with "Allow all pattern" option to auto-approve recurring commands.
 
 Configure: Command Palette → "SDLC Agents: Settings" → LLM Provider tab.
 
@@ -242,6 +244,17 @@ MIT
 ---
 
 ## Changelog
+
+### v1.33.0 (2026-08-20)
+
+- **SA4E-197: Shell Execution + Pattern Auto-Approve**
+  - `execute_shell` tool — chat agent runs terminal commands (npm, git, java, etc.)
+  - Pattern-based auto-approve: "Allow all `npm *`" → future npm commands auto-execute
+  - Inline approval UI: Allow / Allow All / Deny buttons in tool card
+  - Hybrid terminal: commands visible in "Agent Shell" terminal tab + output captured for LLM
+- **Agent Loop Fix** — Removed unreliable `verify_response` for small models (< 32k context)
+- **Resume Button** — No longer hangs; dialog only shows for paused SDLC pipelines
+- **UI Fixes** — Tool section no longer clips; model name truncated with hover tooltip; timeline order corrected; input history persists across reloads
 
 ### v1.32.0 (2026-08-19)
 

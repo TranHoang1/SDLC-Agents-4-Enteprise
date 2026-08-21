@@ -45,6 +45,11 @@ export const VSCODE_TOOL_DEFINITIONS: McpToolDefinition[] = [
     description: "Fetch and extract text content from a web URL. Strips HTML, returns plain text.",
     inputSchema: { type: "object", properties: { url: { type: "string", description: "URL to fetch (http/https)" }, mode: { type: "string", description: "full (default) or truncated" }, max_length: { type: "number", description: "Max chars to return (default 50000)" } }, required: ["url"] },
   },
+  {
+    name: "execute_shell",
+    description: "Execute a shell command in the workspace. Returns stdout on success. Use for build, test, git, package manager, and other CLI operations. Requires user approval before execution.",
+    inputSchema: { type: "object", properties: { command: { type: "string", description: "Shell command to execute (e.g. 'npm test', 'git status', 'ls -la')" }, cwd: { type: "string", description: "Working directory (optional, defaults to workspace root)" }, timeout: { type: "number", description: "Timeout in milliseconds (optional, default 120000)" } }, required: ["command"] },
+  },
 ];
 
 const VSCODE_TOOL_NAMES = new Set(VSCODE_TOOL_DEFINITIONS.map(t => t.name));

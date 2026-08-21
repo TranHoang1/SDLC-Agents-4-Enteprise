@@ -15,9 +15,13 @@ import { debugLog, debugError } from "../../debug-logger";
 import { buildBudgetAwareMessages, estimateMessagesTokens, getDynamicToolResultLimits } from "../core/context-budget";
 import { requiresApproval } from "../../chat/engine/ToolApprovalClassifier";
 import type { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
+import type { CommandPatternMatcher } from "../../chat/engine/CommandPatternMatcher";
 import type { ActiveAgentConfig } from "../agents/agent-config-resolver";
 import { filterTools, isToolAllowed, buildToolBlockedMessage } from "../agents/tool-filter";
 import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
+import type { IDiffTracker } from "../../chat/diff/IDiffTracker";
+import { DIFF_TRACKED_TOOLS, computeUnifiedDiff, countDiffLines, isSensitiveFile } from "../../chat/diff/diff-utils";
+import * as vscode from "vscode";
 
 const LLM_CALL_TIMEOUT_MS = 300_000;
 
@@ -237,7 +241,9 @@ async function agentStepStreaming(
 export function createExecuteToolsNode(
   mcpBridge: McpBridge | undefined, sh: StreamHandler, hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate,
   getAgentConfig?: () => ActiveAgentConfig | null,
-  diagnosticsFeed?: DiagnosticsFeedService
+  diagnosticsFeed?: DiagnosticsFeedService,
+  commandPatternMatcher?: CommandPatternMatcher,
+  diffTracker?: IDiffTracker
 ) {
   return async (state: PipelineState) => {
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
@@ -260,7 +266,7 @@ export function createExecuteToolsNode(
         continue;
       }
 
-      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate, diagnosticsFeed);
+      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate, diagnosticsFeed, commandPatternMatcher, diffTracker);
       results.push(r);
     }
 
@@ -293,7 +299,9 @@ async function executeSingleTool(
   call: { id: string; name: string; arguments: Record<string, unknown> },
   mcpBridge: McpBridge | undefined, sh: StreamHandler, streamId: string,
   hookEngine: HookEngine | undefined, wsRoot: string, approvalGate?: ToolApprovalGate,
-  diagnosticsFeed?: DiagnosticsFeedService
+  diagnosticsFeed?: DiagnosticsFeedService,
+  commandPatternMatcher?: CommandPatternMatcher,
+  diffTracker?: IDiffTracker
 ): Promise<{ toolCallId: string; name: string; content: string }> {
   const tcId = call.id || `tc-${Date.now()}`;
 
@@ -304,8 +312,22 @@ async function executeSingleTool(
     } catch (e) { debugError(`preToolUse hook error`, e as Error); }
   }
 
+  // SA4E-183: Pre-read file content BEFORE tool execution for diff tracking
+  let preContent: string | undefined;
+  if (diffTracker && DIFF_TRACKED_TOOLS.has(call.name)) {
+    preContent = await preReadFileForDiff(call, wsRoot);
+  }
+
+  // Pattern-based auto-approve for shell commands
+  const isShellTool = call.name === "execute_shell" || call.name === "shell_execute" || call.name === "execute_pwsh";
+  const shellCommand = isShellTool ? (call.arguments?.command as string || "") : "";
+  const patternMatch = isShellTool && commandPatternMatcher ? commandPatternMatcher.matches(shellCommand) : null;
+  if (patternMatch) {
+    debugLog(`[execute_tools] Auto-approved '${shellCommand}' via pattern '${patternMatch}'`);
+  }
+
   // SA4E-85: Signal dangerous tool to webview and AWAIT approval before execution
-  const needsApproval = requiresApproval(call.name);
+  const needsApproval = patternMatch ? false : requiresApproval(call.name);
   sh.emitDirect({ type: "chat:toolCall", toolCall: { id: tcId, name: call.name, args: call.arguments, status: "running" }, requiresApproval: needsApproval } as any);
 
   if (needsApproval && approvalGate) {
@@ -350,11 +372,87 @@ async function executeSingleTool(
     if (diagnosticsFeed) {
       diagnosticsFeed.markTouchedFromTool(call.name, call.arguments || {}); // BR-5 (handles write_file — DR-1)
     }
+    // SA4E-183: Record file change in DiffTracker after successful tool execution
+    if (diffTracker && DIFF_TRACKED_TOOLS.has(call.name) && !result.startsWith("Error:")) {
+      recordToolChange(diffTracker, call, result, preContent, wsRoot);
+    }
     return { toolCallId: call.id, name: call.name, content: result };
   } catch (error) {
     sh.emitDirect({ type: "chat:toolCallUpdate", id: tcId, status: "failed", result: (error as Error).message, duration: Date.now() - start } as any);
     return { toolCallId: call.id, name: call.name, content: `Error: ${(error as Error).message}` };
   }
+}
+
+// --- SA4E-183: DiffTracker helper functions ---
+
+/** Pre-read file content before tool modifies it (OI-01: Option A) */
+async function preReadFileForDiff(
+  call: { name: string; arguments: Record<string, unknown> },
+  wsRoot: string
+): Promise<string | undefined> {
+  const filePath = extractFilePath(call);
+  if (!filePath) return undefined;
+  // delete_file: capture content before deletion
+  // write/append: capture content before overwrite
+  try {
+    const fullPath = vscode.Uri.file(
+      filePath.startsWith('/') || filePath.includes(':') ? filePath : `${wsRoot}/${filePath}`
+    );
+    const data = await vscode.workspace.fs.readFile(fullPath);
+    const content = Buffer.from(data).toString('utf-8');
+    // BR-09: Cap originalContent at 2MB
+    return content.length > 2 * 1024 * 1024
+      ? content.slice(0, 2 * 1024 * 1024)
+      : content;
+  } catch {
+    // File doesn't exist yet (new file) — no original
+    return undefined;
+  }
+}
+
+/** Record a tracked tool change into DiffTracker */
+function recordToolChange(
+  diffTracker: IDiffTracker,
+  call: { name: string; arguments: Record<string, unknown> },
+  _result: string,
+  preContent: string | undefined,
+  wsRoot: string
+): void {
+  const filePath = extractFilePath(call);
+  if (!filePath) return;
+
+  const relativePath = filePath.startsWith(wsRoot)
+    ? filePath.slice(wsRoot.length + 1)
+    : filePath;
+
+  const operation = determineOperation(call.name, preContent);
+  const postContent = call.name === 'delete_file' ? '' : (call.arguments?.text as string ?? call.arguments?.content as string ?? '');
+  const diffContent = computeUnifiedDiff(relativePath, preContent ?? '', postContent);
+  const { linesAdded, linesRemoved } = countDiffLines(diffContent);
+
+  diffTracker.recordChange({
+    filePath: relativePath,
+    operation,
+    linesAdded,
+    linesRemoved,
+    diffContent,
+    originalContent: preContent,
+  });
+}
+
+/** Extract target file path from tool arguments */
+function extractFilePath(call: { arguments: Record<string, unknown> }): string | undefined {
+  return (call.arguments?.path ?? call.arguments?.file_path ?? call.arguments?.targetFile) as string | undefined;
+}
+
+/** Determine operation type from tool name + pre-content existence */
+function determineOperation(
+  toolName: string,
+  preContent: string | undefined
+): 'added' | 'modified' | 'deleted' {
+  if (toolName === 'delete_file') return 'deleted';
+  if (preContent === undefined) return 'added';
+  return 'modified';
 }
 
 export function createSynthesizeNode(

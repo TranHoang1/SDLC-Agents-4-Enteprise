@@ -16,6 +16,7 @@ import {
 } from './stores/toolStore';
 import { updateServiceStatus } from './stores/connectionStore';
 import { hydrateChat } from './stores/chatStore';
+import { updateDiffCount, setDiffSummary } from './stores/diffTrackerStore';
 
 /** Message handler map — Strategy pattern for inbound message routing */
 type HandlerMap = Record<string, (msg: ExtensionMessage) => void>;
@@ -75,6 +76,12 @@ function buildHandlers(): HandlerMap {
     },
     SYNC_CHAT_HISTORY: (msg) => {
       if (msg.type === 'SYNC_CHAT_HISTORY') hydrateChat(msg.messages, msg.context);
+    },
+    DIFF_COUNT_UPDATED: (msg) => {
+      if (msg.type === 'DIFF_COUNT_UPDATED') updateDiffCount(msg.count);
+    },
+    DIFF_SUMMARY_RESPONSE: (msg) => {
+      if (msg.type === 'DIFF_SUMMARY_RESPONSE') setDiffSummary(msg.summary);
     },
   };
 }

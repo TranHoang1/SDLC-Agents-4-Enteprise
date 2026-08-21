@@ -16,3 +16,5 @@ export type {
   ExtensionMessageType,
   WebviewMessageType,
 } from './messages';
+
+export type { DiffSummaryPayload, ChangeEntryPayload } from '../diff/IDiffTracker';

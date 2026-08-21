@@ -30,7 +30,11 @@ import { SettingsPanel } from "./panels/settings/SettingsPanel";
 import { ProxyAgentFactory } from "./proxy/ProxyAgentFactory";
 import { ProxyConfigService } from "./proxy/ProxyConfigService";
 import { ProxyDetectionService } from "./proxy/ProxyDetectionService";
+import { applyGlobalFetchPatch } from "./proxy/global-fetch-patch";
 import { KnowledgeClient } from "./knowledge-client";
+import { DiffTracker } from "./chat/diff/DiffTracker";
+import { DiffOriginalProvider } from "./chat/diff/DiffOriginalProvider";
+import { SessionLifecycleEmitter } from "./chat/engine/SessionLifecycleEmitter";
 
 let mcpManager: McpServerManager | undefined;
 let panelManager: WebviewPanelManager | undefined;
@@ -41,6 +45,8 @@ let authManager: AuthManager | undefined;
 let statusBarManager: StatusBarManager | undefined;
 let sessionManager: SessionManager | undefined;
 let chatEngineAdapter: ChatEngineAdapter | undefined;
+let diffTracker: DiffTracker | undefined;
+let sessionLifecycle: SessionLifecycleEmitter | undefined;
 
 /** Project ID for multi-tenant isolation — derived from git remote or user+folder hash. */
 let _projectId = "";
@@ -64,6 +70,8 @@ export async function activate(context: vscode.ExtensionContext) {
   const proxyConfigService = new ProxyConfigService(context.secrets);
   const proxyDetectionService = new ProxyDetectionService();
   ProxyAgentFactory.initialize(proxyConfigService, proxyDetectionService);
+  // Patch globalThis.fetch so ALL fetch() callers in this process route through proxy
+  applyGlobalFetchPatch();
 
   const workspaceRoot = getWorkspaceRoot();
   if (workspaceRoot) {
@@ -77,6 +85,8 @@ export async function deactivate(): Promise<void> {
   configWatcher?.dispose();
   panelManager?.disposeAll();
   chatEngineAdapter?.dispose();
+  diffTracker?.dispose();
+  sessionLifecycle?.dispose();
   await sessionManager?.cleanup();
   // Must await kill() so VS Code waits for the HTTP server to release its port
   // before reloading — prevents EADDRINUSE on reload window.
@@ -200,6 +210,18 @@ async function initializeWorkspace(context: vscode.ExtensionContext, workspaceRo
   context.subscriptions.push(diagnosticsFeedService.start());
   // Pass to ChatPanelProvider so it can be used by LangGraphEngine
   chatPanelProvider.setDiagnosticsFeedService(diagnosticsFeedService);
+
+  // SA4E-183: Initialize DiffTracker + SessionLifecycleEmitter
+  sessionLifecycle = new SessionLifecycleEmitter();
+  diffTracker = new DiffTracker(null, vscode.workspace.getConfiguration('kiroSdlc').get<boolean>('diffTracker.enabled', true));
+  const diffOriginalProvider = new DiffOriginalProvider(diffTracker);
+  context.subscriptions.push(
+    vscode.workspace.registerTextDocumentContentProvider('diff-original', diffOriginalProvider)
+  );
+  // DiffTracker resets on new session
+  sessionLifecycle.on('session:created', () => diffTracker?.clearSession());
+  context.subscriptions.push({ dispose: () => { diffTracker?.dispose(); sessionLifecycle?.dispose(); } });
+  chatPanelProvider.setDiffTracker(diffTracker);
   // Live toggle watcher (BR-9) — follows extension.ts:307 pattern (NOT ConfigWatcher)
   context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((event) => {
     if (!event.affectsConfiguration("kiroSdlc.enableDiagnosticsFeed")) { return; }
@@ -389,6 +411,11 @@ function openAgenticChat(context: vscode.ExtensionContext, workspaceRoot: string
       contextManager,
       toolHandler,
       sessionManager: sessionManager!,
+      // SA4E-185 C-2 (B1): share the engine's approval gate so webview
+      // TOOL_CALL_RESPONSE resolves the same gate the LangGraph chat path blocks on.
+      approvalGate: (engine as any).approvalGate,
+      // SA4E-183: DiffTracker for file change tracking
+      diffTracker,
     });
 
     chatEngineAdapter.initialize();

@@ -16,8 +16,8 @@ import type { SlashSteeringRule, SlashMenuItem } from '../slash-menu/types';
 // SlashMenuItems — Agent data
 // ============================================================
 describe('UT — SlashMenuItems: Agent Data', () => {
-  it('UT-01: defines 6 agents', () => {
-    expect(SLASH_AGENTS).toHaveLength(6);
+  it('UT-01: defines 9 agents', () => {
+    expect(SLASH_AGENTS).toHaveLength(9);
   });
 
   it('UT-02: each agent has required fields', () => {
@@ -38,7 +38,7 @@ describe('UT — SlashMenuItems: Agent Data', () => {
 
   it('UT-04: agentsToMenuItems converts correctly', () => {
     const items = agentsToMenuItems(SLASH_AGENTS);
-    expect(items).toHaveLength(6);
+    expect(items).toHaveLength(9);
     expect(items[0].itemType).toBe('agent');
     expect(items[0].agentName).toBeDefined();
     expect(items[0].id).toMatch(/^agent-/);
@@ -97,7 +97,7 @@ describe('UT — SlashMenuItems: Filter', () => {
 
   it('UT-08: empty filter returns all items', () => {
     const result = filterSlashItems(agents, steering, '');
-    expect(result.agents).toHaveLength(6);
+    expect(result.agents).toHaveLength(9);
     expect(result.steering).toHaveLength(3);
   });
 
@@ -121,9 +121,9 @@ describe('UT — SlashMenuItems: Filter', () => {
     expect(result.steering[0].label).toBe('drawio');
   });
 
-  it('UT-12: "agent" matches all 6 agents (all contain "agent")', () => {
+  it('UT-12: "agent" matches all 9 agents (all contain "agent")', () => {
     const result = filterSlashItems(agents, steering, 'agent');
-    expect(result.agents).toHaveLength(6);
+    expect(result.agents).toHaveLength(9);
   });
 
   it('UT-13: "xyz" matches nothing', () => {
