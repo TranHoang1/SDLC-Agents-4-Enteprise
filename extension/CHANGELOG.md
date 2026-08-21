@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.33.0] - 2026-08-20
+
+### Added
+- **SA4E-197: execute_shell tool** — Chat agent can now run terminal commands (npm, git, java, etc.) via `execute_shell` VS Code native tool
+- **SA4E-197: Pattern-based auto-approve** — "Allow all `npm *` commands" button for shell tool approval; future matching commands auto-execute without prompting
+- **SA4E-197: CommandPatternMatcher service** — Glob-based pattern matching for session-scoped command approval (supports `*` wildcard)
+- **SA4E-197: Inline tool approval UI** — Allow / Allow All / Deny buttons rendered inline in tool card when dangerous tool needs consent (120s timeout)
+- **SA4E-197: Hybrid terminal execution** — Shell commands show in VS Code integrated terminal ("Agent Shell" tab) for real-time visibility + capture output for LLM
+- **SA4E-197: Input history rebuild** — Arrow Up/Down cycles through all previous user messages; fallback rebuild from tab messages on restore
+
+### Fixed
+- **Agent loop for small models** — Removed `verify_response` node from RAG graph path (small models < 32k context); prevents hallucinated "INCOMPLETE" loops with Qwen3-4B
+- **Resume button hang** — Added `finally` blocks to always reset `workingStatus` after resume; improved error message when no checkpoint found
+- **Resume dialog spam** — Only shows Resume/Start Fresh for SDLC pipelines (`status === "paused"` AND `ticketKey` exists), not plain chat sessions
+- **Tool section overflow** — Changed `contain: layout style` → `contain: style` + `overflow: visible` on tool container; content no longer clipped
+- **Tool container collapse on approval** — Auto-expands container (removes `tc-collapsed`) when tool requires approval
+- **Model name overflow** — CSS truncation (`max-width: 180px` + `text-overflow: ellipsis`); long local model paths show filename only + full path on hover tooltip
+- **Timeline order** — `finalizeToolContainer()` called before user message render to seal previous turn's tools; new turn creates container after user bubble
+- **System prompt missing execute_shell** — Added explicit rule: "When user asks to run a command → ALWAYS call execute_shell. NEVER guess the result"
+
 ## [1.30.1] - 2026-08-19
 
 ### Fixed

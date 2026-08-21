@@ -788,7 +788,7 @@
       case "chat:toolCall":
         vscode.postMessage({ type: "chat:debugLog", text: "toolCall obj: " + JSON.stringify(msg.toolCall || msg).slice(0, 200) });
         try {
-          renderToolCall(msg.toolCall);
+          renderToolCall(msg.toolCall, false, msg.requiresApproval);
         } catch (e) {
           vscode.postMessage({ type: "chat:debugLog", text: "renderToolCall ERROR: " + e.message });
         }
@@ -859,6 +859,7 @@
     graphDone = false;
 
     showMessages();
+    finalizeToolContainer(); // Seal previous turn's tools before user message
     if (text) appendMessage("user", text);
     if (pastedAttachments.length > 0) {
       for (var a = 0; a < pastedAttachments.length; a++) {
@@ -1278,7 +1279,7 @@
     return { icon: "T", label: "TOOL", cls: "cat-tool" };
   }
 
-  function renderToolCall(tc, isReplay) {
+  function renderToolCall(tc, isReplay, requiresApproval) {
     // EF-1: Validation - skip if required fields missing
     if (!tc || !tc.id || !tc.name) {
       console.warn("[chat.js] renderToolCall: missing id or name, skipping", tc);
@@ -1380,12 +1381,48 @@
     block.appendChild(header);
     block.appendChild(body);
 
+    // Tool approval UI — show buttons when dangerous tool needs user consent
+    if (requiresApproval && !isReplay) {
+      var approvalBar = document.createElement("div");
+      approvalBar.className = "tool-approval-bar";
+      approvalBar.innerHTML =
+        '<span class="tool-approval-label">⚠️ Requires approval</span>' +
+        '<button class="tool-approve-btn">Allow</button>' +
+        '<button class="tool-approve-pattern-btn">Allow all ' + escapeHtml(tc.name) + '</button>' +
+        '<button class="tool-deny-btn">Deny</button>';
+      approvalBar.querySelector(".tool-approve-btn").addEventListener("click", function () {
+        vscode.postMessage({ type: "chat:toolApproval", toolId: tc.id, decision: "approve" });
+        approvalBar.remove();
+      });
+      approvalBar.querySelector(".tool-approve-pattern-btn").addEventListener("click", function () {
+        var cmd = (tc.args && tc.args.command) ? tc.args.command : "";
+        var parts = cmd.trim().split(/\s+/);
+        var pattern = parts.length > 1 ? parts[0] + " *" : cmd;
+        vscode.postMessage({ type: "chat:toolApproval", toolId: tc.id, decision: "approve", rememberPattern: pattern });
+        approvalBar.remove();
+      });
+      approvalBar.querySelector(".tool-deny-btn").addEventListener("click", function () {
+        vscode.postMessage({ type: "chat:toolApproval", toolId: tc.id, decision: "reject" });
+        approvalBar.remove();
+      });
+      block.appendChild(approvalBar);
+      block.classList.add("expanded"); // Auto-expand so user sees approval
+    }
+
     // KSA-290: Append inside tool-container-body wrapper (not container root)
     var container = getOrCreateToolContainer();
     var bodyWrap = container.querySelector(".tool-container-body");
     bodyWrap.appendChild(block);
     toolCalls[tc.id] = block;
     updateToolContainerSummary(container);
+
+    // Force-expand container when approval is needed (override auto-collapse)
+    if (requiresApproval && !isReplay) {
+      container.classList.remove("tc-collapsed");
+      var summaryHdr = container.querySelector(".tool-container-summary");
+      if (summaryHdr) summaryHdr.setAttribute("aria-expanded", "true");
+    }
+
     scrollToBottom();
 
     // KSA-240: Persist tool call into active tab so it survives re-renders/reload
@@ -1748,6 +1785,18 @@
     // Restore input history if provided
     if (payload.messageHistory && Array.isArray(payload.messageHistory)) {
       messageHistory = payload.messageHistory;
+    } else {
+      // Fallback: rebuild history from user messages in all tabs
+      messageHistory = [];
+      for (var ti = 0; ti < tabs.length; ti++) {
+        var tabMsgs = tabs[ti].messages || [];
+        for (var mi = 0; mi < tabMsgs.length; mi++) {
+          if (tabMsgs[mi].role === "user" && tabMsgs[mi].content) {
+            messageHistory.push(tabMsgs[mi].content);
+          }
+        }
+      }
+      if (messageHistory.length > 50) messageHistory = messageHistory.slice(-50);
     }
     // Update tabCounter to avoid duplicate names
     tabCounter = tabs.length;

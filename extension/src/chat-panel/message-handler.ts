@@ -71,6 +71,9 @@ export class MessageHandler {
       case "chat:setMode":
         this.currentMode = msg.mode;
         break;
+      case "chat:toolApproval":
+        this.handleToolApproval((msg as any).toolId, (msg as any).decision, (msg as any).rememberPattern);
+        break;
       case "chat:applyCode":
         if (this.onApplyCode) { this.onApplyCode(msg.code, msg.filePath); }
         break;
@@ -94,7 +97,8 @@ export class MessageHandler {
 
   private async handleReady(): Promise<void> {
     const pipelines = await this.getEngine().listPersistedPipelines();
-    const paused = pipelines.find(p => p.status === "paused" || p.status === "running");
+    // Only show resume prompt for SDLC pipelines that are actively paused (not completed/cancelled)
+    const paused = pipelines.find(p => p.status === "paused" && p.ticketKey);
     if (paused) {
       this.sendToWebview({ type: "chat:resumePrompt", threadId: paused.threadId, ticketKey: paused.ticketKey, phase: paused.phase, pausedAt: paused.lastUpdatedAt });
     }
@@ -120,6 +124,18 @@ export class MessageHandler {
     const validDecisions = ["approve", "reject", "revise"] as const;
     if (!validDecisions.includes(decision as any)) { return; }
     await this.getEngine().handleApproval(decision as any, feedback);
+  }
+
+  /** Handle tool-level approval from webview (ToolApprovalGate) */
+  private handleToolApproval(toolId: string, decision: string, rememberPattern?: string): void {
+    const gate = this.getEngine().approvalGate;
+    if (!gate) return;
+    const normalizedDecision = decision === "approve" ? "approve" : "reject";
+    // Store pattern for future auto-approve
+    if (normalizedDecision === "approve" && rememberPattern) {
+      this.getEngine().commandPatternMatcher.addPattern(rememberPattern);
+    }
+    gate.resolveApproval(toolId, normalizedDecision);
   }
 
   private handleNodeClick(nodeId: string): void {
