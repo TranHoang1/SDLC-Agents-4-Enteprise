@@ -366,7 +366,7 @@ const CRUD_ACTIONS: Record<string, CrudActionFn> = {
       if (!v.allowed) return `Error: cannot delete — ${v.reason}`;
     }
     await engine.deleteEntry(id);
-    try { await engine.auditLog('DELETE', id); } catch { /* non-fatal */ }
+    try { await engine.auditLog('DELETE', id); } catch { /* audit is non-fatal */ }
     return `Deleted #${id}`;
   },
   list: async (engine, scopeCtx, a) => {
