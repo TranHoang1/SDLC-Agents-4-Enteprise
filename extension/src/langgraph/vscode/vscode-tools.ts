@@ -8,6 +8,17 @@ export { VSCODE_TOOL_DEFINITIONS, isVscodeTool } from "./vscode-tool-definitions
 export { isWebTool } from "./web-tools";
 import { executeWebTool, isWebTool as checkWebTool } from "./web-tools";
 
+/** Ensure resolved path is inside workspace root to prevent path traversal */
+function ensurePathInsideWorkspace(requestedPath: string, workspaceRoot: string): string {
+  if (!workspaceRoot) throw new Error("Workspace root is required");
+  const resolved = path.resolve(workspaceRoot, requestedPath);
+  const normalizedRoot = path.resolve(workspaceRoot) + path.sep;
+  if (!resolved.startsWith(normalizedRoot) && resolved !== path.resolve(workspaceRoot)) {
+    throw new Error(`Path traversal detected: ${requestedPath}`);
+  }
+  return resolved;
+}
+
 export async function executeVscodeTool(name: string, args: Record<string, unknown>, workspaceRoot: string): Promise<string> {
   const wsRoot = workspaceRoot || vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || "";
   switch (name) {
@@ -28,7 +39,12 @@ export async function executeVscodeTool(name: string, args: Record<string, unkno
 async function readFile(args: Record<string, unknown>, workspaceRoot: string): Promise<string> {
   const filePath = args.path as string;
   if (!filePath) return "Error: 'path' is required";
-  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(workspaceRoot, filePath);
+  let fullPath: string;
+  try {
+    fullPath = ensurePathInsideWorkspace(filePath, workspaceRoot);
+  } catch (e) {
+    return `Error reading '${filePath}': ${(e as Error).message}`;
+  }
   try {
     const text = Buffer.from(await vscode.workspace.fs.readFile(vscode.Uri.file(fullPath))).toString("utf-8");
     const startLine = args.start_line as number | undefined;
@@ -45,7 +61,12 @@ async function listDirectory(args: Record<string, unknown>, workspaceRoot: strin
   const dirPath = (args.path as string) || ".";
   const recursive = args.recursive as boolean || false;
   const depth = (args.depth as number) || (recursive ? 2 : 1);
-  const fullPath = path.isAbsolute(dirPath) ? dirPath : path.join(workspaceRoot, dirPath);
+  let fullPath: string;
+  try {
+    fullPath = ensurePathInsideWorkspace(dirPath, workspaceRoot);
+  } catch (e) {
+    return `Error listing '${dirPath}': ${(e as Error).message}`;
+  }
   const EXCLUDE = new Set([".git", "node_modules", "out", "dist", ".code-intel", ".pytest_cache", "__pycache__", ".vscode", ".github", ".kiro", ".antigravity", ".kilo", ".roo", ".gemini"]);
   const EXCLUDE_EXT = new Set([".log", ".vsix"]);
   const SOURCE_DIRS = new Set(["src", "lib", "app", "backend", "frontend", "packages", "services"]);
@@ -96,12 +117,18 @@ async function listDirectory(args: Record<string, unknown>, workspaceRoot: strin
 async function searchText(args: Record<string, unknown>, workspaceRoot: string): Promise<string> {
   const pattern = args.pattern as string;
   if (!pattern) return "Error: 'pattern' is required";
+  if (pattern.length > 200) return "Error: pattern too long (max 200 chars)";
   const include = (args.include as string) || "**/*";
   const maxResults = (args.max_results as number) || 20;
+  let regex: RegExp;
+  try {
+    regex = new RegExp(pattern, "gi");
+  } catch (e) {
+    return `Error searching: Invalid regex pattern`;
+  }
   try {
     const files = await vscode.workspace.findFiles(include, "**/node_modules/**", 100);
     const results: string[] = [];
-    const regex = new RegExp(pattern, "gi");
     for (const file of files) {
       if (results.length >= maxResults) break;
       try {
@@ -121,7 +148,12 @@ async function writeFile(args: Record<string, unknown>, workspaceRoot: string): 
   const content = args.content as string;
   if (!filePath) return "Error: 'path' is required";
   if (content === undefined) return "Error: 'content' is required";
-  const fullPath = path.isAbsolute(filePath) ? filePath : path.join(workspaceRoot, filePath);
+  let fullPath: string;
+  try {
+    fullPath = ensurePathInsideWorkspace(filePath, workspaceRoot);
+  } catch (e) {
+    return `Error writing '${filePath}': ${(e as Error).message}`;
+  }
   try {
     const encoded = Buffer.from(content, "utf-8");
     await vscode.workspace.fs.writeFile(vscode.Uri.file(fullPath), encoded);
@@ -162,29 +194,54 @@ async function getOpenFiles(): Promise<string> {
 async function executeShell(args: Record<string, unknown>, workspaceRoot: string): Promise<string> {
   const command = args.command as string;
   if (!command) return "Error: 'command' is required";
-  const cwd = (args.cwd as string) ? path.isAbsolute(args.cwd as string) ? (args.cwd as string) : path.join(workspaceRoot, args.cwd as string) : workspaceRoot;
+  let cwd: string;
+  try {
+    const rawCwd = (args.cwd as string) || workspaceRoot;
+    cwd = ensurePathInsideWorkspace(rawCwd, workspaceRoot);
+  } catch (e) {
+    return `Error: ${(e as Error).message}`;
+  }
   const timeout = (args.timeout as number) || 120_000;
 
   // 1. Show in VS Code terminal (visible to user)
   showCommandInTerminal(command, cwd);
 
-  // 2. Capture output via child_process (for LLM)
-  const { exec } = require("child_process");
+  // 2. Capture output via child_process with shell mode.
+  // Command already passed through approval gate (user approved), so execute in shell.
+  // On Windows, pipe command to pwsh stdin to avoid double-escaping issues with -Command arg.
+  const { spawn } = require("child_process");
+  const isWindows = process.platform === "win32";
   return new Promise<string>((resolve) => {
-    const child = exec(
-      command,
-      { cwd, maxBuffer: 10 * 1024 * 1024, timeout, shell: getDefaultShell() },
-      (error: Error | null, stdout: string, stderr: string) => {
-        if (error) {
-          const output = stderr?.trim() || error.message;
-          resolve(`Exit code: ${(error as any).code || 1}\n${stdout?.trim() ? "STDOUT:\n" + stdout.trim() + "\n" : ""}STDERR:\n${output}`);
-        } else {
-          const result = stdout?.trim() || "(no output)";
-          resolve(result.length > 50000 ? result.substring(0, 50000) + "\n\n[... truncated at 50KB ...]" : result);
-        }
+    let child;
+    if (isWindows) {
+      child = spawn("pwsh.exe", ["-NoLogo", "-NoProfile", "-Command", "-"], { cwd, env: { ...process.env } });
+      child.stdin.write(command + "\n");
+      child.stdin.end();
+    } else {
+      child = spawn(command, [], { cwd, shell: true, env: { ...process.env } });
+    }
+    let stdout = "";
+    let stderr = "";
+    child.stdout.on("data", (data: Buffer) => { stdout += data.toString(); });
+    child.stderr.on("data", (data: Buffer) => { stderr += data.toString(); });
+    const timer = setTimeout(() => {
+      child.kill();
+      resolve(`Exit code: 124\nSTDERR:\nCommand timed out after ${timeout}ms`);
+    }, timeout);
+    child.on("close", (code: number | null) => {
+      clearTimeout(timer);
+      if (code === 0) {
+        const result = stdout.trim() || "(no output)";
+        resolve(result.length > 50000 ? result.substring(0, 50000) + "\n\n[... truncated at 50KB ...]" : result);
+      } else {
+        const output = stderr.trim() || `Command exited with code ${code}`;
+        resolve(`Exit code: ${code || 1}\n${stdout.trim() ? "STDOUT:\n" + stdout.trim() + "\n" : ""}STDERR:\n${output}`);
       }
-    );
-    child.unref?.();
+    });
+    child.on("error", (err: Error) => {
+      clearTimeout(timer);
+      resolve(`Error: ${err.message}`);
+    });
   });
 }
 
