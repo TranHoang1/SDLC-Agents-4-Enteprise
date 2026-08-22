@@ -36,13 +36,14 @@ export class InputAreaIntegration {
   private inputElement: HTMLElement;
   private hashDetectionEnabled = true;
   private vscodeApi: VsCodeApi;
+  private bridge: MessageBridge;
 
   constructor(options: InputAreaIntegrationOptions) {
     this.inputElement = options.inputElement;
     this.badgeContainer = options.badgeContainer;
     this.vscodeApi = options.vscodeApi;
 
-    const bridge = new MessageBridge(options.vscodeApi);
+    this.bridge = new MessageBridge(options.vscodeApi);
 
     // Context Menu (KSA-252)
     this.controller = new ContextMenuController(
@@ -52,7 +53,7 @@ export class InputAreaIntegration {
         onBadgeInsert: (badge) => this.renderBadge(badge),
         onClose: () => this.onMenuClose(),
       },
-      bridge
+      this.bridge
     );
 
     // Spinner (KSA-255)
@@ -67,6 +68,7 @@ export class InputAreaIntegration {
       inputElement: options.inputElement,
       onAgentSelect: (agentName) => this.onAgentSelected(agentName),
       onSteeringSelect: (rule) => this.onSteeringSelected(rule),
+      onCommandSelect: (commandId) => this.onCommandSelected(commandId),
       onClose: () => this.onMenuClose(),
     });
 
@@ -271,6 +273,22 @@ export class InputAreaIntegration {
       metadata: { steeringFile: `.kiro/steering/${rule.file}` },
     };
     this.renderBadge(badge);
+  }
+
+  /**
+   * SA4E-193: Command selected — dispatch to extension host for execution
+   */
+  private onCommandSelected(commandId: string): void {
+    const text = this.inputElement.textContent || '';
+    const triggerIndex = this.slashController.getTriggerIndex();
+    const before = text.substring(0, triggerIndex);
+    const cursorPos = (window.getSelection()?.anchorOffset) ?? text.length;
+    const after = text.substring(cursorPos);
+    // Clear the input text after slash command
+    this.inputElement.textContent = before + after;
+    this.setCursorPosition(before.length);
+    // Dispatch command to extension host via vscodeApi
+    this.vscodeApi.postMessage({ type: 'COMMAND_DISPATCH', command: commandId });
   }
 
   /**

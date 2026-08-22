@@ -22,7 +22,7 @@ export const SLASH_AGENTS: SlashAgent[] = [
 ];
 
 /**
- * Static list of slash commands (SA4E-182: AD-06)
+ * Static list of slash commands (SA4E-182: AD-06, SA4E-193: config commands)
  * Commands are actions, not agent invocations
  */
 export const SLASH_COMMANDS: SlashMenuItem[] = [
@@ -38,6 +38,35 @@ export const SLASH_COMMANDS: SlashMenuItem[] = [
     icon: '\u{1F4C4}',
     label: 'diff',
     description: 'Show session file changes',
+    itemType: 'command',
+  },
+  // SA4E-193: Config generation commands
+  {
+    id: 'command-create-new-agent',
+    icon: '\u{1F916}',
+    label: 'create-new-agent',
+    description: 'Generate a new agent definition file from description',
+    itemType: 'command',
+  },
+  {
+    id: 'command-create-new-hook',
+    icon: '\u{1F517}',
+    label: 'create-new-hook',
+    description: 'Generate a new hook configuration from description',
+    itemType: 'command',
+  },
+  {
+    id: 'command-create-new-steering',
+    icon: '\u{1F9ED}',
+    label: 'create-new-steering',
+    description: 'Generate a new steering rule file from description',
+    itemType: 'command',
+  },
+  {
+    id: 'command-create-new-skill',
+    icon: '\u{1F9E9}',
+    label: 'create-new-skill',
+    description: 'Generate a new skill folder with SKILL.md from description',
     itemType: 'command',
   },
 ];
