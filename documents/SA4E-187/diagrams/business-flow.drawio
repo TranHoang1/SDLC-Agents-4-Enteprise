@@ -4,10 +4,22 @@
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
-        <mxCell id="start" value="Start Tool Execution" style="ellipse" vertex="1" parent="1"><mxGeometry x="100" y="100" width="120" height="60" as="geometry"/></mxCell>
-        <mxCell id="decide" value="fileMatch?" style="rhombus" vertex="1" parent="1"><mxGeometry x="100" y="220" width="100" height="100" as="geometry"/></mxCell>
-        <mxCell id="load" value="Load Steering Rule" style="rounded" vertex="1" parent="1"><mxGeometry x="300" y="250" width="120" height="60" as="geometry"/></mxCell>
-        <mxCell id="end" value="Next LLM Turn" style="ellipse" vertex="1" parent="1"><mxGeometry x="160" y="380" width="120" height="60" as="geometry"/></mxCell>
+        <mxCell id="start" value="Start Tool Execution" style="ellipse" vertex="1" parent="1"><mxGeometry x="100" y="100" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="checkManual" value="Manual Trigger?" style="rhombus" vertex="1" parent="1"><mxGeometry x="100" y="200" width="120" height="80" as="geometry"/></mxCell>
+        <mxCell id="decide" value="fileMatch?" style="rhombus" vertex="1" parent="1"><mxGeometry x="300" y="200" width="120" height="80" as="geometry"/></mxCell>
+        <mxCell id="loadManual" value="Load Manual Rule" style="rounded" vertex="1" parent="1"><mxGeometry x="100" y="350" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="load" value="Load Steering Rule" style="rounded" vertex="1" parent="1"><mxGeometry x="500" y="220" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="dedup" value="Deduplicate Cache" style="rounded" vertex="1" parent="1"><mxGeometry x="300" y="350" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="inject" value="Inject into LLM" style="rounded" vertex="1" parent="1"><mxGeometry x="550" y="350" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="end" value="Next LLM Turn" style="ellipse" vertex="1" parent="1"><mxGeometry x="700" y="350" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" target="checkManual"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="checkManual" target="loadManual"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="checkManual" target="decide"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="decide" target="load"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="loadManual" target="dedup"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="load" target="dedup"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="dedup" target="inject"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="inject" target="end"><mxGeometry relative="1" as="geometry"/></mxCell>
       </root>
     </mxGraphModel>
   </diagram>

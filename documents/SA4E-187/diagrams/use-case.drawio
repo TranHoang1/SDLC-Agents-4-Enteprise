@@ -7,16 +7,43 @@
         <mxCell id="actor1" value="SM Agent" style="shape=actor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
           <mxGeometry x="80" y="220" width="30" height="80" as="geometry"/>
         </mxCell>
+        <mxCell id="actor2" value="Dev Agent" style="shape=actor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="380" width="30" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="actor3" value="User" style="shape=actor;verticalLabelPosition=bottom;verticalAlign=top;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="140" width="30" height="80" as="geometry"/>
+        </mxCell>
         <mxCell id="usecase1" value="Trigger Manual Steering" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="220" y="200" width="120" height="60" as="geometry"/>
+          <mxGeometry x="220" y="140" width="140" height="60" as="geometry"/>
         </mxCell>
         <mxCell id="usecase2" value="Auto-load fileMatch Steering" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
-          <mxGeometry x="220" y="300" width="120" height="60" as="geometry"/>
+          <mxGeometry x="220" y="240" width="140" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="usecase3" value="Deduplicate Rules" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="340" width="140" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="usecase4" value="Inject into LLM Turn" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="420" y="240" width="140" height="60" as="geometry"/>
         </mxCell>
         <mxCell id="edge1" edge="1" parent="1" source="actor1" target="usecase1">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="edge2" edge="1" parent="1" source="actor1" target="usecase2">
+        <mxCell id="edge2" edge="1" parent="1" source="actor1" target="usecase3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge3" edge="1" parent="1" source="actor2" target="usecase2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge4" edge="1" parent="1" source="actor3" target="usecase1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge5" edge="1" parent="1" source="usecase1" target="usecase4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge6" edge="1" parent="1" source="usecase2" target="usecase4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="edge7" edge="1" parent="1" source="usecase3" target="usecase4">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
       </root>

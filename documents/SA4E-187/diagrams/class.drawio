@@ -1,1 +1,17 @@
-<mxfile><diagram name="Diagram"><mxGraphModel><root><mxCell id="0"/><mxCell id="1" parent="0"/><mxCell id="n1" value="SA4E-187" style="rounded" vertex="1" parent="1"><mxGeometry x="200" y="200" width="160" height="80" as="geometry"/></mxCell></root></mxGraphModel></diagram></mxfile>
+<mxfile host="app.diagrams.net">
+  <diagram name="Class">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="c1" value="SteeringRule&#xa;---------&#xa;- id: string&#xa;- pattern: string&#xa;- content: string&#xa;---------&#xa;+ matches(file): bool&#xa;+ getContent(): string" style="rounded" vertex="1" parent="1"><mxGeometry x="80" y="80" width="200" height="140" as="geometry"/></mxCell>
+        <mxCell id="c2" value="SteeringLoader&#xa;---------&#xa;- cache: DeduplicationCache&#xa;- parser: PatternParser&#xa;---------&#xa;+ loadManual()&#xa;+ loadAuto()&#xa;+ deduplicate()" style="rounded" vertex="1" parent="1"><mxGeometry x="350" y="80" width="200" height="140" as="geometry"/></mxCell>
+        <mxCell id="c3" value="ToolHookService&#xa;---------&#xa;- hooks: []&#xa;---------&#xa;+ register()&#xa;+ trigger()" style="rounded" vertex="1" parent="1"><mxGeometry x="620" y="80" width="200" height="140" as="geometry"/></mxCell>
+        <mxCell id="c4" value="SteeringInjector&#xa;---------&#xa;- target: string&#xa;---------&#xa;+ inject(rule)&#xa;+ formatContext()" style="rounded" vertex="1" parent="1"><mxGeometry x="350" y="280" width="200" height="120" as="geometry"/></mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="c2" target="c1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="c3" target="c2"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="c2" target="c4"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
