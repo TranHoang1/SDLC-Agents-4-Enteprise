@@ -81,6 +81,9 @@ export class HookExecutor {
   /**
    * Execute runCommand — spawns child process with timeout.
    * SIGTERM on timeout, SIGKILL after 5s grace period.
+   * Runs without shell: command template is tokenized into argv and each
+   * placeholder value becomes ONE argv element (no shell interpretation).
+   * {{toolResult}} is never substituted into commands (untrusted file content).
    */
   private async executeRunCommand(hook: HookDefinition, context: HookContext, start: number): Promise<HookResult> {
     const command = hook.then.command;
@@ -88,8 +91,15 @@ export class HookExecutor {
       return { status: "failed", error: "No command defined", duration: Date.now() - start };
     }
 
-    const resolvedCmd = this.substitutePlaceholders(command, context);
-    this.outputChannel.appendLine(`[HOOK] "${hook.name}" runCommand: ${resolvedCmd}`);
+    const [cmd, ...argTemplates] = this.tokenizeCommand(command);
+    if (!cmd) {
+      return { status: "failed", error: "No command defined", duration: Date.now() - start };
+    }
+    if (argTemplates.some(t => t.includes("{{toolResult}}"))) {
+      this.outputChannel.appendLine(`[HOOK] "${hook.name}" {{toolResult}} is not substituted into runCommand (untrusted content)`);
+    }
+    const argv = argTemplates.map(t => this.substituteCommandArg(t, context));
+    this.outputChannel.appendLine(`[HOOK] "${hook.name}" runCommand: ${cmd} ${argv.join(" ")}`);
 
     const timeout = this.defaultTimeout;
     const { spawn } = await import("child_process");
@@ -99,8 +109,8 @@ export class HookExecutor {
       let stderr = "";
       let timedOut = false;
 
-      const proc = spawn(resolvedCmd, [], {
-        shell: true,
+      const proc = spawn(cmd, argv, {
+        shell: false,
         cwd: vscode.workspace.workspaceFolders?.[0]?.uri.fsPath,
         env: { ...process.env },
       });
@@ -161,8 +171,9 @@ export class HookExecutor {
   }
 
   /**
-   * Substitute placeholders in prompt/command templates.
+   * Substitute placeholders in prompt templates.
    * Supported: {{toolName}}, {{toolArgs}}, {{toolResult}}, {{nodeName}}
+   * Prompt-only: never use for shell commands (see substituteCommandArg).
    */
   private substitutePlaceholders(template: string, context: HookContext): string {
     let result = template;
@@ -179,6 +190,46 @@ export class HookExecutor {
     }
     if (context.nodeName) {
       result = result.replace(/\{\{nodeName\}\}/g, context.nodeName);
+    }
+    return result;
+  }
+
+  /**
+   * Tokenize a command template into argv tokens (quote-aware).
+   * The first token is the executable; the rest are argument templates.
+   */
+  private tokenizeCommand(template: string): string[] {
+    const tokens: string[] = [];
+    let current = "";
+    let inQuotes = false;
+    for (const ch of template) {
+      if (ch === "\"") { inQuotes = !inQuotes; continue; }
+      if (!inQuotes && /\s/.test(ch)) {
+        if (current.length > 0) { tokens.push(current); current = ""; }
+        continue;
+      }
+      current += ch;
+    }
+    if (current.length > 0) tokens.push(current);
+    return tokens;
+  }
+
+  /**
+   * Substitute safe placeholders into a single argv token.
+   * Each substituted value stays ONE argv element — no shell metachar interpretation.
+   * {{toolResult}} is intentionally NOT substituted here.
+   */
+  private substituteCommandArg(token: string, context: HookContext): string {
+    let result = token;
+    if (context.toolName) {
+      result = result.replace(/\{\{toolName\}\}/g, context.toolName);
+    }
+    if (context.nodeName) {
+      result = result.replace(/\{\{nodeName\}\}/g, context.nodeName);
+    }
+    if (context.toolArgs) {
+      const argsStr = JSON.stringify(context.toolArgs).slice(0, 1000);
+      result = result.replace(/\{\{toolArgs\}\}/g, argsStr);
     }
     return result;
   }

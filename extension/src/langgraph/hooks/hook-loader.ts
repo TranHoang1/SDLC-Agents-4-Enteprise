@@ -34,8 +34,9 @@ export interface HookAction {
   command?: string;
 }
 
-/** Cached hooks */
-let cachedHooks: HookDefinition[] | null = null;
+/** Cached hooks keyed by workspaceRoot (per-workspace isolation, no cross-workspace leakage) */
+const hookCache = new Map<string, HookDefinition[]>();
+const loadingHooks = new Map<string, Promise<HookDefinition[]>>();
 let hookOutputChannel: vscode.OutputChannel | undefined;
 
 function getHookOutputChannel(): vscode.OutputChannel {
@@ -46,10 +47,26 @@ function getHookOutputChannel(): vscode.OutputChannel {
 /**
  * Load all hook definitions from .code-intel/hooks/ directory.
  * Validates schema; invalid hooks are skipped with logged errors.
+ * Results are cached per workspaceRoot; concurrent loads for the same root are single-flight.
  */
 export async function loadHooks(workspaceRoot: string, forceReload = false): Promise<HookDefinition[]> {
-  if (cachedHooks && !forceReload) return cachedHooks;
-  const hooksDir = path.join(workspaceRoot, ".code-intel", "hooks");
+  if (!forceReload) {
+    const cached = hookCache.get(workspaceRoot);
+    if (cached) return cached;
+  }
+  const inflight = loadingHooks.get(workspaceRoot);
+  if (inflight) return inflight;
+  const pending = readHooksFromDir(path.join(workspaceRoot, ".code-intel", "hooks"))
+    .then(hooks => {
+      hookCache.set(workspaceRoot, hooks);
+      return hooks;
+    })
+    .finally(() => { loadingHooks.delete(workspaceRoot); });
+  loadingHooks.set(workspaceRoot, pending);
+  return pending;
+}
+
+async function readHooksFromDir(hooksDir: string): Promise<HookDefinition[]> {
   const hooks: HookDefinition[] = [];
   const channel = getHookOutputChannel();
   try {
@@ -85,8 +102,7 @@ export async function loadHooks(workspaceRoot: string, forceReload = false): Pro
     // Directory not found — non-fatal, skip silently
   }
   channel.appendLine(`[INFO] Loaded ${hooks.length} valid hooks from .code-intel/hooks/`);
-  cachedHooks = hooks;
   return hooks;
 }
 
-export function clearHookCache(): void { cachedHooks = null; }
+export function clearHookCache(): void { hookCache.clear(); }
