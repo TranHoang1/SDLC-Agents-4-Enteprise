@@ -22,6 +22,7 @@ import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-ser
 import type { IDiffTracker } from "../../chat/diff/IDiffTracker";
 import { DIFF_TRACKED_TOOLS, computeUnifiedDiff, countDiffLines, isSensitiveFile } from "../../chat/diff/diff-utils";
 import * as vscode from "vscode";
+import * as path from "path";
 
 const LLM_CALL_TIMEOUT_MS = 300_000;
 
@@ -39,8 +40,8 @@ export function buildMessages(state: PipelineState, tools: McpToolDefinition[], 
     const lastUser = (state.chatHistory || []).filter(m => m.role === "user").pop();
     if (lastUser && looksLikeCodeRequest(lastUser.content)) {
       toolNudge = {
-        role: "user",
-        content: "[SYSTEM: You MUST call a tool now. Start with list_directory path=\".\" to see the project structure, then read relevant files. Do NOT respond with text yet.]",
+        role: "system",
+        content: "You MUST call a tool now. Start with list_directory path=\".\" to see the project structure, then read relevant files. Do NOT respond with text yet.",
       };
     }
   }
@@ -72,8 +73,8 @@ function buildMessagesUnbounded(state: PipelineState, tools: McpToolDefinition[]
     const lastUser = messages.filter(m => m.role === "user").pop();
     if (lastUser && looksLikeCodeRequest(lastUser.content)) {
       messages.push({
-        role: "user",
-        content: "[SYSTEM: You MUST call a tool now. Start with list_directory path=\".\" to see the project structure, then read relevant files. Do NOT respond with text yet.]",
+        role: "system",
+        content: "You MUST call a tool now. Start with list_directory path=\".\" to see the project structure, then read relevant files. Do NOT respond with text yet.",
       });
     }
   }
@@ -101,6 +102,36 @@ function looksLikeCodeRequest(text: string): boolean {
   ];
 
   return codeActionPatterns.some(p => p.test(lower));
+}
+
+/**
+ * Extract a shell command from user input when the user explicitly asks to execute it.
+ * Returns the command string if detected, null otherwise.
+ * Patterns: "thực hiện command ...", "run ...", "execute ...", "chạy ..."
+ */
+function extractExplicitShellCommand(text: string): string | null {
+  const patterns = [
+    // Vietnamese: "thực hiện command ..."
+    /(?:thực hiện|chạy|thực thi|execute|run)\s+(?:command|cmd|lệnh)?\s*(.+)/i,
+    // Direct command prefixes: curl, npm, git, python, node, etc.
+    /^(curl\s+.+)/im,
+    /^(npm\s+.+)/im,
+    /^(git\s+.+)/im,
+    /^(python[3]?\s+.+)/im,
+    /^(node\s+.+)/im,
+    /^(java\s+.+)/im,
+    /^(docker\s+.+)/im,
+    /^(pip\s+.+)/im,
+    /^(cargo\s+.+)/im,
+    /^(make\s+.+)/im,
+  ];
+  for (const p of patterns) {
+    const m = text.match(p);
+    if (m && m[1] && m[1].trim().length > 3) {
+      return m[1].trim();
+    }
+  }
+  return null;
 }
 
 export function createFetchToolsNode(toolRegistry: ToolRegistry | null) {
@@ -138,11 +169,12 @@ export function createAgentStepNode(
       tools = [];
     }
 
-    // SA4E-186: Filter tools based on active agent config
+    // SA4E-186/204: Filter tools based on active agent config
     const agentConfig = getAgentConfig?.() ?? null;
     if (agentConfig) {
       tools = filterTools(tools, agentConfig.toolPatterns);
     }
+    // No agentConfig → allow all tools (default chat mode is unrestricted)
 
     // SA4E-186: Resolve model override for both tool and streaming paths
     const llmOptions = agentConfig?.model ? { model: agentConfig.model } : undefined;
@@ -183,6 +215,20 @@ async function agentStepWithTools(
     if (response.type === "text") {
       debugLog(`[LLM-RES] type=text, length=${(response.text || "").length}`);
       debugLog(`  preview: ${(response.text || "").slice(0, 200).replace(/\n/g, " ")}`);
+
+      // Small-model fallback: if user explicitly asked to run a command but model refused,
+      // extract the command and force a tool call instead of returning refusal text.
+      const lastUserMsg = (state.chatHistory || []).filter(m => m.role === "user").pop();
+      if (lastUserMsg && (!state.agentScratchpad || state.agentScratchpad.length === 0)) {
+        const extractedCmd = extractExplicitShellCommand(lastUserMsg.content);
+        if (extractedCmd && tools.some(t => t.name === "execute_shell")) {
+          debugLog(`[LLM-FALLBACK] Model refused tool call but user wants shell: "${extractedCmd.slice(0, 80)}"`);
+          const syntheticCall = { id: `fallback-${Date.now()}`, name: "execute_shell", arguments: { command: extractedCmd } };
+          const tcJson = JSON.stringify([{ type: "tool_use", id: syntheticCall.id, name: syntheticCall.name, input: syntheticCall.arguments }]);
+          return { toolCalls: [syntheticCall], parallelResults: { lastToolCallsJson: tcJson }, lastUpdatedAt: new Date().toISOString(), diagnosticsContext: "" };
+        }
+      }
+
       sh.emitStatus("chat", "active", streamId);
       sh.emitToken("chat", response.text || "", streamId);
       sh.emitComplete("chat", 0, streamId);
@@ -254,20 +300,36 @@ export function createExecuteToolsNode(
     // SA4E-186: Get active agent config for tool enforcement
     const agentConfig = getAgentConfig?.() ?? null;
 
-    for (const call of calls) {
-      // SA4E-186: Enforce tool filter at execution time (safety net)
-      if (agentConfig && !isToolAllowed(call.name, agentConfig.toolPatterns)) {
-        const blockedMsg = buildToolBlockedMessage(
-          call.name,
-          agentConfig.agentId,
-          agentConfig.toolPatterns || []
-        );
-        results.push({ toolCallId: call.id, name: call.name, content: blockedMsg });
-        continue;
+    // SA4E-204: Parallel tool execution with feature toggle and max parallelism config
+    const parallelEnabled = process.env.CHAT_PARALLEL_ENABLED !== 'false';
+    const maxParallelism = parseInt(process.env.CHAT_MAX_PARALLELISM || '5', 10);
+    if (parallelEnabled) {
+      debugLog(`[execute_tools] SA4E-204 parallel batch dispatched: ${calls.length} calls, maxParallelism=${maxParallelism}`);
+      const resultsArray = await Promise.all(
+        calls.map(async (call) => {
+          if (agentConfig && !isToolAllowed(call.name, agentConfig.toolPatterns)) {
+            const agentId = agentConfig.agentId;
+            const patterns = agentConfig.toolPatterns || [];
+            const blockedMsg = buildToolBlockedMessage(call.name, agentId, patterns);
+            return { toolCallId: call.id, name: call.name, content: blockedMsg };
+          }
+          return executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate, diagnosticsFeed, commandPatternMatcher, diffTracker);
+        })
+      );
+      results.push(...resultsArray);
+    } else {
+      // Sequential fallback for backward compatibility
+      for (const call of calls) {
+        if (agentConfig && !isToolAllowed(call.name, agentConfig.toolPatterns)) {
+          const agentId = agentConfig.agentId;
+          const patterns = agentConfig.toolPatterns || [];
+          const blockedMsg = buildToolBlockedMessage(call.name, agentId, patterns);
+          results.push({ toolCallId: call.id, name: call.name, content: blockedMsg });
+          continue;
+        }
+        const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate, diagnosticsFeed, commandPatternMatcher, diffTracker);
+        results.push(r);
       }
-
-      const r = await executeSingleTool(call, mcpBridge, sh, streamId, hookEngine, wsRoot, approvalGate, diagnosticsFeed, commandPatternMatcher, diffTracker);
-      results.push(r);
     }
 
     const newEntries: LlmMessage[] = [
@@ -318,16 +380,16 @@ async function executeSingleTool(
     preContent = await preReadFileForDiff(call, wsRoot);
   }
 
-  // Pattern-based auto-approve for shell commands
-  const isShellTool = call.name === "execute_shell" || call.name === "shell_execute" || call.name === "execute_pwsh";
-  const shellCommand = isShellTool ? (call.arguments?.command as string || "") : "";
-  const patternMatch = isShellTool && commandPatternMatcher ? commandPatternMatcher.matches(shellCommand) : null;
-  if (patternMatch) {
-    debugLog(`[execute_tools] Auto-approved '${shellCommand}' via pattern '${patternMatch}'`);
-  }
+  // Pattern-based auto-approve for shell commands REMOVED for security (SA4E-204)
+  // const isShellTool = call.name === "execute_shell" || call.name === "shell_execute" || call.name === "execute_pwsh";
+  // const shellCommand = isShellTool ? (call.arguments?.command as string || "") : "";
+  // const patternMatch = isShellTool && commandPatternMatcher ? commandPatternMatcher.matches(shellCommand) : null;
+  // if (patternMatch) {
+  //   debugLog(`[execute_tools] Auto-approved '${shellCommand}' via pattern '${patternMatch}'`);
+  // }
 
   // SA4E-85: Signal dangerous tool to webview and AWAIT approval before execution
-  const needsApproval = patternMatch ? false : requiresApproval(call.name);
+  const needsApproval = requiresApproval(call.name);
   sh.emitDirect({ type: "chat:toolCall", toolCall: { id: tcId, name: call.name, args: call.arguments, status: "running" }, requiresApproval: needsApproval } as any);
 
   if (needsApproval && approvalGate) {
@@ -395,9 +457,12 @@ async function preReadFileForDiff(
   // delete_file: capture content before deletion
   // write/append: capture content before overwrite
   try {
-    const fullPath = vscode.Uri.file(
-      filePath.startsWith('/') || filePath.includes(':') ? filePath : `${wsRoot}/${filePath}`
-    );
+    const resolved = path.resolve(wsRoot, filePath);
+    const normalizedRoot = path.resolve(wsRoot) + path.sep;
+    if (!resolved.startsWith(normalizedRoot) && resolved !== path.resolve(wsRoot)) {
+      throw new Error(`Path traversal detected: ${filePath}`);
+    }
+    const fullPath = vscode.Uri.file(resolved);
     const data = await vscode.workspace.fs.readFile(fullPath);
     const content = Buffer.from(data).toString('utf-8');
     // BR-09: Cap originalContent at 2MB
