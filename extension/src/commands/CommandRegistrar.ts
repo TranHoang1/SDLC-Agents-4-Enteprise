@@ -26,6 +26,7 @@ import { AuthManager } from "../auth/AuthManager";
 import { KiroTreeViewProvider } from "../sidebar/tree-view-provider";
 import { showUserError } from "../utils/panel-utils";
 import { writeJsonFile } from "../utils/mcp-config-file";
+import { registerConfigCommands } from "./ConfigCommands";
 
 interface CommandDeps {
   mcpManager?: IServerManager;
@@ -99,6 +100,9 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
       vscode.commands.registerCommand("kiroSdlc.impactAnalysis", () => showImpactAnalysis(mcpManager, context.extensionUri)),
     );
   }
+
+  // SA4E-193: Register config commands (create-new-agent, create-new-hook, etc.)
+  registerConfigCommands(context, workspaceRoot);
 }
 
 // === Handlers ===
