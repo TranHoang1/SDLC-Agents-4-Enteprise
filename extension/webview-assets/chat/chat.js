@@ -844,6 +844,9 @@
       case "chat:agentsLoaded":
         populateSlashAgents(msg.agents);
         break;
+      case "chat:skillsLoaded":
+        populateSlashSkills(msg.skills);
+        break;
       case "chat:hookTriggered":
         renderHookBadge(msg.hook);
         break;
@@ -1884,6 +1887,7 @@
   var slashPopup = document.getElementById("slash-popup");
   var slashAgentsList = document.getElementById("slash-agents-list");
   var slashSteeringList = document.getElementById("slash-steering-list");
+  var slashSkillsList = document.getElementById("slash-skills-list");
   var slashActiveIndex = -1;
   var slashVisible = false;
   var slashFilterText = "";
@@ -1902,6 +1906,23 @@
         '<span class="slash-label">' + escapeHtml(agents[i].name || agents[i].id) + '</span>' +
         '<span class="slash-desc">' + escapeHtml(agents[i].description || "") + '</span>';
       slashAgentsList.appendChild(btn);
+    }
+  }
+
+  // SA4E-188: Populate skills dynamically from Extension Host (own section)
+  function populateSlashSkills(skills) {
+    if (!slashSkillsList || !skills || skills.length === 0) return;
+    slashSkillsList.innerHTML = "";
+    for (var i = 0; i < skills.length; i++) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "slash-item";
+      btn.setAttribute("data-slash", "/" + skills[i].id);
+      btn.setAttribute("role", "option");
+      btn.innerHTML = '<span class="slash-icon">\u{1F9E9}</span>' +
+        '<span class="slash-label">' + escapeHtml(skills[i].label || skills[i].id) + '</span>' +
+        '<span class="slash-desc">' + escapeHtml(skills[i].description || "") + '</span>';
+      slashSkillsList.appendChild(btn);
     }
   }
 
@@ -1935,7 +1956,7 @@
   (function initDefaultSteering() {
     var defaults = [];
     for (var i = 0; i < defaultSteeringNames.length; i++) {
-      defaults.push({ name: defaultSteeringNames[i], file: ".kiro/steering/" + defaultSteeringNames[i] + ".md" });
+      defaults.push({ name: defaultSteeringNames[i], file: ".code-intel/steering/" + defaultSteeringNames[i] + ".md" });
     }
     populateSlashSteering(defaults);
   })();

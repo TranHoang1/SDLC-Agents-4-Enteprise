@@ -30,6 +30,13 @@ export class ChatStateManager implements vscode.Disposable {
     this.startSteeringWatcher();
     this.startHooksWatcher();
     this.startSkillsWatcher();
+    this.broadcastInitialState();
+  }
+
+  public broadcastInitialState(): void {
+    try { this.sendAgentsInfo(); } catch (e) { debugError("[ChatPanel] initial sendAgentsInfo failed", e as Error); }
+    try { this.sendSteeringInfo(); } catch (e) { debugError("[ChatPanel] initial sendSteeringInfo failed", e as Error); }
+    try { this.sendSkillsInfo(); } catch (e) { debugError("[ChatPanel] initial sendSkillsInfo failed", e as Error); }
   }
 
   /**
@@ -123,7 +130,7 @@ export class ChatStateManager implements vscode.Disposable {
       if (this.skillsDebounceTimer) { clearTimeout(this.skillsDebounceTimer); }
       this.skillsDebounceTimer = setTimeout(() => {
         debugLog("[ChatStateManager] skills files changed — reloading skills");
-        // Future: sendSkillsInfo() if needed
+        this.sendSkillsInfo();
       }, 300);
     };
     this.skillsWatcher.onDidCreate(onSkillsChanged);
@@ -229,9 +236,44 @@ export class ChatStateManager implements vscode.Disposable {
     }
   }
 
+  /**
+   * SA4E-188: Send available skills to webview (dynamic, from .code-intel/skills/<id>/SKILL.md).
+   * Mirrors sendAgentsInfo — reads the live workspace folder, not bundled resources.
+   */
+  sendSkillsInfo(): void {
+    try {
+      const fs = require("fs");
+      const path = require("path");
+      const skillsDir = path.join(this.workspaceRoot, ".code-intel", "skills");
+      if (!fs.existsSync(skillsDir)) {
+        debugLog("[ChatStateManager] skills dir not found: " + skillsDir);
+        return;
+      }
+      const skills: Array<{ id: string; label: string; description: string }> = [];
+      const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        const skillId = entry.name;
+        const skillFile = path.join(skillsDir, skillId, "SKILL.md");
+        let description = "";
+        if (fs.existsSync(skillFile)) {
+          const content = fs.readFileSync(skillFile, "utf-8");
+          const m = content.match(/description:\s*["']([^"']+)["']/);
+          if (m) description = m[1];
+        }
+        skills.push({ id: skillId, label: skillId, description });
+      }
+      debugLog(`[ChatStateManager] sendSkillsInfo: ${skills.length} skills`);
+      if (skills.length > 0) {
+        this.sendToWebview({ type: "chat:skillsLoaded", skills } as any);
+      }
+    } catch (err) {
+      debugError("[ChatPanel] sendSkillsInfo failed", err as Error);
+    }
+  }
+
   /** Extract name + description from agent frontmatter. */
-  private parseAgentFrontmatter(content: string, fallbackId: string): { id: string; name: string; description: string } {
-    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  private parseAgentFrontmatter(content: string, fallbackId: string): { id: string; name: string; description: string } {    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
     if (!match) { return { id: fallbackId, name: fallbackId, description: "" }; }
     const yaml = match[1];
     const nameMatch = yaml.match(/^(?:label|name):\s*(.+)$/m);
