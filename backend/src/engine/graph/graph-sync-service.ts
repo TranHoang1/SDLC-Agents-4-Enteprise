@@ -104,7 +104,7 @@ export class GraphSyncService {
         await this.adminAdapter.runAsync('PRAGMA foreign_keys = ON', []);
         queued++;
       } catch {
-        try { await this.adminAdapter.runAsync('PRAGMA foreign_keys = ON', []); } catch {}
+        try { await this.adminAdapter.runAsync('PRAGMA foreign_keys = ON', []); } catch { /* restore FK constraint */ }
       }
     }
 

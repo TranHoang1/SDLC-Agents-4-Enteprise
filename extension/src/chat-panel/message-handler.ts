@@ -16,12 +16,14 @@ export class MessageHandler {
   constructor(
     private readonly getEngine: () => LangGraphEngine,
     private readonly sendToWebview: (msg: ChatExtToWebviewMessage) => void,
+    private readonly workspaceRoot: string,
     private readonly onPickContext?: (contextType: string) => void,
     private readonly onPickAttachment?: () => void,
     private readonly onApplyCode?: (code: string, filePath?: string) => void,
     private readonly onInsertCode?: (code: string) => void,
     private readonly onSetModel?: (model: string) => void,
-    private readonly onTurnComplete?: () => void
+    private readonly onTurnComplete?: () => void,
+    private readonly onReady?: () => void
   ) {}
 
   async handle(msg: ChatWebviewToExtMessage): Promise<void> {
@@ -96,6 +98,7 @@ export class MessageHandler {
   }
 
   private async handleReady(): Promise<void> {
+    this.onReady?.();
     const pipelines = await this.getEngine().listPersistedPipelines();
     // Only show resume prompt for SDLC pipelines that are actively paused (not completed/cancelled)
     const paused = pipelines.find(p => p.status === "paused" && p.ticketKey);
@@ -106,18 +109,51 @@ export class MessageHandler {
     this.sendToWebview({ type: "chat:graphUpdate", nodes });
   }
 
+  private resolveSkillContext(text: string): Array<{ type: string; label: string; content: string }> {
+    const fs = require("fs");
+    const path = require("path");
+    const skillDir = path.join(this.workspaceRoot, ".code-intel", "skills");
+    const result: Array<{ type: string; label: string; content: string }> = [];
+    if (!fs.existsSync(skillDir)) return result;
+    let entries: any[];
+    try { entries = fs.readdirSync(skillDir, { withFileTypes: true }); } catch { return result; }
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const id = entry.name;
+      const skillFile = path.join(skillDir, id, "SKILL.md");
+      if (!fs.existsSync(skillFile)) continue;
+      const escaped = id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const re = new RegExp("/skill:" + escaped + "\\b|/" + escaped + "\\b", "g");
+      if (re.test(text)) {
+        try {
+          result.push({ type: "skill", label: id, content: fs.readFileSync(skillFile, "utf-8") });
+        } catch (e) { /* skill file unreadable — skip */ }
+      }
+    }
+    return result;
+  }
+
   private async handleUserMessage(text: string, context?: Array<{ type: string; label: string; path?: string; content?: string }>): Promise<void> {
-    const enrichedText = buildEnrichedText(text, context);
-    debugLog(` handleUserMessage: "${text.slice(0, 80)}" (context: ${context?.length || 0} items)`);
+    const skillCtx = this.resolveSkillContext(text);
+    const mergedContext = context ? [...context, ...skillCtx] : skillCtx;
+    let strippedText = text;
+    for (const s of skillCtx) {
+      strippedText = strippedText.replace(new RegExp("/skill:" + s.label + "\\b", "g"), "");
+      strippedText = strippedText.replace(new RegExp("/" + s.label + "\\b", "g"), "");
+    }
+    strippedText = strippedText.replace(/\s{2,}/g, " ").trim();
+    const finalText = strippedText.length > 0 ? strippedText : "Please follow the provided skill instructions.";
+    const enrichedText = buildEnrichedText(finalText, mergedContext);
+    debugLog(` handleUserMessage: "${finalText.slice(0, 80)}" (context: ${mergedContext.length} items, skills: ${skillCtx.length})`);
     this.sendToWebview({ type: "chat:workingStatus", working: true, label: "Working..." });
     try {
       const engine = this.getEngine();
-      await engine.hookEngine.firePromptSubmit(text, engine.getStreamHandler());
+      await engine.hookEngine.firePromptSubmit(finalText, engine.getStreamHandler());
     } catch (hookErr) {
       // Hooks must never break main execution, but failures must be visible.
       debugLog(`[MessageHandler] promptSubmit hook error (non-fatal): ${(hookErr as Error).message}`);
     }
-    await routeUserMessage(text, enrichedText, this.getEngine, this.sendToWebview, this.onTurnComplete);
+    await routeUserMessage(finalText, enrichedText, this.getEngine, this.sendToWebview, this.onTurnComplete);
   }
 
   private async handleApproval(decision: string, feedback?: string): Promise<void> {

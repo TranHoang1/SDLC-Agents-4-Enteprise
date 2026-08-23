@@ -2,7 +2,7 @@
   "name": "sdlc-agents-4-enterprise",
   "displayName": "SDLC Agents 4 Enterprise",
   "description": "Multi-agent SDLC pipeline for enterprise — 9 AI agents (SM, BA, TA, SA, QA, DEV, DevOps, Security, UI) orchestrated via MCP",
-  "version": "1.33.0",
+  "version": "1.35.0",
   "publisher": "dnguyenminh",
   "license": "MIT",
   "repository": {
@@ -152,6 +152,10 @@
       {
         "command": "kiroSdlc.fetchPegaContext",
         "title": "SDLC Agents: Fetch Pega App Context"
+      },
+      {
+        "command": "kiroSdlc.loadSteeringRule",
+        "title": "SDLC Agents: Load Steering Rule (Manual Trigger)"
       }
     ],
     "viewsContainers": {
@@ -394,7 +398,7 @@
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:integration": "vitest run src/langgraph/__tests__/chat-graph-diagnostics.integration.test.ts",
-    "test:e2e": "vitest run src/__tests__/cross-process.e2e.test.ts src/__tests__/drawio-convert.e2e.test.ts",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts",
     "test:watch": "vitest watch",
     "lint": "npx eslint src/ --ext .ts",
     "lint:fix": "npx eslint src/ --ext .ts --fix"
@@ -417,6 +421,7 @@
     "jsdom": "^29.1.1",
     "mocha": "^10.7.3",
     "sinon": "^17.0.1",
+    "svelte": "^5.56.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.0",
     "typescript-eslint": "^8.67.0",

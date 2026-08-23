@@ -1,0 +1,40 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Sequence" id="1">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="&lt;b&gt;Sequence - Parallel Phase Execution&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="200" y="20" width="400" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="p1" value="Pipeline" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="100" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="p2" value="FanOut" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="100" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="p3" value="Phase A/B parallel" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="100" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="p4" value="Join" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="300" y="220" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="p5" value="Merge" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="500" y="220" width="120" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="p1" target="p2" style="endArrow=classic;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="p2" target="p3" style="endArrow=classic;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="p3" target="p4" style="endArrow=classic;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="p4" target="p5" style="endArrow=classic;html=1;">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

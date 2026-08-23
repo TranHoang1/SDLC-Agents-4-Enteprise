@@ -17,6 +17,10 @@ const TOOL_CATEGORIES: Record<string, string> = {
   web_search: "web", fetch_url: "web",
 };
 
+const MAX_REGEX_PATTERN_LENGTH = 128;
+const MAX_GLOB_PATTERN_LENGTH = 256;
+const MAX_GLOB_PATH_LENGTH = 4096;
+
 export function classifyTool(toolName: string): string {
   return TOOL_CATEGORIES[toolName] || "other";
 }
@@ -33,6 +37,13 @@ export function getMatchingToolHooks(
   });
 }
 
+function safeCompile(pattern: string): RegExp | null {
+  if (pattern.length === 0 || pattern.length > MAX_REGEX_PATTERN_LENGTH) return null;
+  if (/(\.\*){2,}|(\[\^\/\]\*){2,}|\+[^)]*\+|(\*|\+|\?)\s*(\*|\+|\?)/.test(pattern)) return null;
+  try { return new RegExp(`^(?:${pattern})$`); }
+  catch { return null; }
+}
+
 function matchesToolType(hook: HookDefinition, toolName: string, category: string): boolean {
   const toolTypes = hook.when.toolTypes;
   if (!toolTypes || toolTypes.length === 0) return true;
@@ -40,7 +51,9 @@ function matchesToolType(hook: HookDefinition, toolName: string, category: strin
     if (pattern === "*") return true;
     if (pattern === category) return true;
     if (pattern === toolName) return true;
-    try { return new RegExp(pattern).test(toolName); }
+    const compiled = safeCompile(pattern);
+    if (!compiled) return false;
+    try { return compiled.test(toolName); }
     catch { return false; }
   });
 }
@@ -55,12 +68,21 @@ export function extractFilePath(toolName: string, args: Record<string, unknown>)
 
 export function matchGlob(pattern: string, filePath: string): boolean {
   const normalizedPath = filePath.replace(/\\/g, "/");
-  const regex = pattern
-    .replace(/\./g, "\\.")
-    .replace(/\*\*/g, "<<<GLOBSTAR>>>")
+  if (normalizedPath.length > MAX_GLOB_PATH_LENGTH) return false;
+  const source = globToRegex(pattern);
+  if (!source) return false;
+  try { return new RegExp(source).test(normalizedPath); }
+  catch { return false; }
+}
+
+/** Converts an anchored glob to a regex source; returns null for unsafe/oversized patterns. */
+export function globToRegex(pattern: string): string | null {
+  if (pattern.length === 0 || pattern.length > MAX_GLOB_PATTERN_LENGTH) return null;
+  const collapsed = pattern.replace(/\*\*+/g, "**");
+  const regex = collapsed
+    .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*\*/g, "\u0000")
     .replace(/\*/g, "[^/]*")
-    .replace(/<<<GLOBSTAR>>>/g, ".*");
-  try {
-    return new RegExp(`^${regex}$`).test(normalizedPath) || new RegExp(regex).test(normalizedPath);
-  } catch { return false; }
+    .replace(/(?:\u0000)+/g, ".*");
+  return `^${regex}$`;
 }
