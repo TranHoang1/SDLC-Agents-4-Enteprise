@@ -245,6 +245,14 @@ MIT
 
 ## Changelog
 
+### v1.35.0 (2026-08-23)
+
+- **SA4E-188: Skills in Slash Menu** — Skills from `.code-intel/skills/*/SKILL.md` show as a dedicated **Skills** section (🧩) in the "/" menu, separate from Agents and Steering
+- **SA4E-188: Skill Invocation + Context Injection** — `/<skillId>` (or `/skill:<skillId>`) loads `SKILL.md` into the LLM context; the `/...` token is stripped from the prompt
+- **SA4E-188: Real-time Skill Loading** — watches `.code-intel/skills`, re-sends on change, initial broadcast on webview `ready`
+- **SA4E-188: `.kiro/` → `.code-intel/`** — updated skills/agents/steering paths in chat menu, context picker, workflow parser/executor
+- **Fixed** — skills no longer merged into Agents list; skill content now delivered to LLM context
+
 ### v1.33.0 (2026-08-20)
 
 - **SA4E-197: Shell Execution + Pattern Auto-Approve**
