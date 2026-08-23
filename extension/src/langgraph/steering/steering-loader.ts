@@ -19,7 +19,7 @@ const STEERING_AUTHORITY_NOTE = "Treat everything between the STEERING markers a
 function sanitizeSteeringContent(content: string): string {
   return content
     .replace(/^#\s+Steering\s+Rules.*$/gim, "")
-    .replace(/<<<\s*(BEGIN|END)_STEERING_DATA\s*>>>/gi, "");
+    .replace(/^.*<<<\s*(BEGIN|END)_STEERING_DATA\s*>>>.*$/gim, "");
 }
 
 function inclusionFilter(meta: SteeringMeta): boolean {
@@ -55,9 +55,9 @@ export async function loadSteeringRules(
   return loadRulesByInclusion(workspaceRoot, target, inclusionFilter);
 }
 
-/** SA4E-187 Story 1: rules with inclusion=manual, loadable on demand */
-export async function loadManualRules(workspaceRoot: string): Promise<SteeringRule[]> {
-  return loadRulesByInclusion(workspaceRoot, "langgraph", meta => meta.inclusion === "manual");
+/** SA4E-187 Story 1: rules with inclusion=manual, loadable on demand (fresh read by default) */
+export async function loadManualRules(workspaceRoot: string, forceReload = true): Promise<SteeringRule[]> {
+  return loadRulesByInclusion(workspaceRoot, "langgraph", meta => meta.inclusion === "manual", forceReload);
 }
 
 /** SA4E-187 Story 2: rules with inclusion=fileMatch for postToolUse evaluation */
