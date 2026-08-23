@@ -22,7 +22,7 @@ import {
   execShell, execGit,
 } from "../helpers/hook-helpers";
 import { estimateTokens } from "./context-budget";
-import { loadSteeringRules, injectSteering } from "../steering/steering-loader";
+import { loadSteeringRules, injectSteering, appendConditionalSteering } from "../steering/steering-loader";
 import { EnrichmentObserver } from "../enrichment/EnrichmentObserver";
 
 const NODE_TIMEOUT_MS = 300_000;
@@ -241,14 +241,16 @@ export abstract class BaseNode {
 
   /**
    * Load agent system prompt with automatic steering rule injection.
-   * Detects workspace root and merges steering rules into the prompt.
+   * Detects workspace root and merges always/auto + conditional (state-carried)
+   * steering rules into the prompt.
    */
-  protected async loadSystemPromptWithSteering(agentName: string, fallback: string): Promise<string> {
+  protected async loadSystemPromptWithSteering(agentName: string, fallback: string, state?: PipelineState): Promise<string> {
     let prompt = await this.loadAgentPrompt(agentName, fallback);
     const wsRoot = this.getWorkspaceRoot();
     if (wsRoot) {
       const rules = await loadSteeringRules(wsRoot, "langgraph");
       prompt = injectSteering(prompt, rules);
+      prompt = appendConditionalSteering(prompt, state?.activeSteeringRules);
     }
     return prompt;
   }

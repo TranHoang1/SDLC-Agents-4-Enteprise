@@ -18,6 +18,7 @@ import { removeBundledMcpConfig } from "../mcp-injector";
 import { registerSymbolSearch } from "../symbol-search";
 import { registerDiagnosticsProvider } from "../diagnostics-provider";
 import { registerAIContextCommands } from "../ai-context-commands";
+import { registerSteeringCommands } from "./SteeringCommands";
 import { SecurityPanel } from "../panels/security-panel";
 import { showImpactAnalysis } from "../panels/impact-panel";
 import { SettingsPanel } from "../panels/settings-panel";
@@ -90,11 +91,12 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     }),
   );
 
+  registerSteeringCommands(context, workspaceRoot);
+
   if (mcpManager) {
     registerSymbolSearch(context, mcpManager);
     registerDiagnosticsProvider(context, mcpManager);
-    registerAIContextCommands(context, mcpManager);
-    context.subscriptions.push(
+    registerAIContextCommands(context, mcpManager);    context.subscriptions.push(
       vscode.commands.registerCommand("kiroSdlc.openSecurityPanel", () => { new SecurityPanel(mcpManager, context.extensionUri).loadData(); }),
       vscode.commands.registerCommand("kiroSdlc.impactAnalysis", () => showImpactAnalysis(mcpManager, context.extensionUri)),
     );
