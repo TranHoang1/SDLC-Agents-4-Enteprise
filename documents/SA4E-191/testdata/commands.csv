@@ -1,0 +1,8 @@
+command,args,expected_handler,requiresOwner,shortcut
+agents,{},agents,false,Ctrl/Cmd+Shift+A
+compact,{compactionStrategy:semantic},compact,false,Ctrl/Cmd+Shift+C
+diff,{},diff,false,Ctrl/Cmd+Shift+D
+models,{selectedModelId},models,false,Ctrl/Cmd+Shift+M
+new,{confirmReset:true},new,false,Ctrl/Cmd+Shift+N
+review,{branchName,branchDiff},review,true,Ctrl/Cmd+Shift+R
+undo,{lastExchangeId,revertFileChanges},undo,true,Ctrl/Cmd+Shift+U

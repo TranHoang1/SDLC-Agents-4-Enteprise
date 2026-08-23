@@ -1,0 +1,107 @@
+[
+  {
+    "id": "adversarial-review",
+    "label": "adversarial-review",
+    "description": "GAN-style adversarial review where Generator produces artifacts and Critic attacks them iteratively. Use during Phase 3 (TDD), Phase 6 (Code Review), or Security Review."
+  },
+  {
+    "id": "browser-harness",
+    "label": "browser-harness",
+    "description": "Always use browser-harness for any web interaction: automation, scraping, testing, or site/app work."
+  },
+  {
+    "id": "code-standards",
+    "label": "code-standards",
+    "description": ""
+  },
+  {
+    "id": "context-optimization",
+    "label": "context-optimization",
+    "description": "Strategic context window management: when to compact, how to compact, model tiering by task complexity, and token estimation from real project experience."
+  },
+  {
+    "id": "council-decision",
+    "label": "council-decision",
+    "description": "Multi-voice decision pattern with 4 personas (Pragmatist, Purist, Security-minded, User-advocate) debating architecture decisions. Produces ADR. Use when SA faces multiple valid options."
+  },
+  {
+    "id": "dev-bug-diagnosis",
+    "label": "dev-bug-diagnosis",
+    "description": ""
+  },
+  {
+    "id": "drawio-diagrams",
+    "label": "drawio-diagrams",
+    "description": ""
+  },
+  {
+    "id": "file-writing",
+    "label": "file-writing",
+    "description": ""
+  },
+  {
+    "id": "fresh-context-review",
+    "label": "fresh-context-review",
+    "description": "Isolated code review technique where reviewer receives ONLY diff + specs, with no implementation history. Use for large features, security-sensitive changes, or complex refactoring."
+  },
+  {
+    "id": "hono-patterns",
+    "label": "hono-patterns",
+    "description": "Hono framework patterns for this project. Use when creating routes, middleware, or HTTP handlers in backend/src/server/."
+  },
+  {
+    "id": "jira-workflow",
+    "label": "jira-workflow",
+    "description": ""
+  },
+  {
+    "id": "loop-constraints",
+    "label": "loop-constraints",
+    "description": ""
+  },
+  {
+    "id": "mcp-fallback-http",
+    "label": "mcp-fallback-http",
+    "description": ""
+  },
+  {
+    "id": "mcp-server-patterns",
+    "label": "mcp-server-patterns",
+    "description": "MCP Server development patterns. Use when creating MCP tools, child servers, or orchestrator integration."
+  },
+  {
+    "id": "quality-gates",
+    "label": "quality-gates",
+    "description": ""
+  },
+  {
+    "id": "release-versioning",
+    "label": "release-versioning",
+    "description": ""
+  },
+  {
+    "id": "sqlite-patterns",
+    "label": "sqlite-patterns",
+    "description": "SQLite/better-sqlite3 patterns for this project. Use when writing database queries, repositories, or migrations."
+  },
+  {
+    "id": "svelte-webview",
+    "label": "svelte-webview",
+    "description": "Svelte 4 webview patterns for VS Code extension. Use when building UI components, stores, or message passing in extension/src/webview/."
+  },
+  {
+    "id": "typescript-patterns",
+    "label": "typescript-patterns",
+    "description": "TypeScript strict-mode patterns used in this project. Use when writing new modules, types, or services in backend/src/ or extension/src/."
+  },
+  {
+    "id": "vitest-testing",
+    "label": "vitest-testing",
+    "description": "Vitest testing patterns for this project. Use when writing unit tests, integration tests, or property-based tests in backend/src/**/__tests__/."
+  },
+  {
+    "id": "vscode-extension-patterns",
+    "label": "vscode-extension-patterns",
+    "description": "VS Code extension patterns for this project. Use when working on extension activation, commands, webviews, tree views, or diagnostics in extension/src/."
+  }
+]

@@ -59,8 +59,8 @@ export function parseAgentWorkflow(agentName: string, markdown: string): ParsedW
     if (currentStep && inWorkflowSection) {
       const actions = inferActions(line);
       for (const action of actions) { currentStep.actions.push(action); }
-      const skillMatch = line.match(/\.kiro\/steering\/([\w-]+\.md)/);
-      if (skillMatch) { skills.add(`.kiro/steering/${skillMatch[1]}`); }
+      const skillMatch = line.match(/\.code-intel\/steering\/([\w-]+\.md)/);
+      if (skillMatch) { skills.add(`.code-intel/steering/${skillMatch[1]}`); }
     } else if (!inWorkflowSection) {
       roleLines.push(line);
     }

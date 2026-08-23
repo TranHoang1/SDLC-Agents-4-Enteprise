@@ -1,0 +1,8 @@
+command,bad_args,expected_error_code,expected_error_message
+agents,{selectedAgentId:agent_ghost},INVALID_AGENT,"Selected agent is not available."
+compact,{},NOTHING_TO_COMPACT,"Nothing to compact."
+diff,{},TRACKING_UNAVAILABLE,"No change tracking data available for this session."
+models,{selectedModelId:model_ghost},PREF_PERSIST_FAILED,"Model preference could not be saved, but is active for this session."
+new,{confirmReset:false},NO_CONFIRM,"No reset performed (confirmation required)."
+review,{},BRANCH_DIFF_UNAVAILABLE,"Unable to obtain branch diff for review."
+undo,{},NOTHING_TO_UNDO,"Nothing to undo."

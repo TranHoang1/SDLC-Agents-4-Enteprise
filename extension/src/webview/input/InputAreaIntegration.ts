@@ -84,6 +84,7 @@ export class InputAreaIntegration {
     this.setupProcessingListener();
     this.setupOptionsListener();
     this.setupSteeringListener();
+    this.setupSkillsListener();
   }
 
   private setupListeners(): void {
@@ -238,6 +239,15 @@ export class InputAreaIntegration {
     });
   }
 
+  private setupSkillsListener(): void {
+    window.addEventListener('message', (event) => {
+      const message = event.data;
+      if (message && message.type === 'chat:skillsLoaded' && Array.isArray(message.skills)) {
+        this.slashController.setSkillAgents(message.skills);
+      }
+    });
+  }
+
   /**
    * KSA-254: Agent selected — insert /agent-name prefix into textarea (BR-24, BR-25)
    */
@@ -270,7 +280,7 @@ export class InputAreaIntegration {
       type: 'steering',
       label: rule.name,
       icon: rule.icon,
-      metadata: { steeringFile: `.kiro/steering/${rule.file}` },
+      metadata: { steeringFile: `.code-intel/steering/${rule.file}` },
     };
     this.renderBadge(badge);
   }

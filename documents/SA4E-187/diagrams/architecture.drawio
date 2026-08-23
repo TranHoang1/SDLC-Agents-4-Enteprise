@@ -1,0 +1,22 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Architecture">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="langgraph" value="LangGraph&#xa;Engine" style="rounded" vertex="1" parent="1"><mxGeometry x="100" y="100" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="toolhook" value="ToolHookService" style="rounded" vertex="1" parent="1"><mxGeometry x="100" y="250" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="loader" value="SteeringLoader" style="rounded" vertex="1" parent="1"><mxGeometry x="400" y="100" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="injector" value="SteeringInjector" style="rounded" vertex="1" parent="1"><mxGeometry x="400" y="250" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="cache" value="DeduplicationCache" style="rounded" vertex="1" parent="1"><mxGeometry x="700" y="100" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="files" value="Steering&#xa;Files" style="rounded" vertex="1" parent="1"><mxGeometry x="700" y="250" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="langgraph" target="toolhook"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="toolhook" target="loader"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="loader" target="cache"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="cache" target="injector"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="injector" target="langgraph"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="files" target="loader"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
