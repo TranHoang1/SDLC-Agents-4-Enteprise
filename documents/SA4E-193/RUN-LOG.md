@@ -143,3 +143,35 @@
 | STC | v2 | (shared với STP) | #11237 |
 
 Total: 10 draw.io diagrams · 5 DOCX · 13 Jira attachments
+
+
+## REDO Phase 5 — Implementation per TDD v2 — 2026-08-24 01:10
+
+| Time | Agent | Action | Result |
+|------|-------|--------|--------|
+| 00:25 | SM | Verify state: baseline npm test = 1557 passed \| 3 skipped \| 21 todo (141 files); ConfigCommands.ts dở dang 158 dòng, C1/C2 untracked, 0 unit tests cho commands/ | ✅ Gap xác nhận |
+| 00:35 | dev-agent | REDO Phase 5: review toàn bộ state, hoàn thiện C1/C2/M1 theo TDD v2 §6, viết 4 test file mới | ✅ Hoàn thành |
+| 01:02 | SM | Verification độc lập: npm test lại = **1621 passed \| 3 skipped \| 21 todo** (145 files, +64 tests, +0 regression); compile EXIT=0; line counts ≤200; spot-check code D-1..D-7 | ✅ PASS |
+
+### Files (extension/src/commands/)
+| File | Status | Lines | Purpose |
+|------|--------|-------|---------|
+| validation-gate.ts | C1 ★ | 153 | Pure gate: normalize + per-type validators, {ok, reason?, normalized} |
+| frontmatter-utils.ts | NEW | 64 | Pure FM utils tách từ C1 (giữ ≤200 dòng) |
+| template-provider.ts | C2 | 106 | Facade prompts + fallback builders nhận confirmedName |
+| hook-gate.ts | helper | 123 | CMD2 strict JSON + BR-08 XOR + canonical serializer (D-7) |
+| ConfigCommands.ts | M1 | 195 (từ 593) | Thin orchestrators; editor-open out of write try-block (D-3); collision stub |
+| config-command-specs.ts / name-extractor.ts / file-writer.ts / llm-prompts.ts | support | 66/19/33/140 | Spec table, kebab-case extractor, mkdir-write, prompt constants |
+
+### Tests mới (64 cases)
+validation-gate.test.ts (16), hook-gate.test.ts (28), steering-skill-gate.test.ts (9), template-provider.test.ts (11)
+
+### D-item fixes (verified bằng code + regression tests)
+- **D-1**: strip ONE echoed FM + reject residual block; agent fallback trả body-only → single FM `name:=confirmed` trên disk
+- **D-2**: fences stripped trước strict JSON.parse; prose-wrapped vẫn fail ERR-CMD-04
+- **D-3**: open/toast tách khỏi write try-block — warn-only, success toast vẫn bắn
+- **D-4**: empty/whitespace stream → generation failure → template fallback
+- **D-5**: confirmedName truyền vào mọi fallback; gate FORCE skill FM name := confirmedName
+- **D-7**: canonical serializer omit empty action fields; runCommand+command:"" → reject BR-08
+
+Commit: a618e0b → origin/SA4E-193
