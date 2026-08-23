@@ -67,15 +67,22 @@ export function extractFilePath(toolName: string, args: Record<string, unknown>)
 }
 
 export function matchGlob(pattern: string, filePath: string): boolean {
-  if (pattern.length === 0 || pattern.length > MAX_GLOB_PATTERN_LENGTH) return false;
   const normalizedPath = filePath.replace(/\\/g, "/");
   if (normalizedPath.length > MAX_GLOB_PATH_LENGTH) return false;
+  const source = globToRegex(pattern);
+  if (!source) return false;
+  try { return new RegExp(source).test(normalizedPath); }
+  catch { return false; }
+}
+
+/** Converts an anchored glob to a regex source; returns null for unsafe/oversized patterns. */
+export function globToRegex(pattern: string): string | null {
+  if (pattern.length === 0 || pattern.length > MAX_GLOB_PATTERN_LENGTH) return null;
   const collapsed = pattern.replace(/\*\*+/g, "**");
   const regex = collapsed
     .replace(/[.+?^${}()|[\]\\]/g, "\\$&")
     .replace(/\*\*/g, "\u0000")
     .replace(/\*/g, "[^/]*")
     .replace(/(?:\u0000)+/g, ".*");
-  try { return new RegExp(`^${regex}$`).test(normalizedPath); }
-  catch { return false; }
+  return `^${regex}$`;
 }

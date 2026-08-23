@@ -21,6 +21,8 @@ import { filterTools, isToolAllowed, buildToolBlockedMessage } from "../agents/t
 import type { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
 import type { IDiffTracker } from "../../chat/diff/IDiffTracker";
 import { DIFF_TRACKED_TOOLS, computeUnifiedDiff, countDiffLines, isSensitiveFile } from "../../chat/diff/diff-utils";
+import { captureFileMatchSteering } from "../steering/post-tool-use";
+import type { ActiveSteeringRule } from "../steering/frontmatter";
 import * as vscode from "vscode";
 import * as path from "path";
 
@@ -294,7 +296,7 @@ export function createExecuteToolsNode(
   return async (state: PipelineState) => {
     const streamId = state.currentStreamId || `stream-chat-${Date.now()}`;
     const calls = state.toolCalls || [];
-    const results: Array<{ toolCallId: string; name: string; content: string }> = [];
+    const results: Array<SingleToolResult> = [];
     sh.emitComplete("chat", 0, streamId);
 
     // SA4E-186: Get active agent config for tool enforcement
@@ -350,11 +352,26 @@ export function createExecuteToolsNode(
       newEntries.push({ role: "tool", content, toolCallId: r.toolCallId, toolName: r.name });
     }
 
+    // SA4E-187: conditional steering captured during successful file read/write
+    const capturedSteering = results.flatMap(r => r.newSteeringRules ?? []);
+
     // Accumulate scratchpad (reducer now replaces, so we must append here)
     const scratchpad: LlmMessage[] = [...(state.agentScratchpad || []), ...newEntries];
 
-    return { toolResults: results, agentScratchpad: scratchpad, toolCalls: null, agentIterations: (state.agentIterations || 0) + 1, currentStreamId: `stream-chat-${Date.now()}`, lastUpdatedAt: new Date().toISOString() };
+    return {
+      toolResults: results, agentScratchpad: scratchpad, toolCalls: null,
+      agentIterations: (state.agentIterations || 0) + 1,
+      ...(capturedSteering.length > 0 ? { activeSteeringRules: capturedSteering } : {}),
+      currentStreamId: `stream-chat-${Date.now()}`, lastUpdatedAt: new Date().toISOString(),
+    };
   };
+}
+
+interface SingleToolResult {
+  toolCallId: string;
+  name: string;
+  content: string;
+  newSteeringRules?: ActiveSteeringRule[];
 }
 
 async function executeSingleTool(
@@ -364,7 +381,7 @@ async function executeSingleTool(
   diagnosticsFeed?: DiagnosticsFeedService,
   commandPatternMatcher?: CommandPatternMatcher,
   diffTracker?: IDiffTracker
-): Promise<{ toolCallId: string; name: string; content: string }> {
+): Promise<SingleToolResult> {
   const tcId = call.id || `tc-${Date.now()}`;
 
   if (hookEngine) {
@@ -438,7 +455,15 @@ async function executeSingleTool(
     if (diffTracker && DIFF_TRACKED_TOOLS.has(call.name) && !result.startsWith("Error:")) {
       recordToolChange(diffTracker, call, result, preContent, wsRoot);
     }
-    return { toolCallId: call.id, name: call.name, content: result };
+    // SA4E-187: fileMatch steering auto-load on successful read/write (postToolUse)
+    let newSteeringRules: ActiveSteeringRule[] | undefined;
+    try {
+      const captured = await captureFileMatchSteering(call.name, call.arguments || {}, wsRoot);
+      if (captured.length > 0) { newSteeringRules = captured; }
+    } catch (steeringErr) {
+      debugError(`[chat-graph-nodes] steering capture error for '${call.name}'`, steeringErr as Error);
+    }
+    return { toolCallId: call.id, name: call.name, content: result, ...(newSteeringRules ? { newSteeringRules } : {}) };
   } catch (error) {
     sh.emitDirect({ type: "chat:toolCallUpdate", id: tcId, status: "failed", result: (error as Error).message, duration: Date.now() - start } as any);
     return { toolCallId: call.id, name: call.name, content: `Error: ${(error as Error).message}` };

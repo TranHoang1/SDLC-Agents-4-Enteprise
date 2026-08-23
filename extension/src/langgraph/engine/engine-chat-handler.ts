@@ -19,6 +19,7 @@ export async function executeChat(
   streamHandler: StreamHandler,
   onEvent: (msg: ChatExtToWebviewMessage) => void,
   kbContext?: string,
+  activeSteeringRules?: PipelineState["activeSteeringRules"],
 ): Promise<{ activeThread: string }> {
   const threadId = crypto.randomUUID();
   const streamId = `stream-${threadId}-${Date.now()}`;
@@ -37,6 +38,8 @@ export async function executeChat(
     retryCount: {}, createdAt: new Date().toISOString(),
     lastUpdatedAt: new Date().toISOString(), lastCheckpointAt: null,
     kbContext: kbContext || "",
+    // SA4E-187: manual steering rules activated by command inject into this turn
+    ...(activeSteeringRules && activeSteeringRules.length > 0 ? { activeSteeringRules } : {}),
   };
 
   try {
