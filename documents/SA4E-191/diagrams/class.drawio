@@ -1,0 +1,72 @@
+<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="800" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="c_handler" value="&lt;&lt;interface&gt;&gt; CommandHandler&#10;+ execute(ctx): Promise&lt;CommandResult&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="520" y="40" width="200" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="c_slash" value="SlashCommand (descriptor)&#10;id,label,icon,description,&#10;shortcutHint,category,&#10;requiresOwner,timeoutMs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="c_reg" value="CommandRegistry&#10;+ register(d, h)&#10;+ resolve(id)&#10;+ dispatch(ctx)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="290" y="40" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="c_sess" value="ChatSession&#10;id,userId,ownerId,&#10;activeAgentId,activeModelId,&#10;contextRef,historyRef" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="40" y="220" width="200" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="c_diff" value="DiffEntry&#10;id,sessionId,filePath,&#10;beforeHash,afterHash,status" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="40" y="340" width="200" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="c_model" value="ModelChoice&#10;id,label,provider,isDefault" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="40" y="450" width="200" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="h_agents" value="AgentsCommand" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="520" y="140" width="150" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="h_compact" value="CompactCommand" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="520" y="190" width="150" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="h_diff" value="DiffCommand" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="520" y="240" width="150" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="h_models" value="ModelsCommand" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="520" y="290" width="150" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="h_new" value="NewCommand" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="520" y="340" width="150" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="h_review" value="ReviewCommand" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="520" y="390" width="150" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="h_undo" value="UndoCommand" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="520" y="440" width="150" height="35" as="geometry"/>
+    </mxCell>
+    <mxCell id="g1" style="endArrow=block;html=1;" edge="1" parent="1" source="h_agents" target="c_handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="g2" style="endArrow=block;html=1;" edge="1" parent="1" source="h_compact" target="c_handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="g3" style="endArrow=block;html=1;" edge="1" parent="1" source="h_diff" target="c_handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="g4" style="endArrow=block;html=1;" edge="1" parent="1" source="h_models" target="c_handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="g5" style="endArrow=block;html=1;" edge="1" parent="1" source="h_new" target="c_handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="g6" style="endArrow=block;html=1;" edge="1" parent="1" source="h_review" target="c_handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="g7" style="endArrow=block;html=1;" edge="1" parent="1" source="h_undo" target="c_handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="c_reg" target="c_handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;" edge="1" parent="1" source="c_slash" target="c_reg">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

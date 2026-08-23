@@ -1,0 +1,4 @@
+model_id,label,provider,is_default
+model_gpt4o,GPT-4o,openai,true
+model_claude,Claude 3.5,anthropic,false
+model_llama,Llama 3,meta,false
