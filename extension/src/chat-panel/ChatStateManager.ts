@@ -10,13 +10,138 @@ import { ChatExtToWebviewMessage } from "./message-protocol";
 
 const STATE_KEY = "chatPanel.state";
 
-export class ChatStateManager {
+export class ChatStateManager implements vscode.Disposable {
+  private agentWatcher?: vscode.FileSystemWatcher;
+  private agentDebounceTimer?: NodeJS.Timeout;
+  private steeringWatcher?: vscode.FileSystemWatcher;
+  private steeringDebounceTimer?: NodeJS.Timeout;
+  private hooksWatcher?: vscode.FileSystemWatcher;
+  private hooksDebounceTimer?: NodeJS.Timeout;
+  private skillsWatcher?: vscode.FileSystemWatcher;
+  private skillsDebounceTimer?: NodeJS.Timeout;
+
   constructor(
     private readonly workspaceRoot: string,
     private readonly workspaceState: vscode.Memento | undefined,
     private readonly sendToWebview: (msg: ChatExtToWebviewMessage) => void,
     private readonly getEngine: () => LangGraphEngine
-  ) {}
+  ) {
+    this.startAgentWatcher();
+    this.startSteeringWatcher();
+    this.startHooksWatcher();
+    this.startSkillsWatcher();
+  }
+
+  /**
+   * SA4E-189: Hot-reload agent list when .kiro/agents/*.md files change.
+   * Watches for create/change/delete, debounces 300ms, re-sends agent list to webview.
+   */
+  private startAgentWatcher(): void {
+    const fs = require("fs");
+    const path = require("path");
+    const agentsDir = path.join(this.workspaceRoot, ".code-intel", "agents");
+    if (!fs.existsSync(agentsDir)) {
+      debugLog("[ChatStateManager] agent hot-reload: .code-intel/agents not found, watcher skipped");
+      return;
+    }
+
+    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/agents/*.md");
+    this.agentWatcher = vscode.workspace.createFileSystemWatcher(pattern);
+
+    const onAgentsChanged = () => {
+      if (this.agentDebounceTimer) { clearTimeout(this.agentDebounceTimer); }
+      this.agentDebounceTimer = setTimeout(() => {
+        debugLog("[ChatStateManager] agent files changed — reloading agent list");
+        this.sendAgentsInfo();
+      }, 300);
+    };
+
+    this.agentWatcher.onDidCreate(onAgentsChanged);
+    this.agentWatcher.onDidChange(onAgentsChanged);
+    this.agentWatcher.onDidDelete(onAgentsChanged);
+
+    debugLog("[ChatStateManager] agent hot-reload watcher started: " + agentsDir);
+  }
+
+  private startSteeringWatcher(): void {
+    const fs = require("fs");
+    const path = require("path");
+    const steeringDir = path.join(this.workspaceRoot, ".code-intel", "steering");
+    if (!fs.existsSync(steeringDir)) {
+      debugLog("[ChatStateManager] steering hot-reload: .code-intel/steering not found, watcher skipped");
+      return;
+    }
+    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/steering/**/*.md");
+    this.steeringWatcher = vscode.workspace.createFileSystemWatcher(pattern);
+    const onSteeringChanged = () => {
+      if (this.steeringDebounceTimer) { clearTimeout(this.steeringDebounceTimer); }
+      this.steeringDebounceTimer = setTimeout(() => {
+        debugLog("[ChatStateManager] steering files changed — reloading steering info");
+        this.sendSteeringInfo();
+      }, 300);
+    };
+    this.steeringWatcher.onDidCreate(onSteeringChanged);
+    this.steeringWatcher.onDidChange(onSteeringChanged);
+    this.steeringWatcher.onDidDelete(onSteeringChanged);
+    debugLog("[ChatStateManager] steering hot-reload watcher started: " + steeringDir);
+  }
+
+  private startHooksWatcher(): void {
+    const fs = require("fs");
+    const path = require("path");
+    const hooksDir = path.join(this.workspaceRoot, ".code-intel", "hooks");
+    if (!fs.existsSync(hooksDir)) {
+      debugLog("[ChatStateManager] hooks hot-reload: .code-intel/hooks not found, watcher skipped");
+      return;
+    }
+    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/hooks/**/*");
+    this.hooksWatcher = vscode.workspace.createFileSystemWatcher(pattern);
+    const onHooksChanged = () => {
+      if (this.hooksDebounceTimer) { clearTimeout(this.hooksDebounceTimer); }
+      this.hooksDebounceTimer = setTimeout(() => {
+        debugLog("[ChatStateManager] hooks files changed — reloading hooks");
+        // Future: sendHooksInfo() if needed
+      }, 300);
+    };
+    this.hooksWatcher.onDidCreate(onHooksChanged);
+    this.hooksWatcher.onDidChange(onHooksChanged);
+    this.hooksWatcher.onDidDelete(onHooksChanged);
+    debugLog("[ChatStateManager] hooks hot-reload watcher started: " + hooksDir);
+  }
+
+  private startSkillsWatcher(): void {
+    const fs = require("fs");
+    const path = require("path");
+    const skillsDir = path.join(this.workspaceRoot, ".code-intel", "skills");
+    if (!fs.existsSync(skillsDir)) {
+      debugLog("[ChatStateManager] skills hot-reload: .code-intel/skills not found, watcher skipped");
+      return;
+    }
+    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/skills/**/*.md");
+    this.skillsWatcher = vscode.workspace.createFileSystemWatcher(pattern);
+    const onSkillsChanged = () => {
+      if (this.skillsDebounceTimer) { clearTimeout(this.skillsDebounceTimer); }
+      this.skillsDebounceTimer = setTimeout(() => {
+        debugLog("[ChatStateManager] skills files changed — reloading skills");
+        // Future: sendSkillsInfo() if needed
+      }, 300);
+    };
+    this.skillsWatcher.onDidCreate(onSkillsChanged);
+    this.skillsWatcher.onDidChange(onSkillsChanged);
+    this.skillsWatcher.onDidDelete(onSkillsChanged);
+    debugLog("[ChatStateManager] skills hot-reload watcher started: " + skillsDir);
+  }
+
+  dispose(): void {
+    if (this.agentDebounceTimer) { clearTimeout(this.agentDebounceTimer); }
+    if (this.agentWatcher) { this.agentWatcher.dispose(); this.agentWatcher = undefined; }
+    if (this.steeringDebounceTimer) { clearTimeout(this.steeringDebounceTimer); }
+    if (this.steeringWatcher) { this.steeringWatcher.dispose(); this.steeringWatcher = undefined; }
+    if (this.hooksDebounceTimer) { clearTimeout(this.hooksDebounceTimer); }
+    if (this.hooksWatcher) { this.hooksWatcher.dispose(); this.hooksWatcher = undefined; }
+    if (this.skillsDebounceTimer) { clearTimeout(this.skillsDebounceTimer); }
+    if (this.skillsWatcher) { this.skillsWatcher.dispose(); this.skillsWatcher = undefined; }
+  }
 
   /** Save current chat state (called from webview via message) */
   saveChatState(state: { tabs: unknown[]; activeTabId: string; messageHistory?: string[] }): void {
@@ -52,7 +177,7 @@ export class ChatStateManager {
     try {
       const fs = require("fs");
       const path = require("path");
-      const steeringDir = path.join(this.workspaceRoot, ".kiro", "steering");
+      const steeringDir = path.join(this.workspaceRoot, ".code-intel", "steering");
       const rules: Array<{ name: string; file: string }> = [];
       const autoInjectInclusions = new Set(["always", "auto"]);
 
@@ -82,7 +207,7 @@ export class ChatStateManager {
     try {
       const fs = require("fs");
       const path = require("path");
-      const agentsDir = path.join(this.workspaceRoot, ".kiro", "agents");
+      const agentsDir = path.join(this.workspaceRoot, ".code-intel", "agents");
       if (!fs.existsSync(agentsDir)) { return; }
 
       const agents: Array<{ id: string; name: string; description: string }> = [];
@@ -90,9 +215,10 @@ export class ChatStateManager {
 
       for (const file of files) {
         const id = path.basename(file, ".md");
-        const content = fs.readFileSync(path.join(agentsDir, file), "utf-8");
+        const filePath = path.join(agentsDir, file);
+        const content = fs.readFileSync(filePath, "utf-8");
         const meta = this.parseAgentFrontmatter(content, id);
-        agents.push(meta);
+        agents.push({ ...meta, id });
       }
 
       if (agents.length > 0) {
@@ -169,6 +295,26 @@ export class ChatStateManager {
       }
     } catch (err) {
       console.debug(`[ChatStateManager] getSteeringFilesRecursive failed (non-fatal): ${(err as Error).message}`);
+    }
+    return results;
+  }
+
+  private getAgentFilesRecursive(dir: string): string[] {
+    const fs = require("fs");
+    const path = require("path");
+    const results: string[] = [];
+    try {
+      const entries = fs.readdirSync(dir, { withFileTypes: true });
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          results.push(...this.getAgentFilesRecursive(fullPath));
+        } else if (entry.name.endsWith(".md")) {
+          results.push(fullPath);
+        }
+      }
+    } catch (err) {
+      console.debug(`[ChatStateManager] getAgentFilesRecursive failed (non-fatal): ${(err as Error).message}`);
     }
     return results;
   }
