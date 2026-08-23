@@ -233,6 +233,7 @@ The embedding model is expected at `.code-intel/models/model.onnx`. Download it:
 
 | Version | Date | Ticket | Changes |
 |---------|------|--------|---------|
+| 1.33.1 | 2026-08-23 | SA4E-189 | Extension hot-reload for .code-intel agentics — no backend changes. ChatStateManager watches agents/steering/hooks/skills with 300ms debounce, recursive patterns. Unit+e2e tests added. |
 | 1.32.0 | 2026-08-19 | SA4E-184/186 | Web search native in extension (DuckDuckGo Lite, no SearXNG). Agent runtime routing with dynamic slash menu. WebModule removed from backend. |
 | 1.31.0 | 2026-08-19 | SA4E-196 | Fix GraphSyncService drops Pega symbols on re-index. readTopSymbols() now includes pega_* kinds via LIKE pattern. |
 | 1.30.1 | 2026-08-19 | SA4E-175/176/178/179 | Bug fixes: KB offline resilience, auth gate signaling, orphan task cleanup, CODE_ENRICHMENT rename. |
