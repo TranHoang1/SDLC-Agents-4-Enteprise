@@ -234,7 +234,7 @@ describe('SA4E-106: handleTaskError non-retryable patterns', () => {
   });
 
   it.todo('does NOT increment consecutiveErrors for non-retryable data errors' /* SA4E-174: consecutiveErrors removed */, async () => {
-    const { worker, repo } = createWorkerWithSpies();
+    const { worker } = createWorkerWithSpies();
     const task = createFakeTask();
 
     // symbol_not_found should not count as LLM error
@@ -251,7 +251,7 @@ describe('SA4E-106: handleTaskError non-retryable patterns', () => {
   });
 
   it.todo('DOES increment consecutiveErrors for real LLM/transient errors' /* SA4E-174: consecutiveErrors field removed */, async () => {
-    const { worker, repo } = createWorkerWithSpies();
+    const { worker } = createWorkerWithSpies();
     const task = createFakeTask(0, 3);
 
     await (worker as any).handleTaskError(task, new Error('llm_timeout'));

@@ -1,0 +1,63 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="Sequence — /skills (list &amp; invoke skill)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="160" y="10" width="440" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="dev_head" value="Developer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="dev_line" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;size=16;html=1;" vertex="1" parent="1">
+      <mxGeometry x="90" y="80" width="20" height="480" as="geometry"/>
+    </mxCell>
+    <mxCell id="smc_head" value="SlashMenuController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="220" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="smc_line" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;size=16;html=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="80" width="20" height="480" as="geometry"/>
+    </mxCell>
+    <mxCell id="skill_head" value="SkillLoader" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="460" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="skill_line" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;size=16;html=1;" vertex="1" parent="1">
+      <mxGeometry x="520" y="80" width="20" height="480" as="geometry"/>
+    </mxCell>
+    <mxCell id="cfg_head" value="ConfigStore" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="700" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="cfg_line" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;size=16;html=1;" vertex="1" parent="1">
+      <mxGeometry x="750" y="80" width="20" height="480" as="geometry"/>
+    </mxCell>
+    <mxCell id="m1" value="/skills" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.083;entryY=0.083;" edge="1" parent="1" source="dev_line" target="smc_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m2" value="listSkills()" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.167;entryY=0.167;" edge="1" parent="1" source="smc_line" target="skill_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m3" value="read .code-intel/skills/" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.25;entryY=0.25;" edge="1" parent="1" source="skill_line" target="cfg_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m4" value="skillFiles[]" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.333;entryY=0.333;dashed=1;" edge="1" parent="1" source="cfg_line" target="skill_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m5" value="skills[]" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.417;entryY=0.417;dashed=1;" edge="1" parent="1" source="skill_line" target="smc_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m6" value="render skills list" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.5;entryY=0.5;" edge="1" parent="1" source="smc_line" target="dev_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m7" value="invokeSkill(name)" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.625;entryY=0.625;" edge="1" parent="1" source="dev_line" target="smc_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m8" value="loadSkill(name)" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.708;entryY=0.708;" edge="1" parent="1" source="smc_line" target="skill_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m9" value="loaded / SKILLS_DIR_MISSING" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.792;entryY=0.792;dashed=1;" edge="1" parent="1" source="skill_line" target="smc_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m10" value="invoked confirmation" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.875;entryY=0.875;" edge="1" parent="1" source="smc_line" target="dev_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

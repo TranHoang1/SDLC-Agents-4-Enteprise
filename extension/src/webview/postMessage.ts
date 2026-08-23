@@ -14,7 +14,6 @@ interface VsCodeApi {
 }
 
 // Acquire VS Code API singleton (available in webview context)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const vscode: VsCodeApi = (window as any).acquireVsCodeApi
   ? (window as any).acquireVsCodeApi()
   : { postMessage: () => {}, getState: () => null, setState: () => {} };

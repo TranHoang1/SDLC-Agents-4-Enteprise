@@ -35,8 +35,8 @@ export class WorkflowExecutor {
   constructor(private readonly node: WorkflowNodeContext) {}
 
   async run(agentName: string, state: PipelineState, vars: Record<string, string> = {}): Promise<string> {
-    const agentContent = await this.node.readWorkspaceFile(`.kiro/agents/${agentName}.md`);
-    if (!agentContent) { throw new Error(`Agent file not found: .kiro/agents/${agentName}.md`); }
+    const agentContent = await this.node.readWorkspaceFile(`.code-intel/agents/${agentName}.md`);
+    if (!agentContent) { throw new Error(`Agent file not found: .code-intel/agents/${agentName}.md`); }
     const workflow = parseAgentWorkflow(agentName, agentContent);
     const skillContent = await this.loadSkills(workflow.skills);
     const ctx: ExecutionContext = {
