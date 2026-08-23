@@ -247,6 +247,7 @@ MIT
 
 ### v1.35.0 (2026-08-23)
 
+- **SA4E-189: Hot-Reload for .code-intel Agentics** — `ChatStateManager` now watches `.code-intel/agents/**/*.md`, `.code-intel/steering/**/*.md`, `.code-intel/hooks/**/*`, `.code-intel/skills/**/*.md` with 300ms debounce. UI reloads agents/steering/hooks/skills without Kiro restart. Recursive watchers, unit+e2e tests added.
 - **SA4E-188: Skills in Slash Menu** — Skills from `.code-intel/skills/*/SKILL.md` show as a dedicated **Skills** section (🧩) in the "/" menu, separate from Agents and Steering
 - **SA4E-188: Skill Invocation + Context Injection** — `/<skillId>` (or `/skill:<skillId>`) loads `SKILL.md` into the LLM context; the `/...` token is stripped from the prompt
 - **SA4E-188: Real-time Skill Loading** — watches `.code-intel/skills`, re-sends on change, initial broadcast on webview `ready`
