@@ -136,7 +136,7 @@ export class ChatContextPicker {
   }
 
   private async pickSteering(): Promise<ContextItem | undefined> {
-    const files = await vscode.workspace.findFiles(".kiro/steering/**/*.md");
+    const files = await vscode.workspace.findFiles(".code-intel/steering/**/*.md");
     if (files.length === 0) { return undefined; }
     const items = files.map(f => ({ label: path.basename(f.fsPath, ".md"), description: vscode.workspace.asRelativePath(f), uri: f }));
     const picked = await vscode.window.showQuickPick(items, { title: "Select Steering Rule" });

@@ -1,0 +1,33 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="SA4E-191 — Test Execution Flow (level sequence + defect loop)" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1">
+      <mxGeometry x="0" y="-30" width="760" height="24" as="geometry"/>
+    </mxCell>
+    <!-- Level nodes -->
+    <mxCell id="PBT" value="PBT&#10;(Property-Based)&#10;entry: compiled handlers + stubbed adapters" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="240" y="40" width="240" height="60" as="geometry"/></mxCell>
+    <mxCell id="UT" value="UT&#10;(Unit / handlers + registry)&#10;exit: 0 failed, BR-1/BR-2 enforced" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="240" y="140" width="240" height="60" as="geometry"/></mxCell>
+    <mxCell id="IT" value="IT&#10;(Integration: services + SA4E-182/183/186 adapters)&#10;exit: adapter happy+fail paths verified" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="240" y="240" width="240" height="60" as="geometry"/></mxCell>
+    <mxCell id="E2EAPI" value="E2E-API&#10;(real command bus + auth)&#10;exit: 7 cmds + auth + error green" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="240" y="340" width="240" height="60" as="geometry"/></mxCell>
+    <mxCell id="E2EUI" value="E2E-UI&#10;(Playwright: menu + panels)&#10;exit: menu &lt;100ms, all panels open" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="240" y="440" width="240" height="60" as="geometry"/></mxCell>
+    <mxCell id="SIT" value="SIT&#10;(manual session flows + visual/UX)&#10;exit: 0 Critical/0 Major open, UX sign-off" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="240" y="540" width="240" height="60" as="geometry"/></mxCell>
+    <!-- Defect fix & retest node -->
+    <mxCell id="FIX" value="Defect Fix &amp; Retest&#10;(Dev fixes; suites re-run)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;" vertex="1" parent="1"><mxGeometry x="560" y="340" width="200" height="60" as="geometry"/></mxCell>
+    <!-- Sequence edges -->
+    <mxCell id="e1" edge="1" parent="1" source="PBT" target="UT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" edge="1" parent="1" source="UT" target="IT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" edge="1" parent="1" source="IT" target="E2EAPI" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" edge="1" parent="1" source="E2EAPI" target="E2EUI" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" edge="1" parent="1" source="E2EUI" target="SIT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#333;"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- Feedback loop: SIT -> FIX -> back to IT -->
+    <mxCell id="e6" edge="1" parent="1" source="SIT" target="FIX" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#cc0000;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" label="defect found"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e7" edge="1" parent="1" source="FIX" target="IT" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;strokeColor=#cc0000;exitX=0;exitY=0.2;entryX=1;entryY=0.5;" label="retest"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <!-- Entry/exit gate notes -->
+    <mxCell id="g1" value="Gate 1: unit harness green" style="text;html=1;fontSize=10;fillColor=#f5f5f5;align=left;" vertex="1" parent="1"><mxGeometry x="500" y="95" width="200" height="24" as="geometry"/></mxCell>
+    <mxCell id="g2" value="Gate 2: real services wired" style="text;html=1;fontSize=10;fillColor=#f5f5f5;align=left;" vertex="1" parent="1"><mxGeometry x="500" y="195" width="200" height="24" as="geometry"/></mxCell>
+    <mxCell id="g3" value="Gate 3: backend slash module up" style="text;html=1;fontSize=10;fillColor=#f5f5f5;align=left;" vertex="1" parent="1"><mxGeometry x="500" y="295" width="200" height="24" as="geometry"/></mxCell>
+    <mxCell id="g4" value="Gate 4: webview served" style="text;html=1;fontSize=10;fillColor=#f5f5f5;align=left;" vertex="1" parent="1"><mxGeometry x="500" y="395" width="200" height="24" as="geometry"/></mxCell>
+    <mxCell id="g5" value="Gate 5: SIT build + data ready" style="text;html=1;fontSize=10;fillColor=#f5f5f5;align=left;" vertex="1" parent="1"><mxGeometry x="500" y="495" width="200" height="24" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

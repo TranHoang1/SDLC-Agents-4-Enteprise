@@ -66,6 +66,14 @@ MIT
 
 ## Changelog
 
+### v1.35.0 (2026-08-23)
+
+- **SA4E-190: SDLC Pipeline Autonomy L3 Reset & Rebuild** — Full SDLC pipeline reset from requirements to deployment with Autonomy Level L3. Rebuilt BRD, FSD, TDD, STP, STC, UG, TEST-REPORT, DPG, RLN. Implemented backend module `backend/src/sa4e-190/` with PipelineController, StatusManager, repository, unit/integration/e2e tests. All tests PASS (Backend 2617 passed, Extension 1561 passed). Merge origin/main into `dnguyenminh/SA4E-190`, lint fixes applied.
+
+### v1.33.1 (2026-08-23)
+
+- **SA4E-189: Hot-Reload System for .code-intel Agentics** — Extension `ChatStateManager` now watches `.code-intel/agents/**/*.md`, `.code-intel/steering/**/*.md`, `.code-intel/hooks/**/*`, `.code-intel/skills/**/*.md` with 300ms debounce. Agent/Steering/Hooks/Skills UI reloads without Kiro restart. Recursive watchers, unit+e2e tests added, docs updated and pushed to Jira SA4E-189.
+
 ### v1.33.0 (2026-08-20)
 
 - **SA4E-185: LSP Diagnostics Feed — realtime errors into agent loop** — New `DiagnosticsFeedService` streams LSP diagnostics into LangGraph via `diagnosticsContext` channel (consume-once). Auto-fix advisory fires on severity-token lines. Security-hardened: prompt-injection fencing (fence delimiters + untrusted-data boundary), full approval gate for `fs_write`/`str_replace`/`fs_append`, path-containment for traversal (incl. in-root `..`). Full SDLC doc set (BRD/FSD/TDD/STP/STC/security review/pentest).
