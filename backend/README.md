@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.33.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.35.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/tools-66+-teal?style=for-the-badge" alt="Tools">
   <img src="https://img.shields.io/badge/node-%3E%3D18-green?style=for-the-badge" alt="Node">
 </p>
@@ -233,6 +233,7 @@ The embedding model is expected at `.code-intel/models/model.onnx`. Download it:
 
 | Version | Date | Ticket | Changes |
 |---------|------|--------|---------|
+| 1.35.0 | 2026-08-23 | SA4E-190 | SDLC Pipeline Autonomy L3 Reset & Rebuild. New backend module `backend/src/sa4e-190/` with PipelineController, StatusManager, repository, unit/integration/e2e tests. Merge origin/main into dnguyenminh/SA4E-190, lint fixes applied. Tests PASS. |
 | 1.33.1 | 2026-08-23 | SA4E-189 | Extension hot-reload for .code-intel agentics — no backend changes. ChatStateManager watches agents/steering/hooks/skills with 300ms debounce, recursive patterns. Unit+e2e tests added. |
 | 1.32.0 | 2026-08-19 | SA4E-184/186 | Web search native in extension (DuckDuckGo Lite, no SearXNG). Agent runtime routing with dynamic slash menu. WebModule removed from backend. |
 | 1.31.0 | 2026-08-19 | SA4E-196 | Fix GraphSyncService drops Pega symbols on re-index. readTopSymbols() now includes pega_* kinds via LIKE pattern. |
