@@ -1,0 +1,56 @@
+[
+  {
+    "id": "ba-agent",
+    "label": "Business Analyst",
+    "agentName": "ba-agent",
+    "description": ""
+  },
+  {
+    "id": "dev-agent",
+    "label": "Developer",
+    "agentName": "dev-agent",
+    "description": ""
+  },
+  {
+    "id": "devops-agent",
+    "label": "DevOps Engineer",
+    "agentName": "devops-agent",
+    "description": ""
+  },
+  {
+    "id": "qa-agent",
+    "label": "Quality Assurance",
+    "agentName": "qa-agent",
+    "description": ""
+  },
+  {
+    "id": "sa-agent",
+    "label": "Solution Architect",
+    "agentName": "sa-agent",
+    "description": ""
+  },
+  {
+    "id": "security-agent",
+    "label": "security-agent",
+    "agentName": "security-agent",
+    "description": ""
+  },
+  {
+    "id": "sm-agent",
+    "label": "sm-agent",
+    "agentName": "sm-agent",
+    "description": ""
+  },
+  {
+    "id": "ta-agent",
+    "label": "Technical Architect",
+    "agentName": "ta-agent",
+    "description": ""
+  },
+  {
+    "id": "ui-agent",
+    "label": "ui-agent",
+    "agentName": "ui-agent",
+    "description": ""
+  }
+]

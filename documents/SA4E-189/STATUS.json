@@ -1,0 +1,60 @@
+{
+  "ticket": "SA4E-189",
+  "autonomyLevel": "L3",
+  "humanGates": [
+    "uat",
+    "deployment"
+  ],
+  "currentPhase": "design",
+  "jiraStatus": "To Do",
+  "phases": {
+    "requirements": {
+      "status": "done"
+    },
+    "specification": {
+      "status": "done"
+    },
+    "design": {
+      "status": "done"
+    },
+    "feedback_loop": {
+      "status": "not_started",
+      "iterations": 0,
+      "maxIterations": 5
+    },
+    "security_design_review": {
+      "status": "done"
+    },
+    "test_planning": {
+      "status": "done"
+    },
+    "devops_pipeline_setup": {
+      "status": "done"
+    },
+    "implementation": {
+      "status": "done"
+    },
+    "user_guide": {
+      "status": "done"
+    },
+    "security_code_review": {
+      "status": "done"
+    },
+    "testing": {
+      "status": "done"
+    },
+    "pentest": {
+      "status": "not_started"
+    },
+    "uat": {
+      "status": "not_started"
+    },
+    "security_deploy_review": {
+      "status": "not_started"
+    },
+    "deployment": {
+      "status": "not_started"
+    }
+  },
+  "lastUpdated": "2026-08-23T02:05:00.000+07:00"
+}

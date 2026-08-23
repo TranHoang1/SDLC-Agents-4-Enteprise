@@ -18,6 +18,7 @@ import { SlashMenuView } from './SlashMenuView';
 import {
   SLASH_AGENTS,
   SLASH_COMMANDS,
+  SKILL_AGENTS,
   agentsToMenuItems,
   steeringToMenuItems,
   parseSteeringRules,
@@ -58,7 +59,8 @@ export class SlashMenuController {
   constructor(options: SlashMenuOptions) {
     this.options = options;
     this.view = new SlashMenuView(options.container);
-    this.agentItems = [...agentsToMenuItems(SLASH_AGENTS), ...SLASH_COMMANDS];
+    const allAgents = [...SLASH_AGENTS, ...SKILL_AGENTS];
+    this.agentItems = [...agentsToMenuItems(allAgents), ...SLASH_COMMANDS];
     this.visibleAgents = [...this.agentItems];
     this.setupAnnouncer();
   }
@@ -110,6 +112,32 @@ export class SlashMenuController {
     this.steeringRules = parseSteeringRules(rules);
     this.steeringItems = steeringToMenuItems(this.steeringRules);
     this.visibleSteering = [...this.steeringItems];
+  }
+
+  /**
+   * Update skill agents from extension host
+   */
+  setSkillAgents(skills: Array<{id:string;label:string;description:string}>): void {
+    const skillAgents = skills.map(s => ({
+      id: s.id,
+      icon: '🧩',
+      label: s.label,
+      agentName: `skill-${s.id}`,
+      description: s.description || 'Skill',
+    }));
+    const allAgents = [...agentsToMenuItems(SLASH_AGENTS), ...skillAgents.map(a => ({
+      id: `agent-${a.id}`,
+      icon: a.icon,
+      label: a.label,
+      description: a.description,
+      itemType: 'agent' as const,
+      agentName: a.agentName,
+    }))];
+    this.agentItems = [...allAgents, ...SLASH_COMMANDS];
+    if (this.state !== 'CLOSED') {
+      this.visibleAgents = [...this.agentItems];
+      this.view.updateItems(this.visibleAgents, this.visibleSteering);
+    }
   }
 
   /**
