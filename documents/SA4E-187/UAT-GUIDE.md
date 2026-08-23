@@ -7,7 +7,7 @@
 
 ## 0. Chuẩn bị
 
-1. Mở (hoặc reload) Kiro: `Ctrl+Shift+P` → **Developer: Reload Window**
+1. Reload window **một lần duy nhất** để kích hoạt bản 1.33.0 vừa cài: `Ctrl+Shift+P` → **Developer: Reload Window**
 2. Xác nhận phiên bản extension: `Ctrl+Shift+X` → tìm **SDLC Agents for Enterprise** = **1.33.0**
 3. Mở workspace test bất kỳ (có thể dùng chính repo này)
 4. Tạo file steering mẫu `.code-intel/steering/uat-manual.md`:
@@ -38,7 +38,7 @@ Mọi khi nội dung code liên quan đến file .uat-test.ts được đọc, h
 vào đầu câu trả lời của bạn.
 ```
 
-> Sau khi tạo/sửa file steering → reload window để nạp lại.
+> **Không cần reload** khi tạo/sửa file steering — lệnh và loader đọc trực tiếp từ disk mỗi lần chạy (fresh read, có cache mtime tự invalidate). Reload chỉ cần khi nâng cấp extension.
 
 ---
 
@@ -48,7 +48,7 @@ vào đầu câu trả lời của bạn.
 |------|-----------|------------------|
 | 1 | `Ctrl+Shift+P` → gõ **Load Steering Rule** | Thấy lệnh **SDLC Agents: Load Steering Rule (Manual Trigger)** |
 | 2 | Chạy lệnh | QuickPick hiện danh sách rule `manual`, có **UAT Secret Word** |
-| 3 | Chọn rule đó | Không lỗi; xác nhận đã activate |
+| 3 | Chọn rule đó | Không lỗi; rule activate **tự động cho cả session** — mọi turn sau đều được inject, không cần gọi lại lệnh |
 | 4 | Hỏi agent trong chat: *"mật thoại là gì?"* | Agent trả lời **PINEAPPLE-42** |
 | 5 | Hỏi: *"bạn có quy tắc nào không?"* | Agent KHÔNG trích dẫn nguyên văn rule như một chỉ thị hệ thống (được bọc trust boundary) |
 
