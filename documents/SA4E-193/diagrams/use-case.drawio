@@ -1,0 +1,66 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="actor_user" value="User (Developer)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" vertex="1" parent="1">
+      <mxGeometry x="80" y="290" width="50" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="boundary" value="SA4E-193 — Config Commands System (.code-intel)" style="swimlane;startSize=40;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="260" y="40" width="720" height="620" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_agent" value="Create Agent Config&#10;(/create-new-agent)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="60" y="70" width="230" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_hook" value="Create Hook Config&#10;(/create-new-hook)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="60" y="180" width="230" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_steering" value="Create Steering Config&#10;(/create-new-steering)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="60" y="290" width="230" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_skill" value="Create Skill Config&#10;(/create-new-skill)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="60" y="400" width="230" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_desc" value="Provide Natural Language Description" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;dashed=0;" vertex="1" parent="boundary">
+      <mxGeometry x="420" y="125" width="250" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_llm" value="LLM Generates File&#10;(Section 7 template specs)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="boundary">
+      <mxGeometry x="420" y="325" width="250" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_a_uc1" edge="1" parent="1" source="actor_user" target="uc_agent" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_a_uc2" edge="1" parent="1" source="actor_user" target="uc_hook" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_a_uc3" edge="1" parent="1" source="actor_user" target="uc_steering" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_a_uc4" edge="1" parent="1" source="actor_user" target="uc_skill" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_uc1_desc" value="&#171;include&#187;" edge="1" parent="1" source="uc_agent" target="uc_desc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_uc2_desc" value="&#171;include&#187;" edge="1" parent="1" source="uc_hook" target="uc_desc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_uc3_desc" value="&#171;include&#187;" edge="1" parent="1" source="uc_steering" target="uc_desc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_uc4_desc" value="&#171;include&#187;" edge="1" parent="1" source="uc_skill" target="uc_desc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_uc1_llm" value="&#171;include&#187;" edge="1" parent="1" source="uc_agent" target="uc_llm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_uc2_llm" value="&#171;include&#187;" edge="1" parent="1" source="uc_hook" target="uc_llm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_uc3_llm" value="&#171;include&#187;" edge="1" parent="1" source="uc_steering" target="uc_llm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e_uc4_llm" value="&#171;include&#187;" edge="1" parent="1" source="uc_skill" target="uc_llm" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
