@@ -1,0 +1,192 @@
+[
+  {
+    "name": "agent-self-learning",
+    "file": "agent-self-learning.md",
+    "description": ""
+  },
+  {
+    "name": "backend-structure",
+    "file": "backend-structure.md",
+    "description": ""
+  },
+  {
+    "name": "code-intelligence",
+    "file": "code-intelligence.md",
+    "description": ""
+  },
+  {
+    "name": "code-standards",
+    "file": "code-standards.md",
+    "description": ""
+  },
+  {
+    "name": "concise-responses",
+    "file": "concise-responses.md",
+    "description": ""
+  },
+  {
+    "name": "dev-bug-diagnosis",
+    "file": "dev-bug-diagnosis.md",
+    "description": ""
+  },
+  {
+    "name": "drawio",
+    "file": "drawio.md",
+    "description": ""
+  },
+  {
+    "name": "file-writing",
+    "file": "file-writing.md",
+    "description": ""
+  },
+  {
+    "name": "frontend-structure",
+    "file": "frontend-structure.md",
+    "description": ""
+  },
+  {
+    "name": "indexing-guide",
+    "file": "indexing-guide.md",
+    "description": ""
+  },
+  {
+    "name": "jira-rules",
+    "file": "jira-rules.md",
+    "description": ""
+  },
+  {
+    "name": "jira-workflow",
+    "file": "jira-workflow.md",
+    "description": ""
+  },
+  {
+    "name": "loop-constraints",
+    "file": "loop-constraints.md",
+    "description": ""
+  },
+  {
+    "name": "manual-web-test",
+    "file": "manual-web-test.md",
+    "description": ""
+  },
+  {
+    "name": "mcp-fallback-http",
+    "file": "mcp-fallback-http.md",
+    "description": ""
+  },
+  {
+    "name": "mcp-tools-reference",
+    "file": "mcp-tools-reference.md",
+    "description": ""
+  },
+  {
+    "name": "no-workaround-rule",
+    "file": "no-workaround-rule.md",
+    "description": ""
+  },
+  {
+    "name": "orchestration",
+    "file": "orchestration.md",
+    "description": "..."
+  },
+  {
+    "name": "pega-kb-search",
+    "file": "pega-kb-search.md",
+    "description": ""
+  },
+  {
+    "name": "phase-1-requirements",
+    "file": "phase-1-requirements.md",
+    "description": ""
+  },
+  {
+    "name": "phase-2-specification",
+    "file": "phase-2-specification.md",
+    "description": ""
+  },
+  {
+    "name": "phase-3-design",
+    "file": "phase-3-design.md",
+    "description": ""
+  },
+  {
+    "name": "phase-4-test-planning",
+    "file": "phase-4-test-planning.md",
+    "description": ""
+  },
+  {
+    "name": "phase-5-implementation",
+    "file": "phase-5-implementation.md",
+    "description": ""
+  },
+  {
+    "name": "phase-6-testing",
+    "file": "phase-6-testing.md",
+    "description": ""
+  },
+  {
+    "name": "phase-7-deployment",
+    "file": "phase-7-deployment.md",
+    "description": ""
+  },
+  {
+    "name": "release-versioning",
+    "file": "release-versioning.md",
+    "description": ""
+  },
+  {
+    "name": "role-boundaries",
+    "file": "role-boundaries.md",
+    "description": ""
+  },
+  {
+    "name": "shared-diagrams",
+    "file": "shared-diagrams.md",
+    "description": ""
+  },
+  {
+    "name": "shared-jira",
+    "file": "shared-jira.md",
+    "description": ""
+  },
+  {
+    "name": "shared-quality-gates",
+    "file": "shared-quality-gates.md",
+    "description": ""
+  },
+  {
+    "name": "sm-autonomy-L1",
+    "file": "sm-autonomy-L1.md",
+    "description": "SM Autonomy Level 1 (Report Only) — SM chỉ report status, không invoke agents, không transition Jira."
+  },
+  {
+    "name": "sm-autonomy-L2",
+    "file": "sm-autonomy-L2.md",
+    "description": "SM Autonomy Level 2 (Assisted) — SM invoke agents nhưng hỏi user trước mỗi phase transition."
+  },
+  {
+    "name": "sm-autonomy-L3",
+    "file": "sm-autonomy-L3.md",
+    "description": "SM Autonomy Level 3 (Unattended) — SM chạy full pipeline tự động, chỉ dừng ở UAT và Deploy."
+  },
+  {
+    "name": "sm-core",
+    "file": "sm-core.md",
+    "description": ""
+  },
+  {
+    "name": "sm-default-agent",
+    "file": "sm-default-agent.md",
+    "description": ""
+  },
+  {
+    "name": "tool-usage-dynamic",
+    "file": "tool-usage-dynamic.md",
+    "description": ""
+  },
+  {
+    "name": "ui-relative-paths",
+    "file": "ui-relative-paths.md",
+    "description": ""
+  }
+]
