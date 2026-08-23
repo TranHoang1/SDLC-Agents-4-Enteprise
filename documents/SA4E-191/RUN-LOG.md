@@ -34,3 +34,30 @@
 
 > **Decision:** Do NOT redo completed docs (resume principle). Proceed Phase 5 → 5.5 → 5.7 → 6 → 6.3, then STOP at UAT gate (human gate). Will NOT transition to Done or merge to main without user approval.
 
+
+## Phase 5 — Implementation ✅ (2026-08-23T08:10Z)
+
+| Timestamp | Phase | Agent | Action | Result |
+|-----------|-------|-------|--------|--------|
+| 2026-08-23T08:02Z | implementation | dev-agent | Finalized/verified 7 command handlers + adapters + stores; added NewCommand/UndoCommand tests; fixed /new restore-on-failure, /undo 30s cap | handlers complete; 33 tests pass |
+| 2026-08-23T08:08Z | implementation | SM | Ran `npx vitest run src/chat/slash-commands` | 8 files / 33 tests PASSED |
+| 2026-08-23T08:09Z | implementation | SM | git add (slash-commands + STATUS/RUN-LOG only), commit 826d2f8, push origin SA4E-191 | pushed (bb963b0..826d2f8) |
+| 2026-08-23T08:10Z | jira | SM | Transition In Progress -> In Review (id 31) | ok |
+| 2026-08-23T08:11Z | status | SM | STATUS.json: implementation=done, currentPhase=user_guide, jiraStatus=In Review | ok |
+
+> 🤖 [L3 Auto] Phase 5 (Implementation) ✅ — 33 tests passed, committed 826d2f8, Jira → In Review. Next: Phase 5.5 (User Guide).
+
+
+## Phase 5.5 — User Guide ✅ (2026-08-23T08:40Z)
+
+| Timestamp | Phase | Agent | Action | Result |
+|-----------|-------|-------|--------|--------|
+| 2026-08-23T08:20Z | user_guide | dev-agent | Wrote UG.md (388 lines, 7 commands + config + errors + FAQ + audit + §10 deviations) | UG v1 draft |
+| 2026-08-23T08:25Z | user_guide | ba-agent | (attempt 1 empty) re-invoked -> added §11 Known Limitations | ok |
+| 2026-08-23T08:30Z | user_guide | qa-agent | Verified UG vs code: shortcuts 7/7, errors 9/9, descriptor shape, owner-only, tests 33/33 PASS; but Step1 FAIL — module NOT wired into running extension | FAIL (wiring gap) |
+| 2026-08-23T08:35Z | user_guide | dev-agent | Fixed UG §1/§2/§3/§4/§8/§11 to state module is library pending host-shell wiring; added Open Item 7 | UG accurate |
+| 2026-08-23T08:38Z | user_guide | qa-agent | Re-verify: 3/3 points PASS -> "UG VERIFIED" | ok |
+| 2026-08-23T08:40Z | user_guide | SM | export_docx UG-v1, will attach to Jira; STATUS user_guide=done; currentPhase=security_code_review | pending attach |
+
+> 🤖 [L3 Auto] Phase 5.5 (User Guide) ✅ — UG v1 written (DEV), reviewed (BA), verified (QA). NOTE: QA found the 7 commands are NOT wired into the running extension (Open Item 7, owner: host-shell integration) — this is an honest known limitation, not hidden. Next: Phase 5.7 (Security Code Review).
+

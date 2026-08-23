@@ -9,14 +9,9 @@ import type { Logger } from 'pino';
 import * as fs from 'fs';
 import * as path from 'path';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
-import type { CodeIntelModule } from '../../modules/code-intel/CodeIntelModule.js';
 import { loadConfig } from '../../config/index.js';
-import { getDbAdapter } from '../../admin/db/core.js';
-import { GraphRepository } from '../../database/repositories/GraphRepository.js';
 import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
-import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 import { validateSession } from '../../admin/db/sessions.js';
-import type { FileDependency } from '../../engine/parsers/types.js';
 import {
   handleFullIndex, handleFileEvents, handleCancel, handleProgress,
 } from './api-index-decoupled.js';
@@ -62,72 +57,6 @@ function writeFilesPhase(userId: string, projectId: string, files: SourceFile[])
   return { written, rejected };
 }
 
-/** Phase: register/update the project in the admin registry (non-fatal). */
-async function registerProjectPhase(projectId: string, workspace: string, logger: Logger, createdBy = ''): Promise<void> {
-  try {
-    const graphRepo = new GraphRepository(getDbAdapter());
-    await graphRepo.registerProject(projectId, path.basename(workspace), workspace, createdBy);
-  } catch (err) {
-    logger.warn({ err, projectId }, '[index] project registry upsert skipped (non-fatal)');
-  }
-}
-
-/** Phase: trigger a scoped background full re-index. Returns whether an indexer ran. */
-function triggerIndexPhase(registry: ModuleRegistry, scope: IndexScope, logger: Logger): boolean {
-  const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
-  const indexer = codeIntel?.getIndexer();
-  if (!indexer) return false;
-  indexer.runFullIndex({ projectId: scope.projectId, workspace: scope.workspace })
-    .catch((err: unknown) => logger.error({ err }, 'Background full re-index failed'));
-  return true;
-}
-
-/** SA4E-99: Sync code symbols to graph_nodes after incremental source upload (non-fatal). */
-async function syncGraphAfterUpload(registry: ModuleRegistry, projectId: string, logger: Logger): Promise<void> {
-  try {
-    const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
-    const indexer = codeIntel?.getIndexer() as any;
-    if (!indexer || !indexer.syncGraphNodesPublic) return;
-    await indexer.syncGraphNodesPublic(projectId);
-    logger.info({ projectId }, '[index] Graph nodes synced after source upload');
-  } catch (err) {
-    logger.warn({ err }, '[index] Graph sync after upload failed (non-fatal)');
-  }
-}
-
-/** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
-/** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
-async function ensureProjectKbEntry(registry: ModuleRegistry, scope: IndexScope, written: number, logger: Logger): Promise<void> {
-  try {
-    const mem = registry.getModule('memory') as any;
-    if (mem?.status !== 'ready') return;
-    const engine = mem.getEngine();
-    const displayName = path.basename(scope.workspace);
-    // Use async insert — engine.insert() is now async for PostgreSQL compatibility
-    const entryId = await engine.insert({
-      content: `Project "${displayName}" indexed. Workspace: ${scope.workspace}. Files: ${written}.`,
-      summary: `Project metadata for ${displayName}`,
-      type: 'CONTEXT', tier: 'SEMANTIC', scope: 'PROJECT',
-      project_id: scope.projectId, source: 'project-metadata', tags: 'project,metadata,indexed',
-    });
-    await upsertProjectGraphNode(String(entryId), displayName, scope.projectId, logger);
-  } catch (err) {
-    logger.warn({ err }, '[index] project KB entry skipped (non-fatal)');
-  }
-}
-
-/** Upsert the project-metadata graph node (INSERT OR REPLACE to fix stale/missing rows). */
-async function upsertProjectGraphNode(entryId: string, displayName: string, projectId: string, logger: Logger): Promise<void> {
-  try {
-    const graphRepo = new GraphRepository(getDbAdapter());
-    await graphRepo.upsertNode({
-      entryId, label: `Project: ${displayName}`, type: 'CONTEXT',
-      tier: 'SEMANTIC', projectId, x: 0, y: 0, z: 0, level: 'macro', clusterId: '0',
-    });
-  } catch (err) {
-    logger.warn({ err }, '[index] graph node upsert skipped (non-fatal)');
-  }
-}
 
 /** Require valid session — returns 401 if not authenticated. */
 async function requireAuth(c: Context): Promise<{ userId: string } | null> {

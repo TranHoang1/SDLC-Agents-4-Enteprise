@@ -25,7 +25,6 @@ export class InMemoryAuditSink implements AuditSink {
   emit(event: AuditEvent): void {
     this.events.push(event);
     // Dev visibility only; contains no PII.
-    // eslint-disable-next-line no-console
     console.debug('[slash-audit]', JSON.stringify(event));
   }
 
