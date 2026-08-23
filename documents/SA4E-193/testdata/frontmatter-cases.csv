@@ -1,0 +1,6 @@
+case_id,config_type,frontmatter_content,expected_result,expected_reason
+UT-06-double,agent,"---\nname: wrong-name\n---\n---\nname: my-agent\n---","fail","D-1: double frontmatter stripped/rejected"
+UT-12-mismatch,skill,"---\nname: other-skill\n---","fail-or-corrected","D-5: FM name forced to confirmed name"
+UT-14-missing-desc,agent,"---\nname: my-agent\n---","fail","BR-11: description required"
+UT-15-bad-phase,steering,"---\ninclusion: sometimes\n---","fail","invalid enum; allowed always|fileMatch|manual"
+UT-16-valid-skill,skill,"---\nname: sec-review-skill\ndescription: Review code security vulnerabilities\n---","pass",
