@@ -117,6 +117,7 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
     this.statusManager = new ChatStatusManager(mcpManager, secrets, (msg) => this.sendToWebview(msg));
     this.modelManager = new ChatModelManager((msg) => this.sendToWebview(msg));
     this.stateManager = new ChatStateManager(workspaceRoot, workspaceState, (msg) => this.sendToWebview(msg), () => this.getEngine());
+    this.disposables.push(this.stateManager);
   }
 
   /** SA4E-185: Set the diagnostics feed service for the engine. */
