@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.33.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.35.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -48,7 +48,7 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.33.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.35.0.vsix
 
 # Or VS Code
 code --install-extension sdlc-agents-4-enterprise-1.26.0.vsix
@@ -246,6 +246,11 @@ MIT
 ## Changelog
 
 ### v1.35.0 (2026-08-23)
+
+- **SA4E-189: Hot-Reload for .code-intel Agentics** — `ChatStateManager` now watches `.code-intel/agents/**/*.md`, `.code-intel/steering/**/*.md`, `.code-intel/hooks/**/*`, `.code-intel/skills/**/*.md` with 300ms debounce. UI reloads agents/steering/hooks/skills without Kiro restart. Recursive watchers, unit+e2e tests added.
+- **SA4E-190: SDLC Pipeline Autonomy L3 Reset & Rebuild** — Full SDLC pipeline reset with Autonomy Level L3. Documentation and backend module updated. Merge origin/main into dnguyenminh/SA4E-190. Tests PASS (Extension 1561 passed). README changelog updated.
+
+### v1.35.0-pre (2026-08-23)
 
 - **SA4E-189: Hot-Reload for .code-intel Agentics** — `ChatStateManager` now watches `.code-intel/agents/**/*.md`, `.code-intel/steering/**/*.md`, `.code-intel/hooks/**/*`, `.code-intel/skills/**/*.md` with 300ms debounce. UI reloads agents/steering/hooks/skills without Kiro restart. Recursive watchers, unit+e2e tests added.
 - **SA4E-188: Skills in Slash Menu** — Skills from `.code-intel/skills/*/SKILL.md` show as a dedicated **Skills** section (🧩) in the "/" menu, separate from Agents and Steering
