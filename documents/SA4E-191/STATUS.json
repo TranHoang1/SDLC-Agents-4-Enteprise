@@ -5,13 +5,22 @@
   "currentPhase": "implementation",
   "jiraStatus": "In Progress",
   "featureBranch": "SA4E-191",
+  "resumedAt": "2026-08-23T08:00:00Z",
+  "resumeNote": "Prior L3 run completed requirements/specification/design/security_design_review/test_planning/cicd (docs committed in bb963b0, DOCX+drawio attached 11173-11190). True frontier is Phase 5 (implementation) — uncommitted code present at extension/src/chat/slash-commands/. Resuming from Phase 5 per L3 resume principle (do not redo completed docs).",
   "phases": {
-    "cicd": { "status": "done", "file": "CICD.md", "version": 1, "completedAt": "2026-08-23T12:30:00Z", "pipeline": ".github/workflows/ci-sa4e-191.yml", "kbIngested": true },
-    "implementation": { "status": "in_progress" },
+    "requirements": { "status": "done", "file": "BRD.md", "version": 1, "completedAt": "2026-08-23T01:00:00Z", "kbIngested": true, "jiraAttached": true },
+    "specification": { "status": "done", "file": "FSD.md", "version": 1, "completedAt": "2026-08-23T01:30:00Z", "kbIngested": true, "jiraAttached": true },
+    "design": { "status": "done", "file": "TDD.md", "version": 1, "completedAt": "2026-08-23T02:30:00Z", "kbIngested": false, "jiraAttached": true },
+    "security_design_review": { "status": "done", "file": "SEC-DESIGN-REVIEW.md", "version": 1, "completedAt": "2026-08-23T02:32:00Z", "kbIngested": false, "jiraAttached": true },
+    "test_planning": { "status": "done", "file": "STP.md", "version": 1, "completedAt": "2026-08-23T02:43:00Z", "kbIngested": false, "jiraAttached": true },
+    "cicd": { "status": "done", "file": "CICD.md", "version": 1, "completedAt": "2026-08-23T12:30:00Z", "pipeline": ".github/workflows/ci-sa4e-191.yml", "kbIngested": false, "jiraAttached": true },
+    "implementation": { "status": "in_progress", "startedAt": "2026-08-23T08:00:00Z" },
     "user_guide": { "status": "not_started" },
     "security_code_review": { "status": "not_started" },
     "testing": { "status": "not_started" },
-    "pentest": { "status": "not_started" }
+    "pentest": { "status": "not_started" },
+    "uat": { "status": "not_started", "gate": true },
+    "deployment": { "status": "not_started", "gate": true }
   },
-  "lastUpdated": "2026-08-23T12:30:00Z"
+  "lastUpdated": "2026-08-23T08:00:00Z"
 }
