@@ -1,0 +1,51 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="Sequence — /sessions (list &amp; switch session)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="120" y="10" width="460" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="dev_head" value="Developer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="dev_line" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;size=16;html=1;" vertex="1" parent="1">
+      <mxGeometry x="90" y="80" width="20" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="smc_head" value="SlashMenuController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="220" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="smc_line" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;size=16;html=1;" vertex="1" parent="1">
+      <mxGeometry x="280" y="80" width="20" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="sess_head" value="SessionManager" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+      <mxGeometry x="460" y="40" width="140" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="sess_line" value="" style="shape=umlLifeline;perimeter=lifelinePerimeter;size=16;html=1;" vertex="1" parent="1">
+      <mxGeometry x="520" y="80" width="20" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="m1" value="/sessions" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.1;entryY=0.1;" edge="1" parent="1" source="dev_line" target="smc_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m2" value="listSessions()" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.2;entryY=0.2;" edge="1" parent="1" source="smc_line" target="sess_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m3" value="sessions[]" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.3;entryY=0.3;dashed=1;" edge="1" parent="1" source="sess_line" target="smc_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m4" value="render session list" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.4;entryY=0.4;" edge="1" parent="1" source="smc_line" target="dev_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m5" value="selectSession(id)" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.55;entryY=0.55;" edge="1" parent="1" source="dev_line" target="smc_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m6" value="switchSession(id)" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.65;entryY=0.65;" edge="1" parent="1" source="smc_line" target="sess_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m7" value="switched / NO_SESSIONS" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.75;entryY=0.75;dashed=1;" edge="1" parent="1" source="sess_line" target="smc_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m8" value="session active" style="edgeStyle=none;html=1;endArrow=classic;endSize=6;exitY=0.85;entryY=0.85;" edge="1" parent="1" source="smc_line" target="dev_line">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
