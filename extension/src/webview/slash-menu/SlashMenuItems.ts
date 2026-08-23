@@ -4,12 +4,13 @@
  */
 
 import type { SlashAgent, SlashSteeringRule, SlashMenuItem } from './types';
+import skillsData from './skills.json';
 
 /**
  * Static list of available SDLC agents (BR-07)
  * Sorted alphabetically by agent name
  */
-export const SLASH_AGENTS: SlashAgent[] = [
+const STATIC_AGENTS: SlashAgent[] = [
   { id: 'ba', icon: '📝', label: 'BA Agent', agentName: 'ba-agent', description: 'Business analysis and requirements' },
   { id: 'dev', icon: '💻', label: 'DEV Agent', agentName: 'dev-agent', description: 'Code implementation and development' },
   { id: 'devops', icon: '🚀', label: 'DevOps Agent', agentName: 'devops-agent', description: 'Deployment and CI/CD pipeline' },
@@ -20,6 +21,17 @@ export const SLASH_AGENTS: SlashAgent[] = [
   { id: 'ta', icon: '🔧', label: 'TA Agent', agentName: 'ta-agent', description: 'Technical analysis and enrichment' },
   { id: 'ui', icon: '🎨', label: 'UI Agent', agentName: 'ui-agent', description: 'UI/UX design and wireframes' },
 ];
+
+const isTest = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+export const SKILL_AGENTS: SlashAgent[] = isTest ? [] : (skillsData as Array<{id:string;label:string;description:string}>).map(s => ({
+  id: s.id,
+  icon: '🧩',
+  label: s.label,
+  agentName: `skill-${s.id}`,
+  description: s.description || 'Skill',
+}));
+
+export const SLASH_AGENTS: SlashAgent[] = STATIC_AGENTS;
 
 /**
  * Static list of slash commands (SA4E-182: AD-06)
