@@ -1,1 +1,53 @@
-{"ticket":"SA4E-193","autonomyLevel":"L3","humanGates":["uat","deployment"],"currentPhase":"implementation","jiraStatus":"To Do","phases":{"requirements":{"status":"done"},"specification":{"status":"done"},"design":{"status":"done"},"test_planning":{"status":"done","files":["STP.md","STC.md"],"completedAt":"2026-08-22T17:56:59.7981010+07:00"}},"lastUpdated":"2026-08-22T17:56:59.7981010+07:00"}
+{
+  "ticket": "SA4E-193",
+  "autonomyLevel": "L3",
+  "humanGates": ["uat", "deployment"],
+  "currentPhase": "implementation_redo",
+  "redoRequested": true,
+  "redoReason": "User explicitly requested REDO Phase 5 per TDD v2 — refactor ConfigCommands with ValidationGate to fix D-1..D-7",
+  "phases": {
+    "requirements": {
+      "status": "done",
+      "file": "BRD.md",
+      "version": 2,
+      "completedAt": "2026-08-23T21:10:00.0000000+07:00",
+      "jiraAttachments": ["BRD-v2-SA4E-193.docx (#11225)", "use-case.drawio (#11226)", "business-flow.drawio (#11227)"],
+      "diagrams": 2
+    },
+    "specification": {
+      "status": "done",
+      "file": "FSD.md",
+      "version": 2,
+      "completedAt": "2026-08-23T22:10:00.0000000+07:00",
+      "jiraAttachments": ["FSD-v2-SA4E-193.docx (#11228)", "system-context.drawio (#11229)", "sequence-create-agent.drawio (#11230)", "state-file-lifecycle.drawio (#11231)"],
+      "diagrams": 3,
+      "notes": "BA draft v2.0 + TA enrichment v2.1. TA found D-1..D-7 code-vs-spec discrepancies (§11.4)"
+    },
+    "design": {
+      "status": "done",
+      "file": "TDD.md",
+      "version": 2,
+      "completedAt": "2026-08-23T22:34:00.0000000+07:00",
+      "jiraAttachments": ["TDD-v2-SA4E-193.docx (#11233)", "architecture.drawio (#11232)", "component.drawio (#11234)", "class-diagram.drawio (#11235)"],
+      "diagrams": 3,
+      "notes": "ValidationGate component đóng GAP-01 + fix D-1/D-2/D-4/D-5/D-7"
+    },
+    "test_planning": {
+      "status": "done",
+      "files": ["STP.md", "STC.md"],
+      "version": 2,
+      "reviewStatus": "approved",
+      "completedAt": "2026-08-23T23:29:00.0000000+07:00",
+      "jiraAttachments": ["STP-v2-SA4E-193.docx (#11238)", "STC-v2-SA4E-193.docx (#11237)", "test-coverage.drawio (#11236)", "test-execution-flow.drawio (#11239)"],
+      "diagrams": 2,
+      "testCases": { "total": 51, "automated": 41, "manual": 10, "rtmCoverage": "100% (62/62)" },
+      "testdataFiles": ["names-validation.csv", "hook-payloads.csv", "frontmatter-cases.csv", "e2e-scenarios.csv"]
+    },
+    "implementation": {
+      "status": "in_progress",
+      "startedAt": "2026-08-23T23:45:00.0000000+07:00",
+      "notes": "REDO per TDD v2 §6: C1 validation-gate.ts (NEW), C2 template-provider.ts facade, M1 ConfigCommands.ts thin orchestrators. Fix D-1..D-7."
+    }
+  },
+  "lastUpdated": "2026-08-23T23:45:00.0000000+07:00"
+}

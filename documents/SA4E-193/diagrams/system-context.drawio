@@ -1,0 +1,87 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="dev" value="Developer&#10;(Kiro extension user)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="30" y="290" width="160" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="sys" value="Kiro VS Code Extension — Create Config Commands (SA4E-193)" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="260" y="40" width="450" height="620" as="geometry"/>
+    </mxCell>
+    <mxCell id="disp" value="Slash Command Dispatcher&#10;(Chat UI · SlashMenuItems.ts)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="sys">
+      <mxGeometry x="25" y="45" width="400" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="handler" value="ConfigCommands Handler&#10;(handleCreateNew*)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="sys">
+      <mxGeometry x="25" y="145" width="185" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="tmpl" value="Template Registry&#10;(config-templates/)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="sys">
+      <mxGeometry x="240" y="145" width="185" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="val" value="Validation Gate (schema checks before write)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="sys">
+      <mxGeometry x="25" y="250" width="400" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="writer" value="File Writer (writeFileWithMkdir · UTF-8)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="sys">
+      <mxGeometry x="25" y="345" width="400" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="opener" value="Editor Opener (openTextDocument)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="sys">
+      <mxGeometry x="25" y="440" width="400" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="notif" value="Notifications (success / error toasts)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="sys">
+      <mxGeometry x="25" y="535" width="400" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="llm" value="LLM Provider&#10;GitHub Copilot via vscode.lm&#10;(selectChatModels · streaming)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="790" y="70" width="350" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="fs" value="Workspace File System&#10;.code-intel/{agents, hooks, steering, skills}/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="790" y="260" width="350" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="hr" value="Hot-Reload Watcher (SA4E-189)&#10;FileSystemWatcher · 300 ms debounce" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="790" y="420" width="350" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="ed" value="Dual-Tab Custom Editor (SA4E-190, To Do)&#10;Form + Text · fallback: standard text editor" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="790" y="560" width="350" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="ei1" value="dispatch(commandId, rawArgs)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sys" source="disp" target="handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ei2" value="template spec in prompt" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="sys" source="tmpl" target="handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ei3" value="generated content" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sys" source="handler" target="val">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ei4" value="validated content" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sys" source="val" target="writer">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ei5" value="file path" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sys" source="writer" target="opener">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ei6" value="result" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="sys" source="opener" target="notif">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ex1" value="1. /create-new-* + description" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="dev" target="disp">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ex2" value="2. prompts · toasts · opened document" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="disp" target="dev">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ex3" value="3. sendRequest(template spec + description)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="handler" target="llm">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ex4" value="4. streamed content chunks" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="llm" target="handler">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ex5" value="5. mkdir -p + UTF-8 write" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="writer" target="fs">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ex6" value="6. file created event" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="fs" target="hr">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ex7" value="7. postMessage: refresh config lists" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="hr" target="disp">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="ex8" value="8. open generated file" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endFill=1;fontSize=9;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="opener" target="ed">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

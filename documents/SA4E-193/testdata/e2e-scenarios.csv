@@ -1,0 +1,5 @@
+scenario_id,command,description_sample,expected_name_suggestion,expected_output_path,editor_open
+E2E-EXT-01,/create-new-agent,"A code reviewer agent that checks TypeScript quality",code-reviewer,.code-intel/agents/code-reviewer.md,yes
+E2E-EXT-02,/create-new-hook,"Run tests when a TS file is edited",run-tests,.code-intel/hooks/run-tests.json,yes
+E2E-EXT-03,/create-new-steering,"Always use functional style in this project",functional-style,.code-intel/steering/functional-style.md,yes
+E2E-EXT-04,/create-new-skill,"Review code security vulnerabilities",sec-review-skill,.code-intel/skills/sec-review-skill/SKILL.md,yes
