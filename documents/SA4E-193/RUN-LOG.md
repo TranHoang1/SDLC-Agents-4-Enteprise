@@ -175,3 +175,86 @@ validation-gate.test.ts (16), hook-gate.test.ts (28), steering-skill-gate.test.t
 - **D-7**: canonical serializer omit empty action fields; runCommand+command:"" → reject BR-08
 
 Commit: a618e0b → origin/SA4E-193
+
+## REDO Phase 5.5: User Guide Refresh — BẮT ĐẦU (2026-08-24)
+
+**Lý do REDO**: Code refactor commit `a618e0b` — ConfigCommands.ts 593→195 (thin orchestrators), thêm modules mới: validation-gate.ts, frontmatter-utils.ts, template-provider.ts, hook-gate.ts, config-command-specs.ts, name-extractor.ts, file-writer.ts, llm-prompts.ts. Fixed D-1..D-7. UG.md v1.1 viết cho code CŨ → phải refresh.
+
+| Time | Agent | Action | Result |
+|------|-------|--------|--------|
+| 02:00 | SM | Cập nhật STATUS.json | ✅ user_guide = in_progress |
+| 02:05 | dev-agent | Refresh UG.md → v2.0 | ✅ Done | 920 dòng (từ 699). ValidationGate pipeline, 8 modules mới, ERR-CMD-01..09 catalogue khớp source. KB ingest entry #604106 |
+| 03:00 | SM | Verify UG.md v2.0 | ✅ PASS | Version 2.0 + Revision History, 8 sections, §3.2 Config Ref, §6 Troubleshooting, §6.4 FAQ, 26 refs ERR-CMD-01..09 |
+| 03:10 | ba-agent | Review UG.md v2.0 | ✅ Approved with changes | 9 edits trực tiếp: 2 High (name-suggestion examples sai thuật toán thật — 3 tokens đầu + strip hyphens; skill sample name mâu thuẫn D-5), 1 Medium, các Low (stale FSD version ref, title, dangling DPG ref) |
+| 04:00 | qa-agent | Verify UG.md v2.0 vs code | ✅ UG VERIFIED 6/6 PASS | Commands tồn tại (programmatic registration); ERR-CMD-01..09 9/9 match verbatim; config properties 9/9 khớp package.json; name-extractor algorithm verified bằng THỰC THI hàm; PL-1 flow đúng; smoke test src/commands 64/64 pass (1.60s) |
+| 05:53 | SM | Export DOCX + attach Jira | ✅ Done | embed_images (0 imgs, text-only) → pandoc export UG-v2-SA4E-193.docx (34KB, sau BA edits) → attach **#11240** + comment #11944. MCP export_docx unavailable → pandoc fallback theo quy trình |
+| 05:54 | SM | Re-ingest UG v2.0 vào KB | ✅ Done | mem_ingest_file bản CUỐI sau BA edits (bản trước đó của dev là stale) — entries:63 |
+
+### Phase 5.5 REDO — HOÀN THÀNH ✅ (UG v2.0, Jira attachment #11240)
+
+---
+
+## REDO Phase 6: Testing — BẮT ĐẦU (2026-08-24)
+
+**Lý do REDO**: Implementation thay đổi (refactor a618e0b, +64 tests mới) → phải re-run toàn bộ test suite.
+
+**Baseline TRƯỚC refactor**: 1557 passed / 3 skipped / 21 todo (extension)
+**Expect SAU refactor**: ~1621 passed / 3 skipped / 21 todo (145 files)
+
+| Time | Agent | Action | Result |
+|------|-------|--------|--------|
+| 05:56 | SM | Cập nhật STATUS.json | ✅ testing = in_progress |
+| 05:57 | SM | ⚠️ FALLBACK: chạy extension tests trực tiếp | ✅ GREEN | qa-agent trả RỖNG lần 1 → SM chạy `npm test` (extension): **145 files passed/3 skipped, 1621 passed / 0 failed / 3 skipped / 21 todo, 78.50s**. Khớp chính xác baseline refactor (1557→1621, +64 tests mới, 0 regression) |
+| 05:59 | SM | Chạy backend tests trực tiếp | ✅ GREEN | backend tồn tại (vitest run): **224 files passed, 2621 passed / 0 failed / 0 skipped / 0 todo, 179.64s**. 13 E2E-API failures cũ trong TEST-REPORT v2.0 đã RESOLVE — full green |
+| 06:02 | qa-agent | Retry #2: re-run suite + report | ❌ Trả rỗng | Lần 2/2 cho task "chạy tests" — hết quota retry |
+| 06:05 | qa-agent | Update TEST-REPORT.md → v3.0 | ❌ Trả rỗng | Lần 3 liên tiếp rỗng, không side effect |
+| 06:08 | dev-agent | Fallback: update TEST-REPORT.md v3.0 | ❌ Trả rỗng | Sub-agent infra down (4 invokes liên tiếp rỗng). TEST-REPORT.md vẫn v2.0 (timestamp 8/23 unchanged) |
+| 06:10 | SM | Dừng retry theo anti-loop rule | ✅ Done | SM KHÔNG tự viết TEST-REPORT (HARD RULE role separation). Ghi nhận raw results tại RUN-LOG + STATUS.json. testing = done với caveat PENDING |
+
+### Phase 6 REDO — KẾT QUẢ EXECUTION: SUITE GREEN ✅
+
+| Suite | Files | Passed | Failed | Skipped | Todo | Duration |
+|-------|-------|--------|--------|---------|------|----------|
+| Extension | 145✅/3⏭️ (148) | 1,621 | **0** | 3 | 21 | 78.50s |
+| Backend | 224✅ (224) | 2,621 | **0** | 0 | 0 | 179.64s |
+| **Tổng** | **372** | **4,242** | **0** | 3 | 21 | ~258s |
+
+**Delta analysis**: Extension 1557 → 1621 (+64 tests mới từ refactor a618e0b) · Regression: NONE · Backend: 13 E2E-API failures cũ đã resolve.
+
+**⚠️ PENDING ITEM (cần xử lý khi sub-agent infra hồi phục):**
+- TEST-REPORT.md update v2.0 → v3.0 + export DOCX + attach Jira SA4E-193
+- Nguyên nhân: qa-agent unresponsive 3 lần (trả rỗng), dev-agent fallback cũng rỗng — infra down 06:00–06:15
+- Raw test results đã được ghi đầy đủ tại RUN-LOG.md này và STATUS.json (testing.execution)
+
+---
+
+## Phase 6 REDO — TEST-REPORT v3.0: HOÀN THÀNH (2026-08-24T06:25+07:00)
+
+> ✅ **PENDING ITEM của entry trước ĐÃ RESOLVED** — sub-agent infra đã hồi phục.
+
+### Kết quả thực hiện
+
+| Bước | Agent | Hành động | Trạng thái | Ghi chú |
+|------|-------|-----------|------------|---------|
+| 1 | SM | find_tools | ✅ Done | Xác nhận jira_attach_file / jira_add_comment / embed_image; MCP export_docx có schema nhưng gọi qua dynamic tool bị "not found" |
+| 2 | dev-agent | Regenerate TEST-REPORT.md v3.0 | ✅ Done | Lần 1 trả rỗng nhưng đã update một phần (header + Revision History); lần 2 retry hoàn tất TOÀN BỘ body — 376 dòng |
+| 3 | SM | Verify TEST-REPORT.md v3.0 | ✅ Done | Verdict SUITE GREEN; Extension 145/148 files, 1,621 passed (+64 D-1..D-7 regressions); Backend 224/224, 2,621 passed; stale data chỉ còn tại L52/L54 (bảng Baseline Comparison BEFORE/AFTER được label rõ) và L249 (note "Historical v2.0, superseded") |
+| 4 | SM | Export DOCX | ✅ Done | MCP export_docx lỗi → **pandoc CLI fallback** → TEST-REPORT-v3.0-SA4E-193.docx (19,721 bytes) |
+| 5 | SM | Attach Jira SA4E-193 | ✅ Done | **Attachment #11241**, created 2026-08-24T06:24:34+07:00 |
+| 6 | SM | Jira comment | ✅ Done | Comment **#11945** — "TEST-REPORT updated to v3.0 — Phase 6 REDO green" |
+| 7 | SM | STATUS.json update | ✅ Done | testing.execution.reportVersion = "3.0", thêm jiraAttachments [#11241], gỡ caveat PENDING |
+| 8 | SM | RUN-LOG.md append | ✅ Done | Entry này |
+
+### Ghi chú kỹ thuật
+
+- dev-agent lần 1 (task ses_fcf1d3775ffe5iXutruR7vQL4j) trả rỗng — kiểm tra file thấy header/revision history đã cập nhật v3.0 nhưng body còn stale v2.0 (PARTIAL PASS, 13 failures). Retry lần 2 (task ses_fcf19ca24ffeklU2MMKink4xYD) thành công full.
+- dev-agent đã ingest summary vào KB (id=604508).
+- DOCX export: MCP tool unavailable → pandoc `--from gfm --standalone` fallback hoạt động bình thường (như lần UG.md trước).
+
+### Deliverables
+
+| File | Version | Jira |
+|------|---------|------|
+| documents/SA4E-193/TEST-REPORT.md | v3.0 (Final) | TEST-REPORT-v3.0-SA4E-193.docx (#11241) |
+
+**Verdict Phase 6 REDO: SUITE GREEN — Extension 1,621/0 failed · Backend 2,621/0 failed · Report v3.0 published.**

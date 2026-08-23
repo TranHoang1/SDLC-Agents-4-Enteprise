@@ -2,9 +2,9 @@
   "ticket": "SA4E-193",
   "autonomyLevel": "L3",
   "humanGates": ["uat", "deployment"],
-  "currentPhase": "implementation_done",
-  "redoRequested": false,
-  "redoReason": null,
+  "currentPhase": "testing_done_redo",
+  "redoRequested": true,
+  "redoReason": "Code refactored (commit a618e0b): ConfigCommands.ts 593→195 thin orchestrators + new modules (validation-gate, hook-gate, template-provider, frontmatter-utils, config-command-specs, name-extractor, file-writer, llm-prompts). UG.md v1.1 written against OLD code — must refresh. Tests changed 1557→1621 passed.",
   "phases": {
     "requirements": {
       "status": "done",
@@ -51,7 +51,32 @@
       "branch": "SA4E-193",
       "pushedToOrigin": true,
       "notes": "REDO per TDD v2 §6 complete. C1 validation-gate.ts (153 lines, pure), frontmatter-utils.ts (64, NEW split), C2 template-provider.ts (106, confirmedName), M1 ConfigCommands.ts 593→195 thin orchestrators. Fix D-1..D-5, D-7 verified bằng code + regression tests. Tests: BEFORE 1557|3skipped|21todo → AFTER 1621|3skipped|21todo (+64 tests mới, 0 regression). npm run compile EXIT=0."
+    },
+    "user_guide": {
+      "status": "done",
+      "file": "UG.md",
+      "version": 2,
+      "completedAt": "2026-08-24T05:55:00.0000000+07:00",
+      "jiraAttachments": ["UG-v2-SA4E-193.docx (#11240)"],
+      "kbEntry": true,
+      "notes": "REDO per refactored code a618e0b. DEV refresh (699→920 lines): ValidationGate pipeline, 8 modules mới, ERR-CMD-01..09 catalogue. BA review: Approved with changes (9 edits — name-suggestion examples theo thuật toán thật, skill sample D-5 consistency). QA verify: UG VERIFIED 6/6 PASS — error codes 9/9 khớp source verbatim, config 9/9 properties khớp package.json, PL-1 flow đúng thứ tự, smoke test commands module 64/64 pass. DOCX re-export sau BA edits (pandoc fallback vì MCP export_docx unavailable)."
+    },
+    "testing": {
+      "status": "done",
+      "completedAt": "2026-08-24T06:10:00.0000000+07:00",
+      "execution": {
+        "extension": { "files": "145 passed / 3 skipped (148)", "passed": 1621, "failed": 0, "skipped": 3, "todo": 21, "duration": "78.50s", "baselineBefore": 1557, "delta": "+64 tests mới, 0 regression" },
+        "backend": { "files": "224 passed (224)", "passed": 2621, "failed": 0, "skipped": 0, "todo": 0, "duration": "179.64s", "note": "13 E2E-API failures từ report v2.0 đã resolve — full green" },
+        "reportVersion": "3.0",
+        "reportFile": "TEST-REPORT.md",
+        "jiraAttachments": ["TEST-REPORT-v3.0-SA4E-193.docx (#11241)"]
+      },
+      "verdict": "SUITE GREEN",
+      "executedBy": "SM trực tiếp (fallback kỹ thuật — qa-agent unresponsive 2 lần trả rỗng)",
+      "caveats": [
+        "Kết quả test là RAW vitest output, không qua QA analysis riêng."
+      ]
     }
   },
-  "lastUpdated": "2026-08-24T01:10:00.0000000+07:00"
+  "lastUpdated": "2026-08-24T06:25:00.0000000+07:00"
 }
