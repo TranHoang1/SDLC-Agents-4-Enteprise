@@ -71,7 +71,7 @@ export class ChatStateManager implements vscode.Disposable {
       debugLog("[ChatStateManager] steering hot-reload: .code-intel/steering not found, watcher skipped");
       return;
     }
-    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/steering/*.md");
+    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/steering/**/*.md");
     this.steeringWatcher = vscode.workspace.createFileSystemWatcher(pattern);
     const onSteeringChanged = () => {
       if (this.steeringDebounceTimer) { clearTimeout(this.steeringDebounceTimer); }
@@ -94,7 +94,7 @@ export class ChatStateManager implements vscode.Disposable {
       debugLog("[ChatStateManager] hooks hot-reload: .code-intel/hooks not found, watcher skipped");
       return;
     }
-    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/hooks/*.md");
+    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/hooks/**/*");
     this.hooksWatcher = vscode.workspace.createFileSystemWatcher(pattern);
     const onHooksChanged = () => {
       if (this.hooksDebounceTimer) { clearTimeout(this.hooksDebounceTimer); }
@@ -117,7 +117,7 @@ export class ChatStateManager implements vscode.Disposable {
       debugLog("[ChatStateManager] skills hot-reload: .code-intel/skills not found, watcher skipped");
       return;
     }
-    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/skills/*.md");
+    const pattern = new vscode.RelativePattern(this.workspaceRoot, ".code-intel/skills/**/*.md");
     this.skillsWatcher = vscode.workspace.createFileSystemWatcher(pattern);
     const onSkillsChanged = () => {
       if (this.skillsDebounceTimer) { clearTimeout(this.skillsDebounceTimer); }
