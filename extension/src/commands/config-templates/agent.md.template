@@ -1,0 +1,10 @@
+---
+name: {{NAME}}
+label: {{LABEL}}
+description: >
+  {{DESCRIPTION}}
+phase: {{PHASE}}
+tools: ["read", "write", "shell", "@mcp"]
+---
+
+{{SYSTEM_PROMPT}}
