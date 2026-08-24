@@ -81,7 +81,7 @@
       "status": "done",
       "startedAt": "2026-08-24T07:10:00.0000000+07:00",
       "completedAt": "2026-08-24T14:40:00.0000000+07:00",
-      "releasedVersion": "v1.35.0",
+      "releasedVersion": "v1.37.0",
       "releaseDate": "2026-08-24",
       "releaseCorrection": {
         "reason": "PO confirmed 'v1.35.0 chưa được release' — SA4E-190 bumped package.json to 1.35.0 earlier but never tagged/released. SA4E-193 therefore ships as the official v1.35.0 release covering SA4E-190 + SA4E-193.",

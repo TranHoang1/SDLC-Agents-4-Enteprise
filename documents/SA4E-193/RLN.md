@@ -8,13 +8,13 @@
 
 | Field | Value |
 |-------|-------|
-| Release Version | **v1.35.0** |
+| Release Version | **v1.37.0** |
 | Covers | **SA4E-190 + SA4E-193** — first tagged release of the 1.35 line |
 | Release Date | 2026-08-24 |
 | Jira Ticket | SA4E-193 (release also carries SA4E-190 content — see §1) |
 | Parent Epic | SA4E-181 — Chat Module — OpenCode Parity + Agentic Config System |
 | Environment | PROD (released on default branch `main`) |
-| Git Tag | `v1.35.0` (annotated, → `f9c64a8`) |
+| Git Tag | `v1.37.0` (annotated, → `77378f1`, **local only — NOT pushed to origin per PO instruction**) |
 | Author | DevOps Agent |
 | Status | Released |
 
@@ -25,7 +25,8 @@
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-08-24 | DevOps Agent | Initiate document for release v1.36.0 (interim) |
-| 1.1 | 2026-08-24 | DevOps Agent | Release version correction v1.36.0 → v1.35.0 per PO decision (v1.35.0 was never released; SA4E-193 ships as official v1.35.0) |
+| 1.1 | 2026-08-24 | DevOps Agent | Version corrected v1.36.0 → v1.35.0 per PO decision ("v1.35 line never released") |
+| 1.2 | 2026-08-24 | SM Agent | Retargeted release to **v1.37.0** per PO decision; annotated tag recreated locally at `77378f1` — **NOT pushed** per PO instruction |
 
 ---
 
@@ -35,10 +36,10 @@
 |------|-------|
 | Merge commit into `main` | `3d924ca` — "Merge branch 'SA4E-193' — Config Commands with ValidationGate (fixes D-1..D-7)" (parents `d4836f3` + `3a3b6c4`) |
 | Final feature commit lineage includes | `a618e0b` — ConfigCommands refactor (593 → 195 lines) + ValidationGate modules + 64 regression tests; `6a6b42e` — phase docs sync |
-| Version commit (**tag target**) | `f9c64a8` — "SA4E-193: set official release version to 1.35.0": all 3 package.json corrected **1.36.0 → 1.35.0** (correction commit) + README changelog consolidated into a single `### v1.35.0 (2026-08-24)` entry covering SA4E-190 + SA4E-193 |
-| Annotated tag | `v1.35.0` → points to `f9c64a8` (pushed to origin, verified via `git ls-remote`: `v1.35.0^{commit}` = `f9c64a8`) |
-| Version history (superseded — record only) | Intermediate bump `cb83296` (all 3 package.json 1.35.0 → 1.36.0) and its annotated tag `v1.36.0` (→ `cb83296`) were **reverted/deleted local + remote** after PO confirmed the 1.35 line had never been released; earlier README changelog commits (`c492837`, docs bookkeeping `01ba3e0`) superseded by `f9c64a8` |
-| Tag hygiene | Stale tag `v1.34.0` deleted local+remote earlier (had pointed at wrong commit `1a7a800` of SA4E-206); interim tag `v1.36.0` deleted local+remote on this correction. Official tag is now `v1.35.0`; last valid released baseline remains **v1.33.0** |
+| Version commit (**tag target**) | `77378f1` — "SA4E-193: set official release version to 1.37.0": all 3 package.json **1.35.0 → 1.37.0** + README changelog entry retitled `### v1.37.0 (2026-08-24)` covering SA4E-190 + SA4E-193 |
+| Annotated tag | `v1.37.0` → points to `77378f1` (**local only** — PO instructed NOT to push tags to origin; publish manually when ready) |
+| Version history (superseded — record only) | `cb83296` (bump 1.35.0 → 1.36.0) + tag `v1.36.0` deleted local+remote after PO confirmed the 1.35 line had never been released; `f9c64a8` (correction to 1.35.0) + tag `v1.35.0` subsequently superseded/deleted-local when PO retargeted the release to **v1.37.0** (remote `v1.35.0` tag may still exist until PO cleans it); earlier README commits (`c492837`, `01ba3e0`) superseded |
+| Tag hygiene | Stale tag `v1.34.0` deleted local+remote earlier (had pointed at wrong commit `1a7a800` of SA4E-206); interim tags `v1.36.0` (local+remote) and `v1.35.0` (local) deleted on corrections. Official tag is now **`v1.37.0` (local only)**; last fully published release remains **v1.33.0** |
 
 ---
 
@@ -46,7 +47,7 @@
 
 ### 1.1 Feature Summary
 
-> **Release scope:** **v1.35.0 covers SA4E-190 + SA4E-193** — this is the first tagged release of the 1.35 line (no v1.34.0 was ever published; SA4E-190 had raised package.json to 1.35.0 without ever tagging/releasing it). The changelog content of release v1.35.0 therefore combines:
+> **Release scope:** **v1.37.0 covers SA4E-190 + SA4E-193** — this is the first tagged release of the 1.35 line (no v1.34.0 was ever published; SA4E-190 had raised package.json to 1.35.0 without ever tagging/releasing it). The changelog content of release v1.37.0 therefore combines:
 >
 > - **SA4E-190 — SDLC Pipeline Autonomy L3 Reset & Rebuild:** full SDLC pipeline reset from requirements to deployment at Autonomy Level L3; rebuilt BRD, FSD, TDD, STP, STC, UG, TEST-REPORT, DPG, RLN; implemented backend module `backend/src/sa4e-190/` with PipelineController, StatusManager, repository, and unit/integration/e2e tests (all PASS).
 > - **SA4E-193 — Config Commands with ValidationGate:** detailed in the remainder of these release notes.
@@ -95,7 +96,7 @@ None — persistence is plain files under the user workspace (`.code-intel/`), c
 
 | Property | Change Type | Description |
 |----------|-----------|-------------|
-| `version` ×3 package.json | Modified | 1.36.0 → **1.35.0** (correction commit `f9c64a8`; supersedes intermediate bump `cb83296`, which was never released) |
+| `version` ×3 package.json | Modified | 1.35.0 → **1.37.0** (final correction commit `77378f1`; supersedes `cb83296` → 1.36.0 and `f9c64a8` → 1.35.0, neither released) |
 | *(runtime config)* | None added | LLM via built-in `vscode.lm.selectChatModels({vendor:"copilot"})`; hot-reload globs unchanged from SA4E-189 |
 
 ### 2.4 Infrastructure / Code Structure Changes
@@ -167,9 +168,9 @@ None. Workspace files under `.code-intel/` are untouched by install/upgrade/unin
 
 ### 6.3 Backward Compatibility
 
-Fully compatible: v1.35.0 only adds commands and modules; no existing command, config format, or watcher behavior changed. Files generated by v1.35.0 remain readable by older versions (standard `.code-intel` conventions).
+Fully compatible: v1.37.0 only adds commands and modules; no existing command, config format, or watcher behavior changed. Files generated by v1.37.0 remain readable by older versions (standard `.code-intel` conventions).
 
-**Upgrade baseline:** the last tagged release before v1.35.0 is **v1.33.0** (no v1.34.0 was ever published; the 1.35 line had been staged by SA4E-190 but never released). Workstations upgrade directly from v1.33.x → v1.35.0. The rollback target is likewise the **v1.33.x line** — no user data action required.
+**Upgrade baseline:** the last tagged release before v1.37.0 is **v1.33.0** (no v1.34.0 was ever published; the 1.35 line had been staged by SA4E-190 but never released). Workstations upgrade directly from v1.33.x → v1.37.0. The rollback target is likewise the **v1.33.x line** — no user data action required.
 
 ---
 
@@ -199,7 +200,7 @@ Quick reference:
 
 | Step | Action | Estimated Time |
 |------|--------|---------------|
-| 1 | Checkout tag `v1.35.0` + verify lineage (`git rev-parse v1.35.0^{commit}` → `f9c64a8`; merge `3d924ca` in history) | 2 min |
+| 1 | Checkout tag `v1.37.0` + verify lineage (`git rev-parse v1.37.0^{commit}` → `77378f1`; merge `3d924ca` in history) | 2 min |
 | 2 | Test gates (extension 1,621 · backend 2,621) | ~5 min |
 | 3 | Package VSIX (`npm run package:prod`) | 2 min |
 | 4 | Publish/side-load + reload window | 3 min |
@@ -218,7 +219,7 @@ Full procedure with diagram: DPG Section 8 ([rollback-flow](diagrams/rollback-fl
 - Invalid file ever observed on disk post-write → rollback immediately + investigate
 - Minor cosmetic issue with workaround → hotfix v1.35.1, no rollback
 
-**Estimated Rollback Time:** ≤ 15 minutes (VSIX downgrade to archived v1.33.x — the last stable released line before v1.35.0; user workspace data unaffected).
+**Estimated Rollback Time:** ≤ 15 minutes (VSIX downgrade to archived v1.33.x — the last stable released line before v1.37.0; user workspace data unaffected).
 
 ---
 
@@ -245,4 +246,4 @@ Full procedure with diagram: DPG Section 8 ([rollback-flow](diagrams/rollback-fl
 
 ---
 
-*RLN v1.1 — DevOps Agent, 2026-08-24. Release v1.35.0 · merge `3d924ca` · version/tag commit `f9c64a8` (annotated tag `v1.35.0` → `f9c64a8`). Sources: BRD v2.0, TDD v2.0, TEST-REPORT v3.0. v1.1: release version corrected v1.36.0 → v1.35.0 per PO decision.*
+*RLN v1.2 — SM Agent, 2026-08-24. Release v1.37.0 · merge `3d924ca` · version/tag commit `77378f1` (annotated tag `v1.37.0` → `77378f1`, LOCAL ONLY — tag not pushed per PO instruction). Sources: BRD v2.0, TDD v2.0, TEST-REPORT v3.0. v1.1: version corrected v1.36.0 → v1.35.0 per PO. v1.2: retargeted to v1.37.0 per PO; tag kept local.*
