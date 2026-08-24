@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "{{NAME}}",
+  "description": "{{DESCRIPTION}}",
+  "version": "1",
+  "when": {
+    "type": "{{TRIGGER_TYPE}}"
+  },
+  "then": {
+    "type": "{{ACTION_TYPE}}",
+    "prompt": "{{ACTION_PROMPT}}"
+  }
+}

@@ -139,10 +139,12 @@ export class PowerShellTransport {
   }
 
   /** Quick connectivity test — returns latency in ms */
-  async testConnection(url: string, _proxyUrl?: string | null): Promise<number> {
+  async testConnection(url: string, proxyUrl?: string | null): Promise<number> {
     const start = Date.now();
     const response = await this.request(url, { method: "GET", timeout: 10000 });
-    if (!response.ok && response.status !== 301 && response.status !== 302) {
+    // Accept 2xx and all redirect codes (301, 302, 303, 307, 308)
+    const isRedirect = response.status >= 300 && response.status < 400;
+    if (!response.ok && !isRedirect) {
       throw new PowerShellTransportError(`HTTP ${response.status}: ${response.statusText}`);
     }
     return Date.now() - start;

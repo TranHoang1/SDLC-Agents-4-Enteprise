@@ -5,6 +5,7 @@
 
 import { Annotation } from "@langchain/langgraph";
 import type { LlmToolCall, LlmMessage } from "./llm-provider";
+import type { ActiveSteeringRule } from "../steering/frontmatter";
 
 export type { LlmToolCall } from "./llm-provider";
 export {
@@ -66,7 +67,21 @@ export const PipelineAnnotation = Annotation.Root({
 
   // SA4E-185: realtime LSP diagnostics feed summary; consumed once per turn (BR-7)
   diagnosticsContext: Annotation<string>({ reducer: (_e, u) => u, default: () => "" }),
+
+  // SA4E-187: conditional steering rules (fileMatch/manual) merged by rule id so
+  // concurrent tool captures never lose updates (proper channel reducer, not naive LWW)
+  activeSteeringRules: Annotation<ActiveSteeringRule[]>({ reducer: mergeActiveSteeringRules, default: () => [] }),
 });
+
+export function mergeActiveSteeringRules(
+  existing: ActiveSteeringRule[],
+  update: ActiveSteeringRule[]
+): ActiveSteeringRule[] {
+  const byId = new Map<string, ActiveSteeringRule>();
+  for (const r of existing) { byId.set(r.id, r); }
+  for (const r of update) { byId.set(r.id, r); }
+  return [...byId.values()];
+}
 
 export type PipelineState = typeof PipelineAnnotation.State;
 

@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { BASE_URL, API_URL, E2E_PASSWORD } from './setup/e2e-config.js';
+import { BASE_URL, API_URL, E2E_PORT, E2E_PASSWORD } from './setup/e2e-config.js';
 
 const API = API_URL;
 
@@ -450,7 +450,7 @@ describe('Config — Get, Patch, Reset', () => {
     expect(status).toBe(200);
     expect(data.config).toBeDefined();
     expect(data.config.server).toBeDefined();
-    expect(data.config.server.port).toBe(48721);
+    expect(data.config.server.port).toBe(E2E_PORT);
     expect(data.config.embedding).toBeDefined();
     expect(data.config.kb).toBeDefined();
     expect(data.restartRequired).toBeDefined();
@@ -490,14 +490,14 @@ describe('Config — Get, Patch, Reset', () => {
     expect(status).toBe(200);
     expect(data.success).toBe(true);
     expect(data.config).toBeDefined();
-    // After reset, port should be back to default 48721
-    expect(data.config.port).toBe(48721);
+    // After reset, port should be back to default
+    expect(data.config.port).toBe(E2E_PORT);
   });
 
   it('should verify defaults restored after reset', async () => {
     const { status, data } = await apiCall('/config');
     expect(status).toBe(200);
-    expect(data.config.server.port).toBe(48721);
+    expect(data.config.server.port).toBe(E2E_PORT);
     expect(data.config.server.logLevel).toBe('info');
   });
 

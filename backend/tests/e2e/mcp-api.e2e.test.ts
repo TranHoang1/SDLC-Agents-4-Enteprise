@@ -6,10 +6,29 @@
  */
 
 import { describe, it, expect, beforeAll } from 'vitest';
-import { BASE_URL } from './setup/e2e-config.js';
+import { BASE_URL, API_URL, E2E_PASSWORD } from './setup/e2e-config.js';
 
 // ============================================================
-// Setup: Verify server is running
+// Shared auth state
+// ============================================================
+
+const ADMIN_USERNAME = 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_INITIAL_PASSWORD || E2E_PASSWORD;
+let authToken = '';
+
+async function authFetch(path: string, init: RequestInit = {}): Promise<Response> {
+  return fetch(`${BASE_URL}${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...((init.headers as Record<string, string>) || {}),
+    },
+  });
+}
+
+// ============================================================
+// Setup: Verify server is running + authenticate
 // ============================================================
 
 beforeAll(async () => {
@@ -21,6 +40,17 @@ beforeAll(async () => {
       `Server is not running at ${BASE_URL}. Start it with "npm run dev" before running E2E tests.\n` +
         `Original error: ${err}`,
     );
+  }
+
+  // Authenticate to get JWT/session token for protected MCP endpoints
+  const loginRes = await fetch(`${API_URL}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD }),
+  });
+  if (loginRes.ok) {
+    const data = await loginRes.json();
+    authToken = data.token || '';
   }
 });
 
@@ -57,7 +87,7 @@ describe('E2E MCP — Health', () => {
 
 describe('E2E MCP — Tools List', () => {
   it('GET /mcp/tools/list returns 200 with tool array', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/list`);
+    const res = await authFetch('/mcp/tools/list');
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.tools).toBeInstanceOf(Array);
@@ -65,7 +95,7 @@ describe('E2E MCP — Tools List', () => {
   });
 
   it('each tool has required fields', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/list`);
+    const res = await authFetch('/mcp/tools/list');
     const data = await res.json();
     for (const tool of data.tools.slice(0, 10)) {
       expect(tool.name).toBeDefined();
@@ -77,7 +107,7 @@ describe('E2E MCP — Tools List', () => {
   });
 
   it('includes core memory tools', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/list`);
+    const res = await authFetch('/mcp/tools/list');
     const data = await res.json();
     const names = data.tools.map((t: any) => t.name);
     expect(names).toContain('mem_search');
@@ -86,7 +116,7 @@ describe('E2E MCP — Tools List', () => {
   });
 
   it('includes orchestration tools', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/list`);
+    const res = await authFetch('/mcp/tools/list');
     const data = await res.json();
     const names = data.tools.map((t: any) => t.name);
     expect(names).toContain('find_tools');
@@ -100,9 +130,8 @@ describe('E2E MCP — Tools List', () => {
 
 describe('E2E MCP — Tool Call', () => {
   it('POST /mcp/tools/call executes mem_search', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'mem_search',
         arguments: { query: 'code intelligence', limit: 5 },
@@ -117,9 +146,8 @@ describe('E2E MCP — Tool Call', () => {
   });
 
   it('POST /mcp/tools/call executes find_tools', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'find_tools',
         arguments: { query: 'memory', threshold: 0.3, top_k: 5 },
@@ -134,9 +162,8 @@ describe('E2E MCP — Tool Call', () => {
   });
 
   it('POST /mcp/tools/call executes agent_log', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'agent_log',
         arguments: { level: 'info', message: 'E2E test log', agent: 'e2e-test' },
@@ -148,9 +175,8 @@ describe('E2E MCP — Tool Call', () => {
   });
 
   it('POST /mcp/tools/call executes orchestration_status', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'orchestration_status',
         arguments: {},
@@ -171,9 +197,8 @@ describe('E2E MCP — Memory Lifecycle', () => {
   const testContent = 'This is E2E lifecycle test content for MCP memory module';
 
   it('mem_ingest creates an entry', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'mem_ingest',
         arguments: { title: testTitle, content: testContent, tags: 'e2e,test' },
@@ -185,9 +210,8 @@ describe('E2E MCP — Memory Lifecycle', () => {
   });
 
   it('mem_search finds the ingested entry', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'mem_search',
         arguments: { query: testTitle, limit: 10 },
@@ -201,9 +225,8 @@ describe('E2E MCP — Memory Lifecycle', () => {
   });
 
   it('mem_delete removes the entry', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'mem_delete',
         arguments: { id: testTitle },
@@ -221,9 +244,8 @@ describe('E2E MCP — Memory Lifecycle', () => {
 
 describe('E2E MCP — Error Cases', () => {
   it('unknown tool returns 404 with TOOL_NOT_FOUND', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tool_name: 'totally_fake_tool_that_does_not_exist',
         arguments: {},
@@ -235,9 +257,8 @@ describe('E2E MCP — Error Cases', () => {
   });
 
   it('missing tool_name returns 400', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ arguments: { query: 'test' } }),
     });
     expect(res.status).toBe(400);
@@ -246,9 +267,8 @@ describe('E2E MCP — Error Cases', () => {
   });
 
   it('invalid JSON returns 400', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: '{"broken json',
     });
     expect(res.status).toBe(400);
@@ -257,18 +277,16 @@ describe('E2E MCP — Error Cases', () => {
   });
 
   it('empty body returns 400', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: '',
     });
     expect(res.status).toBe(400);
   });
 
   it('empty tool_name string returns 400', async () => {
-    const res = await fetch(`${BASE_URL}/mcp/tools/call`, {
+    const res = await authFetch('/mcp/tools/call', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tool_name: '', arguments: {} }),
     });
     expect(res.status).toBe(400);

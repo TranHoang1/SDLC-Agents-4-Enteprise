@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.32.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.37.0.vsix
 ```
 
 ### 3. Use
@@ -66,9 +66,10 @@ MIT
 
 ## Changelog
 
-### v1.35.0 (2026-08-23)
+### v1.37.0 (2026-08-24)
 
 - **SA4E-190: SDLC Pipeline Autonomy L3 Reset & Rebuild** — Full SDLC pipeline reset from requirements to deployment with Autonomy Level L3. Rebuilt BRD, FSD, TDD, STP, STC, UG, TEST-REPORT, DPG, RLN. Implemented backend module `backend/src/sa4e-190/` with PipelineController, StatusManager, repository, unit/integration/e2e tests. All tests PASS (Backend 2617 passed, Extension 1561 passed). Merge origin/main into `dnguyenminh/SA4E-190`, lint fixes applied.
+- **SA4E-193: Config Commands — 4 slash commands (/create-new-agent, hook, steering, skill)** — LLM-generated config files with ValidationGate schema enforcement (closes GAP-01, fixes D-1..D-7), template fallback offline-safe, hot-reload integration. Ext tests 1621 ✓ · Backend 2621 ✓
 
 ### v1.33.1 (2026-08-23)
 

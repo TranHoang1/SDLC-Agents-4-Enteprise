@@ -19,6 +19,7 @@ import type { FindAgentMetaFn } from "../agents/agent-config-resolver";
 import { DiagnosticsFeedService } from "../diagnostics/diagnostics-feed-service";
 import { ToolApprovalGate } from "../../chat/engine/ToolApprovalGate";
 import { CommandPatternMatcher } from "../../chat/engine/CommandPatternMatcher";
+import { getActiveManualRules, toActiveSteeringRules } from "../steering/session-store";
 import {
   PipelineState,
   SDLCPhase,
@@ -349,6 +350,9 @@ export class LangGraphEngine {
     // SA4E-85 v3.1: Pre-search Backend KB for relevant context (OpenCode style)
     const kbContext = await this.searchKb(chatInput);
 
+    // SA4E-187: manual steering rules activated via command ride the next turn
+    const activeSteeringRules = toActiveSteeringRules(getActiveManualRules(this.workspaceRoot));
+
     const { activeThread } = await executeChat(
       chatInput,
       this.activeTabId,
@@ -357,6 +361,7 @@ export class LangGraphEngine {
       this.streamHandler,
       this.onEvent,
       kbContext,
+      activeSteeringRules.length > 0 ? activeSteeringRules : undefined,
     );
     this.activeThread = activeThread;
   }

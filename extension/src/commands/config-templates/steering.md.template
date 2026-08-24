@@ -1,0 +1,8 @@
+---
+inclusion: {{INCLUSION}}
+description: {{DESCRIPTION}}
+---
+
+# {{TITLE}}
+
+{{BODY}}

@@ -1,0 +1,30 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="active" value="Active" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="40" y="120" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="compacted" value="Compacted" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="260" y="40" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="reset" value="Reset (New)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="260" y="120" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="reviewing" value="Reviewing" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="260" y="200" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="t1" value="/compact" edge="1" parent="1" source="active" target="compacted" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t2" value="/new" edge="1" parent="1" source="active" target="reset" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t3" value="/review" edge="1" parent="1" source="active" target="reviewing" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t4" value="/undo" edge="1" parent="1" source="active" target="active" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

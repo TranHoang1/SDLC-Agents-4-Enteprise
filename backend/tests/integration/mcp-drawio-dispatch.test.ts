@@ -124,7 +124,7 @@ describe('MCP dispatch: execute_dynamic_tool → drawio_export_png', () => {
     resetRendererCache();
   });
 
-  it.skip('TC-MCP-01: dispatches drawio_export_png successfully', async () => {
+  it('TC-MCP-01: dispatches drawio_export_png successfully', async () => {
     const { isExportPngAvailable } = await import('../../src/engine/tools/drawio-export-png.js');
     if (!isExportPngAvailable()) { return; }
 

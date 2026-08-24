@@ -346,7 +346,7 @@ export class IndexerHttpClient {
                 signal: AbortSignal.timeout(30000),
             });
             const body = await response.text();
-            return { ok: response.status === 200 || response.status === 201, body };
+            return { ok: response.status >= 200 && response.status < 300, body };
         } catch (err) {
             console.debug(`[IndexerHttpClient] httpPostJson failed (non-fatal): ${(err as Error).message}`);
             return { ok: false, body: "" };
@@ -390,12 +390,15 @@ export class IndexerHttpClient {
         return headers;
     }
 
-    /** SA4E-99: Sync Pega rules to KB (POST /api/index/sync-pega-rules). */
+    /** SA4E-209: Trigger async Pega sync (POST returns 202, actual sync runs in background). */
     async syncPegaRulesToKb(projectId: string, token?: string): Promise<{ message: string }> {
         const url = `${this.backendUrl}/api/index/sync-pega-rules`;
         const { ok, body } = await this.httpPostJson(url, { projectId }, token);
         if (!ok) return { message: `Pega sync failed: ${body}` };
-        try { return JSON.parse(body); } catch { return { message: body || "Pega rules synced" }; }
+        try {
+            const data = JSON.parse(body);
+            return { message: data.message || "Pega sync started" };
+        } catch { return { message: body || "Pega sync started" }; }
     }
 
     /** SA4E-99: Get enrichment status (GET /api/v1/enrichment/status). */

@@ -1,0 +1,39 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="lu" value="Chat User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="lsmc" value="SlashMenuController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="220" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="lch" value="CommandHandler" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="400" y="40" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="lext" value="SA4E-186 / 182 / 183" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="580" y="40" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" edge="1" parent="1" source="lu" target="lsmc" style="endArrow=none;dashed=1;" value="">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="d2" edge="1" parent="1" source="lsmc" target="lch" style="endArrow=none;dashed=1;" value="">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m1" value="1: invokes /command" edge="1" parent="1" source="lu" target="lsmc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m2" value="2: dispatch to handler" edge="1" parent="1" source="lsmc" target="lch" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m3" value="3: call dependency" edge="1" parent="1" source="lch" target="lext" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m4" value="4: result" edge="1" parent="1" source="lext" target="lch" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="m5" value="5: UI feedback" edge="1" parent="1" source="lch" target="lu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

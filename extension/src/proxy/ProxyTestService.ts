@@ -107,6 +107,10 @@ export class ProxyTestService {
     if (response.ok) {
       return { success: true, message: "Proxy connection successful", latencyMs };
     }
+    // Accept all redirect codes — target server is reachable
+    if (response.status >= 300 && response.status < 400) {
+      return { success: true, message: "Proxy connection successful (redirect)", latencyMs };
+    }
     if (response.status === 407) {
       return { success: false, message: "Proxy requires authentication — enter credentials" };
     }
