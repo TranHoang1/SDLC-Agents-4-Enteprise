@@ -296,3 +296,41 @@ Commit: a618e0b → origin/SA4E-193
 | diagrams/rollback-flow.drawio | v1.0 | attachment #11245 |
 
 **Verdict Phase 7 REDO: RELEASED v1.36.0 — Jira SA4E-193 = DONE.**
+
+
+---
+
+## RELEASE VERSION CORRECTION — v1.36.0 → v1.35.0 (2026-08-24, 08:00–08:30 +07:00)
+
+**Trigger:** PO xác nhận "v1.35.0 chưa được release" — SA4E-190 đã bump package.json lên 1.35.0 từ trước nhưng KHÔNG BAO GIỜ tag/release. Do đó SA4E-193 CHÍNH THỨC là release **v1.35.0**, gộp nội dung cả SA4E-190 + SA4E-193. Tag v1.36.0 phải bị xóa, version được revert.
+
+### Các bước thực hiện
+
+| # | Agent | Bước | Kết quả | Bằng chứng |
+|---|-------|------|---------|------------|
+| 1 | SM | Pre-flight verify | ✅ Done | origin/main = 0988e42; tag v1.36.0 → cb83296 (local+remote); KHÔNG tồn tại tag v1.34.0/v1.35.0 nào cả hai nơi |
+| 2 | SM | Version revert commit trên main qua detached temp worktree (origin/main) | ✅ Done | `f9c64a8` "SA4E-193: set official release version to 1.35.0" — 3 package.json (root/extension/backend) 1.36.0→1.35.0 + README: xóa entry "### v1.36.0", gộp bullet SA4E-193 vào entry "### v1.35.0 (2026-08-24)" (duy nhất, chứa cả SA4E-190 + SA4E-193); push fast-forward HEAD:main (0988e42..f9c64a8), không force-push |
+| 3 | SM | Retarget tag | ✅ Done | v1.36.0 deleted local (`was 77b6526`) + remote; **v1.35.0** (annotated, msg "v1.35.0 — SA4E-190 Editors/Hot-Reload + SA4E-193 Config Commands with ValidationGate") → f9c64a8; verify `git log v1.35.0 --oneline -1` = f9c64a8; ls-remote: v1.35.0^{commit} = f9c64a8, v1.36.0 ABSENT. ⚠️ Deviation an toàn: bỏ qua lệnh `push :refs/tags/v1.34.0` trong đề bài vì tag này KHÔNG tồn tại (tránh rủi ro xóa nhầm) |
+| 4 | devops-agent | Cập nhật RLN.md + DPG.md → v1.1 + diagrams | ✅ Done | task ses_fceb81719ffezR5Yp37SDO2ohH — semantic replace v1.36.0→v1.35.0 (rollback target chỉnh về v1.33.x baseline RELEASED thật, hotfix kế = v1.35.1); Git Release Record: merge 3d924ca + version commit f9c64a8 (tag target) + superseded history cb83296/v1.36.0; note "v1.35.0 covers SA4E-190 + SA4E-193 (first tagged release of 1.35 line)"; deployment-architecture.drawio + rollback-flow.drawio sửa label + re-export PNG (335KB/276KB); live-reference 1.36.0 còn sót = 0 (chỉ còn ghi nhận lịch sử có chủ ý) |
+| 5 | SM | Verify độc lập output devops-agent | ✅ Done | Headers "Release Version **v1.35.0**" ở cả 2 file; Git Record có f9c64a8; grep pattern lệnh sống (publish/install-extension/checkout/vsix) với 1.36 = chỉ trỏ tới 3 dòng history notes (RLN:40, DPG:70, DPG:388); DOCX v1.1 exists: DPG 1,858,835 B / RLN 1,239,233 B |
+| 6 | SM | Attach Jira | ✅ Done | **DPG-v1.1-SA4E-193.docx (#11246)**, **RLN-v1.1-SA4E-193.docx (#11247)** — giữ lại bản v1.0 (#11242/#11243) làm lịch sử |
+| 7 | SM | STATUS.json update | ✅ Done | releasedVersion=**v1.35.0**; releaseCorrection + releaseRecord mới (versionCommit f9c64a8, tag v1.35.0→f9c64a8, supersededHistory); JSON VALID |
+| 8 | SM | Jira comment | ✅ Done | Comment ID **11947**: release corrected v1.35.0, tag retargeted, v1.36.0 removed |
+| 9 | SM | Commit doc updates → merge main | ✅ Done | Commit docs trên branch SA4E-193 rồi merge vào main qua temp worktree, push fast-forward (xem commit bên dưới) |
+
+### Deliverables (sau correction)
+
+| File | Version | Jira |
+|------|---------|------|
+| documents/SA4E-193/DPG.md | v1.1 | DPG-v1.1-SA4E-193.docx (**#11246**) |
+| documents/SA4E-193/RLN.md | v1.1 | RLN-v1.1-SA4E-193.docx (**#11247**) |
+| diagrams/deployment-architecture.drawio/.png | v1.1 (labels f9c64a8/v1.35.0) | drawio #11244 (bản cũ; bản mới commit kèm docs) |
+| diagrams/rollback-flow.drawio/.png | v1.1 (rollback target 1.33.x) | drawio #11245 (bản cũ; bản mới commit kèm docs) |
+
+### Trạng thái cuối cùng
+
+- **Release chính thức: v1.35.0** — covers SA4E-190 + SA4E-193 (first tagged release of the 1.35 line)
+- origin/main = chứa f9c64a8; tag hợp lệ: ..., v1.33.0, **v1.35.0** (không có v1.34.0, không có v1.36.0)
+- Jira SA4E-193 = DONE + comment 11947; attachments mới nhất = DPG-v1.1 (#11246), RLN-v1.1 (#11247)
+
+**Verdict CORRECTION: COMPLETED — official release = v1.35.0.**
