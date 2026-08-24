@@ -139,7 +139,10 @@ async function executeCurl(url: string, init?: RequestInit): Promise<Response> {
   const method = init?.method || "GET";
   const headers = extractHeaders(init);
   const body = typeof init?.body === "string" ? init.body : undefined;
-  const res = await curlAdapter.request(url, method, headers, body, 30000);
+  // fetch() mặc định follow redirects (redirect: "follow").
+  // Chỉ skip follow khi caller explicitly set redirect: "manual" hoặc "error".
+  const shouldFollow = !init || (init as any).redirect !== "manual";
+  const res = await curlAdapter.request(url, method, headers, body, 30000, shouldFollow);
   return new Response(res.body, {
     status: res.status,
     statusText: res.statusText,
@@ -152,6 +155,7 @@ async function executePwsh(url: string, init?: RequestInit): Promise<Response> {
   const method = init?.method || "GET";
   const headers = extractHeaders(init);
   const body = typeof init?.body === "string" ? init.body : undefined;
+  // PowerShell Invoke-WebRequest follows redirects by default (MaximumRedirection > 0)
   const res = await pwshAdapter.request(url, method, headers, body, 30000);
   return new Response(res.body, {
     status: res.status,

@@ -230,9 +230,16 @@ export class SettingsMessageHandler {
 
   private async handleTestPegaConnection(): Promise<void> {
     try {
-      const client = new (await import("../../services/PegaHttpClient")).PegaHttpClient(this.secrets);
-      const ctx = await client.getOperatorContext();
-      this.postMessage({ type: "pegaTestResult", success: true, message: `Connected as ${ctx.operatorId} (${ctx.currentApplication?.name || "Pega App"})` });
+      const { PegaHttpClient } = await import("../../services/PegaHttpClient");
+      const client = new PegaHttpClient(this.secrets);
+      const endpoint = client.getPegaEndpoint();
+      // Only check connectivity — no auth, no login
+      const res = await fetch(endpoint, { method: "GET" });
+      if (res.status > 0) {
+        this.postMessage({ type: "pegaTestResult", success: true, message: `✅ Network OK — Pega Server reachable (HTTP ${res.status}). Authentication not tested.` });
+      } else {
+        this.postMessage({ type: "pegaTestResult", success: false, message: "Connection failed: no response from server" });
+      }
     } catch (err: any) {
       this.postMessage({ type: "pegaTestResult", success: false, message: `Connection failed: ${err.message}` });
     }
