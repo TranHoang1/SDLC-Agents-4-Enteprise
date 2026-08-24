@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.37.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.37.1-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -48,10 +48,10 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.37.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.37.1.vsix
 
 # Or VS Code
-code --install-extension sdlc-agents-4-enterprise-1.37.0.vsix
+code --install-extension sdlc-agents-4-enterprise-1.37.1.vsix
 ```
 
 3. **Verify connection**: Command Palette → "SDLC Agents: Settings" → Server Settings → Test Connection
@@ -245,10 +245,20 @@ MIT
 
 ## Changelog
 
+### v1.37.1 (2026-08-24)
+
+- **Proxy Fix: global-fetch-patch defensive fallback** — Fixed silent proxy bypass when `CurlHttpAdapter.isCurlMode()` threw during factory lookup. Added `getActiveProxyMode()` defensive check so curl/powershell mode requests never fall through to direct fetch.
+- **Proxy: Cookie jar persistence** — CurlHttpAdapter and PowerShellHttpAdapter now persist cookies at `{workspace}/.code-intel/curl-cookies.txt` / `pwsh-session.xml` for session reuse across subprocess calls.
+- **Proxy: followRedirects** — `executeCurl()` in global-fetch-patch now respects `redirect: "manual"` from callers; defaults to follow (matching native fetch behavior).
+- **Proxy: Workspace-scoped config** — ProxyConfigService saves mode/host/port/bypass at Workspace level (each project gets its own proxy config).
+- **PowerShell CLM compatibility** — Removed `$ProgressPreference` and `SecurityProtocol` assignments (incompatible with Constrained Language Mode). Prefer `pwsh` (PS7) over `powershell.exe` on Windows.
+- **Test Pega Connection** — Simplified to network reachability check only (no auth attempt).
+- **SA4E-204/205/206 docs** — Pipeline documents for parallel orchestration module.
+
 ### v1.37.0 (2026-08-24)
 
 - **SA4E-193: Config Commands — 4 slash commands (/create-new-agent, /create-new-hook, /create-new-steering, /create-new-skill)** — LLM-generated config files written to `.code-intel/` with ValidationGate schema enforcement before write (closes GAP-01, fixes D-1..D-7), offline-safe template fallback, editor auto-open, hot-reload integration. Ext tests 1621 ✓ · Backend 2621 ✓
-- Consolidated release — carries SA4E-190 content (see v1.35.0 below); tag `v1.37.0` local-only pending publish
+- Consolidated release — carries SA4E-190 content (see v1.35.0 below)
 
 ### v1.35.0 (2026-08-23)
 
