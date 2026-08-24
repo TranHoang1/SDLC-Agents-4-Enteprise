@@ -245,6 +245,10 @@ MIT
 
 ## Changelog
 
+### v1.35.1 (2026-08-23)
+
+- **SA4E-188: Skill Auto-Invoke** — intent detection scores skill descriptions against the prompt and auto-injects the best-matching `SKILL.md` into context (no `/skill:` needed). Skipped for ticket/agent/direct commands.
+
 ### v1.35.0 (2026-08-23)
 
 - **SA4E-188: Skills in Slash Menu** — Skills from `.code-intel/skills/*/SKILL.md` show as a dedicated **Skills** section (🧩) in the "/" menu, separate from Agents and Steering

@@ -133,9 +133,55 @@ export class MessageHandler {
     return result;
   }
 
+  private isPlainChat(text: string): boolean {
+    const t = text.trim();
+    if (/^[A-Z]+-\d+\s+/i.test(t)) return false;
+    if (/^\/[a-z][-a-z]*\s+/i.test(t)) return false;
+    const lc = t.toLowerCase();
+    if (lc === "status" || lc === "resume" || lc === "cancel") return false;
+    return true;
+  }
+
+  private autoResolveSkillContext(text: string): Array<{ type: string; label: string; content: string }> {
+    const fs = require("fs");
+    const path = require("path");
+    const skillDir = path.join(this.workspaceRoot, ".code-intel", "skills");
+    if (!fs.existsSync(skillDir)) return [];
+    let entries: any[];
+    try { entries = fs.readdirSync(skillDir, { withFileTypes: true }); } catch { return []; }
+    const lower = text.toLowerCase();
+    const STOP = new Set(["the", "and", "for", "with", "when", "use", "this", "that", "from", "your", "agent", "will", "into", "have", "are", "you", "our", "via", "how", "what", "which", "each", "other", "based", "such", "than", "then", "them", "they", "their", "about", "these", "those", "should", "must", "can", "may", "not", "but", "all", "any", "per", "within", "across", "between", "during", "using", "used", "also", "more", "most", "some", "only", "over", "under", "after", "before"]);
+    const scored: Array<{ score: number; item: { type: string; label: string; content: string } }> = [];
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      const id = entry.name;
+      const skillFile = path.join(skillDir, id, "SKILL.md");
+      if (!fs.existsSync(skillFile)) continue;
+      let content = "";
+      try { content = fs.readFileSync(skillFile, "utf-8"); } catch { continue; }
+      const m = content.match(/description:\s*["']([^"']+)["']/);
+      const description = m ? m[1] : "";
+      const tokens = (description + " " + id).toLowerCase().split(/[^a-z0-9]+/).filter(w => w.length >= 4 && !STOP.has(w));
+      let score = 0;
+      for (const kw of tokens) { if (lower.includes(kw)) score++; }
+      if (score >= 2) {
+        scored.push({ score, item: { type: "skill", label: id, content } });
+      }
+    }
+    if (scored.length === 0) return [];
+    scored.sort((a, b) => b.score - a.score);
+    debugLog(` autoResolveSkillContext: best="${scored[0].item.label}" score=${scored[0].score}`);
+    return [scored[0].item];
+  }
+
   private async handleUserMessage(text: string, context?: Array<{ type: string; label: string; path?: string; content?: string }>): Promise<void> {
     const skillCtx = this.resolveSkillContext(text);
-    const mergedContext = context ? [...context, ...skillCtx] : skillCtx;
+    const autoCtx = this.isPlainChat(text) ? this.autoResolveSkillContext(text) : [];
+    const mergedSkills = [...skillCtx];
+    for (const a of autoCtx) {
+      if (!mergedSkills.some(e => e.label === a.label)) mergedSkills.push(a);
+    }
+    const mergedContext = context ? [...context, ...mergedSkills] : mergedSkills;
     let strippedText = text;
     for (const s of skillCtx) {
       strippedText = strippedText.replace(new RegExp("/skill:" + s.label + "\\b", "g"), "");
@@ -144,7 +190,7 @@ export class MessageHandler {
     strippedText = strippedText.replace(/\s{2,}/g, " ").trim();
     const finalText = strippedText.length > 0 ? strippedText : "Please follow the provided skill instructions.";
     const enrichedText = buildEnrichedText(finalText, mergedContext);
-    debugLog(` handleUserMessage: "${finalText.slice(0, 80)}" (context: ${mergedContext.length} items, skills: ${skillCtx.length})`);
+    debugLog(` handleUserMessage: "${finalText.slice(0, 80)}" (context: ${mergedContext.length} items, explicitSkills: ${skillCtx.length}, autoSkills: ${autoCtx.length})`);
     this.sendToWebview({ type: "chat:workingStatus", working: true, label: "Working..." });
     try {
       const engine = this.getEngine();
