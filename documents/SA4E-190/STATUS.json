@@ -2,6 +2,15 @@
   "ticket": "SA4E-190",
   "autonomyLevel": "L3",
   "currentPhase": "requirements",
+  "todos": [
+    {
+      "id": "SA4E-190-TO-01",
+      "title": "Custom Dual-Tab Editors (Form+Text)",
+      "description": "Zero code implementation",
+      "status": "to-do",
+      "createdAt": "2026-08-25T00:00:00Z"
+    }
+  ],
   "phases": {
     "requirements": {
       "status": "done",
@@ -36,5 +45,5 @@
       "completedAt": "2026-08-23T17:00:00Z"
     }
   },
-  "lastUpdated": "2026-08-23T09:51:37.948Z"
+  "lastUpdated": "2026-08-25T00:00:00Z"
 }
