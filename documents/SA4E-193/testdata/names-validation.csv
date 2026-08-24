@@ -1,0 +1,10 @@
+case_id,name_input,expected_valid,expected_suggestion
+PBT-01,my-code-reviewer,true,
+UT-01,9lives,false,
+UT-02,MyAgent,false,
+UT-03,my_agent,false,
+UT-04,../evil,false,
+UT-05,,false,
+UT-06,agent,true,
+IT-04,duplicate-name,true,
+SIT-07,kiểm-tra,false,

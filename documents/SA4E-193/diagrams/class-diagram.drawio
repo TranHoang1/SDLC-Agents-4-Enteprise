@@ -1,0 +1,42 @@
+<mxGraphModel dx="1420" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0">
+      <mxGeometry as="geometry" />
+    </mxCell>
+    <mxCell id="1" parent="0">
+      <mxGeometry as="geometry" />
+    </mxCell>
+    <mxCell id="clsCC" value="&lt;p style='margin:0'&gt;&lt;b&gt;&#171;orchestrator&#187; ConfigCommands&lt;/b&gt;&lt;/p&gt;&lt;hr size='1'/&gt;&lt;p style='margin:4px' align='left'&gt;+ registerConfigCommands(context, workspaceRoot)&lt;br/&gt;+ handleCreateNewAgent(rawArgs?)&lt;br/&gt;+ handleCreateNewHook(rawArgs?)&lt;br/&gt;+ handleCreateNewSteering(rawArgs?)&lt;br/&gt;+ handleCreateNewSkill(rawArgs?)&lt;br/&gt;- promptDescription(config): string|undefined&lt;br/&gt;- confirmName(suggestion): string|undefined&lt;br/&gt;- assembleAndPersist(name, desc)&lt;/p&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="60" y="60" width="360" height="240" as="geometry" />
+    </mxCell>
+    <mxCell id="clsVG" value="&lt;p style='margin:0'&gt;&lt;b&gt;&#171;NEW GAP-01&#187; ValidationGate&lt;/b&gt;&lt;br/&gt;implements IValidator&lt;/p&gt;&lt;hr size='1'/&gt;&lt;p style='margin:4px' align='left'&gt;+ validate(type, rawContent, confirmedName,&lt;br/&gt;&#160;&#160;&#160;description): ValidationResult&lt;br/&gt;- normalize(rawContent): string&lt;br/&gt;- stripCodeFences(content): string&#160;&#160;// AF-13/24&lt;br/&gt;- stripEchoedFrontmatter(content) // ERR-CMD-09&lt;br/&gt;- validateAgent(doc, name, desc)&lt;br/&gt;- validateHook(jsonText)&#160;&#160;// BR-08/BR-09 XOR&lt;br/&gt;- validateSteering(md)&#160;&#160;&#160;&#160;// BR-10/BR-11&lt;br/&gt;- validateSkill(md, confirmedName) // AF-33 force name&lt;br/&gt;- serializeHookCanonical(obj) // omit empty D-7&lt;/p&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=top;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=3;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="540" y="60" width="400" height="280" as="geometry" />
+    </mxCell>
+    <mxCell id="clsNE" value="&lt;p style='margin:0'&gt;&lt;b&gt;NameExtractor &#171;pure&#187;&lt;/b&gt;&lt;/p&gt;&lt;hr size='1'/&gt;&lt;p style='margin:4px' align='left'&gt;+ extractNameFromDescription(&lt;br/&gt;&#160;&#160;&#160;description: string, prefix: string): string&lt;br/&gt;// lowercase &#8594; strip non-alnum &#8594; len&amp;gt;2&lt;br/&gt;// first 3 words join '-' else '{prefix}-new'&lt;/p&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=top;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="580" y="430" width="340" height="140" as="geometry" />
+    </mxCell>
+    <mxCell id="clsTP" value="&lt;p style='margin:0'&gt;&lt;b&gt;&#171;facade&#187; TemplateProvider&lt;/b&gt;&lt;/p&gt;&lt;hr size='1'/&gt;&lt;p style='margin:4px' align='left'&gt;+ getLlmPrompt(type): string&lt;br/&gt;+ getFallbackScaffold(type, confirmedName,&lt;br/&gt;&#160;&#160;&#160;description): string&#160;&#160;// fixes D-5&lt;br/&gt;+ getTemplateSpec(type): string&#160;&#160;// resolves OI-08/D-6&lt;br/&gt;- AGENT_LLM_PROMPT / HOOK_LLM_PROMPT&lt;br/&gt;- STEERING_LLM_PROMPT / SKILL_LLM_PROMPT&lt;/p&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=top;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="60" y="420" width="380" height="170" as="geometry" />
+    </mxCell>
+    <mxCell id="clsVR" value="&lt;p style='margin:0'&gt;&lt;b&gt;&#171;value&#187; ValidationResult&lt;/b&gt;&lt;/p&gt;&lt;hr size='1'/&gt;&lt;p style='margin:4px' align='left'&gt;+ ok: boolean&lt;br/&gt;+ reason?: string&lt;br/&gt;+ normalized: string&lt;/p&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=top;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+      <mxGeometry x="1030" y="90" width="240" height="120" as="geometry" />
+    </mxCell>
+    <mxCell id="de1" value="validate() BEFORE write (BR-07)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="clsCC" target="clsVG">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="de2" value="suggests name (BR-04)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="clsCC" target="clsNE">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="330" y="620" />
+          <mxPoint x="500" y="620" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="de3" value="prompts + scaffolds" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="clsCC" target="clsTP">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="de4" value="returns" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="clsVG" target="clsVR">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

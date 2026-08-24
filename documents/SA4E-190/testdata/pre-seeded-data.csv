@@ -1,0 +1,4 @@
+test_case_id,ticket,autonomyLevel,currentPhase,completedAt,expected_http_code,description
+TC-001,SA4E-190,L3,requirements,,200,Baseline pipeline status before reset
+TC-003,SA4E-190,L2,requirements,,200,Baseline for autonomy change
+TC-004,SA4E-190,L3,requirements,2026-08-23T12:00:00Z,200,Approved requirements status

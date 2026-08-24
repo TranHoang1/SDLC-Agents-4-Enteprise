@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.32.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.37.1.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,20 @@ MIT
 ---
 
 ## Changelog
+
+### v1.37.1 (2026-08-24)
+
+- **Proxy Fix: global-fetch-patch defensive fallback** — Fixed silent proxy bypass in curl/powershell mode. Added cookie jar persistence, followRedirects support, workspace-scoped config, PowerShell CLM compatibility.
+- **SA4E-204/205/206** — Parallel orchestration module docs and implementation.
+
+### v1.37.0 (2026-08-24)
+
+- **SA4E-190: SDLC Pipeline Autonomy L3 Reset & Rebuild** — Full SDLC pipeline reset from requirements to deployment with Autonomy Level L3. Rebuilt BRD, FSD, TDD, STP, STC, UG, TEST-REPORT, DPG, RLN. Implemented backend module `backend/src/sa4e-190/` with PipelineController, StatusManager, repository, unit/integration/e2e tests. All tests PASS (Backend 2617 passed, Extension 1561 passed). Merge origin/main into `dnguyenminh/SA4E-190`, lint fixes applied.
+- **SA4E-193: Config Commands — 4 slash commands (/create-new-agent, hook, steering, skill)** — LLM-generated config files with ValidationGate schema enforcement (closes GAP-01, fixes D-1..D-7), template fallback offline-safe, hot-reload integration. Ext tests 1621 ✓ · Backend 2621 ✓
+
+### v1.33.1 (2026-08-23)
+
+- **SA4E-189: Hot-Reload System for .code-intel Agentics** — Extension `ChatStateManager` now watches `.code-intel/agents/**/*.md`, `.code-intel/steering/**/*.md`, `.code-intel/hooks/**/*`, `.code-intel/skills/**/*.md` with 300ms debounce. Agent/Steering/Hooks/Skills UI reloads without Kiro restart. Recursive watchers, unit+e2e tests added, docs updated and pushed to Jira SA4E-189.
 
 ### v1.33.0 (2026-08-20)
 

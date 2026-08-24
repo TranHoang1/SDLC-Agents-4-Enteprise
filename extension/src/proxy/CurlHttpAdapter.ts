@@ -1,11 +1,14 @@
 /**
  * CurlHttpAdapter — Adapts CurlTransport for use by HttpClient.
  * Encapsulates curl mode detection, bypass checking, and request execution.
- * Separates curl-specific logic from the main HttpClient class.
+ * Persistent cookie jar stored at {workspace}/.code-intel/curl-cookies.txt.
  */
 
 import { CurlTransport } from "./CurlTransport";
 import { ProxyAgentFactory } from "./ProxyAgentFactory";
+import * as vscode from "vscode";
+import { join } from "path";
+import { mkdirSync, existsSync } from "fs";
 
 /** Simplified response for curl adapter consumers */
 export interface CurlAdapterResponse {
@@ -47,7 +50,8 @@ export class CurlHttpAdapter {
     method: string,
     headers: Record<string, string>,
     body?: string,
-    timeout?: number
+    timeout?: number,
+    followRedirects?: boolean
   ): Promise<CurlAdapterResponse> {
     const transport = this.buildTransport();
     const response = await transport.request(url, {
@@ -55,6 +59,8 @@ export class CurlHttpAdapter {
       headers,
       body,
       timeout: timeout || 10000,
+      followRedirects: followRedirects ?? false,
+      cookieJarPath: this.getCookieJarPath(),
     });
     return {
       status: response.status,
@@ -62,6 +68,19 @@ export class CurlHttpAdapter {
       body: response.body,
       statusText: response.statusText,
     };
+  }
+
+  /** Resolve cookie jar path: {workspace}/.code-intel/curl-cookies.txt */
+  private getCookieJarPath(): string | undefined {
+    try {
+      const folder = vscode.workspace.workspaceFolders?.[0];
+      if (!folder) { return undefined; }
+      const dir = join(folder.uri.fsPath, ".code-intel");
+      if (!existsSync(dir)) { mkdirSync(dir, { recursive: true }); }
+      return join(dir, "curl-cookies.txt");
+    } catch {
+      return undefined;
+    }
   }
 
   /** Build CurlTransport with proxy URL from config (or null for NTLM SSO) */

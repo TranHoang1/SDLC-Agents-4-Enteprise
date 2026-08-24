@@ -1,12 +1,15 @@
 /**
  * PowerShellHttpAdapter — Adapts PowerShellTransport for use by HttpClient.
  * Encapsulates powershell mode detection, bypass checking, and request execution.
- * Separates PowerShell-specific logic from the main HttpClient class.
+ * Persistent cookie session stored at {workspace}/.code-intel/pwsh-session.xml.
  */
 
 import { PowerShellTransport } from "./PowerShellTransport";
 import { ProxyAgentFactory } from "./ProxyAgentFactory";
 import { ProxyDetectionService } from "./ProxyDetectionService";
+import * as vscode from "vscode";
+import { join } from "path";
+import { mkdirSync, existsSync } from "fs";
 
 /** Simplified response for adapter consumers */
 export interface PwshAdapterResponse {
@@ -60,6 +63,7 @@ export class PowerShellHttpAdapter {
       headers,
       body,
       timeout: timeout || 10000,
+      cookieJarPath: this.getCookieJarPath(),
     });
     return {
       status: response.status,
@@ -67,6 +71,19 @@ export class PowerShellHttpAdapter {
       body: response.body,
       statusText: response.statusText,
     };
+  }
+
+  /** Resolve cookie session path: {workspace}/.code-intel/pwsh-session.xml */
+  private getCookieJarPath(): string | undefined {
+    try {
+      const folder = vscode.workspace.workspaceFolders?.[0];
+      if (!folder) { return undefined; }
+      const dir = join(folder.uri.fsPath, ".code-intel");
+      if (!existsSync(dir)) { mkdirSync(dir, { recursive: true }); }
+      return join(dir, "pwsh-session.xml");
+    } catch {
+      return undefined;
+    }
   }
 
   /**

@@ -59,18 +59,18 @@ export class ProxyConfigService {
     };
   }
 
-  /** Update proxy mode setting (Global scope — machine-specific) */
+  /** Update proxy mode setting (workspace-scoped) */
   async setMode(mode: ProxyMode): Promise<void> {
     await vscode.workspace.getConfiguration(CONFIG_SECTION)
-      .update("proxy.mode", mode, vscode.ConfigurationTarget.Global);
+      .update("proxy.mode", mode, vscode.ConfigurationTarget.Workspace);
   }
 
-  /** Save proxy host, port, bypass settings */
+  /** Save proxy host, port, bypass settings (workspace-scoped — mỗi project có config riêng) */
   async saveProxy(host: string, port: number, bypass: string): Promise<void> {
     const config = vscode.workspace.getConfiguration(CONFIG_SECTION);
-    await config.update("proxy.host", host, vscode.ConfigurationTarget.Global);
-    await config.update("proxy.port", port, vscode.ConfigurationTarget.Global);
-    await config.update("proxy.bypass", bypass, vscode.ConfigurationTarget.Global);
+    await config.update("proxy.host", host, vscode.ConfigurationTarget.Workspace);
+    await config.update("proxy.port", port, vscode.ConfigurationTarget.Workspace);
+    await config.update("proxy.bypass", bypass, vscode.ConfigurationTarget.Workspace);
   }
 
   /** Store credentials securely in SecretStorage */

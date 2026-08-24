@@ -1,0 +1,7 @@
+test_case_id,ticket,autonomyLevel,phase,expected_http_code,expected_result,description
+TC-001,SA4E-190,L3,requirements,200,status success,Pipeline reset happy path
+TC-101,SA4E-190,L4,requirements,400,Invalid autonomy level,Invalid autonomy level validation
+TC-201,INVALID, L3,requirements,400,Ticket key required,Missing/invalid ticket
+TC-401,SA4E-190,,requirements,400,Ticket key required,Empty autonomy level
+TC-402,SA4E-190,L1,design,200,status success,Valid autonomy L1 reset
+TC-402b,SA4E-190,L2,implementation,200,status success,Valid autonomy L2 reset

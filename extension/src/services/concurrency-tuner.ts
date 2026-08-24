@@ -4,7 +4,7 @@
  * (CPU cores, free memory) and measured request latency.
  */
 
-import { cpus, freemem } from 'node:os';
+import { cpus, freemem, loadavg } from 'node:os';
 
 /** Options for computing optimal concurrency. */
 export interface ConcurrencyOpts {
@@ -34,11 +34,15 @@ export function computeOptimalConcurrency(opts: ConcurrencyOpts): number {
   const cores = cpus().length;
   const { measuredLatencyMs, totalItems, isRemote } = opts;
   const targetMs = opts.targetDurationMs ?? DEFAULT_TARGET_MS;
-  const maxServer = opts.maxServerConnections ?? 15;
+  const maxServer = opts.maxServerConnections ?? 50;
 
   const cLittles = Math.ceil(totalItems * measuredLatencyMs / targetMs);
   const cFloor = Math.ceil(cores / 2);
-  const cCpuBound = cores * (isRemote ? 4 : 8);
+
+  const load = loadavg()[0] || 0;
+  const loadFactor = Math.max(0.3, 1 - (load / cores));
+  const cCpuBound = Math.max(1, Math.floor(cores * (isRemote ? 6 : 12) * loadFactor));
+
   const availableMB = freemem() / (1024 * 1024);
   const cMemBound = Math.floor(availableMB / MB_PER_REQUEST);
   const cServerCap = isRemote ? maxServer : totalItems;

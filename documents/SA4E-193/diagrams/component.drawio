@@ -1,0 +1,82 @@
+<mxGraphModel dx="1420" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1650" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0">
+      <mxGeometry as="geometry" />
+    </mxCell>
+    <mxCell id="1" parent="0">
+      <mxGeometry as="geometry" />
+    </mxCell>
+    <mxCell id="cH" value="&#171;component&#187;&#10;&lt;b&gt;ConfigCommandHandler&lt;/b&gt;&#10;shared 8-step pipeline PL-1&#10;dialogs BR-02/BR-03 &#183; orchestrate&#10;generate &#8594; validate &#8594; write &#8594; open &#8594; notify" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="60" y="280" width="250" height="120" as="geometry" />
+    </mxCell>
+    <mxCell id="cNE" value="&#171;component&#187;&#10;&lt;b&gt;NameExtractor&lt;/b&gt;&#10;extractNameFromDescription()&#10;BR-04 pure function" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="420" y="60" width="210" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="cTP" value="&#171;component&#187;&#10;&lt;b&gt;TemplateProvider&lt;/b&gt;&#10;LLM prompts + fallback scaffolds&#10;config-templates single source" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="420" y="170" width="210" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="ifL" value="&#171;interface&#187;&#10;&lt;b&gt;ILlmService&lt;/b&gt;&#10;generate(prompt, desc, type)" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="420" y="290" width="210" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="cLLM" value="&#171;component&#187;&#10;&lt;b&gt;LLMServiceAdapter&lt;/b&gt;&#10;vscode.lm copilot streaming&#10;failure taxonomy F1-F4" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="420" y="390" width="210" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="ifV" value="&#171;interface&#187;&#10;&lt;b&gt;IValidator&lt;/b&gt;&#10;validate(type, raw, name, desc)&#10;&#8594; {ok, reason?, normalized}" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;fillColor=#ffffff;strokeColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="730" y="170" width="230" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="cVG" value="&#171;component&#187;&#10;&lt;b&gt;ValidationGate&lt;/b&gt; &#9733; NEW (GAP-01)&#10;normalize: fences / echoed FM / empty&#10;schema per type &#183; canonical serializer&#10;pure functions &#8212; no vscode.* import" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=3;" vertex="1" parent="1">
+      <mxGeometry x="730" y="300" width="230" height="120" as="geometry" />
+    </mxCell>
+    <mxCell id="cFW" value="&#171;component&#187;&#10;&lt;b&gt;FileWriter&lt;/b&gt;&#10;writeFileWithMkdir(path, content)&#10;UTF-8 single complete write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="300" width="200" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="cES" value="&#171;component&#187;&#10;&lt;b&gt;EditorService&lt;/b&gt;&#10;open generated file&#10;text editor fallback (BR-13)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="450" width="200" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="xFS" value="Workspace FS&#10;.code-intel/{agents,hooks,&#10;steering,skills}" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="1350" y="290" width="190" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="xCopilot" value="&#171;external&#187; vscode.lm&#10;GitHub Copilot model" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+      <mxGeometry x="420" y="540" width="210" height="70" as="geometry" />
+    </mxCell>
+    <mxCell id="xHR" value="&#171;external&#187; SA4E-189&#10;HotReloadWatcher (300 ms debounce)" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="1350" y="480" width="220" height="70" as="geometry" />
+    </mxCell>
+    <mxCell id="ed1" value="suggests name" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="cH" target="cNE">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed2" value="prompts / scaffolds" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="cH" target="cTP">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed3" value="calls via" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="cH" target="ifL">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed4" value="realizes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="cLLM" target="ifL">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed5" value="fallback scaffold (FR-COMMON-02)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="cLLM" target="cTP">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed6" value="stream" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="cLLM" target="xCopilot">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed7" value="validate BEFORE write" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="cH" target="ifV">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed8" value="realizes" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="cVG" target="ifV">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed9" value="{ok, normalized}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="cVG" target="cFW">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed10" value="persist UTF-8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="cFW" target="xFS">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed11" value="open doc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;" edge="1" parent="1" source="cFW" target="cES">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="ed12" value="file events" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;strokeColor=#9673a6;" edge="1" parent="1" source="xFS" target="xHR">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

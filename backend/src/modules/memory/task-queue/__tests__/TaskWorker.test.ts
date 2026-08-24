@@ -167,7 +167,7 @@ describe('SA4E-106: handleTaskError non-retryable patterns', () => {
     return { id: 42, retry_count: retryCount, max_retries: maxRetries };
   }
 
-  it.todo('marks task failed immediately for invalid_payload error' /* SA4E-174: behavior verified in handleTaskError */, async () => {
+  it('marks task failed immediately for invalid_payload error', async () => {
     const { worker, repo } = createWorkerWithSpies();
     const task = createFakeTask();
     const error = new Error('invalid_payload: symbolId is required');
@@ -178,7 +178,7 @@ describe('SA4E-106: handleTaskError non-retryable patterns', () => {
     expect(repo.resetForRetry).not.toHaveBeenCalled();
   });
 
-  it.todo('marks task failed immediately for symbol_not_found error' /* SA4E-174: behavior verified in handleTaskError */, async () => {
+  it('marks task failed immediately for symbol_not_found error', async () => {
     const { worker, repo } = createWorkerWithSpies();
     const task = createFakeTask();
     const error = new Error('symbol_not_found: 999');
@@ -233,28 +233,41 @@ describe('SA4E-106: handleTaskError non-retryable patterns', () => {
     expect(repo.resetForRetry).not.toHaveBeenCalled();
   });
 
-  it.todo('does NOT increment consecutiveErrors for non-retryable data errors' /* SA4E-174: consecutiveErrors removed */, async () => {
+  it('does NOT resetForRetry for any non-retryable data errors', async () => {
     const { worker, repo } = createWorkerWithSpies();
     const task = createFakeTask();
 
-    // symbol_not_found should not count as LLM error
+    // symbol_not_found should not trigger retry
     await (worker as any).handleTaskError(task, new Error('symbol_not_found: 999'));
-    expect((worker as any).consecutiveErrors).toBe(0);
+    expect(repo.markFailed).toHaveBeenCalledWith(42, 'symbol_not_found: 999');
+    expect(repo.resetForRetry).not.toHaveBeenCalled();
 
-    // entry_not_found should not count as LLM error
+    // Reset spies for next call
+    vi.mocked(repo.markFailed).mockClear();
+    vi.mocked(repo.resetForRetry).mockClear();
+
+    // entry_not_found should not trigger retry
     await (worker as any).handleTaskError(task, new Error('entry_not_found'));
-    expect((worker as any).consecutiveErrors).toBe(0);
+    expect(repo.markFailed).toHaveBeenCalledWith(42, 'entry_not_found');
+    expect(repo.resetForRetry).not.toHaveBeenCalled();
 
-    // invalid_payload should not count as LLM error
+    vi.mocked(repo.markFailed).mockClear();
+    vi.mocked(repo.resetForRetry).mockClear();
+
+    // invalid_payload should not trigger retry
     await (worker as any).handleTaskError(task, new Error('invalid_payload: bad'));
-    expect((worker as any).consecutiveErrors).toBe(0);
+    expect(repo.markFailed).toHaveBeenCalledWith(42, 'invalid_payload: bad');
+    expect(repo.resetForRetry).not.toHaveBeenCalled();
   });
 
-  it.todo('DOES increment consecutiveErrors for real LLM/transient errors' /* SA4E-174: consecutiveErrors field removed */, async () => {
+  it('DOES resetForRetry for transient LLM errors when retries remaining', async () => {
     const { worker, repo } = createWorkerWithSpies();
-    const task = createFakeTask(0, 3);
+    const task = createFakeTask(0, 3); // retry_count=0, max_retries=3
 
     await (worker as any).handleTaskError(task, new Error('llm_timeout'));
-    expect((worker as any).consecutiveErrors).toBe(1);
+
+    // Transient error: markFailed AND resetForRetry (retries still available)
+    expect(repo.markFailed).toHaveBeenCalledWith(42, 'llm_timeout');
+    expect(repo.resetForRetry).toHaveBeenCalledWith(42);
   });
 });
