@@ -83,13 +83,16 @@ export class CurlTransport {
       timeout: 10000,
       proxyUrl: proxyUrl || this.proxyUrl || undefined,
       proxyAuth,
+      followRedirects: true,
     });
-    if (!response.ok && response.status !== 301 && response.status !== 302) {
+    // Accept 2xx and all redirect codes (301, 302, 303, 307, 308)
+    const isRedirect = response.status >= 300 && response.status < 400;
+    if (!response.ok && !isRedirect) {
       throw new CurlTransportError(`HTTP ${response.status}: ${response.statusText}`);
     }
     return Date.now() - start;
   }
-
+  
   /** Check if curl binary is available */
   static async isAvailable(): Promise<boolean> {
     try {
