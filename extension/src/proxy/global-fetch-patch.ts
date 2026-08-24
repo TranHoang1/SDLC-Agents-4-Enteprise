@@ -64,6 +64,17 @@ export function applyGlobalFetchPatch(): void {
       return executePwsh(targetUrl, init);
     }
 
+    // Defensive fallback: if adapter mode checks failed (e.g. factory threw during
+    // isCurlMode/isPowerShellMode), re-check config directly to prevent request leak.
+    // Without this, curl/powershell mode requests silently bypass the proxy.
+    const activeMode = getActiveProxyMode();
+    if (activeMode === "curl") {
+      return executeCurl(targetUrl, init);
+    }
+    if (activeMode === "powershell") {
+      return executePwsh(targetUrl, init);
+    }
+
     // System/manual mode: inject undici ProxyAgent dispatcher
     if (init && (init as any).dispatcher) {
       // Caller already specified a dispatcher — respect it
@@ -106,6 +117,20 @@ function shouldBypass(targetUrl: string): boolean {
     return factory.shouldBypass(targetUrl, config.bypass);
   } catch {
     return false;
+  }
+}
+
+/**
+ * Read proxy mode directly from ProxyAgentFactory config.
+ * Separate path from adapter checks — adapters wrap this in try-catch that may swallow errors.
+ * Returns null if factory is not initialized (extension still starting up).
+ */
+function getActiveProxyMode(): string | null {
+  try {
+    const factory = ProxyAgentFactory.getInstance();
+    return factory.getConfig().mode;
+  } catch {
+    return null;
   }
 }
 

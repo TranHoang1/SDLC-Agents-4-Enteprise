@@ -154,6 +154,11 @@ export async function fetchRuleTypesInParallel(
         }
         const dupCount = subRules.length - newCount;
         const dupInfo = dupCount > 0 ? ` (${dupCount} duplicates skipped)` : '';
+        const sampleKeys = subRules.slice(0,3).map(s => (s as any).insKey || '').join('|');
+        const sampleRule = subRules[0] || {};
+        const sampleClass = (sampleRule as any).pyClassName || (sampleRule as any).pyAppliesTo || '';
+        const sampleName = (sampleRule as any).pyRuleName || (sampleRule as any).pyPropertyName || '';
+        log(`[Pega Indexer] 🐞 DEBUG Class "${targetClassName}" ${rt} sampleInsKeys=${sampleKeys} sampleClass=${sampleClass} sampleName=${sampleName} total=${subRules.length}`);
         log(`[Pega Indexer] 📌 Class "${targetClassName}": ${newCount}/${subRules.length} new rules of type "${rt}"${dupInfo}. Saving & ingesting...`);
     }
 
