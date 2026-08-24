@@ -180,7 +180,7 @@ describe("global-fetch-patch", () => {
       const response = await globalThis.fetch("https://pega.corp.com/prweb/api");
 
       expect(mockCurlRequest).toHaveBeenCalledWith(
-        "https://pega.corp.com/prweb/api", "GET", {}, undefined, 30000
+        "https://pega.corp.com/prweb/api", "GET", {}, undefined, 30000, true
       );
       expect(fetchSpy).not.toHaveBeenCalled();
       expect(response.status).toBe(200);
@@ -202,7 +202,8 @@ describe("global-fetch-patch", () => {
         "POST",
         { "Authorization": "Basic abc", "Content-Type": "application/json" },
         '{"data":1}',
-        30000
+        30000,
+        true
       );
     });
 

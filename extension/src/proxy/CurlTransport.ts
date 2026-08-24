@@ -38,6 +38,8 @@ export interface CurlRequestOptions {
   proxyAuth?: string | null;
   insecure?: boolean;
   followRedirects?: boolean;
+  /** Path to persistent cookie jar file. Enables -b/-c for session reuse. */
+  cookieJarPath?: string;
 }
 
 /**
@@ -135,6 +137,18 @@ export class CurlTransport {
 
     if (options.followRedirects) {
       args.push("-L");
+      // Persistent cookie jar — reuse session across requests (browser behavior)
+      if (options.cookieJarPath) {
+        args.push("-b", options.cookieJarPath, "-c", options.cookieJarPath);
+      } else {
+        // Fallback: in-memory cookie engine for redirect chain only
+        args.push("-b", "");
+      }
+      // Cap redirects to prevent infinite loop
+      args.push("--max-redirs", "10");
+    } else if (options.cookieJarPath) {
+      // Even without followRedirects, use persistent cookies for session reuse
+      args.push("-b", options.cookieJarPath, "-c", options.cookieJarPath);
     }
 
     // Method: -I for HEAD, implicit GET, -X for others
