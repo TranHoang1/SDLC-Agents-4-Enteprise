@@ -11,7 +11,7 @@
 | Jira Ticket | SA4E-193 |
 | Title | Config Commands with ValidationGate — /create-new-agent, /create-new-hook, /create-new-steering, /create-new-skill |
 | Parent Epic | SA4E-181 — Chat Module — OpenCode Parity + Agentic Config System |
-| Release Version | **v1.35.0** (covers SA4E-190 + SA4E-193) |
+| Release Version | **v1.37.0** (covers SA4E-190 + SA4E-193) |
 | Author | DevOps Agent |
 | Version | 1.1 |
 | Date | 2026-08-24 |
@@ -26,7 +26,7 @@
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-08-24 | DevOps Agent | Initiate document — auto-generated from TDD v2.0, BRD v2.0, TEST-REPORT v3.0; release merged to `main` (default branch) |
-| 1.1 | 2026-08-24 | DevOps Agent | Release version correction v1.36.0 → v1.35.0 per PO decision (v1.35.0 was never released; SA4E-193 ships as official v1.35.0) |
+| 1.1 | 2026-08-24 | DevOps Agent | Release version correction v1.36.0 → v1.37.0 per PO decision (v1.37.0 was never released; SA4E-193 ships as official v1.37.0) |
 
 ---
 
@@ -65,11 +65,11 @@ Key engineering guarantees introduced by this release:
 |------|-------|
 | Default branch | `main` |
 | Merge commit into main | `3d924ca` — "Merge branch 'SA4E-193' — Config Commands with ValidationGate (fixes D-1..D-7)" (parents `d4836f3` + `3a3b6c4`) |
-| Version commit (**tag target**) | `f9c64a8` — "set official release version to 1.35.0": all 3 package.json corrected **1.36.0 → 1.35.0** (correction commit) + README changelog consolidated into a single `### v1.35.0 (2026-08-24)` entry covering SA4E-190 + SA4E-193 |
-| Annotated tag | `v1.35.0` → points to `f9c64a8` (pushed to origin; verified `git ls-remote`: `v1.35.0^{commit}` = `f9c64a8`) |
+| Version commit (**tag target**) | `f9c64a8` — "set official release version to 1.35.0": all 3 package.json corrected **1.36.0 → 1.35.0** (correction commit) + README changelog consolidated into a single `### v1.37.0 (2026-08-24)` entry covering SA4E-190 + SA4E-193 |
+| Annotated tag | `v1.37.0` → points to `f9c64a8` (pushed to origin; verified `git ls-remote`: `v1.37.0^{commit}` = `f9c64a8`) |
 | Superseded history (record only) | Intermediate bump `cb83296` (all 3 package.json 1.35.0 → 1.36.0) and its annotated tag `v1.36.0` (→ `cb83296`) were **reverted/deleted local + remote** after PO confirmed the 1.35 line had never been released; README changelog commits `c492837` superseded by `f9c64a8` |
-| Tag hygiene precedent | Stale tag `v1.34.0` deleted local+remote earlier (had pointed at wrong commit `1a7a800` of SA4E-206); interim tag `v1.36.0` deleted on this correction — official tag is now `v1.35.0` |
-| Release coverage | **v1.35.0 covers SA4E-190 + SA4E-193** — first tagged release of the 1.35 line; last valid released baseline remains **v1.33.0** |
+| Tag hygiene precedent | Stale tag `v1.34.0` deleted local+remote earlier (had pointed at wrong commit `1a7a800` of SA4E-206); interim tag `v1.36.0` deleted on this correction — official tag is now `v1.37.0` |
+| Release coverage | **v1.37.0 covers SA4E-190 + SA4E-193** — first tagged release of the 1.35 line; last valid released baseline remains **v1.33.0** |
 | Final refactor included | `a618e0b` — ConfigCommands.ts 593 → 195 lines (thin orchestrators) + 8 new modules + 64 ValidationGate regression tests |
 
 ### 1.3 Deployment Scope
@@ -117,28 +117,28 @@ The product is a VS Code extension monorepo; "environments" map to build/distrib
 | esbuild bundler | ^0.21.0 | `npm run esbuild-production` |
 | @vscode/vsce packager | current | `vsce package --no-dependencies` |
 | Vitest | ^4.1.x | Test gate runner (extension + backend suites) |
-| Git | ≥ 2.x | Tag verification (`v1.35.0` → `f9c64a8`) |
+| Git | ≥ 2.x | Tag verification (`v1.37.0` → `f9c64a8`) |
 
 ### 2.3 Access Requirements
 
 | Access | Type | Who Needs It |
 |--------|------|-------------|
-| Repository read at tag `v1.35.0` | Git clone/pull | Build engineer |
+| Repository read at tag `v1.37.0` | Git clone/pull | Build engineer |
 | Marketplace publisher account (`dnguyenminh`) | Credentials/PAT | Release manager (PROD only) |
 | VS Code CLI on target machines | Local admin/user | QA + end users (VSIX side-load) |
 | Jira project access | Service account | SM attaches DPG/RLN artifacts |
 
 ### 2.4 Backup Requirements
 
-- [ ] Previous release artifact archived: `sdlc-agents-4-enterprise-1.33.x.vsix` (v1.33.0) stored in release archive (rollback prerequisite — last stable released line before v1.35.0)
+- [ ] Previous release artifact archived: `sdlc-agents-4-enterprise-1.33.x.vsix` (v1.33.0) stored in release archive (rollback prerequisite — last stable released line before v1.37.0)
 - [ ] Database backup: **N/A** — no database involved in this feature
 - [ ] Configuration backup: **N/A** — no deploy-time configuration changes; user workspace files under `.code-intel/` are user-owned and untouched by install/uninstall
-- [x] Git state backup: tag `v1.35.0` → `f9c64a8` + merge commit `3d924ca` pushed to origin (verified)
+- [x] Git state backup: tag `v1.37.0` → `f9c64a8` + merge commit `3d924ca` pushed to origin (verified)
 
 ---
 ## 3. Pre-Deployment Checklist
 
-All items below were verified for release v1.35.0 on 2026-08-24:
+All items below were verified for release v1.37.0 on 2026-08-24:
 
 | # | Item | Responsible | Status |
 |---|------|-------------|--------|
@@ -161,7 +161,7 @@ All items below were verified for release v1.35.0 on 2026-08-24:
 
 - Persistence is plain UTF-8 files under the end-user workspace: `.code-intel/{agents,hooks,steering,skills}/`.
 - Directories are created on demand at first write (`writeFileWithMkdir()`); fresh workspaces are safe.
-- Artifacts written by v1.35.0 remain valid when the extension is downgraded (older versions simply ignore the new files; formats follow the pre-existing `.code-intel` convention).
+- Artifacts written by v1.37.0 remain valid when the extension is downgraded (older versions simply ignore the new files; formats follow the pre-existing `.code-intel` convention).
 
 ### 4.1 Verification Instead of Migration Queries
 
@@ -189,15 +189,15 @@ No database rollback exists or is needed. Generated workspace files may optional
 
 *[Edit in draw.io](diagrams/deployment-architecture.drawio)*
 
-The pipeline is: **Source (main @ merge `3d924ca` + version commit `f9c64a8`, tag `v1.35.0`) → Build & Test gates → VSIX package → Distribution (marketplace / side-load) → End-user VS Code workstation** where the extension host runs the new command modules, writes validated configs to `.code-intel/`, and hands off to the pre-existing hot-reload watcher.
+The pipeline is: **Source (main @ merge `3d924ca` + version commit `f9c64a8`, tag `v1.37.0`) → Build & Test gates → VSIX package → Distribution (marketplace / side-load) → End-user VS Code workstation** where the extension host runs the new command modules, writes validated configs to `.code-intel/`, and hands off to the pre-existing hot-reload watcher.
 
 ### 5.2 Build & Package Steps
 
-Execute from repository root at tag `v1.35.0`:
+Execute from repository root at tag `v1.37.0`:
 
 | Step | Action | Command | Verification |
 |------|--------|---------|-------------|
-| 1 | Checkout release state | `git fetch --tags && git checkout v1.35.0` | `git describe --tags` → `v1.35.0`; `git rev-parse v1.35.0^{commit}` → `f9c64a8…` |
+| 1 | Checkout release state | `git fetch --tags && git checkout v1.37.0` | `git describe --tags` → `v1.37.0`; `git rev-parse v1.37.0^{commit}` → `f9c64a8…` |
 | 2 | Verify merge lineage | `git log --oneline -3 main` | Contains `3d924ca` merge commit |
 | 3 | Install dependencies (all workspaces) | `npm ci` | Clean install, no errors |
 | 4 | Extension test gate | `npm run test --workspace=extension` | **Expected: 1,621 passed / 0 failed** (~80s) |
@@ -211,7 +211,7 @@ Execute from repository root at tag `v1.35.0`:
 
 ```powershell
 cd extension
-npx @vscode/vsce publish 1.35.0        # publishes dnguyenminh.sdlc-agents-4-enterprise v1.35.0
+npx @vscode/vsce publish 1.35.0        # publishes dnguyenminh.sdlc-agents-4-enterprise v1.37.0
 ```
 
 **PROD channel B — Enterprise VSIX side-load (per workstation):**
@@ -224,7 +224,7 @@ code --install-extension .\sdlc-agents-4-enterprise-1.35.0.vsix
 
 | Step | Action | Command | Verification |
 |------|--------|---------|-------------|
-| 1 | Install/side-load VSIX | `code --install-extension sdlc-agents-4-enterprise-1.35.0.vsix` | CLI exits 0: "Extension 'sdlc-agents-4-enterprise' v1.35.0 was successfully installed." |
+| 1 | Install/side-load VSIX | `code --install-extension sdlc-agents-4-enterprise-1.35.0.vsix` | CLI exits 0: "Extension 'sdlc-agents-4-enterprise' v1.37.0 was successfully installed." |
 | 2 | Reload window | Command Palette → "Developer: Reload Window" | Extension Host restarts without errors |
 | 3 | Version check | Extensions view → search "SDLC Agents" | Shows **1.35.0**, no reload prompt pending |
 
@@ -259,7 +259,7 @@ Runtime behavior notes:
 
 | Flag | DEV | SIT | UAT | PROD |
 |------|-----|-----|-----|------|
-| *(none — feature is always-on once v1.35.0 installed)* | — | — | — | — |
+| *(none — feature is always-on once v1.37.0 installed)* | — | — | — | — |
 
 ---
 
@@ -337,7 +337,7 @@ Rollback is an artifact downgrade — no database, no configuration, no server s
 |------|--------|---------|-------------|
 | 1 | Freeze & notify | Notify PO + Dev Lead (decision gate per diagram) | Acknowledgment recorded |
 | 2 | Acquire last-good artifact | Retrieve `sdlc-agents-4-enterprise-1.33.x.vsix` (v1.33.0) from release archive | File hash matches archive record |
-| 3 | Uninstall current version | `code --uninstall-extension dnguyenminh.sdlc-agents-4-enterprise` | CLI confirms removal of v1.35.0 |
+| 3 | Uninstall current version | `code --uninstall-extension dnguyenminh.sdlc-agents-4-enterprise` | CLI confirms removal of v1.37.0 |
 | 4 | Install previous version | `code --install-extension sdlc-agents-4-enterprise-1.33.x.vsix` | CLI: "was successfully installed." |
 | 5 | Reload window | Command Palette → "Developer: Reload Window" | Extension Host restarts clean |
 | 6 | Verify rollback | Extensions view shows **1.33.x**; `/create-new-*` commands absent (expected); existing `.code-intel/` files intact and still listed by watcher | Smoke §7.2 #7 passes |
@@ -345,9 +345,9 @@ Rollback is an artifact downgrade — no database, no configuration, no server s
 
 Notes:
 
-- **User data safety:** uninstalling never deletes workspace files under `.code-intel/`; artifacts produced by v1.35.0 stay valid under older versions.
+- **User data safety:** uninstalling never deletes workspace files under `.code-intel/`; artifacts produced by v1.37.0 stay valid under older versions.
 - **Git-level rollback (exceptional):** reverting merge commit `3d924ca` on `main` is NOT automatic and requires change-control approval; if executed, delete the release tag local+remote following the same procedure used for the stale `v1.34.0` cleanup and the interim `v1.36.0` removal. Never force-push protected `main`.
-- **Marketplace rollback:** if channel A was used, unpublish/mark v1.35.0 deprecated in publisher portal while side-loading v1.33.x internally.
+- **Marketplace rollback:** if channel A was used, unpublish/mark v1.37.0 deprecated in publisher portal while side-loading v1.33.x internally.
 
 ### 8.4 Rollback Time Estimate
 
@@ -381,11 +381,11 @@ Notes:
 
 ### 9.4 PROD
 
-- **Deployment Window:** 2026-08-24 (release executed post-merge of `3d924ca`; official release tag `v1.35.0` cut at version commit `f9c64a8`)
+- **Deployment Window:** 2026-08-24 (release executed post-merge of `3d924ca`; official release tag `v1.37.0` cut at version commit `f9c64a8`)
 - **Approval Required From:** Product Owner (Duc Nguyen Minh) + Dev Lead
 - **Communication Plan:** announce in team channel with RLN link; SM attaches DPG/RLN to Jira SA4E-193
 - **On-Call Contact:** DevOps rotation (per team roster)
-- **Special note — release version correction:** interim tag `v1.36.0` (→ `cb83296`) was deleted local+remote after the PO confirmed v1.35.0 had never been released. SA4E-193 therefore ships as the official release **v1.35.0**, which covers both **SA4E-190** (Pipeline Autonomy L3 Reset & Rebuild) and **SA4E-193** (Config Commands with ValidationGate). Precedent retained: legacy tag `v1.34.0` (wrong commit `1a7a800`, SA4E-206 work) was also deleted local+remote during this release — do not re-create it. Next tags: hotfix ≥ `v1.35.1`, next minor ≥ `v1.36.0`.
+- **Special note — release version correction:** interim tag `v1.36.0` (→ `cb83296`) was deleted local+remote after the PO confirmed v1.37.0 had never been released. SA4E-193 therefore ships as the official release **v1.37.0**, which covers both **SA4E-190** (Pipeline Autonomy L3 Reset & Rebuild) and **SA4E-193** (Config Commands with ValidationGate). Precedent retained: legacy tag `v1.34.0` (wrong commit `1a7a800`, SA4E-206 work) was also deleted local+remote during this release — do not re-create it. Next tags: hotfix ≥ `v1.35.1`, next minor ≥ `v1.36.0`.
 
 ---
 
@@ -419,4 +419,4 @@ Related diagrams maintained in TDD.md: [architecture.png](diagrams/architecture.
 
 ---
 
-*DPG v1.1 — DevOps Agent, 2026-08-24. Sources: TDD.md v2.0, BRD.md v2.0, TEST-REPORT.md v3.0, verified git state of `main` @ merge `3d924ca` / version commit & tag `f9c64a8` (`v1.35.0`). v1.1: release version corrected v1.36.0 → v1.35.0 per PO decision.*
+*DPG v1.1 — DevOps Agent, 2026-08-24. Sources: TDD.md v2.0, BRD.md v2.0, TEST-REPORT.md v3.0, verified git state of `main` @ merge `3d924ca` / version commit & tag `f9c64a8` (`v1.37.0`). v1.1: release version corrected v1.36.0 → v1.37.0 per PO decision.*
