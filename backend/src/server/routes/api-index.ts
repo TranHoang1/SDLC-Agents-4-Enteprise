@@ -259,7 +259,7 @@ async function handleIngestDocsFromTemp(c: Context, registry: ModuleRegistry, lo
   }
 }
 
-/** SA4E-209: Sync indexed Pega rules (symbols) into code graph for a project. */
+/** SA4E-209: Trigger async Pega rules sync — returns 202 immediately, runs in background. */
 async function handleSyncPegaRules(c: Context, registry: ModuleRegistry, logger: Logger) {
   try {
     const body = await c.req.json<{ projectId?: string }>();
@@ -270,18 +270,23 @@ async function handleSyncPegaRules(c: Context, registry: ModuleRegistry, logger:
     if (!memModule || memModule.status !== 'ready') {
       return c.json({ error: 'Memory module not ready', action: 'Wait for server initialization' }, 503);
     }
+    // Fire-and-forget: run sync in background, report via progress polling
     const service = new PegaService(memModule.getEngine());
-    const result = await service.syncIndexedRulesToKb(body.projectId);
-    logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors },
-      '[sync-pega-rules] Pega graph sync complete');
+    service.syncIndexedRulesToKb(body.projectId)
+      .then((result) => {
+        logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors },
+          '[sync-pega-rules] Pega graph sync complete');
+      })
+      .catch((err: any) => {
+        logger.error({ err, projectId: body.projectId }, '[sync-pega-rules] Background sync failed');
+      });
     return c.json({
-      message: `Synced ${result.synced} pega rules`,
-      synced: result.synced,
-      skipped: result.skipped,
-      errors: result.errors,
-    });
+      status: 'started',
+      message: 'Pega sync started — poll GET /api/index/progress for status',
+      projectId: body.projectId,
+    }, 202);
   } catch (err: any) {
-    logger.error({ err }, '[sync-pega-rules] Failed');
+    logger.error({ err }, '[sync-pega-rules] Failed to start');
     return c.json({ error: 'Pega sync failed', details: err.message }, 500);
   }
 }
