@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.35.0-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.37.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -48,10 +48,10 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.35.0.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.37.0.vsix
 
 # Or VS Code
-code --install-extension sdlc-agents-4-enterprise-1.26.0.vsix
+code --install-extension sdlc-agents-4-enterprise-1.37.0.vsix
 ```
 
 3. **Verify connection**: Command Palette → "SDLC Agents: Settings" → Server Settings → Test Connection
@@ -244,6 +244,11 @@ MIT
 ---
 
 ## Changelog
+
+### v1.37.0 (2026-08-24)
+
+- **SA4E-193: Config Commands — 4 slash commands (/create-new-agent, /create-new-hook, /create-new-steering, /create-new-skill)** — LLM-generated config files written to `.code-intel/` with ValidationGate schema enforcement before write (closes GAP-01, fixes D-1..D-7), offline-safe template fallback, editor auto-open, hot-reload integration. Ext tests 1621 ✓ · Backend 2621 ✓
+- Consolidated release — carries SA4E-190 content (see v1.35.0 below); tag `v1.37.0` local-only pending publish
 
 ### v1.35.0 (2026-08-23)
 
