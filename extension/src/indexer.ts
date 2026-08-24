@@ -14,10 +14,32 @@ function getBackendUrl(): string {
     return vscode.workspace.getConfiguration("kiroSdlc").get<string>("backend.url") || "http://127.0.0.1:48721";
 }
 
-function getWorkspaceRoot(): string | undefined {
+/**
+ * Resolve workspace root for indexing. In multi-root workspaces, auto-detects
+ * the target project folder by priority markers (Pega > Salesforce > generic).
+ * If multiple candidates found, prompts user to choose.
+ */
+async function getWorkspaceRoot(): Promise<string | undefined> {
     const folders = vscode.workspace.workspaceFolders;
-    if (!folders || folders.length === 0) { vscode.window.showErrorMessage("No workspace folder open."); return undefined; }
-    return folders[0].uri.fsPath;
+    if (!folders || folders.length === 0) {
+        vscode.window.showErrorMessage("No workspace folder open.");
+        return undefined;
+    }
+    if (folders.length === 1) { return folders[0].uri.fsPath; }
+    // Multi-root: detect project type by priority markers
+    const fs = require('fs');
+    const path = require('path');
+    const domainMarkers = ['pega-project.json', 'sfdx-project.json'];
+    for (const marker of domainMarkers) {
+        const match = folders.find(f => fs.existsSync(path.join(f.uri.fsPath, marker)));
+        if (match) { return match.uri.fsPath; }
+    }
+    // No domain-specific marker found — prompt user to select folder
+    const pick = await vscode.window.showQuickPick(
+        folders.map(f => ({ label: path.basename(f.uri.fsPath), description: f.uri.fsPath, folder: f })),
+        { placeHolder: "Select workspace folder to index" }
+    );
+    return pick?.folder.uri.fsPath;
 }
 
 let indexingOutputChannel: vscode.OutputChannel | undefined;
@@ -43,7 +65,7 @@ export async function promptIndexAfterInject(root: string, token?: string): Prom
 }
 
 export async function handleIndexWorkspace(token?: string, secrets?: vscode.SecretStorage, tokenRefresher?: () => Promise<string | undefined>): Promise<void> {
-    const root = getWorkspaceRoot();
+    const root = await getWorkspaceRoot();
     if (!root) { return; }
     await runIndexWorkspace(root, token, secrets, tokenRefresher);
 }
@@ -83,7 +105,7 @@ function describeSummaryTitle(options: string[]): string {
 }
 
 async function showIndexOptions(): Promise<string[] | undefined> {
-    const root = getWorkspaceRoot();
+    const root = await getWorkspaceRoot();
     const isPega = root ? require('fs').existsSync(require('path').join(root, 'pega-project.json')) : false;
 
     const items: Array<{ label: string; description: string; id: string; picked: boolean }> = [];

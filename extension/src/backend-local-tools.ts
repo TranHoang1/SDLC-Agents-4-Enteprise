@@ -11,6 +11,9 @@
 import * as fs from "fs";
 import * as path from "path";
 
+let vscode: any;
+try { vscode = require('vscode'); } catch {}
+
 /** Type for a local tool handler function. */
 type LocalToolHandler = (args: Record<string, unknown>) => unknown;
 
@@ -79,7 +82,7 @@ export function getVisibleLocalToolDefinitions(): LocalToolDefinition[] {
 function streamWriteFileDefinition(): LocalToolDefinition {
   return {
     name: "stream_write_file",
-    description: "Write or append content to a local workspace file (creates parent dirs).",
+    description: "Write or append content to a local workspace file (creates parent dirs). Path can be relative to workspace root.",
     inputSchema: {
       type: "object",
       properties: {
@@ -108,22 +111,40 @@ function embedImageDefinition(): LocalToolDefinition {
 }
 
 function handleStreamWriteFile(args: Record<string, unknown>): any {
-  const filePath = (args.file_path ?? args.path) as string;
+  const rawPath = (args.file_path ?? args.path) as string;
   const content = args.content as string;
   const mode = (args.mode as string) || "write";
-  if (!filePath || typeof content !== "string") {
+  if (!rawPath || typeof content !== "string") {
     return { isError: true, content: [{ type: "text", text: "'file_path' and 'content' required." }] };
   }
+  let workspaceRoot: string | undefined;
   try {
-    ensureDir(path.dirname(filePath));
-    if (mode === "append") {
-      fs.appendFileSync(filePath, content, "utf-8");
-      return { isError: false, content: [{ type: "text", text: `Appended to: ${filePath}` }] };
+    workspaceRoot = vscode?.workspace?.workspaceFolders?.[0]?.uri?.fsPath;
+  } catch {}
+  workspaceRoot = workspaceRoot ?? process.cwd();
+  let resolvedPath: string;
+  if (path.isAbsolute(rawPath)) {
+    resolvedPath = path.resolve(rawPath);
+  } else {
+    resolvedPath = path.resolve(workspaceRoot, rawPath);
+  }
+  if (workspaceRoot) {
+    const normalizedRoot = path.normalize(workspaceRoot + path.sep);
+    const normalizedPath = path.normalize(resolvedPath);
+    if (!normalizedPath.startsWith(normalizedRoot)) {
+      return { isError: true, content: [{ type: "text", text: `Path rejected: ${rawPath} is outside workspace.` }] };
     }
-    fs.writeFileSync(filePath, content, "utf-8");
-    return { isError: false, content: [{ type: "text", text: `Wrote file: ${filePath}` }] };
+  }
+  try {
+    ensureDir(path.dirname(resolvedPath));
+    if (mode === "append") {
+      fs.appendFileSync(resolvedPath, content, "utf-8");
+      return { isError: false, content: [{ type: "text", text: `Appended to: ${resolvedPath}` }] };
+    }
+    fs.writeFileSync(resolvedPath, content, "utf-8");
+    return { isError: false, content: [{ type: "text", text: `Wrote file: ${resolvedPath}` }] };
   } catch (err: any) {
-    return { isError: true, content: [{ type: "text", text: `Failed to write ${filePath}: ${err.message}` }] };
+    return { isError: true, content: [{ type: "text", text: `Failed to write ${resolvedPath}: ${err.message}` }] };
   }
 }
 

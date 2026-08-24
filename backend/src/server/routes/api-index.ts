@@ -9,17 +9,13 @@ import type { Logger } from 'pino';
 import * as fs from 'fs';
 import * as path from 'path';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
-import type { CodeIntelModule } from '../../modules/code-intel/CodeIntelModule.js';
 import { loadConfig } from '../../config/index.js';
-import { getDbAdapter } from '../../admin/db/core.js';
-import { GraphRepository } from '../../database/repositories/GraphRepository.js';
 import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
-import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 import { validateSession } from '../../admin/db/sessions.js';
-import type { FileDependency } from '../../engine/parsers/types.js';
 import {
   handleFullIndex, handleFileEvents, handleCancel, handleProgress,
 } from './api-index-decoupled.js';
+import { PegaService } from '../../modules/pega/PegaService.js';
 
 interface SourceFile {
   path: string;
@@ -62,72 +58,6 @@ function writeFilesPhase(userId: string, projectId: string, files: SourceFile[])
   return { written, rejected };
 }
 
-/** Phase: register/update the project in the admin registry (non-fatal). */
-async function registerProjectPhase(projectId: string, workspace: string, logger: Logger, createdBy = ''): Promise<void> {
-  try {
-    const graphRepo = new GraphRepository(getDbAdapter());
-    await graphRepo.registerProject(projectId, path.basename(workspace), workspace, createdBy);
-  } catch (err) {
-    logger.warn({ err, projectId }, '[index] project registry upsert skipped (non-fatal)');
-  }
-}
-
-/** Phase: trigger a scoped background full re-index. Returns whether an indexer ran. */
-function triggerIndexPhase(registry: ModuleRegistry, scope: IndexScope, logger: Logger): boolean {
-  const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
-  const indexer = codeIntel?.getIndexer();
-  if (!indexer) return false;
-  indexer.runFullIndex({ projectId: scope.projectId, workspace: scope.workspace })
-    .catch((err: unknown) => logger.error({ err }, 'Background full re-index failed'));
-  return true;
-}
-
-/** SA4E-99: Sync code symbols to graph_nodes after incremental source upload (non-fatal). */
-async function syncGraphAfterUpload(registry: ModuleRegistry, projectId: string, logger: Logger): Promise<void> {
-  try {
-    const codeIntel = registry.getModule('codeIntel') as CodeIntelModule | undefined;
-    const indexer = codeIntel?.getIndexer() as any;
-    if (!indexer || !indexer.syncGraphNodesPublic) return;
-    await indexer.syncGraphNodesPublic(projectId);
-    logger.info({ projectId }, '[index] Graph nodes synced after source upload');
-  } catch (err) {
-    logger.warn({ err }, '[index] Graph sync after upload failed (non-fatal)');
-  }
-}
-
-/** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
-/** Phase: ensure a KB metadata entry + graph node exist for the project (non-fatal). */
-async function ensureProjectKbEntry(registry: ModuleRegistry, scope: IndexScope, written: number, logger: Logger): Promise<void> {
-  try {
-    const mem = registry.getModule('memory') as any;
-    if (mem?.status !== 'ready') return;
-    const engine = mem.getEngine();
-    const displayName = path.basename(scope.workspace);
-    // Use async insert — engine.insert() is now async for PostgreSQL compatibility
-    const entryId = await engine.insert({
-      content: `Project "${displayName}" indexed. Workspace: ${scope.workspace}. Files: ${written}.`,
-      summary: `Project metadata for ${displayName}`,
-      type: 'CONTEXT', tier: 'SEMANTIC', scope: 'PROJECT',
-      project_id: scope.projectId, source: 'project-metadata', tags: 'project,metadata,indexed',
-    });
-    await upsertProjectGraphNode(String(entryId), displayName, scope.projectId, logger);
-  } catch (err) {
-    logger.warn({ err }, '[index] project KB entry skipped (non-fatal)');
-  }
-}
-
-/** Upsert the project-metadata graph node (INSERT OR REPLACE to fix stale/missing rows). */
-async function upsertProjectGraphNode(entryId: string, displayName: string, projectId: string, logger: Logger): Promise<void> {
-  try {
-    const graphRepo = new GraphRepository(getDbAdapter());
-    await graphRepo.upsertNode({
-      entryId, label: `Project: ${displayName}`, type: 'CONTEXT',
-      tier: 'SEMANTIC', projectId, x: 0, y: 0, z: 0, level: 'macro', clusterId: '0',
-    });
-  } catch (err) {
-    logger.warn({ err }, '[index] graph node upsert skipped (non-fatal)');
-  }
-}
 
 /** Require valid session — returns 401 if not authenticated. */
 async function requireAuth(c: Context): Promise<{ userId: string } | null> {
@@ -181,6 +111,12 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
     return handleIngestDocsFromTemp(c, registry, logger, session.userId);
+  });
+  // SA4E-209: Sync Pega rules to KB (graph projection)
+  app.post('/api/index/sync-pega-rules', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleSyncPegaRules(c, registry, logger);
   });
   app.post('/api/index/cancel', async (c) => {
     const session = await requireAuth(c);
@@ -320,6 +256,38 @@ async function handleIngestDocsFromTemp(c: Context, registry: ModuleRegistry, lo
     return c.json({ ingested, errors, total: files.length });
   } catch (err: any) {
     return indexError(c, err, logger, 'Error ingesting documents from Temp');
+  }
+}
+
+/** SA4E-209: Trigger async Pega rules sync — returns 202 immediately, runs in background. */
+async function handleSyncPegaRules(c: Context, registry: ModuleRegistry, logger: Logger) {
+  try {
+    const body = await c.req.json<{ projectId?: string }>();
+    if (!body.projectId) {
+      return c.json({ error: 'projectId is required', action: 'Include projectId in request body' }, 400);
+    }
+    const memModule = registry.getModule('memory') as any;
+    if (!memModule || memModule.status !== 'ready') {
+      return c.json({ error: 'Memory module not ready', action: 'Wait for server initialization' }, 503);
+    }
+    // Fire-and-forget: run sync in background, report via progress polling
+    const service = new PegaService(memModule.getEngine());
+    service.syncIndexedRulesToKb(body.projectId)
+      .then((result) => {
+        logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors },
+          '[sync-pega-rules] Pega graph sync complete');
+      })
+      .catch((err: any) => {
+        logger.error({ err, projectId: body.projectId }, '[sync-pega-rules] Background sync failed');
+      });
+    return c.json({
+      status: 'started',
+      message: 'Pega sync started — poll GET /api/index/progress for status',
+      projectId: body.projectId,
+    }, 202);
+  } catch (err: any) {
+    logger.error({ err }, '[sync-pega-rules] Failed to start');
+    return c.json({ error: 'Pega sync failed', details: err.message }, 500);
   }
 }
 

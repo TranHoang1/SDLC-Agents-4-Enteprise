@@ -1,0 +1,114 @@
+{
+  "ticket": "SA4E-193",
+  "autonomyLevel": "L3",
+  "humanGates": ["uat", "deployment"],
+  "currentPhase": "released",
+  "redoRequested": false,
+  "redoReason": "REDO RESOLVED — refactored code (a618e0b) shipped in the official release. Prior redo of UG/testing completed 2026-08-24 morning; Phase 7 release redone 2026-08-24 after failed silent attempt (wrong tag v1.34.0 cleaned up); release version corrected v1.36.0 → v1.35.0 same day per PO decision.",
+  "phases": {
+    "requirements": {
+      "status": "done",
+      "file": "BRD.md",
+      "version": 2,
+      "completedAt": "2026-08-23T21:10:00.0000000+07:00",
+      "jiraAttachments": ["BRD-v2-SA4E-193.docx (#11225)", "use-case.drawio (#11226)", "business-flow.drawio (#11227)"],
+      "diagrams": 2
+    },
+    "specification": {
+      "status": "done",
+      "file": "FSD.md",
+      "version": 2,
+      "completedAt": "2026-08-23T22:10:00.0000000+07:00",
+      "jiraAttachments": ["FSD-v2-SA4E-193.docx (#11228)", "system-context.drawio (#11229)", "sequence-create-agent.drawio (#11230)", "state-file-lifecycle.drawio (#11231)"],
+      "diagrams": 3,
+      "notes": "BA draft v2.0 + TA enrichment v2.1. TA found D-1..D-7 code-vs-spec discrepancies (§11.4)"
+    },
+    "design": {
+      "status": "done",
+      "file": "TDD.md",
+      "version": 2,
+      "completedAt": "2026-08-23T22:34:00.0000000+07:00",
+      "jiraAttachments": ["TDD-v2-SA4E-193.docx (#11233)", "architecture.drawio (#11232)", "component.drawio (#11234)", "class-diagram.drawio (#11235)"],
+      "diagrams": 3,
+      "notes": "ValidationGate component đóng GAP-01 + fix D-1/D-2/D-4/D-5/D-7"
+    },
+    "test_planning": {
+      "status": "done",
+      "files": ["STP.md", "STC.md"],
+      "version": 2,
+      "reviewStatus": "approved",
+      "completedAt": "2026-08-23T23:29:00.0000000+07:00",
+      "jiraAttachments": ["STP-v2-SA4E-193.docx (#11238)", "STC-v2-SA4E-193.docx (#11237)", "test-coverage.drawio (#11236)", "test-execution-flow.drawio (#11239)"],
+      "diagrams": 2,
+      "testCases": { "total": 51, "automated": 41, "manual": 10, "rtmCoverage": "100% (62/62)" },
+      "testdataFiles": ["names-validation.csv", "hook-payloads.csv", "frontmatter-cases.csv", "e2e-scenarios.csv"]
+    },
+    "implementation": {
+      "status": "done",
+      "startedAt": "2026-08-23T23:45:00.0000000+07:00",
+      "completedAt": "2026-08-24T01:10:00.0000000+07:00",
+      "commitHash": "a618e0b",
+      "branch": "SA4E-193",
+      "pushedToOrigin": true,
+      "notes": "REDO per TDD v2 §6 complete. C1 validation-gate.ts (153 lines, pure), frontmatter-utils.ts (64, NEW split), C2 template-provider.ts (106, confirmedName), M1 ConfigCommands.ts 593→195 thin orchestrators. Fix D-1..D-5, D-7 verified bằng code + regression tests. Tests: BEFORE 1557|3skipped|21todo → AFTER 1621|3skipped|21todo (+64 tests mới, 0 regression). npm run compile EXIT=0."
+    },
+    "user_guide": {
+      "status": "done",
+      "file": "UG.md",
+      "version": 2,
+      "completedAt": "2026-08-24T05:55:00.0000000+07:00",
+      "jiraAttachments": ["UG-v2-SA4E-193.docx (#11240)"],
+      "kbEntry": true,
+      "notes": "REDO per refactored code a618e0b. DEV refresh (699→920 lines): ValidationGate pipeline, 8 modules mới, ERR-CMD-01..09 catalogue. BA review: Approved with changes (9 edits — name-suggestion examples theo thuật toán thật, skill sample D-5 consistency). QA verify: UG VERIFIED 6/6 PASS — error codes 9/9 khớp source verbatim, config 9/9 properties khớp package.json, PL-1 flow đúng thứ tự, smoke test commands module 64/64 pass. DOCX re-export sau BA edits (pandoc fallback vì MCP export_docx unavailable)."
+    },
+    "testing": {
+      "status": "done",
+      "completedAt": "2026-08-24T06:10:00.0000000+07:00",
+      "execution": {
+        "extension": { "files": "145 passed / 3 skipped (148)", "passed": 1621, "failed": 0, "skipped": 3, "todo": 21, "duration": "78.50s", "baselineBefore": 1557, "delta": "+64 tests mới, 0 regression" },
+        "backend": { "files": "224 passed (224)", "passed": 2621, "failed": 0, "skipped": 0, "todo": 0, "duration": "179.64s", "note": "13 E2E-API failures từ report v2.0 đã resolve — full green" },
+        "reportVersion": "3.0",
+        "reportFile": "TEST-REPORT.md",
+        "jiraAttachments": ["TEST-REPORT-v3.0-SA4E-193.docx (#11241)"]
+      },
+      "verdict": "SUITE GREEN",
+      "executedBy": "SM trực tiếp (fallback kỹ thuật — qa-agent unresponsive 2 lần trả rỗng)",
+      "caveats": [
+        "Kết quả test là RAW vitest output, không qua QA analysis riêng."
+      ]
+    },
+    "deployment": {
+      "status": "done",
+      "startedAt": "2026-08-24T07:10:00.0000000+07:00",
+      "completedAt": "2026-08-24T14:40:00.0000000+07:00",
+      "releasedVersion": "v1.37.0",
+      "releaseDate": "2026-08-24",
+      "releaseCorrection": {
+        "reason": "PO confirmed 'v1.35.0 chưa được release' — SA4E-190 bumped package.json to 1.35.0 earlier but never tagged/released. SA4E-193 therefore ships as the official v1.35.0 release covering SA4E-190 + SA4E-193.",
+        "actions": [
+          "Version revert commit f9c64a8 (3x package.json 1.36.0 → 1.35.0 + README changelog merged into single v1.35.0 entry) pushed fast-forward to main",
+          "Tag v1.36.0 (→ cb83296) deleted local + remote; tag v1.35.0 (annotated) created at f9c64a8 and pushed",
+          "RLN.md + DPG.md updated to v1.1 with corrected version, new hashes, diagrams re-exported; DOCX v1.1 re-attached to Jira (#11246, #11247)"
+        ]
+      },
+      "releaseRecord": {
+        "mergeCommit": "3d924ca (parents d4836f3 + 3a3b6c4) — 'Merge branch SA4E-193 — Config Commands with ValidationGate (fixes D-1..D-7)'",
+        "versionCommit": "f9c64a8 'SA4E-193: set official release version to 1.35.0' (root/extension/backend package.json 1.36.0 → 1.35.0; README changelog merged into single v1.35.0 entry covering SA4E-190 + SA4E-193)",
+        "tag": "v1.35.0 → f9c64a8 (annotated, pushed to origin; verified git ls-remote: v1.35.0^{commit} = f9c64a8)",
+        "supersededHistory": "Intermediate bump cb83296 (1.35.0 → 1.36.0) + tag v1.36.0 deleted local + remote after PO confirmed v1.35.0 was never released; readme commit c492837 superseded by f9c64a8",
+        "staleTagCleanup": "v1.34.0 deleted local + remote earlier same day (was wrongly pointing at 1a7a800, a SA4E-206 commit); v1.36.0 also removed during correction",
+        "note": "Merge and correction commits executed via detached temp worktree because branch main is checked out in another worktree (C:/projects/kiro); pushes were fast-forward HEAD:main, no force-push."
+      },
+      "docs": {
+        "files": ["DPG.md", "RLN.md"],
+        "docVersion": 1.1,
+        "diagrams": ["deployment-architecture.drawio/.png", "rollback-flow.drawio/.png"],
+        "kbIngest": ["DPG id=604695 (superseded by v1.1 ingest)", "RLN id=604696 (superseded by v1.1 ingest)", "DPG.md v1.1 re-ingested by devops-agent (48 entries)", "RLN.md v1.1 re-ingested by devops-agent (28 entries)"],
+        "jiraAttachments": ["DPG-v1.0-SA4E-193.docx (#11242, superseded)", "RLN-v1.0-SA4E-193.docx (#11243, superseded)", "DPG-v1.1-SA4E-193.docx (#11246, CURRENT — release corrected to v1.35.0)", "RLN-v1.1-SA4E-193.docx (#11247, CURRENT — release corrected to v1.35.0)", "deployment-architecture.drawio (#11244)", "rollback-flow.drawio (#11245)"]
+      },
+      "jiraStatus": "Done (transition #41 from In Review; workflow has no Ready For Product state)",
+      "uatConfirmation": "UAT pass confirmed by user (message: 'Answer: 1 — release as v1.36.0'); release version later corrected to v1.35.0 per PO decision — scope/content unchanged"
+    }
+  },
+  "lastUpdated": "2026-08-24T08:20:00.0000000+07:00"
+}

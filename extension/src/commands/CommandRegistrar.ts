@@ -18,6 +18,7 @@ import { removeBundledMcpConfig } from "../mcp-injector";
 import { registerSymbolSearch } from "../symbol-search";
 import { registerDiagnosticsProvider } from "../diagnostics-provider";
 import { registerAIContextCommands } from "../ai-context-commands";
+import { registerSteeringCommands } from "./SteeringCommands";
 import { SecurityPanel } from "../panels/security-panel";
 import { showImpactAnalysis } from "../panels/impact-panel";
 import { SettingsPanel } from "../panels/settings-panel";
@@ -26,6 +27,7 @@ import { AuthManager } from "../auth/AuthManager";
 import { KiroTreeViewProvider } from "../sidebar/tree-view-provider";
 import { showUserError } from "../utils/panel-utils";
 import { writeJsonFile } from "../utils/mcp-config-file";
+import { registerConfigCommands } from "./ConfigCommands";
 
 interface CommandDeps {
   mcpManager?: IServerManager;
@@ -90,15 +92,19 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
     }),
   );
 
+  registerSteeringCommands(context, workspaceRoot);
+
   if (mcpManager) {
     registerSymbolSearch(context, mcpManager);
     registerDiagnosticsProvider(context, mcpManager);
-    registerAIContextCommands(context, mcpManager);
-    context.subscriptions.push(
+    registerAIContextCommands(context, mcpManager);    context.subscriptions.push(
       vscode.commands.registerCommand("kiroSdlc.openSecurityPanel", () => { new SecurityPanel(mcpManager, context.extensionUri).loadData(); }),
       vscode.commands.registerCommand("kiroSdlc.impactAnalysis", () => showImpactAnalysis(mcpManager, context.extensionUri)),
     );
   }
+
+  // SA4E-193: Register config commands (create-new-agent, create-new-hook, etc.)
+  registerConfigCommands(context, workspaceRoot);
 }
 
 // === Handlers ===

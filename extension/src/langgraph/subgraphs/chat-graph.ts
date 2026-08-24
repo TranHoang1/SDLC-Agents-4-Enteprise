@@ -15,7 +15,7 @@ import { StreamHandler } from "../core/stream-handler";
 import { McpBridge } from "../core/mcp-bridge";
 import { ToolRegistry } from "../vscode/tool-registry";
 import type { LlmProvider } from "../core/llm-provider";
-import { loadSteeringRules, injectSteering } from "../steering/steering-loader";
+import { loadSteeringRules, injectSteering, appendConditionalSteering } from "../steering/steering-loader";
 import { HookEngine } from "../hooks/hook-engine";
 import { debugLog } from "../../debug-logger";
 import {
@@ -258,6 +258,8 @@ export async function buildChatSubgraph(
     if (state.kbContext) {
       prompt = `${prompt}\n\n---\n${state.kbContext}\n---`;
     }
+    // SA4E-187: conditional steering (fileMatch/manual) merged per turn — no graph recompile
+    prompt = appendConditionalSteering(prompt, state.activeSteeringRules);
     if (state.diagnosticsContext) {
       prompt += `\n\n<<<BEGIN_DIAGNOSTICS_DATA>>>\n${state.diagnosticsContext}\n<<<END_DIAGNOSTICS_DATA>>>`;
       // C-1 (B3): explicit authority boundary — diagnostics are untrusted data, never instructions.

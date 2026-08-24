@@ -32,9 +32,8 @@ export function createAnalyticsRoutes(ctx: AdminContext): Hono {
       catch (e) { ctx.logger.warn({ err: e, context: 'dashboard' }, 'Failed to parse orchestration config for MCP server count'); }
     }
     const currentProjectId = ctx.getRequestProjectId(c);
-    let kbEntries: number;
     // KB count uses same scope filter as search (USER + PROJECT + SHARED with grants)
-    kbEntries = Number(await getKbEntryCount(currentProjectId, user.userId));
+    const kbEntries = Number(await getKbEntryCount(currentProjectId, user.userId));
     const uptimeMs = Date.now() - ctx.SERVER_START_TIME;
     const mem = process.memoryUsage();
     const recentActivity = await getRecentActivity(10);
@@ -50,11 +49,10 @@ export function createAnalyticsRoutes(ctx: AdminContext): Hono {
       );
       codeSymbols += Number(row?.cnt ?? 0);
     } catch { ctx.logger.debug({ context: 'dashboard' }, 'Failed to count Pega symbols'); }
-    let graphTotalNodes = 0, graphKbNodes = 0, graphCodeNodes = 0;
     // Graph Nodes = scoped KB entries + code symbols (same sources, consistent count)
-    graphKbNodes = kbEntries;
-    graphCodeNodes = codeSymbols;
-    graphTotalNodes = graphKbNodes + graphCodeNodes;
+    const graphKbNodes = kbEntries;
+    const graphCodeNodes = codeSymbols;
+    const graphTotalNodes = graphKbNodes + graphCodeNodes;
     return c.json({
       kbEntries, codeSymbols,
       graphTotalNodes, graphKbNodes, graphCodeNodes,

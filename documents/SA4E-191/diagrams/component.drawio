@@ -1,0 +1,48 @@
+<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="m_ui" value="ui-shell&#10;(InputAreaIntegration,&#10;SlashMenuController, SlashMenuView)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="m_core" value="slash-core&#10;(CommandRegistry, types,&#10;rateLimiter, resilience, audit)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="270" y="60" width="170" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="m_cmd" value="commands&#10;(7 handlers: agents, compact,&#10;diff, models, new, review, undo)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="500" y="60" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="m_sess" value="session-service&#10;(sessionStore, modelPreferenceStore,&#10;chatStore, agentStore, diffTrackerStore)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="270" y="210" width="190" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="m_ad" value="integration-adapters&#10;(AgentRouter, Compaction, FileChange)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="500" y="210" width="180" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="m_backend" value="backend slash-command module&#10;(host-side SlashCommandModule)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+      <mxGeometry x="720" y="210" width="190" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="m_eng" value="SA4E-186 / 182 / 183&#10;(engines)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="720" y="330" width="190" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="c1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="m_ui" target="m_core">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="c2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="m_core" target="m_cmd">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="c3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="m_cmd" target="m_sess">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="c4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="m_cmd" target="m_ad">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="c5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="m_ad" target="m_backend">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="c6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;" edge="1" parent="1" source="m_backend" target="m_eng">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="c7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;" edge="1" parent="1" source="m_core" target="m_sess">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

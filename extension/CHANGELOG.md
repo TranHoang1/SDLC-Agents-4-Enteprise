@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.35.1] - 2026-08-23
+## [1.38.0] - 2026-08-25
 
 ### Added
 - **SA4E-188: Skill Auto-Invoke** — when a user message has no explicit `/skill:` token, the host detects intent by scoring skill `description`/`name` keywords against the prompt and automatically injects the best-matching skill's `SKILL.md` into the LLM context (threshold ≥ 2 keyword hits). Explicit `/skill:<id>` invocations still take priority and are de-duplicated.

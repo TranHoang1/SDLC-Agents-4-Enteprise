@@ -5,7 +5,13 @@
  * empty/invalid payloads are ignored (non-destructive).
  */
 import { describe, it, expect, beforeEach } from 'vitest';
-import { get } from 'svelte/store';
+// Simple get implementation for Vitest environment
+function get<T>(store: { subscribe: (run: (value: T) => void) => () => void }): T {
+  let value: T;
+  const unsubscribe = store.subscribe(v => (value = v));
+  unsubscribe();
+  return value!;
+}
 import { chatState, hydrateChat, clearChat, messages } from '../stores/chatStore';
 import { contextState } from '../stores/contextStore';
 
