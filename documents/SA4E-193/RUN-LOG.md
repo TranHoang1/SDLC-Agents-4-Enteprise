@@ -258,3 +258,41 @@ Commit: a618e0b → origin/SA4E-193
 | documents/SA4E-193/TEST-REPORT.md | v3.0 (Final) | TEST-REPORT-v3.0-SA4E-193.docx (#11241) |
 
 **Verdict Phase 6 REDO: SUITE GREEN — Extension 1,621/0 failed · Backend 2,621/0 failed · Report v3.0 published.**
+
+
+---
+
+## PHASE 7 REDO — RELEASE v1.36.0 (2026-08-24, 07:10–14:40 +07:00)
+
+**Trigger:** Lần release trước FAIL âm thầm — tag v1.34.0 bị tạo sai (trỏ 1a7a800 của SA4E-206), chưa merge main, chưa bump version, thiếu DPG/RLN. User yêu cầu REDO step-by-step kèm verify.
+
+### Các bước thực hiện
+
+| # | Agent | Bước | Kết quả | Bằng chứng |
+|---|-------|------|---------|------------|
+| 0 | SM | Verify trạng thái ban đầu | ✅ Done | Branch SA4E-193 = 20b5a9e; origin/main = d483f36; tag v1.34.0 → 1a7a800 (SAI, xác nhận); 3 package.json = 1.33.0 trên branch / **1.35.0 trên main** (SA4E-190 đã bump trước đó) |
+| 1 | SM | Commit docs pending trên branch | ✅ Done | `6a6b42e` — TEST-REPORT v3.0 + UG v2 + DOCX exports |
+| 2 | SM | Merge origin/main → branch + resolve conflicts | ✅ Done | `3a3b6c4` — 3 conflicts: extension/tsconfig.json (union giữ "svelte" + thêm vitest.e2e.config.ts), backend/vitest.e2e.config.ts (lấy superset exclude của main), TaskWorker.test.ts (giữ test chủ động assert resetForRetry — khớp source handleTaskError sau merge); CommandRegistrar auto-merge giữ nguyên registerConfigCommands |
+| 3 | SM | Sanity check sau merge | ✅ Done | tsc -p backend EXIT=0; tsc -p extension EXIT=0; vitest TaskWorker.test.ts 14/14 PASS |
+| 4 | SM | Merge branch → main (--no-ff) qua detached temp worktree | ✅ Done | `3d924ca` parents [d4836f3, 3a3b6c4]; push fast-forward HEAD:main (main đang bị checkout ở worktree C:/projects/kiro dirty — không đụng tới, KHÔNG force-push) |
+| 5 | ⚠️→SM | Quyết định version | ✅ User chọn Option 1 | Main đã ở 1.35.0 (SA4E-190) nên literal 1.34.0 sẽ là DOWNGRADE → SM dừng hỏi; user chốt **v1.36.0** |
+| 6 | SM | Version bump 1.35.0 → 1.36.0 | ✅ Done | `cb83296` — cả 3 package.json (theo precedent 2fa799d: không sync lockfile) |
+| 7 | SM | Xóa tag sai + tạo tag đúng | ✅ Done | v1.34.0 deleted local+remote; **v1.36.0** (annotated) → cb83296, verify `git log v1.36.0 -1` = "SA4E-193: bump version to 1.36.0"; remote ls-remote confirm v1.36.0^{} = cb83296, v1.34.0 biến mất |
+| 8 | SM | README changelog | ✅ Done | `c492837` — entry "### v1.36.0 (2026-08-24)" trên đầu Changelog (trên v1.35.0) |
+| 9 | devops-agent | Tạo DPG.md + RLN.md + diagrams | ✅ Done | task ses_fceea1b5cffeeWrsXvTtoV2CbI — DPG.md 420 dòng (10 sections + Diagram Index), RLN.md 238 dòng (Git Release Record, Known Issues từ TEST-REPORT §5.2); deployment-architecture.drawio/.png (310KB), rollback-flow.drawio/.png (253KB) |
+| 10 | SM | Verify độc lập output devops-agent | ✅ Done | Đủ sections (Pre-Deployment/Deployment/Post-Deployment/Rollback/Diagram Index); XML: 0 mxfile wrapper, 0 self-closing edge, root mxGraphModel; DOCX magic = PK (zip hợp lệ); 4 image refs trong DPG.md |
+| 11 | SM | Attach Jira | ✅ Done | DPG-v1.0 (#11242), RLN-v1.0 (#11243), deployment-architecture.drawio (#11244), rollback-flow.drawio (#11245) |
+| 12 | SM | Jira transition In Review → Done | ✅ Done | Workflow project chỉ có 4 states phẳng (không có Ready For Product) → transition #41 trực tiếp kèm comment release record; get_issue xác nhận status = **Done** (10375) |
+| 13 | SM | STATUS.json update | ✅ Done | currentPhase=released; deployment.status=done; releasedVersion=v1.36.0; JSON VALID |
+| 14 | SM | KB ingest verify | ✅ Done | DPG id=604695, RLN id=604696 (ingest bởi devops-agent, full content) |
+
+### Deliverables
+
+| File | Version | Jira |
+|------|---------|------|
+| documents/SA4E-193/DPG.md | v1.0 | DPG-v1.0-SA4E-193.docx (#11242) |
+| documents/SA4E-193/RLN.md | v1.0 | RLN-v1.0-SA4E-193.docx (#11243) |
+| diagrams/deployment-architecture.drawio | v1.0 | attachment #11244 |
+| diagrams/rollback-flow.drawio | v1.0 | attachment #11245 |
+
+**Verdict Phase 7 REDO: RELEASED v1.36.0 — Jira SA4E-193 = DONE.**
