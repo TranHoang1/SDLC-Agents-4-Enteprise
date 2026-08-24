@@ -1,0 +1,63 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="&lt;b&gt;Use Case Diagram — SA4E-192 Tier 2 Slash Commands&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" parent="1" vertex="1">
+      <mxGeometry x="120" y="10" width="640" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_dev" value="Developer" style="shape=actor;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+      <mxGeometry x="100" y="340" width="40" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="boundary" value="Tier 2 Slash Commands" style="shape=rectangle;dashed=1;fillColor=none;strokeColor=#666666;verticalAlign=top;fontStyle=1;fontSize=14;spacingTop=10;html=1;" parent="1" vertex="1">
+      <mxGeometry x="300" y="80" width="700" height="600" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_copy" value="/copy&#10;Copy transcript" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+      <mxGeometry x="340" y="120" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_debug" value="/debug&#10;Debug info" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+      <mxGeometry x="340" y="240" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_help" value="/help&#10;Help" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+      <mxGeometry x="340" y="360" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_init" value="/init&#10;Project init" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+      <mxGeometry x="340" y="480" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_sessions" value="/sessions&#10;Switch session" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="1" vertex="1">
+      <mxGeometry x="640" y="120" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_skills" value="/skills&#10;Skills list" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" parent="1" vertex="1">
+      <mxGeometry x="640" y="240" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_status" value="/status&#10;Status panel" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" parent="1" vertex="1">
+      <mxGeometry x="640" y="360" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_thinking" value="/thinking&#10;Toggle thinking" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
+      <mxGeometry x="640" y="480" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" style="html=1;endArrow=none;edgeStyle=none;" parent="1" source="actor_dev" target="uc_copy" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" style="html=1;endArrow=none;edgeStyle=none;" parent="1" source="actor_dev" target="uc_debug" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" style="html=1;endArrow=none;edgeStyle=none;" parent="1" source="actor_dev" target="uc_help" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" style="html=1;endArrow=none;edgeStyle=none;" parent="1" source="actor_dev" target="uc_init" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" style="html=1;endArrow=none;edgeStyle=none;" parent="1" source="actor_dev" target="uc_sessions" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" style="html=1;endArrow=none;edgeStyle=none;" parent="1" source="actor_dev" target="uc_skills" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" style="html=1;endArrow=none;edgeStyle=none;" parent="1" source="actor_dev" target="uc_status" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" style="html=1;endArrow=none;edgeStyle=none;" parent="1" source="actor_dev" target="uc_thinking" edge="1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

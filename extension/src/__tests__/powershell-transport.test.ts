@@ -285,7 +285,18 @@ describe("PowerShellTransport", () => {
       expect(latency).toBeGreaterThanOrEqual(0);
     });
 
-    it("throws on non-OK response", async () => {
+    it("accepts redirect responses (301, 302)", async () => {
+      mockExecFile.mockResolvedValueOnce({
+        stdout: "---PWSH_STATUS---\n302\n---PWSH_STATUS_TEXT---\nFound\n---PWSH_HEADERS---\nlocation: /new\n---PWSH_BODY---\n",
+        stderr: "",
+      } as never);
+
+      const transport = new PowerShellTransport("http://proxy:8080");
+      const latency = await transport.testConnection("https://example.com/old");
+      expect(latency).toBeGreaterThanOrEqual(0);
+    });
+
+    it("throws on non-OK non-redirect response", async () => {
       mockExecFile.mockResolvedValueOnce({
         stdout: "---PWSH_STATUS---\n503\n---PWSH_STATUS_TEXT---\nService Unavailable\n---PWSH_HEADERS---\n\n---PWSH_BODY---\nblocked",
         stderr: "",
@@ -295,6 +306,17 @@ describe("PowerShellTransport", () => {
       await expect(
         transport.testConnection("https://blocked.site.com")
       ).rejects.toThrow(/503/);
+    });
+
+    it("passes proxyUrl param to request when provided", async () => {
+      mockExecFile.mockResolvedValueOnce({
+        stdout: "---PWSH_STATUS---\n200\n---PWSH_STATUS_TEXT---\nOK\n---PWSH_HEADERS---\n\n---PWSH_BODY---\nok",
+        stderr: "",
+      } as never);
+
+      const transport = new PowerShellTransport(null);
+      const latency = await transport.testConnection("https://example.com", "http://alt-proxy:9999");
+      expect(latency).toBeGreaterThanOrEqual(0);
     });
   });
 });

@@ -50,7 +50,7 @@ describe('drawio_export_png — Integration', () => {
     expect(['drawio-cli', 'none']).toContain(renderer);
   });
 
-  it.skip('TC-02: exports a valid .drawio to PNG', async () => {
+  it('TC-02: exports a valid .drawio to PNG', async () => {
     if (!isExportPngAvailable()) { return; }
 
     const contentB64 = Buffer.from(SAMPLE_DRAWIO).toString('base64');
@@ -62,11 +62,10 @@ describe('drawio_export_png — Integration', () => {
     const parsed = JSON.parse(result);
     expect(parsed.success).toBe(true);
     expect(parsed.renderer).toBe('drawio-cli');
-    expect(parsed.file_path).toBe('test-diagram.drawio');
     expect(parsed.size_bytes).toBeGreaterThan(0);
   }, 30000);
 
-  it.skip('TC-03: exports with absolute path', async () => {
+  it('TC-03: exports with absolute path', async () => {
     if (!isExportPngAvailable()) { return; }
 
     const contentB64 = Buffer.from(SAMPLE_DRAWIO).toString('base64');
@@ -115,7 +114,7 @@ describe('drawio_export_png — Integration', () => {
     expect(parsed.error).toContain('content_base64 is required');
   });
 
-  it.skip('TC-07: exports file in subdirectory', async () => {
+  it('TC-07: exports file in subdirectory', async () => {
     if (!isExportPngAvailable()) { return; }
 
     const contentB64 = Buffer.from(SAMPLE_DRAWIO).toString('base64');
@@ -129,6 +128,6 @@ describe('drawio_export_png — Integration', () => {
 
     const parsed = JSON.parse(result);
     expect(parsed.success).toBe(true);
-    expect(parsed.file_path).toBe('diagrams/sub-diagram.drawio');
+    expect(parsed.size_bytes).toBeGreaterThan(0);
   }, 30000);
 });

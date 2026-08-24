@@ -1,0 +1,7 @@
+case_id,payload_desc,json_payload,expected_result,expected_reason
+UT-08-valid,"Valid fileEdited hook","{""enabled"":true,""name"":""watch-ts"",""description"":""Watch TS files"",""version"":""1"",""when"":{""type"":""fileEdited"",""patterns"":[""**/*.ts""]},""then"":{""type"":""runCommand"",""command"":""npm test""}}","pass",
+UT-08-xor1,"askAgent missing prompt","{""enabled"":true,""name"":""bad-hook"",""when"":{""type"":""promptSubmit""},""then"":{""type"":""askAgent""}}","fail","BR-08: prompt required iff askAgent"
+UT-08-xor2,"runCommand missing command","{""when"":{""type"":""promptSubmit""},""then"":{""type"":""runCommand""}}","fail","BR-08: command required iff runCommand"
+UT-09,"Fenced JSON wrapper","```json\n{""name"":""fenced""}\n```","pass-after-normalize","D-2: strip code fences"
+UT-10,"Unknown top-level key","{""eventType"":""fileEdited"",""name"":""x""}","fail","BR-09: unknown key rejected"
+UT-11,"Patterns on promptSubmit","{""when"":{""type"":""promptSubmit"",""patterns"":[""*.ts""]}}","fail","BR-08: patterns only for file events"

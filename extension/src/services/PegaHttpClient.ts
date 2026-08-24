@@ -1,5 +1,7 @@
 /**
  * PegaHttpClient — Client HTTP giao tiếp giữa Extension, Pega Platform và Backend.
+ * All fetch() calls are transparently routed through the global proxy patch
+ * (global-fetch-patch.ts) which handles curl/powershell/undici modes.
  */
 
 import * as vscode from "vscode";
@@ -522,8 +524,9 @@ export class PegaHttpClient {
       return [];
     }
     try {
-      const data = await this.listApplicationRules(ruleType, className, pageSize, 1);
-      const pxResults = (data.pxResults || data.pxResult || data.rules || data.properties || []) as Record<string, unknown>[];
+      // Use listRules with filter on pyClassName for reliable class scoping
+      const result = await this.listRulesByFilter(ruleType, "pyClassName", className, pageSize, 1);
+      const pxResults = result.pxResults || [];
       return Array.isArray(pxResults) ? pxResults : [];
     } catch (err) {
       console.debug('[PegaHttpClient] Failed to parse rule list response:', (err as Error).message);

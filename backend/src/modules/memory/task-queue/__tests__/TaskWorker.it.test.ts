@@ -245,7 +245,7 @@ describe('TaskWorker Integration Tests', () => {
 
   // IT-04: LLM timeout → fallback extraction
   describe('IT-04: LLM timeout fallback', () => {
-    it.todo('uses fallback extraction when LLM times out, still updates structured_map' /* SA4E-174: fallback behavior changed with code summary routing */, async () => {
+    it('uses fallback extraction when LLM times out, still updates structured_map', async () => {
       vi.mocked(llm.complete).mockRejectedValue(new Error('LLM timeout'));
 
       const id = await engine.insert({
@@ -267,11 +267,10 @@ describe('TaskWorker Integration Tests', () => {
       await (worker as any).processTagEnrichment(task!, payload);
 
       const entry = await engine.findById(id);
-      // SA4E-155: LLM failure marks task as failed, tags NOT updated
-      expect(entry!.tags).toBe('');
+      // SA4E-155: LLM failure triggers fallback extraction which DOES update tags
+      expect(entry!.tags).not.toBe('');
 
       const sm = JSON.parse(entry!.structured_map);
-      expect(sm.fallback_used).toBe(true);
       expect(sm.extraction_meta.fallback_used).toBe(true);
     });
   });
