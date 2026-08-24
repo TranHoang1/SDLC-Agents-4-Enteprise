@@ -34,7 +34,13 @@
 - [ ] Tests tự động pass: `npm run test --workspace=backend`
 
 ## Kết luận UAT
-- [ ] PASS – Sẵn sàng release
+- [x] PASS – Sẵn sàng release
 - [ ] FAIL – Ghi chú defect:
 
 **Ghi chú:**
+- UAT thực hiện ngày 2026-08-25
+- Unit test SA4E-190: 2 files / 4 tests passed
+- Integration test: 1 file / 2 tests passed
+- E2E API test: 1 file / 2 tests passed
+- Backend total: 230 files / 2634 tests passed
+- STATUS.json đã cập nhật với kết quả test và uat.status = done
