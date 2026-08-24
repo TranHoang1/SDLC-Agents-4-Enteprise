@@ -15,6 +15,7 @@ import { validateSession } from '../../admin/db/sessions.js';
 import {
   handleFullIndex, handleFileEvents, handleCancel, handleProgress,
 } from './api-index-decoupled.js';
+import { PegaService } from '../../modules/pega/PegaService.js';
 
 interface SourceFile {
   path: string;
@@ -110,6 +111,12 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
     return handleIngestDocsFromTemp(c, registry, logger, session.userId);
+  });
+  // SA4E-209: Sync Pega rules to KB (graph projection)
+  app.post('/api/index/sync-pega-rules', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleSyncPegaRules(c, registry, logger);
   });
   app.post('/api/index/cancel', async (c) => {
     const session = await requireAuth(c);
@@ -249,6 +256,33 @@ async function handleIngestDocsFromTemp(c: Context, registry: ModuleRegistry, lo
     return c.json({ ingested, errors, total: files.length });
   } catch (err: any) {
     return indexError(c, err, logger, 'Error ingesting documents from Temp');
+  }
+}
+
+/** SA4E-209: Sync indexed Pega rules (symbols) into code graph for a project. */
+async function handleSyncPegaRules(c: Context, registry: ModuleRegistry, logger: Logger) {
+  try {
+    const body = await c.req.json<{ projectId?: string }>();
+    if (!body.projectId) {
+      return c.json({ error: 'projectId is required', action: 'Include projectId in request body' }, 400);
+    }
+    const memModule = registry.getModule('memory') as any;
+    if (!memModule || memModule.status !== 'ready') {
+      return c.json({ error: 'Memory module not ready', action: 'Wait for server initialization' }, 503);
+    }
+    const service = new PegaService(memModule.getEngine());
+    const result = await service.syncIndexedRulesToKb(body.projectId);
+    logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors },
+      '[sync-pega-rules] Pega graph sync complete');
+    return c.json({
+      message: `Synced ${result.synced} pega rules`,
+      synced: result.synced,
+      skipped: result.skipped,
+      errors: result.errors,
+    });
+  } catch (err: any) {
+    logger.error({ err }, '[sync-pega-rules] Failed');
+    return c.json({ error: 'Pega sync failed', details: err.message }, 500);
   }
 }
 
