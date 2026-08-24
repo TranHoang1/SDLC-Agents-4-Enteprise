@@ -334,3 +334,5 @@ Commit: a618e0b → origin/SA4E-193
 - Jira SA4E-193 = DONE + comment 11947; attachments mới nhất = DPG-v1.1 (#11246), RLN-v1.1 (#11247)
 
 **Verdict CORRECTION: COMPLETED — official release = v1.35.0.**
+
+| 11:20 | SM | RELEASE RETARGET v1.35.0 → **v1.37.0** (PO: "Version bây giờ phải là 1.37.0"; tag KHÔNG push remote). Delete local tag v1.35.0; bump ×3 package.json → 1.37.0 + README entry retitle (77378f1); annotated tag v1.37.0 → 77378f1 LOCAL ONLY; RLN v1.2/DPG/STATUS updated (d154303); merge main 6f5bab6; branch pushed. NOTE: fetch re-imported remote tag v1.35.0 (remote untouched per PO); Jira comment #11948 | ✅ |
