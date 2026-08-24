@@ -1,0 +1,6 @@
+test_case_id,diagramName,drawioPath,pngPath,expected_result,description
+TC-004,business-flow,documents/SA4E-190/diagrams/business-flow.drawio,documents/SA4E-190/diagrams/business-flow.png,Files exist,Review artifacts happy path
+TC-310,business-flow,documents/SA4E-190/diagrams/business-flow.drawio,documents/SA4E-190/diagrams/business-flow.png,both exist,Diagrams exist BR-10
+TC-311,requirements,documents/SA4E-190/diagrams/business-flow.drawio,documents/SA4E-190/diagrams/business-flow.png,status done,Status updated BR-11
+TC-203,business-flow,documents/SA4E-190/diagrams/missing.drawio,documents/SA4E-190/diagrams/missing.png,export fail,Diagram export failure
+TC-501,business-flow,documents/SA4E-190/diagrams/business-flow.drawio,documents/SA4E-190/diagrams/business-flow.png,PNG viewable,UI diagram viewable
