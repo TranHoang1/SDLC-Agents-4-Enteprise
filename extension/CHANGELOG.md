@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.38.0] - 2026-08-25
+
+### Added
+- **SA4E-214: Extension-driven Pega Schema Creation** — on-the-fly LLM-enriched schemas created automatically during BFS indexing. `PegaSchemaOrchestrator` drives recursive harness/section fetching with depth limit (5), circuit breaker (>20 sections), and mutex; `SchemaLocalCache` + `SchemaValidator` handle caching and progressive field discovery; `SchemaApiClient` talks to new backend endpoints.
+
+### Changed
+- **Removed "Index Pega Rule Schemas" QuickPick option** — schema creation is now on-the-fly during "Index Pega Rules"; no separate manual step.
+
+### Fixed
+- **PegaSchemaIndexer section extraction** — now discovers sections from `pxRuleReferences` (Rule-HTML-Section) for stream-rendered harnesses that lack `pySections`.
+
 ## [1.37.2] - 2026-08-25
 
 ### Added
