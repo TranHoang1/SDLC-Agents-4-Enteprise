@@ -245,6 +245,10 @@ MIT
 
 ## Changelog
 
+### v1.38.0 (2026-08-25)
+
+- **SA4E-214: Extension-driven Schema Creation for Pega Rule Types** — On-the-fly LLM-enriched schemas during BFS indexing (removed separate "Index Pega Rule Schema" command). Dual-strategy harness analysis (rule-based + LLM fallback), recursive section discovery, progressive schema enrichment, schema-guided code enrichment. Fixed TaskWorker delegation, enrichment percent rounding, admin static MIME types, LLM timeout configurable (120s default).
+
 ### v1.37.2 (2026-08-25)
 
 - **SA4E-188: Skill Auto-Invoke** — intent detection scores skill descriptions against the prompt and auto-injects the best-matching `SKILL.md` into context (no `/skill:` needed). Skipped for ticket/agent/direct commands.
