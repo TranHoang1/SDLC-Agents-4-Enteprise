@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.37.2.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.38.0.vsix
 ```
 
 ### 3. Use
@@ -65,6 +65,10 @@ MIT
 ---
 
 ## Changelog
+
+### v1.38.0 (2026-08-25)
+
+- **SA4E-214: Extension-driven Schema Creation for Pega Rule Types** — On-the-fly LLM-enriched schemas created automatically during BFS indexing (no separate "Index Pega Rule Schema" step). Dual-strategy harness analysis (rule-based `HarnessParser` + `LlmSectionExtractor` fallback for stream-rendered harnesses), recursive section discovery with depth/circuit-breaker safety, progressive schema enrichment, and schema-guided code enrichment for accurate summary/pseudo_code. Fixed: `TaskWorker` now delegates `CODE_ENRICHMENT` to `CodeEnrichmentHandler` (Pega flow rules now get summary + pseudo_code); enrichment progress uses `Math.floor`; admin static route serves vendor assets with correct MIME type. Backend 2634 tests ✓.
 
 ### v1.37.2 (2026-08-24)
 
