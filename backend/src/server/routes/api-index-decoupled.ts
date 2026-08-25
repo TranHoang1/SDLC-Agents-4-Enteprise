@@ -9,12 +9,12 @@
 import type { Context } from 'hono';
 import type { Logger } from 'pino';
 import * as fs from 'fs';
-import * as os from 'os';
 import * as path from 'path';
 import type { ModuleRegistry } from '../../modules/ModuleRegistry.js';
 import type { CodeIntelModule } from '../../modules/code-intel/CodeIntelModule.js';
 import { IndexOperationManager } from '../../engine/indexer/index-operation-manager.js';
 import { loadConfig } from '../../config/index.js';
+import { resolveIndexTempDir } from './index-temp-dir.js';
 import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
 import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 import type { FileEvent, FileEventsResult } from '../../engine/indexer/types.js';
@@ -41,12 +41,14 @@ function getManager(registry: ModuleRegistry): IndexOperationManager | null {
 }
 
 /** Resolve project scope from request headers. */
-function resolveScope(c: Context, sessionUserId?: string) {
+async function resolveScope(c: Context, sessionUserId?: string) {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
   const userId = sessionUserId || 'default';
-  const kiroTempDir = process.env.KIRO_TEMP_DIR || path.join(os.tmpdir(), 'kiro');
-  const workspace = path.join(kiroTempDir, userId, projectId);
+  // Use the configured indexTempDir (single source of truth) instead of a
+  // hardcoded KIRO_TEMP_DIR/kiro default.
+  const indexTempDir = await resolveIndexTempDir();
+  const workspace = path.join(indexTempDir, userId, projectId);
   if (!fs.existsSync(workspace)) fs.mkdirSync(workspace, { recursive: true });
   return { projectId, workspace };
 }
@@ -57,7 +59,7 @@ function resolveScope(c: Context, sessionUserId?: string) {
  */
 export async function handleFullIndex(c: Context, registry: ModuleRegistry, logger: Logger, userId?: string) {
   try {
-    const scope = resolveScope(c, userId);
+    const scope = await resolveScope(c, userId);
     const manager = getManager(registry);
     if (!manager) return c.json({ error: 'Code intelligence not ready' }, 503);
 
@@ -90,7 +92,7 @@ export async function handleFullIndex(c: Context, registry: ModuleRegistry, logg
  */
 export async function handleFileEvents(c: Context, registry: ModuleRegistry, logger: Logger) {
   try {
-    const scope = resolveScope(c);
+    const scope = await resolveScope(c);
     const body = await c.req.json() as { events: FileEvent[] };
     const { events } = body;
 
@@ -163,7 +165,7 @@ async function processFileEvent(
  */
 export async function handleCancel(c: Context, registry: ModuleRegistry, logger: Logger) {
   try {
-    const scope = resolveScope(c);
+    const scope = await resolveScope(c);
     const manager = getManager(registry);
     if (!manager) return c.json({ error: 'Code intelligence not ready' }, 503);
 
@@ -188,7 +190,7 @@ export async function handleCancel(c: Context, registry: ModuleRegistry, logger:
  * @returns Current progress snapshot (idle if no operation).
  */
 export async function handleProgress(c: Context, registry: ModuleRegistry, _logger: Logger) {
-  const scope = resolveScope(c);
+  const scope = await resolveScope(c);
   const manager = getManager(registry);
   if (!manager) return c.json({ error: 'Code intelligence not ready' }, 503);
 
