@@ -1,0 +1,130 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-214 — Component Diagram: Schema Creation Pipeline" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="300" y="10" width="560" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Row 1: Trigger Layer -->
+    <mxCell id="r1_label" value="Trigger Layer (Extension)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="40" y="50" width="200" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="bfs" value="&lt;b&gt;PegaBfsIndexer&lt;/b&gt;&#xa;&#xa;• BFS loop&#xa;• First-encounter detection&#xa;• Calls orchestrator on miss" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="40" y="80" width="200" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="ingester" value="&lt;b&gt;PegaStreamIngester&lt;/b&gt;&#xa;&#xa;• POST rule to backend&#xa;• Returns unresolvedDeps" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="280" y="80" width="190" height="90" as="geometry"/>
+    </mxCell>
+    <!-- Row 2: Orchestration Layer -->
+    <mxCell id="r2_label" value="Orchestration Layer (Extension — NEW)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="40" y="200" width="300" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="orch" value="&lt;b&gt;PegaSchemaOrchestrator&lt;/b&gt;&#xa;&#xa;• createSchema(ruleType)&#xa;• Recursive section fetch&#xa;• Mutex (1 at a time)&#xa;• Circuit breaker (20/level)&#xa;• 60s total timeout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="40" y="230" width="210" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="cache" value="&lt;b&gt;SchemaLocalCache&lt;/b&gt;&#xa;&#xa;• Memory Map (session)&#xa;• Disk files (.pega-schemas/)&#xa;• Read-first (fast path)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="290" y="230" width="190" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="validator" value="&lt;b&gt;SchemaValidator&lt;/b&gt;&#xa;&#xa;• findNewFields()&#xa;• Append-only (BR-07)&#xa;• ≤50ms per instance" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="520" y="230" width="180" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="api_client" value="&lt;b&gt;SchemaApiClient&lt;/b&gt;&#xa;&#xa;• analyze() / store()&#xa;• find() / update()&#xa;• Uses IndexerHttpClient" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="40" y="380" width="190" height="100" as="geometry"/>
+    </mxCell>
+    <!-- Row 3: Backend Analysis Layer -->
+    <mxCell id="r3_label" value="Analysis Layer (Backend — NEW/MODIFIED)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="40" y="510" width="300" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="routes" value="&lt;b&gt;pega-schema-routes&lt;/b&gt;&#xa;&#xa;• POST /analyze&#xa;• POST /store&#xa;• GET /find&#xa;• PATCH /update" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="40" y="540" width="160" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="analyze_svc" value="&lt;b&gt;SchemaAnalyzeService&lt;/b&gt;&#xa;&#xa;• Dual-strategy coord&#xa;• Rule-based → LLM fallback&#xa;• Field extraction&#xa;• Hint derivation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="240" y="540" width="180" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="storage_svc" value="&lt;b&gt;SchemaStorageService&lt;/b&gt;&#xa;&#xa;• KB store/find/update&#xa;• knowledge_entries table&#xa;• type=PEGA_SCHEMA_ENRICHED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="460" y="540" width="190" height="110" as="geometry"/>
+    </mxCell>
+    <mxCell id="aggregator" value="&lt;b&gt;SchemaAggregator&lt;/b&gt;&#xa;&#xa;• Merge fields from&#xa;  multiple analyses&#xa;• Build EnrichedSchema" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="690" y="540" width="170" height="110" as="geometry"/>
+    </mxCell>
+    <!-- Row 4: Existing Components (Modified) -->
+    <mxCell id="r4_label" value="Existing Components (MODIFIED)" style="text;html=1;align=left;verticalAlign=middle;resizable=0;points=[];strokeColor=none;fillColor=none;fontSize=10;fontStyle=3;fontColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="40" y="680" width="300" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="parser" value="&lt;b&gt;HarnessParser&lt;/b&gt;&#xa;(MODIFIED)&#xa;&#xa;• Stream-rendered detect&#xa;• LLM fallback trigger" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="40" y="710" width="170" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="llm_ext" value="&lt;b&gt;LlmSectionExtractor&lt;/b&gt;&#xa;(Existing)&#xa;&#xa;• LLM-based section discovery&#xa;• 30s timeout" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="250" y="710" width="180" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="enrichment" value="&lt;b&gt;CodeEnrichmentHandler&lt;/b&gt;&#xa;(MODIFIED)&#xa;&#xa;• Schema context injection&#xa;• PEGA_SUMMARY strategy" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="470" y="710" width="190" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="kb_db" value="KB&#xa;(SQLite/PG)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="710" y="710" width="100" height="70" as="geometry"/>
+    </mxCell>
+    <!-- Edges -->
+    <!-- BFS → Orchestrator -->
+    <mxCell id="e1" value="first encounter" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="bfs" target="orch">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- BFS → Validator -->
+    <mxCell id="e2" value="each rule" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="bfs" target="validator">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Orchestrator → Cache -->
+    <mxCell id="e3" value="check/save" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="orch" target="cache">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Orchestrator → ApiClient -->
+    <mxCell id="e4" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="orch" target="api_client">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- ApiClient → Routes -->
+    <mxCell id="e5" value="HTTP" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#82b366;" edge="1" parent="1" source="api_client" target="routes">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Routes → AnalyzeSvc -->
+    <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="routes" target="analyze_svc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Routes → StorageSvc -->
+    <mxCell id="e7" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="routes" target="storage_svc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- AnalyzeSvc → Parser -->
+    <mxCell id="e8" value="strategy 1" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="analyze_svc" target="parser">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- AnalyzeSvc → LlmExt -->
+    <mxCell id="e9" value="strategy 2&#xa;(fallback)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;fontSize=9;" edge="1" parent="1" source="analyze_svc" target="llm_ext">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- StorageSvc → KB -->
+    <mxCell id="e10" value="SQL" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;" edge="1" parent="1" source="storage_svc" target="kb_db">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Enrichment → StorageSvc -->
+    <mxCell id="e11" value="load schema" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="enrichment" target="storage_svc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Validator → Cache -->
+    <mxCell id="e12" value="read schema" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;" edge="1" parent="1" source="validator" target="cache">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Legend -->
+    <mxCell id="leg_new" value="NEW" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="900" y="80" width="60" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_mod" value="MODIFIED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="900" y="115" width="80" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_exist" value="EXISTING" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="900" y="150" width="80" height="25" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg_entry" value="ENTRY POINT" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="900" y="185" width="90" height="25" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

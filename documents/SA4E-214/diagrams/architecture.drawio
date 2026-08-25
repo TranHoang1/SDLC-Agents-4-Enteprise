@@ -1,0 +1,152 @@
+<mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <!-- Title -->
+    <mxCell id="title" value="SA4E-214 — Architecture Overview: Extension-driven Schema Creation" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="250" y="10" width="680" height="30" as="geometry"/>
+    </mxCell>
+    <!-- Pega Server (External) -->
+    <mxCell id="pega" value="Pega Server&#xa;(External)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="280" width="120" height="80" as="geometry"/>
+    </mxCell>
+    <!-- Extension Boundary -->
+    <mxCell id="ext_boundary" value="Extension (VS Code / Kiro)&#xa;— Has Internet Access —" style="swimlane;startSize=40;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=11;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="220" y="60" width="420" height="700" as="geometry"/>
+    </mxCell>
+    <!-- PegaBfsIndexer -->
+    <mxCell id="bfs" value="PegaBfsIndexer&#xa;(BFS Loop)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="140" y="60" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- PegaSchemaOrchestrator -->
+    <mxCell id="orch" value="PegaSchemaOrchestrator&#xa;(Recursive Discovery)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="100" y="170" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <!-- SchemaLocalCache -->
+    <mxCell id="cache" value="SchemaLocalCache&#xa;(.pega-schemas/)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=10;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="20" y="300" width="130" height="60" as="geometry"/>
+    </mxCell>
+    <!-- SchemaValidator -->
+    <mxCell id="validator" value="SchemaValidator&#xa;(Progressive)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="250" y="300" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- SchemaApiClient -->
+    <mxCell id="api_client" value="SchemaApiClient&#xa;(HTTP → Backend)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="130" y="420" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- PegaHttpClient -->
+    <mxCell id="pega_client" value="PegaHttpClient&#xa;(→ Pega Server)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="20" y="170" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- PegaStreamIngester -->
+    <mxCell id="ingester" value="PegaStreamIngester&#xa;(Rule Ingest)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="250" y="170" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <!-- OutputChannel -->
+    <mxCell id="output" value="OutputChannel&#xa;(Progress Log)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;" vertex="1" parent="ext_boundary">
+      <mxGeometry x="20" y="60" width="110" height="50" as="geometry"/>
+    </mxCell>
+    <!-- Backend Boundary -->
+    <mxCell id="be_boundary" value="Backend (Node.js — localhost:48721)&#xa;— No Internet Access —" style="swimlane;startSize=40;fillColor=none;strokeColor=#82b366;html=1;fontStyle=1;fontSize=11;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="700" y="60" width="430" height="700" as="geometry"/>
+    </mxCell>
+    <!-- Schema Routes -->
+    <mxCell id="routes" value="/api/v1/pega/schema/*&#xa;(Hono Routes)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="be_boundary">
+      <mxGeometry x="130" y="60" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <!-- SchemaAnalyzeService -->
+    <mxCell id="analyze_svc" value="SchemaAnalyzeService&#xa;(Dual-Strategy)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="be_boundary">
+      <mxGeometry x="40" y="170" width="170" height="50" as="geometry"/>
+    </mxCell>
+    <!-- HarnessParser -->
+    <mxCell id="parser" value="HarnessParser&#xa;(Rule-based)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="be_boundary">
+      <mxGeometry x="20" y="280" width="130" height="50" as="geometry"/>
+    </mxCell>
+    <!-- LlmSectionExtractor -->
+    <mxCell id="llm_ext" value="LlmSectionExtractor&#xa;(LLM Fallback)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="be_boundary">
+      <mxGeometry x="170" y="280" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- SchemaStorageService -->
+    <mxCell id="storage_svc" value="SchemaStorageService&#xa;(KB CRUD)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" vertex="1" parent="be_boundary">
+      <mxGeometry x="250" y="170" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- SchemaAggregator -->
+    <mxCell id="aggregator" value="SchemaAggregator&#xa;(Merge Fields)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="be_boundary">
+      <mxGeometry x="130" y="390" width="150" height="50" as="geometry"/>
+    </mxCell>
+    <!-- CodeEnrichmentHandler -->
+    <mxCell id="enrichment" value="CodeEnrichmentHandler&#xa;(PEGA_SUMMARY)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" vertex="1" parent="be_boundary">
+      <mxGeometry x="40" y="500" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <!-- KB Database -->
+    <mxCell id="kb_db" value="KB (SQLite/PG)&#xa;knowledge_entries" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" vertex="1" parent="be_boundary">
+      <mxGeometry x="270" y="380" width="130" height="80" as="geometry"/>
+    </mxCell>
+    <!-- LLM Runtime -->
+    <mxCell id="llm" value="Local LLM&#xa;(LM Studio / Ollama)" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;size=15;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="be_boundary">
+      <mxGeometry x="250" y="500" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <!-- EDGES -->
+    <!-- BFS → Orchestrator: triggers schema creation -->
+    <mxCell id="e1" value="triggers" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="ext_boundary" source="bfs" target="orch">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Orchestrator → Cache: read/write -->
+    <mxCell id="e2" value="read/write" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="ext_boundary" source="orch" target="cache">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Orchestrator → ApiClient -->
+    <mxCell id="e3" value="analyze/store" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="ext_boundary" source="orch" target="api_client">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- BFS → Validator: validate each rule -->
+    <mxCell id="e4" value="validate" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=1;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="ext_boundary" source="bfs" target="validator">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Routes → AnalyzeService -->
+    <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="be_boundary" source="routes" target="analyze_svc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Routes → StorageService -->
+    <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="be_boundary" source="routes" target="storage_svc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- AnalyzeService → HarnessParser -->
+    <mxCell id="e7" value="rule-based" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.25;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="be_boundary" source="analyze_svc" target="parser">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- AnalyzeService → LlmExtractor -->
+    <mxCell id="e8" value="LLM fallback" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;dashed=1;fontSize=9;exitX=0.75;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="be_boundary" source="analyze_svc" target="llm_ext">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- StorageService → KB -->
+    <mxCell id="e9" value="CRUD" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" edge="1" parent="be_boundary" source="storage_svc" target="kb_db">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- EnrichmentHandler → StorageService -->
+    <mxCell id="e10" value="load schema" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;fontSize=9;exitX=1;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="be_boundary" source="enrichment" target="storage_svc">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- LlmExtractor → LLM -->
+    <mxCell id="e11" value="prompt" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=1;exitY=1;entryX=0;entryY=0.5;" edge="1" parent="be_boundary" source="llm_ext" target="llm">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- EnrichmentHandler → LLM -->
+    <mxCell id="e12" value="enrich" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;exitX=0.5;exitY=1;entryX=0;entryY=1;" edge="1" parent="be_boundary" source="enrichment" target="llm">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <!-- Cross-boundary: Pega → PegaClient -->
+    <mxCell id="e_pega" value="HTTP&#xa;(harness JSON)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#d6b656;" edge="1" parent="1" source="pega" target="ext_boundary">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="220" y="320" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+    <!-- Cross-boundary: ApiClient → Routes -->
+    <mxCell id="e_api" value="HTTP localhost:48721" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=block;endFill=1;fontSize=9;strokeColor=#82b366;" edge="1" parent="1" source="ext_boundary" target="be_boundary">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="640" y="540" as="sourcePoint"/>
+        <mxPoint x="700" y="540" as="targetPoint"/>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

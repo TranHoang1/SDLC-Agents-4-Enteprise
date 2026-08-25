@@ -106,25 +106,65 @@ export class PegaSchemaIndexer {
         pegaClient: PegaHttpClientType, harnessJson: Record<string, unknown>, ruleType: string,
     ): Promise<Record<string, Record<string, unknown>>> {
         const result: Record<string, Record<string, unknown>> = {};
+
+        // Build map: sectionName → appliesTo class (from pxRuleReferences)
+        const sectionClassMap = new Map<string, string>();
+        const refs = harnessJson.pxRuleReferences;
+        if (Array.isArray(refs)) {
+            for (const ref of refs) {
+                if (!ref || typeof ref !== "object") continue;
+                const r = ref as Record<string, unknown>;
+                if (r.pxRuleObjClass === "Rule-HTML-Section" && typeof r.pyRuleName === "string") {
+                    const cls = (r.pxRuleClassName as string) || ruleType;
+                    sectionClassMap.set(r.pyRuleName as string, cls);
+                }
+            }
+        }
+
         for (const name of this.extractSectionNames(harnessJson)) {
+            const appliesTo = sectionClassMap.get(name) || ruleType;
             try {
-                const json = await pegaClient.queryRuleByTriple("Rule-HTML-Section", ruleType, name);
+                const json = await pegaClient.queryRuleByTriple("Rule-HTML-Section", appliesTo, name);
                 if (json) { result[name] = json; }
             } catch (err) { console.debug('[PegaSchemaIndexer] section not found — non-fatal :', (err as Error).message); }
         }
         return result;
     }
 
-    /** Parse section references from harness JSON (pyTemplateName, pySectionBody). */
+    /**
+     * Parse section references from harness JSON.
+     * Strategy: 1) pyTemplateName regex, 2) pySectionBody regex,
+     * 3) pxRuleReferences where pxRuleObjClass=Rule-HTML-Section (fallback for stream-rendered harnesses).
+     */
     private extractSectionNames(harnessJson: Record<string, unknown>): string[] {
         const names = new Set<string>();
         const raw = JSON.stringify(harnessJson);
+
+        // Strategy 1: pyTemplateName in nested section bodies
         for (const m of raw.matchAll(/"pyTemplateName"\s*:\s*"([^"]+)"/g)) {
             if (m[1] && m[1] !== "undefined" && !m[1].startsWith("pz")) { names.add(m[1]); }
         }
+
+        // Strategy 2: pySectionBody string references
         for (const m of raw.matchAll(/"pySectionBody"\s*:\s*"([^"]+)"/g)) {
             if (m[1] && m[1] !== "undefined") { names.add(m[1]); }
         }
+
+        // Strategy 3: pxRuleReferences with Rule-HTML-Section (covers stream-rendered RuleForms)
+        const refs = harnessJson.pxRuleReferences;
+        if (Array.isArray(refs)) {
+            for (const ref of refs) {
+                if (!ref || typeof ref !== "object") continue;
+                const r = ref as Record<string, unknown>;
+                if (r.pxRuleObjClass === "Rule-HTML-Section" && typeof r.pyRuleName === "string") {
+                    const sectionName = r.pyRuleName as string;
+                    if (sectionName && !sectionName.startsWith("pz")) {
+                        names.add(sectionName);
+                    }
+                }
+            }
+        }
+
         return Array.from(names);
     }
 

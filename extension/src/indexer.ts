@@ -109,9 +109,6 @@ async function showIndexOptions(): Promise<string[] | undefined> {
     const isPega = root ? require('fs').existsSync(require('path').join(root, 'pega-project.json')) : false;
 
     const items: Array<{ label: string; description: string; id: string; picked: boolean }> = [];
-    if (isPega) {
-        items.push({ label: "$(symbol-class) Index Pega Rule Schemas", description: "Generate JSON Schemas from Pega RuleForms (run first)", id: "schemas", picked: true });
-    }
     items.push(
         { label: "$(code) Index Source Code", description: "Re-index all code symbols", id: "code", picked: true },
         { label: "$(book) Index Documents", description: "Index SDLC documents into KB", id: "documents", picked: true },

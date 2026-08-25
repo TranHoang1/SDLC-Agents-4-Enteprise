@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-1.37.2-blue?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/version-1.38.0-blue?style=for-the-badge" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green?style=for-the-badge" alt="License">
   <img src="https://img.shields.io/badge/agents-9-purple?style=for-the-badge" alt="Agents">
   <img src="https://img.shields.io/badge/KB_Panels-5-orange?style=for-the-badge" alt="KB Panels">
@@ -48,10 +48,10 @@ npm run esbuild
 npx vsce package --no-dependencies
 
 # Install into Kiro
-kiro --install-extension sdlc-agents-4-enterprise-1.37.2.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.38.0.vsix
 
 # Or VS Code
-code --install-extension sdlc-agents-4-enterprise-1.37.2.vsix
+code --install-extension sdlc-agents-4-enterprise-1.38.0.vsix
 ```
 
 3. **Verify connection**: Command Palette → "SDLC Agents: Settings" → Server Settings → Test Connection
@@ -244,6 +244,10 @@ MIT
 ---
 
 ## Changelog
+
+### v1.38.0 (2026-08-25)
+
+- **SA4E-214: Extension-driven Schema Creation for Pega Rule Types** — On-the-fly LLM-enriched schemas during BFS indexing (removed separate "Index Pega Rule Schema" command). Dual-strategy harness analysis (rule-based + LLM fallback), recursive section discovery, progressive schema enrichment, schema-guided code enrichment. Fixed TaskWorker delegation, enrichment percent rounding, admin static MIME types, LLM timeout configurable (120s default).
 
 ### v1.37.2 (2026-08-25)
 
