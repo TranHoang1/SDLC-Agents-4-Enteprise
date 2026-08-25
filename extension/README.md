@@ -245,8 +245,9 @@ MIT
 
 ## Changelog
 
-### v1.37.2 (2026-08-24)
+### v1.37.2 (2026-08-25)
 
+- **SA4E-188: Skill Auto-Invoke** — intent detection scores skill descriptions against the prompt and auto-injects the best-matching `SKILL.md` into context (no `/skill:` needed). Skipped for ticket/agent/direct commands.
 - **Proxy Fix: global-fetch-patch defensive fallback** — Fixed silent proxy bypass when `CurlHttpAdapter.isCurlMode()` threw during factory lookup. Added `getActiveProxyMode()` defensive check so curl/powershell mode requests never fall through to direct fetch.
 - **Proxy: Cookie jar persistence** — CurlHttpAdapter and PowerShellHttpAdapter now persist cookies at `{workspace}/.code-intel/curl-cookies.txt` / `pwsh-session.xml` for session reuse across subprocess calls.
 - **Proxy: followRedirects** — `executeCurl()` in global-fetch-patch now respects `redirect: "manual"` from callers; defaults to follow (matching native fetch behavior).
