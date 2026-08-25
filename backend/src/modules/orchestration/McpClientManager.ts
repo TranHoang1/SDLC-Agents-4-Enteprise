@@ -21,6 +21,8 @@ export class McpClientManager {
   private toolsToServer: Map<string, string> = new Map();
   private proxiedTools: ToolDefinition[] = [];
   private serverConfigs: Map<string, ServerConfig> = new Map();
+  /** Tool names provided locally by the orchestrator/registry — child servers must never shadow these. */
+  private reservedToolNames: Set<string> = new Set();
   private logger: Logger;
   private healthConfig: HealthCheckConfig;
   private stateTracker: ConnectionStateTracker;
@@ -82,6 +84,13 @@ export class McpClientManager {
   getServersStatus(): ServerStatusEntry[] {
     return this.stateTracker.getAllStatuses((name) => this.getServerToolCount(name));
   }
+
+  /**
+   * Reserve a set of tool names that are provided locally by the orchestrator/registry.
+   * Any child server attempting to register a tool with one of these names will be skipped,
+   * preventing it from shadowing the locally-provided (correct) handler. SA4E-218.
+   */
+  setReservedToolNames(names: Set<string>): void { this.reservedToolNames = names; }
 
   ownsTool(toolName: string): boolean { return this.toolsToServer.has(toolName); }
 
@@ -228,6 +237,11 @@ export class McpClientManager {
   private async registerServerTools(name: string, client: Client): Promise<void> {
     const toolsResult = await client.listTools();
     for (const tool of toolsResult.tools ?? []) {
+      // SA4E-218: never allow a child server to shadow a locally-provided (reserved) tool.
+      if (this.reservedToolNames.has(tool.name)) {
+        this.logger.warn({ tool: tool.name, server: name }, 'Skipping child tool registration: name conflicts with a locally-provided (reserved) tool — preventing shadowing');
+        continue;
+      }
       this.toolsToServer.set(tool.name, name);
       this.proxiedTools.push({
         name: tool.name, description: tool.description ?? '',
