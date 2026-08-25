@@ -2,9 +2,15 @@
  * SA4E-95 - HarnessParser: recursive descent parser for Pega harness/section hierarchy.
  * Walks: Harness -> pySections -> pySectionBody -> pyRows -> pyCells -> FIELD
  * Implements BR-01, BR-09, BR-15. Field extraction delegated to FieldExtractor.
+ *
+ * Dual-strategy section discovery:
+ * 1. Rule-based: walk pySections, resolve pxRuleReferences
+ * 2. LLM-based: ask LLM to identify sections/fields from raw harness JSON
+ * Results are merged (union) to minimize information loss.
  */
 import type { ParsedHarness, PageContext } from '../models/ParsedHarness.js';
 import type { ParsedSection, BodyType } from '../models/ParsedSection.js';
+import type { ExtractedField } from '../models/ExtractedField.js';
 import type { RepeatDefinition } from '../models/RepeatDefinition.js';
 import type { ResolvedContext } from '../models/ResolvedContext.js';
 import type { TemplateMarker } from '../models/TemplateMarker.js';
@@ -15,6 +21,24 @@ import { FieldExtractor } from './FieldExtractor.js';
 
 /** Internal parse context passed through recursion */
 interface ParseContext { primaryClass: string; contextPages: PageContext[]; ruleType: string; }
+
+/** LLM-extracted section info (output from LLM analysis) */
+export interface LlmExtractedSection {
+  name: string;
+  description: string;
+  fields: Array<{ propertyName: string; type: string; description: string; required: boolean }>;
+}
+
+/** Optional LLM service interface for section extraction. */
+export interface ILlmSectionExtractor {
+  /**
+   * Ask LLM to analyze raw harness JSON and identify sections + fields.
+   * @param harnessJson Raw harness JSON
+   * @param ruleType The rule type (e.g. "Rule-Obj-Flow")
+   * @returns Array of LLM-identified sections with fields
+   */
+  extractSections(harnessJson: Record<string, unknown>, ruleType: string): Promise<LlmExtractedSection[]>;
+}
 
 /** Interface for the harness parser */
 export interface IHarnessParser {
@@ -30,7 +54,8 @@ export class HarnessParser implements IHarnessParser {
   constructor(
     private readonly fetcher: HarnessFetcher,
     private readonly hierarchyResolver: IClassHierarchyResolver,
-    private readonly contextResolver: IPageContextResolver
+    private readonly contextResolver: IPageContextResolver,
+    private readonly llmExtractor?: ILlmSectionExtractor,
   ) {}
 
   /** Parse a full harness JSON into intermediate representation */
@@ -40,7 +65,26 @@ export class HarnessParser implements IHarnessParser {
     const primaryClass = String(harnessJson.pyClassName ?? ruleType);
     const contextPages = this.extractContextPages(harnessJson);
     const ctx: ParseContext = { primaryClass, contextPages, ruleType };
-    const sections = await this.parseSections(harnessJson, ctx, 0, new Set());
+
+    // Strategy 1: Rule-based section discovery
+    let ruleSections = await this.parseSections(harnessJson, ctx, 0, new Set());
+
+    // Fallback: stream-rendered harnesses → resolve from pxRuleReferences
+    if (ruleSections.length === 0) {
+      ruleSections = await this.resolveReferencedSections(harnessJson, ctx);
+    }
+
+    // SA4E-214 Phase D: Detect stream-rendered harness (pySourceStream present) —
+    // force LLM extraction when standard parse is empty, even if no pxRuleReferences
+    const isStreamRendered = Boolean(harnessJson.pySourceStream) && ruleSections.length === 0;
+
+    // Strategy 2: LLM-based section discovery (complements rule-based)
+    // For stream-rendered harnesses, LLM is the primary strategy (not just supplement)
+    const llmSections = await this.extractSectionsViaLlm(harnessJson, ruleType, ctx);
+
+    // Merge: union of both strategies
+    const sections = this.mergeSections(ruleSections, llmSections);
+
     return {
       ruleType, primaryClass, contextPages, sections,
       templateMarkers: [...this.templateMarkers],
@@ -50,6 +94,114 @@ export class HarnessParser implements IHarnessParser {
         ruleSetVersion: String(harnessJson.pyRuleSetVersion ?? ''),
       },
     };
+  }
+
+  /**
+   * Strategy 2: LLM-based extraction.
+   * Returns ParsedSection[] from LLM analysis. Non-fatal: returns [] on failure.
+   */
+  private async extractSectionsViaLlm(
+    harnessJson: Record<string, unknown>, ruleType: string, ctx: ParseContext,
+  ): Promise<ParsedSection[]> {
+    if (!this.llmExtractor) return [];
+    try {
+      const llmResult = await this.llmExtractor.extractSections(harnessJson, ruleType);
+      return llmResult.map(s => this.convertLlmSection(s, ctx));
+    } catch {
+      return []; // LLM failure is non-fatal — rule-based output still available
+    }
+  }
+
+  /** Convert LLM output to ParsedSection format. */
+  private convertLlmSection(llmSection: LlmExtractedSection, ctx: ParseContext): ParsedSection {
+    const pageCtx: ResolvedContext = { className: ctx.primaryClass, objectPath: '', source: 'primary' };
+    const fields: ExtractedField[] = llmSection.fields.map(f => ({
+      propertyName: f.propertyName,
+      pyFormat: f.type || 'pxTextInput',
+      readOnly: false,
+      label: f.description,
+      required: f.required,
+      pageContext: ctx.primaryClass,
+    }));
+    return {
+      name: llmSection.name,
+      sourceClass: ctx.primaryClass,
+      bodyType: 'INCLUDE',
+      pageContext: pageCtx,
+      fields,
+      children: [],
+      depth: 0,
+    };
+  }
+
+  /**
+   * Merge rule-based and LLM-based sections.
+   * LLM sections supplement rule-based: add new sections not found by rules,
+   * and add new fields to existing sections.
+   */
+  private mergeSections(ruleSections: ParsedSection[], llmSections: ParsedSection[]): ParsedSection[] {
+    if (llmSections.length === 0) return ruleSections;
+    if (ruleSections.length === 0) return llmSections;
+
+    const merged = [...ruleSections];
+    const existingNames = new Set(ruleSections.map(s => s.name.toLowerCase()));
+
+    for (const llmSection of llmSections) {
+      const existing = merged.find(s => s.name.toLowerCase() === llmSection.name.toLowerCase());
+      if (existing) {
+        // Merge fields: add LLM fields not already in rule-based section
+        const existingFieldNames = new Set(existing.fields.map(f => f.propertyName));
+        for (const field of llmSection.fields) {
+          if (!existingFieldNames.has(field.propertyName)) {
+            existing.fields.push(field);
+          }
+        }
+      } else {
+        // New section from LLM — add it
+        merged.push(llmSection);
+      }
+    }
+    return merged;
+  }
+
+  /**
+   * Fallback for stream-rendered harnesses (pySourceStream):
+   * Extract section names from pxRuleReferences and resolve them via hierarchy resolver.
+   */
+  private async resolveReferencedSections(
+    harnessJson: Record<string, unknown>, ctx: ParseContext
+  ): Promise<ParsedSection[]> {
+    const refs = harnessJson.pxRuleReferences;
+    if (!Array.isArray(refs)) return [];
+
+    const sectionNames: string[] = [];
+    for (const ref of refs) {
+      if (!ref || typeof ref !== 'object') continue;
+      const r = ref as Record<string, unknown>;
+      if (r.pxRuleObjClass === 'Rule-HTML-Section' && typeof r.pyRuleName === 'string') {
+        const name = r.pyRuleName as string;
+        if (name && !name.startsWith('pz')) sectionNames.push(name);
+      }
+    }
+
+    const results: ParsedSection[] = [];
+    const visited = new Set<string>();
+    for (const sectionName of sectionNames) {
+      if (visited.has(sectionName)) continue;
+      visited.add(sectionName);
+      try {
+        const resolved = await this.hierarchyResolver.resolveSection(sectionName, ctx.primaryClass);
+        if (!resolved) continue;
+        const pageCtx = this.contextResolver.resolve('', ctx.contextPages, ctx.primaryClass);
+        const fields = this.fieldExtractor.extractFromJson(resolved.sectionJson, pageCtx);
+        const children = await this.parseSections(resolved.sectionJson, ctx, 1, new Set(visited));
+        results.push({
+          name: sectionName, sourceClass: resolved.resolvedClass, bodyType: 'INCLUDE',
+          pageContext: pageCtx, fields, children, depth: 0,
+        });
+      } catch { /* non-fatal: section not resolvable */ }
+    }
+    return results;
   }
 
   private extractContextPages(json: Record<string, unknown>): PageContext[] {
