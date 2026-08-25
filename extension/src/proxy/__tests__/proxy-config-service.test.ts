@@ -119,18 +119,18 @@ describe("ProxyConfigService", () => {
     expect(state.detectedBypass).toBeNull();
   });
 
-  it("setMode updates the proxy.mode setting at Global scope", async () => {
+  it("setMode updates the proxy.mode setting at Workspace scope", async () => {
     const service = new ProxyConfigService(secrets);
     await service.setMode("none");
-    expect(cfg.update).toHaveBeenCalledWith("proxy.mode", "none", vscode.ConfigurationTarget.Global);
+    expect(cfg.update).toHaveBeenCalledWith("proxy.mode", "none", vscode.ConfigurationTarget.Workspace);
   });
 
-  it("saveProxy updates host, port, and bypass at Global scope", async () => {
+  it("saveProxy updates host, port, and bypass at Workspace scope", async () => {
     const service = new ProxyConfigService(secrets);
     await service.saveProxy("proxy.corp", 3128, "*.internal,localhost");
-    expect(cfg.update).toHaveBeenCalledWith("proxy.host", "proxy.corp", vscode.ConfigurationTarget.Global);
-    expect(cfg.update).toHaveBeenCalledWith("proxy.port", 3128, vscode.ConfigurationTarget.Global);
-    expect(cfg.update).toHaveBeenCalledWith("proxy.bypass", "*.internal,localhost", vscode.ConfigurationTarget.Global);
+    expect(cfg.update).toHaveBeenCalledWith("proxy.host", "proxy.corp", vscode.ConfigurationTarget.Workspace);
+    expect(cfg.update).toHaveBeenCalledWith("proxy.port", 3128, vscode.ConfigurationTarget.Workspace);
+    expect(cfg.update).toHaveBeenCalledWith("proxy.bypass", "*.internal,localhost", vscode.ConfigurationTarget.Workspace);
   });
 
   it("saveCredentials stores username and password in SecretStorage", async () => {

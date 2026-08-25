@@ -1,0 +1,9 @@
+test_id,tool_call_id,tool_name,arguments,expected_status,parallel_eligible
+TC-001,call_1,web_search,{"query":"test"},success,true
+TC-001,call_2,read_file,{"path":"/tmp/a.txt"},success,true
+TC-002,call_3,web_search,{"query":"test"},success,true
+TC-002,call_4,web_search,{"query":"test2"},error,true
+TC-003,call_5,execute_shell,{"command":"echo hi"},success,false
+TC-004,call_6,read_file,{"path":"/tmp/b.txt"},success,true
+TC-004,call_7,read_file,{"path":"/tmp/c.txt"},success,true
+TC-004,call_8,read_file,{"path":"/tmp/d.txt"},success,true

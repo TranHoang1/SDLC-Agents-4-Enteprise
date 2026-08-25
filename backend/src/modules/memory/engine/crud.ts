@@ -177,6 +177,10 @@ export class MemoryEngineCrud {
     try { await this.adapter.runAsync('DELETE FROM consolidation_log WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
     try { await this.adapter.runAsync('DELETE FROM citations WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
     try { await this.adapter.runAsync('DELETE FROM entry_quality_scores WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
+    try { await this.adapter.runAsync('DELETE FROM pending_tasks WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
+    try { await this.adapter.runAsync('DELETE FROM entry_outcomes WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
+    try { await this.adapter.runAsync('DELETE FROM scope_promotion_log WHERE entry_id = ?', [id]); } catch { /* non-fatal */ }
+    try { await this.adapter.runAsync('DELETE FROM contradiction_log WHERE entry_id_a = ? OR entry_id_b = ?', [id, id]); } catch { /* non-fatal */ }
     await this.adapter.runAsync('DELETE FROM knowledge_entries WHERE id = ?', [id]);
     // Cascade: remove corresponding graph node (same unified DB — SA4E-49)
     try {

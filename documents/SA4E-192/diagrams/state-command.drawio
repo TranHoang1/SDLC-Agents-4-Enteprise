@@ -1,0 +1,81 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="title" value="State — SlashMenuController lifecycle &amp; /thinking toggle" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="120" y="10" width="540" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="init1" value="" style="ellipse;shape=doubleCircle;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="60" y="80" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="idle" value="IDLE" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="130" y="70" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="parsing" value="PARSING" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="130" y="150" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="validating" value="VALIDATING" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="130" y="230" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="dispatched" value="DISPATCHED" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="130" y="310" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="executing" value="EXECUTING" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="320" y="310" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="rendering" value="RENDERING" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="320" y="230" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="error" value="ERROR" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#c62828;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="320" y="150" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="t1" value="start" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="init1" target="idle">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t2" value="/command input" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="idle" target="parsing">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t3" value="parse args" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="parsing" target="validating">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t4" value="registered" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="validating" target="dispatched">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t5" value="unknown cmd" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="validating" target="error">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t6" value="dispatch handler" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="dispatched" target="executing">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t7" value="success" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="executing" target="rendering">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t8" value="exception" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="executing" target="error">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t9" value="done" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="rendering" target="idle">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t10" value="acknowledge" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="error" target="idle">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="init2" value="" style="ellipse;shape=doubleCircle;fillColor=#000000;strokeColor=#000000;" vertex="1" parent="1">
+      <mxGeometry x="560" y="400" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="toff" value="THINKING_OFF" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="630" y="390" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ton" value="THINKING_ON" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="630" y="480" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="t11" value="start" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="init2" target="toff">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t12" value="/thinking toggle" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="toff" target="ton">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="t13" value="/thinking toggle" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=classic;endSize=6;" edge="1" parent="1" source="ton" target="toff">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

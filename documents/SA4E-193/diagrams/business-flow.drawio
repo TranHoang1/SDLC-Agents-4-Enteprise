@@ -1,0 +1,81 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="lane_user" value="User" style="swimlane;horizontal=0;startSize=110;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="980" height="170" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_start" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;html=1;" vertex="1" parent="lane_user">
+      <mxGeometry x="140" y="70" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_s1" value="Type slash command&#10;/create-new-agent | hook | steering | skill" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="lane_user">
+      <mxGeometry x="210" y="55" width="230" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_s3" value="Enter natural-language description&#10;of desired config" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;" vertex="1" parent="lane_user">
+      <mxGeometry x="650" y="55" width="250" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_chat" value="Chat Interface" style="swimlane;horizontal=0;startSize=110;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="210" width="980" height="170" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_s2" value="Chat displays prompt:&#10;&quot;Describe the agent/hook/steering/skill you want&quot;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#82b366;" vertex="1" parent="lane_chat">
+      <mxGeometry x="400" y="55" width="260" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_err" value="Show validation error in chat&#10;with retry guidance (file not written)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="lane_chat">
+      <mxGeometry x="700" y="55" width="220" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="lane_engine" value="Command Engine (LLM + File System)" style="swimlane;horizontal=0;startSize=110;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="380" width="980" height="300" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_s4" value="LLM generates complete config file&#10;following Section 7 template specs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="lane_engine">
+      <mxGeometry x="150" y="45" width="230" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_d1" value="Schema&#10;valid?" style="rhombus;whiteSpace=wrap;html=1;fillColor:#fff2cc;strokeColor:#d6b656;" vertex="1" parent="lane_engine">
+      <mxGeometry x="430" y="30" width="130" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_s5" value="Write file to .code-intel/{agents|hooks|steering|skills}/" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="lane_engine">
+      <mxGeometry x="620" y="45" width="240" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_s6" value="Open generated file in dual-tab editor&#10;(Form + Text) for review/edit/save" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d79b00;" vertex="1" parent="lane_engine">
+      <mxGeometry x="150" y="180" width="230" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_s7" value="Hot-reload picks up new file automatically&#10;(FileSystemWatcher, 300ms debounce) &#8594; UI updated, no restart" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="lane_engine">
+      <mxGeometry x="430" y="180" width="290" height="65" as="geometry"/>
+    </mxCell>
+    <mxCell id="n_end" value="" style="ellipse;fillColor=#000000;strokeColor=#000000;html=1;" vertex="1" parent="lane_engine">
+      <mxGeometry x="780" y="197" width="30" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" edge="1" parent="1" source="n_start" target="n_s1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" edge="1" parent="1" source="n_s1" target="n_s2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" edge="1" parent="1" source="n_s2" target="n_s3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" edge="1" parent="1" source="n_s3" target="n_s4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" edge="1" parent="1" source="n_s4" target="n_d1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="Yes" edge="1" parent="1" source="n_d1" target="n_s5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=11;fontStyle=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="No" edge="1" parent="1" source="n_d1" target="n_err" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;fontStyle=1;strokeColor=#b85450;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="retry" edge="1" parent="1" source="n_err" target="n_s3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;fontSize=11;strokeColor=#b85450;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" edge="1" parent="1" source="n_s5" target="n_s6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" edge="1" parent="1" source="n_s6" target="n_s7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" edge="1" parent="1" source="n_s7" target="n_end" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -38,6 +38,8 @@ export interface CurlRequestOptions {
   proxyAuth?: string | null;
   insecure?: boolean;
   followRedirects?: boolean;
+  /** Path to persistent cookie jar file. Enables -b/-c for session reuse. */
+  cookieJarPath?: string;
 }
 
 /**
@@ -83,13 +85,16 @@ export class CurlTransport {
       timeout: 10000,
       proxyUrl: proxyUrl || this.proxyUrl || undefined,
       proxyAuth,
+      followRedirects: true,
     });
-    if (!response.ok && response.status !== 301 && response.status !== 302) {
+    // Accept 2xx and all redirect codes (301, 302, 303, 307, 308)
+    const isRedirect = response.status >= 300 && response.status < 400;
+    if (!response.ok && !isRedirect) {
       throw new CurlTransportError(`HTTP ${response.status}: ${response.statusText}`);
     }
     return Date.now() - start;
   }
-
+  
   /** Check if curl binary is available */
   static async isAvailable(): Promise<boolean> {
     try {
@@ -132,6 +137,18 @@ export class CurlTransport {
 
     if (options.followRedirects) {
       args.push("-L");
+      // Persistent cookie jar — reuse session across requests (browser behavior)
+      if (options.cookieJarPath) {
+        args.push("-b", options.cookieJarPath, "-c", options.cookieJarPath);
+      } else {
+        // Fallback: in-memory cookie engine for redirect chain only
+        args.push("-b", "");
+      }
+      // Cap redirects to prevent infinite loop
+      args.push("--max-redirs", "10");
+    } else if (options.cookieJarPath) {
+      // Even without followRedirects, use persistent cookies for session reuse
+      args.push("-b", options.cookieJarPath, "-c", options.cookieJarPath);
     }
 
     // Method: -I for HEAD, implicit GET, -X for others

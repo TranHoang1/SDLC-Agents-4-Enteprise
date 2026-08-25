@@ -1,0 +1,46 @@
+# Dockerfile for SA4E-189 Hot-Reload System (Backend - Hono App)
+# -------------------------------------------------------------
+# This Dockerfile builds the Hono backend with FileSystemWatcher
+# for reactive prompt reload (agents/, steering/, hooks/ directories).
+# -------------------------------------------------------------
+
+# ---- Builder Stage ----
+FROM node:18-alpine AS builder
+
+WORKDIR /app
+
+# Install dependencies (with --omit=dev for production image size)
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev
+
+# Copy source code
+COPY . .
+
+# Build the TypeScript/Hono application
+RUN npm run build
+
+# ---- Runtime Stage ----
+FROM node:18-alpine AS runtime
+
+WORKDIR /app
+
+# Copy built distribution from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
+
+# Install only production dependencies (reinstall without dev deps)
+RUN npm ci --omit=dev
+
+# Create non-root user for security best practices
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+USER appuser
+
+# ---- Expose Port ----
+# Hono app listens on port 3000 by default
+EXPOSE 3000
+
+# ---- Start Command ----
+# Use 'npm run dev' for development with auto-reload
+# Use 'node dist/index.js' for production
+CMD ["node", "dist/index.js"]

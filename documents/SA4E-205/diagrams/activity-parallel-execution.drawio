@@ -1,0 +1,51 @@
+<mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+<root>
+<mxCell id="0"/>
+<mxCell id="1" parent="0"/>
+<mxCell id="2" value="Start" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;" vertex="1" parent="1">
+<mxGeometry x="380" y="40" width="80" height="60" as="geometry"/>
+</mxCell>
+<mxCell id="3" value="Identify independent phases" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+<mxGeometry x="340" y="140" width="160" height="60" as="geometry"/>
+</mxCell>
+<mxCell id="4" value="Fan-out to parallel branches" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+<mxGeometry x="320" y="240" width="200" height="60" as="geometry"/>
+</mxCell>
+<mxCell id="5" value="Execute phases concurrently" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+<mxGeometry x="340" y="340" width="160" height="60" as="geometry"/>
+</mxCell>
+<mxCell id="6" value="Per-branch error handling" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+<mxGeometry x="360" y="440" width="120" height="80" as="geometry"/>
+</mxCell>
+<mxCell id="7" value="Join node &amp; merge state" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+<mxGeometry x="340" y="560" width="160" height="60" as="geometry"/>
+</mxCell>
+<mxCell id="8" value="Continue pipeline" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+<mxGeometry x="360" y="660" width="120" height="60" as="geometry"/>
+</mxCell>
+<mxCell id="9" value="End" style="ellipse;whiteSpace=wrap;html=1;fillColor=#000000;" vertex="1" parent="1">
+<mxGeometry x="380" y="760" width="80" height="60" as="geometry"/>
+</mxCell>
+<mxCell id="e1" edge="1" parent="1" source="2" target="3" style="edgeStyle=orthogonalEdgeStyle;html=1;">
+<mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e2" edge="1" parent="1" source="3" target="4" style="edgeStyle=orthogonalEdgeStyle;html=1;">
+<mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e3" edge="1" parent="1" source="4" target="5" style="edgeStyle=orthogonalEdgeStyle;html=1;">
+<mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e4" edge="1" parent="1" source="5" target="6" style="edgeStyle=orthogonalEdgeStyle;html=1;">
+<mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e5" edge="1" parent="1" source="6" target="7" style="edgeStyle=orthogonalEdgeStyle;html=1;">
+<mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e6" edge="1" parent="1" source="7" target="8" style="edgeStyle=orthogonalEdgeStyle;html=1;">
+<mxGeometry relative="1" as="geometry"/>
+</mxCell>
+<mxCell id="e7" edge="1" parent="1" source="8" target="9" style="edgeStyle=orthogonalEdgeStyle;html=1;">
+<mxGeometry relative="1" as="geometry"/>
+</mxCell>
+</root>
+</mxGraphModel>

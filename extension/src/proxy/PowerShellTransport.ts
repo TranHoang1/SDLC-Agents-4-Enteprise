@@ -31,6 +31,8 @@ export interface PwshRequestOptions {
   headers?: Record<string, string>;
   body?: string;
   timeout?: number;
+  /** Path to persistent cookie jar file for session reuse across subprocess calls. */
+  cookieJarPath?: string;
 }
 
 /**
@@ -139,10 +141,13 @@ export class PowerShellTransport {
   }
 
   /** Quick connectivity test — returns latency in ms */
-  async testConnection(url: string, _proxyUrl?: string | null): Promise<number> {
+  async testConnection(url: string, proxyUrl?: string | null): Promise<number> {
     const start = Date.now();
-    const response = await this.request(url, { method: "GET", timeout: 10000 });
-    if (!response.ok && response.status !== 301 && response.status !== 302) {
+    // 30s timeout — NTLM handshake + TLS qua corporate proxy có thể chậm
+    const response = await this.request(url, { method: "GET", timeout: 30000 });
+    // Accept 2xx and all redirect codes (301, 302, 303, 307, 308)
+    const isRedirect = response.status >= 300 && response.status < 400;
+    if (!response.ok && !isRedirect) {
       throw new PowerShellTransportError(`HTTP ${response.status}: ${response.statusText}`);
     }
     return Date.now() - start;
@@ -172,9 +177,9 @@ export class PowerShellTransport {
     const escapedUrl = url.replace(/'/g, "''");
     const lines: string[] = [];
 
-    // Suppress progress bar (speeds up significantly)
-    lines.push("$ProgressPreference = 'SilentlyContinue'");
-    lines.push("[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12");
+    // Constrained Language Mode: avoid variable assignment & method calls
+    // PS7 + Windows 10+ default to TLS 1.2, no need to force
+    // $ProgressPreference cannot be set in CLM — accept progress output noise
 
     // Build params hashtable
     lines.push("$params = @{");
@@ -217,7 +222,7 @@ export class PowerShellTransport {
     lines.push("  Write-Output '---PWSH_STATUS_TEXT---'");
     lines.push("  Write-Output $r.StatusDescription");
     lines.push("  Write-Output '---PWSH_HEADERS---'");
-    lines.push("  foreach ($h in $r.Headers.GetEnumerator()) { Write-Output \"$($h.Key): $($h.Value)\" }");
+    lines.push("  $r.Headers.Keys | ForEach-Object { Write-Output \"${_}: $($r.Headers[$_])\" }");
     lines.push("  Write-Output '---PWSH_BODY---'");
     lines.push("  Write-Output $r.Content");
     lines.push("} catch {");
@@ -373,9 +378,9 @@ export class PowerShellTransport {
     return `PowerShell error: ${stderr}`;
   }
 
-  /** Get PowerShell binary path — prefer pwsh (PS7+), fallback to powershell.exe */
+  /** Get PowerShell binary — pwsh preferred (PS7), fallback powershell.exe */
   private static getPwshBinary(): string {
-    return process.platform === "win32" ? "powershell.exe" : "pwsh";
+    return process.platform === "win32" ? "pwsh" : "pwsh";
   }
 }
 

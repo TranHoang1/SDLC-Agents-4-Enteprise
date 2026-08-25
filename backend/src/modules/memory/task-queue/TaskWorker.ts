@@ -157,6 +157,10 @@ export class TaskWorker {
       const tasks = await this.repo.claimBatch(concurrency);
       if (tasks.length === 0) {
         this.consecutiveEmpty++;
+        // SA4E-209: Periodic scan for unenriched symbols when queue is idle
+        if (this.consecutiveEmpty === 5) {
+          await this.scanForUnenrichedSymbols();
+        }
         const delay = Math.min(
           this.config.baseInterval * Math.pow(2, this.consecutiveEmpty),
           this.config.maxInterval);
@@ -186,6 +190,34 @@ export class TaskWorker {
     this.logger.info('TaskWorker stopped');
     this.shutdownResolve?.();
     this.shutdownResolve = null;
+  }
+
+  /**
+   * SA4E-209: Scan for unenriched symbols and create tasks automatically.
+   * Runs when queue is idle (consecutiveEmpty hits threshold). Non-fatal.
+   */
+  private async scanForUnenrichedSymbols(): Promise<void> {
+    try {
+      const { CodeEnrichmentTaskCreator } = await import('../../../engine/enrichment/CodeEnrichmentTaskCreator.js');
+      const adapter = this.engine.getAdapter();
+      const creator = new CodeEnrichmentTaskCreator(adapter, this.logger);
+      // Find all projects with unenriched symbols
+      const projects = await adapter.allAsync<{ project_id: string }>(
+        `SELECT DISTINCT project_id FROM symbols
+         WHERE (enrichment_status IS NULL OR enrichment_status = '')
+           AND kind NOT IN ('variable', 'import', 'namespace')
+         LIMIT 10`,
+        [],
+      );
+      for (const { project_id } of projects) {
+        const created = await creator.createTasksForProject(project_id);
+        if (created > 0) {
+          this.logger.info({ created, projectId: project_id }, '[TaskWorker] Auto-created enrichment tasks for unenriched symbols');
+        }
+      }
+    } catch (err) {
+      this.logger.debug({ err }, '[TaskWorker] Unenriched symbol scan failed (non-fatal)');
+    }
   }
 
   private async processTask(task: PendingTask): Promise<void> {

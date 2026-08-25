@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.37.2] - 2026-08-25
+
+### Added
+- **SA4E-188: Skill Auto-Invoke** — when a user message has no explicit `/skill:` token, the host detects intent by scoring skill `description`/`name` keywords against the prompt and automatically injects the best-matching skill's `SKILL.md` into the LLM context (threshold ≥ 2 keyword hits). Explicit `/skill:<id>` invocations still take priority and are de-duplicated.
+- **SA4E-188: Auto-Invoke scope guard** — auto-invoke only runs for plain chat messages; skipped for ticket commands (`XXX-NNN ...`), agent commands (`/agent task`), and direct commands (`status`/`resume`/`cancel`) to avoid context bloat.
+
+## [1.35.0] - 2026-08-23
+
+### Added
+- **SA4E-188: Skills in Slash Menu** — Skills from `.code-intel/skills/*/SKILL.md` appear as a dedicated **Skills** section (🧩) in the "/" slash menu, separated from Agents and Steering Rules
+- **SA4E-188: Skill Invocation + Context Injection** — typing `/<skillId>` (or `/skill:<skillId>`) loads the skill's `SKILL.md` content into the LLM context as a `<skill>` block; the `/...` token is stripped from the user prompt
+- **SA4E-188: Real-time Skill Loading** — `ChatStateManager` watches `.code-intel/skills` and re-sends `chat:skillsLoaded` on file change; initial broadcast fires on webview `ready`
+
+### Changed
+- **SA4E-188: `.kiro/` → `.code-intel/`** — skills/agents/steering paths updated in chat menu, context picker, and workflow parser/executor to match the `.code-intel` workspace layout
+
+### Fixed
+- **Slash menu skill grouping** — skills were previously merged into the Agents list; now rendered in their own Skills section
+- **Skill content not delivered to LLM** — selecting a skill now injects `SKILL.md` content into context instead of leaving a bare `/skill:...` token the model could not interpret
+
 ## [1.33.0] - 2026-08-20
 
 ### Added
