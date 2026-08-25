@@ -65,3 +65,10 @@ export const SchemaUpdateRequestSchema = z.object({
   ruleType: z.string().min(1).max(200),
   new_fields: z.array(FieldDescriptorSchema).min(1).max(100),
 });
+
+/** POST /pega/schema/generate (SA4E-214) */
+export const SchemaGenerateRequestSchema = z.object({
+  harnessJson: z.record(z.unknown()),
+  sectionJsons: z.record(z.record(z.unknown())).optional(),
+  ruleType: z.string().min(1).max(200).optional(),
+});

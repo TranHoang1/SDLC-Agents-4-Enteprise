@@ -41,16 +41,30 @@ export function createStaticRoutes(_ctx: AdminContext): Hono {
     return c.text('Admin Portal not found', 404);
   });
 
-  const jsFiles = ['kb-graph-renderer.js', 'gesture-fsm.js', 'camera-physics.js', 'zoom-animator.js', 'map-controls.js', 'lod-clustering.js', 'lod-manager.js', 'lod-animation.js'];
-  for (const file of jsFiles) {
-    app.get('/admin/' + file, (c) => {
-      const fp = path.resolve(__dirname, '../../../viewer/admin/' + file);
-      if (fs.existsSync(fp)) return new Response(fs.readFileSync(fp, 'utf-8'), { headers: { 'Content-Type': 'application/javascript' } });
-      return c.text('Not found', 404);
-    });
-  }
+  const viewerAdminDir = path.resolve(__dirname, '../../../viewer/admin');
 
+  // Serve any static asset under /admin/ (JS, CSS, vendor libs, etc.) with correct MIME type.
+  // Query strings (?embed=&page=&token=) are ignored — only the path matters for file lookup.
+  // Path traversal is prevented by resolving + verifying the result stays within viewerAdminDir.
   app.get('/admin/*', (c) => {
+    const urlPath = c.req.path; // e.g. /admin/vendor/react.production.min.js
+    const relative = urlPath.replace(/^\/admin\//, '');
+
+    // Attempt to serve as a static asset if it has a known asset extension
+    const ext = path.extname(relative).toLowerCase();
+    if (ext && MIME_TYPES[ext]) {
+      const resolved = path.resolve(viewerAdminDir, relative);
+      // SEC: prevent path traversal — resolved path must stay within viewerAdminDir
+      if (resolved.startsWith(viewerAdminDir + path.sep) && fs.existsSync(resolved) && fs.statSync(resolved).isFile()) {
+        return new Response(fs.readFileSync(resolved), {
+          headers: { 'Content-Type': MIME_TYPES[ext], 'Cache-Control': 'no-cache' },
+        });
+      }
+      // Asset not found → 404 (do NOT fall back to HTML for asset requests)
+      return c.text('Not found', 404);
+    }
+
+    // Non-asset path (SPA client route) → serve index.html for client-side routing
     if (fs.existsSync(spaPath)) {
       const html = fs.readFileSync(spaPath, 'utf-8');
       return c.html(html);
@@ -60,3 +74,21 @@ export function createStaticRoutes(_ctx: AdminContext): Hono {
 
   return app;
 }
+
+/** MIME types for static viewer assets. Extensions not listed fall through to SPA HTML. */
+const MIME_TYPES: Record<string, string> = {
+  '.js': 'application/javascript',
+  '.mjs': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.map': 'application/json',
+};

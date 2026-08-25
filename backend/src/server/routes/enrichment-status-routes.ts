@@ -111,8 +111,8 @@ async function buildStatusResponse(taskWorker: TaskWorker, projectId: string | n
 
   const state = deriveEnrichmentState(stats);
   const total = stats.pending + stats.processing + stats.completed + stats.failed;
-  // BR-02: percent = completed / total * 100
-  const percent = total > 0 ? Math.round((stats.completed / total) * 100) : 0;
+  // BR-02: percent = completed / total * 100 (floor to avoid showing 100% when not truly done)
+  const percent = total > 0 ? Math.floor((stats.completed / total) * 100) : 0;
   const estimatedCompletion = computeEstimatedCompletion(stats.completed, total, startedAt);
 
   return {

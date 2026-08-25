@@ -79,11 +79,8 @@ export class IndexingService {
 
         try {
 
-        // Auto-enable schema generation only for Pega projects without existing schemas
-        if (!options.schemas && secrets && this.isPegaProject(root) && !this.hasExistingSchemas(root)) {
-            options.schemas = true;
-            this.log("[IndexingService] Auto-enabling schema generation (no schemas found in Pega workspace).");
-        }
+        // SA4E-214: Schema generation removed as separate step — now on-the-fly during BFS indexing
+        // (Legacy auto-enable disabled)
 
         if (this.outputChannel) {
             this.outputChannel.show(true);
