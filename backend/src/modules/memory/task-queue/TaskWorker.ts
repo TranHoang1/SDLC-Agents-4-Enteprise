@@ -58,6 +58,8 @@ export class TaskWorker {
   private tagAnalyzer?: TagAnalyzerService;
   private embeddingService?: EmbeddingService;
   private llmService?: { getConfig(): { model: string }; complete(messages: LLMMessage[]): Promise<{ content: string }> };
+  /** SA4E-107: Dedicated handler for CODE_ENRICHMENT tasks (PEGA_SUMMARY + FUNCTION_SUMMARY strategies). */
+  private codeEnrichmentHandler?: { enrichSymbol(task: PendingTask): Promise<void> };
   private running = false;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private consecutiveEmpty = 0;
@@ -81,9 +83,10 @@ export class TaskWorker {
   setEmbeddingService(service: EmbeddingService): void { this.embeddingService = service; }
   setLlmService(service: { getConfig(): { model: string }; complete(messages: LLMMessage[]): Promise<{ content: string }> }): void { this.llmService = service; }
 
-  /** SA4E-107: Wire CodeEnrichmentHandler — stores reference for code summary tasks. */
-  setCodeEnrichmentHandler(_handler: unknown): void {
-    // Handler's LLM is already set via setLlmService. This is a no-op wiring point.
+  /** SA4E-107: Wire CodeEnrichmentHandler — delegates CODE_ENRICHMENT tasks to proper handler. */
+  setCodeEnrichmentHandler(handler: { enrichSymbol(task: PendingTask): Promise<void> }): void {
+    this.codeEnrichmentHandler = handler;
+    this.logger.info('[TaskWorker] CodeEnrichmentHandler wired — enrichSymbol() will handle CODE_ENRICHMENT tasks');
   }
 
   /** SA4E-99: Get current progress info (file being processed). */
@@ -240,6 +243,13 @@ export class TaskWorker {
     try {
       // CODE_ENRICHMENT tasks use symbols table, not knowledge_entries
       if (task.task_type === TaskType.CODE_ENRICHMENT) {
+        // SA4E-107: Delegate to CodeEnrichmentHandler (loads body from DB, uses proper strategy)
+        if (this.codeEnrichmentHandler) {
+          await this.codeEnrichmentHandler.enrichSymbol(task);
+          await this.repo.markCompleted(task.id);
+          return;
+        }
+        // Fallback: legacy processCodeSummary (payload must contain body field)
         let payload: any;
         try { payload = JSON.parse(task.payload); }
         catch { this.repo.markFailed(task.id, 'invalid_json_payload'); return; }
