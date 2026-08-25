@@ -19,6 +19,12 @@ const LLM_TIMEOUT_MS = 30_000;
 /** Max pseudo code length (BR-05). */
 const MAX_PSEUDO_CODE_LENGTH = 2000;
 
+/** System prompt for on-the-fly schema creation via LLM (SA4E-214 §6.3 legacy path). */
+const SCHEMA_CREATION_SYSTEM_PROMPT = `You are a Pega Platform expert. Analyze the rule instance JSON and produce a schema describing its fields.
+Return a JSON object with: { "ruleType": "...", "semanticFields": [...], "logicPaths": [...], "extractionHints": {...} }
+Focus on fields carrying business logic (py* properties). Skip internal px*/pz* fields.
+Return ONLY valid JSON. No markdown, no explanation.`;
+
 // Strategy selection: which symbol kinds map to which enrichment strategy
 const CLASS_KINDS = new Set(['class', 'interface', 'enum']);
 const FUNCTION_KINDS = new Set(['function', 'method', 'arrow_function', 'generator']);
@@ -40,6 +46,7 @@ export class CodeEnrichmentHandler {
 
   /**
    * Enrich a single symbol from a CODE_ENRICHMENT task.
+   * For Pega rules: checks KB for enriched schema, creates on-the-fly if missing.
    * @param task - The pending task with payload
    */
   async enrichSymbol(task: PendingTask): Promise<void> {
@@ -50,10 +57,160 @@ export class CodeEnrichmentHandler {
     const payload = parsed.data;
     const context = await this.loadContext(payload);
     const strategy = this.selectStrategy(payload.symbolKind, payload.workspaceType);
+
+    // For Pega rules: load or create enriched schema context
+    if (strategy === 'PEGA_SUMMARY') {
+      context.schemaContext = await this.loadOrCreateSchemaContext(payload.symbolKind, context.bodyText);
+    }
+
     const messages = this.promptBuilder.build(strategy, context);
     const raw = await this.callLLMWithTimeout(messages);
     const response = this.parseResponse(raw, strategy);
     await this.storeResults(payload.symbolId, response, strategy);
+  }
+
+  /**
+   * Load enriched schema from KB for this rule type.
+   * If not found, create on-the-fly using LLM + current rule instance as sample.
+   * Progressive: schema is enriched once per rule type, reused for all instances.
+   */
+  private async loadOrCreateSchemaContext(symbolKind: string, bodyText: string | null): Promise<string | undefined> {
+    const ruleType = this.kindToRuleType(symbolKind);
+    if (!ruleType) return undefined;
+
+    // Check KB for existing enriched schema
+    const existing = await this.findEnrichedSchema(ruleType);
+    if (existing) return existing;
+
+    // No enriched schema yet — create on-the-fly using this rule instance as sample
+    if (!bodyText || bodyText.length < 50) return undefined;
+    try {
+      const schema = await this.createSchemaOnTheFly(ruleType, bodyText);
+      if (schema) {
+        await this.storeEnrichedSchema(ruleType, schema);
+        return schema;
+      }
+    } catch (err) {
+      this.logger.debug({ err, ruleType }, '[enrichment] Schema creation failed (non-fatal)');
+    }
+    return undefined;
+  }
+
+  /** Map symbol kind back to Pega pxObjClass for schema lookup. */
+  private kindToRuleType(kind: string): string | null {
+    const map: Record<string, string> = {
+      pega_activity: 'Rule-Obj-Activity',
+      pega_flow: 'Rule-Obj-Flow',
+      pega_data_transform: 'Rule-Obj-Model',
+      pega_decision_table: 'Rule-Declare-DecisionTable',
+      pega_decision_tree: 'Rule-Declare-DecisionTree',
+      pega_section: 'Rule-HTML-Section',
+      pega_harness: 'Rule-HTML-Harness',
+      pega_when: 'Rule-Obj-When',
+      pega_declare_expression: 'Rule-Declare-Expressions',
+      pega_declare_page: 'Rule-Declare-Pages',
+      pega_report: 'Rule-Obj-Report-Definition',
+      pega_connector: 'Rule-Connect-REST',
+      pega_case_type: 'Rule-Obj-CaseType',
+      pega_validate: 'Rule-Obj-Validate',
+      pega_property: 'Rule-Obj-Property',
+    };
+    return map[kind] || null;
+  }
+
+  /** Search KB (knowledge_entries) for enriched schema of this rule type. */
+  private async findEnrichedSchema(ruleType: string): Promise<string | null> {
+    // SA4E-214: Check new format first (pega-schema:{ruleType} — stored as pure JSON)
+    const newRow = await this.adapter.getAsync<{ content: string }>(
+      `SELECT content FROM knowledge_entries
+       WHERE type = 'PEGA_SCHEMA_ENRICHED' AND source = ?
+       ORDER BY id DESC LIMIT 1`,
+      [`pega-schema:${ruleType}`],
+    );
+    if (newRow?.content) {
+      // New format: content is pure JSON — format for prompt
+      return this.formatSchemaForPrompt(newRow.content);
+    }
+
+    // Legacy format: pega-schema-enriched/{ruleType} with prefix
+    const row = await this.adapter.getAsync<{ content: string }>(
+      `SELECT content FROM knowledge_entries
+       WHERE type = 'PEGA_SCHEMA_ENRICHED' AND source = ?
+       ORDER BY id DESC LIMIT 1`,
+      [`pega-schema-enriched/${ruleType}`],
+    );
+    if (!row?.content) return null;
+    // Extract the JSON schema part after the prefix
+    const prefixEnd = row.content.indexOf(' | schema=');
+    if (prefixEnd === -1) return row.content;
+    return row.content.substring(prefixEnd + ' | schema='.length);
+  }
+
+  /**
+   * Format enriched schema JSON for inclusion in LLM prompt.
+   * R-03: Wraps schema content in clear delimiters to prevent prompt injection.
+   */
+  private formatSchemaForPrompt(schemaJson: string): string {
+    try {
+      const schema = JSON.parse(schemaJson);
+      const fields = [
+        ...Object.values(schema.identity_fields || {}),
+        ...Object.values(schema.logic_fields || {}),
+        ...Object.values(schema.connectivity_fields || {}),
+      ] as Array<{ path: string; category: string; description: string }>;
+
+      const fieldList = fields.map(f => `- ${f.path} (${f.category}): ${f.description}`).join('\n');
+      const hints = schema.extraction_hints || {};
+
+      // R-03: Use clear delimiters to separate schema context from user content
+      return [
+        '--- BEGIN SCHEMA CONTEXT ---',
+        `Rule Type: ${schema.rule_type}`,
+        `Primary Logic Field: ${hints.primary_logic_field || 'unknown'}`,
+        `Logic Structure: ${hints.logic_structure || 'unknown'}`,
+        `Known Fields (${fields.length}):`,
+        fieldList,
+        '--- END SCHEMA CONTEXT ---',
+      ].join('\n');
+    } catch {
+      return schemaJson;
+    }
+  }
+
+  /** Ask LLM to analyze a rule instance and produce extraction schema. */
+  private async createSchemaOnTheFly(ruleType: string, sampleBody: string): Promise<string | null> {
+    const truncatedSample = sampleBody.length > 6000 ? sampleBody.substring(0, 6000) + '...' : sampleBody;
+    const messages = [
+      { role: 'system', content: SCHEMA_CREATION_SYSTEM_PROMPT },
+      { role: 'user', content: `Rule Type: ${ruleType}\n\nSample Rule Instance:\n${truncatedSample}` },
+    ];
+    const raw = await this.callLLMWithTimeout(messages);
+    // Validate it's parseable JSON
+    try {
+      const parsed = JSON.parse(raw.includes('```') ? (raw.match(/```(?:json)?\s*([\s\S]*?)```/)?.[1] || raw) : raw);
+      if (parsed && parsed.ruleType) return JSON.stringify(parsed);
+    } catch { /* try extracting JSON object */ }
+    const objMatch = raw.match(/\{[\s\S]*\}/);
+    if (objMatch) {
+      try {
+        const parsed = JSON.parse(objMatch[0]);
+        if (parsed && (parsed.ruleType || parsed.semanticFields)) return JSON.stringify(parsed);
+      } catch { /* give up */ }
+    }
+    return null;
+  }
+
+  /** Store enriched schema to KB (knowledge_entries table). */
+  private async storeEnrichedSchema(ruleType: string, schema: string): Promise<void> {
+    const now = new Date().toISOString();
+    const content = `PEGA_SCHEMA_ENRICHED | ruleType=${ruleType} | version=1 | schema=${schema}`;
+    const summary = `Enriched schema for ${ruleType}: semantic fields, logic paths, extraction hints`;
+    await this.adapter.runAsync(
+      `INSERT INTO knowledge_entries (content, summary, type, source, tags, scope, tier, created_at, enrichment_status)
+       VALUES (?, ?, 'PEGA_SCHEMA_ENRICHED', ?, ?, 'PROJECT', 'SEMANTIC', ?, 'done')`,
+      [content, summary, `pega-schema-enriched/${ruleType}`, `pega,schema,enriched,${ruleType}`, now],
+    );
+    this.logger.info({ ruleType }, '[enrichment] Enriched schema created and stored in KB');
   }
 
   private selectStrategy(kind: string, workspaceType: string): EnrichmentStrategy {

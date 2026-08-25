@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import * as crypto from "crypto";
 import type { CrawlPlanItem } from "../models";
 import type { PegaHttpClient } from "./PegaHttpClient";
+import type { ISchemaOrchestrator } from "./PegaSchemaOrchestrator";
 import { fetchRulesInParallel, saveRuleFile, calibrateFetchConcurrency } from "./PegaCrawlHelper";
 import { PegaStreamIngester } from "./PegaStreamIngester";
 import { DependencyMapper } from "./DependencyMapper";
@@ -37,15 +38,19 @@ export interface BfsIndexResult {
 /**
  * BFS-driven indexer: fetches rules from Pega, ingests into backend,
  * and enqueues newly-discovered relatives until queue is empty.
+ * SA4E-214: Hooks schema creation on first-encounter rule types + progressive validation.
  */
 export class PegaBfsIndexer {
   private readonly ingester: PegaStreamIngester;
+  /** SA4E-214: Track rule types already seen this session for schema creation */
+  private readonly seenRuleTypes = new Set<string>();
 
   constructor(
     private readonly pegaClient: PegaHttpClient,
     private readonly backendUrl: string,
     private readonly outputChannel: vscode.OutputChannel | undefined,
     private readonly log: LogFn,
+    private readonly schemaOrchestrator?: ISchemaOrchestrator,
   ) {
     this.ingester = new PegaStreamIngester(backendUrl);
   }
@@ -112,6 +117,9 @@ export class PegaBfsIndexer {
       const result = await this.ingestAndDiscover(projectId, ruleObj);
       if (result.ingested) { counters.totalIngested++; } else { counters.skippedCount++; }
       counters.discoveredCount += this.enqueueRelatives(result.relatives, fetchQueue, dedupSet);
+
+      // SA4E-214: Hook schema creation/validation (async, non-blocking)
+      this.triggerSchemaHook(item.pxObjClass, ruleObj);
     }
     counters.errorCount += batch.length - fetchResult.fetched.length;
   }
@@ -161,5 +169,28 @@ export class PegaBfsIndexer {
   /** Compute SHA-256 checksum of rule JSON for dedup */
   private computeChecksum(rule: Record<string, unknown>): string {
     return crypto.createHash('sha256').update(JSON.stringify(rule)).digest('hex');
+  }
+
+  /**
+   * SA4E-214: Fire-and-forget schema hook.
+   * First encounter of a rule type → trigger async schema creation.
+   * Subsequent encounters → trigger progressive validation (field discovery).
+   * Non-blocking: errors are logged but never propagate to BFS loop (BR-06).
+   */
+  private triggerSchemaHook(ruleType: string, ruleJson: Record<string, unknown>): void {
+    if (!this.schemaOrchestrator) return;
+
+    if (!this.seenRuleTypes.has(ruleType)) {
+      // First encounter → create schema (async, fire-and-forget)
+      this.seenRuleTypes.add(ruleType);
+      this.schemaOrchestrator.createSchema(ruleType).catch(err =>
+        this.log(`[BfsIndexer] ⚠️ Schema creation failed for ${ruleType}: ${err.message}`),
+      );
+    } else {
+      // Subsequent encounter → progressive validation
+      this.schemaOrchestrator.validateAndUpdate(ruleType, ruleJson).catch(() => {
+        /* non-fatal, silent */
+      });
+    }
   }
 }
