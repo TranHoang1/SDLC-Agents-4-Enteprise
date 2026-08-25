@@ -67,6 +67,7 @@ MIT
 ## Changelog
 
 ### v1.37.2 (2026-08-24)
+
 - **Proxy Fix: global-fetch-patch defensive fallback** — Fixed silent proxy bypass in curl/powershell mode. Added cookie jar persistence, followRedirects support, workspace-scoped config, PowerShell CLM compatibility.
 - **SA4E-204/205/206** — Parallel orchestration module docs and implementation.
 
