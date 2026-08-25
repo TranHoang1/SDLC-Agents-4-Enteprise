@@ -245,7 +245,7 @@ MIT
 
 ## Changelog
 
-### v1.38.0 (2026-08-25)
+### v1.37.2 (2026-08-25)
 
 - **SA4E-188: Skill Auto-Invoke** — intent detection scores skill descriptions against the prompt and auto-injects the best-matching `SKILL.md` into context (no `/skill:` needed). Skipped for ticket/agent/direct commands.
 
