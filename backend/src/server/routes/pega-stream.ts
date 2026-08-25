@@ -152,6 +152,19 @@ async function finalizeJob(
 
   if (meta) await registerPegaProject(service, meta.projectId, ingestedRules);
 
+  // SA4E-209: Batch catch-up — create enrichment tasks for any unenriched Pega symbols
+  if (meta?.projectId) {
+    try {
+      const { CodeEnrichmentTaskCreator } = await import('../../engine/enrichment/CodeEnrichmentTaskCreator.js');
+      const adapter = (service as any).memoryEngine.getAdapter();
+      const taskCreator = new CodeEnrichmentTaskCreator(adapter, logger);
+      const created = await taskCreator.createTasksForProject(meta.projectId);
+      if (created > 0) logger.info({ created, projectId: meta.projectId }, '[pega-stream] Enrichment catch-up tasks created');
+    } catch (err: any) {
+      logger.warn({ err: err.message }, '[pega-stream] Enrichment catch-up failed (non-fatal)');
+    }
+  }
+
   const result: JobResult = { stored, ...totals, nextBatch };
   pegaJobStore.complete(jobId, result);
   logger.info({ jobId, stored, total: totals.totalRulesInDb }, '[pega-stream] Job complete');

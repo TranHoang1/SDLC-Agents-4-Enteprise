@@ -1,0 +1,63 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="boundary" value="SA4E-191 Slash Commands" style="swimlane;startSize=30;html=1;fillColor=#f5f5f5;strokeColor=#666666;" vertex="1" parent="1">
+      <mxGeometry x="160" y="60" width="820" height="400" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_agents" value="/agents" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="40" y="60" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_compact" value="/compact" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="40" y="140" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_diff" value="/diff" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="40" y="220" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_models" value="/models" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="40" y="300" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_new" value="/new" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="boundary">
+      <mxGeometry x="260" y="60" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_review" value="/review" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="boundary">
+      <mxGeometry x="260" y="200" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="uc_undo" value="/undo" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="boundary">
+      <mxGeometry x="260" y="300" width="140" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_chat" value="Chat User" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="20" y="200" width="110" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="actor_owner" value="Session Owner" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="240" width="120" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_agents" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_chat" target="uc_agents">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_compact" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_chat" target="uc_compact">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_diff" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_chat" target="uc_diff">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_models" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_chat" target="uc_models">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_new" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_chat" target="uc_new">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_review_cu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_chat" target="uc_review">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_undo_cu" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_chat" target="uc_undo">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_review_so" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_owner" target="uc_review">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="a_undo_so" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="actor_owner" target="uc_undo">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

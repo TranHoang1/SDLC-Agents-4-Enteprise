@@ -1,0 +1,103 @@
+<mxGraphModel dx="1420" dy="780" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="820" math="0" shadow="0">
+  <root>
+    <mxCell id="0">
+      <mxGeometry as="geometry" />
+    </mxCell>
+    <mxCell id="1" parent="0">
+      <mxGeometry as="geometry" />
+    </mxCell>
+    <mxCell id="nUser" value="Developer (User)" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="40" y="300" width="140" height="70" as="geometry" />
+    </mxCell>
+    <mxCell id="nChat" value="Chat UI&#10;(SlashMenuItems +&#10;InputAreaIntegration)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="240" y="295" width="170" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="nReg" value="Command Registrar&#10;registerConfigCommands(context,&#10;workspaceRoot)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="470" y="295" width="200" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="nH1" value="handleCreateNewAgent&#10;/create-new-agent" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="730" y="110" width="200" height="56" as="geometry" />
+    </mxCell>
+    <mxCell id="nH2" value="handleCreateNewHook&#10;/create-new-hook" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="730" y="186" width="200" height="56" as="geometry" />
+    </mxCell>
+    <mxCell id="nH3" value="handleCreateNewSteering&#10;/create-new-steering" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="730" y="262" width="200" height="56" as="geometry" />
+    </mxCell>
+    <mxCell id="nH4" value="handleCreateNewSkill&#10;/create-new-skill" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="730" y="338" width="200" height="56" as="geometry" />
+    </mxCell>
+    <mxCell id="nLLM" value="LLM Service&#10;generateWithLLM() via vscode.lm (Copilot)&#10;fallback generateFromTemplate()" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="1010" y="212" width="210" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="nGate" value="Validation Gate &#9733; NEW (GAP-01)&#10;normalize fences/frontmatter/empty&#10;schema check agent/hook/steering/skill" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;strokeWidth=3;" vertex="1" parent="1">
+      <mxGeometry x="1290" y="212" width="220" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="nFW" value="FileWriter&#10;writeFileWithMkdir()&#10;mkdir recursive + UTF-8 single write" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="1580" y="222" width="200" height="70" as="geometry" />
+    </mxCell>
+    <mxCell id="nFS" value=".code-intel/&#10;agents | hooks | steering | skills" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+      <mxGeometry x="1580" y="60" width="200" height="100" as="geometry" />
+    </mxCell>
+    <mxCell id="nEditor" value="EditorService&#10;openTextDocument + showTextDocument&#10;(dual-tab when SA4E-190 ships)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="1290" y="400" width="220" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="nHR" value="HotReloadWatcher (SA4E-189)&#10;watch .code-intel/* globs&#10;300 ms debounce &#8594; postMessage refresh" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+      <mxGeometry x="1580" y="480" width="230" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nUser" target="nChat">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e2" value="slash + rawArgs" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nChat" target="nReg">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;" edge="1" parent="1" source="nReg" target="nH1">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.4;exitDx=0;exitDy=0;" edge="1" parent="1" source="nReg" target="nH2">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.6;exitDx=0;exitDy=0;" edge="1" parent="1" source="nReg" target="nH3">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;" edge="1" parent="1" source="nReg" target="nH4">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nH1" target="nLLM">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nH2" target="nLLM">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nH3" target="nLLM">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nH4" target="nLLM">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e11" value="content" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nLLM" target="nGate">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e12" value="{ok, normalized}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nGate" target="nFW">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e13" value="write BR-05 paths" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;" edge="1" parent="1" source="nFW" target="nFS">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e14" value="open doc &#8804;1s" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;strokeColor=#6c8ebf;" edge="1" parent="1" source="nFW" target="nEditor">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e15" value="onCreate/onChange" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;strokeColor=#9673a6;" edge="1" parent="1" source="nFS" target="nHR">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="e16" value="postMessage refresh (no restart)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;strokeColor=#9673a6;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="nHR" target="nChat">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="1180" y="525" />
+          <mxPoint x="1180" y="620" />
+          <mxPoint x="450" y="620" />
+        </Array>
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

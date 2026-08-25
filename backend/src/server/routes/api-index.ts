@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Source/document indexing endpoints — POST /api/index/source|document|documents.
  * SA4E-41: every write is path-safe (SEC-04/05) and tenant-scoped (requireProjectId).
  */

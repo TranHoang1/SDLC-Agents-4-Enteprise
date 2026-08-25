@@ -4,12 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Portal - Code Intelligence</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/d3@7/dist/d3.min.js"></script>
-  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
-  <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+  <script src="/admin/vendor/react.production.min.js"></script>
+  <script src="/admin/vendor/react-dom.production.min.js"></script>
+  <script src="/admin/vendor/d3.min.js"></script>
+  <script src="/admin/vendor/three.min.js"></script>
+  <script src="/admin/vendor/OrbitControls.js"></script>
+  <script src="/admin/vendor/marked.min.js"></script>
   <script src="/admin/gesture-fsm.js?v=1"></script>
   <script src="/admin/camera-physics.js?v=1"></script>
   <script src="/admin/zoom-animator.js?v=1"></script>
@@ -24,7 +24,7 @@
 </head>
 <body>
 <div id="root"></div>
-<script src="https://unpkg.com/@babel/standalone@7.17.12/babel.min.js"></script>
+<script src="/admin/vendor/babel.min.js"></script>
 <script type="text/babel">const{useState,useEffect,useCallback,useRef}=React;
 const API='/api/admin';
 const __urlParams=new URLSearchParams(window.location.search);
@@ -486,3 +486,4 @@ if(window.Babel&&window.Babel.transform){var origTransform=window.Babel.transfor
 </script>
 </body>
 </html>
+

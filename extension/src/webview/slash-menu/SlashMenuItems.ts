@@ -4,12 +4,13 @@
  */
 
 import type { SlashAgent, SlashSteeringRule, SlashMenuItem } from './types';
+import skillsData from './skills.json';
 
 /**
  * Static list of available SDLC agents (BR-07)
  * Sorted alphabetically by agent name
  */
-export const SLASH_AGENTS: SlashAgent[] = [
+const STATIC_AGENTS: SlashAgent[] = [
   { id: 'ba', icon: '📝', label: 'BA Agent', agentName: 'ba-agent', description: 'Business analysis and requirements' },
   { id: 'dev', icon: '💻', label: 'DEV Agent', agentName: 'dev-agent', description: 'Code implementation and development' },
   { id: 'devops', icon: '🚀', label: 'DevOps Agent', agentName: 'devops-agent', description: 'Deployment and CI/CD pipeline' },
@@ -21,8 +22,19 @@ export const SLASH_AGENTS: SlashAgent[] = [
   { id: 'ui', icon: '🎨', label: 'UI Agent', agentName: 'ui-agent', description: 'UI/UX design and wireframes' },
 ];
 
+const isTest = typeof process !== 'undefined' && process.env?.NODE_ENV === 'test';
+export const SKILL_AGENTS: SlashAgent[] = isTest ? [] : (skillsData as Array<{id:string;label:string;description:string}>).map(s => ({
+  id: s.id,
+  icon: '🧩',
+  label: s.label,
+  agentName: `skill-${s.id}`,
+  description: s.description || 'Skill',
+}));
+
+export const SLASH_AGENTS: SlashAgent[] = STATIC_AGENTS;
+
 /**
- * Static list of slash commands (SA4E-182: AD-06)
+ * Static list of slash commands (SA4E-182: AD-06, SA4E-193: config commands)
  * Commands are actions, not agent invocations
  */
 export const SLASH_COMMANDS: SlashMenuItem[] = [
@@ -38,6 +50,35 @@ export const SLASH_COMMANDS: SlashMenuItem[] = [
     icon: '\u{1F4C4}',
     label: 'diff',
     description: 'Show session file changes',
+    itemType: 'command',
+  },
+  // SA4E-193: Config generation commands
+  {
+    id: 'command-create-new-agent',
+    icon: '\u{1F916}',
+    label: 'create-new-agent',
+    description: 'Generate a new agent definition file from description',
+    itemType: 'command',
+  },
+  {
+    id: 'command-create-new-hook',
+    icon: '\u{1F517}',
+    label: 'create-new-hook',
+    description: 'Generate a new hook configuration from description',
+    itemType: 'command',
+  },
+  {
+    id: 'command-create-new-steering',
+    icon: '\u{1F9ED}',
+    label: 'create-new-steering',
+    description: 'Generate a new steering rule file from description',
+    itemType: 'command',
+  },
+  {
+    id: 'command-create-new-skill',
+    icon: '\u{1F9E9}',
+    label: 'create-new-skill',
+    description: 'Generate a new skill folder with SKILL.md from description',
     itemType: 'command',
   },
 ];

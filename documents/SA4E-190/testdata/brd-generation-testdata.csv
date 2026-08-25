@@ -1,0 +1,7 @@
+test_case_id,ticketKey,templatePath,expected_http_code,expected_result,description
+TC-002,SA4E-190,documents/templates/BRD-TEMPLATE.md,200,BRD.md created,Generate BRD happy path
+TC-102,SA4E-190,missing/template.md,200,Default template used,Template missing fallback
+TC-202,SA4E-190,documents/templates/BRD-TEMPLATE.md,500,Write failure simulated,BRD write failure
+TC-305,SA4E-190,documents/templates/BRD-TEMPLATE.md,200,Template sections present,BRD follows template
+TC-306,SA4E-190,documents/templates/BRD-TEMPLATE.md,200,User stories >=3,User stories count validation
+TC-307,SA4E-190,documents/templates/BRD-TEMPLATE.md,200,No placeholders,Placeholder check

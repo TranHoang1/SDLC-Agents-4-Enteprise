@@ -117,6 +117,7 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
     this.statusManager = new ChatStatusManager(mcpManager, secrets, (msg) => this.sendToWebview(msg));
     this.modelManager = new ChatModelManager((msg) => this.sendToWebview(msg));
     this.stateManager = new ChatStateManager(workspaceRoot, workspaceState, (msg) => this.sendToWebview(msg), () => this.getEngine());
+    this.disposables.push(this.stateManager);
   }
 
   /** SA4E-185: Set the diagnostics feed service for the engine. */
@@ -317,6 +318,7 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
       this.stateManager.restoreChatState();
       this.stateManager.sendSteeringInfo();
       this.stateManager.sendAgentsInfo();
+      this.stateManager.sendSkillsInfo();
       void this.sendInitialContextUsage();
     }
     this.handleMessage(msg);
@@ -370,7 +372,7 @@ export class ChatPanelProvider implements vscode.WebviewViewProvider, vscode.Dis
 
   private getMessageHandler(): MessageHandler {
     if (!this.messageHandler) {
-      this.messageHandler = new MessageHandler(() => this.getEngine(), (msg) => this.sendToWebview(msg), (ct) => this.handlePickContext(ct), () => this.handlePickAttachment(), (code, filePath) => this.handleApplyCode(code, filePath), (code) => this.handleInsertCode(code), (model) => this.handleSetModel(model), () => this.updateContextUsageAfterTurn());
+      this.messageHandler = new MessageHandler(() => this.getEngine(), (msg) => this.sendToWebview(msg), this.workspaceRoot, (ct) => this.handlePickContext(ct), () => this.handlePickAttachment(), (code, filePath) => this.handleApplyCode(code, filePath), (code) => this.handleInsertCode(code), (model) => this.handleSetModel(model), () => this.updateContextUsageAfterTurn(), () => this.stateManager.broadcastInitialState());
     }
     return this.messageHandler;
   }

@@ -9,7 +9,9 @@ import type { PegaIngestRuleRequest, UnresolvedDependency } from './models.js';
 import { PegaParser, type ExtractedPegaSymbol } from './PegaParser.js';
 import { PegaRuleAstParser } from './PegaRuleAstParser.js';
 import { syncRuleToSymbols } from './PegaSymbolSync.js';
-import { buildFqn, resolveRuleNameField } from './pega-mapping.js';
+import { buildFqn, resolveRuleNameField, resolveSymbolKind, buildVirtualPath } from './pega-mapping.js';
+import { TaskType, TaskStatus } from '../memory/task-queue/models.js';
+import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import pino from 'pino';
 
 const logger = pino({ name: 'pega-indexer' });
@@ -58,10 +60,19 @@ export async function indexRule(
     resolveRuleNameField(req.ruleJson),
   );
   if (req.checksum) {
-    const { exists, checksumMatch } = await checkRuleChecksum(
+    const { exists, checksumMatch, needsEnrichment, symbolId } = await checkRuleChecksum(
       memoryEngine, req.projectId, canonicalFqn, req.checksum,
     );
     if (exists && checksumMatch) {
+      // SA4E-209: Even if checksum matches, ensure enrichment task exists for unenriched symbols
+      if (needsEnrichment && symbolId > 0) {
+        const kind = resolveSymbolKind(String((req.ruleJson as any)?.pxObjClass || ''));
+        const virtualPath = buildVirtualPath(
+          String((req.ruleJson as any)?.pyClassName || ''), kind, resolveRuleNameField(req.ruleJson),
+        );
+        await ensureEnrichmentTask(memoryEngine.getAdapter(), symbolId, resolveRuleNameField(req.ruleJson),
+          kind, virtualPath, req.projectId);
+      }
       return { status: 'skipped', ruleId: -1, fqn: symbol.fqn,
         isRule: symbol.isRule, reason: 'checksum_match', dependencies: deps };
     }
@@ -90,21 +101,48 @@ export async function indexRule(
     isRule: symbol.isRule, dependencies: deps };
 }
 
-/** Check if rule exists in symbols with matching content hash. */
+/** Check if rule exists in symbols with matching content hash + enrichment status. */
 async function checkRuleChecksum(
   memoryEngine: MemoryEngine,
   projectId: string,
   fqn: string,
   checksum: string,
-): Promise<{ exists: boolean; checksumMatch: boolean }> {
+): Promise<{ exists: boolean; checksumMatch: boolean; needsEnrichment: boolean; symbolId: number }> {
   const adapter = memoryEngine.getAdapter();
-  const row = await adapter.getAsync<{ content_hash: string | null }>(
-    `SELECT f.content_hash
+  const row = await adapter.getAsync<{ content_hash: string | null; symbol_id: number; enrichment_status: string | null; summary: string | null }>(
+    `SELECT f.content_hash, s.id as symbol_id, s.enrichment_status, s.summary
      FROM symbols s JOIN files f ON f.id = s.file_id
      WHERE s.project_id = $1 AND s.signature = $2 AND s.kind LIKE 'pega_%'
      LIMIT 1`,
     [projectId, fqn],
   );
-  if (!row) return { exists: false, checksumMatch: false };
-  return { exists: true, checksumMatch: row.content_hash === checksum };
+  if (!row) return { exists: false, checksumMatch: false, needsEnrichment: false, symbolId: 0 };
+  const needsEnrichment = !(row.enrichment_status === 'COMPLETED' && row.summary);
+  return { exists: true, checksumMatch: row.content_hash === checksum, needsEnrichment, symbolId: row.symbol_id };
+}
+
+/** SA4E-209: Create enrichment task for a checksum-deduped symbol that lacks enrichment. */
+async function ensureEnrichmentTask(
+  adapter: DatabaseAdapter, symbolId: number, symbolName: string,
+  kind: string, filePath: string, projectId: string,
+): Promise<void> {
+  // Check no pending/processing task already exists for this symbol
+  const existing = await adapter.getAsync<{ id: number }>(
+    `SELECT id FROM pending_tasks WHERE task_type = $1 AND entry_id = $2
+     AND status IN ('PENDING', 'PROCESSING') LIMIT 1`,
+    [TaskType.CODE_ENRICHMENT, symbolId],
+  );
+  if (existing) return;
+
+  const payload = JSON.stringify({
+    symbolId, symbolName, symbolKind: kind,
+    projectId, filePath, workspaceType: 'pega',
+  });
+  const now = new Date().toISOString();
+  await adapter.runAsync(
+    `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, project_id, created_at)
+     VALUES ($1, $2, $3, $4, 3, $5, $6)`,
+    [TaskType.CODE_ENRICHMENT, symbolId, TaskStatus.PENDING, payload, projectId, now],
+  );
+  logger.debug({ symbolId, symbolName, kind }, 'Enrichment task created for deduped symbol');
 }

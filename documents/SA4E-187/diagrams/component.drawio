@@ -1,0 +1,17 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Component">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="parser" value="PatternParser" style="rounded" vertex="1" parent="1"><mxGeometry x="100" y="100" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="cacheMgr" value="CacheManager" style="rounded" vertex="1" parent="1"><mxGeometry x="350" y="100" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="injector" value="Injector" style="rounded" vertex="1" parent="1"><mxGeometry x="600" y="100" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="hook" value="HookAdapter" style="rounded" vertex="1" parent="1"><mxGeometry x="350" y="250" width="140" height="60" as="geometry"/></mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="hook" target="parser"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="parser" target="cacheMgr"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="cacheMgr" target="injector"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

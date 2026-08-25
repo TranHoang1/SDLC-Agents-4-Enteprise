@@ -1,0 +1,39 @@
+<mxGraphModel adaptiveColors="auto">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="user" value="Chat User" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+      <mxGeometry x="40" y="40" width="120" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="smc" value="SlashMenuController" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+      <mxGeometry x="260" y="40" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="session" value="ChatSession" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+      <mxGeometry x="260" y="160" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext186" value="SA4E-186&#10;(Agent Runtime)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="40" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext182" value="SA4E-182&#10;(Compaction)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="120" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="ext183" value="SA4E-183&#10;(File Tracking)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="500" y="200" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" edge="1" parent="1" source="user" target="smc" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" edge="1" parent="1" source="smc" target="session" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" edge="1" parent="1" source="smc" target="ext186" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" edge="1" parent="1" source="smc" target="ext182" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" edge="1" parent="1" source="smc" target="ext183" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;dashed=1;">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

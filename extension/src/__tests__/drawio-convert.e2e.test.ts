@@ -59,7 +59,7 @@ describe('E2E: Convert Drawio Files', () => {
 
   beforeAll(async () => {
     console.log(`[E2E] Starting local backend via tsx on port ${TEST_PORT}...`);
-    backendProcess = cp.fork(path.join(BACKEND_DIR, 'node_modules', 'tsx', 'dist', 'cli.mjs'), ['src/index.ts'], {
+    backendProcess = cp.fork(path.resolve(BACKEND_DIR, '..', 'node_modules', 'tsx', 'dist', 'cli.mjs'), ['src/index.ts'], {
       cwd: BACKEND_DIR,
       execPath: 'node',
       stdio: 'pipe',

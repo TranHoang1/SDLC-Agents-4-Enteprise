@@ -1,0 +1,8 @@
+test_case_id,ticket,autonomyLevel,currentPhase,completedAt,expected_result,description
+TC-003,SA4E-190,L3,requirements,,autonomy updated,Configure autonomy level
+TC-301,SA4E-190,L3,requirements,,enum valid,Autonomy enum validation BR-01
+TC-302,SA4E-190,L3,requirements,,phase valid,Phase validation BR-02
+TC-303,SA4E-190,L3,requirements,2026-08-23T12:00:00Z,ISO8601 valid,CompletedAt format BR-03
+TC-304,SA4E-190,L3,requirements,,human approval required,L3 approval gate BR-04
+TC-308,SA4E-190,L4,requirements,,enum rejected,Autonomy level limited BR-08
+TC-309,SA4E-190,L3,requirements,,review enforced,L3 review enforcement BR-09
