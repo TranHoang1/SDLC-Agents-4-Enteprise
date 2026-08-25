@@ -19,7 +19,7 @@ import { PageContextResolver } from '../../modules/pega/harness-schema/resolver/
 import { ClassHierarchyResolver } from '../../modules/pega/harness-schema/resolver/ClassHierarchyResolver.js';
 import { SchemaAnalyzeService } from '../../modules/pega/schema/SchemaAnalyzeService.js';
 import { SchemaStorageService, SchemaNotFoundError, SchemaAlreadyExistsError } from '../../modules/pega/schema/SchemaStorageService.js';
-import { SchemaAnalyzeRequestSchema, SchemaStoreRequestSchema, SchemaUpdateRequestSchema } from '../../models/pega-schema.models.js';
+import { SchemaAnalyzeRequestSchema, SchemaGenerateRequestSchema, SchemaStoreRequestSchema, SchemaUpdateRequestSchema } from '../../models/pega-schema.models.js';
 
 /** Request body: extension sends raw harness + pre-fetched sections */
 interface SchemaGenerateRequest {
@@ -61,11 +61,17 @@ export function createPegaSchemaRoutes(logger: Logger, dbAdapter?: any): Hono {
    * Returns generated JSON Schema.
    */
   app.post('/pega/schema/generate', async (c) => {
-    const body = await c.req.json<SchemaGenerateRequest>();
-
-    if (!body.harnessJson) {
-      return c.json({ error: 'Missing harnessJson in request body' }, 400);
+    const raw = await c.req.json();
+    const parsed = SchemaGenerateRequestSchema.safeParse(raw);
+    if (!parsed.success) {
+      return c.json({
+        error: 'Invalid request',
+        code: 'SCHEMA_INVALID_REQUEST',
+        details: parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`),
+      }, 400);
     }
+
+    const body = parsed.data as SchemaGenerateRequest;
 
     try {
       // Create a local hierarchy resolver that uses provided sections (no API calls)
@@ -122,7 +128,7 @@ export function createPegaSchemaRoutes(logger: Logger, dbAdapter?: any): Hono {
       logger.error({ err: err.message }, '[pega-schema] Generation failed');
       return c.json({
         error: 'Schema generation failed',
-        details: err.message,
+        ...(process.env.NODE_ENV !== 'production' && { details: err.message }),
       }, 500);
     }
   });
@@ -161,7 +167,11 @@ export function createPegaSchemaRoutes(logger: Logger, dbAdapter?: any): Hono {
         return c.json({ error: 'LLM timeout', code: 'SCHEMA_LLM_TIMEOUT' }, 504);
       }
       logger.error({ err: err.message }, '[pega-schema] Analysis failed');
-      return c.json({ error: 'Analysis failed', code: 'SCHEMA_ANALYSIS_FAILED', details: err.message }, 500);
+      return c.json({
+        error: 'Analysis failed',
+        code: 'SCHEMA_ANALYSIS_FAILED',
+        ...(process.env.NODE_ENV !== 'production' && { details: err.message }),
+      }, 500);
     }
   });
 
@@ -192,7 +202,10 @@ export function createPegaSchemaRoutes(logger: Logger, dbAdapter?: any): Hono {
         return c.json({ error: err.message, code: 'SCHEMA_ALREADY_EXISTS' }, 409);
       }
       logger.error({ err: err.message }, '[pega-schema] Store failed');
-      return c.json({ error: 'Store failed', code: 'SCHEMA_STORE_FAILED', details: err.message }, 500);
+      return c.json({
+        error: 'Store failed',
+        ...(process.env.NODE_ENV !== 'production' && { details: err.message }),
+      }, 500);
     }
   });
 
@@ -244,7 +257,10 @@ export function createPegaSchemaRoutes(logger: Logger, dbAdapter?: any): Hono {
         return c.json({ error: err.message, code: 'SCHEMA_NOT_FOUND' }, 404);
       }
       logger.error({ err: err.message }, '[pega-schema] Update failed');
-      return c.json({ error: 'Update failed', details: err.message }, 500);
+      return c.json({
+        error: 'Update failed',
+        ...(process.env.NODE_ENV !== 'production' && { details: err.message }),
+      }, 500);
     }
   });
 

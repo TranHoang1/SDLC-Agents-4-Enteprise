@@ -37,6 +37,8 @@ export interface SymbolContext {
   existingPseudoCode: string | null;
   pegaClass?: string;
   pegaRuleset?: string;
+  /** Enriched schema context (describes important fields for this rule type). */
+  schemaContext?: string;
 }
 
 /** Payload stored in pending_tasks for CODE_ENRICHMENT tasks. */

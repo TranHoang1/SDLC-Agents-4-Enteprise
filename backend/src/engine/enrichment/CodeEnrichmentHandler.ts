@@ -14,8 +14,8 @@ import type { CodeEnrichmentPayload, EnrichmentStrategy, SymbolContext, CodeEnri
 import { validateTags } from './tag-validator.js';
 import { isPegaKind } from '../../modules/pega/pega-mapping.js';
 
-/** LLM call timeout in milliseconds (BR-02). */
-const LLM_TIMEOUT_MS = 30_000;
+/** LLM call timeout in milliseconds (BR-02). Env override: LLM_ENRICH_TIMEOUT_MS. Default 120s for slow local models. */
+const LLM_TIMEOUT_MS = parseInt(process.env.LLM_ENRICH_TIMEOUT_MS || '120000', 10);
 /** Max pseudo code length (BR-05). */
 const MAX_PSEUDO_CODE_LENGTH = 2000;
 
