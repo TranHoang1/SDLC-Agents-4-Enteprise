@@ -6,6 +6,11 @@ import { RemoteCheckpointer } from "../core/remote-checkpointer";
 import type { LlmProvider } from "../core/llm-provider";
 import { getAlternateStrategy } from "../config/alternate-strategies";
 import { createSdlcNodes, SdlcNodes } from "./sdlc-node-factory";
+import { FanOutNode } from "./parallel/fan-out.node";
+import { JoinNode } from "./parallel/join.node";
+import { ParallelExecutor } from "./parallel/parallel-executor.service";
+import { StateMergeService } from "./parallel/state-merge.service";
+import { PhaseIdentificationService } from "./parallel/phase-identification.service";
 import { agentRegistry } from "../agents/registry";
 import { DynamicAgentNode } from "../agents/dynamic-agent-node";
 import type { PhaseDefinition, AgentRelation } from "../agents/pipeline-extractor";
@@ -302,6 +307,7 @@ function wireDesignPhase(
 ): void {
   addNodeIfNeeded(graph, "ba-agent");
   addNodeIfNeeded(graph, "sa-agent");
+  addNodeIfNeeded(graph, "design_parallel_join");
 
   graph.addEdge(agentId, verifyId ?? gateId!);
 
@@ -316,6 +322,16 @@ function wireDesignPhase(
     });
     addNodeIfNeeded(graph, "security_review_tdd");
 
+    const joinNode = new JoinNode(new StateMergeService());
+    addNodeIfNeeded(graph, "design_parallel_join");
+    graph.addNode("design_parallel_join", (s: PipelineState) => joinNode.join([s]).then(r => r.state));
+
+    graph.addEdge("feedback_check", "ba-agent");
+    graph.addEdge("feedback_check", "sa-agent");
+
+    graph.addEdge("ba-agent", "design_parallel_join");
+    graph.addEdge("sa-agent", "design_parallel_join");
+
     graph.addConditionalEdges("ba-agent", routeAfterBaFixFsd, {
       "sa-agent": "sa-agent", __end__: END
     });
@@ -324,6 +340,7 @@ function wireDesignPhase(
       feedback_check: "feedback_check", __end__: END
     });
 
+    graph.addEdge("design_parallel_join", "security_review_tdd");
     graph.addEdge("security_review_tdd", gateId);
 
     graph.addConditionalEdges(gateId, routeAfterQualityGate, {
@@ -342,6 +359,7 @@ function wireUserGuidePhase(
 ): void {
   addNodeIfNeeded(graph, "ba-agent");
   addNodeIfNeeded(graph, "qa-agent");
+  addNodeIfNeeded(graph, "ug_parallel_join");
 
   graph.addEdge(agentId, verifyId ?? gateId!);
 
@@ -350,6 +368,13 @@ function wireUserGuidePhase(
       "ba-agent": "ba-agent", [agentId]: agentId,
       strategy_switch: "strategy_switch", __end__: END
     });
+
+    const joinNode = new JoinNode(new StateMergeService());
+    graph.addNode("ug_parallel_join", (s: PipelineState) => joinNode.join([s]).then(r => r.state));
+
+    graph.addEdge("ba-agent", "qa-agent");
+    graph.addEdge("ba-agent", "ug_parallel_join");
+    graph.addEdge("qa-agent", "ug_parallel_join");
 
     graph.addConditionalEdges("ba-agent", routeToQaAgent, {
       "qa-agent": "qa-agent", __end__: END
@@ -362,6 +387,8 @@ function wireUserGuidePhase(
     graph.addConditionalEdges("ug_join", routeToUgGate, {
       [gateId]: gateId, __end__: END
     });
+
+    graph.addEdge("ug_parallel_join", "ug_join");
 
     graph.addConditionalEdges(gateId, routeAfterQualityGate, {
       ...QUALITY_GATE_TARGETS, analyze_input: "analyze_input"
