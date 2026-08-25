@@ -17,7 +17,7 @@ npx sdlc-agent-4-enterprise-server
 ```bash
 cd extension
 npm ci && npm run esbuild && npx vsce package --no-dependencies
-kiro --install-extension sdlc-agents-4-enterprise-1.37.1.vsix
+kiro --install-extension sdlc-agents-4-enterprise-1.37.2.vsix
 ```
 
 ### 3. Use
@@ -66,7 +66,7 @@ MIT
 
 ## Changelog
 
-### v1.37.1 (2026-08-24)
+### v1.37.2 (2026-08-24)
 
 - **Proxy Fix: global-fetch-patch defensive fallback** — Fixed silent proxy bypass in curl/powershell mode. Added cookie jar persistence, followRedirects support, workspace-scoped config, PowerShell CLM compatibility.
 - **SA4E-204/205/206** — Parallel orchestration module docs and implementation.
