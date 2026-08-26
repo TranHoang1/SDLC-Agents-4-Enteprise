@@ -34,6 +34,9 @@ export async function injectAll(root: string, extensionPath: string): Promise<st
     if (adapter.inject(root, extensionPath)) {
       injected.push(`ide:${ideTarget}`);
     }
+    // Templates always go to documents/templates regardless of IDE
+    const tplComponent = CORE_COMPONENTS.find(c => c.id === "templates");
+    if (tplComponent && injectComponent(tplComponent, root, extensionPath)) { injected.push("templates"); }
   }
 
   buildManifestAfterInject(root, extensionPath);
