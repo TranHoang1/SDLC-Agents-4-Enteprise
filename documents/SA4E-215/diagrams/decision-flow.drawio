@@ -1,40 +1,46 @@
-<mxfile host="app.diagrams.net" modified="2026-08-26T01:00:00Z" agent="opencode" version="21.0.0">
+<mxfile host="app.diagrams.net" modified="2026-08-26T02:00:00Z" agent="opencode" version="21.0.0">
   <diagram id="decision-flow" name="Decision Flow">
-    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="600" math="0" shadow="0">
+    <mxGraphModel dx="900" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="960" pageHeight="600" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
-        <mxCell id="title" value="Decision Engine Flow - SA4E-215" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="120" y="20" width="560" height="24" as="geometry"/>
+        <mxCell id="title" value="Decision Engine Flow - SA4E-215 (real audit_log shape)" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="20" width="640" height="24" as="geometry"/>
         </mxCell>
-        <mxCell id="eval" value="POST /api/sa4e-215/decisions/evaluate&lt;br/&gt;{ rule_set_id, params }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="60" y="80" width="280" height="50" as="geometry"/>
+        <mxCell id="eval" value="POST /api/sa4e-215/decisions/evaluate&lt;br/&gt;{ rule_set_id, params, user_id, project_id? }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="320" height="50" as="geometry"/>
         </mxCell>
-        <mxCell id="logic" value="Decision logic (rule_set_id='default')&lt;br/&gt;score = sum(params numbers)&lt;br/&gt;score&gt;50 approved | &gt;20 pending | else rejected&lt;br/&gt;confidence = f(score)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="60" y="170" width="320" height="80" as="geometry"/>
+        <mxCell id="logic" value="Decision logic (rule_set_id='default')&lt;br/&gt;score = sum(numeric params)&lt;br/&gt;score&gt;50 approved | &gt;20 pending | else rejected&lt;br/&gt;confidence = f(score)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="170" width="340" height="80" as="geometry"/>
         </mxCell>
-        <mxCell id="audit" value="prisma.auditLog.create&lt;br/&gt;action='decision_evaluate'&lt;br/&gt;metadata={rule_set_id,params,decision,confidence}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="440" y="170" width="320" height="70" as="geometry"/>
+        <mxCell id="ins" value="INSERT decisions&lt;br/&gt;(decision_id TEXT PK, user_id, project_id,&lt;br/&gt;rule_set_id, input_params, result, confidence)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="460" y="80" width="320" height="80" as="geometry"/>
         </mxCell>
-        <mxCell id="resp" value="200 { decision, confidence, audit_id, evaluated_at }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="60" y="290" width="340" height="40" as="geometry"/>
+        <mxCell id="audit" value="INSERT audit_log (REAL shape)&lt;br/&gt;audit_id, user_id, username,&lt;br/&gt;action='decision_evaluate', resource='decision',&lt;br/&gt;resource_id=decision_id, changes=json, timestamp" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="460" y="190" width="340" height="100" as="geometry"/>
         </mxCell>
-        <mxCell id="hist" value="GET /api/sa4e-215/decisions/history&lt;br/&gt;?user_id=&amp;limit=&amp;offset=" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="60" y="390" width="320" height="50" as="geometry"/>
+        <mxCell id="resp" value="200 { decision, confidence, decision_id, evaluated_at }" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="60" y="300" width="360" height="40" as="geometry"/>
         </mxCell>
-        <mxCell id="tables" value="decisions + users tables&lt;br/&gt;(join user.email, role)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
-          <mxGeometry x="440" y="390" width="280" height="50" as="geometry"/>
+        <mxCell id="hist" value="GET /api/sa4e-215/decisions/history&lt;br/&gt;?user_id=&amp;project_id=&amp;limit=&amp;offset=" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="400" width="340" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="tables" value="decisions + users + project_registry&lt;br/&gt;(joined for display)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="460" y="400" width="320" height="50" as="geometry"/>
         </mxCell>
         <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="eval" target="logic">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="logic" target="audit">
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="logic" target="ins">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="logic" target="resp">
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="ins" target="audit">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
-        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="hist" target="tables">
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="logic" target="resp">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="hist" target="tables">
           <mxGeometry relative="1" as="geometry"/>
         </mxCell>
       </root>

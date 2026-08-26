@@ -1,36 +1,60 @@
 /**
- * SA4E-215 — Database Schema Definitions.
- * Defines tables: users, decisions, audit_log.
- * Maps to Prisma schema and raw DDL for SQLite/PostgreSQL.
- * Implements: TDD.md Section 3.2, FSD.md Section 3.1
+ * SA4E-215 — Database Schema Definitions (ALIGNED TO REAL sa4e_db, verified 2026-08-26).
+ *
+ * Real platform conventions (DO NOT deviate):
+ *  - Primary keys are TEXT ids (e.g. user-admin-001, grp-admin, project_id text)
+ *  - JSON is stored as TEXT (e.g. schema_json TEXT)
+ *  - Booleans are INTEGER 0/1 (e.g. force_password_change INTEGER)
+ *  - Passwords: pbkdf2 `salt:hash` (sha512) — see backend/src/admin/db/password.ts
+ *
+ * Prerequisite tables that ALREADY EXIST in sa4e_db (documented for reference,
+ * NOT created by SA4E-215 migration): users, access_groups, group_permissions,
+ * project_registry, audit_log, mcp_tools.
+ *
+ * SA4E-215 OWNS and creates exactly two new tables: mcp_servers, decisions.
  */
 
 import type { ColumnDef, IndexDef, TableDef } from './types.js';
 
-/** Users table – stores registered users with RBAC roles. */
-export const USERS_TABLE: TableDef = {
-  name: 'users',
+/** mcp_servers — NEW dedicated table for MCP SERVER DECLARATION/CONFIG.
+ *  Distinct from mcp_tools (which the server uses to ingest tools for search). */
+export const MCP_SERVERS_TABLE: TableDef = {
+  name: 'mcp_servers',
   columns: [
-    { name: 'id', type: 'serial', primaryKey: true, autoIncrement: true, notNull: true },
-    { name: 'email', type: 'varchar(255)', unique: true, notNull: true },
-    { name: 'password_hash', type: 'varchar(255)', notNull: true },
-    { name: 'role', type: 'varchar(50)', notNull: true, default: "'user'" },
-    { name: 'created_at', type: 'timestamp', notNull: true, default: 'now()' },
-    { name: 'updated_at', type: 'timestamp', notNull: true, default: 'now()' },
+    { name: 'server_id', type: 'text', primaryKey: true, notNull: true },
+    { name: 'project_id', type: 'text', notNull: true },
+    { name: 'name', type: 'text', notNull: true },
+    { name: 'transport_type', type: 'text', notNull: true },
+    { name: 'url', type: 'text' },
+    { name: 'command', type: 'text' },
+    { name: 'args', type: 'text' },
+    { name: 'env', type: 'text' },
+    { name: 'disabled', type: 'integer', notNull: true, default: '0' },
+    { name: 'auto_approve', type: 'text' },
+    { name: 'tools', type: 'text' },
+    { name: 'created_at', type: 'timestamp', notNull: true },
+    { name: 'updated_at', type: 'timestamp', notNull: true },
+  ],
+  indexes: [
+    { name: 'idx_mcp_servers_project_id', columns: ['project_id'], unique: false },
+    { name: 'idx_mcp_servers_name_project', columns: ['name', 'project_id'], unique: true },
+    { name: 'idx_mcp_servers_disabled', columns: ['disabled'], unique: false },
   ],
 };
 
-/** Decisions table – stores decision evaluation results with confidence scores. */
+/** decisions — NEW table for decision evaluation results.
+ *  Audit trail is written to the EXISTING audit_log table (real shape). */
 export const DECISIONS_TABLE: TableDef = {
   name: 'decisions',
   columns: [
-    { name: 'id', type: 'serial', primaryKey: true, autoIncrement: true, notNull: true },
-    { name: 'user_id', type: 'integer', notNull: true },
-    { name: 'rule_set_id', type: 'varchar(100)', notNull: true },
-    { name: 'input_params', type: 'jsonb' },
-    { name: 'result', type: 'varchar(50)', notNull: true },
-    { name: 'confidence', type: 'real', notNull: true, default: 0 },
-    { name: 'evaluated_at', type: 'timestamp', notNull: true, default: 'now()' },
+    { name: 'decision_id', type: 'text', primaryKey: true, notNull: true },
+    { name: 'user_id', type: 'text', notNull: true },
+    { name: 'project_id', type: 'text' },
+    { name: 'rule_set_id', type: 'text', notNull: true },
+    { name: 'input_params', type: 'text' },
+    { name: 'result', type: 'text', notNull: true },
+    { name: 'confidence', type: 'real', notNull: true, default: '0' },
+    { name: 'evaluated_at', type: 'timestamp', notNull: true },
   ],
   indexes: [
     { name: 'idx_decisions_user_id', columns: ['user_id'], unique: false },
@@ -39,35 +63,43 @@ export const DECISIONS_TABLE: TableDef = {
   ],
 };
 
-/** Audit log table – stores audit trail for all user actions and system events. */
-export const AUDIT_LOG_TABLE: TableDef = {
-  name: 'audit_log',
+/** Reference definitions of prerequisite tables (must exist before SA4E-215 runs).
+ *  These mirror sa4e_db EXACTLY and are NOT included in SA4E_215_TABLES. */
+export const USERS_TABLE: TableDef = {
+  name: 'users',
   columns: [
-    { name: 'id', type: 'serial', primaryKey: true, autoIncrement: true, notNull: true },
-    { name: 'user_id', type: 'integer' },
-    { name: 'action', type: 'varchar(100)', notNull: true },
-    { name: 'resource_type', type: 'varchar(50)', notNull: true },
-    { name: 'resource_id', type: 'integer', notNull: true },
-    { name: 'metadata', type: 'jsonb', notNull: true, default: '{}' },
-    { name: 'created_at', type: 'timestamp', notNull: true, default: 'now()' },
-  ],
-  indexes: [
-    { name: 'idx_audit_log_user_id', columns: ['user_id'], unique: false },
-    { name: 'idx_audit_log_action', columns: ['action'], unique: false },
-    { name: 'idx_audit_log_created_at', columns: ['created_at'], unique: false },
+    { name: 'user_id', type: 'text', primaryKey: true, notNull: true },
+    { name: 'username', type: 'text', notNull: true },
+    { name: 'email', type: 'text', notNull: true },
+    { name: 'password_hash', type: 'text', notNull: true },
+    { name: 'status', type: 'text', notNull: true, default: "'ACTIVE'" },
+    { name: 'access_group_id', type: 'text', notNull: true },
+    { name: 'force_password_change', type: 'integer', notNull: true, default: '0' },
+    { name: 'created_at', type: 'timestamp', notNull: true },
+    { name: 'last_login', type: 'timestamp' },
   ],
 };
 
-/** All SA4E-215 tables for registry registration. */
-export const SA4E_215_TABLES: TableDef[] = [
-  USERS_TABLE,
-  DECISIONS_TABLE,
-  AUDIT_LOG_TABLE,
-];
+export const AUDIT_LOG_TABLE: TableDef = {
+  name: 'audit_log',
+  columns: [
+    { name: 'audit_id', type: 'text', primaryKey: true, notNull: true },
+    { name: 'user_id', type: 'text', notNull: true },
+    { name: 'username', type: 'text', notNull: true },
+    { name: 'action', type: 'text', notNull: true },
+    { name: 'resource', type: 'text', notNull: true },
+    { name: 'resource_id', type: 'text', notNull: true, default: "''" },
+    { name: 'changes', type: 'text', default: "''" },
+    { name: 'timestamp', type: 'timestamp', notNull: true },
+    { name: 'ip_address', type: 'text', default: "''" },
+  ],
+};
 
-/** Table name shorthand for queries. */
+/** Tables SA4E-215 creates/migrates (only the NEW ones it owns). */
+export const SA4E_215_TABLES: TableDef[] = [MCP_SERVERS_TABLE, DECISIONS_TABLE];
+
+/** Table name shorthand. */
 export const SA4E_215_TABLE_NAMES = {
-  USERS: 'users',
+  MCP_SERVERS: 'mcp_servers',
   DECISIONS: 'decisions',
-  AUDIT_LOG: 'audit_log',
 } as const;
