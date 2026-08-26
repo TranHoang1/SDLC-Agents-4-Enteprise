@@ -1,0 +1,34 @@
+<mxfile host="app.diagrams.net" modified="2026-08-26T00:00:00Z" agent="opencode" version="21.0.0">
+  <diagram id="api-usage" name="API Usage">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="820" pageHeight="560" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="API Usage - /api/sa4e-215/mcp-servers" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="100" y="20" width="560" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="client" value="Client&lt;br/&gt;(curl / Postman / app)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="req" value="HTTP Request&lt;br/&gt;POST /api/sa4e-215/mcp-servers&lt;br/&gt;{ name, project_id, transport_type, url, ... }" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
+          <mxGeometry x="300" y="70" width="280" height="80" as="geometry"/>
+        </mxCell>
+        <mxCell id="resp" value="HTTP Response 200&lt;br/&gt;{&lt;br/&gt;  success: true,&lt;br/&gt;  data: { id, project_id, name, ... },&lt;br/&gt;  meta: { total, page, page_size }&lt;br/&gt;}" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
+          <mxGeometry x="300" y="200" width="300" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="methods" value="Methods:&lt;br/&gt;POST   create&lt;br/&gt;GET    list / {id}&lt;br/&gt;PUT    update {id}&lt;br/&gt;DELETE remove {id}" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
+          <mxGeometry x="60" y="200" width="180" height="110" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="client" target="req">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="req" target="resp">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;" edge="1" parent="1" source="resp" target="client">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
