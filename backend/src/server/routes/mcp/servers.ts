@@ -1,197 +1,243 @@
 /**
- * SA4E-215 — MCP Server CRUD Routes.
- * Implements: FR-001 to FR-013, FR-015 (FSD.md)
- * Routes: GET/POST /api/sa4e-215/mcp-servers, GET/PUT/DELETE /api/sa4e-215/mcp-servers/:id
+ * SA4E-215 — MCP Server declaration/config routes (aligned to real sa4e_db).
+ *
+ * CRUD on the NEW `mcp_servers` table. Distinct from mcp_tools (server tool
+ * ingest/search). Scoped by project_registry.project_id (TEXT FK, no constraint
+ * enforced via adapter but validated against project_registry).
+ * Uses getDbAdapter() + recordAudit.
+ * Mounted at /api/sa4e-215/mcp/servers (via sa4e-215/index.ts).
  */
-
 import { Hono } from 'hono';
-import type { Context } from 'hono';
-import type { Logger } from 'pino';
-import { PrismaClient } from '@prisma/client';
+import * as crypto from 'crypto';
+import pino from 'pino';
+import { getDbAdapter, recordAudit } from '../../../admin/admin-db.js';
+import { requireSa4eUser } from '../sa4e-215/guard.js';
 
-export function createMcpServerRoute(prisma: PrismaClient, logger: Logger) {
+const logger = pino({ name: 'sa4e-215-mcp-servers' });
+
+function rowToServer(r: Record<string, unknown>) {
+  return {
+    serverId: r.server_id,
+    projectId: r.project_id,
+    name: r.name,
+    transportType: r.transport_type,
+    url: r.url,
+    command: r.command,
+    args: r.args ? JSON.parse(r.args as string) : [],
+    env: r.env ? JSON.parse(r.env as string) : {},
+    disabled: !!(r.disabled as number),
+    autoApprove: r.auto_approve ? JSON.parse(r.auto_approve as string) : [],
+    tools: r.tools ? JSON.parse(r.tools as string) : [],
+    createdAt: r.created_at,
+    updatedAt: r.updated_at,
+  };
+}
+
+export function createSa4e215McpServersRoutes(): Hono {
   const app = new Hono();
 
-  // GET /api/sa4e-215/mcp-servers
-  app.get('/', async (c: Context) => {
-    const projectId = c.req.query('project_id') ? Number(c.req.query('project_id')) : undefined;
-    const page = c.req.query('page') ? Number(c.req.query('page')) : 1;
-    const pageSize = c.req.query('page_size') ? Number(c.req.query('page_size')) : 20;
+  // GET /api/sa4e-215/mcp/servers?projectId=&disabled=
+  app.get('/', async (c) => {
+    const auth = await requireSa4eUser(c);
+    if (auth instanceof Response) return auth;
 
-    const where = projectId
-      ? { project_id: projectId }
-      : {};
+    try {
+      const adapter = getDbAdapter();
+      const projectId = c.req.query('projectId');
+      const disabled = c.req.query('disabled');
 
-    const [servers, total] = await prisma.$transaction([
-      prisma.mcp_server.findMany({
-        where,
-        skip: (page - 1) * pageSize,
-        take: pageSize,
-        orderBy: { created_at: 'desc' },
-      }),
-      prisma.mcp_server.count({ where }),
-    ]);
+      let sql = 'SELECT * FROM mcp_servers WHERE 1=1';
+      const params: unknown[] = [];
+      if (projectId) { sql += ' AND project_id = ?'; params.push(projectId); }
+      if (disabled !== undefined) {
+        sql += ' AND disabled = ?';
+        params.push(disabled === 'true' || disabled === '1' ? 1 : 0);
+      }
+      sql += ' ORDER BY created_at DESC';
 
-    return c.json({
-      success: true,
-      data: servers,
-      meta: {
-        total,
-        page,
-        page_size: pageSize,
-      },
-    });
+      const rows = await adapter.allAsync<Record<string, unknown>>(sql, params);
+      return c.json({ success: true, data: rows.map(rowToServer) });
+    } catch (err: any) {
+      logger.error({ err }, 'list mcp servers error');
+      return c.json({ success: false, error: { code: 'ERR_009', message: 'Failed to list MCP servers' } }, 500);
+    }
   });
 
-  // GET /api/sa4e-215/mcp-servers/:id
-  app.get('/:id', async (c: Context) => {
-    const id = Number(c.req.param('id'));
+  // POST /api/sa4e-215/mcp/servers
+  app.post('/', async (c) => {
+    const auth = await requireSa4eUser(c);
+    if (auth instanceof Response) return auth;
 
-    const server = await prisma.mcp_server.findUnique({
-      where: { id },
-    });
+    try {
+      const body = await c.req.json();
+      const {
+        projectId, name, transportType, url, command, args, env, disabled, autoApprove, tools,
+      } = body;
 
-    if (!server) {
-      return c.json(
-        { success: false, error: { code: 'ERR_004', message: 'MCP server not found' } },
-        404
-      );
-    }
-
-    return c.json({
-      success: true,
-      data: server,
-    });
-  });
-
-  // POST /api/sa4e-215/mcp-servers
-  app.post('/', async (c: Context) => {
-    const data = await c.req.json();
-
-    // Validate required fields
-    if (!data.name || !data.project_id || !data.transport_type) {
-      return c.json(
-        { success: false, error: { code: 'ERR_001', message: 'name, project_id, transport_type are required' } },
-        400
-      );
-    }
-
-    // Check uniqueness: name must be unique per project_id
-    const existing = await prisma.mcp_server.findFirst({
-      where: { name: data.name, project_id: data.project_id },
-    });
-
-    if (existing) {
-      return c.json(
-        { success: false, error: { code: 'ERR_001', message: 'Name must be unique per project' } },
-        409
-      );
-    }
-
-    // Use transaction for atomicity
-    const server = await prisma.$transaction(async (tx) => {
-      return await tx.mcp_server.create({
-        data: {
-          name: data.name,
-          project_id: data.project_id,
-          transport_type: data.transport_type,
-          url: data.url,
-          command: data.command,
-          args: data.args || {},
-          env: data.env || {},
-          disabled: data.disabled ?? false,
-          auto_approve: data.auto_approve || {},
-          tools: data.tools || {},
-        },
-      });
-    });
-
-    return c.json({
-      success: true,
-      data: server,
-    });
-  });
-
-  // PUT /api/sa4e-215/mcp-servers/:id
-  app.put('/:id', async (c: Context) => {
-    const id = Number(c.req.param('id'));
-    const data = await c.req.json();
-
-    // Use transaction for atomicity
-    const server = await prisma.$transaction(async (tx) => {
-      // Check if server exists
-      const existing = await tx.mcp_server.findUnique({
-        where: { id },
-      });
-
-      if (!existing) {
+      if (!projectId || !name || !transportType) {
         return c.json(
-          { success: false, error: { code: 'ERR_004', message: 'MCP server not found' } },
-          404
+          { success: false, error: { code: 'ERR_001', message: 'projectId, name and transportType are required' } },
+          400,
         );
       }
 
-      // If updating name, check uniqueness per project
-      if (data.name && data.name !== existing.name) {
-        const nameExists = await tx.mcp_server.findFirst({
-          where: { name: data.name, project_id: data.project_id },
-        });
+      const adapter = getDbAdapter();
 
-        if (nameExists) {
-          return c.json(
-            { success: false, error: { code: 'ERR_001', message: 'Name must be unique per project' } },
-            409
-          );
-        }
+      const project = await adapter.getAsync<{ project_id: string }>(
+        'SELECT project_id FROM project_registry WHERE project_id = ?', [projectId],
+      );
+      if (!project) {
+        return c.json(
+          { success: false, error: { code: 'ERR_006', message: 'Unknown project_id' } },
+          400,
+        );
       }
 
-      // Update server
-      const updated = await tx.mcp_server.update({
-        where: { id },
-        data: {
-          name: data.name ?? existing.name,
-          project_id: data.project_id ?? existing.project_id,
-          transport_type: data.transport_type ?? existing.transport_type,
-          url: data.url ?? existing.url,
-          command: data.command ?? existing.command,
-          args: data.args ?? existing.args,
-          env: data.env ?? existing.env,
-          disabled: data.disabled ?? existing.disabled,
-          auto_approve: data.auto_approve ?? existing.auto_approve,
-          tools: data.tools ?? existing.tools,
-          updated_at: new Date(),
-        },
-      });
+      const existing = await adapter.getAsync<{ server_id: string }>(
+        'SELECT server_id FROM mcp_servers WHERE name = ? AND project_id = ?', [name, projectId],
+      );
+      if (existing) {
+        return c.json(
+          { success: false, error: { code: 'ERR_001', message: 'Server name already exists for this project' } },
+          400,
+        );
+      }
 
-      return updated;
-    });
+      const serverId = 'mcp-' + crypto.randomUUID().slice(0, 8);
+      const now = new Date().toISOString();
 
-    return c.json({
-      success: true,
-      data: server,
-    });
+      await adapter.runAsync(
+        `INSERT INTO mcp_servers
+          (server_id, project_id, name, transport_type, url, command, args, env, disabled, auto_approve, tools, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          serverId,
+          projectId,
+          name,
+          transportType,
+          url || null,
+          command || null,
+          args ? JSON.stringify(args) : null,
+          env ? JSON.stringify(env) : null,
+          disabled ? 1 : 0,
+          autoApprove ? JSON.stringify(autoApprove) : null,
+          tools ? JSON.stringify(tools) : null,
+          now,
+          now,
+        ],
+      );
+
+      await recordAudit(
+        auth.userId,
+        auth.username,
+        'MCP_SERVER_CREATE',
+        'mcp_server',
+        serverId,
+        JSON.stringify({ projectId, name, transportType }),
+      );
+
+      const r = await adapter.getAsync<Record<string, unknown>>(
+        'SELECT * FROM mcp_servers WHERE server_id = ?', [serverId],
+      );
+      return c.json({ success: true, data: rowToServer(r!) });
+    } catch (err: any) {
+      logger.error({ err }, 'create mcp server error');
+      return c.json({ success: false, error: { code: 'ERR_009', message: 'Failed to create MCP server' } }, 500);
+    }
   });
 
-  // DELETE /api/sa4e-215/mcp-servers/:id
-  app.delete('/:id', async (c: Context) => {
-    const id = Number(c.req.param('id'));
+  // GET /api/sa4e-215/mcp/servers/:id
+  app.get('/:id', async (c) => {
+    const auth = await requireSa4eUser(c);
+    if (auth instanceof Response) return auth;
 
-    // Use transaction for atomicity
-    await prisma.$transaction(async (tx) => {
-      // Soft delete: set disabled=1
-      await tx.mcp_server.update({
-        where: { id },
-        data: { disabled: true, updated_at: new Date() },
-      });
-    });
+    try {
+      const id = c.req.param('id');
+      const adapter = getDbAdapter();
+      const r = await adapter.getAsync<Record<string, unknown>>(
+        'SELECT * FROM mcp_servers WHERE server_id = ?', [id],
+      );
+      if (!r) {
+        return c.json({ success: false, error: { code: 'ERR_006', message: 'MCP server not found' } }, 404);
+      }
+      return c.json({ success: true, data: rowToServer(r) });
+    } catch (err: any) {
+      logger.error({ err }, 'get mcp server error');
+      return c.json({ success: false, error: { code: 'ERR_009', message: 'Failed to get MCP server' } }, 500);
+    }
+  });
 
-    return c.json({
-      success: true,
-      message: 'MCP server soft-deleted (disabled)',
-    });
+  // PUT /api/sa4e-215/mcp/servers/:id
+  app.put('/:id', async (c) => {
+    const auth = await requireSa4eUser(c);
+    if (auth instanceof Response) return auth;
+
+    try {
+      const id = c.req.param('id');
+      const body = await c.req.json();
+      const adapter = getDbAdapter();
+
+      const existing = await adapter.getAsync<Record<string, unknown>>(
+        'SELECT * FROM mcp_servers WHERE server_id = ?', [id],
+      );
+      if (!existing) {
+        return c.json({ success: false, error: { code: 'ERR_006', message: 'MCP server not found' } }, 404);
+      }
+
+      const fields: string[] = [];
+      const params: unknown[] = [];
+      const set = (col: string, val: unknown) => { fields.push(`${col} = ?`); params.push(val); };
+
+      if (body.name !== undefined) set('name', body.name);
+      if (body.transportType !== undefined) set('transport_type', body.transportType);
+      if (body.url !== undefined) set('url', body.url);
+      if (body.command !== undefined) set('command', body.command);
+      if (body.args !== undefined) set('args', JSON.stringify(body.args));
+      if (body.env !== undefined) set('env', JSON.stringify(body.env));
+      if (body.disabled !== undefined) set('disabled', body.disabled ? 1 : 0);
+      if (body.autoApprove !== undefined) set('auto_approve', JSON.stringify(body.autoApprove));
+      if (body.tools !== undefined) set('tools', JSON.stringify(body.tools));
+
+      set('updated_at', new Date().toISOString());
+      params.push(id);
+
+      await adapter.runAsync(
+        `UPDATE mcp_servers SET ${fields.join(', ')} WHERE server_id = ?`, params,
+      );
+      await recordAudit(auth.userId, auth.username, 'MCP_SERVER_UPDATE', 'mcp_server', id);
+
+      const r = await adapter.getAsync<Record<string, unknown>>(
+        'SELECT * FROM mcp_servers WHERE server_id = ?', [id],
+      );
+      return c.json({ success: true, data: rowToServer(r!) });
+    } catch (err: any) {
+      logger.error({ err }, 'update mcp server error');
+      return c.json({ success: false, error: { code: 'ERR_009', message: 'Failed to update MCP server' } }, 500);
+    }
+  });
+
+  // DELETE /api/sa4e-215/mcp/servers/:id
+  app.delete('/:id', async (c) => {
+    const auth = await requireSa4eUser(c);
+    if (auth instanceof Response) return auth;
+
+    try {
+      const id = c.req.param('id');
+      const adapter = getDbAdapter();
+      const existing = await adapter.getAsync<{ server_id: string }>(
+        'SELECT server_id FROM mcp_servers WHERE server_id = ?', [id],
+      );
+      if (!existing) {
+        return c.json({ success: false, error: { code: 'ERR_006', message: 'MCP server not found' } }, 404);
+      }
+      await adapter.runAsync('DELETE FROM mcp_servers WHERE server_id = ?', [id]);
+      await recordAudit(auth.userId, auth.username, 'MCP_SERVER_DELETE', 'mcp_server', id);
+      return c.json({ success: true, message: 'MCP server deleted' });
+    } catch (err: any) {
+      logger.error({ err }, 'delete mcp server error');
+      return c.json({ success: false, error: { code: 'ERR_009', message: 'Failed to delete MCP server' } }, 500);
+    }
   });
 
   return app;
 }
-
-export type { createMcpServerRoute };
