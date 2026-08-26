@@ -28,8 +28,22 @@
     ]
   },
   "docsRealigned": {
-    "date": "2026-08-26",
+    "date": "2026-08-26T01:30:00Z",
     "reason": "Aligned BRD/FSD/TDD/STP/UG to actual code: Auth (users) + Decisions (decisions/audit_log) + MCP (mcp_servers/projects)"
   },
-  "lastUpdated": "2026-08-26T01:30:00Z"
+  "redesignedAgainstRealDb": {
+    "date": "2026-08-26T02:00:00Z",
+    "verifiedDb": "postgresql://localhost:5432/sa4e_db",
+    "keyFindings": [
+      "PKs are TEXT ids; JSON as TEXT; booleans as INTEGER 0/1",
+      "Password = PBKDF2 salt:hash (NOT argon2)",
+      "RBAC group-based (access_groups + group_permissions), no 'role' column",
+      "mcp_tools is tool-ingest/search, NOT MCP server declaration",
+      "Project scoping via project_registry (project_id text)",
+      "decisions table did not exist; created new with platform standards"
+    ],
+    "newTablesOwned": ["mcp_servers", "decisions"],
+    "registryFixed": true
+  },
+  "lastUpdated": "2026-08-26T02:00:00Z"
 }
