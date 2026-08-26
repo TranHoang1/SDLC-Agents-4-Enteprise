@@ -1,32 +1,26 @@
-<mxfile host="app.diagrams.net" modified="2026-08-26T00:00:00Z" agent="opencode" version="21.0.0">
+<mxfile host="app.diagrams.net" modified="2026-08-26T01:00:00Z" agent="opencode" version="21.0.0">
   <diagram id="api-usage" name="API Usage">
-    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="820" pageHeight="560" math="0" shadow="0">
+    <mxGraphModel dx="900" dy="640" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="920" pageHeight="640" math="0" shadow="0">
       <root>
         <mxCell id="0"/>
         <mxCell id="1" parent="0"/>
-        <mxCell id="title" value="API Usage - /api/sa4e-215/mcp-servers" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
-          <mxGeometry x="100" y="20" width="560" height="24" as="geometry"/>
+        <mxCell id="title" value="API Usage - SA4E-215 (Auth + Decisions + MCP)" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="20" width="620" height="24" as="geometry"/>
         </mxCell>
-        <mxCell id="client" value="Client&lt;br/&gt;(curl / Postman / app)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="1">
-          <mxGeometry x="60" y="80" width="180" height="50" as="geometry"/>
+        <mxCell id="auth" value="AUTH&lt;br/&gt;POST /api/sa4e-215/auth/register&lt;br/&gt;POST /api/sa4e-215/auth/login&lt;br/&gt;POST /api/sa4e-215/auth/logout" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontFamily=monospace;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="70" width="300" height="110" as="geometry"/>
         </mxCell>
-        <mxCell id="req" value="HTTP Request&lt;br/&gt;POST /api/sa4e-215/mcp-servers&lt;br/&gt;{ name, project_id, transport_type, url, ... }" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
-          <mxGeometry x="300" y="70" width="280" height="80" as="geometry"/>
+        <mxCell id="dec" value="DECISIONS&lt;br/&gt;POST /api/sa4e-215/decisions/evaluate&lt;br/&gt;GET  /api/sa4e-215/decisions/history" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontFamily=monospace;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="210" width="300" height="80" as="geometry"/>
         </mxCell>
-        <mxCell id="resp" value="HTTP Response 200&lt;br/&gt;{&lt;br/&gt;  success: true,&lt;br/&gt;  data: { id, project_id, name, ... },&lt;br/&gt;  meta: { total, page, page_size }&lt;br/&gt;}" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
-          <mxGeometry x="300" y="200" width="300" height="110" as="geometry"/>
+        <mxCell id="mcp" value="MCP SERVERS&lt;br/&gt;GET    /api/sa4e-215/mcp-servers&lt;br/&gt;POST   /api/sa4e-215/mcp-servers&lt;br/&gt;GET    /api/sa4e-215/mcp-servers/:id&lt;br/&gt;PUT    /api/sa4e-215/mcp-servers/:id&lt;br/&gt;DELETE /api/sa4e-215/mcp-servers/:id" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontFamily=monospace;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="60" y="320" width="320" height="160" as="geometry"/>
         </mxCell>
-        <mxCell id="methods" value="Methods:&lt;br/&gt;POST   create&lt;br/&gt;GET    list / {id}&lt;br/&gt;PUT    update {id}&lt;br/&gt;DELETE remove {id}" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontFamily=monospace;" vertex="1" parent="1">
-          <mxGeometry x="60" y="200" width="180" height="110" as="geometry"/>
+        <mxCell id="resp" value="Common response envelopes:&lt;br/&gt;{ success, data, meta }&lt;br/&gt;{ success:false, error:{ code, message } }&lt;br/&gt;Error codes: ERR_001 (validation),&lt;br/&gt;ERR_002 (auth), ERR_004 (not found)" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;fontFamily=monospace;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="460" y="210" width="360" height="150" as="geometry"/>
         </mxCell>
-        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="client" target="req">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;" edge="1" parent="1" source="req" target="resp">
-          <mxGeometry relative="1" as="geometry"/>
-        </mxCell>
-        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;" edge="1" parent="1" source="resp" target="client">
-          <mxGeometry relative="1" as="geometry"/>
+        <mxCell id="tok" value="Auth header:&lt;br/&gt;Authorization: Bearer &lt;JWT&gt;" style="rounded=1;whiteSpace=wrap;html=1;align=left;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontFamily=monospace;spacingLeft=8;" vertex="1" parent="1">
+          <mxGeometry x="460" y="70" width="360" height="60" as="geometry"/>
         </mxCell>
       </root>
     </mxGraphModel>

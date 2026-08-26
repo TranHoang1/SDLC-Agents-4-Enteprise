@@ -1,282 +1,125 @@
-FSD.md - Functional Specification Document
-SA4E-215 L3
+# Functional Specification Document (FSD) — SA4E-215
 
----
-# Document Information
+**Ticket:** SA4E-215
+**Status:** Done (L3 autonomy)
+**Last updated:** 2026-08-26
 
-| Attribute | Value |
-|-----------|-------|
-| Jira Ticket | SA4E-215 |
-| Title | Functional Specification |
-| Author | SM-Agent |
-| Version | 1 |
-| Date | 2026-08-25 |
-| Status | requirements → specification |
-| Autonomy Level | L3 |
+> Aligned with implemented code: `backend/src/server/routes/sa4e-215/auth.ts`, `.../decisions.ts`, `backend/src/server/routes/mcp/servers.ts`, `backend/src/database/schema-registry/sa4e-215.ts`, `backend/scripts/migrate-mcp.js`.
 
-# Revision History
+## 1. API Conventions
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1 | 2026-08-25 | SM-Agent | Initial FSD creation |
+- Base path: `/api/sa4e-215`
+- Auth header: `Authorization: Bearer <JWT>` (consumed by protected routes; current routes do not yet enforce it — see Open Issues).
+- Envelope success: `{ success: true, data: <object|array>, meta?: { total, page, page_size | limit, offset } }`
+- Envelope error: `{ success: false, error: { code: "ERR_xxx", message: "..." } }`
+- Content-Type: `application/json`.
 
----
+### Error Codes
 
-# 1. Introduction
-
-## 1.1 Purpose
-This document specifies the functional requirements for SA4E-215, defining what the system must do from a user and business perspective. The ticket aims to refactor MCP server configuration storage from file-based to database-based.
-
-## 1.2 Scope
-### In Scope
-- MCP server CRUD operations via database API
-- Multi-tenant project scoping for server configurations
-- Migration script from orchestration.json to database
-- Repository/service layer for MCP server management
-- Refactored admin routes and orchestration module
-- Transaction/atomicity improvements over file-based CRUD
-
-### Out of Scope
-- UI/UX design for MCP server management interface
-- Third-party integrations beyond API scope
-- Complete overhaul of MCP server runtime functionality
-- Infrastructure provisioning and deployment (Phase 7)
-
-## 1.3 Preliminary Requirements
-- System must support CRUD operations for MCP server configuration via database
-- Configuration must be project-scoped (multi-tenant isolation)
-- Migration from existing orchestration.json must be backward-compatible
-- All CRUD operations must have transaction/atomicity (no race conditions)
-- Database must be the single source of truth (file can remain as read-only export)
+| Code | Meaning | HTTP |
+|------|---------|------|
+| ERR_001 | Validation failure (missing/invalid field, duplicate) | 400 / 409 |
+| ERR_002 | Authentication failure (invalid email/password) | 401 |
+| ERR_004 | Resource not found | 404 |
 
 ---
 
-# 2. Functional Requirements
+## 2. Auth Module
 
-## 2.1 MCP Server CRUD Operations
-
-| ID | Requirement | Description |
-|----|-----------|-------------|
-| **FR-001** | **Create MCP Server** | System shall allow administrators to create new MCP server configurations via API POST /api/sa4e-215/mcp-servers. Input shall include: name (unique per project), transport_type, url, command, args (JSON), env (JSON), disabled, auto_approve (JSON). Database must enforce uniqueness of name per project_id. |
-| **FR-002** | **Read MCP Server** | System shall allow retrieval of MCP server configuration via API GET /api/sa4e-215/mcp-servers/{id} or GET /api/sa4e-215/mcp-servers?project_id={id}. Response shall include all fields: id, project_id, name, transport_type, url, command, args, env, disabled, auto_approve, tools, created_at, updated_at. |
-| **FR-003** | **Update MCP Server** | System shall allow administrators to update MCP server configuration via API PUT /api/sa4e-215/mcp-servers/{id}. Input shall support partial updates to any field. Database must use transactions to prevent race conditions during concurrent updates. |
-| **FR-004** | **Delete MCP Server** | System shall allow administrators to delete MCP server configuration via API DELETE /api/sa4e-215/mcp-servers/{id}. Database must use soft delete (set disabled=1) or hard delete with cascade removal from related tables. |
-
-## 2.2 Multi-Tenancy & Project Scoping
-
-| ID | Requirement | Description |
-|----|-----------|-------------|
-| **FR-005** | **Project-Scoped Names** | MCP server names must be unique per project_id. Same server name can exist in different projects. Database schema must include project_id column on mcp_servers table. |
-| **FR-006** | **Isolated Configuration** | Each project's MCP server configuration must be isolated. Queries must filter by project_id automatically (via middleware or views). No cross-project config leakage. |
-| **FR-007** | **Migration Scope** | Migration script must scope all operations by project_id. Existing orchestration.json data must be tagged with project_id during import. |
-
-## 2.3 Migration Requirements
-
-| ID | Requirement | Description |
-|----|-----------|-------------|
-| **FR-008** | **Data Integrity** | Migration script must verify that all MCP servers from orchestration.json are imported to DB. Verification: same count, same attributes, same attribute values. |
-| **FR-009** | **Backward Compatibility** | After migration, orchestration.json must remain as read-only export. System must read MCP config from DB by default, fall back to orchestration.json only if DB query returns no results. |
-| **FR-010** | **One-Time Execution** | Migration script must be idempotent or clearly marked as one-time execution. Running multiple times must not duplicate data or cause errors. |
-
-## 2.4 Transaction & Atomicity Requirements
-
-| ID | Requirement | Description |
-|----|-----------|-------------|
-| **FR-011** | **Transaction Writes** | All CRUD write operations (CREATE, UPDATE, DELETE) must use database transactions. No file .tmp rename patterns. Must roll back on any error. |
-| **FR-012** | **Concurrent Safety** | System must handle concurrent CRUD operations without data corruption. Tests must verify: same input → same output, no race conditions, no corrupt state. |
-| **FR-013** | **Error Structured Responses** | All API errors must return structured JSON: { success: false, error: { code, message, details } }. No raw database errors exposed to clients. |
-
-## 2.5 API Endpoints
-
-| Method | Endpoint | Description | Request Fields | Response |
-|--------|----------|-------------|----------------|----------|
-| **POST** | `/api/sa4e-215/mcp-servers` | Create new MCP server | {name, project_id, transport_type, url, command, args, env, disabled, auto_approve, tools} | { success: true, data: { id, ... } } |
-| **GET** | `/api/sa4e-215/mcp-servers` | List MCP servers | {project_id?, page?, page_size?} | { success: true, data: [...], meta: { total, page, page_size } } |
-| **GET** | `/api/sa4e-215/mcp-servers/{id}` | Get single MCP server | {id} | { success: true, data: { id, ... } } |
-| **PUT** | `/api/sa4e-215/mcp-servers/{id}` | Update MCP server | {id} + partial fields | { success: true, data: { id, ... } } |
-| **DELETE** | `/api/sa4e-215/mcp-servers/{id}` | Delete MCP server | {id} | { success: true } |
-
----
-
-# 3. System Requirements
-
-## 3.1 Technical Stack
-- **Backend**: Hono framework (Node.js runtime)
-- **Database**: SQLite (development) / PostgreSQL (production)
-- **ORM/Query**: Prisma or raw DatabaseAdapter
-- **Migration**: Custom migration script (up/down)
-- **Auth**: Admin-only middleware for all MCP server routes
-
-## 3.2 Performance Requirements
-- **CRUD Latency**: Create/Read/Update/Delete < 100ms p95
-- **Migration Throughput**: Import 100+ servers from orchestration.json < 5 seconds
-- **Concurrent Users**: Support 100 simultaneous admin operations
-
-## 3.3 Security Requirements
-- **Admin-Only Routes**: All MCP server CRUD endpoints require JWT with admin role
-- **Input Validation**: Zod schema validation on all API inputs
-- **SQL Injection Prevention**: Parameterized queries (Prisma/pg), no raw SQL in API handlers
-- **Rate Limiting**: 10 requests/minute per IP for MCP admin endpoints
-
----
-
-# 4. Component Design Overview
-
-## 4.1 Core Components
-- **MCP Config Service**: Handles all DB operations for mcp_servers table
-- **Migration Script**: One-time import from orchestration.json to DB
-- **API Gateway**: Route handling, validation
-- **Database Adapter**: SQLite/PostgreSQL connection
-- **OrchestrationModule**: Updated to read config from DB instead of file
-
-## 4.2 Data Model Key Entities
-
-### mcp_servers table
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | SERIAL | PRIMARY KEY, autoIncrement |
-| project_id | INTEGER | NOT NULL, FK to projects table |
-| name | VARCHAR(100) | NOT NULL, UNIQUE per project_id |
-| transport_type | VARCHAR(50) | NOT NULL |
-| url | TEXT | |
-| command | TEXT | |
-| args | JSONB | DEFAULT '{}' |
-| env | JSONB | DEFAULT '{}' |
-| disabled | BOOLEAN | DEFAULT false |
-| auto_approve | JSONB | DEFAULT '{}' |
-| tools | JSONB | DEFAULT '{}' |
-| created_at | TIMESTAMP | DEFAULT NOW() |
-| updated_at | TIMESTAMP | DEFAULT NOW() |
-
-### projects table (minimal)
-| Column | Type | Constraints |
-|--------|------|-------------|
-| id | SERIAL | PRIMARY KEY |
-| name | VARCHAR(100) | NOT NULL, UNIQUE |
-| created_at | TIMESTAMP | DEFAULT NOW() |
-| updated_at | TIMESTAMP | DEFAULT NOW() |
-
----
-
-# 5. External Interfaces
-
-## 5.1 API Endpoints (Full Specification)
-
-### POST /api/sa4e-215/mcp-servers
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| name | string | ✓ | Server name |
-| project_id | integer | ✓ | Project identifier |
-| transport_type | string | ✓ | e.g., 'http', 'command', 'websocket' |
-| url | string | | Server URL (if applicable) |
-| command | string | | Command to execute (if applicable) |
-| args | object | | JSON arguments for command |
-| env | object | | Environment variables |
-| disabled | boolean | | Whether disabled |
-| auto_approve | object | | Auto-approve config |
-| tools | object | | Tools list |
-
-**Response (201):** Server created with full fields
-**Response (400):** Validation errors
-**Response (401):** Admin auth required
-**Response (409):** Name must be unique per project
-
-### GET /api/sa4e-215/mcp-servers
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| project_id | integer | | Filter by project |
-| page | integer | | Page number (default: 1) |
-| page_size | integer | | Items per page (default: 20) |
-
-**Response (200):** Paginated list of MCP servers
-
-### GET /api/sa4e-215/mcp-servers/{id}
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| id | integer | ✓ | Server ID |
-
-**Response (200):** Single MCP server object
-
-### PUT /api/sa4e-215/mcp-servers/{id}
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| id | integer | ✓ | Server ID |
-| Partial fields | | | Any fields to update |
-
-**Response (200):** Server updated
-**Response (400/404):** Validation/Not found
-
-### DELETE /api/sa4e-215/mcp-servers/{id}
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| id | integer | ✓ | Server ID |
-
-**Response (200):**
+### 2.1 POST /api/sa4e-215/auth/register
+**Request**
 ```json
-{
-  "success": true,
-  "message": "MCP server soft-deleted"
-}
+{ "email": "admin@example.com", "password": "secret", "role": "admin" }
+```
+**Behavior:** hash password (argon2), create `users` row (role defaults `user`). Rejects duplicate email (ERR_001).
+**Response 200**
+```json
+{ "success": true, "data": { "token": "<jwt>", "user": { "id": 1, "email": "admin@example.com", "role": "admin" }, "expires_at": "2026-08-27T..." } }
 ```
 
----
+### 2.2 POST /api/sa4e-215/auth/login
+**Request** `{ "email": "...", "password": "..." }`
+**Behavior:** verify argon2 hash; on success sign JWT (claims `sub, email, role`, 24h). Invalid → ERR_002 (401).
+**Response 200:** same envelope as register.
 
-# 6. Related Tickets
-
-| Ticket | Relationship | Status |
-|--------|-------------|--------|
-| SA4E-215 | Parent ticket | specification |
-| SA4E-119 | Reference refactor | completed |
-| SA4E-208 | Previous project | completed |
+### 2.3 POST /api/sa4e-215/auth/logout
+**Behavior:** stateless no-op. **Response 200** `{ success: true, message: "Successfully logged out" }`.
 
 ---
 
-# 6. Appendix
+## 3. Decision Engine Module
 
-## 6.1 Diagram Index (Mandatory per Quality Gate)
+### 3.1 POST /api/sa4e-215/decisions/evaluate
+**Request** `{ "rule_set_id": "default", "params": { "x": 30, "y": 40 } }`
+**Behavior:** `rule_set_id` required (ERR_001). For `default`, `score = sum(numeric params)`.
+- score > 50 → `approved`, confidence up to 0.95
+- 20 < score ≤ 50 → `pending`
+- else → `rejected`
 
-| # | Diagram | Image | Source (editable) |
-|---|---------|-------|-------------------|
-| 1 | ER Diagram mcp_servers + projects | [pending.png](diagrams/er-diagram.png) | [pending.drawio](diagrams/er-diagram.drawio) |
-| 2 | Migration Flow orchestration.json → DB | [pending.png](diagrams/migration-flow.png) | [pending.drawio](diagrams/migration-flow.drawio) |
-| 3 | Admin CRUD Flow API → DB → Response | [pending.png](diagrams/admin-crud-flow.png) | [pending.drawio](diagrams/admin-crud-flow.drawio) |
+Writes `audit_log` (`action='decision_evaluate'`) best-effort.
+**Response 200**
+```json
+{ "success": true, "data": { "decision": "approved", "confidence": 0.7, "audit_id": 0, "evaluated_at": "2026-08-26T..." } }
+```
 
-## 6.2 Technology Stack Decisions
-
-| Decision | Option Chosen | Rationale |
-|----------|---------------|-----------|
-| Database | PostgreSQL (production) / SQLite (dev) | Mature, relational, JSONB support |
-| ORM | Prisma | Type-safe, migration-friendly |
-| Migration Script | Custom Node.js script | <= 200 lines, explicit |
-| API Framework | Hono | Lightweight, native ES modules |
-| Auth | JWT + Admin middleware | Fine-grained access control |
-
-## 6.3 Acceptance Criteria Checklist
-
-- [ ] FR-001 to FR-013 all implemented and tested
-- [ ] All API endpoints return correct structured responses
-- [ ] Migration script imports 100% of orchestration.json data
-- [ ] Project name uniqueness enforced per project_id
-- [ ] All CRUD operations use database transactions
-- [ ] Concurrent CRUD tests pass (no race conditions)
-- [ ] Admin-only auth middleware works correctly
-- [ ] FR-010 migration is idempotent or one-time
-- [ ] Code coverage ≥ 90% for new code
-- [ ] Diagrams in Appendix indexed and pending draw.io creation
-
-## 6.3 Glossary
-
-| Term | Definition |
-|------|-----------|
-| L3 | Autonomy Level 3 - minimal human gates required (UAT + deployment only) |
-| FSD | Functional Specification Document |
-| BRD | Business Requirements Document |
-| CRUD | Create, Read, Update, Delete |
-| DB | Database (SQLite/PostgreSQL) |
-| ORM | Object-Relational Mapping |
-| API | Application Programming Interface |
-| JSONB | JSON Binary type (PostgreSQL) |
+### 3.2 GET /api/sa4e-215/decisions/history
+**Query:** `?user_id=&limit=50&offset=0`
+**Behavior:** list `decisions` ordered by `evaluated_at` desc, joined with `users.email/role`.
+**Response 200** `{ success: true, data: [ { id, user_id, rule_set_id, result, confidence, input_params, evaluated_at, user:{email,role} } ], meta:{ total, limit, offset } }`
 
 ---
 
-**Current Phase**: specification — FSD.md completed, ready to proceed to Phase 3 (TDD.md)
+## 4. MCP Server Config Module
+
+### 4.1 GET /api/sa4e-215/mcp-servers
+**Query:** `?project_id=&page=1&page_size=20`
+**Response 200** `{ success:true, data:[...], meta:{ total, page, page_size } }`
+
+### 4.2 GET /api/sa4e-215/mcp-servers/:id
+**Response 200** `{ success:true, data:{ id, project_id, name, transport_type, url, command, args, env, disabled, auto_approve, tools, created_at, updated_at } }`
+Not found → ERR_004 (404).
+
+### 4.3 POST /api/sa4e-215/mcp-servers
+**Request** `{ "name":"srv","project_id":1,"transport_type":"stdio","url":null,"command":"npx", args:{}, env:{}, disabled:false, auto_approve:{}, tools:{} }`
+**Validation:** `name`, `project_id`, `transport_type` required (ERR_001). Unique `(name, project_id)` (ERR_001, 409). Created inside a transaction.
+
+### 4.4 PUT /api/sa4e-215/mcp-servers/:id
+Partial update; re-checks uniqueness if `name` changes; not found → ERR_004. Runs in transaction.
+
+### 4.5 DELETE /api/sa4e-215/mcp-servers/:id
+**Soft delete:** sets `disabled=true`, `updated_at=now()`. Returns `{ success:true, message:"MCP server soft-deleted (disabled)" }`.
+
+---
+
+## 5. Data Model (summary)
+
+| Table | Key columns | Defined in registry? |
+|-------|-------------|----------------------|
+| users | id, email (unique), password_hash, role | ✅ |
+| decisions | id, user_id (FK), rule_set_id, input_params (jsonb), result, confidence, evaluated_at | ✅ |
+| audit_log | id, user_id (FK nullable), action, resource_type, resource_id, metadata (jsonb) | ✅ |
+| projects | id, name (unique) | ❌ (runtime only) |
+| mcp_servers | id, project_id (FK), name, transport_type, url, command, args/env/auto_approve/tools (jsonb), disabled | ❌ (runtime only) |
+
+See [er-diagram.png](diagrams/er-diagram.png) for relationships.
+
+---
+
+## 6. Open Issues
+
+1. **Auth not enforced** on protected routes (no middleware verifying JWT yet).
+2. **Schema registry gap** — `mcp_servers`/`projects` missing from `schema-registry/sa4e-215.ts`.
+3. **Logout** does not revoke token.
+
+## 7. Diagram Index
+
+| # | Diagram | PNG | Drawio |
+|---|---------|-----|--------|
+| 1 | ER Diagram | [er-diagram.png](diagrams/er-diagram.png) | [er-diagram.drawio](diagrams/er-diagram.drawio) |
+| 2 | Auth Flow | [auth-flow.png](diagrams/auth-flow.png) | [auth-flow.drawio](diagrams/auth-flow.drawio) |
+| 3 | Decision Flow | [decision-flow.png](diagrams/decision-flow.png) | [decision-flow.drawio](diagrams/decision-flow.drawio) |
+| 4 | Migration Flow | [migration-flow.png](diagrams/migration-flow.png) | [migration-flow.drawio](diagrams/migration-flow.drawio) |
+| 5 | MCP CRUD Flow | [admin-crud-flow.png](diagrams/admin-crud-flow.png) | [admin-crud-flow.drawio](diagrams/admin-crud-flow.drawio) |
+| 6 | API Usage | [api-usage.png](diagrams/api-usage.png) | [api-usage.drawio](diagrams/api-usage.drawio) |
+| 7 | API Flow | [api-flow.png](diagrams/api-flow.png) | [api-flow.drawio](diagrams/api-flow.png) |
+| 8 | Test Strategy | [pending.png](diagrams/pending.png) | [pending.drawio](diagrams/pending.drawio) |

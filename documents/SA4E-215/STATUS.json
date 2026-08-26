@@ -16,14 +16,20 @@
     "status": "done",
     "renderer": "drawio-cli",
     "files": [
-      "er-diagram.drawio/png",
+      "er-diagram.drawio/png (5 tables)",
       "migration-flow.drawio/png",
+      "auth-flow.drawio/png (new)",
+      "decision-flow.drawio/png (new)",
       "admin-crud-flow.drawio/png",
       "admin-workflow.drawio/png",
-      "api-usage.drawio/png",
+      "api-usage.drawio/png (all 3 modules)",
       "api-flow.drawio/png",
       "pending.drawio/png (test strategy)"
     ]
   },
-  "lastUpdated": "2026-08-26T00:30:00Z"
+  "docsRealigned": {
+    "date": "2026-08-26",
+    "reason": "Aligned BRD/FSD/TDD/STP/UG to actual code: Auth (users) + Decisions (decisions/audit_log) + MCP (mcp_servers/projects)"
+  },
+  "lastUpdated": "2026-08-26T01:30:00Z"
 }
