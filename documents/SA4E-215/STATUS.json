@@ -45,5 +45,21 @@
     "newTablesOwned": ["mcp_servers", "decisions"],
     "registryFixed": true
   },
-  "lastUpdated": "2026-08-26T02:00:00Z"
+  "codeRewrittenAgainstRealDb": {
+    "date": "2026-08-26T03:00:00Z",
+    "summary": "Rewrote SA4E-215 implementation to use platform primitives (getDbAdapter async, PBKDF2 hashPassword/verifyPassword, createSession/validateSession, recordAudit, getUserPermissions). Removed all Prisma/argon2/fabricated-schema code.",
+    "files": [
+      "backend/src/server/routes/sa4e-215/guard.ts (NEW session-auth helper)",
+      "backend/src/server/routes/sa4e-215/auth.ts (register/login/logout via users table + sessions + group RBAC)",
+      "backend/src/server/routes/sa4e-215/decisions.ts (CRUD on decisions table + audit_log)",
+      "backend/src/server/routes/mcp/servers.ts (CRUD on mcp_servers, scoped by project_registry.project_id)",
+      "backend/src/server/routes/sa4e-215/index.ts (NEW aggregator mounted at /api/sa4e-215)",
+      "backend/src/server/routes/admin/index.ts (mounts sa4e-215 route)",
+      "backend/scripts/migrate-mcp.js (pg: CREATE TABLE IF NOT EXISTS mcp_servers/decisions + upsert orchestration.json)"
+    ],
+    "tscErrorsSa4e215": 0,
+    "lintErrorsSa4e215": 0,
+    "note": "Repo build also contains pre-existing errors in src/server/routes/sa4e-216 (orphaned sibling-ticket stubs using @prisma/client / @node-rs/argon2 / jose which are not in this platform). Out of SA4E-215 scope."
+  },
+  "lastUpdated": "2026-08-26T03:00:00Z"
 }

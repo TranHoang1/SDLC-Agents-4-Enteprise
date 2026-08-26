@@ -14,7 +14,7 @@
  * SA4E-215 OWNS and creates exactly two new tables: mcp_servers, decisions.
  */
 
-import type { ColumnDef, IndexDef, TableDef } from './types.js';
+import type { TableDef } from './types.js';
 
 /** mcp_servers — NEW dedicated table for MCP SERVER DECLARATION/CONFIG.
  *  Distinct from mcp_tools (which the server uses to ingest tools for search). */
