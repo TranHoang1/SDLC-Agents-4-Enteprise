@@ -1,0 +1,28 @@
+<mxfile host="app.diagrams.net" modified="2026-08-26T00:00:00Z" agent="opencode" version="21.0.0">
+  <diagram id="er-diagram" name="ER Diagram">
+    <mxGraphModel dx="800" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="700" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="ER Diagram - MCP Server Configuration (project-scoped)" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="60" y="20" width="640" height="24" as="geometry"/>
+        </mxCell>
+        <mxCell id="projects" value="&lt;b&gt;projects&lt;/b&gt;&lt;hr&gt;id : SERIAL (PK)&lt;br&gt;name : VARCHAR(100) UNIQUE NOT NULL&lt;br&gt;created_at : TIMESTAMP&lt;br&gt;updated_at : TIMESTAMP" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontFamily=monospace;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="300" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="mcp_servers" value="&lt;b&gt;mcp_servers&lt;/b&gt;&lt;hr&gt;id : SERIAL (PK)&lt;br&gt;project_id : INTEGER (FK -&gt; projects.id)&lt;br&gt;name : VARCHAR(100) NOT NULL&lt;br&gt;transport_type : VARCHAR(50) NOT NULL&lt;br&gt;url : TEXT&lt;br&gt;command : TEXT&lt;br&gt;args : JSONB DEFAULT '{}'&lt;br&gt;env : JSONB DEFAULT '{}'&lt;br&gt;disabled : BOOLEAN DEFAULT false&lt;br&gt;auto_approve : JSONB DEFAULT '{}'&lt;br&gt;tools : JSONB DEFAULT '{}'&lt;br&gt;created_at : TIMESTAMP&lt;br&gt;updated_at : TIMESTAMP&lt;hr&gt;UNIQUE (name, project_id)" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fontFamily=monospace;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;spacingLeft=8;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="480" y="60" width="340" height="290" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=ERone;startArrow=ERmany;endFill=1;startFill=1;" edge="1" parent="1" source="mcp_servers" target="projects">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="rel-label" value="1 project ── N servers" style="text;html=1;align=center;verticalAlign=middle;fontSize=11;fontStyle=1;" vertex="1" parent="1" connectable="0">
+          <mxGeometry x="360" y="170" width="120" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="idx" value="Indexes:&lt;br&gt;idx_mcp_servers_project_id (project_id)&lt;br&gt;idx_mcp_servers_name_project (name+project_id)&lt;br&gt;idx_mcp_servers_disabled (disabled)" style="rounded=1;whiteSpace=wrap;html=1;align=left;fontSize=10;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="60" y="240" width="300" height="70" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
