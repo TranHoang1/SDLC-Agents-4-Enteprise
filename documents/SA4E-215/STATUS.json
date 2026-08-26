@@ -61,5 +61,13 @@
     "lintErrorsSa4e215": 0,
     "note": "Repo build also contains pre-existing errors in src/server/routes/sa4e-216 (orphaned sibling-ticket stubs using @prisma/client / @node-rs/argon2 / jose which are not in this platform). Out of SA4E-215 scope."
   },
+  "autoCreateTablesOnStartup": {
+    "date": "2026-08-26T04:00:00Z",
+    "module": "backend/src/database/schema-registry/ensure-sa4e-215.ts",
+    "function": "ensureSa4e215Tables()",
+    "hookedIn": "backend/src/index.ts (after initAdapters, before server.start)",
+    "behavior": "Idempotent CREATE TABLE IF NOT EXISTS for mcp_servers + decisions, generated from TableDef registry; runs on every boot for BOTH SQLite and PostgreSQL via getDbAdapter().execAsync(). Failure is logged but does NOT abort startup.",
+    "manualScript": "backend/scripts/migrate-mcp.js (one-time: creates tables + upserts orchestration.json data)"
+  },
   "lastUpdated": "2026-08-26T03:00:00Z"
 }
