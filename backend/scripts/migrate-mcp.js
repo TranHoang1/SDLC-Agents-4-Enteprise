@@ -6,6 +6,10 @@
  *      mcp_servers, decisions
  *  - Upserts MCP server declarations from orchestration.json (if present).
  *
+ * NOTE: Table creation also runs automatically at server startup via
+ *       backend/src/database/schema-registry/ensure-sa4e-215.ts (ensureSa4e215Tables).
+ *       This script is the ONE-TIME data migration (seed from orchestration.json).
+ *
  * Conventions (DO NOT deviate — matches running platform):
  *   - TEXT primary keys (server_id, decision_id, project_id)
  *   - JSON stored as TEXT
