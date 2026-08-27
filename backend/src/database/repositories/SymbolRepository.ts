@@ -14,13 +14,15 @@ export class SymbolRepository implements ISymbolRepository {
 
   async getSymbolCount(projectId?: string): Promise<number> {
     try {
+      // Count standard code kinds AND all pega_* rule kinds (pattern match), so
+      // Pega symbols are not understated in stats (they are real indexed symbols).
       const row = projectId
         ? await this.adapter.getAsync<{ cnt: number }>(
-            `SELECT COUNT(*) as cnt FROM symbols WHERE project_id = $1 AND kind IN (${SYMBOL_KINDS_SQL})`,
+            `SELECT COUNT(*) as cnt FROM symbols WHERE project_id = $1 AND (kind IN (${SYMBOL_KINDS_SQL}) OR kind LIKE 'pega_%')`,
             [projectId],
           )
         : await this.adapter.getAsync<{ cnt: number }>(
-            `SELECT COUNT(*) as cnt FROM symbols WHERE kind IN (${SYMBOL_KINDS_SQL})`,
+            `SELECT COUNT(*) as cnt FROM symbols WHERE kind IN (${SYMBOL_KINDS_SQL}) OR kind LIKE 'pega_%'`,
           );
       return row?.cnt ?? 0;
     } catch (err) {

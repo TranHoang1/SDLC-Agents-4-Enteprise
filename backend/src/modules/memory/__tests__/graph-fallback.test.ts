@@ -59,16 +59,20 @@ describe('isPegaQuery', () => {
 // --- inferNodeType ---
 
 describe('inferNodeType', () => {
-  it('returns ACTIVITY for Activity rules', () => {
-    expect(inferNodeType('Rule-Obj-Activity ValidateData')).toBe('ACTIVITY');
+  it('returns RULE_OBJ_ACTIVITY for Activity rules', () => {
+    expect(inferNodeType('Rule-Obj-Activity ValidateData')).toBe('RULE_OBJ_ACTIVITY');
   });
 
-  it('returns FLOW for Flow rules', () => {
-    expect(inferNodeType('Rule-Obj-Flow ProcessClaim')).toBe('FLOW');
+  it('returns RULE_OBJ_FLOW for Flow rules', () => {
+    expect(inferNodeType('Rule-Obj-Flow ProcessClaim')).toBe('RULE_OBJ_FLOW');
   });
 
-  it('returns DECISION_TABLE for Decision rules', () => {
-    expect(inferNodeType('Rule-Obj-Decision EligibilityCheck')).toBe('DECISION_TABLE');
+  it('returns RULE_OBJ_FLOWACTION for FlowAction rules (distinct from Flow)', () => {
+    expect(inferNodeType('Rule-Obj-FlowAction SubmitForm')).toBe('RULE_OBJ_FLOWACTION');
+  });
+
+  it('returns RULE_DECLARE_DECISIONTABLE for Decision Table rules', () => {
+    expect(inferNodeType('Rule-Declare-DecisionTable EligibilityCheck')).toBe('RULE_DECLARE_DECISIONTABLE');
   });
 
   it('returns CLASS for Work- classes', () => {
@@ -79,8 +83,8 @@ describe('inferNodeType', () => {
     expect(inferNodeType('Data-Customer')).toBe('CLASS');
   });
 
-  it('returns PROPERTY for .pyX patterns', () => {
-    expect(inferNodeType('.pyLabel')).toBe('PROPERTY');
+  it('returns RULE_OBJ_PROPERTY for .pyX patterns', () => {
+    expect(inferNodeType('.pyLabel')).toBe('RULE_OBJ_PROPERTY');
   });
 
   it('returns undefined for ambiguous queries', () => {

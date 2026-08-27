@@ -13,6 +13,7 @@ import { fetchRulesInParallel, saveRuleFile, calibrateFetchConcurrency } from ".
 import { PegaStreamIngester } from "./PegaStreamIngester";
 import { DependencyMapper } from "./DependencyMapper";
 import type { UnresolvedDependency } from "./DependencyMapper";
+import type { MembershipSet } from "./DiskBackedSet";
 
 type ProgressReporter = vscode.Progress<{ message?: string }>;
 type LogFn = (msg: string) => void;
@@ -68,7 +69,7 @@ export class PegaBfsIndexer {
   async run(
     projectId: string,
     fetchQueue: CrawlPlanItem[],
-    dedupSet: Set<string>,
+    dedupSet: MembershipSet,
     report: ProgressReporter,
     root: string,
   ): Promise<BfsIndexResult> {
@@ -102,7 +103,7 @@ export class PegaBfsIndexer {
     batch: CrawlPlanItem[],
     projectId: string,
     fetchQueue: CrawlPlanItem[],
-    dedupSet: Set<string>,
+    dedupSet: MembershipSet,
     root: string,
     counters: { totalIngested: number; discoveredCount: number; skippedCount: number; errorCount: number },
   ): Promise<void> {
@@ -148,7 +149,7 @@ export class PegaBfsIndexer {
   private enqueueRelatives(
     relatives: UnresolvedDependency[],
     fetchQueue: CrawlPlanItem[],
-    dedupSet: Set<string>,
+    dedupSet: MembershipSet,
   ): number {
     let count = 0;
     for (const dep of relatives) {

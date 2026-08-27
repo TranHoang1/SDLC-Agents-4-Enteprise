@@ -22,8 +22,8 @@ export class ActivityParserStrategy implements IPegaRuleParserStrategy {
       className,
       ruleType: 'Rule-Obj-Activity',
       isRule: true,
-      ruleset: (json.pyRuleset as string) || undefined,
-      version: (json.pyRulesetVersion as string) || undefined,
+      ruleset: (json.pyRuleSet as string) || (json.pyRuleset as string) || undefined,
+      version: (json.pyRuleSetVersion as string) || (json.pyRulesetVersion as string) || undefined,
       logicSummary: PegaLogicNormalizer.normalizeActivity(json),
     };
 

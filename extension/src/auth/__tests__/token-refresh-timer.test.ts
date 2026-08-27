@@ -9,6 +9,9 @@ const INTERVAL_MS = 5 * 60 * 1000;
 
 class StubAuthManager {
   isAuthenticated = true;
+  // Default: token is due for refresh (near expiry). Tests flip this to false
+  // to verify the timer does NOT rotate a token that is still fresh.
+  shouldRefreshNow = vi.fn(() => true);
   refreshToken = vi.fn(async () => {});
 }
 
@@ -34,6 +37,15 @@ describe("TokenRefreshTimer", () => {
     expect(auth.refreshToken).toHaveBeenCalledTimes(1);
     await vi.advanceTimersByTimeAsync(INTERVAL_MS);
     expect(auth.refreshToken).toHaveBeenCalledTimes(2);
+  });
+
+  it("does NOT refresh when the token is still fresh (not near expiry)", async () => {
+    auth.shouldRefreshNow.mockReturnValue(false);
+    timer.start();
+    await vi.advanceTimersByTimeAsync(INTERVAL_MS);
+    expect(auth.refreshToken).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(INTERVAL_MS);
+    expect(auth.refreshToken).not.toHaveBeenCalled();
   });
 
   it("stops itself and does not refresh when not authenticated", async () => {

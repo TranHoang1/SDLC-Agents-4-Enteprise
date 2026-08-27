@@ -20,11 +20,12 @@ import { createMcpConfigRoutes } from '../modules/orchestration/McpConfigRoutes.
 import { McpConfigService } from '../modules/orchestration/McpConfigService.js';
 import { createRequestLogger } from './middleware/request-logger.js';
 import { createErrorHandler } from './middleware/error-handler.js';
-import { rateLimiter } from './middleware/rate-limiter.js';
+import { rateLimiter, loadPersistedRateLimitCap } from './middleware/rate-limiter.js';
 import { securityHeaders } from './middleware/security-headers.js';
 import { apiKeyAuth } from './middleware/api-key-auth.js';
 import { jwtAuth } from './middleware/jwt-auth.js';
 import { createKbApiRoutes, createToolsApiRoutes } from './routes/kb-api.js';
+import { createRateLimitConfigRoutes } from './routes/rate-limit-config-routes.js';
 import { createPegaApiRoutes } from './routes/pega-api.js';
 import { createPegaStreamRoutes } from './routes/pega-stream.js';
 import { createIngestRuleRoute } from './routes/pega-ingest-rule.js';
@@ -88,6 +89,10 @@ export class HttpServer {
     app.route('/', createAdminRoute(this.logger, this.options.registry));
 
     this.registerMcpConfigRoutes(app);
+
+    // SA4E-217: Rate limit config API
+    const rateLimitConfigRoutes = createRateLimitConfigRoutes(this.logger);
+    app.route('/api/v1', rateLimitConfigRoutes);
 
     const kbApiRoutes = createKbApiRoutes(this.options.registry, this.logger);
     app.route('/api/v1', kbApiRoutes);
@@ -153,6 +158,10 @@ export class HttpServer {
       }, (info) => {
         this._isRunning = true;
         this.logger.info({ port: info.port, host: this.host }, 'Backend server started');
+        // Apply any admin-persisted rate-limit cap (non-blocking; survives restart).
+        loadPersistedRateLimitCap().catch((err) => {
+          this.logger.debug({ err }, '[RateLimit] Failed to load persisted cap — using env default');
+        });
         resolve();
       });
     });

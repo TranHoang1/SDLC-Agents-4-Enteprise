@@ -72,4 +72,6 @@ export const Events = {
   LLM_CONFIG_CHANGED: 'llm:config:changed',
   /** Emitted when admin saves a TaskWorker config change — payload: { section, key, value } */
   TASK_WORKER_CONFIG_CHANGED: 'taskworker:config:changed',
+  /** Emitted when admin saves a rate-limit config change — payload: { section, key, value } */
+  RATE_LIMIT_CONFIG_CHANGED: 'ratelimit:config:changed',
 } as const;

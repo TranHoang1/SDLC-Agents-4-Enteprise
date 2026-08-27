@@ -4,6 +4,7 @@
  * syncIndexedRulesToKb only projects code graph nodes. No knowledge_entries PEGA_* rows.
  */
 import type { MemoryEngine } from '../memory/engine/core.js';
+import { buildFqn, parseFqn } from './pega-mapping.js';
 import type {
   PegaCheckRuleRequest,
   PegaCheckRuleResponse,
@@ -75,25 +76,36 @@ export class PegaService {
   }
 
   public async checkRule(req: PegaCheckRuleRequest): Promise<PegaCheckRuleResponse> {
-    const fqn = `${req.ruleType}:${req.className}:${req.ruleName}`;
     const adapter = this.memoryEngine.getAdapter();
-    const row = await adapter.getAsync<{ id: number; name: string; signature: string; doc_comment: string | null }>(
-      `SELECT s.id, s.name, s.signature, s.doc_comment
-       FROM symbols s JOIN files f ON f.id = s.file_id
-       WHERE s.signature = $1 AND s.project_id = $2 AND s.kind LIKE 'pega_%'
-       LIMIT 1`,
-      [fqn, req.projectId],
-    );
+    // Signature is 5-part (type:class:name:ruleset:version). If the caller knows
+    // ruleset+version, match the exact rule; otherwise match on the first 3 identity
+    // parts (type:class:name) with a prefix so any ruleset/version variant is found.
+    let row;
+    if (req.ruleset || req.version) {
+      const fqn = buildFqn(req.ruleType, req.className, req.ruleName, req.ruleset, req.version);
+      row = await adapter.getAsync<{ id: number; name: string; signature: string }>(
+        `SELECT s.id, s.name, s.signature FROM symbols s
+         WHERE s.signature = $1 AND s.project_id = $2 AND s.kind LIKE 'pega_%' LIMIT 1`,
+        [fqn, req.projectId],
+      );
+    } else {
+      const prefix = `${req.ruleType}:${req.className}:${req.ruleName}:%`;
+      row = await adapter.getAsync<{ id: number; name: string; signature: string }>(
+        `SELECT s.id, s.name, s.signature FROM symbols s
+         WHERE s.signature LIKE $1 AND s.project_id = $2 AND s.kind LIKE 'pega_%' LIMIT 1`,
+        [prefix, req.projectId],
+      );
+    }
     if (!row) return { cached: false };
-    const storedClass = row.signature.split(':')[0] ?? '';
+    const parsed = parseFqn(row.signature);
     return {
       cached: true,
       ruleId: row.id,
       content: {
         pyRuleName: row.name,
         pyActivityName: row.name,
-        pyClassName: storedClass || req.className,
-        pxObjClass: req.ruleType,
+        pyClassName: parsed.pyClassName || req.className,
+        pxObjClass: parsed.pxObjClass || req.ruleType,
       } as Record<string, unknown>,
     };
   }

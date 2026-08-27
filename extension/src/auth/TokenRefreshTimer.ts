@@ -29,6 +29,12 @@ export class TokenRefreshTimer {
       this.stop();
       return;
     }
+    // Only refresh when the token is actually near expiry. Refreshing on every
+    // tick would rotate (and invalidate) the session token mid-operation and
+    // break long-running requests that are still holding the previous token.
+    if (!this.authManager.shouldRefreshNow()) {
+      return;
+    }
     try {
       await this.authManager.refreshToken();
     } catch (err) {

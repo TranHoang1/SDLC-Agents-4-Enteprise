@@ -14,6 +14,9 @@ import { PegaLogicNormalizer } from './PegaLogicNormalizer.js';
 import { extractGenericLogic } from './extraction/PegaGenericLogicExtractor.js';
 import { renderSchemaDrivenLogic } from './extraction/SchemaDrivenRenderer.js';
 import type { ExtractOptions } from './extraction/types.js';
+import { extractNestedLogic } from './PegaNestedLogicExtractor.js';
+import { extractFlowStructure } from './PegaFlowExtractor.js';
+import { extractCaseTypeLifecycle } from './PegaCaseTypeExtractor.js';
 
 /** Field prefixes considered Pega internal metadata (px/pz/__) — excluded from dumps. */
 export const INTERNAL_PREFIXES = ['px', 'pz', '__'];
@@ -116,6 +119,15 @@ function buildLogic(ruleJson: PegaRuleJson, opts?: ExtractOptions): string | nul
       return `LOGIC (Activity Steps):\n${PegaLogicNormalizer.normalizeActivity(ruleJson)}`;
     case 'Rule-Obj-Model':
       return `LOGIC (Data Transform):\n${PegaLogicNormalizer.normalizeDataTransform(ruleJson)}`;
+    case 'Rule-Obj-Flow':
+      // Reconstruct the real flow (shapes + connectors) from pyModelProcess so the
+      // LLM sees the actual process, not just metadata. Fall back to generic
+      // logic-array rendering if the export has no model process.
+      return extractFlowStructure(ruleJson) ?? extractGenericLogic(ruleJson, opts);
+    case 'Rule-Obj-CaseType':
+      // Reconstruct the case lifecycle (stages → processes, primary + alternate)
+      // from pyStages/pyAlternateStages — mirrors the Pega Case Lifecycle UI.
+      return extractCaseTypeLifecycle(ruleJson) ?? extractGenericLogic(ruleJson, opts);
     case 'Rule-Obj-DecisionTable':
     case 'Rule-Declare-DecisionTable':
       return buildDecisionTable(ruleJson);
@@ -159,8 +171,15 @@ function buildDecisionTable(ruleJson: PegaRuleJson): string | null {
   return lines.join('\n');
 }
 
-/** Build readable expression fields for When / Declare rules. */
+/**
+ * Build readable expression fields for When / Declare rules.
+ * Prefers nested logic (real formula/conditions) over top-level scalar scan,
+ * since declarative rules store their logic in nested arrays/objects.
+ */
 function buildExpressionBlock(ruleJson: PegaRuleJson): string | null {
+  const nested = extractNestedLogic(ruleJson);
+  if (nested) return nested;
+
   const lines: string[] = [];
   for (const key of ['pyWhenText', 'pyExpression', 'pyFormula', 'pyWhenCondition', 'pyDescription']) {
     const value = ruleJson[key];

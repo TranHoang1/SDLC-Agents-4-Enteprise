@@ -335,8 +335,26 @@ export class IndexerHttpClient {
         return undefined;
     }
 
-    /** POST JSON and return raw body + ok status. Uses fetch() (proxy-patched globally). */
+    /**
+     * POST JSON and return raw body + ok status. Uses fetch() (proxy-patched globally).
+     * On 401, refreshes the token once (if a refresher is set) and retries — long
+     * operations (e.g. Pega crawl of hundreds of rules) can outlive the JWT, so the
+     * final sync POST must refresh rather than fail with Unauthorized.
+     */
     private async httpPostJson(url: string, payload: unknown, token: string | undefined): Promise<{ ok: boolean; body: string }> {
+        const first = await this.httpPostJsonOnce(url, payload, token);
+        if (first.status !== 401 || !this.tokenRefresher) {
+            return { ok: first.status >= 200 && first.status < 300, body: first.body };
+        }
+        // Token likely expired mid-operation — refresh once and retry.
+        const freshToken = await this.tokenRefresher();
+        if (!freshToken) { return { ok: false, body: first.body }; }
+        const retry = await this.httpPostJsonOnce(url, payload, freshToken);
+        return { ok: retry.status >= 200 && retry.status < 300, body: retry.body };
+    }
+
+    /** Single POST attempt returning HTTP status + raw body (status 0 on network error). */
+    private async httpPostJsonOnce(url: string, payload: unknown, token: string | undefined): Promise<{ status: number; body: string }> {
         const headers = await this.buildHeaders(token);
         try {
             const response = await fetch(url, {
@@ -346,10 +364,10 @@ export class IndexerHttpClient {
                 signal: AbortSignal.timeout(30000),
             });
             const body = await response.text();
-            return { ok: response.status >= 200 && response.status < 300, body };
+            return { status: response.status, body };
         } catch (err) {
             console.debug(`[IndexerHttpClient] httpPostJson failed (non-fatal): ${(err as Error).message}`);
-            return { ok: false, body: "" };
+            return { status: 0, body: "" };
         }
     }
 
@@ -387,6 +405,12 @@ export class IndexerHttpClient {
         if (workspaceFolders && workspaceFolders.length > 0) {
             headers["X-Workspace-Root"] = workspaceFolders[0].uri.fsPath;
         }
+        // Client-requested rate limit (rpm). Server clamps this to its own hard cap,
+        // so this can only lower (never raise) the effective limit above the server max.
+        const rpm = vscode.workspace.getConfiguration("kiroSdlc").get<number>("backend.rateLimitRpm");
+        if (typeof rpm === "number" && Number.isInteger(rpm) && rpm > 0) {
+            headers["X-Rate-Limit-RPM"] = String(rpm);
+        }
         return headers;
     }
 
@@ -407,8 +431,25 @@ export class IndexerHttpClient {
         return this.httpGet(url, token);
     }
 
-    /** GET request returning raw body + ok status. Uses fetch() (proxy-patched globally). */
+    /**
+     * GET request returning raw body + ok status. Uses fetch() (proxy-patched globally).
+     * On 401, refreshes the token once (if a refresher is set) and retries — the
+     * extension is responsible for keeping its JWT fresh against the remote backend.
+     */
     private async httpGet(url: string, token: string | undefined): Promise<{ ok: boolean; body: string }> {
+        const first = await this.httpGetOnce(url, token);
+        if (first.status !== 401 || !this.tokenRefresher) {
+            return { ok: first.status === 200, body: first.body };
+        }
+        // Token likely expired — refresh once and retry with the fresh token.
+        const freshToken = await this.tokenRefresher();
+        if (!freshToken) { return { ok: false, body: first.body }; }
+        const retry = await this.httpGetOnce(url, freshToken);
+        return { ok: retry.status === 200, body: retry.body };
+    }
+
+    /** Single GET attempt returning HTTP status + raw body (status 0 on network error). */
+    private async httpGetOnce(url: string, token: string | undefined): Promise<{ status: number; body: string }> {
         const headers = await this.buildHeaders(token);
         try {
             const response = await fetch(url, {
@@ -417,10 +458,10 @@ export class IndexerHttpClient {
                 signal: AbortSignal.timeout(10000),
             });
             const body = await response.text();
-            return { ok: response.status === 200, body };
+            return { status: response.status, body };
         } catch (err) {
             console.debug(`[IndexerHttpClient] httpGet failed (non-fatal): ${(err as Error).message}`);
-            return { ok: false, body: "" };
+            return { status: 0, body: "" };
         }
     }
 }

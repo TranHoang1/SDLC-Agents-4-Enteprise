@@ -58,9 +58,12 @@ export class CodeEnrichmentHandler {
     const context = await this.loadContext(payload);
     const strategy = this.selectStrategy(payload.symbolKind, payload.workspaceType);
 
-    // For Pega rules: load or create enriched schema context
+    // For Pega rules: load or create enriched schema context.
+    // ruleType = pxObjClass, taken from the FQN signature (first ':'-segment) —
+    // the original class, not reverse-engineered from the kind string.
     if (strategy === 'PEGA_SUMMARY') {
-      context.schemaContext = await this.loadOrCreateSchemaContext(payload.symbolKind, context.bodyText);
+      const ruleType = (context.signature || '').split(':')[0] || null;
+      context.schemaContext = await this.loadOrCreateSchemaContext(ruleType, context.bodyText);
     }
 
     const messages = this.promptBuilder.build(strategy, context);
@@ -74,8 +77,7 @@ export class CodeEnrichmentHandler {
    * If not found, create on-the-fly using LLM + current rule instance as sample.
    * Progressive: schema is enriched once per rule type, reused for all instances.
    */
-  private async loadOrCreateSchemaContext(symbolKind: string, bodyText: string | null): Promise<string | undefined> {
-    const ruleType = this.kindToRuleType(symbolKind);
+  private async loadOrCreateSchemaContext(ruleType: string | null, bodyText: string | null): Promise<string | undefined> {
     if (!ruleType) return undefined;
 
     // Check KB for existing enriched schema (canonical key first)
@@ -94,28 +96,6 @@ export class CodeEnrichmentHandler {
       this.logger.debug({ err, ruleType }, '[enrichment] Schema creation failed (non-fatal)');
     }
     return undefined;
-  }
-
-  /** Map symbol kind back to Pega pxObjClass for schema lookup. */
-  private kindToRuleType(kind: string): string | null {
-    const map: Record<string, string> = {
-      pega_activity: 'Rule-Obj-Activity',
-      pega_flow: 'Rule-Obj-Flow',
-      pega_data_transform: 'Rule-Obj-Model',
-      pega_decision_table: 'Rule-Declare-DecisionTable',
-      pega_decision_tree: 'Rule-Declare-DecisionTree',
-      pega_section: 'Rule-HTML-Section',
-      pega_harness: 'Rule-HTML-Harness',
-      pega_when: 'Rule-Obj-When',
-      pega_declare_expression: 'Rule-Declare-Expressions',
-      pega_declare_page: 'Rule-Declare-Pages',
-      pega_report: 'Rule-Obj-Report-Definition',
-      pega_connector: 'Rule-Connect-REST',
-      pega_case_type: 'Rule-Obj-CaseType',
-      pega_validate: 'Rule-Obj-Validate',
-      pega_property: 'Rule-Obj-Property',
-    };
-    return map[kind] || null;
   }
 
   /** Search KB (knowledge_entries) for enriched schema of this rule type. */
@@ -303,8 +283,10 @@ export class CodeEnrichmentHandler {
     }
 
     const now = new Date().toISOString();
+    // Write pseudo_code directly (not COALESCE): on re-enrichment the fresh LLM
+    // output must overwrite stale/incorrect values instead of being preserved.
     await this.adapter.runAsync(
-      `UPDATE symbols SET summary = ?, pseudo_code = COALESCE(?, pseudo_code),
+      `UPDATE symbols SET summary = ?, pseudo_code = ?,
        llm_tags = ?, enrichment_status = 'COMPLETED', enriched_at = ? WHERE id = ?`,
       [response.summary, pseudoCode, tagsJson, now, symbolId],
     );

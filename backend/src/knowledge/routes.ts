@@ -1,9 +1,12 @@
 /**
  * SA4E-85 — Knowledge REST API routes.
  * Security requirements (SECURITY-REVIEW v3.1):
- *  - #19: jwtAuth on all /api/v1/threads* routes + localhostOnly guard
+ *  - #19: jwtAuth on all /api/v1/threads* + /agents routes (path-scoped, not '*')
  *  - #23: rateLimiter on threads + 10MB bodyLimit cap on checkpoint PUT
  *  - #18: workspace binding enforced in KnowledgeService → 404 on mismatch
+ * NOTE: localhostOnly is intentionally NOT used — the backend is deployed on a
+ * separate machine from the extension, so all access is authenticated via JWT.
+ * Middleware is path-scoped (not '*') to avoid leaking onto sibling /api/v1 routers.
  * Checkpoint bodies are NEVER logged.
  */
 
@@ -13,7 +16,6 @@ import { bodyLimit } from 'hono/body-limit';
 import type { Logger } from 'pino';
 import { jwtAuth } from '../server/middleware/jwt-auth.js';
 import { rateLimiter } from '../server/middleware/rate-limiter.js';
-import { localhostOnly } from '../server/middleware/localhost-only.js';
 import type { KnowledgeService } from './KnowledgeService.js';
 import type { ProjectContext } from '../modules/memory/ProjectContext.js';
 
@@ -38,9 +40,14 @@ export function createKnowledgeApiRoutes(
   options: KnowledgeApiOptions = {},
 ): Hono<KnowledgeEnv> {
   const api = new Hono<KnowledgeEnv>();
-  api.use('*', localhostOnly);
-  api.use('*', jwtAuth);
-  api.use('*', rateLimiter);
+  // SA4E: Backend runs on a DIFFERENT machine from the extension — localhostOnly
+  // would 403 every extension call, so it is NOT applied here.
+  // Scope guards to the paths this router actually owns (/threads*, /agents).
+  // Using '*' would register middleware at pattern /api/v1/* on the parent app,
+  // which leaks onto sibling routers mounted at /api/v1 (e.g. enrichment/status).
+  api.use('/threads', jwtAuth, rateLimiter);
+  api.use('/threads/*', jwtAuth, rateLimiter);
+  api.use('/agents', jwtAuth, rateLimiter);
 
   api.get('/threads', async (c) => {
     const ctx = c.get('projectContext');

@@ -43,15 +43,17 @@ export function isPegaQuery(query: string): boolean {
 
 /**
  * Infer graph node type from query string for narrower graph search.
- * Matches GraphSyncService.nodeTypeFor() graph types (pega_* → uppercase, no prefix).
+ * Graph types are derived from kind via graphTypeForKind: for Pega the type is
+ * the pxObjClass (minus 'Rule-') uppercased, e.g. Rule-Obj-Flow → RULE_OBJ_FLOW.
  * Returns undefined if type cannot be inferred (search all types).
  */
 export function inferNodeType(query: string): string | undefined {
-  if (/Rule-Obj-Activity/i.test(query)) return 'ACTIVITY';
-  if (/Rule-Obj-Flow/i.test(query)) return 'FLOW';
-  if (/Rule-Obj-Decision/i.test(query)) return 'DECISION_TABLE';
+  if (/Rule-Obj-Activity/i.test(query)) return 'RULE_OBJ_ACTIVITY';
+  if (/Rule-Obj-FlowAction/i.test(query)) return 'RULE_OBJ_FLOWACTION';
+  if (/Rule-Obj-Flow/i.test(query)) return 'RULE_OBJ_FLOW';
+  if (/Rule-Declare-DecisionTable/i.test(query)) return 'RULE_DECLARE_DECISIONTABLE';
   if (/Work-|Data-/i.test(query)) return 'CLASS';
-  if (/\.py[A-Z]/i.test(query)) return 'PROPERTY';
+  if (/\.py[A-Z]/i.test(query)) return 'RULE_OBJ_PROPERTY';
   return undefined;
 }
 

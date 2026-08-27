@@ -7,7 +7,7 @@
 import { join, relative } from 'node:path';
 import type { Logger } from 'pino';
 import {
-  loadHashCache, saveHashCache, compareFileHash, computeHash,
+  loadHashCache, saveHashCache, compareFileHash, computeHash, pruneStaleEntries,
   type HashCacheData,
 } from './PegaHashCache.js';
 import {
@@ -126,9 +126,12 @@ export class PegaIndexerTool {
     workspaceRoot: string, stats: IndexStats,
   ): Promise<void> {
     const cache = await loadHashCache(workspaceRoot);
+    // Track the paths present in this run so we can drop stale entries afterwards.
+    const seenPaths = new Set<string>();
 
     for (const filePath of filePaths) {
       const relPath = relative(rulesDir, filePath);
+      seenPaths.add(relPath);
       const content = await readFileSafe(filePath);
       if (!content) { stats.errors++; continue; }
 
@@ -140,6 +143,9 @@ export class PegaIndexerTool {
       if (ok) cache.entries[relPath] = cmp.hash;
     }
 
+    // Prune entries for rules no longer present (deleted/renamed) so the on-disk
+    // cache does not grow unbounded across incremental runs.
+    pruneStaleEntries(cache, seenPaths);
     await saveHashCache(workspaceRoot, cache);
   }
 

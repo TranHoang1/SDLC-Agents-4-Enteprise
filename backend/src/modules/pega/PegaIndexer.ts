@@ -9,7 +9,10 @@ import type { PegaIngestRuleRequest, UnresolvedDependency } from './models.js';
 import { PegaParser, type ExtractedPegaSymbol } from './PegaParser.js';
 import { PegaRuleAstParser } from './PegaRuleAstParser.js';
 import { syncRuleToSymbols } from './PegaSymbolSync.js';
-import { buildFqn, resolveRuleNameField, resolveSymbolKind, buildVirtualPath } from './pega-mapping.js';
+import {
+  buildFqn, resolveRuleNameField, resolveSymbolKind, buildVirtualPath,
+  resolveRuleSetName, resolveRuleSetVersion,
+} from './pega-mapping.js';
 import { TaskType, TaskStatus } from '../memory/task-queue/models.js';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import pino from 'pino';
@@ -58,6 +61,8 @@ export async function indexRule(
     String((req.ruleJson as any)?.pxObjClass || ''),
     String((req.ruleJson as any)?.pyClassName || ''),
     resolveRuleNameField(req.ruleJson),
+    resolveRuleSetName(req.ruleJson),
+    resolveRuleSetVersion(req.ruleJson),
   );
   if (req.checksum) {
     const { exists, checksumMatch, needsEnrichment, symbolId } = await checkRuleChecksum(
@@ -69,6 +74,7 @@ export async function indexRule(
         const kind = resolveSymbolKind(String((req.ruleJson as any)?.pxObjClass || ''));
         const virtualPath = buildVirtualPath(
           String((req.ruleJson as any)?.pyClassName || ''), kind, resolveRuleNameField(req.ruleJson),
+          resolveRuleSetName(req.ruleJson), resolveRuleSetVersion(req.ruleJson),
         );
         await ensureEnrichmentTask(memoryEngine.getAdapter(), symbolId, resolveRuleNameField(req.ruleJson),
           kind, virtualPath, req.projectId);

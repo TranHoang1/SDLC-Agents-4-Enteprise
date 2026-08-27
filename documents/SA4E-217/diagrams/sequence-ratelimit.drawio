@@ -1,0 +1,63 @@
+<mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="sp_title" value="SA4E-217 — Sequence: Rate-Limit Config" style="text;html=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="20" width="900" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="h_admin" value="Admin" style="html=1;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=0;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="80" y="60" width="160" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="h_cfg" value="Rate-Limit Config Route" style="html=1;fillColor=#ffe6cc;strokeColor=#d79b00;rounded=0;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="380" y="60" width="160" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="h_rl" value="Rate Limiter" style="html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=0;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="680" y="60" width="160" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="l_admin" style="html=1;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="155" y="100" width="10" height="380" as="geometry" />
+    </mxCell>
+    <mxCell id="l_cfg" style="html=1;fillColor=#ffe6cc;strokeColor=#d79b00;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="455" y="100" width="10" height="380" as="geometry" />
+    </mxCell>
+    <mxCell id="l_rl" style="html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="755" y="100" width="10" height="380" as="geometry" />
+    </mxCell>
+    <mxCell id="m1" value="1: POST /api/v1/rate-limit/config" style="html=1;fillColor=none;strokeColor=#9673a6;endArrow=block;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="160" y="140" as="sourcePoint" />
+        <mxPoint x="460" y="140" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m2" value="2: validate (Zod)" style="html=1;fillColor=#ffe6cc;strokeColor=#d79b00;endArrow=block;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="460" y="190" as="sourcePoint" />
+        <mxPoint x="760" y="190" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m3" value="3: 200 saved config" style="html=1;fillColor=#d5e8d4;strokeColor=#82b366;endArrow=open;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="760" y="230" as="sourcePoint" />
+        <mxPoint x="460" y="230" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m4" value="4: 200 applied" style="html=1;fillColor=#d5e8d4;strokeColor=#82b366;endArrow=open;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="460" y="280" as="sourcePoint" />
+        <mxPoint x="160" y="280" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m5" value="5: incoming request (token bucket)" style="html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;endArrow=block;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="160" y="330" as="sourcePoint" />
+        <mxPoint x="760" y="330" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m6" value="6: allow / 429 throttled" style="html=1;fillColor=#f8cecc;strokeColor=#b85450;endArrow=open;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="760" y="380" as="sourcePoint" />
+        <mxPoint x="160" y="380" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>
