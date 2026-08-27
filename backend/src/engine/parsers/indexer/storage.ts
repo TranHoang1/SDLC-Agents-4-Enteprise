@@ -6,6 +6,7 @@ import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter
 import { DialectHelper } from '../../../database/dialect/DialectHelper.js';
 import pino from 'pino';
 import type { ParseResult } from '../types.js';
+import { scrubSecretValues } from '../languages/salesforce-meta/helpers.js';
 
 const logger = pino({ name: 'indexer-storage' });
 
@@ -107,7 +108,8 @@ export async function extractAndStoreBodies(
       if (!symbolId) continue;
       const bodyLines = lines.slice(sym.startLine - 1, sym.endLine);
       if (bodyLines.length < minBodyLines) continue;
-      const bodyText = bodyLines.join('\n');
+      // F-03: redact secret element values before persisting body/source.
+      const bodyText = scrubSecretValues(bodyLines.join('\n'));
       const tokenCount = bodyText.split(/\s+/).filter(Boolean).length;
       const textBuffer = Buffer.from(bodyText, 'utf-8');
       await adapter.runAsync(insertSql, [projectId, symbolId, 0, textBuffer, tokenCount]);

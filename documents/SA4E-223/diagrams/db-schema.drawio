@@ -1,0 +1,14 @@
+<mxGraphModel dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="files" value="&lt;b&gt;files&lt;/b&gt;&#10;id PK&#10;project_id&#10;relative_path&#10;language&#10;module&#10;size_bytes&#10;line_count" style="rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="60" width="200" height="130" as="geometry"/></mxCell>
+    <mxCell id="symbols" value="&lt;b&gt;symbols&lt;/b&gt;&#10;id PK&#10;project_id&#10;file_id FK&#10;name&#10;kind&#10;signature&#10;parent_name&#10;is_exported" style="rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="260" width="200" height="140" as="geometry"/></mxCell>
+    <mxCell id="modules" value="&lt;b&gt;modules&lt;/b&gt;&#10;project_id&#10;name PK&#10;root_path&#10;language&#10;file_count&#10;symbol_count" style="rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="340" y="260" width="200" height="130" as="geometry"/></mxCell>
+    <mxCell id="cis" value="&lt;b&gt;code_index_status&lt;/b&gt;&#10;project_id PK&#10;total_files&#10;indexed_files&#10;salesforce_files&#10;last_indexed_at" style="rounded=0;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="340" y="60" width="200" height="130" as="geometry"/></mxCell>
+    <mxCell id="e1" value="1..* contains" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="files" target="symbols"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" value="1..* groups" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="modules" target="files"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" value="1..* aggregates" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="cis" target="modules"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="note" value="KHÔNG có DDL mới.&#10;Chỉ ghi giá trị language/module mới&#10;(visualforce, aura, salesforce-meta, sf-*)" style="shape=note;fillColor=#fff2cc;strokeColor=#d6b656;align=left;" vertex="1" parent="1"><mxGeometry x="600" y="160" width="240" height="90" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

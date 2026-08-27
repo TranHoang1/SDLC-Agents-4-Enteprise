@@ -147,7 +147,9 @@ export class GrammarRegistry {
 
     for (const lang of sorted) {
       for (const ext of lang.extensions) {
-        this.extensionMap.set(ext, lang.id);
+        // Normalize extension keys to lowercase so getLanguageId()'s lowercased path always matches,
+        // regardless of casing in grammar-config.json (SA4E-223 audit).
+        this.extensionMap.set(ext.toLowerCase(), lang.id);
       }
     }
   }

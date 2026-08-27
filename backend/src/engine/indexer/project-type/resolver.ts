@@ -17,6 +17,8 @@ const FALLBACK_EXCLUDES = [
 const FALLBACK_EXTENSIONS = [
   '.ts', '.tsx', '.js', '.jsx', '.kt', '.java', '.py',
   '.go', '.rs', '.c', '.cpp', '.h', '.hpp', '.cs',
+  // ---- SA4E-223: ensure known Salesforce extensions pass Gate 2 (DISC-1) ----
+  '.cls', '.trigger', '.apex', '.soql', '.page', '.component', '.cmp', '.app', '.evt', '.intf', '.tokens', '.pega',
 ];
 
 /**

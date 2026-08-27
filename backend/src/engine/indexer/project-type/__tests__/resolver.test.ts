@@ -37,4 +37,11 @@ describe('IndexingStrategyResolver', () => {
     expect(config.sourceRoots).toEqual(['src/main/java/']);
     expect(config.testRoots).toEqual(['src/test/java/']);
   });
+
+  it('SA4E-223: getFallback includes new Salesforce extensions', () => {
+    const exts = resolver.getFallback().includeExtensions;
+    for (const e of ['.apex', '.soql', '.page', '.component', '.cmp', '.app', '.evt', '.intf', '.tokens', '.cls', '.trigger', '.pega']) {
+      expect(exts).toContain(e);
+    }
+  });
 });

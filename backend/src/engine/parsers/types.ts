@@ -81,7 +81,7 @@ export interface IndexResult {
   relationshipCount: number;
   parseErrors: number;
   duration: number;
-  method: 'tree-sitter' | 'regex-fallback';
+  method: 'tree-sitter' | 'regex-fallback' | 'timeout-degraded';
   dependencies: FileDependency[];
 }
 

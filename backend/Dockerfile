@@ -103,3 +103,41 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:48721/health || exit 1
 
 CMD ["node", "dist/index.js"]
+
+# -----------------------------------------------------------------------------
+# Development stage — hot reload (tsx watch) for local dev. Non-root user.
+# Build: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# -----------------------------------------------------------------------------
+FROM base AS development
+WORKDIR /app
+ENV NODE_ENV=development
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY tsconfig.json ./
+COPY src/ ./src/
+RUN addgroup -g 1001 -S sa4e && \
+    adduser -S sa4e -u 1001 -G sa4e && \
+    chown -R sa4e:sa4e /app
+USER sa4e
+EXPOSE 48721
+CMD ["npx", "tsx", "watch", "--ignore", ".code-intel/**", "src/index.ts"]
+
+# -----------------------------------------------------------------------------
+# Test stage — runs the vitest unit suite inside the container (non-root).
+# Build: docker build --target test -t sa4e-backend-test .
+# Run:   docker run --rm sa4e-backend-test
+# -----------------------------------------------------------------------------
+FROM base AS test
+WORKDIR /app
+ENV NODE_ENV=test
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY tsconfig.json ./
+COPY src/ ./src/
+COPY tests/ ./tests/
+COPY .env.test ./
+RUN addgroup -g 1001 -S sa4e && \
+    adduser -S sa4e -u 1001 -G sa4e && \
+    chown -R sa4e:sa4e /app
+USER sa4e
+CMD ["npx", "vitest", "run"]
