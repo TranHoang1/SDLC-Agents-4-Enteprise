@@ -13,6 +13,7 @@ import { MemoryModule } from './modules/memory/MemoryModule.js';
 import { OrchestrationModule } from './modules/orchestration/OrchestrationModule.js';
 import { EmbeddingService } from './engine/parsers/embedding/EmbeddingService.js';
 import { initAdapters } from './admin/db/core.js';
+import { ensureSa4e215Tables } from './database/schema-registry/ensure-sa4e-215.js';
 import { Container } from './di/Container.js';
 import { bus, Events } from './shared/EventBus.js';
 
@@ -37,6 +38,13 @@ async function main() {
 
   // --- Init DB adapters first ---
   await initAdapters();
+
+  // --- SA4E-215: ensure owned tables exist (mcp_servers, decisions) ---
+  try {
+    await ensureSa4e215Tables();
+  } catch (err) {
+    logger.error({ err }, 'Failed to ensure SA4E-215 tables; continuing startup');
+  }
 
   // --- Registry + Factory ---
   const registry = new ModuleRegistry(logger, bus);
