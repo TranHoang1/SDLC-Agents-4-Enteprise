@@ -1,67 +1,92 @@
 # User Guide (UG) — SA4E-215
 
-**Ticket:** SA4E-215 · **Status:** Done (L3) · **Redesigned 2026-08-26 vs verified `sa4e_db`**
+**Ticket:** SA4E-215 · **Status:** Deployed & UAT live (verified 2026-08-27)
+**IMPORTANT — docs realigned to actual code:** older UG described `:3000`, `/mcp-servers`, `/decisions/evaluate` and snake_case fields. Those are WRONG. This version matches the real routes (verified against `backend/src/server/routes/sa4e-215/*` and `mcp/servers.ts`).
 
-All endpoints under `/api/sa4e-215`. Built on the **real platform model**: TEXT ids, pbkdf2 passwords, group RBAC, `project_registry` scoping.
+## 0. Base URL & Auth model
+- Base: `http://127.0.0.1:48721/api/sa4e-215`
+  > Port follows the backend `PORT` env (was `48721` at live UAT). Replace `B=...` below with your actual base.
+- `B=http://127.0.0.1:48721/api/sa4e-215`
+- `/auth/*` are **public**.
+- `/decisions/*` and `/mcp/servers/*` require `Authorization: Bearer <token>` (guard `requireSa4eUser`).
 
 ## 1. Authentication (reuse `users`)
 ### Register
 ```bash
-curl -X POST localhost:3000/api/sa4e-215/auth/register -H 'Content-Type: application/json' \
+curl -X POST $B/auth/register -H 'Content-Type: application/json' \
   -d '{"email":"admin@example.com","password":"secret","access_group_id":"grp-admin"}'
+# => { success:true, data:{ userId, email, accessGroupId } }
 ```
 ### Login
 ```bash
-curl -X POST localhost:3000/api/sa4e-215/auth/login -H 'Content-Type: application/json' \
+curl -X POST $B/auth/login -H 'Content-Type: application/json' \
   -d '{"email":"admin@example.com","password":"secret"}'
-# => { token, user:{ user_id, email, access_group_id, status } }
+# => { success:true, data:{ token, user:{ userId, email, accessGroupId, permissions:[...] }, expiresAt } }
 ```
-Send token as `Authorization: Bearer <token>`. Passwords are **pbkdf2 `salt:hash`** (compatible with the platform).
+- `permissions` is an array of `permissionId` (e.g. `MCP_ACCESS`). Capture the token:
+  `TOKEN=$(curl -s -X POST $B/auth/login ... | python -c "import sys,json;print(json.load(sys.stdin)['data']['token'])")`
+- Passwords are **pbkdf2 `salt:hash`** (platform standard).
 ### Logout
 ```bash
-curl -X POST localhost:3000/api/sa4e-215/auth/logout
+curl -X POST $B/auth/logout -H "Authorization: Bearer $TOKEN"
 ```
 
 ## 2. Decision Engine (new `decisions` + real `audit_log`)
-### Evaluate
+> There is **NO** `/evaluate` and **NO** server-side scoring. The client supplies `result`; the server stores it and writes an `audit_log` row (`action='DECISION_CREATE'`).
+
+### Create
 ```bash
-curl -X POST localhost:3000/api/sa4e-215/decisions/evaluate -H 'Content-Type: application/json' \
-  -d '{"rule_set_id":"default","params":{"risk":30,"impact":40},"user_id":"user-admin-001","project_id":"prj-demo"}'
-# score=70 -> approved; writes audit_log row
+curl -X POST $B/decisions -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"ruleSetId":"default","result":"approved","inputParams":{"risk":30,"impact":40},"confidence":0.7,"projectId":"<PROJECT_THẬT>"}'
+# => { success:true, data:{ decisionId:"dec-xxxxxxxx", userId, projectId, ruleSetId, result, confidence, evaluatedAt } }
 ```
-### History
+- Required: `ruleSetId` + `result` (else `ERR_001`). `projectId` optional (defaults null). `inputParams`/`confidence` optional.
+### List (filter by project / rule set, paginated)
 ```bash
-curl "localhost:3000/api/sa4e-215/decisions/history?user_id=user-admin-001&limit=20&offset=0"
+curl "$B/decisions?projectId=<PROJECT_THẬT>&ruleSetId=default&limit=20" -H "Authorization: Bearer $TOKEN"
+# => { success:true, data:[ { decisionId, userId, projectId, ruleSetId, inputParams, result, confidence, evaluatedAt } ] }
+```
+### Read one
+```bash
+curl "$B/decisions/<decisionId>" -H "Authorization: Bearer $TOKEN"
 ```
 
 ## 3. MCP Server Config (new `mcp_servers`, scoped by `project_registry`)
+> Mounted at `/mcp/servers` (NOT `/mcp-servers`). `projectId` MUST exist in `project_registry` or you get `ERR_006`. `name` is unique per `projectId`.
+
+### List
+```bash
+curl "$B/mcp/servers?projectId=<PROJECT_THẬT>&disabled=false" -H "Authorization: Bearer $TOKEN"
+```
 ### Create
 ```bash
-curl -X POST localhost:3000/api/sa4e-215/mcp-servers -H 'Content-Type: application/json' \
-  -d '{"name":"github","project_id":"prj-demo","transport_type":"stdio","command":"npx","args":{},"env":{}}'
+curl -X POST $B/mcp/servers -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '{"projectId":"<PROJECT_THẬT>","name":"github","transportType":"stdio","command":"npx","args":{},"env":{}}'
+# => { success:true, data:{ serverId:"mcp-xxxxxxxx", projectId, name, transportType, ... } }
 ```
-### List / Read
+- Required: `projectId`, `name`, `transportType` (else `ERR_001`). Unknown `projectId` → `ERR_006`.
+- Optional: `url`, `command`, `args`, `env`, `disabled`, `autoApprove`, `tools`.
+### Read / Update / Delete
 ```bash
-curl "localhost:3000/api/sa4e-215/mcp-servers?project_id=prj-demo&page=1&page_size=20"
-curl "localhost:3000/api/sa4e-215/mcp-servers/<server_id>"
+curl "$B/mcp/servers/<serverId>" -H "Authorization: Bearer $TOKEN"
+curl -X PUT $B/mcp/servers/<serverId> -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' -d '{"disabled":true}'
+curl -X DELETE $B/mcp/servers/<serverId> -H "Authorization: Bearer $TOKEN"
+# => { success:true, message:"MCP server deleted" }
 ```
-### Update / Delete (soft)
+> **Delete is HARD delete** (row removed). There is no soft-delete `disabled` flag set by DELETE — use `PUT` with `disabled:true` to disable instead.
+### Migrate (one-time, import orchestration.json → mcp_servers)
 ```bash
-curl -X PUT localhost:3000/api/sa4e-215/mcp-servers/<server_id> -H 'Content-Type: application/json' -d '{"disabled":1}'
-curl -X DELETE localhost:3000/api/sa4e-215/mcp-servers/<server_id>
+node backend/scripts/migrate-mcp.js
 ```
-### Migrate
-```bash
-node backend/scripts/migrate-mcp.js   # orchestration.json -> mcp_servers (tagged project_id)
-```
-> `mcp_tools` is **not** used here — it is the server's tool-ingest/search table.
+> `mcp_tools` is NOT used here — it is the server's tool-ingest/search table.
 
 ## 4. Common Errors
 | Code | Meaning | Fix |
 |------|---------|-----|
-| ERR_001 | Validation / duplicate | Check required fields; name unique per project |
-| ERR_002 | Invalid credentials | Verify email/password |
-| ERR_004 | Not found | Check id |
+| ERR_001 | Validation / duplicate / missing required | Check required fields; `name` unique per `projectId` |
+| ERR_002 | Invalid credentials / account disabled | Verify email/password; check `users.status` |
+| ERR_006 | Unknown `project_id` or resource not found | Ensure `projectId` exists in `project_registry`; check id |
+| ERR_009 | Database error | Check backend logs / DB connectivity |
 
 ## 5. Diagram Index
 | # | Diagram | PNG | Drawio |
