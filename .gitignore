@@ -12,8 +12,8 @@ out/
 *.vsix
 
 # IDE
-.vscode/
-.idea/
+/.vscode/
+/.idea/
 
 # OS
 .DS_Store
@@ -29,31 +29,31 @@ test-results/
 coverage/
 
 # Antigravity
-.agents
-./skills
-./GEMINI.md
+/.agents
+/skills
+/GEMINI.md
 
 # OpenCode
-.OpenCode
-AGENTS.md
-opencode.json
+.opencode/
+/AGENTS.md
+/opencode.json
 
 # Claude
-.Claude
-CLAUDE.md
+/.Claude
+/CLAUDE.md
 
 # kilo
-.kilo
+/.kilo
 
 # roo
-.roo
+/.roo
 
 # vscode
-.vscode
+/.vscode
 
 # zcode
-.zcode
+/.zcode
 
 # dev server log (keep untracked)
 /backend/dev-server.log
-backend/*.log
+/backend/*.log
