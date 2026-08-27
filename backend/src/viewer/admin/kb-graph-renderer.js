@@ -57,11 +57,45 @@
     FIELD_VALUE: 0x22d3ee,    // cyan-400
     ACTIVITY: 0xfb923c,       // orange-400
     FLOW: 0x60a5fa,           // blue-400
+    FLOW_ACTION: 0x38bdf8,    // sky-400 — distinct from FLOW
     PROPERTY: 0xa78bfa,       // violet-400
     MODEL: 0x4ade80,          // green-400
     RULE: 0xf87171,           // red-400
     DATA: 0x2dd4bf,           // teal-400
   };
+
+  /**
+   * Resolve a node's color as a 0xRRGGBB int. Known types use the fixed palette;
+   * unknown/new types (e.g. RULE_OBJ_*) derive a distinct BRIGHT color from a hash
+   * of the type name. MUST match typeColor() in index.html exactly so the graph
+   * nodes and the legend/filter swatches show the SAME color per type.
+   */
+  function colorForType(type) {
+    if (type && COLORS[type] !== undefined) { return COLORS[type]; }
+    if (!type) { return 0x94a3b8; }
+    let h = 0;
+    for (let i = 0; i < type.length; i++) { h = (h * 31 + type.charCodeAt(i)) >>> 0; }
+    const hue = h % 360;
+    const sat = (65 + ((h >> 9) % 20)) / 100;   // 0.65–0.85
+    const light = (60 + ((h >> 16) % 12)) / 100; // 0.60–0.72 (bright on dark bg)
+    return hslToHex(hue, sat, light);
+  }
+
+  /** Convert HSL (h in degrees, s/l in 0..1) to a 0xRRGGBB integer. */
+  function hslToHex(h, s, l) {
+    const c = (1 - Math.abs(2 * l - 1)) * s;
+    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    const m = l - c / 2;
+    let r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; }
+    else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; }
+    else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; }
+    else { r = c; b = x; }
+    const R = Math.round((r + m) * 255), G = Math.round((g + m) * 255), B = Math.round((b + m) * 255);
+    return (R << 16) | (G << 8) | B;
+  }
 
   const NODE_SIZES = {
     // Document types (larger = more important)
@@ -262,7 +296,7 @@
         positions[i * 3] = node.x;
         positions[i * 3 + 1] = node.y;
         positions[i * 3 + 2] = node.z;
-        tmpColor.setHex(COLORS[node.type] || 0x64748b);
+        tmpColor.setHex(colorForType(node.type));
         colors[i * 3] = tmpColor.r;
         colors[i * 3 + 1] = tmpColor.g;
         colors[i * 3 + 2] = tmpColor.b;
@@ -407,7 +441,7 @@
         dummy.scale.set(size, size, size);
         dummy.updateMatrix();
         this.instancedMesh.setMatrixAt(i, dummy.matrix);
-        tmpColor.setHex(COLORS[node.type] || 0x64748b);
+        tmpColor.setHex(colorForType(node.type));
         colorArr[i * 3] = tmpColor.r; colorArr[i * 3 + 1] = tmpColor.g; colorArr[i * 3 + 2] = tmpColor.b;
       }
       this.instancedMesh.instanceMatrix.needsUpdate = true;
@@ -436,7 +470,7 @@
       var sphereGeo = new THREE.SphereGeometry(1, 16, 12);
       for (var i = 0; i < selected.length; i++) {
         var node = this.nodes[selected[i].idx];
-        var hex = COLORS[node.type] || 0x64748b;
+        var hex = colorForType(node.type);
         var material = new THREE.MeshPhongMaterial({ color: hex, emissive: hex, emissiveIntensity: 0.2 });
         var mesh = new THREE.Mesh(sphereGeo, material);
         var size = (NODE_SIZES[node.type] || 3) * 2;

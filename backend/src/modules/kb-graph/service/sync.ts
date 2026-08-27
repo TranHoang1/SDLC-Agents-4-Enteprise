@@ -10,7 +10,7 @@ import type { DatabaseAdapter } from '../../../database/adapters/DatabaseAdapter
 import { getKbEntries } from '../../../admin/admin-db.js';
 import { getDbAdapter } from '../../../admin/db/core.js';
 import { loadConfig } from '../../../config/index.js';
-import { KIND_TO_TYPE } from './constants.js';
+import { graphTypeForKind } from './constants.js';
 import { computePositionByIndex } from './nodes.js';
 import { buildSpatialEdges, buildCrossClusterEdges } from './spatial.js';
 
@@ -113,7 +113,7 @@ function processSymbolRow(
   sym: any, allEntries: EntryRow[], sources: Record<string, number>,
   ksaGroupMap: Map<string, number>, groupCounter: { value: number },
 ): void {
-  const type = KIND_TO_TYPE[sym.kind] || 'CODE_ENTITY';
+  const type = graphTypeForKind(sym.kind);
   const fileSuffix = sym.file_path ? sym.file_path.replace(/\\/g, '/').split('/').pop() || '' : '';
   const label = `${sym.name} (${fileSuffix})`.substring(0, 60);
   const fileParts = (sym.file_path || '').replace(/\\/g, '/').split('/');

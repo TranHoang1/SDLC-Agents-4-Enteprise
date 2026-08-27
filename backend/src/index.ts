@@ -102,7 +102,20 @@ async function main() {
       }
     }
 
-    logger.info({ ingestedTools: ingestedCount, totalTools: allTools.length }, 'Ingested dynamic tools with vector embeddings');
+logger.info({ ingestedTools: ingestedCount, totalTools: allTools.length }, 'Ingested dynamic tools with vector embeddings');
+
+    // SA4E-217: Ensure pega_category_counters table exists (idempotent)
+    try {
+      const { getDbAdapter } = await import('./admin/db/core.js');
+      const adminAdapter = getDbAdapter();
+      if (adminAdapter.isConnected()) {
+        const { ensurePegaCategoryCountersTable } = await import('./database/migration/ensure-pega-category-counters.ts');
+        await ensurePegaCategoryCountersTable(adminAdapter);
+        logger.info('Ensured pega_category_counters table exists');
+      }
+    } catch (err) {
+      logger.warn({ err }, 'pega_category_counters migration skipped (non-fatal)');
+    }
 
     // Wire ToolSearchService into OrchestrationModule
     if (orchestrationModule) {

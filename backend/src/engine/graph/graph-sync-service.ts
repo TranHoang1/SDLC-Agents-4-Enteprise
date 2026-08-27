@@ -9,7 +9,7 @@
 
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
 import { DialectHelper } from '../../database/dialect/DialectHelper.js';
-import { KIND_TO_TYPE } from '../../modules/kb-graph/service/constants.js';
+import { graphTypeForKind } from '../../modules/kb-graph/service/constants.js';
 import { extractAndInsertCodeEdges } from './code-edge-extractor.js';
 import type { Logger } from 'pino';
 
@@ -149,7 +149,7 @@ export class GraphSyncService {
     // SA4E-97: Group symbols by type for cluster-based positioning
     const byType = new Map<string, CodeSymbolRow[]>();
     for (const s of symbols) {
-      const nodeType = KIND_TO_TYPE[s.kind] || 'CODE_ENTITY';
+      const nodeType = graphTypeForKind(s.kind);
       if (!byType.has(nodeType)) byType.set(nodeType, []);
       byType.get(nodeType)!.push(s);
     }

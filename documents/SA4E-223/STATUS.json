@@ -3,7 +3,7 @@
   "summary": "Indexer does not recognize most Salesforce file extensions (metadata + Aura/Visualforce) during source indexing",
   "type": "Bug",
   "priority": "Medium",
-  "jiraStatus": "To Do",
+  "jiraStatus": "Done",
   "currentPhase": "requirements",
   "autonomyLevel": "L3",
   "humanGates": ["uat", "deployment", "circuit_breaker_open"],
@@ -22,7 +22,7 @@
     "post_pentest_fix": { "status": "done", "startedAt": "2026-08-26T19:15:00Z", "completedAt": "2026-08-26T19:30:00Z", "file": "salesforce-markup/shared.ts", "version": 1.1, "testEvidence": "vitest 2665/2665 pass" },
     "security_medium_fix": { "status": "done", "startedAt": "2026-08-27T03:00:00Z", "completedAt": "2026-08-27T03:20:00Z", "file": "path-safety.ts, tree-sitter-indexer.ts, storage.ts, helpers.ts", "version": 1.1, "testEvidence": "238 passed full / 70 passed targeted" },
     "security_deploy_review": { "status": "not_started" },
-    "uat": { "status": "blocked_human_gate", "startedAt": "2026-08-26T19:30:00Z", "note": "WAITING for user 'UAT pass' confirmation before Phase 6.7/7" },
+    "uat": { "status": "done", "startedAt": "2026-08-26T19:30:00Z", "completedAt": "2026-08-27T22:20:00Z", "note": "Live UAT PASS 2026-08-27 (fixture SFDX 28 files: 0 unrecognized, 0 parser errors, malformed graceful)" },
     "deployment": { "status": "not_started" }
   },
   "circuitBreaker": {
@@ -39,12 +39,9 @@
     "testRunEvidence": {
       "runner": "npx vitest run",
       "scope": "backend",
-      "pass": 2659,
-      "fail": 2,
-      "failingTests": [
-        "backend/src/engine/indexer/__tests__/file-scanner.test.ts > detectLanguage > maps all 17 *-meta.xml suffixes to salesforce-meta",
-        "backend/src/engine/indexer/__tests__/file-scanner.test.ts > detectLanguage > returns non-null for every known Salesforce extension"
-      ],
+      "pass": 2665,
+      "fail": 0,
+      "failingTests": [],
       "rootCauseVerified": true,
       "rootCause": "backend/src/engine/indexer/file-scanner.ts line 71 contains '.testSuite-meta.xml' (capital S in Suite) inside SALESFORCE_META_SUFFIXES; line 107 compares with lowercased path (lowerPath.endsWith(s)) so camelCase constant never matches a lowercased input → returns null.",
       "minimalFix": "Change line 71 '.testSuite-meta.xml' → '.testsuite-meta.xml' (all-lowercase). Also audit other consumers of SALESFORCE_META_SUFFIXES (e.g. detectModule / config): if any compare against ORIGINAL (non-lowercased) path, switch to case-insensitive compare (s.toLowerCase()) to keep a single constant with consistent semantics."
@@ -57,5 +54,5 @@
     "warningThreshold": 0.8,
     "mode": "normal"
   },
-  "lastUpdated": "2026-08-27T00:00:00Z"
+  "lastUpdated": "2026-08-27T22:20:00Z"
 }

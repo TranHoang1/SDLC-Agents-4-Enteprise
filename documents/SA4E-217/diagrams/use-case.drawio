@@ -1,0 +1,69 @@
+<mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="sp_title" value="SA4E-217 — Use Case Diagram" style="text;html=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="20" width="900" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="n_actor_user" value="User" style="shape=umlActor;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalLabelPosition=bottom;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="60" y="120" width="30" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="n_actor_admin" value="Admin" style="shape=umlActor;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalLabelPosition=bottom;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="60" y="320" width="30" height="60" as="geometry" />
+    </mxCell>
+    <mxCell id="sys_bound" value="Code-Intel Server" style="swimlane;html=1;startSize=20;fillColor=none;strokeColor=#666666;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="180" y="100" width="740" height="360" as="geometry" />
+    </mxCell>
+    <mxCell id="uc1" value="Authenticate via JWT (fix 403)" style="ellipse;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="sys_bound">
+      <mxGeometry x="40" y="60" width="220" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="uc2" value="Configure rate-limit policy" style="ellipse;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="sys_bound">
+      <mxGeometry x="40" y="160" width="220" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="uc3" value="Run Pega enrichment" style="ellipse;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="sys_bound">
+      <mxGeometry x="320" y="60" width="200" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="uc4" value="Dedup symbols (RAM+disk)" style="ellipse;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="sys_bound">
+      <mxGeometry x="320" y="160" width="200" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="uc5" value="Persist category counters" style="ellipse;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="sys_bound">
+      <mxGeometry x="560" y="110" width="220" height="50" as="geometry" />
+    </mxCell>
+    <mxCell id="e_ua1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#6c8ebf;" edge="1" parent="1" source="n_actor_user" target="uc1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="75" y="180" as="sourcePoint" />
+        <mxPoint x="250" y="185" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e_ua2" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#6c8ebf;" edge="1" parent="1" source="n_actor_user" target="uc3">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="75" y="180" as="sourcePoint" />
+        <mxPoint x="420" y="160" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e_aa1" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9673a6;" edge="1" parent="1" source="n_actor_admin" target="uc2">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="75" y="380" as="sourcePoint" />
+        <mxPoint x="250" y="400" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e_aa2" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#9673a6;" edge="1" parent="1" source="n_actor_admin" target="uc5">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="75" y="380" as="sourcePoint" />
+        <mxPoint x="670" y="360" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e_uc34" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#d6b656;" edge="1" parent="sys_bound" source="uc3" target="uc4">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="420" y="185" as="sourcePoint" />
+        <mxPoint x="420" y="210" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="e_uc45" style="edgeStyle=orthogonalEdgeStyle;html=1;rounded=0;strokeColor=#82b366;" edge="1" parent="sys_bound" source="uc4" target="uc5">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="520" y="210" as="sourcePoint" />
+        <mxPoint x="670" y="210" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>

@@ -15,9 +15,15 @@ function getBackendUrl(): string {
 }
 
 /**
- * Resolve workspace root for indexing. In multi-root workspaces, auto-detects
- * the target project folder by priority markers (Pega > Salesforce > generic).
- * If multiple candidates found, prompts user to choose.
+ * Resolve workspace root for indexing. Uses the already-configured target
+ * workspace as the single source of truth, so multi-root workspaces do not
+ * force the user to pick a folder that the backend already knows about.
+ *
+ * Resolution priority:
+ *   1. CODE_INTEL_WORKSPACE env var (the workspace the backend/MCP was configured for)
+ *   2. Domain project markers (pega-project.json > sfdx-project.json)
+ *   3. Folder containing a `.code-intel/` directory (initialised project)
+ *   4. Prompt the user only when the target is genuinely ambiguous
  */
 async function getWorkspaceRoot(): Promise<string | undefined> {
     const folders = vscode.workspace.workspaceFolders;
@@ -26,15 +32,30 @@ async function getWorkspaceRoot(): Promise<string | undefined> {
         return undefined;
     }
     if (folders.length === 1) { return folders[0].uri.fsPath; }
-    // Multi-root: detect project type by priority markers
+
     const fs = require('fs');
     const path = require('path');
+
+    // 1. Configured workspace wins — matches what the backend/MCP already targets.
+    const configuredRoot = process.env.CODE_INTEL_WORKSPACE?.trim();
+    if (configuredRoot) {
+        const normalize = (p: string) => path.resolve(p).toLowerCase();
+        const match = folders.find(f => normalize(f.uri.fsPath) === normalize(configuredRoot));
+        if (match) { return match.uri.fsPath; }
+    }
+
+    // 2. Domain-specific project markers.
     const domainMarkers = ['pega-project.json', 'sfdx-project.json'];
     for (const marker of domainMarkers) {
         const match = folders.find(f => fs.existsSync(path.join(f.uri.fsPath, marker)));
         if (match) { return match.uri.fsPath; }
     }
-    // No domain-specific marker found — prompt user to select folder
+
+    // 3. Folder that has already been initialised for code intelligence.
+    const initialised = folders.find(f => fs.existsSync(path.join(f.uri.fsPath, '.code-intel')));
+    if (initialised) { return initialised.uri.fsPath; }
+
+    // 4. Genuinely ambiguous — ask the user.
     const pick = await vscode.window.showQuickPick(
         folders.map(f => ({ label: path.basename(f.uri.fsPath), description: f.uri.fsPath, folder: f })),
         { placeHolder: "Select workspace folder to index" }

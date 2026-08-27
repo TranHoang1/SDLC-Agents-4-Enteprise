@@ -12,7 +12,7 @@ import type { SpatialQueryParams, SpatialGraphResult, GraphNode } from './consta
 import { getKbEntryCount } from '../../../admin/admin-db.js';
 
 export type { GraphNode, GraphEdge, SpatialQueryParams, SpatialGraphResult } from './constants.js';
-export { LEVEL_MAP, KIND_TO_TYPE } from './constants.js';
+export { LEVEL_MAP, KIND_TO_TYPE, graphTypeForKind } from './constants.js';
 export * from './nodes.js';
 export * from './spatial.js';
 export * from './sync.js';

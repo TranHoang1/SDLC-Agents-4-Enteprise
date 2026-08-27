@@ -287,11 +287,20 @@ async function resolvePegaSymbolId(ctx: AdminContext, fqn: string): Promise<stri
   try {
     const { getDbAdapter } = await import('../../../admin/db/core.js');
     const adapter = getDbAdapter();
-    const sym = await adapter.getAsync<{ id: number }>(
+    // Exact match on the full 5-part signature first.
+    let sym = await adapter.getAsync<{ id: number }>(
       `SELECT s.id FROM symbols s JOIN files f ON f.id = s.file_id
        WHERE s.signature = ? AND s.kind LIKE 'pega_%' LIMIT 1`,
       [fqn],
     );
+    // Fallback: legacy 3-part FQN deep-links (type:class:name) — match by prefix.
+    if (!sym && (fqn.match(/:/g) || []).length === 2) {
+      sym = await adapter.getAsync<{ id: number }>(
+        `SELECT s.id FROM symbols s JOIN files f ON f.id = s.file_id
+         WHERE s.signature LIKE ? AND s.kind LIKE 'pega_%' LIMIT 1`,
+        [`${fqn}:%`],
+      );
+    }
     return sym ? String(sym.id) : null;
   } catch {
     return null;
@@ -322,16 +331,42 @@ async function getCodeSymbolDetail(symbolId: string, ctx: AdminContext): Promise
     const isPega = Boolean(detail.language && detail.language.toLowerCase() === 'pega');
     const codeLabel = isPega ? '**Rule Content:**' : '**Code:**';
     const codeFence = isPega ? 'text' : (detail.language?.toLowerCase() || 'typescript');
-    const contentParts = [
-      detail.signature ? `**Signature:** \`${detail.signature}\`` : '',
+    // For Pega, show the 5 identity fields (type, class, name, ruleset, version)
+    // parsed from the signature instead of the raw FQN string. These 5 together
+    // uniquely identify a Pega rule.
+    // Trailing two spaces = markdown hard line break, so each identity field
+    // renders on its own line (content is rendered via marked.parse()).
+    const BR = '  ';
+    const identityParts: string[] = [];
+    if (isPega && detail.signature) {
+      const { parseFqn } = await import('../../../modules/pega/pega-mapping.js');
+      const f = parseFqn(detail.signature);
+      const dash = (v: string) => (v && v !== '-' ? v : '(none)');
+      identityParts.push(
+        `**Rule Name:** ${detail.name}${BR}`,
+        `**Rule Type:** ${f.pxObjClass}${BR}`,
+        `**Rule Class:** ${f.pyClassName}${BR}`,
+        `**RuleSet:** ${dash(f.ruleSet)}${BR}`,
+        `**Version:** ${dash(f.version)}`,
+      );
+    } else if (detail.signature) {
+      identityParts.push(`**Signature:** \`${detail.signature}\``);
+    }
+    const metaParts = [
       detail.docComment ? `**Doc:** ${detail.docComment}` : '',
       `**Kind:** ${detail.kind}`, `**File:** ${detail.relativePath}`,
       lines ? `**Location:** ${lines}` : '',
       detail.module ? `**Module:** ${detail.module}` : '',
       detail.visibility ? `**Visibility:** ${detail.visibility}` : '',
       detail.parentSymbol ? `**Parent:** ${detail.parentSymbol}` : '',
-      bodyCode ? `\n${codeLabel}\n\`\`\`${codeFence}\n${bodyCode.substring(0, 2000)}\n\`\`\`` : '',
-    ].filter(Boolean).join('\n');
+    ].filter(Boolean);
+    const contentParts = [
+      // Identity block (each field already ends with a hard break) as its own paragraph.
+      identityParts.join('\n'),
+      // Meta fields: blank line between each so markdown keeps them on separate lines.
+      metaParts.join('\n\n'),
+      bodyCode ? `${codeLabel}\n\`\`\`${codeFence}\n${bodyCode.substring(0, 2000)}\n\`\`\`` : '',
+    ].filter(Boolean).join('\n\n');
     return {
       id: `code:${detail.id}`,
       title: `${detail.name} (${detail.kind})`,

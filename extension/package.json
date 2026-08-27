@@ -213,6 +213,18 @@
           "default": 30000,
           "description": "Health check interval (ms)"
         },
+        "kiroSdlc.backend.rateLimitRpm": {
+          "type": "number",
+          "default": 6000,
+          "minimum": 1,
+          "description": "Requests-per-minute this client asks the backend to allow. The server clamps this to its own hard cap (configured in the web admin); you can lower it but never exceed the server maximum."
+        },
+        "kiroSdlc.pega.dedupMaxInMemory": {
+          "type": "number",
+          "default": 100000,
+          "minimum": 1,
+          "description": "Max Pega rule dedup keys kept in memory during indexing. When exceeded, keys spill to a temporary disk file (deleted after the run) so RAM stays bounded on large rulebases. Lower this on memory-constrained machines."
+        },
         "kiroSdlc.mcpServerPort": {
           "type": "number",
           "default": 9181,

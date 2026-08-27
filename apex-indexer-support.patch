@@ -1,0 +1,59 @@
+diff --git a/backend/src/engine/parsers/__tests__/signature-extractor.test.ts b/backend/src/engine/parsers/__tests__/signature-extractor.test.ts
+index 81353b3..740fd10 100644
+--- a/backend/src/engine/parsers/__tests__/signature-extractor.test.ts
++++ b/backend/src/engine/parsers/__tests__/signature-extractor.test.ts
+@@ -97,6 +97,26 @@ describe('extractSymbols ΓÇö multi-language', () => {
+     const symbols = extractSymbols('function foo() {}\nclass Bar {}', 'unknownlang');
+     expect(symbols.map(s => s.name)).toEqual(['foo', 'Bar']);
+   });
++
++  it('extracts apex classes, interfaces, enums, triggers and methods', () => {
++    const src = [
++      'public with sharing class AccountService {',
++      '  public void processAccount(Account acc) {}',
++      '  private static List<Account> getAccounts() {}',
++      '}',
++      'public interface IAccountHandler {}',
++      'public enum Status { NEW_STATUS, ACTIVE, CLOSED }',
++      'trigger AccountTrigger on Account (before insert, after update) {}',
++    ].join('\n');
++    const symbols = extractSymbols(src, 'apex');
++    const byName = Object.fromEntries(symbols.map(s => [s.name, s.kind]));
++    expect(byName.AccountService).toBe('class');
++    expect(byName.IAccountHandler).toBe('interface');
++    expect(byName.Status).toBe('enum');
++    expect(byName.AccountTrigger).toBe('function');
++    expect(byName.processAccount).toBe('method');
++    expect(byName.getAccounts).toBe('method');
++  });
+ });
+ 
+ describe('extractSymbols ΓÇö edge cases', () => {
+diff --git a/backend/src/engine/parsers/signature-extractor.ts b/backend/src/engine/parsers/signature-extractor.ts
+index 47b90d2..fd3bb42 100644
+--- a/backend/src/engine/parsers/signature-extractor.ts
++++ b/backend/src/engine/parsers/signature-extractor.ts
+@@ -118,6 +118,7 @@ function getPatterns(language: string): PatternDef[] {
+     case 'kotlin': return KOTLIN_PATTERNS;
+     case 'python': return PYTHON_PATTERNS;
+     case 'java': return JAVA_PATTERNS;
++    case 'apex': return APEX_PATTERNS;
+     case 'go': return GO_PATTERNS;
+     case 'rust': return RUST_PATTERNS;
+     default: return GENERIC_PATTERNS;
+@@ -167,6 +168,15 @@ const RUST_PATTERNS: PatternDef[] = [
+   { regex: /^\s*(?:pub\s+)?mod\s+(\w+)/m, kind: 'module', nameGroup: 1 },
+ ];
+ 
++/** Apex (Salesforce) ΓÇö classes, interfaces, enums, triggers, methods. */
++const APEX_PATTERNS: PatternDef[] = [
++  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?(?:virtual\s+|abstract\s+|with\s+sharing\s+|without\s+sharing\s+|inherited\s+sharing\s+)*class\s+(\w+)/m, kind: 'class', nameGroup: 1 },
++  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?interface\s+(\w+)/m, kind: 'interface', nameGroup: 1 },
++  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?enum\s+(\w+)/m, kind: 'enum', nameGroup: 1 },
++  { regex: /^\s*trigger\s+(\w+)\s+on\s+/m, kind: 'function', nameGroup: 1 },
++  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?(?:static\s+)?(?:(?:override|virtual|abstract|testMethod)\s+)*(?:[\w<>,\s[\]]+?)\s+(\w+)\s*\(/m, kind: 'method', nameGroup: 1 },
++];
++
+ const GENERIC_PATTERNS: PatternDef[] = [
+   { regex: /^(?:function|def|func|fn|sub)\s+(\w+)/m, kind: 'function', nameGroup: 1 },
+   { regex: /^(?:class|struct|type)\s+(\w+)/m, kind: 'class', nameGroup: 1 },

@@ -6,7 +6,10 @@
 
 import { createHash } from 'crypto';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
-import { resolveSymbolKind, buildVirtualPath, buildFqn, resolveRuleNameField } from './pega-mapping.js';
+import {
+  resolveSymbolKind, buildVirtualPath, buildFqn, resolveRuleNameField,
+  resolveRuleSetName, resolveRuleSetVersion,
+} from './pega-mapping.js';
 import { extractRuleContent } from './PegaContentExtractor.js';
 import { SchemaStorageService, type IDatabaseAdapter } from './schema/SchemaStorageService.js';
 import { TaskType, TaskStatus } from '../memory/task-queue/models.js';
@@ -52,8 +55,10 @@ export async function syncRuleToSymbols(
 
   const { pxObjClass, pyClassName, pyRuleName } = fields;
   const kind = resolveSymbolKind(pxObjClass);
-  const fqn = buildFqn(pxObjClass, pyClassName, pyRuleName);
-  const virtualPath = buildVirtualPath(pyClassName, kind, pyRuleName);
+  const ruleSet = resolveRuleSetName(ruleJson);
+  const version = resolveRuleSetVersion(ruleJson);
+  const fqn = buildFqn(pxObjClass, pyClassName, pyRuleName, ruleSet, version);
+  const virtualPath = buildVirtualPath(pyClassName, kind, pyRuleName, ruleSet, version);
   const ruleJsonStr = JSON.stringify(ruleJson);
 
   // SEC-06: skip oversized rules
@@ -92,11 +97,16 @@ export async function refreshRuleSymbolBody(
   await storeBodyEmbedding(adapter, projectId, symbolId, extractRuleContent(ruleJson, { nestedLogicPaths }));
 
   const kind = resolveSymbolKind(fields.pxObjClass);
-  const virtualPath = buildVirtualPath(fields.pyClassName, kind, fields.pyRuleName);
+  const virtualPath = buildVirtualPath(
+    fields.pyClassName, kind, fields.pyRuleName,
+    resolveRuleSetName(ruleJson), resolveRuleSetVersion(ruleJson),
+  );
 
-  // Clear prior enrichment so a fresh CODE_ENRICHMENT task is created
+  // Clear ALL prior CODE_ENRICHMENT tasks for this symbol before requeuing.
+  // A fresh task fully supersedes historical ones; deleting only PENDING/PROCESSING
+  // left COMPLETED/FAILED rows to accumulate unbounded across re-index runs.
   await adapter.runAsync(
-    `DELETE FROM pending_tasks WHERE task_type = 'CODE_ENRICHMENT' AND entry_id = ? AND status IN ('PENDING', 'PROCESSING')`,
+    `DELETE FROM pending_tasks WHERE task_type = 'CODE_ENRICHMENT' AND entry_id = ?`,
     [symbolId],
   );
   await adapter.runAsync(
@@ -110,10 +120,10 @@ export async function refreshRuleSymbolBody(
   );
 }
 
-/** Resolve "RuleSet Version" string from rule JSON. */
+/** Resolve "RuleSet Version" display string from rule JSON (both export casings). */
 function resolveRuleSet(ruleJson: Record<string, unknown>): string {
-  const rs = (ruleJson as any)?.pyRuleset as string | undefined;
-  const version = (ruleJson as any)?.pyRulesetVersion as string | undefined;
+  const rs = resolveRuleSetName(ruleJson);
+  const version = resolveRuleSetVersion(ruleJson);
   return rs ? (version ? `${rs} ${version}` : rs) : '';
 }
 

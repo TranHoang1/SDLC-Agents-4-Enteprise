@@ -118,6 +118,7 @@ function getPatterns(language: string): PatternDef[] {
     case 'kotlin': return KOTLIN_PATTERNS;
     case 'python': return PYTHON_PATTERNS;
     case 'java': return JAVA_PATTERNS;
+    case 'apex': return APEX_PATTERNS;
     case 'go': return GO_PATTERNS;
     case 'rust': return RUST_PATTERNS;
     default: return GENERIC_PATTERNS;
@@ -165,6 +166,15 @@ const RUST_PATTERNS: PatternDef[] = [
   { regex: /^\s*(?:pub\s+)?trait\s+(\w+)/m, kind: 'trait', nameGroup: 1 },
   { regex: /^\s*(?:pub\s+)?enum\s+(\w+)/m, kind: 'enum', nameGroup: 1 },
   { regex: /^\s*(?:pub\s+)?mod\s+(\w+)/m, kind: 'module', nameGroup: 1 },
+];
+
+/** Apex (Salesforce) — classes, interfaces, enums, triggers, methods. */
+const APEX_PATTERNS: PatternDef[] = [
+  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?(?:virtual\s+|abstract\s+|with\s+sharing\s+|without\s+sharing\s+|inherited\s+sharing\s+)*class\s+(\w+)/m, kind: 'class', nameGroup: 1 },
+  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?interface\s+(\w+)/m, kind: 'interface', nameGroup: 1 },
+  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?enum\s+(\w+)/m, kind: 'enum', nameGroup: 1 },
+  { regex: /^\s*trigger\s+(\w+)\s+on\s+/m, kind: 'function', nameGroup: 1 },
+  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?(?:static\s+)?(?:(?:override|virtual|abstract|testMethod)\s+)*(?:[\w<>,\s[\]]+?)\s+(\w+)\s*\(/m, kind: 'method', nameGroup: 1 },
 ];
 
 const GENERIC_PATTERNS: PatternDef[] = [

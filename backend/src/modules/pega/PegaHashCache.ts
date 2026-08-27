@@ -81,3 +81,22 @@ export function compareFileHash(
   const cachedHash = cache.entries[filePath];
   return { filePath, hash, changed: hash !== cachedHash };
 }
+
+/**
+ * Remove cache entries whose paths were not seen in the current index run.
+ * Prevents the on-disk cache from growing unbounded as rules are deleted/renamed.
+ * Mutates the given cache in place.
+ * @param cache - Loaded cache data to prune
+ * @param seenPaths - Set of relative paths present in the current run
+ * @returns Number of stale entries removed
+ */
+export function pruneStaleEntries(cache: HashCacheData, seenPaths: Set<string>): number {
+  let removed = 0;
+  for (const key of Object.keys(cache.entries)) {
+    if (!seenPaths.has(key)) {
+      delete cache.entries[key];
+      removed++;
+    }
+  }
+  return removed;
+}

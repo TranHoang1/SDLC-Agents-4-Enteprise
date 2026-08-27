@@ -8,7 +8,7 @@ import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync } from 'nod
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { PegaIndexerTool, type GraphWriter } from '../PegaIndexerTool.js';
-import { computeHash, compareFileHash, type HashCacheData } from '../PegaHashCache.js';
+import { computeHash, compareFileHash, pruneStaleEntries, type HashCacheData } from '../PegaHashCache.js';
 
 /** Fake GraphWriter tracking all operations (Spy pattern). */
 class FakeGraphWriter implements GraphWriter {
@@ -93,6 +93,17 @@ describe('PegaHashCache', () => {
     const cache: HashCacheData = { version: 1, entries: { 'rule.pega.json': 'oldhash' } };
     const result = compareFileHash('rule.pega.json', '{"modified":true}', cache);
     expect(result.changed).toBe(true);
+  });
+
+  it('pruneStaleEntries removes entries not seen in the current run', () => {
+    const cache: HashCacheData = {
+      version: 1,
+      entries: { 'a.json': 'h1', 'b.json': 'h2', 'gone.json': 'h3' },
+    };
+    const removed = pruneStaleEntries(cache, new Set(['a.json', 'b.json']));
+    expect(removed).toBe(1);
+    expect(Object.keys(cache.entries).sort()).toEqual(['a.json', 'b.json']);
+    expect(cache.entries['gone.json']).toBeUndefined();
   });
 });
 

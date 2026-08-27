@@ -159,7 +159,16 @@ export class MemoryEngineCrud {
            SELECT id FROM symbols
          )`,
       );
-      return (r1.changes ?? 0) + (r2.changes ?? 0) + (r3.changes ?? 0);
+      // Clean orphan 'code:*' nodes (symbols re-created with a new id on re-index).
+      // Without this, a graph node points at a dead symbol id and the viewer
+      // shows "No content available" even though the live symbol is enriched.
+      const r4 = await this.adapter.runAsync(
+        `DELETE FROM graph_nodes WHERE entry_id LIKE 'code:%'
+         AND CAST(REPLACE(entry_id, 'code:', '') AS INTEGER) NOT IN (
+           SELECT id FROM symbols
+         )`,
+      );
+      return (r1.changes ?? 0) + (r2.changes ?? 0) + (r3.changes ?? 0) + (r4.changes ?? 0);
     } catch {
       // Non-fatal: graph_nodes table may not exist in test environments
       return 0;

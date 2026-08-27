@@ -1,0 +1,69 @@
+<mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="sp_title" value="SA4E-217 — Sequence: JWT 403 Fix" style="text;html=1;strokeColor=none;fillColor=none;fontSize=16;fontStyle=1;align=center;" vertex="1" parent="1">
+      <mxGeometry x="40" y="20" width="900" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="h_user" value="User / Extension" style="html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=0;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="80" y="60" width="160" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="h_auth" value="Code-Intel Auth" style="html=1;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=0;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="380" y="60" width="160" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="h_pega" value="Pega Enrichment" style="html=1;fillColor=#fff2cc;strokeColor=#d6b656;rounded=0;whiteSpace=wrap;" vertex="1" parent="1">
+      <mxGeometry x="680" y="60" width="160" height="40" as="geometry" />
+    </mxCell>
+    <mxCell id="l_user" style="html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="155" y="100" width="10" height="420" as="geometry" />
+    </mxCell>
+    <mxCell id="l_auth" style="html=1;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="455" y="100" width="10" height="420" as="geometry" />
+    </mxCell>
+    <mxCell id="l_pega" style="html=1;fillColor=#fff2cc;strokeColor=#d6b656;rounded=0;" vertex="1" parent="1">
+      <mxGeometry x="755" y="100" width="10" height="420" as="geometry" />
+    </mxCell>
+    <mxCell id="m1" value="1: GET /enrich (old JWT)" style="html=1;fillColor=none;strokeColor=#6c8ebf;endArrow=block;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="160" y="140" as="sourcePoint" />
+        <mxPoint x="460" y="140" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m2" value="2: 403 invalid/expired token" style="html=1;fillColor=#f8cecc;strokeColor=#b85450;endArrow=open;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="460" y="180" as="sourcePoint" />
+        <mxPoint x="160" y="180" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m3" value="3: refresh token (auth middleware)" style="html=1;fillColor=#d5e8d4;strokeColor=#82b366;endArrow=block;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="160" y="230" as="sourcePoint" />
+        <mxPoint x="460" y="230" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m4" value="4: 200 OK (valid token)" style="html=1;fillColor=#d5e8d4;strokeColor=#82b366;endArrow=open;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="460" y="270" as="sourcePoint" />
+        <mxPoint x="160" y="270" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m5" value="5: call enrichment" style="html=1;fillColor=#fff2cc;strokeColor=#d6b656;endArrow=block;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="460" y="320" as="sourcePoint" />
+        <mxPoint x="760" y="320" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m6" value="6: result" style="html=1;fillColor=#d5e8d4;strokeColor=#82b366;endArrow=open;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="760" y="360" as="sourcePoint" />
+        <mxPoint x="460" y="360" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+    <mxCell id="m7" value="7: 200 enriched payload" style="html=1;fillColor=#d5e8d4;strokeColor=#82b366;endArrow=open;" edge="1" parent="1">
+      <mxGeometry relative="1" as="geometry">
+        <mxPoint x="460" y="410" as="sourcePoint" />
+        <mxPoint x="160" y="410" as="targetPoint" />
+      </mxGeometry>
+    </mxCell>
+  </root>
+</mxGraphModel>
