@@ -34,7 +34,7 @@ coverage/
 /GEMINI.md
 
 # OpenCode
-.opencode/
+/!conversions/opencode/.opencode/\n!extension/resources/conversions/opencode/.opencode/\n.opencode/
 /AGENTS.md
 /opencode.json
 
