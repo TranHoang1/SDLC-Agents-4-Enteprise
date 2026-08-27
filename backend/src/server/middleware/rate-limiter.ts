@@ -21,7 +21,7 @@ setInterval(() => {
   }
 }, 300000).unref();
 
-const MAX_REQUESTS = process.env.NODE_ENV === 'production' ? 100 : 10000;
+const MAX_REQUESTS = process.env.NODE_ENV === 'production' ? 10000 : 10000;
 const WINDOW_MS = 60000; // 1 minute
 
 /**
