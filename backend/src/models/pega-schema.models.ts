@@ -24,6 +24,10 @@ export const ExtractionHintsSchema = z.object({
   primary_logic_field: z.string().nullable(),
   logic_structure: z.string().nullable(),
   summary_focus: z.string().nullable(),
+  // SA4E-222 Scope B — traversable nested logic paths (backward compatible: default []).
+  // Examples: ["pyModelProcess.pyShapes", "pyStages[].pyProcesses[]"]
+  nested_logic_paths: z.array(z.string()).optional().default([]),
+  path_render_hint: z.string().nullable().optional(),
 });
 
 export type ExtractionHints = z.infer<typeof ExtractionHintsSchema>;
