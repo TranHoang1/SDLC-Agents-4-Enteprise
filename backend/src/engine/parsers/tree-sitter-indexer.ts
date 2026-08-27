@@ -6,6 +6,28 @@ import { extractSymbols } from './signature-extractor.js';
 import type { ParseResult, IndexResult } from './types.js';
 import { storeResults, storeRegexResults, extractAndStoreBodies } from './indexer/storage.js';
 import { DependencyResolver } from './dependency-resolver.js';
+import { DEFAULT_PARSER_CONFIG } from './grammars/grammar-config-loader.js';
+import pino from 'pino';
+
+const logger = pino({ name: 'tree-sitter-indexer' });
+
+/**
+ * F-02 — Race a promise against a timeout. Resolves with the promise value, or
+ * rejects (so callers can degrade gracefully) if it does not settle in `ms`.
+ * Used to enforce `timeoutPerFile` on parser invocations as defense-in-depth
+ * against slow/hanging parse paths.
+ */
+export async function withTimeout<T>(p: Promise<T>, ms: number, label: string): Promise<T> {
+  let timer: NodeJS.Timeout | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`parse-timeout:${label}`)), ms);
+  });
+  try {
+    return await Promise.race([p, timeout]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
 
 export class TreeSitterIndexer {
   private registry: GrammarRegistry;
@@ -13,13 +35,21 @@ export class TreeSitterIndexer {
   private maxFileSize: number;
   private depResolver: DependencyResolver;
   private workspace: string;
+  private timeoutPerFile: number;
 
-  constructor(registry: GrammarRegistry, adapter: DatabaseAdapter, maxFileSize: number = 1_048_576, workspace: string = '') {
+  constructor(
+    registry: GrammarRegistry,
+    adapter: DatabaseAdapter,
+    maxFileSize: number = 1_048_576,
+    workspace: string = '',
+    timeoutPerFile: number = DEFAULT_PARSER_CONFIG.timeoutPerFile,
+  ) {
     this.registry = registry;
     this.adapter = adapter;
     this.maxFileSize = maxFileSize;
     this.depResolver = new DependencyResolver();
     this.workspace = workspace;
+    this.timeoutPerFile = timeoutPerFile;
   }
 
   async indexFile(filePath: string, relativePath: string, projectId: string): Promise<IndexResult> {
@@ -34,10 +64,20 @@ export class TreeSitterIndexer {
     }
     const parser = await this.registry.getParser(filePath);
     let result: ParseResult;
-    let method: 'tree-sitter' | 'regex-fallback';
+    let method: 'tree-sitter' | 'regex-fallback' | 'timeout-degraded';
     if (parser) {
-      result = parser.parse(source, relativePath);
-      method = 'tree-sitter';
+      // F-02: enforce timeoutPerFile on the (potentially heavy) parse path.
+      try {
+        const parsePromise = Promise.resolve().then(() => parser.parse(source, relativePath));
+        result = await withTimeout(parsePromise, this.timeoutPerFile, relativePath);
+        method = 'tree-sitter';
+      } catch (err) {
+        logger.warn({ err, relativePath }, '[indexer] parse exceeded timeoutPerFile — degrading to empty result');
+        return {
+          filePath: relativePath, symbolCount: 0, relationshipCount: 0, parseErrors: 1,
+          duration: Date.now() - startTime, method: 'timeout-degraded', dependencies: [],
+        };
+      }
     } else {
       return await this.regexFallback(filePath, relativePath, projectId, startTime);
     }

@@ -21,6 +21,8 @@ const DEFAULT_EXTENSIONS = [
   '.rb', '.php', '.swift', '.scala', '.sql', '.sh',
   '.yaml', '.yml', '.json', '.toml', '.gradle.kts',
   '.cls', '.trigger', '.pega',
+  // ---- SA4E-223: new Salesforce simple extensions (Gate 2) ----
+  '.apex', '.soql', '.page', '.component', '.cmp', '.app', '.evt', '.intf', '.tokens',
 ];
 
 const UnifiedConfigSchema = z.object({

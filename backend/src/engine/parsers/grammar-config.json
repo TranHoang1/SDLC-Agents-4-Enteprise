@@ -44,15 +44,32 @@
     },
     {
       "id": "apex",
-      "extensions": [".cls", ".trigger"],
+      "extensions": [".cls", ".trigger", ".apex", ".soql"],
       "wasmPath": "grammars/tree-sitter-apex.wasm",
       "parserModule": "./languages/apex-parser.js"
     },
     {
       "id": "salesforce-meta",
-      "extensions": [".flow-meta.xml", ".object-meta.xml", ".field-meta.xml", ".js-meta.xml", ".component-meta.xml"],
+      "extensions": [
+        ".flow-meta.xml", ".object-meta.xml", ".field-meta.xml", ".js-meta.xml", ".component-meta.xml",
+        ".flexipage-meta.xml", ".permissionset-meta.xml", ".profile-meta.xml", ".labels-meta.xml",
+        ".tab-meta.xml", ".layout-meta.xml", ".report-meta.xml", ".dashboard-meta.xml",
+        ".site-meta.xml", ".resource-meta.xml", ".email-meta.xml", ".testsuite-meta.xml"
+      ],
       "wasmPath": null,
       "parserModule": "./languages/salesforce-meta-parser.js"
+    },
+    {
+      "id": "visualforce",
+      "extensions": [".page", ".component"],
+      "wasmPath": null,
+      "parserModule": "./languages/visualforce-parser.js"
+    },
+    {
+      "id": "aura",
+      "extensions": [".cmp", ".app", ".evt", ".intf", ".tokens"],
+      "wasmPath": null,
+      "parserModule": "./languages/aura-parser.js"
     },
     {
       "id": "pega",

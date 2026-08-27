@@ -5,5 +5,8 @@
   ],
   "src/**/*.{ts,test.ts}": [
     "vitest related --run"
+  ],
+  "backend/src/**/*.ts": [
+    "bash -c 'bash \"$(git rev-parse --show-toplevel)/scripts/check-line-count.sh\" --staged'"
   ]
 }

@@ -10,17 +10,36 @@ import { detectPatterns, inferModulePurpose } from '../parsers/pattern-detector.
 
 /** Detect module from relative file path. */
 export function detectModule(relativePath: string): string {
-  if (relativePath.includes('force-app/')) {
-    if (relativePath.includes('/classes/')) return 'apex-classes';
-    if (relativePath.includes('/triggers/')) return 'apex-triggers';
-    if (relativePath.includes('/flows/')) return 'sf-flows';
-    if (relativePath.includes('/objects/')) return 'sf-objects';
-    if (relativePath.includes('/lwc/')) return 'lwc-components';
-    if (relativePath.includes('/aura/')) return 'aura-components';
+  const p = relativePath.replace(/\\/g, '/');
+
+  // ---- SA4E-223: Salesforce UI / metadata segment checks (placed BEFORE default) ----
+  if (p.includes('/pages/')) return 'visualforce-pages';
+  if (p.includes('/components/')) return 'visualforce-components'; // .component (VF) — BR-3
+  if (p.includes('/layouts/')) return 'sf-layouts';
+  if (p.includes('/permissionsets/')) return 'sf-permissionsets';
+  if (p.includes('/profiles/')) return 'sf-profiles';
+  if (p.includes('/tabs/')) return 'sf-tabs';
+  if (p.includes('/flexipages/')) return 'sf-flexipages';
+  if (p.includes('/labels/')) return 'sf-labels';
+  if (p.includes('/reports/')) return 'sf-reports';
+  if (p.includes('/dashboards/')) return 'sf-dashboards';
+  if (p.includes('/sites/')) return 'sf-sites';
+  if (p.includes('/staticresources/')) return 'sf-staticresources';
+  if (p.includes('/email/')) return 'sf-email';
+  if (p.includes('/testSuites/')) return 'sf-testsuites';
+  if (p.includes('/aura/')) return 'aura-components'; // .cmp/.app/.evt/.intf/.tokens
+
+  if (p.includes('force-app/')) {
+    if (p.includes('/classes/')) return 'apex-classes';
+    if (p.includes('/triggers/')) return 'apex-triggers';
+    if (p.includes('/flows/')) return 'sf-flows';
+    if (p.includes('/objects/')) return 'sf-objects';
+    if (p.includes('/lwc/')) return 'lwc-components';
+    if (p.includes('/aura/')) return 'aura-components';
     return 'salesforce';
   }
 
-  const parts = relativePath.split('/');
+  const parts = p.split('/');
   if (parts.length >= 2 && parts[0] === 'src') return parts[1];
   if (parts.length >= 1) return parts[0];
   return 'root';
