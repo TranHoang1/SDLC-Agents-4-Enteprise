@@ -27,6 +27,7 @@ const PENDING_TASKS_SCHEMA = `
     retry_count INTEGER NOT NULL DEFAULT 0,
     max_retries INTEGER NOT NULL DEFAULT 3,
     project_id TEXT DEFAULT NULL,
+    priority INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     started_at TEXT,
     completed_at TEXT,
@@ -133,6 +134,29 @@ describe('TaskWorker Integration Tests', () => {
       expect(sm.extraction_meta.model).toBe('test-model');
       expect(sm.extraction_meta.fallback_used).toBe(false);
       expect(sm.extraction_meta.context_chain_enabled).toBe(true);
+    });
+  });
+
+  // IT-01b: SA4E-155 priority ordering — HIGH claimed before NORMAL, FIFO within same priority
+  describe('IT-01b: priority queue ordering', () => {
+    it('claimNext/claimBatch return highest priority first, then created_at ASC', async () => {
+      const repo = new PendingTaskRepository(adapter);
+      const e1 = await engine.insert({ content: 'a', summary: 'a', type: 'CONTEXT', tier: 'WORKING', source: '/a.md', tags: '' });
+      const e2 = await engine.insert({ content: 'b', summary: 'b', type: 'CONTEXT', tier: 'WORKING', source: '/b.md', tags: '' });
+      const e3 = await engine.insert({ content: 'c', summary: 'c', type: 'CONTEXT', tier: 'WORKING', source: '/c.md', tags: '' });
+      await repo.create({ task_type: TaskType.TAG_ENRICHMENT, entry_id: e1, payload: { x: 1 } });
+      await repo.create({ task_type: TaskType.TAG_ENRICHMENT, entry_id: e2, payload: { x: 1 }, priority: 100 });
+      await repo.create({ task_type: TaskType.TAG_ENRICHMENT, entry_id: e3, payload: { x: 1 }, priority: 100 });
+
+      const first = await repo.claimNext();
+      expect(first!.entry_id).toBe(e2); // higher priority, earlier created
+
+      const batch = await repo.claimBatch(5);
+      const claimedIds = batch.map(t => t.entry_id);
+      expect(claimedIds).toContain(e3);
+      expect(claimedIds).toContain(e1);
+      // e3 (priority 100) must come before e1 (priority 0)
+      expect(claimedIds.indexOf(e3)).toBeLessThan(claimedIds.indexOf(e1));
     });
   });
 

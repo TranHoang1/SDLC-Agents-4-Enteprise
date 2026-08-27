@@ -17,6 +17,17 @@ export enum TaskStatus {
   FAILED = 'FAILED',
 }
 
+/**
+ * SA4E-155: Priority levels for the task queue.
+ * Higher number = claimed first (claimNext/claimBatch ORDER BY priority DESC, created_at ASC).
+ * Normal background enrichment tasks use PRIORITY_NORMAL (0); on-demand user requests
+ * use PRIORITY_HIGH (100) so they jump ahead of bulk backlog.
+ */
+export enum TaskPriority {
+  NORMAL = 0,
+  HIGH = 100,
+}
+
 export interface PendingTask {
   id: number;
   task_type: TaskType;
@@ -37,4 +48,6 @@ export interface CreateTaskInput {
   payload: object;
   max_retries?: number;
   project_id?: string | null;
+  /** SA4E-155: queue priority. Higher claimed first. Defaults to PRIORITY_NORMAL (0). */
+  priority?: number;
 }
