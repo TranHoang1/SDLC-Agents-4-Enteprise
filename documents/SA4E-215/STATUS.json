@@ -10,7 +10,7 @@
     "test_planning": { "status": "done", "file": "STP.md", "version": 1, "completedAt": "2026-08-25T00:30:00Z" },
     "implementation": { "status": "done", "startedAt": "2026-08-25T00:00:00Z", "completedAt": "2026-08-25T00:30:00Z" },
     "testing": { "status": "done", "startedAt": "2026-08-25T00:30:00Z", "completedAt": "2026-08-25T01:00:00Z" },
-    "deployment": { "status": "done", "completedAt": "2026-08-25T01:30:00Z" }
+    "deployment": { "status": "done", "completedAt": "2026-08-27T09:00:00Z", "note": "Backend live & serving /api/sa4e-215 on port 48721 (verified by live UAT). Tables auto-created on boot via ensure-sa4e-215.", "uat": { "status": "passed", "date": "2026-08-27T09:30:00Z", "result": "auth/decisions/mcp-servers green; unknown project_id correctly blocked by guard (ERR_006)" } }
   },
   "diagrams": {
     "status": "done",
@@ -30,6 +30,10 @@
   "docsRealigned": {
     "date": "2026-08-26T01:30:00Z",
     "reason": "Aligned BRD/FSD/TDD/STP/UG to actual code: Auth (users) + Decisions (decisions/audit_log) + MCP (mcp_servers/projects)"
+  },
+  "docsRealignedAgainstApi": {
+    "date": "2026-08-27T09:30:00Z",
+    "reason": "UG.md/STP.md fixed for API drift: real port 48721, /mcp/servers (not /mcp-servers), camelCase fields (projectId/ruleSetId/transportType), no /decisions/evaluate (client supplies result), MCP DELETE is hard-delete, error codes ERR_006/ERR_009 added."
   },
   "redesignedAgainstRealDb": {
     "date": "2026-08-26T02:00:00Z",
@@ -69,5 +73,5 @@
     "behavior": "Idempotent CREATE TABLE IF NOT EXISTS for mcp_servers + decisions, generated from TableDef registry; runs on every boot for BOTH SQLite and PostgreSQL via getDbAdapter().execAsync(). Failure is logged but does NOT abort startup.",
     "manualScript": "backend/scripts/migrate-mcp.js (one-time: creates tables + upserts orchestration.json data)"
   },
-  "lastUpdated": "2026-08-26T03:00:00Z"
+  "lastUpdated": "2026-08-27T09:30:00Z"
 }
