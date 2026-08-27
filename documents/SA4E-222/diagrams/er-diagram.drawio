@@ -1,0 +1,42 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1180" pageHeight="640" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="eSchema" value="&lt;b&gt;EnrichedSchema&lt;/b&gt;&lt;br/&gt;rule_type (PK)&lt;br/&gt;schema_version&lt;br/&gt;identity_fields&lt;br/&gt;logic_fields&lt;br/&gt;connectivity_fields&lt;br/&gt;coverage&lt;br/&gt;known_fields" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="40" y="60" width="240" height="170" as="geometry"/>
+    </mxCell>
+    <mxCell id="eHints" value="&lt;b&gt;ExtractionHints&lt;/b&gt;&lt;br/&gt;primary_logic_field&lt;br/&gt;logic_structure&lt;br/&gt;summary_focus&lt;br/&gt;&lt;b&gt;logic_paths[]&lt;/b&gt; (NEW)&lt;br/&gt;&nbsp;&nbsp;path&lt;br/&gt;&nbsp;&nbsp;render_as&lt;br/&gt;&nbsp;&nbsp;relationship" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="340" y="60" width="240" height="170" as="geometry"/>
+    </mxCell>
+    <mxCell id="eField" value="&lt;b&gt;FieldDescriptor&lt;/b&gt;&lt;br/&gt;path&lt;br/&gt;category&lt;br/&gt;type&lt;br/&gt;description&lt;br/&gt;frequency" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="640" y="60" width="220" height="150" as="geometry"/>
+    </mxCell>
+    <mxCell id="eKB" value="&lt;b&gt;knowledge_entries&lt;/b&gt; (KB)&lt;br/&gt;id (PK)&lt;br/&gt;type&lt;br/&gt;source&lt;br/&gt;content&lt;br/&gt;tags&lt;br/&gt;scope" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="40" y="330" width="260" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="eDoc" value="&lt;b&gt;PegaDocConcept&lt;/b&gt; (KB entry)&lt;br/&gt;concept&lt;br/&gt;source_url (attribution)&lt;br/&gt;summary (paraphrase)&lt;br/&gt;tags: pega-doc, concept:x, ruletype:y" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;verticalAlign=top;" vertex="1" parent="1">
+      <mxGeometry x="360" y="330" width="300" height="180" as="geometry"/>
+    </mxCell>
+    <mxCell id="eRenderer" value="&lt;b&gt;SchemaDrivenRenderer&lt;/b&gt;&lt;br/&gt;(resolves logic_paths)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="1">
+      <mxGeometry x="720" y="330" width="240" height="100" as="geometry"/>
+    </mxCell>
+    <mxCell id="r1" value="has 1:1" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=none;fontSize=9;" edge="1" parent="1" source="eSchema" target="eHints">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r2" value="contains 1:N" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=none;fontSize=9;" edge="1" parent="1" source="eSchema" target="eField">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r3" value="stored as PEGA_SCHEMA_ENRICHED / source=pega-schema:{ruleType} 1:1" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=none;fontSize=9;" edge="1" parent="1" source="eSchema" target="eKB">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r4" value="stored as PEGA_DOC 1:1" style="edgeStyle=entityRelationEdgeStyle;html=1;endArrow=none;fontSize=9;" edge="1" parent="1" source="eDoc" target="eKB">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r5" value="reads logic_paths" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;strokeColor=#82b366;" edge="1" parent="1" source="eRenderer" target="eHints">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="r6" value="retrieves for render" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;strokeColor=#82b366;" edge="1" parent="1" source="eRenderer" target="eKB">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

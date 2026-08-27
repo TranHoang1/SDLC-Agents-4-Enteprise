@@ -1,0 +1,75 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1320" pageHeight="760" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="boundary" value="Pega Rule Understanding System (SA4E-222)" style="swimlane;startSize=30;fillColor=none;strokeColor=#0288d1;html=1;fontStyle=1;fontSize=13;" vertex="1" parent="1">
+      <mxGeometry x="300" y="50" width="720" height="660" as="geometry"/>
+    </mxCell>
+    <mxCell id="cExtract" value="PegaContentExtractor.buildLogic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="120" width="260" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="cGen" value="PegaGenericLogicExtractor (Scope A - NEW)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="210" width="280" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="cSch" value="SchemaDrivenRenderer (Scope B - NEW)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="300" width="280" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="cAna" value="SchemaAnalyzeService.createSchemaOnTheFly (Scope B - UPDATED)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="390" width="320" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="cStore" value="SchemaStorageService / KB (SA4E-214 - REUSE)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="boundary">
+      <mxGeometry x="20" y="490" width="320" height="60" as="geometry"/>
+    </mxCell>
+    <mxCell id="aDev" value="Developer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="490" width="160" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="aEnrich" value="LLM Enrichment Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="300" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="aGen" value="Rule Generation Pipeline" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="150" width="180" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="aDocs" value="Pega Platform Docs (docs.pega.com)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="120" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="aKB" value="Knowledge Base (mem_search)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="320" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="aRule" value="Pega Rule Instances" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="1060" y="500" width="200" height="50" as="geometry"/>
+    </mxCell>
+    <mxCell id="e1" value="submit / configure" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="1" source="aDev" target="cExtract">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e2" value="request summary/logic" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="1" source="aEnrich" target="cExtract">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e3" value="retrieve concept" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;fontSize=9;" edge="1" parent="1" source="aGen" target="aKB">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e4" value="delegates (fallback)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="boundary" source="cExtract" target="cGen">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e5" value="delegates (learned)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="boundary" source="cExtract" target="cSch">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e6" value="load schema" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="boundary" source="cSch" target="cStore">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e7" value="store schema" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="boundary" source="cAna" target="cStore">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e8" value="ingest (crawl/summarize)" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="1" source="cAna" target="aDocs">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e9" value="retrieve concept" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="1" source="aEnrich" target="aKB">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e10" value="store summaries" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="1" source="aDocs" target="aKB">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e11" value="input rule JSON" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="1" source="aRule" target="cExtract">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>

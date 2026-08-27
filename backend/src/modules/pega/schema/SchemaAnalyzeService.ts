@@ -262,10 +262,17 @@ export class SchemaAnalyzeService {
     else if (ruleType.includes('Decision')) structure = 'decision_tree';
     else if (ruleType.includes('Activity')) structure = 'procedural_steps';
 
+    // SA4E-222 Scope B: array-typed logic fields are candidate nested logic paths.
+    const nestedLogicPaths = logicFields
+      .filter(f => f.type === 'array')
+      .map(f => f.path);
+
     return {
       primary_logic_field: primary,
       logic_structure: structure,
       summary_focus: null,
+      // Backward compatible (optional in schema): empty when no array logic found.
+      nested_logic_paths: nestedLogicPaths,
     };
   }
 }

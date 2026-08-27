@@ -1,0 +1,75 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="820" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="laneRule" value="Pega Rule Instance" style="swimlane;horizontal=0;startSize=130;fillColor=#e1f5fe;strokeColor=#0288d1;html=1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="40" width="1160" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="laneExtract" value="PegaContentExtractor.buildLogic Resolution" style="swimlane;horizontal=0;startSize=130;fillColor=#dae8fc;strokeColor=#6c8ebf;html=1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="160" width="1160" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="laneSchema" value="Schema Storage / KB" style="swimlane;horizontal=0;startSize=130;fillColor=#f3e5f5;strokeColor=#9673a6;html=1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="360" width="1160" height="120" as="geometry"/>
+    </mxCell>
+    <mxCell id="laneLLM" value="LLM Enrichment / Generation Pipeline" style="swimlane;horizontal=0;startSize=130;fillColor=#d5e8d4;strokeColor=#82b366;html=1;fontSize=11;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="0" y="480" width="1160" height="140" as="geometry"/>
+    </mxCell>
+    <mxCell id="start" value="Rule ingested / symbol created" style="ellipse;fillColor=#000000;fontColor=#FFFFFF;html=1;fontSize=10;" vertex="1" parent="laneRule">
+      <mxGeometry x="20" y="45" width="160" height="40" as="geometry"/>
+    </mxCell>
+    <mxCell id="step1" value="Has dedicated extractor? (Activity/Model/Decision/When/Declare)" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="laneExtract">
+      <mxGeometry x="20" y="20" width="260" height="160" as="geometry"/>
+    </mxCell>
+    <mxCell id="d1" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="laneExtract" source="step1">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="step2" value="Schema-driven render (learned logic_paths)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="laneExtract">
+      <mxGeometry x="320" y="60" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="step3" value="Generic deterministic extractor (Scope A)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="laneExtract">
+      <mxGeometry x="600" y="60" width="240" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="step4" value="Metadata fallback (shallow FIELDS)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;" vertex="1" parent="laneExtract">
+      <mxGeometry x="880" y="60" width="220" height="80" as="geometry"/>
+    </mxCell>
+    <mxCell id="q2" value="schema exists for rule type?" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" vertex="1" parent="laneSchema">
+      <mxGeometry x="320" y="20" width="240" height="90" as="geometry"/>
+    </mxCell>
+    <mxCell id="screate" value="createSchemaOnTheFly -> store (v1)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="laneSchema">
+      <mxGeometry x="600" y="30" width="260" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="sreuse" value="find + reuse EnrichedSchema" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="laneSchema">
+      <mxGeometry x="880" y="30" width="220" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="enrich" value="Enrich prompt pulls schema context + Pega concept (mem_search)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="laneLLM">
+      <mxGeometry x="320" y="40" width="360" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="gen" value="Generate Pega rule using concept KB" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="laneLLM">
+      <mxGeometry x="700" y="40" width="320" height="70" as="geometry"/>
+    </mxCell>
+    <mxCell id="eS1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="laneExtract" source="step1" target="step2">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eS2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="laneExtract" source="step2" target="step3">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eS3" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="laneExtract" source="step3" target="step4">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eQ2" value="no" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="laneSchema" source="q2" target="screate">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eQ2b" value="yes" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="laneSchema" source="q2" target="sreuse">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eDown1" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="1" source="laneExtract" target="laneSchema">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="eDown2" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;endArrow=classic;endFill=1;fontSize=9;" edge="1" parent="1" source="laneSchema" target="laneLLM">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="reen" value="Re-enrich existing symbols (reenrich-pega-all --kind)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="laneLLM">
+      <mxGeometry x="20" y="40" width="260" height="70" as="geometry"/>
+    </mxCell>
+  </root>
+</mxGraphModel>
