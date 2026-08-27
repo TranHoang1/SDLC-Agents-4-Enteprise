@@ -1,4 +1,4 @@
-import type { ExtractedSymbol, ExtractedRelationship } from '../../types.js';
+import type { ExtractedSymbol, ExtractedRelationship } from '../../../types.js';
 import { extractXmlValues, extractXmlBlocks, nameFromPath, isSecretElement } from '../helpers.js';
 
 export function parseLabels(source: string, filePath: string, symbols: ExtractedSymbol[], _rel: ExtractedRelationship[]): void {
