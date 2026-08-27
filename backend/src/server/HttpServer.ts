@@ -29,6 +29,7 @@ import { createPegaApiRoutes } from './routes/pega-api.js';
 import { createPegaStreamRoutes } from './routes/pega-stream.js';
 import { createIngestRuleRoute } from './routes/pega-ingest-rule.js';
 import { createPegaSchemaRoutes } from './routes/pega-schema-routes.js';
+import { getDbAdapter } from '../admin/db/core.js';
 import { createPegaSyncToKbRoutes } from './routes/pega-sync-to-kb.js';
 import { createKnowledgeApiRoutes } from '../knowledge/routes.js';
 import { bodyLimit } from 'hono/body-limit';
@@ -106,8 +107,9 @@ export class HttpServer {
     const ingestRuleRoute = createIngestRuleRoute(this.options.registry, this.logger);
     app.route('/api/v1/pega/ingest-rule', ingestRuleRoute);
 
-    // SA4E-95: Schema generation from harness JSON (backend analysis, no Pega API calls)
-    const pegaSchemaRoutes = createPegaSchemaRoutes(this.logger);
+    // SA4E-95/SA4E-214: Schema generation + persistence (analyze/store/find/update).
+    // Inject dbAdapter so SchemaStorageService can persist enriched schemas to the DB (single source of truth).
+    const pegaSchemaRoutes = createPegaSchemaRoutes(this.logger, getDbAdapter());
     app.route('/api/v1', pegaSchemaRoutes);
 
     // SA4E-85 Phase 0: Backend-Driven Knowledge REST API (threads/messages/checkpoint/events/artifacts/agents)
