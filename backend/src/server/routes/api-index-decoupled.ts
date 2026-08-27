@@ -148,7 +148,9 @@ async function processFileEvent(
   }
 
   try {
-    await indexer.indexSingleFile(event.path, scope.projectId);
+    // F-01: pass the already-validated/contained safePath (not the raw event.path)
+    // so a symlink submitted in event.path cannot be followed outside the workspace.
+    await indexer.indexSingleFile(safePath, scope.projectId);
     return event.type === 'add' ? 'indexed' : 'updated';
   } catch (err) {
     logger.warn({ err, file: event.path }, '[index] file-event index failed');

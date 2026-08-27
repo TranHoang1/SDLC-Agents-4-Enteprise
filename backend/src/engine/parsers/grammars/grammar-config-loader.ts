@@ -52,7 +52,7 @@ export interface GrammarConfig {
   scoping: ScopingConfig;
 }
 
-const DEFAULT_PARSER_CONFIG: ParserConfig = {
+export const DEFAULT_PARSER_CONFIG: ParserConfig = {
   includePrivate: false,
   includeTests: false,
   parseDocs: true,

@@ -1,0 +1,20 @@
+<mxGraphModel dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="700" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="iface" value="&lt;&lt;interface&gt;&gt;&#10;ILanguageParser&#10;+ languageId: string&#10;+ parse(src, path): ParseResult&#10;+ getSupportedExtensions(): string[]" style="rounded=0;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="60" width="260" height="100" as="geometry"/></mxCell>
+    <mxCell id="smp" value="SalesforceMetaParser&#10;implements ILanguageParser&#10;- per-case try/catch dispatch&#10;- detectMetaType()&#10;- 17 sub-parsers" style="rounded=0;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="220" width="260" height="110" as="geometry"/></mxCell>
+    <mxCell id="vp" value="VisualforceParser&#10;implements ILanguageParser&#10;+ getSupportedExtensions(): .page,.component&#10;+ parse(): extractMarkupTopLevel" style="rounded=0;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="360" y="220" width="260" height="100" as="geometry"/></mxCell>
+    <mxCell id="ap" value="AuraParser&#10;implements ILanguageParser&#10;+ getSupportedExtensions(): .cmp,.app,.evt,.intf,.tokens&#10;+ parse(): extractMarkupTopLevel" style="rounded=0;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="680" y="220" width="260" height="100" as="geometry"/></mxCell>
+    <mxCell id="axp" value="apex-parser (tree-sitter)&#10;implements ILanguageParser" style="rounded=0;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;align=left;" vertex="1" parent="1"><mxGeometry x="360" y="360" width="260" height="70" as="geometry"/></mxCell>
+    <mxCell id="shared" value="salesforce-markup/shared.ts&#10;extractMarkupTopLevel(source, path, opts)&#10;→ { symbols, relationships }" style="shape=note;fillColor=#fff2cc;strokeColor=#d6b656;align=left;" vertex="1" parent="1"><mxGeometry x="680" y="360" width="260" height="80" as="geometry"/></mxCell>
+    <mxCell id="types" value="parsers/types.ts&#10;ExtractedSymbol (canonical)&#10;ParseResult / ParseError&#10;ExtractedRelationship" style="shape=note;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;" vertex="1" parent="1"><mxGeometry x="40" y="400" width="260" height="80" as="geometry"/></mxCell>
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="smp" target="iface"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="vp" target="iface"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="ap" target="iface"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="axp" target="iface"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1" source="vp" target="shared"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1" source="ap" target="shared"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;html=1;dashed=1;" edge="1" parent="1" source="smp" target="types"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

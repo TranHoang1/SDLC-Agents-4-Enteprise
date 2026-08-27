@@ -9,6 +9,7 @@ import * as path from 'path';
 import * as crypto from 'crypto';
 import { AppConfig } from '../config.js';
 import { createIgnoreParser, IgnoreParser } from '../parsers/ignore/index.js';
+import { resolveContainedPath, isWithinWorkspace, resolveWorkspaceRoot } from './path-safety.js';
 
 export interface ScannedFile {
   absolutePath: string;
@@ -46,20 +47,46 @@ const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
   '.cls': 'apex',
   '.trigger': 'apex',
   '.pega': 'pega',
+  // ---- SA4E-223: new Salesforce simple extensions ----
+  '.apex': 'apex',
+  '.soql': 'apex',
+  '.page': 'visualforce',
+  '.component': 'visualforce',
+  '.cmp': 'aura',
+  '.app': 'aura',
+  '.evt': 'aura',
+  '.intf': 'aura',
+  '.tokens': 'aura',
 };
+
+/**
+ * SA4E-223 — Single source of truth for Salesforce `*-meta.xml` compound suffixes.
+ * Used by detectLanguage() so *.xml files are routed to the `salesforce-meta` parser.
+ * (Compound-suffix files have ext === '.xml' which is NOT in includeExtensions, but
+ * processFile/async-file-scanner exempt `language === 'salesforce-meta'`.)
+ */
+export const SALESFORCE_META_SUFFIXES: string[] = [
+  '.flow-meta.xml', '.object-meta.xml', '.field-meta.xml', '.js-meta.xml', '.component-meta.xml',
+  '.flexipage-meta.xml', '.permissionset-meta.xml', '.profile-meta.xml', '.labels-meta.xml',
+  '.tab-meta.xml', '.layout-meta.xml', '.report-meta.xml', '.dashboard-meta.xml',
+  '.site-meta.xml', '.resource-meta.xml', '.email-meta.xml', '.testsuite-meta.xml',
+];
 
 /** Scan workspace and return list of indexable files. */
 export function scanWorkspace(config: AppConfig): ScannedFile[] {
   const results: ScannedFile[] = [];
   const ignoreParser = createIgnoreParser(config.workspace);
-  traverseDirectory(config.workspace, config, ignoreParser, results);
+  const root = resolveWorkspaceRoot(config.workspace);
+  traverseDirectory(config.workspace, config, ignoreParser, results, root);
   return results;
 }
 
 /** Scan a single file and return metadata. */
 export function scanSingleFile(filePath: string, workspace: string): ScannedFile | null {
   try {
-    const content = fs.readFileSync(filePath, 'utf-8');
+    const realPath = resolveContainedPath(filePath, workspace);
+    if (!realPath) return null;
+    const content = fs.readFileSync(realPath, 'utf-8');
     const relativePath = path.relative(workspace, filePath).replace(/\\/g, '/');
     const language = detectLanguage(filePath);
     if (!language) return null;
@@ -81,11 +108,7 @@ export function scanSingleFile(filePath: string, workspace: string): ScannedFile
 export function detectLanguage(filePath: string): string | null {
   // Check compound extensions first (Salesforce metadata)
   const lowerPath = filePath.toLowerCase().replace(/\\/g, '/');
-  if (lowerPath.endsWith('.flow-meta.xml') ||
-      lowerPath.endsWith('.object-meta.xml') ||
-      lowerPath.endsWith('.field-meta.xml') ||
-      lowerPath.endsWith('.js-meta.xml') ||
-      lowerPath.endsWith('.component-meta.xml')) {
+  if (SALESFORCE_META_SUFFIXES.some(s => lowerPath.endsWith(s))) {
     return 'salesforce-meta';
   }
 
@@ -106,7 +129,8 @@ function traverseDirectory(
   dir: string,
   config: AppConfig,
   ignoreParser: IgnoreParser,
-  results: ScannedFile[]
+  results: ScannedFile[],
+  root: string
 ): void {
   const entries = safeReadDir(dir);
   for (const entry of entries) {
@@ -116,15 +140,15 @@ function traverseDirectory(
     if (shouldExclude(relPath, entry.name, config.excludePatterns, ignoreParser)) continue;
 
     if (entry.isDirectory()) {
-      traverseDirectory(fullPath, config, ignoreParser, results);
+      traverseDirectory(fullPath, config, ignoreParser, results, root);
     } else if (entry.isFile()) {
-      const file = processFile(fullPath, relPath, config);
+      const file = processFile(fullPath, relPath, config, root);
       if (file) results.push(file);
     }
   }
 }
 
-function processFile(fullPath: string, relPath: string, config: AppConfig): ScannedFile | null {
+function processFile(fullPath: string, relPath: string, config: AppConfig, root: string): ScannedFile | null {
   const language = detectLanguage(fullPath);
   if (!language) return null;
 
@@ -133,10 +157,14 @@ function processFile(fullPath: string, relPath: string, config: AppConfig): Scan
   if (!config.includeExtensions.includes(ext) && ext !== '.kts' && language !== 'salesforce-meta') return null;
 
   try {
-    const stat = fs.statSync(fullPath);
+    // F-01: reject symlinks that escape the workspace (realpath containment).
+    const realPath = fs.realpathSync(fullPath);
+    if (!isWithinWorkspace(realPath, root)) return null;
+
+    const stat = fs.statSync(realPath);
     if (stat.size > config.maxFileSize) return null;
 
-    const content = fs.readFileSync(fullPath, 'utf-8');
+    const content = fs.readFileSync(realPath, 'utf-8');
     if (isBinary(content)) return null;
 
     return {

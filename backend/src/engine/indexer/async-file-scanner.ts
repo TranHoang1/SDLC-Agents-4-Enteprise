@@ -11,6 +11,7 @@ import type { AppConfig } from '../config.js';
 import type { ScannedFile } from './file-scanner.js';
 import { detectLanguage, loadFileMetadata } from './file-scanner.js';
 import { createIgnoreParser } from '../parsers/ignore/index.js';
+import { isWithinWorkspace, resolveWorkspaceRoot } from './path-safety.js';
 
 const CHUNK_SIZE = 50;
 
@@ -20,6 +21,7 @@ export async function scanWorkspaceAsync(
   const results: ScannedFile[] = [];
   const ignoreParser = createIgnoreParser(config.workspace);
   const metadata = loadFileMetadata(config.workspace);
+  const root = resolveWorkspaceRoot(config.workspace);
   const queue: string[] = [config.workspace];
   let processed = 0;
 
@@ -42,7 +44,7 @@ export async function scanWorkspaceAsync(
       if (entry.isDirectory()) {
         queue.push(fullPath);
       } else if (entry.isFile()) {
-        const file = await processFile(fullPath, relPath, config, metadata);
+        const file = await processFile(fullPath, relPath, config, metadata, root);
         if (file) results.push(file);
       }
 
@@ -69,6 +71,7 @@ function shouldSkip(
 async function processFile(
   fullPath: string, relPath: string, config: AppConfig,
   metadata: Record<string, { fileCreatedAt?: string; fileAuthor?: string; fileVersion?: string }>,
+  root: string,
 ): Promise<ScannedFile | null> {
   const language = detectLanguage(fullPath);
   if (!language) return null;
@@ -79,10 +82,14 @@ async function processFile(
   if (!validExt) return null;
 
   try {
-    const stat = await fsp.stat(fullPath);
+    // F-01: reject symlinks that escape the workspace (realpath containment).
+    const realPath = await fsp.realpath(fullPath);
+    if (!isWithinWorkspace(realPath, root)) return null;
+
+    const stat = await fsp.stat(realPath);
     if (stat.size > config.maxFileSize) return null;
 
-    const content = await fsp.readFile(fullPath, 'utf-8');
+    const content = await fsp.readFile(realPath, 'utf-8');
     if (isBinary(content)) return null;
 
     const meta = metadata[relPath] || {};

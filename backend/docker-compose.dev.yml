@@ -1,0 +1,79 @@
+# SA4E-223 — Local Development environment (hot reload)
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# (uses the `development` target of the Dockerfile)
+version: "3.9"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: sa4e-postgres-dev
+    environment:
+      POSTGRES_DB: sa4e_db
+      POSTGRES_USER: sa4e_user
+      POSTGRES_PASSWORD: ${DEV_DB_PASSWORD:-sa4e_local_dev_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./scripts/db/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sa4e_user -d sa4e_db"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - sa4e-dev-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: sa4e-backend-dev
+    environment:
+      NODE_ENV: development
+      PORT: 48721
+      DATABASE_URL: postgresql://sa4e_user:${DEV_DB_PASSWORD:-sa4e_local_dev_password}@postgres:5432/sa4e_db
+      DATABASE_ADAPTER: postgresql
+      TASK_WORKER_ENABLED: "true"
+      TASK_WORKER_POLL_INTERVAL_MS: "5000"
+      TASK_WORKER_MAX_RETRIES: "3"
+      TASK_WORKER_BACKOFF_BASE_MS: "1000"
+      CODE_INTEL_ENABLED: "true"
+      CODE_INTEL_MAX_BATCH_SIZE: "100"
+      CODE_INTEL_UPLOAD_TIMEOUT_MS: "30000"
+      ONNX_RUNTIME_URL: http://onnx-runtime:8080
+    ports:
+      - "48721:48721"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # Source mounted for live reload; non-root UID 1001 (sa4e)
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - code_intel_dev:/app/.code-intel
+    user: "1001:1001"
+    networks:
+      - sa4e-dev-network
+    restart: unless-stopped
+
+  onnx-runtime:
+    image: mcr.microsoft.com/onnxruntime/server:latest
+    container_name: sa4e-onnx-dev
+    ports:
+      - "8080:8080"
+    profiles:
+      - embeddings
+    networks:
+      - sa4e-dev-network
+    restart: unless-stopped
+
+volumes:
+  postgres_dev_data:
+  code_intel_dev:
+
+networks:
+  sa4e-dev-network:
+    driver: bridge

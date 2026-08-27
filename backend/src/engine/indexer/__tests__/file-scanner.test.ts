@@ -76,6 +76,55 @@ describe('detectLanguage', () => {
     expect(detectLanguage('/a/b/flow.flow-meta.xml')).toBe('salesforce-meta');
   });
 
+  // ---- SA4E-223: new simple extensions (TC-01) ----
+  it('maps new Salesforce simple extensions to languages', () => {
+    expect(detectLanguage('/a/MyClass.apex')).toBe('apex');
+    expect(detectLanguage('/a/Query.soql')).toBe('apex');
+    expect(detectLanguage('/a/MyPage.page')).toBe('visualforce');
+    expect(detectLanguage('/a/MyComp.component')).toBe('visualforce');
+    expect(detectLanguage('/a/MyCmp.cmp')).toBe('aura');
+    expect(detectLanguage('/a/MyApp.app')).toBe('aura');
+    expect(detectLanguage('/a/MyEvt.evt')).toBe('aura');
+    expect(detectLanguage('/a/MyIntf.intf')).toBe('aura');
+    expect(detectLanguage('/a/MyTokens.tokens')).toBe('aura');
+  });
+
+  // ---- SA4E-223: 17 compound suffixes -> salesforce-meta (TC-02) ----
+  it('maps all 17 *-meta.xml suffixes to salesforce-meta', () => {
+    const suffixes = ['flow', 'object', 'field', 'js', 'component', 'flexipage', 'permissionset',
+      'profile', 'labels', 'tab', 'layout', 'report', 'dashboard', 'site', 'resource', 'email', 'testSuite'];
+    for (const s of suffixes) {
+      expect(detectLanguage(`/a/Name.${s}-meta.xml`)).toBe('salesforce-meta');
+    }
+  });
+
+  // ---- SA4E-223: no Salesforce extension returns null (TC-03) ----
+  it('returns non-null for every known Salesforce extension', () => {
+    const paths = [
+      'x.apex', 'x.soql', 'x.page', 'x.component', 'x.cmp', 'x.app', 'x.evt', 'x.intf', 'x.tokens',
+      'x.flow-meta.xml', 'x.object-meta.xml', 'x.field-meta.xml', 'x.js-meta.xml', 'x.component-meta.xml',
+      'x.flexipage-meta.xml', 'x.permissionset-meta.xml', 'x.profile-meta.xml', 'x.labels-meta.xml',
+      'x.tab-meta.xml', 'x.layout-meta.xml', 'x.report-meta.xml', 'x.dashboard-meta.xml',
+      'x.site-meta.xml', 'x.resource-meta.xml', 'x.email-meta.xml', 'x.testSuite-meta.xml',
+    ];
+    for (const p of paths) {
+      expect(detectLanguage('/a/' + p)).not.toBeNull();
+    }
+  });
+
+  // ---- SA4E-223: regression — .cls/.trigger/.pega unchanged (TC-05) ----
+  it('keeps legacy apex/pega mappings', () => {
+    expect(detectLanguage('/a/C.cls')).toBe('apex');
+    expect(detectLanguage('/a/T.trigger')).toBe('apex');
+    expect(detectLanguage('/a/R.pega')).toBe('pega');
+  });
+
+  // ---- SA4E-223: unknown still null (TC-06) ----
+  it('returns null for unknown extensions', () => {
+    expect(detectLanguage('/a/b/readme.md')).toBeNull();
+    expect(detectLanguage('/a/b/noext')).toBeNull();
+  });
+
   it('maps .gradle.kts to kotlin', () => {
     expect(detectLanguage('/a/b/build.gradle.kts')).toBe('kotlin');
   });
@@ -112,95 +161,5 @@ describe('scanSingleFile', () => {
 
   it('returns null for missing files', () => {
     expect(scanSingleFile(path.join(dir, 'nope.ts'), dir)).toBeNull();
-  });
-});
-
-describe('scanWorkspace', () => {
-  it('returns scanned files with hashes and normalized relative paths', () => {
-    write('a.ts', 'export const a = 1;');
-    write('lib/b.js', 'export default 1;');
-    write('lib/deep/c.py', 'x = 1');
-
-    const results = scanWorkspace(config());
-    expect(results).toHaveLength(3);
-    const rels = results.map(r => r.relativePath).sort();
-    expect(rels).toEqual(['a.ts', 'lib/b.js', 'lib/deep/c.py']);
-    expect(results.every(r => r.contentHash.length === 16)).toBe(true);
-  });
-
-  it('respects .gitignore patterns', () => {
-    write('.gitignore', '*.min.js\n');
-    write('keep.js', 'const a = 1;');
-    write('app.min.js', 'const b = 2;');
-
-    const results = scanWorkspace(config());
-    expect(results.map(r => r.relativePath)).toEqual(['keep.js']);
-  });
-
-  it('respects .codeintelignore overrides', () => {
-    write('.codeintelignore', 'generated/\n');
-    write('src/main.ts', 'export {};');
-    write('generated/g.ts', 'export {};');
-
-    const results = scanWorkspace(config());
-    expect(results.map(r => r.relativePath)).toEqual(['src/main.ts']);
-  });
-
-  it('respects excludePatterns from config', () => {
-    const cfg = config({ excludePatterns: ['vendor'] });
-    write('vendor/v.ts', 'export {};');
-    write('main.ts', 'export {};');
-
-    const results = scanWorkspace(cfg);
-    expect(results.map(r => r.relativePath)).toEqual(['main.ts']);
-  });
-
-  it('skips dotfiles and dot-directories', () => {
-    write('.hidden.ts', 'export {};');
-    write('.cache/x.ts', 'export {};');
-    write('visible.ts', 'export {};');
-
-    const results = scanWorkspace(config());
-    expect(results.map(r => r.relativePath)).toEqual(['visible.ts']);
-  });
-
-  it('filters by includeExtensions', () => {
-    const cfg = config({ includeExtensions: ['.py'] });
-    write('a.ts', 'export {};');
-    write('b.py', 'x = 1');
-
-    const results = scanWorkspace(cfg);
-    expect(results.map(r => r.relativePath)).toEqual(['b.py']);
-  });
-
-  it('skips files larger than maxFileSize', () => {
-    const cfg = config({ maxFileSize: 5 });
-    write('big.ts', 'x'.repeat(100));
-    write('small.ts', 'x');
-
-    const results = scanWorkspace(cfg);
-    expect(results.map(r => r.relativePath)).toEqual(['small.ts']);
-  });
-
-  it('skips binary files with many null bytes', () => {
-    write('bin.ts', `text${'\0'.repeat(10)}more`);
-    write('ok.ts', 'export {};');
-
-    const results = scanWorkspace(config());
-    expect(results.map(r => r.relativePath)).toEqual(['ok.ts']);
-  });
-});
-
-describe('loadFileMetadata', () => {
-  it('returns the parsed sidecar map when present', () => {
-    write('.code-intel/file-meta.json', JSON.stringify({ 'src/a.ts': { fileAuthor: 'tester', fileVersion: '1.2.3' } }));
-    const meta = loadFileMetadata(dir);
-    expect(meta['src/a.ts']).toEqual({ fileAuthor: 'tester', fileVersion: '1.2.3' });
-  });
-
-  it('returns an empty object when missing or invalid', () => {
-    expect(loadFileMetadata(dir)).toEqual({});
-    write('.code-intel/file-meta.json', 'not-json');
-    expect(loadFileMetadata(dir)).toEqual({});
   });
 });

@@ -1,0 +1,37 @@
+<mxGraphModel dx="900" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1000" pageHeight="800" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+    <mxCell id="fs" value="file-scanner.ts&#10;(detectLanguage / processFile)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="40" y="60" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="as" value="async-file-scanner.ts&#10;(tái dùng detectLanguage)" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="40" y="140" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="cfg" value="config/index.ts&#10;DEFAULT_EXTENSIONS" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="40" y="220" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="res" value="resolver.ts&#10;FALLBACK_EXTENSIONS" style="rounded=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1"><mxGeometry x="40" y="300" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="gc" value="grammar-config.json" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="40" y="380" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="gr" value="grammar-registry.ts&#10;loadParser" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1"><mxGeometry x="40" y="460" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="mh" value="module-helper.ts&#10;detectModule" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1"><mxGeometry x="40" y="540" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="smp" value="salesforce-meta/parser.ts&#10;SalesforceMetaParser" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="320" y="460" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="sub" value="salesforce-meta/parsers/*.ts&#10;(17 sub-parsers)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="320" y="540" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="dt" value="salesforce-meta/detectMetaType.ts" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="320" y="380" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="hlp" value="salesforce-meta/helpers.ts" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="320" y="620" width="200" height="50" as="geometry"/></mxCell>
+    <mxCell id="sh" value="salesforce-markup/shared.ts&#10;extractMarkupTopLevel" style="rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1"><mxGeometry x="600" y="380" width="220" height="50" as="geometry"/></mxCell>
+    <mxCell id="vp" value="visualforce/parser.ts&#10;VisualforceParser" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="600" y="460" width="220" height="50" as="geometry"/></mxCell>
+    <mxCell id="ap" value="aura/parser.ts&#10;AuraParser" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="600" y="540" width="220" height="50" as="geometry"/></mxCell>
+    <mxCell id="axp" value="apex/parser.ts&#10;apex-parser (tree-sitter)" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1"><mxGeometry x="600" y="620" width="220" height="50" as="geometry"/></mxCell>
+
+    <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="fs" target="gr"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="as" target="gr"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="gc" target="gr"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="gr" target="smp"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="gr" target="vp"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="gr" target="ap"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="gr" target="axp"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e8" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="smp" target="sub"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e9" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="smp" target="dt"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e10" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="sub" target="hlp"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e11" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="dt" target="hlp"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e12" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="vp" target="sh"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e13" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="ap" target="sh"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e14" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="fs" target="mh"><mxGeometry relative="1" as="geometry"/></mxCell>
+    <mxCell id="e15" style="edgeStyle=orthogonalEdgeStyle;" edge="1" parent="1" source="smp" target="mh"><mxGeometry relative="1" as="geometry"/></mxCell>
+  </root>
+</mxGraphModel>

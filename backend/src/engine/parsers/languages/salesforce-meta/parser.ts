@@ -1,14 +1,22 @@
 import type { ILanguageParser, ParseResult, ExtractedSymbol, ExtractedRelationship, ParseError } from '../../types.js';
-import { parseFlow, parseObject, parseField, parseLWCMeta, parseAuraMeta } from './parsers.js';
+import pino from 'pino';
+import { detectMetaType, META_SUFFIXES } from './detectMetaType.js';
+import { isSecretElement } from './helpers.js';
+import {
+  parseFlow, parseObject, parseField, parseLWCMeta, parseAuraMeta,
+  parseFlexipage, parsePermissionset, parseProfile, parseLabels, parseTab,
+  parseLayout, parseReport, parseDashboard, parseSite, parseResource, parseEmail, parseTestSuite,
+} from './parsers/index.js';
 
-function detectMetaType(filePath: string): string | null {
-  const normalized = filePath.replace(/\\/g, '/').toLowerCase();
-  if (normalized.endsWith('.flow-meta.xml')) return 'flow';
-  if (normalized.endsWith('.object-meta.xml')) return 'object';
-  if (normalized.endsWith('.field-meta.xml')) return 'field';
-  if (normalized.endsWith('.js-meta.xml')) return 'lwc-meta';
-  if (normalized.endsWith('.component-meta.xml')) return 'aura-meta';
-  return null;
+const logger = pino({ name: 'salesforce-meta-parser' });
+
+function errMsg(e: unknown): string {
+  return e instanceof Error ? e.message : String(e);
+}
+
+function pushErr(errors: ParseError[], metaType: string | null, e: unknown): void {
+  errors.push({ message: `salesforce-meta [${metaType}] parse failed: ${errMsg(e)}`, line: 1, column: 0 });
+  logger.warn({ metaType, error: errMsg(e) }, 'salesforce-meta parse failed');
 }
 
 export default class SalesforceMetaParser implements ILanguageParser {
@@ -19,26 +27,42 @@ export default class SalesforceMetaParser implements ILanguageParser {
   }
 
   getSupportedExtensions(): string[] {
-    return ['.flow-meta.xml', '.object-meta.xml', '.field-meta.xml', '.js-meta.xml', '.component-meta.xml'];
+    return META_SUFFIXES.map(s => `.${s}-meta.xml`);
   }
 
   parse(source: string, filePath: string): ParseResult {
-    const symbols: ExtractedSymbol[] = [];
+    let symbols: ExtractedSymbol[] = [];
     const relationships: ExtractedRelationship[] = [];
     const errors: ParseError[] = [];
 
     try {
       const metaType = detectMetaType(filePath);
       switch (metaType) {
-        case 'flow': parseFlow(source, filePath, symbols, relationships); break;
-        case 'object': parseObject(source, filePath, symbols, relationships); break;
-        case 'field': parseField(source, filePath, symbols, relationships); break;
-        case 'lwc-meta': parseLWCMeta(source, filePath, symbols, relationships); break;
-        case 'aura-meta': parseAuraMeta(source, filePath, symbols); break;
+        case 'flow': try { parseFlow(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'object': try { parseObject(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'field': try { parseField(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'lwc-meta': try { parseLWCMeta(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'aura-meta': try { parseAuraMeta(source, filePath, symbols); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'flexipage': try { parseFlexipage(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'permissionset': try { parsePermissionset(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'profile': try { parseProfile(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'labels': try { parseLabels(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'tab': try { parseTab(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'layout': try { parseLayout(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'report': try { parseReport(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'dashboard': try { parseDashboard(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'site': try { parseSite(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'resource': try { parseResource(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'email': try { parseEmail(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        case 'testSuite': try { parseTestSuite(source, filePath, symbols, relationships); } catch (e) { pushErr(errors, metaType, e); } break;
+        default: break;
       }
-    } catch (err) {
-      errors.push({ message: `XML parse error: ${err instanceof Error ? err.message : String(err)}`, line: 1, column: 0 });
+    } catch (e) {
+      pushErr(errors, null, e);
     }
+
+    // F-03: never index secret element names
+    symbols = symbols.filter(s => !isSecretElement(s.name));
 
     return { symbols, relationships, errors };
   }
