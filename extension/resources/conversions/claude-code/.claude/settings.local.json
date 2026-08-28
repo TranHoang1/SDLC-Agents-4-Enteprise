@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(if \\(\\(Get-Item \"C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise\\\\backend\\\\extension\"\\).LinkType\\) { \"symlink/ junction\" } else { \"not a symlink\" })",
+      "PowerShell(Get-ChildItem -Path . -Directory | Where-Object { $_.Name -notmatch 'node_modules|\\\\.git' } | Select-Object Name)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell($p='C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise'; @\\('pnpm-workspace.yaml','lerna.json','nx.json','turbo.json','rush.json'\\) | ForEach-Object { $f=Join-Path $p $_; if \\(Test-Path $f\\) { \"FOUND: $f\"; Get-Content $f -TotalCount 40 } else { \"MISSING: $f\" } })",
+      "PowerShell(Get-Content *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise\\\\backend\" -Force | Where-Object { $_.Name -ne 'node_modules' } | Select-Object Mode, Length, Name | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise\\\\extension\" -Force | Where-Object { $_.Name -ne 'node_modules' } | Select-Object Mode, Length, Name | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise\\\\backend\\\\src\" -Force -Recurse -Depth 2 | Where-Object { $_.Name -ne 'node_modules' } | Select-Object Mode, FullName | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise\\\\backend\\\\servers\\\\fastapi\" -Force -Recurse -Depth 3 | Where-Object { $_.Name -ne '__pycache__' -and $_.Name -ne '.venv' -and $_.Name -ne 'node_modules' } | Where-Object { $_.Extension -in '.py','.toml','.txt','.cfg','.ini','.env','.md','.json','.sh','.ps1','.yaml','.yml' } | Select-Object Mode, FullName | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise\\\\backend\\\\servers\\\\nextjs\" -Force -Recurse -Depth 3 | Where-Object { $_.Name -ne 'node_modules' -and $_.Name -ne '.next' } | Where-Object { $_.Extension -in '.ts','.tsx','.js','.json','.md','.mjs','.cjs','.env','' -or $_.Name -in 'package.json','tsconfig.json','.env.example','requirements.txt','pyproject.toml' } | Select-Object Mode, FullName | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise\\\\backend\\\\servers\\\\nextjs\" -Force | Where-Object { $_.Name -in 'package.json','next.config.mjs','next.config.js','.env.example','README.md','requirements.txt' -or $_.Extension -eq '.md' } | Select-Object Mode, Length, Name | Format-Table -AutoSize)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\projects\\\\kiro\\\\SDLC-Agents-4-Enterprise\\\\backend\\\\servers\\\\fastapi\" -Force | Where-Object { $_.Name -match 'pyproject|requirements|setup|Dockerfile|Makefile' } | Select-Object Name, Length)"
+    ]
+  }
+}

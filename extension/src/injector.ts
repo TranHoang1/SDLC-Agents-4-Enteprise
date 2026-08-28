@@ -13,7 +13,7 @@ import { IdeTarget, IDE_TARGETS, createAdapter } from "./ide-adapters";
 
 export { migrateLegacyScripts, injectMcpConfig } from "./mcp-injector";
 
-export async function injectAll(root: string, extensionPath: string): Promise<string[]> {
+export async function injectAll(root: string, extensionPath: string, mcpPort: number): Promise<string[]> {
   migrateLegacyVersion(root, extensionPath);
 
   const ideTarget = await showIdePicker();
@@ -26,7 +26,7 @@ export async function injectAll(root: string, extensionPath: string): Promise<st
     for (const component of CORE_COMPONENTS) {
       if (injectComponent(component, root, extensionPath)) { injected.push(component.id); }
     }
-    writeBundledMcpConfig(root, 9181);
+    writeBundledMcpConfig(root, mcpPort);
     injected.push("mcp-bundled");
   } else {
     // Use IDE-specific adapter — copy pre-converted files
@@ -34,6 +34,12 @@ export async function injectAll(root: string, extensionPath: string): Promise<st
     if (adapter.inject(root, extensionPath)) {
       injected.push(`ide:${ideTarget}`);
     }
+    
+    // Dynamic Port Injection for specific IDEs
+    if (ideTarget === "opencode" || ideTarget === "codex" || ideTarget === "vscode") {
+      updateMcpPortInWorkspace(root, ideTarget, mcpPort);
+    }
+
     // Templates always go to documents/templates regardless of IDE
     const tplComponent = CORE_COMPONENTS.find(c => c.id === "templates");
     if (tplComponent && injectComponent(tplComponent, root, extensionPath)) { injected.push("templates"); }
@@ -43,7 +49,7 @@ export async function injectAll(root: string, extensionPath: string): Promise<st
   return injected;
 }
 
-export async function injectSelective(root: string, extensionPath: string): Promise<string[]> {
+export async function injectSelective(root: string, extensionPath: string, mcpPort: number): Promise<string[]> {
   migrateLegacyVersion(root, extensionPath);
 
   const ideTarget = await showIdePicker();
@@ -54,6 +60,11 @@ export async function injectSelective(root: string, extensionPath: string): Prom
     const adapter = createAdapter(ideTarget);
     const injected: string[] = [];
     if (adapter.inject(root, extensionPath)) { injected.push(`ide:${ideTarget}`); }
+    
+    if (ideTarget === "opencode" || ideTarget === "codex" || ideTarget === "vscode") {
+      updateMcpPortInWorkspace(root, ideTarget, mcpPort);
+    }
+
     // Templates always go to documents/templates regardless of IDE
     const tplComponent = CORE_COMPONENTS.find(c => c.id === "templates");
     if (tplComponent && injectComponent(tplComponent, root, extensionPath)) { injected.push("templates"); }
@@ -68,7 +79,7 @@ export async function injectSelective(root: string, extensionPath: string): Prom
   const injected: string[] = [];
   for (const pick of selected) {
     if (pick.id === "mcp-config") {
-      writeBundledMcpConfig(root, 9181);
+      writeBundledMcpConfig(root, mcpPort);
       injected.push("mcp-bundled");
     } else {
       const component = CORE_COMPONENTS.find(c => c.id === pick.id);
@@ -78,6 +89,31 @@ export async function injectSelective(root: string, extensionPath: string): Prom
 
   buildManifestAfterInject(root, extensionPath);
   return injected;
+}
+
+function updateMcpPortInWorkspace(root: string, target: string, port: number) {
+  let filePath: string | undefined;
+  if (target === "opencode") filePath = path.join(root, "opencode.json");
+  else if (target === "codex") filePath = path.join(root, "mcp.json");
+  else if (target === "vscode") filePath = path.join(root, ".github/mcp.json");
+
+  if (!filePath || !fs.existsSync(filePath)) return;
+
+  try {
+    const content = fs.readFileSync(filePath, "utf8");
+    const json = JSON.parse(content);
+    const url = `http://127.0.0.1:${port}/mcp`;
+
+    if (target === "opencode" && json.mcp?.["code-intel"]) {
+      json.mcp["code-intel"].url = url;
+    } else if ((target === "codex" || target === "vscode") && json.mcpServers?.["code-intelligence"]) {
+      json.mcpServers["code-intelligence"].url = url;
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(json, null, 2));
+  } catch (e) {
+    console.error(`Failed to update port in ${filePath}:`, e);
+  }
 }
 
 export async function safeUpdate(root: string, extensionPath: string): Promise<string[]> {
