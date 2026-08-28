@@ -37,13 +37,16 @@ function recreateFiles(db: SyncDatabaseAdapter, legacyProjectId: string): void {
     size_bytes INTEGER NOT NULL,
     last_indexed TEXT NOT NULL DEFAULT (datetime('now')),
     line_count INTEGER NOT NULL DEFAULT 0,
+    file_created_at TEXT,
+    file_author TEXT,
+    file_version TEXT,
     UNIQUE(project_id, path)
   );`);
   db.run(
     `INSERT INTO files_new (id, project_id, path, relative_path, language, module,
-        content_hash, size_bytes, last_indexed, line_count)
+        content_hash, size_bytes, last_indexed, line_count, file_created_at, file_author, file_version)
       SELECT id, ?, path, relative_path, language, module,
-        content_hash, size_bytes, last_indexed, line_count FROM files`,
+        content_hash, size_bytes, last_indexed, line_count, NULL, NULL, NULL FROM files`,
     [legacyProjectId],
   );
   db.exec('DROP TABLE files; ALTER TABLE files_new RENAME TO files;');

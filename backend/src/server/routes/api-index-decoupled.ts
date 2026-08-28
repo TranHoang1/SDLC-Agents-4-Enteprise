@@ -39,15 +39,16 @@ function getManager(registry: ModuleRegistry): IndexOperationManager | null {
   return manager;
 }
 
-/** Resolve project scope from request headers. */
-function resolveScope(c: Context, sessionUserId?: string) {
+/** Resolve project scope from request headers (multi-tenant via JWT + X-Project-Id). */
+function resolveScope(c: Context): { userId: string; projectId: string; workspace: string } {
   const config = loadConfig();
   const projectId = requireProjectId(c.req.header('X-Project-Id') || config.projectId);
-  const userId = sessionUserId || 'default';
+  const ctx = c.get('projectContext') as { userId?: string; projectId?: string } | undefined;
+  const userId = ctx?.userId || 'default';
   // indexTempDir/{userId}/{projectId} for source file writes
   const workspace = path.join(config.indexTempDir, userId, projectId);
   if (!fs.existsSync(workspace)) fs.mkdirSync(workspace, { recursive: true });
-  return { projectId, workspace };
+  return { userId, projectId, workspace };
 }
 
 /**
@@ -60,24 +61,23 @@ export async function handleFullIndex(c: Context, registry: ModuleRegistry, logg
     const manager = getManager(registry);
     if (!manager) return c.json({ error: 'Code intelligence not ready' }, 503);
 
-    const op = manager.startOperation(scope.projectId, scope);
-    if (!op) {
-      // Already running — return 409
-      const progress = manager.getProgress(scope.projectId);
-      return c.json({
-        error: 'Index already running',
-        operationId: progress.operationId,
-        projectId: scope.projectId,
-      }, 409);
-    }
+    // BR-11: auto-cancel any existing op and start a new one (unified 200 response).
+    const result = await manager.startOrReplace(scope.userId, scope.projectId, scope);
 
-    logger.info({ operationId: op.operationId, projectId: scope.projectId }, '[index] Full index started');
+    logger.info(
+      { operationId: result.operation.operationId, projectId: scope.projectId, cancelledPrevious: result.cancelledPrevious },
+      '[index] Full index started',
+    );
     return c.json({
-      operationId: op.operationId,
+      operationId: result.operation.operationId,
       projectId: scope.projectId,
-      status: 'started',
-      message: 'Full index started',
-    }, 202);
+      status: 'running',
+      message: result.cancelledPrevious
+        ? 'Previous operation cancelled, new index started'
+        : 'Full index started',
+      cancelledPrevious: result.cancelledPrevious,
+      cancelledOperationId: result.cancelledOperationId,
+    }, 200);
   } catch (err: unknown) {
     return handleError(c, err, logger, 'Error starting full index');
   }
@@ -168,7 +168,7 @@ export async function handleCancel(c: Context, registry: ModuleRegistry, logger:
     const manager = getManager(registry);
     if (!manager) return c.json({ error: 'Code intelligence not ready' }, 503);
 
-    const op = manager.cancelOperation(scope.projectId);
+    const op = manager.cancelOperation(scope.userId, scope.projectId);
     if (!op) {
       return c.json({ error: 'No active index operation', projectId: scope.projectId }, 404);
     }
@@ -193,7 +193,8 @@ export async function handleProgress(c: Context, registry: ModuleRegistry, _logg
   const manager = getManager(registry);
   if (!manager) return c.json({ error: 'Code intelligence not ready' }, 503);
 
-  const progress = manager.getProgress(scope.projectId);
+  // Hot-path first, cold-path (DB) fallback for post-restart durability.
+  const progress = await manager.getProgress(scope.userId, scope.projectId);
   return c.json(progress);
 }
 
