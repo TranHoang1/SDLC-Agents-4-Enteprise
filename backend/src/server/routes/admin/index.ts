@@ -18,6 +18,7 @@ import { createAnalyticsRoutes } from './analytics.js';
 import { createSseRoutes } from './sse.js';
 import { createMcpCrudRoutes } from './mcp-crud.js';
 import { createDatabaseRoutes } from './database.js';
+import { createSa4e215Route } from '../sa4e-215/index.js';
 import type { AdminContext } from './context.js';
 
 /** GET /api/admin/projects — list registered workspaces from project_registry. */
@@ -70,7 +71,8 @@ export function createAdminRoute(logger: Logger, registry?: any): Hono {
   app.route('/', createSseRoutes(ctx));
   app.route('/', createDatabaseRoutes(ctx));
   app.route('/', createProjectsRoutes(ctx));
+  app.route('/api/sa4e-215', createSa4e215Route());
 
-  logger.info('Admin portal routes registered: /admin + /api/admin/* (with auth, SSE)');
+  logger.info('Admin portal routes registered: /admin + /api/admin/* + /api/sa4e-215/* (with auth, SSE)');
   return app;
 }

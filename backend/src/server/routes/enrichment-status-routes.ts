@@ -1,7 +1,7 @@
 /**
  * SA4E-157 — Enrichment Status Route.
  * GET /api/v1/enrichment/status — returns current LLM enrichment progress.
- * JWT auth required, no admin permission check (read-only status data).
+ * JWT auth required (backend is remote), no admin permission check (read-only data).
  */
 
 import { Hono } from 'hono';
@@ -21,8 +21,10 @@ import type { TaskWorker } from '../../modules/memory/task-queue/TaskWorker.js';
 export function createEnrichmentStatusRoutes(registry: ModuleRegistry, logger: Logger): Hono {
   const app = new Hono();
 
-  // GET status is read-only, no auth required (extension polls without login)
-  app.get('/enrichment/status', async (c) => {
+  // SA4E: Backend is remote from the extension — every API call must carry a JWT.
+  // jwtAuth binds project context from the token (anonymous only when
+  // CODE_INTEL_REQUIRE_AUTH is not set). Status data is read-only, no admin check.
+  app.get('/enrichment/status', jwtAuth, async (c) => {
     try {
       const taskWorker = getTaskWorker(registry);
       if (!taskWorker) {

@@ -23,8 +23,8 @@ export class DefaultPegaParserStrategy implements IPegaRuleParserStrategy {
       className,
       ruleType: pxObjClass,
       isRule,
-      ruleset: (json.pyRuleset as string) || undefined,
-      version: (json.pyRulesetVersion as string) || undefined,
+      ruleset: (json.pyRuleSet as string) || (json.pyRuleset as string) || undefined,
+      version: (json.pyRuleSetVersion as string) || (json.pyRulesetVersion as string) || undefined,
     };
 
     const dependencies: UnresolvedDependency[] = [];

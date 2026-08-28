@@ -97,6 +97,26 @@ describe('extractSymbols — multi-language', () => {
     const symbols = extractSymbols('function foo() {}\nclass Bar {}', 'unknownlang');
     expect(symbols.map(s => s.name)).toEqual(['foo', 'Bar']);
   });
+
+  it('extracts apex classes, interfaces, enums, triggers and methods', () => {
+    const src = [
+      'public with sharing class AccountService {',
+      '  public void processAccount(Account acc) {}',
+      '  private static List<Account> getAccounts() {}',
+      '}',
+      'public interface IAccountHandler {}',
+      'public enum Status { NEW_STATUS, ACTIVE, CLOSED }',
+      'trigger AccountTrigger on Account (before insert, after update) {}',
+    ].join('\n');
+    const symbols = extractSymbols(src, 'apex');
+    const byName = Object.fromEntries(symbols.map(s => [s.name, s.kind]));
+    expect(byName.AccountService).toBe('class');
+    expect(byName.IAccountHandler).toBe('interface');
+    expect(byName.Status).toBe('enum');
+    expect(byName.AccountTrigger).toBe('function');
+    expect(byName.processAccount).toBe('method');
+    expect(byName.getAccounts).toBe('method');
+  });
 });
 
 describe('extractSymbols — edge cases', () => {

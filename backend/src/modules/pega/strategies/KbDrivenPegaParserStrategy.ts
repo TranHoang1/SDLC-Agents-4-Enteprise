@@ -42,8 +42,8 @@ export class KbDrivenPegaParserStrategy implements IPegaRuleParserStrategy {
       className,
       ruleType: pxObjClass,
       isRule: pxObjClass.startsWith('Rule-'),
-      ruleset: (json.pyRuleset as string) || undefined,
-      version: (json.pyRulesetVersion as string) || undefined,
+      ruleset: (json.pyRuleSet as string) || (json.pyRuleset as string) || undefined,
+      version: (json.pyRuleSetVersion as string) || (json.pyRulesetVersion as string) || undefined,
     };
 
     const dependencies = this.extractDependenciesBySchema(json, schema?.dependencyPaths || []);

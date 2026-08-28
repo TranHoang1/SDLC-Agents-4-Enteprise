@@ -87,14 +87,21 @@ Tag values: lowercase, alphanumeric + hyphens only. Max 8 tags.`;
 Return JSON only: {"summary":"<1-3 sentences describing business purpose>","pseudo_code":"<structured pseudo code>","tags":["category:value",...]}
 Valid tag categories: ${VALID_TAG_CATEGORIES.join(', ')}
 Tag values: lowercase, alphanumeric + hyphens only. Max 8 tags.
-Focus on business intent and the main logic flow (steps, decisions, expressions).
-CRITICAL pseudo_code format rules:
-- Use \\n for line breaks between steps
-- Indent nested blocks with 2 spaces
-- Use IF/ELSE/END IF, FOR/END FOR, WHILE/END WHILE keywords
-- Number the steps (1. 2. 3.) for sequential logic
-- Max 2000 chars
-Example: "1. Validate input\\n2. IF condition THEN\\n  2a. Do action A\\n  2b. Do action B\\nELSE\\n  2c. Do fallback\\nEND IF\\n3. Return result"`;
+
+GROUNDING RULES (CRITICAL — accuracy over completeness):
+- Base the summary AND pseudo_code STRICTLY on the provided "Rule Content". Do NOT invent steps, conditions, default values, or branches that are not present in the rule.
+- If the rule has no imperative steps (e.g. a declarative expression, a when-condition, a property, a report), do NOT fabricate IF/ELSE/FOR control flow. Represent what the rule ACTUALLY expresses.
+- If the Rule Content is insufficient to determine the logic, say so briefly in the summary and keep pseudo_code to a faithful restatement of the available fields. Never guess concrete literals (e.g. "No Manager Assigned").
+
+pseudo_code guidance BY RULE NATURE:
+- Procedural rule (Activity, Data Transform, Flow): number sequential steps; use IF/ELSE/END IF, FOR/END FOR only when the rule contains them.
+- Declared Expression: express as "<target> = <formula>" exactly as given (you may lightly annotate what the formula computes).
+- When condition: list the conditions and how they combine (AND/OR) exactly as given, e.g. "A: .Dependents(1).pyFirstName = \\"\\"\\nB: ...\\nRESULT = A AND B".
+- Decision Table / Map Value: render as "WHEN <condition> THEN <result>" rows.
+- Property / Report / structural rule: describe its definition/configuration; pseudo_code may be a concise structural description rather than control flow.
+
+FORMAT:
+- Use \\n for line breaks; indent nested blocks with 2 spaces. Max 2000 chars.`;
   }
 
   private buildClassUserPrompt(ctx: SymbolContext): string {

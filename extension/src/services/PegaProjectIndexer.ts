@@ -14,6 +14,7 @@ import { enumerateAllRuleSets } from "./PegaRuleSetEnumerator";
 import { discoverAppClasses, fetchCategoryRules } from "./PegaAppClassDiscovery";
 import { summaryToCrawlItem } from "../models";
 import { setProjectId } from "../extension";
+import { createPegaDedupSet } from "./DiskBackedSet";
 
 type ProgressReporter = vscode.Progress<{ message?: string }>;
 
@@ -211,33 +212,40 @@ export class PegaProjectIndexer {
         crawlSet: any[], pegaClient: any, root: string, report: ProgressReporter,
     ): Promise<Record<string, unknown>[]> {
         const CHUNK = 50;
-        const visitedKeys = new Set<string>();
+        // Disk-backed dedup: bounded RAM + spill-to-disk so the visited set does not
+        // grow unbounded on large rulebases. Disposed in finally (deletes spill file).
+        const visitedKeys = createPegaDedupSet(root, 'project-indexer');
         const fetched: Record<string, unknown>[] = [];
 
-        for (let i = 0; i < crawlSet.length; i += CHUNK) {
-            const chunk = crawlSet.slice(i, i + CHUNK);
-            report.report({ message: `Fetching (${i + chunk.length}/${crawlSet.length})...` });
-            for (const item of chunk) { visitedKeys.add(item.insKey); }
+        try {
+            for (let i = 0; i < crawlSet.length; i += CHUNK) {
+                const chunk = crawlSet.slice(i, i + CHUNK);
+                report.report({ message: `Fetching (${i + chunk.length}/${crawlSet.length})...` });
+                for (const item of chunk) { visitedKeys.add(item.insKey); }
 
-            const result = await fetchRulesInParallel(chunk, pegaClient, this.log);
-            if (result.serverError) { throw new Error(result.serverError); }
+                const result = await fetchRulesInParallel(chunk, pegaClient, this.log);
+                if (result.serverError) { throw new Error(result.serverError); }
 
-            for (const { ruleObj, item } of result.fetched) {
-                fetched.push(ruleObj);
-                saveRuleFile(ruleObj, root, this.log, item.pxObjClass, item.pyRuleName);
-                if (this.isClassRule(item, ruleObj)) {
-                    const className = (ruleObj.pyClassName as string) || item.pyClassName;
-                    if (className) {
-                        const subs = await fetchRuleTypesInParallel(className, pegaClient, visitedKeys, this.log);
-                        for (const sr of subs) { saveRuleFile(sr.rule, root, this.log, sr.ruleType); fetched.push(sr.rule); }
-                        // SA4E-173: Category-based rule discovery via directChildren
-                        const catRules = await fetchCategoryRules(className, pegaClient, visitedKeys, root, this.log);
-                        fetched.push(...catRules);
+                for (const { ruleObj, item } of result.fetched) {
+                    fetched.push(ruleObj);
+                    saveRuleFile(ruleObj, root, this.log, item.pxObjClass, item.pyRuleName);
+                    if (this.isClassRule(item, ruleObj)) {
+                        const className = (ruleObj.pyClassName as string) || item.pyClassName;
+                        if (className) {
+                            const subs = await fetchRuleTypesInParallel(className, pegaClient, visitedKeys, this.log);
+                            for (const sr of subs) { saveRuleFile(sr.rule, root, this.log, sr.ruleType); fetched.push(sr.rule); }
+                            // SA4E-173: Category-based rule discovery via directChildren
+                            const catRules = await fetchCategoryRules(className, pegaClient, visitedKeys, root, this.log);
+                            fetched.push(...catRules);
+                        }
+                        // SA4E-172: Resolve DataTable + Database for this class inline
+                        await this.resolveDataTableForClass(ruleObj, pegaClient, root);
                     }
-                    // SA4E-172: Resolve DataTable + Database for this class inline
-                    await this.resolveDataTableForClass(ruleObj, pegaClient, root);
                 }
             }
+        } finally {
+            // Clear RAM + delete the spill file once this index run completes.
+            visitedKeys.dispose();
         }
         return fetched;
     }

@@ -94,4 +94,35 @@ describe('PegaContentExtractor', () => {
     expect(out).toContain('RULE TYPE: Rule-Obj-Flow');
     expect(out).toContain('NAME: F');
   });
+
+  it('SA4E-222: routes an unhandled type with nestedLogicPaths to schema-driven rendering', () => {
+    const out = extractRuleContent(
+      {
+        pxObjClass: 'Rule-Obj-Property',
+        pyClassName: 'Work',
+        pyRuleName: 'Status',
+        pyConditions: [{ name: 'c1', when: 'a', result: 'b' }],
+      },
+      { nestedLogicPaths: ['pyConditions'] },
+    );
+    expect(out).toContain('LOGIC (generic: pyConditions):');
+    expect(out).toContain('c1');
+  });
+
+  it('SA4E-222: unhandled type with logic-bearing array uses the generic extractor', () => {
+    const out = extractRuleContent({
+      pxObjClass: 'Rule-Obj-Property',
+      pyClassName: 'Work',
+      pyRuleName: 'Status',
+      pyInputs: [{ label: 'Gold', value: '100', result: 'VIP' }],
+    });
+    expect(out).toContain('LOGIC (generic: pyInputs):');
+    expect(out).toContain('VIP');
+  });
+
+  it('SA4E-222: dedicated extractors still preferred (Activity unchanged)', () => {
+    const out = extractRuleContent(MOCK_ACTIVITY_JSON);
+    expect(out).toContain('LOGIC (Activity Steps):');
+    expect(out).not.toContain('LOGIC (generic:');
+  });
 });

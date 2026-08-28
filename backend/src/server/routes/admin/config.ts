@@ -35,6 +35,10 @@ async function getEffectiveConfig(ctx: AdminContext): Promise<Record<string, Rec
       baseInterval: parseInt(process.env.TASK_WORKER_BASE_INTERVAL || '2000', 10),
       maxInterval: parseInt(process.env.TASK_WORKER_MAX_INTERVAL || '30000', 10),
     },
+    rateLimit: {
+      // Server hard cap (rpm) per IP. Clients may request up to (never above) this.
+      maxRpm: parseInt(process.env.RATE_LIMIT_MAX_RPM || (process.env.NODE_ENV === 'production' ? '6000' : '10000'), 10),
+    },
   };
 
   // Merge DB-persisted LLM config on top of env defaults (Admin UI changes)
@@ -70,6 +74,15 @@ async function getEffectiveConfig(ctx: AdminContext): Promise<Record<string, Rec
       if (val !== undefined && val.trim()) base.server[key] = val;
     }
   } catch (err) { ctx.logger.debug({ err, context: 'server-config' }, 'DB not ready for server config — using env defaults'); }
+
+  // Merge DB-persisted rateLimit config (maxRpm)
+  try {
+    const val = await getLatestConfigValue('rateLimit', 'maxRpm');
+    if (val !== undefined) {
+      const n = parseInt(val, 10);
+      if (!isNaN(n) && n > 0) base.rateLimit.maxRpm = n;
+    }
+  } catch (err) { ctx.logger.debug({ err, context: 'ratelimit-config' }, 'DB not ready for rateLimit config — using env defaults'); }
 
   // Runtime in-memory overrides (from PATCH calls in current session) always win
   for (const [section, keys] of Object.entries(ctx.configOverrides)) {
@@ -266,6 +279,10 @@ export function createConfigRoutes(ctx: AdminContext): Hono {
     // If TaskWorker config changed, notify TaskWorker to apply new settings immediately
     if (section === 'taskWorker') {
       await bus.emit(Events.TASK_WORKER_CONFIG_CHANGED, { section, key, value });
+    }
+    // If rate-limit config changed, hot-reload the middleware cap (no restart)
+    if (section === 'rateLimit') {
+      await bus.emit(Events.RATE_LIMIT_CONFIG_CHANGED, { section, key, value });
     }
     return c.json({ success: true, requiresRestart, section, key, value });
   });

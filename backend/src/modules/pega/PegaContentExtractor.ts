@@ -2,12 +2,24 @@
  * SA4E-106 — PegaContentExtractor: converts raw Pega rule JSON into readable,
  * structured text (identity, parameters, steps, expressions, Java snippets) so
  * the LLM enrichment pipeline can generate summary + pseudo code + tags.
+ *
+ * SA4E-222 — `buildLogic` dispatch order (FR-B-4 / FSD §4.3):
+ *   dedicated extractor → schema-driven renderer → generic extractor → metadata fallback.
+ * The deterministic `PegaGenericLogicExtractor` replaces the former shallow
+ * `buildLogicBlocks` fallback. `isInternalKey` / `INTERNAL_PREFIXES` / `scalar` /
+ * `scalarStr` are exported for reuse by the new extractors (no duplication).
  */
 
 import { PegaLogicNormalizer } from './PegaLogicNormalizer.js';
+import { extractGenericLogic } from './extraction/PegaGenericLogicExtractor.js';
+import { renderSchemaDrivenLogic } from './extraction/SchemaDrivenRenderer.js';
+import type { ExtractOptions } from './extraction/types.js';
+import { extractNestedLogic } from './PegaNestedLogicExtractor.js';
+import { extractFlowStructure } from './PegaFlowExtractor.js';
+import { extractCaseTypeLifecycle } from './PegaCaseTypeExtractor.js';
 
 /** Field prefixes considered Pega internal metadata (px/pz/__) — excluded from dumps. */
-const INTERNAL_PREFIXES = ['px', 'pz', '__'];
+export const INTERNAL_PREFIXES = ['px', 'pz', '__'];
 
 /** Max items rendered per array in structured blocks. */
 const MAX_DUMP_ITEMS = 200;
@@ -15,21 +27,16 @@ const MAX_DUMP_ITEMS = 200;
 /** Max lines for the generic scalar fallback dump. */
 const MAX_DUMP_LINES = 250;
 
-/** Array keys that carry rule logic, rendered by buildLogicBlocks(). */
-const LOGIC_ARRAY_KEYS = [
-  'pySteps', 'steps', 'pyActions', 'pyRows', 'pyTableRows', 'pyDecisionRules',
-  'pyStrategyGroups', 'pyAlternates', 'pyFlowActions', 'pyShapes', 'pyNodes',
-];
-
 /** JSON-compatible object shape operated on (all values optional). */
 export type PegaRuleJson = Record<string, unknown>;
 
 /**
  * Extract readable content from a Pega rule JSON payload.
  * @param ruleJson - Raw Pega rule JSON (from Pega API or export)
+ * @param opts - Optional extraction options (schema-driven paths, generic toggle)
  * @returns Structured text covering identity, parameters, logic and Java code
  */
-export function extractRuleContent(ruleJson: PegaRuleJson): string {
+export function extractRuleContent(ruleJson: PegaRuleJson, opts?: ExtractOptions): string {
   const sections: string[] = [];
 
   sections.push(buildHeader(ruleJson));
@@ -37,7 +44,7 @@ export function extractRuleContent(ruleJson: PegaRuleJson): string {
   const parameters = buildParameters(ruleJson);
   if (parameters) sections.push(parameters);
 
-  const logic = buildLogic(ruleJson);
+  const logic = buildLogic(ruleJson, opts);
   if (logic) sections.push(logic);
 
   const java = buildJavaBlock(ruleJson);
@@ -81,10 +88,10 @@ function buildParameters(ruleJson: PegaRuleJson): string | null {
     out.push('PARAMETERS:');
     for (const p of rawParams.slice(0, MAX_DUMP_ITEMS)) {
       if (typeof p !== 'object' || !p) continue;
-      const name = scalarStr(p.pyParameterName, p.pyName, p.pyLabel) || scalar(p.pyPropertyName);
+      const name = scalarStr((p as Record<string, unknown>).pyParameterName, (p as Record<string, unknown>).pyName, (p as Record<string, unknown>).pyLabel) || scalar((p as Record<string, unknown>).pyPropertyName);
       if (!name) continue;
-      const mode = scalarStr(p.pyMode, p.pyType) || 'input';
-      const def = scalar(p.pyDefaultValue, p.pyValue);
+      const mode = scalarStr((p as Record<string, unknown>).pyMode, (p as Record<string, unknown>).pyType) || 'input';
+      const def = scalar((p as Record<string, unknown>).pyDefaultValue, (p as Record<string, unknown>).pyValue);
       out.push(`  - ${name}${def ? ` = ${def}` : ''} (${mode})`);
     }
   }
@@ -94,17 +101,17 @@ function buildParameters(ruleJson: PegaRuleJson): string | null {
     out.push('PAGES:');
     for (const pg of rawPages.slice(0, MAX_DUMP_ITEMS)) {
       if (typeof pg !== 'object' || !pg) continue;
-      const name = scalarStr(pg.pyName, pg.pyPageName) || scalar(pg.pyClassName);
+      const name = scalarStr((pg as Record<string, unknown>).pyName, (pg as Record<string, unknown>).pyPageName) || scalar((pg as Record<string, unknown>).pyClassName);
       if (!name) continue;
-      out.push(`  - ${name} (${scalarStr(pg.pyMode) || 'page'})`);
+      out.push(`  - ${name} (${scalarStr((pg as Record<string, unknown>).pyMode) || 'page'})`);
     }
   }
 
   return out.length > 0 ? out.join('\n') : null;
 }
 
-/** Build the logic block for the rule type. */
-function buildLogic(ruleJson: PegaRuleJson): string | null {
+/** Build the logic block for the rule type (SA4E-222 dispatch order). */
+function buildLogic(ruleJson: PegaRuleJson, opts?: ExtractOptions): string | null {
   const pxObjClass = String(ruleJson.pxObjClass || '');
 
   switch (pxObjClass) {
@@ -112,6 +119,15 @@ function buildLogic(ruleJson: PegaRuleJson): string | null {
       return `LOGIC (Activity Steps):\n${PegaLogicNormalizer.normalizeActivity(ruleJson)}`;
     case 'Rule-Obj-Model':
       return `LOGIC (Data Transform):\n${PegaLogicNormalizer.normalizeDataTransform(ruleJson)}`;
+    case 'Rule-Obj-Flow':
+      // Reconstruct the real flow (shapes + connectors) from pyModelProcess so the
+      // LLM sees the actual process, not just metadata. Fall back to generic
+      // logic-array rendering if the export has no model process.
+      return extractFlowStructure(ruleJson) ?? extractGenericLogic(ruleJson, opts);
+    case 'Rule-Obj-CaseType':
+      // Reconstruct the case lifecycle (stages → processes, primary + alternate)
+      // from pyStages/pyAlternateStages — mirrors the Pega Case Lifecycle UI.
+      return extractCaseTypeLifecycle(ruleJson) ?? extractGenericLogic(ruleJson, opts);
     case 'Rule-Obj-DecisionTable':
     case 'Rule-Declare-DecisionTable':
       return buildDecisionTable(ruleJson);
@@ -119,8 +135,21 @@ function buildLogic(ruleJson: PegaRuleJson): string | null {
     case 'Rule-Declare-Expressions':
     case 'Rule-Declare-Pages':
       return buildExpressionBlock(ruleJson);
-    default:
-      return buildExpressionBlock(ruleJson) ?? buildLogicBlocks(ruleJson);
+    default: {
+      // SA4E-222: schema-driven → generic → expression (preserves existing logic)
+      if (opts?.nestedLogicPaths?.length) {
+        const sd = renderSchemaDrivenLogic(ruleJson, opts.nestedLogicPaths);
+        if (sd) return sd;
+      }
+      const parts: string[] = [];
+      if (opts?.genericEnabled !== false) {
+        const generic = extractGenericLogic(ruleJson, opts);
+        if (generic) parts.push(generic);
+      }
+      const expr = buildExpressionBlock(ruleJson);
+      if (expr) parts.push(expr);
+      return parts.length > 0 ? parts.join('\n\n') : null;
+    }
   }
 }
 
@@ -142,47 +171,21 @@ function buildDecisionTable(ruleJson: PegaRuleJson): string | null {
   return lines.join('\n');
 }
 
-/** Build readable expression fields for When / Declare rules. */
+/**
+ * Build readable expression fields for When / Declare rules.
+ * Prefers nested logic (real formula/conditions) over top-level scalar scan,
+ * since declarative rules store their logic in nested arrays/objects.
+ */
 function buildExpressionBlock(ruleJson: PegaRuleJson): string | null {
+  const nested = extractNestedLogic(ruleJson);
+  if (nested) return nested;
+
   const lines: string[] = [];
   for (const key of ['pyWhenText', 'pyExpression', 'pyFormula', 'pyWhenCondition', 'pyDescription']) {
     const value = ruleJson[key];
     if (typeof value === 'string' && value.trim()) lines.push(`${key}: ${value.trim()}`);
   }
   return lines.length > 0 ? `LOGIC (Expression):\n${lines.join('\n')}` : null;
-}
-
-/** Generic block renderer for known logic arrays (flows, trees, strategies). */
-function buildLogicBlocks(ruleJson: PegaRuleJson): string | null {
-  const sections: string[] = [];
-
-  for (const key of LOGIC_ARRAY_KEYS) {
-    const arr = ruleJson[key];
-    if (!Array.isArray(arr) || arr.length === 0) continue;
-    const lines = [`LOGIC (${key}):`];
-    for (let i = 0; i < arr.length && i < MAX_DUMP_ITEMS; i++) {
-      lines.push(`  - ${formatItem(arr[i])}`);
-    }
-    sections.push(lines.join('\n'));
-  }
-
-  return sections.length > 0 ? sections.join('\n\n') : null;
-}
-
-/** Render a single logic item — primitive or flattened scalar fields. */
-function formatItem(item: unknown): string {
-  if (typeof item !== 'object' || item === null) return String(item ?? '');
-  const parts: string[] = [];
-  for (const [key, value] of Object.entries(item as Record<string, unknown>)) {
-    if (isInternalKey(key)) continue;
-    if (value === null || value === undefined) continue;
-    if (Array.isArray(value) || typeof value === 'object') continue;
-    const s = String(value).trim();
-    if (!s) continue;
-    parts.push(`${key}: ${s}`);
-    if (parts.length >= 8) break;
-  }
-  return parts.length > 0 ? parts.join(' | ') : '(object)';
 }
 
 /** Extract top-level Java code fields (snippets, Code-Java rule payloads). */
@@ -220,13 +223,13 @@ function isHeaderKey(key: string): boolean {
   ].includes(key);
 }
 
-/** Pega internal metadata fields (px/pz/__) — always excluded. */
-function isInternalKey(key: string): boolean {
+/** Pega internal metadata fields (px/pz/__) — always excluded. Exported for reuse. */
+export function isInternalKey(key: string): boolean {
   return INTERNAL_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
 /** First non-empty scalar (string/number/boolean) among candidate values. */
-function scalar(...values: unknown[]): string | undefined {
+export function scalar(...values: unknown[]): string | undefined {
   for (const value of values) {
     if (typeof value === 'string' && value.trim()) return value.trim();
     if (typeof value === 'number' || typeof value === 'boolean') return String(value);
@@ -235,7 +238,7 @@ function scalar(...values: unknown[]): string | undefined {
 }
 
 /** First non-empty string among candidate values. */
-function scalarStr(...values: unknown[]): string | undefined {
+export function scalarStr(...values: unknown[]): string | undefined {
   for (const value of values) {
     if (typeof value === 'string' && value.trim()) return value.trim();
   }

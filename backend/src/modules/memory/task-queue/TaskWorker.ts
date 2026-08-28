@@ -124,6 +124,11 @@ export class TaskWorker {
     this.resetProcessingOnStartup().catch(err =>
         this.logger.warn({ err }, 'TaskWorker: startup reset failed (non-fatal)'),
     );
+    // On startup: bound table growth by purging superseded COMPLETED tasks
+    // (keeps only the latest completed task per entry+type).
+    this.purgeSupersededOnStartup().catch(err =>
+      this.logger.warn({ err }, 'TaskWorker: startup purge failed (non-fatal)'),
+    );
     // Delay first poll by 6s to allow LLM health check + tagAnalyzer init to complete.
     // LLMInitializer is fire-and-forget async (5s timeout) — 6s ensures it's ready.
     this.schedulePoll(6000);
@@ -146,6 +151,13 @@ export class TaskWorker {
     const result = await this.repo.resetAllProcessing();
     if (result > 0) this.logger.info({ reset: result }, 'TaskWorker: reset stuck PROCESSING tasks on startup');
     return result;
+  }
+
+  /** Purge superseded COMPLETED tasks on startup to bound pending_tasks growth. */
+  async purgeSupersededOnStartup(): Promise<number> {
+    const purged = await this.repo.purgeSupersededCompleted();
+    if (purged > 0) this.logger.info({ purged }, 'TaskWorker: purged superseded COMPLETED tasks on startup');
+    return purged;
   }
 
   async recoverStaleTasks(): Promise<number> {

@@ -12,8 +12,9 @@ export class PegaRuleAstParser {
     const pxObjClass = (json.pxObjClass as string) || 'Rule-Obj-Activity';
     const name = this.extractName(pxObjClass, json);
     const className = (json.pyClassName as string) || '';
-    const ruleset = (json.pyRuleset as string) || undefined;
-    const version = (json.pyRuleSetVersion as string) || undefined;
+    // Read both export casings: pyRuleSet (actual export) and pyRuleset (fixtures).
+    const ruleset = (json.pyRuleSet as string) || (json.pyRuleset as string) || undefined;
+    const version = (json.pyRuleSetVersion as string) || (json.pyRulesetVersion as string) || undefined;
     const label = (json.pyLabel as string) || undefined;
 
     const builder = this.getBuilder(pxObjClass);

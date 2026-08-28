@@ -7,6 +7,7 @@ import * as path from "path";
 import * as fs from "fs";
 import type { PegaHttpClient } from "./PegaHttpClient";
 import { saveRuleFile } from "./PegaCrawlHelper";
+import type { MembershipSet } from "./DiskBackedSet";
 
 type LogFn = (msg: string) => void;
 
@@ -113,7 +114,7 @@ async function queryRuleKeysFromInfo(
  */
 export async function fetchCategoryRules(
     className: string, pegaClient: PegaHttpClient,
-    visitedKeys: Set<string>, root: string, log: LogFn,
+    visitedKeys: MembershipSet, root: string, log: LogFn,
 ): Promise<Record<string, unknown>[]> {
     const fetched: Record<string, unknown>[] = [];
     const categoryRuleKeys = await discoverRulesViaCategories(className, pegaClient, log);

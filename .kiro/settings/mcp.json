@@ -69,7 +69,7 @@
     },
     "atlassian-mcp-server": {
       "type": "registry",
-      "disabled": false,
+      "disabled": true,
       "autoApprove": [
         "getVisibleJiraProjects",
         "getAccessibleAtlassianResources",
@@ -82,7 +82,7 @@
       ]
     },
     "atlassian": {
-      "url": "http://localhost:3062/mcp",
+      "url": "http://localhost:3010/mcp",
       "type": "httpStream",
       "transportType": "httpStream",
       "disabled": false,

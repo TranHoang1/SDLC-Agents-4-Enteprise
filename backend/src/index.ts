@@ -13,6 +13,7 @@ import { MemoryModule } from './modules/memory/MemoryModule.js';
 import { OrchestrationModule } from './modules/orchestration/OrchestrationModule.js';
 import { EmbeddingService } from './engine/parsers/embedding/EmbeddingService.js';
 import { initAdapters } from './admin/db/core.js';
+import { ensureSa4e215Tables } from './database/schema-registry/ensure-sa4e-215.js';
 import { Container } from './di/Container.js';
 import { bus, Events } from './shared/EventBus.js';
 
@@ -37,6 +38,13 @@ async function main() {
 
   // --- Init DB adapters first ---
   await initAdapters();
+
+  // --- SA4E-215: ensure owned tables exist (mcp_servers, decisions) ---
+  try {
+    await ensureSa4e215Tables();
+  } catch (err) {
+    logger.error({ err }, 'Failed to ensure SA4E-215 tables; continuing startup');
+  }
 
   // --- Registry + Factory ---
   const registry = new ModuleRegistry(logger, bus);
@@ -94,7 +102,20 @@ async function main() {
       }
     }
 
-    logger.info({ ingestedTools: ingestedCount, totalTools: allTools.length }, 'Ingested dynamic tools with vector embeddings');
+logger.info({ ingestedTools: ingestedCount, totalTools: allTools.length }, 'Ingested dynamic tools with vector embeddings');
+
+    // SA4E-217: Ensure pega_category_counters table exists (idempotent)
+    try {
+      const { getDbAdapter } = await import('./admin/db/core.js');
+      const adminAdapter = getDbAdapter();
+      if (adminAdapter.isConnected()) {
+        const { ensurePegaCategoryCountersTable } = await import('./database/migration/ensure-pega-category-counters.ts');
+        await ensurePegaCategoryCountersTable(adminAdapter);
+        logger.info('Ensured pega_category_counters table exists');
+      }
+    } catch (err) {
+      logger.warn({ err }, 'pega_category_counters migration skipped (non-fatal)');
+    }
 
     // Wire ToolSearchService into OrchestrationModule
     if (orchestrationModule) {

@@ -244,4 +244,24 @@ export class PendingTaskRepository {
     );
     return kbResult.changes + codeResult.changes;
   }
+
+  /**
+   * Bound table growth: delete COMPLETED tasks, keeping only the most recent
+   * one per (entry_id, task_type). Historical completed rows have no functional
+   * value and otherwise accumulate unbounded across re-index/re-enrich runs.
+   * @returns number of rows deleted
+   */
+  async purgeSupersededCompleted(): Promise<number> {
+    const result = await this.db.runAsync(
+      `DELETE FROM pending_tasks
+       WHERE status = ?
+         AND id NOT IN (
+           SELECT MAX(id) FROM pending_tasks
+           WHERE status = ?
+           GROUP BY entry_id, task_type
+         )`,
+      [TaskStatus.COMPLETED, TaskStatus.COMPLETED],
+    );
+    return result.changes;
+  }
 }

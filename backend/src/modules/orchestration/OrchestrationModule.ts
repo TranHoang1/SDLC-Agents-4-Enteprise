@@ -44,6 +44,15 @@ export class OrchestrationModule implements IModule {
 
   async initialize(): Promise<void> {
     this.logger.info('Initializing orchestration module');
+
+    // SA4E-218: reserve locally-provided tool names so child MCP servers can never
+    // shadow them (e.g. a mis-schema'd external Atlassian server must not override our
+    // own jira_create_issue / jira_search handlers).
+    if (this.registry) {
+      const reserved = new Set<string>(this.registry.getToolHandlers().keys());
+      this.clientManager.setReservedToolNames(reserved);
+    }
+
     await this.clientManager.initializeAll();
     this.clientManager.startHealthMonitor();
     this.reindexSubscriber = createReindexSubscriber(this.clientManager, this.logger, this.registry);

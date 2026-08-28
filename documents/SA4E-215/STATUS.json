@@ -1,0 +1,83 @@
+{
+  "ticket": "SA4E-215",
+  "currentPhase": "completed",
+  "autonomyLevel": "L3",
+  "phases": {
+    "requirements": { "status": "done", "file": "BRD.md", "version": 1, "completedAt": "2026-08-25T23:45:00Z" },
+    "specification": { "status": "done", "file": "FSD.md", "version": 1, "completedAt": "2026-08-25T23:55:00Z" },
+    "design": { "status": "done", "file": "TDD.md", "version": 1, "completedAt": "2026-08-25T00:10:00Z" },
+    "feedback_loop": { "status": "not_started", "iterations": 0, "maxIterations": 5 },
+    "test_planning": { "status": "done", "file": "STP.md", "version": 1, "completedAt": "2026-08-25T00:30:00Z" },
+    "implementation": { "status": "done", "startedAt": "2026-08-25T00:00:00Z", "completedAt": "2026-08-25T00:30:00Z" },
+    "testing": { "status": "done", "startedAt": "2026-08-25T00:30:00Z", "completedAt": "2026-08-25T01:00:00Z" },
+    "deployment": { "status": "done", "completedAt": "2026-08-27T09:00:00Z", "note": "Backend live & serving /api/sa4e-215 on port 48721 (verified by live UAT). Tables auto-created on boot via ensure-sa4e-215.", "uat": { "status": "passed", "date": "2026-08-27T09:30:00Z", "result": "auth/decisions/mcp-servers green; unknown project_id correctly blocked by guard (ERR_006)" } }
+  },
+  "diagrams": {
+    "status": "done",
+    "renderer": "drawio-cli",
+    "files": [
+      "er-diagram.drawio/png (5 tables)",
+      "migration-flow.drawio/png",
+      "auth-flow.drawio/png (new)",
+      "decision-flow.drawio/png (new)",
+      "admin-crud-flow.drawio/png",
+      "admin-workflow.drawio/png",
+      "api-usage.drawio/png (all 3 modules)",
+      "api-flow.drawio/png",
+      "pending.drawio/png (test strategy)"
+    ]
+  },
+  "docsRealigned": {
+    "date": "2026-08-26T01:30:00Z",
+    "reason": "Aligned BRD/FSD/TDD/STP/UG to actual code: Auth (users) + Decisions (decisions/audit_log) + MCP (mcp_servers/projects)"
+  },
+  "docsRealignedAgainstApi": {
+    "date": "2026-08-27T09:30:00Z",
+    "reason": "UG.md/STP.md fixed for API drift: real port 48721, /mcp/servers (not /mcp-servers), camelCase fields (projectId/ruleSetId/transportType), no /decisions/evaluate (client supplies result), MCP DELETE is hard-delete, error codes ERR_006/ERR_009 added."
+  },
+  "acGapClosed": {
+    "date": "2026-08-27T21:25:00Z",
+    "reason": "Reopened (In Progress) to satisfy Acceptance Criteria: added 21 route integration tests (Vitest, isolated SQLite) under backend/src/server/routes/sa4e-215/__tests__/sa4e-215.routes.test.ts (AUTH 6, DECISIONS 6, MCP 9 — all PASS). Added missing QA artifacts: STC.md, TEST-REPORT.md, DPG.md, RLN.md.",
+    "testsPass": 21,
+    "testsTotal": 21
+  },
+  "redesignedAgainstRealDb": {
+    "date": "2026-08-26T02:00:00Z",
+    "verifiedDb": "postgresql://localhost:5432/sa4e_db",
+    "keyFindings": [
+      "PKs are TEXT ids; JSON as TEXT; booleans as INTEGER 0/1",
+      "Password = PBKDF2 salt:hash (NOT argon2)",
+      "RBAC group-based (access_groups + group_permissions), no 'role' column",
+      "mcp_tools is tool-ingest/search, NOT MCP server declaration",
+      "Project scoping via project_registry (project_id text)",
+      "decisions table did not exist; created new with platform standards"
+    ],
+    "newTablesOwned": ["mcp_servers", "decisions"],
+    "registryFixed": true
+  },
+  "codeRewrittenAgainstRealDb": {
+    "date": "2026-08-26T03:00:00Z",
+    "summary": "Rewrote SA4E-215 implementation to use platform primitives (getDbAdapter async, PBKDF2 hashPassword/verifyPassword, createSession/validateSession, recordAudit, getUserPermissions). Removed all Prisma/argon2/fabricated-schema code.",
+    "files": [
+      "backend/src/server/routes/sa4e-215/guard.ts (NEW session-auth helper)",
+      "backend/src/server/routes/sa4e-215/auth.ts (register/login/logout via users table + sessions + group RBAC)",
+      "backend/src/server/routes/sa4e-215/decisions.ts (CRUD on decisions table + audit_log)",
+      "backend/src/server/routes/mcp/servers.ts (CRUD on mcp_servers, scoped by project_registry.project_id)",
+      "backend/src/server/routes/sa4e-215/index.ts (NEW aggregator mounted at /api/sa4e-215)",
+      "backend/src/server/routes/admin/index.ts (mounts sa4e-215 route)",
+      "backend/scripts/migrate-mcp.js (pg: CREATE TABLE IF NOT EXISTS mcp_servers/decisions + upsert orchestration.json)"
+    ],
+    "tscErrorsSa4e215": 0,
+    "lintErrorsSa4e215": 0,
+    "note": "Repo build also contains pre-existing errors in src/server/routes/sa4e-216 (orphaned sibling-ticket stubs using @prisma/client / @node-rs/argon2 / jose which are not in this platform). Out of SA4E-215 scope."
+  },
+  "autoCreateTablesOnStartup": {
+    "date": "2026-08-26T04:00:00Z",
+    "module": "backend/src/database/schema-registry/ensure-sa4e-215.ts",
+    "function": "ensureSa4e215Tables()",
+    "hookedIn": "backend/src/index.ts (after initAdapters, before server.start)",
+    "behavior": "Idempotent CREATE TABLE IF NOT EXISTS for mcp_servers + decisions, generated from TableDef registry; runs on every boot for BOTH SQLite and PostgreSQL via getDbAdapter().execAsync(). Failure is logged but does NOT abort startup.",
+    "manualScript": "backend/scripts/migrate-mcp.js (one-time: creates tables + upserts orchestration.json data)"
+  },
+  "lastUpdated": "2026-08-27T21:25:00Z"
+}

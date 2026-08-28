@@ -21,24 +21,33 @@ export const KIND_TO_TYPE: Record<string, string> = {
   enum: 'ENUM',
   constant: 'CONSTANT',
   variable: 'VARIABLE',
-  // Pega rule kinds → meaningful graph types
-  pega_activity: 'ACTIVITY',
-  pega_flow: 'FLOW',
-  pega_flow_action: 'FLOW',
-  pega_data_transform: 'DATA_TRANSFORM',
-  pega_declare_expression: 'DECLARE_EXPRESSION',
-  pega_report: 'REPORT',
-  pega_section: 'SECTION',
-  pega_harness: 'HARNESS',
-  pega_property: 'PROPERTY',
-  pega_class: 'PEGA_SCHEMA',
-  pega_decision_table: 'DECISION',
-  pega_decision_tree: 'DECISION',
-  pega_map_value: 'DECISION',
-  pega_when: 'DECISION',
-  pega_validate: 'VALIDATE',
-  pega_unknown: 'PEGA_RULE',
 };
+
+/**
+ * Derive the graph node type for a symbol kind.
+ * - Standard code kinds use the fixed KIND_TO_TYPE map above.
+ * - Pega kinds (kind = 'pega_' + pxObjClass lowercased) derive their graph type
+ *   1:1 from the kind, WITHOUT collapsing distinct rule types together, so graph
+ *   per-type counts match the DB per-kind counts. e.g.
+ *     pega_rule_obj_flow        → FLOW
+ *     pega_rule_obj_flowaction  → FLOW_ACTION
+ *     pega_rule_declare_decisiontable → DECLARE_DECISIONTABLE
+ * The type is the kind with the leading 'pega_rule_' (or 'pega_') stripped,
+ * uppercased. This is deterministic and needs no per-type table.
+ * @param kind - Symbol kind (e.g. 'pega_rule_obj_flow', 'function')
+ * @returns Graph node type (e.g. 'FLOW', 'FUNCTION', 'CODE_ENTITY')
+ */
+export function graphTypeForKind(kind: string): string {
+  const fixed = KIND_TO_TYPE[kind];
+  if (fixed) return fixed;
+  if (kind && kind.startsWith('pega_')) {
+    if (kind === 'pega_unknown') return 'PEGA_RULE';
+    // Strip only the 'pega_' prefix, keep the rest (e.g. rule_obj_flow → RULE_OBJ_FLOW).
+    const suffix = kind.replace(/^pega_/, '');
+    return suffix ? suffix.toUpperCase() : 'PEGA_RULE';
+  }
+  return 'CODE_ENTITY';
+}
 
 export interface SpatialQueryParams {
   camX: number;

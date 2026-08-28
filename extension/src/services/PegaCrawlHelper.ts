@@ -8,6 +8,7 @@ import * as fs from "fs";
 import { parallelBatch } from "./parallel-utils";
 import { computeOptimalConcurrency, measureLatency } from "./concurrency-tuner";
 import type { PegaHttpClient } from "./PegaHttpClient";
+import type { MembershipSet } from "./DiskBackedSet";
 
 /** Computed at runtime — see computeFetchConcurrency() */
 let FETCH_CONCURRENCY = 10; // default until measured
@@ -122,7 +123,7 @@ export async function fetchRulesInParallel(
 export async function fetchRuleTypesInParallel(
     targetClassName: string,
     pegaClient: PegaHttpClient,
-    visitedKeys: Set<string>,
+    visitedKeys: MembershipSet,
     log: LogFn,
 ): Promise<SubRuleFetched[]> {
     const results: SubRuleFetched[] = [];

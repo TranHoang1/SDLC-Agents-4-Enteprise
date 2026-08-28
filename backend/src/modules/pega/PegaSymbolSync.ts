@@ -6,8 +6,12 @@
 
 import { createHash } from 'crypto';
 import type { DatabaseAdapter } from '../../database/adapters/DatabaseAdapter.js';
-import { resolveSymbolKind, buildVirtualPath, buildFqn, resolveRuleNameField } from './pega-mapping.js';
+import {
+  resolveSymbolKind, buildVirtualPath, buildFqn, resolveRuleNameField,
+  resolveRuleSetName, resolveRuleSetVersion,
+} from './pega-mapping.js';
 import { extractRuleContent } from './PegaContentExtractor.js';
+import { SchemaStorageService, type IDatabaseAdapter } from './schema/SchemaStorageService.js';
 import { TaskType, TaskStatus } from '../memory/task-queue/models.js';
 import pino from 'pino';
 
@@ -51,8 +55,10 @@ export async function syncRuleToSymbols(
 
   const { pxObjClass, pyClassName, pyRuleName } = fields;
   const kind = resolveSymbolKind(pxObjClass);
-  const fqn = buildFqn(pxObjClass, pyClassName, pyRuleName);
-  const virtualPath = buildVirtualPath(pyClassName, kind, pyRuleName);
+  const ruleSet = resolveRuleSetName(ruleJson);
+  const version = resolveRuleSetVersion(ruleJson);
+  const fqn = buildFqn(pxObjClass, pyClassName, pyRuleName, ruleSet, version);
+  const virtualPath = buildVirtualPath(pyClassName, kind, pyRuleName, ruleSet, version);
   const ruleJsonStr = JSON.stringify(ruleJson);
 
   // SEC-06: skip oversized rules
@@ -66,8 +72,10 @@ export async function syncRuleToSymbols(
 
   const fileId = await upsertVirtualFile(adapter, projectId, virtualPath, pyClassName, contentHash, ruleJsonStr.length);
   const symbolId = await upsertSymbol(adapter, projectId, fileId, pyRuleName, kind, fqn, pyClassName, docComment);
+  // SA4E-222: resolve learned schema paths (if any) and pass to extraction (no LLM at index time)
+  const nestedLogicPaths = await resolveNestedLogicPaths(adapter, pxObjClass);
   // SA4E-106: store extracted readable content (steps/params/Java) for LLM enrichment
-  await storeBodyEmbedding(adapter, projectId, symbolId, extractRuleContent(ruleJson));
+  await storeBodyEmbedding(adapter, projectId, symbolId, extractRuleContent(ruleJson, { nestedLogicPaths }));
   await createEnrichmentTaskIfNeeded(
     adapter, symbolId, pyRuleName, kind, virtualPath, projectId, pyClassName, resolveRuleSet(ruleJson),
   );
@@ -83,16 +91,22 @@ export async function refreshRuleSymbolBody(
   symbolId: number,
   projectId: string,
 ): Promise<void> {
-  await storeBodyEmbedding(adapter, projectId, symbolId, extractRuleContent(ruleJson));
-
   const fields = extractRequiredFields(ruleJson);
   if (!fields) return;
-  const kind = resolveSymbolKind(fields.pxObjClass);
-  const virtualPath = buildVirtualPath(fields.pyClassName, kind, fields.pyRuleName);
+  const nestedLogicPaths = await resolveNestedLogicPaths(adapter, fields.pxObjClass);
+  await storeBodyEmbedding(adapter, projectId, symbolId, extractRuleContent(ruleJson, { nestedLogicPaths }));
 
-  // Clear prior enrichment so a fresh CODE_ENRICHMENT task is created
+  const kind = resolveSymbolKind(fields.pxObjClass);
+  const virtualPath = buildVirtualPath(
+    fields.pyClassName, kind, fields.pyRuleName,
+    resolveRuleSetName(ruleJson), resolveRuleSetVersion(ruleJson),
+  );
+
+  // Clear ALL prior CODE_ENRICHMENT tasks for this symbol before requeuing.
+  // A fresh task fully supersedes historical ones; deleting only PENDING/PROCESSING
+  // left COMPLETED/FAILED rows to accumulate unbounded across re-index runs.
   await adapter.runAsync(
-    `DELETE FROM pending_tasks WHERE task_type = 'CODE_ENRICHMENT' AND entry_id = ? AND status IN ('PENDING', 'PROCESSING')`,
+    `DELETE FROM pending_tasks WHERE task_type = 'CODE_ENRICHMENT' AND entry_id = ?`,
     [symbolId],
   );
   await adapter.runAsync(
@@ -106,11 +120,31 @@ export async function refreshRuleSymbolBody(
   );
 }
 
-/** Resolve "RuleSet Version" string from rule JSON. */
+/** Resolve "RuleSet Version" display string from rule JSON (both export casings). */
 function resolveRuleSet(ruleJson: Record<string, unknown>): string {
-  const rs = (ruleJson as any)?.pyRuleset as string | undefined;
-  const version = (ruleJson as any)?.pyRulesetVersion as string | undefined;
+  const rs = resolveRuleSetName(ruleJson);
+  const version = resolveRuleSetVersion(ruleJson);
   return rs ? (version ? `${rs} ${version}` : rs) : '';
+}
+
+/**
+ * SA4E-222 — Resolve learned nested logic paths for a rule type from the KB.
+ * Reads the canonical EnrichedSchema (if it exists from a prior enrichment) so
+ * extraction can render structured logic without new TypeScript. Returns undefined
+ * when no schema/paths exist, letting the generic extractor take over. Non-fatal.
+ */
+async function resolveNestedLogicPaths(
+  adapter: DatabaseAdapter, ruleType: string,
+): Promise<string[] | undefined> {
+  try {
+    const storage = new SchemaStorageService(adapter as unknown as IDatabaseAdapter, logger);
+    const schema = await storage.find(ruleType);
+    const paths = schema?.extraction_hints?.nested_logic_paths;
+    return paths && paths.length > 0 ? paths : undefined;
+  } catch (err) {
+    logger.warn({ err, ruleType }, '[pega-sync] Schema path lookup failed; using generic extractor');
+    return undefined;
+  }
 }
 
 /** Extract and validate required fields from rule JSON. */

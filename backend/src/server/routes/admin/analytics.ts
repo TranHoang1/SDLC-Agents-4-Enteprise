@@ -13,7 +13,6 @@ import {
 } from '../../../admin/admin-db.js';
 import { formatUptime, formatBytes } from './utils.js';
 import type { AdminContext } from './context.js';
-import { getDbAdapter } from '../../../admin/db/core.js';
 
 export function createAnalyticsRoutes(ctx: AdminContext): Hono {
   const app = new Hono();
@@ -37,22 +36,22 @@ export function createAnalyticsRoutes(ctx: AdminContext): Hono {
     const uptimeMs = Date.now() - ctx.SERVER_START_TIME;
     const mem = process.memoryUsage();
     const recentActivity = await getRecentActivity(10);
+    // Code Symbols = count from the authoritative `symbols` table.
+    // getSymbolCount already includes pega_* kinds (see SymbolRepository), so we
+    // must NOT add Pega separately or they'd be double-counted.
     let codeSymbols = 0;
     try { codeSymbols = Number(await ctx.db.symbol.getSymbolCount(currentProjectId)); }
     catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to read code symbols count from index.db'); }
-    // Include Pega rules as code symbols (Pega rules ARE code) — SA4E-171: from symbols
+    // Graph Nodes = REAL row counts from graph_nodes (same source the KB Graph
+    // viewer uses), so the dashboard and the graph never disagree. This reflects
+    // what has actually been projected into the graph, not an arithmetic sum.
+    let graphKbNodes = 0, graphCodeNodes = 0, graphTotalNodes = 0;
     try {
-      const adapter = getDbAdapter();
-      const row = await adapter.getAsync<{ cnt: number }>(
-        `SELECT COUNT(*) as cnt FROM symbols WHERE project_id = ? AND kind LIKE 'pega_%'`,
-        [currentProjectId],
-      );
-      codeSymbols += Number(row?.cnt ?? 0);
-    } catch { ctx.logger.debug({ context: 'dashboard' }, 'Failed to count Pega symbols'); }
-    // Graph Nodes = scoped KB entries + code symbols (same sources, consistent count)
-    const graphKbNodes = kbEntries;
-    const graphCodeNodes = codeSymbols;
-    const graphTotalNodes = graphKbNodes + graphCodeNodes;
+      const counts = await ctx.db.graph.getNodeCounts(currentProjectId);
+      graphKbNodes = counts.kb;
+      graphCodeNodes = counts.code;
+      graphTotalNodes = counts.total;
+    } catch { ctx.logger.warn({ context: 'dashboard' }, 'Failed to read graph node counts'); }
     return c.json({
       kbEntries, codeSymbols,
       graphTotalNodes, graphKbNodes, graphCodeNodes,

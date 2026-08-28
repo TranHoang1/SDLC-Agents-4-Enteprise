@@ -87,8 +87,8 @@ describe('SA4E-41 GraphSyncService', () => {
     // Seed Pega symbols into PID_B
     const fInfo = indexDb.prepare(`INSERT INTO files (project_id, path, relative_path, language) VALUES (?, ?, 'rules/MyFlow.xml', 'pega')`).run(PID_B, `/${PID_B}/rules/MyFlow.xml`);
     const fileId = fInfo.lastInsertRowid as number;
-    indexDb.prepare(`INSERT INTO symbols (project_id, file_id, name, kind, start_line, end_line, is_exported, complexity) VALUES (?, ?, 'ProcessClaim', 'pega_flow', 1, 10, 0, 5)`).run(PID_B, fileId);
-    indexDb.prepare(`INSERT INTO symbols (project_id, file_id, name, kind, start_line, end_line, is_exported, complexity) VALUES (?, ?, 'ValidateInput', 'pega_activity', 1, 8, 0, 3)`).run(PID_B, fileId);
+    indexDb.prepare(`INSERT INTO symbols (project_id, file_id, name, kind, start_line, end_line, is_exported, complexity) VALUES (?, ?, 'ProcessClaim', 'pega_rule_obj_flow', 1, 10, 0, 5)`).run(PID_B, fileId);
+    indexDb.prepare(`INSERT INTO symbols (project_id, file_id, name, kind, start_line, end_line, is_exported, complexity) VALUES (?, ?, 'ValidateInput', 'pega_rule_obj_activity', 1, 8, 0, 3)`).run(PID_B, fileId);
 
     await new GraphSyncService(new SqliteDbAdapter(indexDb), new SqliteDbAdapter(adminDb), log).syncProjectSymbols(PID_B);
 
@@ -96,10 +96,10 @@ describe('SA4E-41 GraphSyncService', () => {
     const count = adminDb.prepare("SELECT COUNT(*) c FROM graph_nodes WHERE entry_id LIKE 'code:%' AND project_id = ?").get(PID_B) as any;
     expect(count.c).toBe(3);
 
-    // Verify pega symbols have correct types from KIND_TO_TYPE
-    const pegaNodes = adminDb.prepare("SELECT label, type FROM graph_nodes WHERE entry_id LIKE 'code:%' AND type IN ('FLOW', 'ACTIVITY')").all() as any[];
+    // Verify pega symbols get distinct 1:1 graph types (derived from kind, not collapsed)
+    const pegaNodes = adminDb.prepare("SELECT label, type FROM graph_nodes WHERE entry_id LIKE 'code:%' AND type IN ('RULE_OBJ_FLOW', 'RULE_OBJ_ACTIVITY')").all() as any[];
     expect(pegaNodes.length).toBe(2);
-    expect(pegaNodes.some(n => n.type === 'FLOW')).toBe(true);
-    expect(pegaNodes.some(n => n.type === 'ACTIVITY')).toBe(true);
+    expect(pegaNodes.some(n => n.type === 'RULE_OBJ_FLOW')).toBe(true);
+    expect(pegaNodes.some(n => n.type === 'RULE_OBJ_ACTIVITY')).toBe(true);
   });
 });
