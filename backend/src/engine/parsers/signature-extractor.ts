@@ -1,7 +1,12 @@
 /**
  * Signature Extractor — Multi-language regex-based symbol extraction.
  * Extracts functions, classes, interfaces, and other symbols from source files.
+ *
+ * The per-language `PatternDef[]` sets live in ./languages (SA4E-225) so this
+ * file stays a pure engine and under the 200-line maintainability limit.
  */
+
+import { LANGUAGE_PATTERNS } from './languages/index.js';
 
 export interface ExtractedSymbol {
   name: string;
@@ -19,12 +24,20 @@ export type SymbolKind =
   | 'enum' | 'type' | 'constant' | 'variable'
   | 'module' | 'namespace' | 'trait' | 'struct';
 
-interface PatternDef {
+// Exported so per-language PatternDef sets (./languages/*) can type their constants.
+export interface PatternDef {
   regex: RegExp;
   kind: SymbolKind;
   nameGroup: number;
   signatureGroup?: number;
 }
+
+/**
+ * Security condition C2 — per-line size guard.
+ * Lines longer than this are blanked before matching so that `matchAll` can never
+ * be forced to scan multi-megabyte single lines (reinforces ReDoS condition C1).
+ */
+const MAX_LINE_LENGTH = 8192;
 
 /** Extract symbols from source content based on language. */
 export function extractSymbols(content: string, language: string): ExtractedSymbol[] {
@@ -32,10 +45,14 @@ export function extractSymbols(content: string, language: string): ExtractedSymb
   if (!patterns.length) return [];
 
   const lines = content.split('\n');
-  const symbols: ExtractedSymbol[] = [];
+  // C2 size guard: blank out oversized lines so matchAll operates on bounded input.
+  const safeContent = lines
+    .map((line) => (line.length > MAX_LINE_LENGTH ? '' : line))
+    .join('\n');
 
+  const symbols: ExtractedSymbol[] = [];
   for (const pattern of patterns) {
-    extractWithPattern(lines, content, pattern, symbols);
+    extractWithPattern(lines, safeContent, pattern, symbols);
   }
 
   return deduplicateSymbols(symbols);
@@ -112,71 +129,12 @@ function deduplicateSymbols(symbols: ExtractedSymbol[]): ExtractedSymbol[] {
   });
 }
 
+/** Single source of routing for regex-only languages (SA4E-225 §5.3). */
 function getPatterns(language: string): PatternDef[] {
-  switch (language) {
-    case 'typescript': case 'javascript': return TS_PATTERNS;
-    case 'kotlin': return KOTLIN_PATTERNS;
-    case 'python': return PYTHON_PATTERNS;
-    case 'java': return JAVA_PATTERNS;
-    case 'apex': return APEX_PATTERNS;
-    case 'go': return GO_PATTERNS;
-    case 'rust': return RUST_PATTERNS;
-    default: return GENERIC_PATTERNS;
-  }
+  return LANGUAGE_PATTERNS[language] ?? GENERIC_PATTERNS;
 }
 
-const TS_PATTERNS: PatternDef[] = [
-  { regex: /^(?:export\s+)?(?:async\s+)?function\s+(\w+)/m, kind: 'function', nameGroup: 1 },
-  { regex: /^(?:export\s+)?class\s+(\w+)/m, kind: 'class', nameGroup: 1 },
-  { regex: /^(?:export\s+)?interface\s+(\w+)/m, kind: 'interface', nameGroup: 1 },
-  { regex: /^(?:export\s+)?type\s+(\w+)/m, kind: 'type', nameGroup: 1 },
-  { regex: /^(?:export\s+)?enum\s+(\w+)/m, kind: 'enum', nameGroup: 1 },
-  { regex: /^(?:export\s+)?const\s+(\w+)\s*=\s*(?:async\s*)?\(/m, kind: 'function', nameGroup: 1 },
-];
-
-const KOTLIN_PATTERNS: PatternDef[] = [
-  { regex: /^\s*(?:(?:public|private|internal|protected)\s+)?(?:suspend\s+)?fun\s+(\w+)/m, kind: 'function', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|internal|protected)\s+)?(?:data\s+|sealed\s+|abstract\s+|open\s+)?class\s+(\w+)/m, kind: 'class', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|internal|protected)\s+)?interface\s+(\w+)/m, kind: 'interface', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|internal|protected)\s+)?object\s+(\w+)/m, kind: 'module', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|internal|protected)\s+)?enum\s+class\s+(\w+)/m, kind: 'enum', nameGroup: 1 },
-];
-
-const PYTHON_PATTERNS: PatternDef[] = [
-  { regex: /^(?:async\s+)?def\s+(\w+)/m, kind: 'function', nameGroup: 1 },
-  { regex: /^class\s+(\w+)/m, kind: 'class', nameGroup: 1 },
-];
-
-const JAVA_PATTERNS: PatternDef[] = [
-  { regex: /^\s*(?:(?:public|private|protected)\s+)?(?:static\s+)?(?:[\w<>]+(?:\s*\[\])*\s+)(\w+)\s*\(/m, kind: 'function', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|protected)\s+)?(?:abstract\s+)?class\s+(\w+)/m, kind: 'class', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|protected)\s+)?interface\s+(\w+)/m, kind: 'interface', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|protected)\s+)?enum\s+(\w+)/m, kind: 'enum', nameGroup: 1 },
-];
-
-const GO_PATTERNS: PatternDef[] = [
-  { regex: /^func\s+(?:\(\w+\s+\*?\w+\)\s+)?(\w+)/m, kind: 'function', nameGroup: 1 },
-  { regex: /^type\s+(\w+)\s+struct/m, kind: 'struct', nameGroup: 1 },
-  { regex: /^type\s+(\w+)\s+interface/m, kind: 'interface', nameGroup: 1 },
-];
-
-const RUST_PATTERNS: PatternDef[] = [
-  { regex: /^\s*(?:pub\s+)?(?:async\s+)?fn\s+(\w+)/m, kind: 'function', nameGroup: 1 },
-  { regex: /^\s*(?:pub\s+)?struct\s+(\w+)/m, kind: 'struct', nameGroup: 1 },
-  { regex: /^\s*(?:pub\s+)?trait\s+(\w+)/m, kind: 'trait', nameGroup: 1 },
-  { regex: /^\s*(?:pub\s+)?enum\s+(\w+)/m, kind: 'enum', nameGroup: 1 },
-  { regex: /^\s*(?:pub\s+)?mod\s+(\w+)/m, kind: 'module', nameGroup: 1 },
-];
-
-/** Apex (Salesforce) — classes, interfaces, enums, triggers, methods. */
-const APEX_PATTERNS: PatternDef[] = [
-  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?(?:virtual\s+|abstract\s+|with\s+sharing\s+|without\s+sharing\s+|inherited\s+sharing\s+)*class\s+(\w+)/m, kind: 'class', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?interface\s+(\w+)/m, kind: 'interface', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?enum\s+(\w+)/m, kind: 'enum', nameGroup: 1 },
-  { regex: /^\s*trigger\s+(\w+)\s+on\s+/m, kind: 'function', nameGroup: 1 },
-  { regex: /^\s*(?:(?:public|private|protected|global)\s+)?(?:static\s+)?(?:(?:override|virtual|abstract|testMethod)\s+)*(?:[\w<>,\s[\]]+?)\s+(\w+)\s*\(/m, kind: 'method', nameGroup: 1 },
-];
-
+/** Fallback patterns used when no language-specific set is registered. */
 const GENERIC_PATTERNS: PatternDef[] = [
   { regex: /^(?:function|def|func|fn|sub)\s+(\w+)/m, kind: 'function', nameGroup: 1 },
   { regex: /^(?:class|struct|type)\s+(\w+)/m, kind: 'class', nameGroup: 1 },

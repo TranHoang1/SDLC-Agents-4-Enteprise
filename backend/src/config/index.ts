@@ -15,7 +15,7 @@ const DEFAULT_EXCLUDE = [
   '.code-intel', 'coverage', '.next', '.nuxt',
 ];
 
-const DEFAULT_EXTENSIONS = [
+export const DEFAULT_EXTENSIONS = [
   '.ts', '.tsx', '.js', '.jsx', '.kt', '.java', '.py',
   '.go', '.rs', '.c', '.cpp', '.h', '.hpp', '.cs',
   '.rb', '.php', '.swift', '.scala', '.sql', '.sh',
@@ -23,6 +23,8 @@ const DEFAULT_EXTENSIONS = [
   '.cls', '.trigger', '.pega',
   // ---- SA4E-223: new Salesforce simple extensions (Gate 2) ----
   '.apex', '.soql', '.page', '.component', '.cmp', '.app', '.evt', '.intf', '.tokens',
+  // ---- SA4E-225: un-skip PowerShell ----
+  '.ps1',
 ];
 
 const UnifiedConfigSchema = z.object({
