@@ -41,8 +41,8 @@ export function registerCommands(context: vscode.ExtensionContext, deps: Command
   const { mcpManager, panelManager, authManager, treeProvider, workspaceRoot } = deps;
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("kiroSdlc.injectAll", () => handleInjectAll(context)),
-    vscode.commands.registerCommand("kiroSdlc.injectSelective", () => handleInjectSelective(context)),
+    vscode.commands.registerCommand("kiroSdlc.injectAll", () => handleInjectAll(context, mcpManager)),
+    vscode.commands.registerCommand("kiroSdlc.injectSelective", () => handleInjectSelective(context, mcpManager)),
     vscode.commands.registerCommand("kiroSdlc.update", () => handleUpdate(context)),
     vscode.commands.registerCommand("kiroSdlc.status", () => handleStatus(context)),
     vscode.commands.registerCommand("kiroSdlc.indexWorkspace", () => handleIndexWorkspace(
@@ -130,22 +130,24 @@ async function handleLogout(authManager?: AuthManager, panelManager?: WebviewPan
   vscode.window.showInformationMessage("Logged out successfully.");
 }
 
-async function handleInjectAll(context: vscode.ExtensionContext): Promise<void> {
+async function handleInjectAll(context: vscode.ExtensionContext, mcpManager?: IServerManager): Promise<void> {
   const root = getWorkspaceRoot();
   if (!root) { return; }
   const confirm = await vscode.window.showInformationMessage("Inject all SDLC agents?", "Yes", "Cancel");
   if (confirm !== "Yes") { return; }
   try {
-    const injected = await injectAll(root, context.extensionPath);
+    const port = mcpManager?.port || 9181;
+    const injected = await injectAll(root, context.extensionPath, port);
     vscode.window.showInformationMessage(`✅ Injected ${injected.length} components`);
     await promptIndexAfterInject(root);
   } catch (err) { showUserError("Inject", err); }
 }
 
-async function handleInjectSelective(context: vscode.ExtensionContext): Promise<void> {
+async function handleInjectSelective(context: vscode.ExtensionContext, mcpManager?: IManager): Promise<void> {
   const root = getWorkspaceRoot();
   if (!root) { return; }
-  const injected = await injectSelective(root, context.extensionPath);
+  const port = mcpManager?.port || 9181;
+  const injected = await injectSelective(root, context.extensionPath, port);
   if (injected.length > 0) { vscode.window.showInformationMessage(`✅ Injected: ${injected.join(", ")}`); await promptIndexAfterInject(root); }
 }
 
