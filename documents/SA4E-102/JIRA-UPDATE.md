@@ -87,22 +87,38 @@ extension/src/services/jira-sync/
 
 ## Acceptance Criteria
 
-- [ ] **AC-1**: QuickPick "Index Workspace" menu hiển thị option "Index Jira Project" (unchecked by default)
-- [ ] **AC-2**: Khi chọn, user được prompt nhập Project Key (InputBox với validation)
-- [ ] **AC-3**: Paginated fetch tất cả tickets trong project (JQL `project = KEY`)
-- [ ] **AC-4**: Per ticket: fetch linked issues (inward + outward) với max depth = 2, anti-loop via visitedSet
-- [ ] **AC-5**: Per ticket: fetch all comments, convert ADF → Markdown, output summary format `[date] @author: summary`
-- [ ] **AC-6**: Per ticket: download text-based attachments (.md, .txt, .json, .csv, .yml) — convert .docx/.xlsx/.pdf via ConvertToolResolver
-- [ ] **AC-7**: Per ticket: ingest 3 KB entries (metadata, comments, links) với scope=PROJECT
-- [ ] **AC-8**: KB entry `source` field format: `jira/{PROJECT}/{KEY}/{type}` (searchable via mem_search)
-- [ ] **AC-9**: Incremental sync: chỉ fetch tickets có `updated > lastSyncDate` (trừ lần đầu = full)
-- [ ] **AC-10**: Linked tickets ngoài project: full-deep (desc + comments + links) nhưng không download attachment
-- [ ] **AC-11**: Progress reporting: status bar + output channel hiển thị tiến trình (fetched X/Y, ingesting...)
-- [ ] **AC-12**: Error handling: network errors, rate limits (429) → retry with backoff, partial results reported
-- [ ] **AC-13**: Comment body scan phát hiện ticket references → add vào links entry
-- [ ] **AC-14**: ADF fallback: nếu ADF parse fail → dùng renderedBody HTML → strip tags
+- [x] **AC-1**: QuickPick "Index Workspace" menu hiển thị option "Index Jira Project" (unchecked by default) — verified in `extension/src/indexer.ts:137`
+- [x] **AC-2**: Khi chọn, user được prompt nhập Project Key (InputBox với validation) — verified in `extension/src/services/JiraProjectIndexer.ts`
+- [x] **AC-3**: Paginated fetch tất cả tickets trong project (JQL `project = KEY`) — verified (PAGE_SIZE=50) in `JiraProjectIndexer.ts`
+- [x] **AC-4**: Per ticket: fetch linked issues (inward + outward) với max depth = 2, anti-loop via visitedSet — verified in `LinkCrawler.ts`
+- [x] **AC-5**: Per ticket: fetch all comments, convert ADF → Markdown, output summary format `[date] @author: summary` — verified in `CommentSummarizer.ts` + `AdfConverter.ts`
+- [x] **AC-6**: Per ticket: download text-based attachments (.md, .txt, .json, .csv, .yml) — convert .docx/.xlsx/.pdf via ConvertToolResolver — verified in `AttachmentFetcher.ts`
+- [x] **AC-7**: Per ticket: ingest 3 KB entries (metadata, comments, links) với scope=PROJECT — verified in `KbEntryBuilder.ts`
+- [x] **AC-8**: KB entry `source` field format: `jira/{PROJECT}/{KEY}/{type}` (searchable via mem_search) — verified (source pattern + scope=PROJECT)
+- [x] **AC-9**: Incremental sync: chỉ fetch tickets có `updated > lastSyncDate` (trừ lần đầu = full) — verified in `SyncState.ts`
+- [x] **AC-10**: Linked tickets ngoài project: full-deep (desc + comments + links) nhưng không download attachment — verified in `JiraProjectIndexer.ts`
+- [x] **AC-11**: Progress reporting: status bar + output channel hiển thị tiến trình (fetched X/Y, ingesting...) — verified in `JiraProjectIndexer.ts`
+- [x] **AC-12**: Error handling: network errors, rate limits (429) → retry with backoff, partial results reported — verified in `JiraProjectIndexer.ts`
+- [x] **AC-13**: Comment body scan phát hiện ticket references → add vào links entry — verified in `KbEntryBuilder.ts`
+- [x] **AC-14**: ADF fallback: nếu ADF parse fail → dùng renderedBody HTML → strip tags — verified in `AdfConverter.ts`
+
+> **Note (D-5):** Linked-issue KB entry currently uses `type: CONTEXT` (`KbEntryBuilder.ts:124`) instead of the originally specified `ARCHITECTURE`. This is a known minor deviation being addressed — low impact, no functional break. See `DISCREPANCY.md` §4.
 
 ---
+
+## Out-of-scope / Tracked Separately
+
+This document covers **Option A (batch sync)** only — the deep-crawl + KB ingestion flow implemented in the VS Code extension (`extension/src/services/jira-sync/*`, `JiraProjectIndexer.ts`).
+
+The following requirements are **NOT covered by this document** and are tracked separately in `DISCREPANCY.md`. They will be routed to a follow-up ticket / dev-agent for Phase 5 implementation:
+
+| ID | Requirement | Source | Status |
+|----|-------------|--------|--------|
+| D-1 | On-demand auto-cache: `jira_get_issue` must auto-ingest fetched ticket into KB (fire-and-forget, <500ms) | BRD #2 (MUST HAVE); FSD UC-02 | ❌ Not implemented — tracked in DISCREPANCY.md §3 |
+| D-2 | Graph node per ticket: `mem_graph(action:"add_node")` `type=TICKET` | BRD #4 (SHOULD HAVE); FSD UC-04 | ❌ Not implemented — tracked in DISCREPANCY.md §3 |
+| D-3 | Graph edges `DEPENDS_ON` / `IMPLEMENTS` / `RELATES_TO` between linked tickets | BRD #4; FSD UC-05 | ❌ Not implemented — tracked in DISCREPANCY.md §3 |
+
+> These items remain open gaps vs the full BRD/FSD scope and are intentionally excluded from this doc's acceptance criteria.
 
 ## Labels
 indexing, knowledge-base, jira, sync
