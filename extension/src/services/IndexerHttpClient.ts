@@ -77,17 +77,47 @@ export class IndexerHttpClient {
                 if (!ok) { statusBar.text = "$(sync~spin) Indexing..."; statusBar.tooltip = "Code Intelligence: Indexing workspace..."; continue; }
                 try {
                     const progress = JSON.parse(body);
-                    if (progress.phase === 'idle') {
+                    const status = progress.status;
+                    if (status === 'idle' || progress.phase === 'idle') {
                         statusBar.text = "$(check) Index complete";
                         statusBar.tooltip = "Code Intelligence: Indexing finished successfully";
                         setTimeout(() => statusBar.dispose(), 5000);
                         return;
                     }
+                    if (status === 'interrupted') {
+                        statusBar.text = "$(warning) Index interrupted";
+                        statusBar.tooltip = "Code Intelligence: Indexing was interrupted by backend restart";
+                        setTimeout(() => statusBar.dispose(), 8000);
+                        return;
+                    }
+                    if (status === 'superseded') {
+                        statusBar.text = "$(info) Index superseded";
+                        statusBar.tooltip = "Code Intelligence: Previous index was superseded by a new run";
+                        setTimeout(() => statusBar.dispose(), 8000);
+                        return;
+                    }
+                    if (status === 'failed' || progress.phase === 'error') {
+                        statusBar.text = "$(error) Index failed";
+                        statusBar.tooltip = `Code Intelligence: Indexing failed — ${progress.message || 'unknown error'}`;
+                        setTimeout(() => statusBar.dispose(), 8000);
+                        return;
+                    }
+                    if (status === 'cancelled' || progress.phase === 'cancelled') {
+                        statusBar.text = "$(stop) Index cancelled";
+                        statusBar.tooltip = "Code Intelligence: Indexing was cancelled";
+                        setTimeout(() => statusBar.dispose(), 5000);
+                        return;
+                    }
                     const elapsed = Math.round((progress.elapsedMs || 0) / 1000);
+                    const checksumStats = progress.checksumStats;
+                    let checksumInfo = '';
+                    if (checksumStats) {
+                        checksumInfo = `\nChecksum: skipped ${checksumStats.files_skipped}, processed ${checksumStats.files_processed}, pending ${checksumStats.files_pending}`;
+                    }
                     statusBar.text = `$(sync~spin) Indexing: ${progress.percentage}%`;
-                    statusBar.tooltip = `Code Intelligence — ${progress.phase}\n`
+                    statusBar.tooltip = `Code Intelligence — ${progress.phase}${status ? ' (' + status + ')' : ''}\n`
                         + `Progress: ${progress.current}/${progress.total} files (${progress.percentage}%)\n`
-                        + `Elapsed: ${elapsed}s\n`
+                        + `Elapsed: ${elapsed}s${checksumInfo}\n`
                         + (progress.currentFile ? `Current: ${progress.currentFile}` : '');
                 } catch { statusBar.text = "$(sync~spin) Indexing..."; statusBar.tooltip = "Code Intelligence: Processing..."; }
             }
@@ -258,7 +288,15 @@ export class IndexerHttpClient {
     private async triggerFullIndex(token?: string): Promise<void> {
         try {
             const url = `${this.backendUrl}/api/index/full`;
-            await this.httpPostWithDetail(url, {}, token);
+            const { ok, body } = await this.httpPostJson(url, {}, token);
+            if (ok && body) {
+                try {
+                    const data = JSON.parse(body);
+                    if (data.cancelledPrevious && data.message) {
+                        vscode.window.showInformationMessage(`Indexing: ${data.message}`);
+                    }
+                } catch { /* ignore parse errors */ }
+            }
         } catch { /* non-fatal */ }
     }
 

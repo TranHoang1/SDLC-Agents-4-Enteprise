@@ -31,6 +31,9 @@ import { createPegaStreamRoutes } from './routes/pega-stream.js';
 import { createIngestRuleRoute } from './routes/pega-ingest-rule.js';
 import { createPegaSchemaRoutes } from './routes/pega-schema-routes.js';
 import { getDbAdapter } from '../admin/db/core.js';
+import { ensureSa4e101Tables } from '../database/schema-registry/ensure-sa4e-101.js';
+import { runStartupInterruptDetection } from '../engine/indexer/startup-interrupt-detector.js';
+import { CleanupScheduler } from '../engine/indexer/cleanup-scheduler.js';
 import { createPegaSyncToKbRoutes } from './routes/pega-sync-to-kb.js';
 import { createKnowledgeApiRoutes } from '../knowledge/routes.js';
 import { bodyLimit } from 'hono/body-limit';
@@ -56,6 +59,8 @@ export class HttpServer {
   private port: number;
   private host: string;
   private _isRunning = false;
+  /** SA4E-101: periodic terminal-record cleanup (started after DB bootstrap). */
+  private cleanupScheduler?: CleanupScheduler;
 
   constructor(private options: HttpServerOptions) {
     this.logger = options.logger;
@@ -162,6 +167,21 @@ export class HttpServer {
         loadPersistedRateLimitCap().catch((err) => {
           this.logger.debug({ err }, '[RateLimit] Failed to load persisted cap — using env default');
         });
+        // SA4E-101: bootstrap persistent index-status tables, then mark stale
+        // running ops as interrupted, then start the cleanup scheduler.
+        // All non-blocking — failures degrade gracefully (EF-04).
+        ensureSa4e101Tables()
+          .then(() => runStartupInterruptDetection())
+          .then(() => {
+            this.cleanupScheduler = new CleanupScheduler();
+            this.cleanupScheduler.start();
+          })
+          .catch((err) => {
+            this.logger.error(
+              { err },
+              '[startup] SA4E-101 persistence init failed — progress will not survive restart',
+            );
+          });
         resolve();
       });
     });
@@ -169,6 +189,7 @@ export class HttpServer {
 
   async stop(): Promise<void> {
     if (this.server) {
+      this.cleanupScheduler?.stop();
       this.server.close();
       this._isRunning = false;
       this.logger.info('Backend server stopped');
