@@ -31,3 +31,13 @@ Agent: SM
 Action: Document consistency fix — updated TDD.md §1.2/§10, created FSD.md (extension-scoped), rewrote DPG.md v1.1 + RLN.md v1.1 to reflect extension deployment (.vsix), updated STATUS.json
 Result: All SDLC docs now consistent: tool implemented IN EXTENSION (in-process), not backend MCP server.
 
+## 2026-08-28T18:05:00Z
+Agent: SM
+Action: UAT execution — invoked jira_download_attachment (live) on attachment 11263
+Result: UAT PASS. Tool returned content_base64 + mime_type + filename + size_bytes (199740), NO 403. Confirmed extension authenticated session works.
+
+## 2026-08-28T18:10:00Z
+Agent: SM
+Action: Close ticket — Jira SA4E-229 transitioned to Done; STATUS.json set to done; testing phase marked UAT-verified
+Result: SA4E-229 completed end-to-end (Requirements→Deployment) with extension implementation, docs aligned, UAT pass.
+

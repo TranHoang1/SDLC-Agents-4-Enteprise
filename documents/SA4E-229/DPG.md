@@ -178,3 +178,14 @@ No DB rollback needed.
 ### CI/CD Reference
 - `.github/workflows/ci-sa4e-229.yml`
 - Reverted backend attempt: PR #8 (undo), corrected: PR #9 (extension).
+
+---
+
+## 11. Rollout Execution Record
+- **Date:** 2026-08-28
+- **Version:** extension `1.39.0` (bumped from `1.38.0` in `extension/package.json`)
+- **Package built:** `extension/sdlc-agents-4-Enterprise-1.39.0.vsix` (14.35 MB, 1693 files) via `npm run package:prod`
+- **Git tag:** `v1.39.0` → pushed to `origin/main` (commit `ae30c20`)
+- **UAT:** PASSED — `jira_download_attachment` invoked on live attachment `11263` returned `content_base64` + `mime_type` + `filename` + `size_bytes`, no 403
+- **Jira:** SA4E-229 transitioned to **Done**
+- **Install (SIT/UAT/PROD):** `code --install-extension sdlc-agents-4-enterprise-1.39.0.vsix` then reload window; tool registered in-process, no backend restart.
