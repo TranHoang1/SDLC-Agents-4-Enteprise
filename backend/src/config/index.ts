@@ -6,6 +6,7 @@ import * as crypto from 'crypto';
 import { execSync } from 'child_process';
 import * as os from 'os';
 import pino from 'pino';
+import { SandboxConfigSchema } from './SandboxConfig.js';
 
 const logger = pino({ name: 'app-config' });
 
@@ -48,6 +49,7 @@ const UnifiedConfigSchema = z.object({
   orchestrationConfigPath: z.string(),
   excludePatterns: z.array(z.string()),
   includeExtensions: z.array(z.string()),
+  sandbox: SandboxConfigSchema,
 });
 
 export type UnifiedConfig = z.infer<typeof UnifiedConfigSchema>;
@@ -160,6 +162,7 @@ export function loadConfig(overrides?: Partial<UnifiedConfig>): UnifiedConfig {
     orchestrationConfigPath: process.env.CODE_INTEL_ORCHESTRATION || 'orchestration.json',
     excludePatterns: fileConfig.excludePatterns ?? DEFAULT_EXCLUDE,
     includeExtensions: fileConfig.includeExtensions ?? DEFAULT_EXTENSIONS,
+    sandbox: fileConfig.sandbox ?? {},
     ...overrides,
   };
 

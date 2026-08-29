@@ -33,11 +33,16 @@ export async function migrate003PendingTasks(db: DatabaseAdapter): Promise<void>
       status TEXT NOT NULL DEFAULT 'PENDING',
       payload TEXT NOT NULL,
       error TEXT,
+      error_message TEXT,
       retry_count INTEGER NOT NULL DEFAULT 0,
       max_retries INTEGER NOT NULL DEFAULT 3,
+      priority INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT current_timestamp,
       started_at TEXT,
       completed_at TEXT,
+      updated_at TEXT,
+      claimed_at TEXT,
+      dead_lettered_at TEXT,
       FOREIGN KEY (entry_id) REFERENCES knowledge_entries(id)
     )
   `);

@@ -11,7 +11,7 @@
 | Jira Ticket | SA4E-6 |
 | Title | Sandbox Execution (MCP Server Bridge) |
 | Author | SA Agent |
-| Version | 1.0 |
+| Version | 1.1 |
 | Date | 2026-07-03 |
 | Status | Draft |
 | Related BRD | BRD-v1-SA4E-6.docx |
@@ -33,6 +33,7 @@
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-07-03 | SA Agent | Initiate document — TDD for Sandbox Execution module |
+| 1.1 | 2026-08-28 | SA Agent | Record SM decisions (K8s deferred SD-1, Security reuse SD-2); add §1.7, §5.7 Backend Integration Contract, §7.5 Security Module Integration; fix registration point to ModuleFactory; fix 4 mis-wrapped diagrams; add 3 diagrams (architecture, component, class-sandbox); update Diagram Index; create DISCREPANCY.md (DISC-1) |
 
 ---
 
@@ -62,6 +63,7 @@ Design the Sandbox Execution module as a plugin to the Backend MCP Server (SA4E-
 - **SessionStore** — in-memory session registry with TTL tracking
 - **Reaper** — background cleanup timer
 - **5 MCP Tools** — sandbox_session, sandbox_exec, sandbox_run, sandbox_install, sandbox_test
+- **Out of scope for SA4E-6** — Kubernetes (K8s) executor. Deferred to Phase 2; `IExecutor` is retained so it can be added later without changing `ExecutionManager` (see §1.7, DISC-1).
 
 ### 1.3 Technology Stack
 
@@ -105,6 +107,19 @@ Design the Sandbox Execution module as a plugin to the Backend MCP Server (SA4E-
 
 ---
 
+## 1.7 Scope Decisions (SM-Resolved)
+
+Two design decisions were resolved by the Scrum Master prior to implementation and MUST be honored by this TDD:
+
+| # | Decision | Implication for SA4E-6 |
+|---|----------|------------------------|
+| SD-1 | **K8s executor DEFERRED to Phase 2** | SA4E-6 delivers **Local + Docker** executors only. The `IExecutor` strategy pattern is retained specifically so a `KubernetesExecutor` can be added later without touching `ExecutionManager`. The ticket description's claim of "3 modes incl. K8s" is a **scope inconsistency** (see DISCREPANCY.md, DISC-1). |
+| SD-2 | **Security REUSE via SecurityModule (SA4E-167 GateGuard)** | `SandboxModule` / `DockerExecutor` MUST reuse the existing `SecurityModule` for BR-12 hardening (cap drop, no-new-privileges, seccomp, non-privileged, read-only rootfs + tmpfs). Do NOT re-implement hardening. See §7.5 for graceful degradation. |
+
+> **Source-set note:** `BRD-TOUCH.md` and `TDD-TOUCH.md` in this folder belong to a **different feature** and are NOT part of the SA4E-6 source set. They are excluded from the diagram index and must not be edited as part of SA4E-6.
+
+---
+
 ## 2. System Architecture
 
 ### 2.1 Architecture Overview
@@ -112,13 +127,14 @@ Design the Sandbox Execution module as a plugin to the Backend MCP Server (SA4E-
 The Sandbox Execution module integrates as a new plugin in the Backend MCP Server's ModuleRegistry. It follows the same lifecycle pattern as existing modules (MemoryModule, CodeIntelModule, OrchestrationModule).
 
 ![Architecture Diagram](diagrams/architecture.png)
+*[Edit in draw.io](diagrams/architecture.drawio)*
 
 **Key Architectural Decisions:**
 
 | # | Decision | Rationale |
 |---|----------|-----------|
 | AD-1 | In-process module (not separate service) | Avoid network hop; leverage existing auth, logging, tool discovery |
-| AD-2 | Strategy pattern for executors | Easy to add K8s executor later without modifying manager |
+| AD-2 | Strategy pattern for executors | Easy to add **K8s executor in Phase 2** without modifying manager (K8s OUT of scope for SA4E-6 — see §1.7, DISC-1) |
 | AD-3 | In-memory session store | Sessions are ephemeral; no need for DB persistence |
 | AD-4 | Lazy Docker connection | Don't fail backend startup if Docker is unavailable |
 | AD-5 | Output buffering with cap | Prevent memory exhaustion from verbose commands |
@@ -126,6 +142,7 @@ The Sandbox Execution module integrates as a new plugin in the Backend MCP Serve
 ### 2.2 Component Diagram
 
 ![Component Diagram](diagrams/component.png)
+*[Edit in draw.io](diagrams/component.drawio)*
 
 | Component | Responsibility | Technology |
 |-----------|---------------|------------|
@@ -577,6 +594,7 @@ export interface IExecutionManager {
 ### 5.3 Class Diagram
 
 ![Class Diagram](diagrams/class-sandbox.png)
+*[Edit in draw.io](diagrams/class-sandbox.drawio)*
 
 ### 5.4 Design Patterns
 
@@ -717,6 +735,53 @@ export class SandboxError extends Error {
 ```
 
 ---
+### 5.7 Backend Integration Contract (Verified)
+
+The backend MCP Server exposes a fixed plugin contract. `SandboxModule` MUST conform exactly:
+
+**IModule shape (`backend/src/types/module.ts`):**
+
+```typescript
+interface IModule {
+  readonly name: string;
+  status: ModuleStatus;
+  initialize(): Promise<void>;
+  shutdown(): Promise<void>;
+  getToolHandlers(): Map<string, ToolHandler>;
+  getToolDefinitions(): ToolDefinition[];
+}
+```
+
+**Registration point (CORRECT):** `backend/src/modules/ModuleFactory.ts:39` — `createAndRegisterAll()`. `SandboxModule` is NOT yet registered; add it there alongside the other modules. (Earlier drafts referenced `backend/src/index.ts` — that is incorrect; registration is centralized in `ModuleFactory`.)
+
+```typescript
+// backend/src/modules/ModuleFactory.ts  (inside createAndRegisterAll)
+const sandbox = new SandboxModule(logger);
+registry.register(sandbox);
+```
+
+**ToolHandler return-shape pitfall (CRITICAL):** A `ToolHandler` returns `{ content: [{ type: 'text', text: string }], isError: boolean }`. Sandbox tools MUST serialize their `ExecutionResult` (or `TestResult`) as a **JSON string inside `content[0].text`** and set `isError: true` on failure. Returning a raw object or omitting `content[0].text` will break the MCP client.
+
+```typescript
+// CORRECT
+return {
+  content: [{ type: 'text', text: JSON.stringify(result) }],
+  isError: false,
+};
+
+// WRONG — client cannot parse, content[0].text missing
+return { content: [result], isError: false } as any;
+```
+
+**Config & helpers (reuse, do NOT reinvent):**
+- `loadConfig()` — read the `sandbox.*` config block.
+- `resolveWithinWorkspace(path)` — safely resolve mount sources / file paths, preventing escape outside the workspace root.
+- `withErrorHandling(handler)` — standardize error → `isError: true` responses.
+
+**SecurityModule location:** `backend/src/modules/security/SecurityModule.ts`. `DockerExecutor` obtains BR-12 hardening params from it (see §7.5).
+
+---
+
 ## 6. Integration Design
 
 ### 6.1 External System: Docker Engine
@@ -762,15 +827,17 @@ const hostConfig: Docker.HostConfig = {
 
 ### 6.2 Internal System: ModuleRegistry Integration
 
-**Registration (in backend/src/index.ts):**
+**Registration (in `backend/src/modules/ModuleFactory.ts:39` — `createAndRegisterAll()`):**
 
 ```typescript
 import { SandboxModule } from './modules/sandbox/SandboxModule.js';
 
-// In server initialization:
+// Inside createAndRegisterAll(), alongside other modules:
 const sandboxModule = new SandboxModule(logger);
 registry.register(sandboxModule);
 ```
+
+> NOTE: Earlier drafts referenced `backend/src/index.ts`. The canonical registration point is `ModuleFactory.createAndRegisterAll()` — `SandboxModule` is not yet registered there. Do NOT add a separate registration in `index.ts`.
 
 **Tool Discovery Integration:**
 
@@ -871,6 +938,35 @@ Mitigations in local mode:
 - No resource limits (OS-level only)
 
 ---
+### 7.5 Security Module Integration (Reuse of SecurityModule / SA4E-167 GateGuard)
+
+Per SM decision SD-2, `SandboxModule` / `DockerExecutor` MUST reuse the **existing `SecurityModule`** for BR-12 hardening. Do NOT re-implement:
+
+| BR-12 Control | Provided by SecurityModule | Applied to |
+|---------------|----------------------------|------------|
+| Capability drop | `CapDrop: ['ALL']` | Docker HostConfig |
+| No-new-privileges | `SecurityOpt: ['no-new-privileges:true']` | Docker HostConfig |
+| seccomp profile | default / seccomp.json | Docker HostConfig |
+| Non-privileged | `Privileged: false` | Docker HostConfig |
+| Read-only rootfs + tmpfs | `ReadonlyRootfs: true` + tmpfs mount for `/tmp` (writable layer for package install) | Docker HostConfig |
+
+**Graceful degradation:** If `SecurityModule` is NOT registered in the backend (e.g., a minimal backend build), `DockerExecutor` MUST fall back to a **built-in safe default** rather than silently launching an unhardened container:
+
+```typescript
+const hardening = securityModule?.getHardeningProfile('sandbox') ?? {
+  CapDrop: ['ALL'],
+  SecurityOpt: ['no-new-privileges:true'],
+  Privileged: false,
+  ReadonlyRootfs: true,
+};
+```
+
+The module logs a `WARN` when falling back so operators are aware hardening is not centrally managed.
+
+> Note: `LocalExecutor` provides NO isolation by design (see §7.4). It is exempt from BR-12 container controls but still benefits from timeout + output-cap enforcement.
+
+---
+
 ## 8. Performance & Scalability
 
 ### 8.1 Performance Targets
@@ -1011,7 +1107,7 @@ sandbox:
 ### 10.5 Rollback Strategy
 
 Module is isolated within ModuleRegistry. Rollback:
-1. Remove `SandboxModule` registration from `backend/src/index.ts`
+1. Remove `SandboxModule` registration from `backend/src/modules/ModuleFactory.ts` (`createAndRegisterAll`)
 2. Remove `backend/src/modules/sandbox/` directory
 3. Remove `dockerode` from package.json
 4. Rebuild — no other modules affected
@@ -1049,7 +1145,7 @@ No database migrations. No schema changes. No external service dependencies that
 
 | # | File | Change | Impact |
 |---|------|--------|--------|
-| 1 | `backend/src/index.ts` | Add SandboxModule registration | Low — 3 lines |
+| 1 | `backend/src/modules/ModuleFactory.ts` | Add SandboxModule registration in `createAndRegisterAll()` | Low — 3 lines |
 | 2 | `backend/package.json` | Add dockerode dependency | Low |
 | 3 | `backend/src/types/tool.ts` | Add 'sandbox' to category union | Low — 1 line |
 
@@ -1109,15 +1205,20 @@ Phase 6: Testing (Day 5-7)
 | 1 | Should we support custom Dockerfiles for session images? | Deferred | Phase 2 — custom images via pre-built |
 | 2 | Should output streaming use Server-Sent Events? | Resolved | No — MCP request/response is sufficient. Agent polls for long commands. |
 | 3 | Should sessions survive backend restart? | Resolved | No — sessions are ephemeral. Orphan cleanup handles crash recovery. |
-| 4 | K8s executor design? | Deferred | Separate ticket, same IExecutor interface |
+| 4 | K8s executor design? | Deferred to **Phase 2** | Out of scope for SA4E-6 (Local + Docker only). Ticket description's "3 modes incl. K8s" is a scope inconsistency — see DISCREPANCY.md DISC-1. Same IExecutor interface will be reused. |
 
 ### Diagram Index
 
-| # | Diagram | Image | Source (editable) |
-|---|---------|-------|-------------------|
-| 1 | Architecture Overview | [architecture.png](diagrams/architecture.png) | [architecture.drawio](diagrams/architecture.drawio) |
-| 2 | Component Diagram | [component.png](diagrams/component.png) | [component.drawio](diagrams/component.drawio) |
-| 3 | Class Diagram | [class-sandbox.png](diagrams/class-sandbox.png) | [class-sandbox.drawio](diagrams/class-sandbox.drawio) |
-| 4 | Session Creation Sequence | [sequence-session-creation.png](diagrams/sequence-session-creation.png) | [sequence-session-creation.drawio](diagrams/sequence-session-creation.drawio) |
-| 5 | Command Execution Sequence | [sequence-command-execution.png](diagrams/sequence-command-execution.png) | [sequence-command-execution.drawio](diagrams/sequence-command-execution.drawio) |
-| 6 | Session Lifecycle State | [state-session-lifecycle.png](diagrams/state-session-lifecycle.png) | [state-session-lifecycle.drawio](diagrams/state-session-lifecycle.drawio) |
+| # | Diagram | Source Doc | Image | Source (editable) |
+|---|---------|-----------|-------|-------------------|
+| 1 | Business Flow | BRD/FSD | [business-flow.png](diagrams/business-flow.png) | [business-flow.drawio](diagrams/business-flow.drawio) |
+| 2 | Use Case | BRD/FSD | [use-case.png](diagrams/use-case.png) | [use-case.drawio](diagrams/use-case.drawio) |
+| 3 | System Context | FSD | [system-context.png](diagrams/system-context.png) | [system-context.drawio](diagrams/system-context.drawio) |
+| 4 | Architecture Overview | TDD | [architecture.png](diagrams/architecture.png) | [architecture.drawio](diagrams/architecture.drawio) |
+| 5 | Component Diagram | TDD | [component.png](diagrams/component.png) | [component.drawio](diagrams/component.drawio) |
+| 6 | Class Diagram | TDD | [class-sandbox.png](diagrams/class-sandbox.png) | [class-sandbox.drawio](diagrams/class-sandbox.drawio) |
+| 7 | Session Creation Sequence | TDD/FSD | [sequence-session-creation.png](diagrams/sequence-session-creation.png) | [sequence-session-creation.drawio](diagrams/sequence-session-creation.drawio) |
+| 8 | Command Execution Sequence | TDD/FSD | [sequence-command-execution.png](diagrams/sequence-command-execution.png) | [sequence-command-execution.drawio](diagrams/sequence-command-execution.drawio) |
+| 9 | Session Lifecycle State | TDD/FSD | [state-session-lifecycle.png](diagrams/state-session-lifecycle.png) | [state-session-lifecycle.drawio](diagrams/state-session-lifecycle.drawio) |
+
+> NOTE: `BRD-TOUCH.md` / `TDD-TOUCH.md` in this folder belong to a **different feature** and are NOT part of the SA4E-6 source set. They are excluded from the diagram index above.
