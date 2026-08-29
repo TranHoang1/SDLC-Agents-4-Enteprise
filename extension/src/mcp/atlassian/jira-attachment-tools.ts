@@ -1,6 +1,8 @@
 /**
- * SA4E-110 — Jira attachment tools (3 tools) registered in-process.
- * attach_file, get_attachments, delete_attachment.
+ * SA4E-110 + SA4E-229 — Jira attachment tools (4 tools) registered in-process.
+ * attach_file, get_attachments, delete_attachment (SA4E-110).
+ * download_attachment (SA4E-229): download via the extension authenticated session,
+ * avoiding the 403 seen when webfetch is used directly.
  * Note: jira_attach_file requires file system access from extension host.
  */
 import { readFile } from "fs/promises";
