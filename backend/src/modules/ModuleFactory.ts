@@ -14,6 +14,7 @@ import { AnalyticsModule } from './analytics/AnalyticsModule.js';
 import { KBGraphModule } from './kb-graph/KBGraphModule.js';
 import { UtilityModule } from './utility/UtilityModule.js';
 import { SecurityModule } from './security/SecurityModule.js';
+import { SandboxModule } from './sandbox/SandboxModule.js';
 import { KnowledgeModule } from '../knowledge/KnowledgeModule.js';
 import { HttpServer } from '../server/HttpServer.js';
 import { MemoryToolSearchService } from './orchestration/MemoryToolSearchService.js';
@@ -47,6 +48,8 @@ export class ModuleFactory {
     this.registry.register(new KnowledgeModule(this.logger));
     // SA4E-167: GateGuard — programmatic destructive command prevention
     this.registry.register(new SecurityModule(this.logger, this.registry));
+    // SA4E-6: Sandbox Execution (MCP Server Bridge) — isolated code execution
+    this.registry.register(new SandboxModule(this.logger, this.registry));
   }
 
   createToolRouter(): ToolRouter {

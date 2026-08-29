@@ -1,19 +1,68 @@
 {
   "ticket": "SA4E-6",
-  "currentPhase": "design",
+  "currentPhase": "deployment",
   "architecturePattern": "plugin",
   "phases": {
     "requirements": { "status": "done", "file": "BRD.md", "version": 1, "completedAt": "2026-07-03T16:30:00Z" },
     "specification": { "status": "done", "file": "FSD.md", "version": 1, "completedAt": "2026-07-03T17:30:00Z" },
-    "design": { "status": "in_progress", "startedAt": "2026-07-03T18:00:00Z" },
-    "feedback_loop": { "status": "not_started", "iterations": 0, "maxIterations": 5 },
-    "test_planning": { "status": "not_started" },
-    "implementation": { "status": "not_started" },
-    "user_guide": { "status": "not_started" },
-    "testing": { "status": "not_started" },
-    "deployment": { "status": "not_started" }
+    "design": {
+      "status": "done",
+      "file": "TDD.md",
+      "version": 1.1,
+      "completedAt": "2026-08-29T00:00:00Z",
+      "note": "sa-agent added 3 missing diagrams (architecture, component, class-sandbox), fixed 4 <mxfile> wrappers to <mxGraphModel>, documented SD-1/SD-2 scope decisions in TDD v1.1, and created DISCREPANCY.md (DISC-1..DISC-3)."
+    },
+    "feedback_loop": { "status": "done", "iterations": 1, "note": "sa-agent resolved TDD diagram + wrapper gaps; no open discrepancies blocking implementation." },
+    "test_planning": { "status": "done", "file": "STP.md", "note": "qa-agent produced STP.md with RTM + environment-dependent AC note." },
+    "implementation": {
+      "status": "done",
+      "note": "dev-agent implemented backend/src/modules/sandbox/ (SandboxModule, ExecutionManager, LocalExecutor, DockerExecutor, SessionStore, Reaper, tool-handlers, hardening), registered in ModuleFactory.ts, added SandboxConfig.ts (resolveDefaultSandboxMode: docker on Linux / local on non-Linux), added dockerode dep."
+    },
+    "user_guide": { "status": "not_started", "note": "Optional; DPG covers usage. Pending dev-agent if required." },
+    "testing": {
+      "status": "done",
+      "file": "TEST-REPORT.md",
+      "result": "4 passed / 3 skipped / 0 failed (verdict PASS)",
+      "note": "STC.md + TEST-REPORT.md written. TC-04/09/18 environment-gated (skipIf(!fullIsolation)); reclassified as Docker Desktop infra limitation, not code defect."
+    },
+    "deployment": { "status": "done", "files": ["DPG.md", "RLN.md"], "note": "devops-agent docs written; SANDBOX_FULL_ISOLATION + default-mode resolution documented." }
   },
-  "lastUpdated": "2026-07-03T17:30:00Z",
-  "lastCommentProcessed": null
+  "decisions": {
+    "k8sScope": {
+      "status": "resolved",
+      "decision": "DEFER K8s to Phase 2 / separate ticket. SA4E-6 scope = Local + Docker only.",
+      "resolvedBy": "sm-agent (L3 unattended)",
+      "resolvedAt": "2026-08-28T09:00:00Z"
+    },
+    "securityCoupling": {
+      "status": "resolved",
+      "decision": "SandboxModule REUSES SecurityModule (SA4E-167 GateGuard) for BR-12 hardening; graceful degradation if absent.",
+      "resolvedBy": "sm-agent (L3 unattended)",
+      "resolvedAt": "2026-08-28T09:00:00Z"
+    },
+    "environmentDependentAC": {
+      "status": "resolved",
+      "decision": "TC-04 (npm install), TC-09 (OOM kill), TC-18 (network isolation) are environment-dependent: gated behind SANDBOX_FULL_ISOLATION=true OR platform=linux. Default mode = local on non-Linux, docker on Linux. Docker Desktop (WSL2) ignores NetworkMode:none + cgroup limits (infra limitation, not code defect).",
+      "resolvedBy": "dev-agent + qa-agent (with user approval — Option 1)",
+      "resolvedAt": "2026-08-29T09:30:00Z"
+    }
+  },
+  "verifiedSourceContract": {
+    "note": "Confirmed via git status: sandbox module + tests + config implemented and registered on 2026-08-29.",
+    "imoduleInterface": "backend/src/types/module.ts",
+    "registrationPoint": "backend/src/modules/ModuleFactory.ts createAndRegisterAll()",
+    "toolHandlerReturnShape": "{ content:[{type:'text',text}], isError } — sandbox handlers serialize ExecutionResult JSON into content[0].text",
+    "config": "backend/src/config/SandboxConfig.ts (zod schema, resolveDefaultSandboxMode)",
+    "referenceModule": "backend/src/modules/utility/UtilityModule.ts"
+  },
+  "artifacts": {
+    "docs": ["BRD.md", "FSD.md", "TDD.md", "DISCREPANCY.md", "STP.md", "STC.md", "TEST-REPORT.md", "DPG.md", "RLN.md", "RUN-LOG.md", "STATUS.json"],
+    "diagrams": ["business-flow", "use-case", "system-context", "sequence-session-creation", "sequence-command-execution", "state-session-lifecycle", "architecture", "component", "class-sandbox"],
+    "code": ["backend/src/modules/sandbox/", "backend/src/config/SandboxConfig.ts"],
+    "tests": ["backend/tests/integration/sandbox.it.test.ts", "backend/tests/unit/"]
+  },
+  "blockers": [],
+  "lastUpdated": "2026-08-29T09:45:00Z",
+  "assessmentBy": "sm-agent (L3 unattended) + orchestrator",
+  "assessmentNote": "SA4E-6 pipeline complete through deployment docs. Final test verdict PASS (4 passed / 3 skipped / 0 failed). Remaining: Jira status transition (In Progress -> Done) and memory ingest of final docs."
 }
-

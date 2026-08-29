@@ -1,6 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2026-07-03T17:00:00.000Z" agent="BA Agent" version="24.0.0">
-  <diagram id="state-session" name="State Diagram - Session Lifecycle">
-    <mxGraphModel dx="1100" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+<mxGraphModel dx="1100" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -75,6 +73,4 @@
           </mxGeometry>
         </mxCell>
       </root>
-    </mxGraphModel>
-  </diagram>
-</mxfile>
+</mxGraphModel>
