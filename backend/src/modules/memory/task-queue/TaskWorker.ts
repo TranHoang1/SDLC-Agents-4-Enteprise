@@ -129,6 +129,11 @@ export class TaskWorker {
     this.purgeSupersededOnStartup().catch(err =>
       this.logger.warn({ err }, 'TaskWorker: startup purge failed (non-fatal)'),
     );
+    // On startup: bound table growth by purging superseded COMPLETED tasks
+    // (keeps only the latest completed task per entry+type).
+    this.purgeSupersededOnStartup().catch(err =>
+      this.logger.warn({ err }, 'TaskWorker: startup purge failed (non-fatal)'),
+    );
     // Delay first poll by 6s to allow LLM health check + tagAnalyzer init to complete.
     // LLMInitializer is fire-and-forget async (5s timeout) — 6s ensures it's ready.
     this.schedulePoll(6000);
@@ -234,11 +239,11 @@ export class TaskWorker {
       const creator = new CodeEnrichmentTaskCreator(adapter, this.logger);
       // Find all projects with unenriched symbols
       const projects = await adapter.allAsync<{ project_id: string }>(
-          `SELECT DISTINCT project_id FROM symbols
-           WHERE (enrichment_status IS NULL OR enrichment_status = '')
-             AND kind NOT IN ('variable', 'import', 'namespace')
-             LIMIT 10`,
-          [],
+        `SELECT DISTINCT project_id FROM symbols
+         WHERE (enrichment_status IS NULL OR enrichment_status = '')
+           AND kind NOT IN ('variable', 'import', 'namespace')
+         LIMIT 10`,
+        [],
       );
       for (const { project_id } of projects) {
         const created = await creator.createTasksForProject(project_id);

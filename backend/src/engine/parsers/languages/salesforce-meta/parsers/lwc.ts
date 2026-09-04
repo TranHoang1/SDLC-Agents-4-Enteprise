@@ -1,4 +1,4 @@
-import type { ExtractedSymbol, ExtractedRelationship, RelationshipKind } from '../../../types.js';
+import type { ExtractedSymbol, ExtractedRelationship, RelationshipKind } from '../../types.js';
 import { extractXmlValues, nameFromPath } from '../helpers.js';
 
 export function parseLWCMeta(

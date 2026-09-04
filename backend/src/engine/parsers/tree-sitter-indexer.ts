@@ -114,6 +114,16 @@ export class TreeSitterIndexer {
       '.ts': 'typescript', '.tsx': 'typescript', '.js': 'javascript', '.jsx': 'javascript',
       '.py': 'python', '.kt': 'kotlin', '.kts': 'kotlin', '.java': 'java', '.go': 'go', '.rs': 'rust',
       '.cls': 'apex', '.trigger': 'apex',
+      // ── NEW language routing (SA4E-225) ──
+      '.scala': 'scala',
+      '.c': 'c', '.h': 'c',
+      '.cpp': 'cpp', '.hpp': 'cpp',
+      '.cs': 'csharp',
+      '.rb': 'ruby',
+      '.php': 'php',
+      '.swift': 'swift',
+      '.sh': 'bash',
+      '.ps1': 'powershell',
     };
     return map[ext] ?? 'generic';
   }

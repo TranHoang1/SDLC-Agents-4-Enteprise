@@ -1,4 +1,4 @@
-import type { ExtractedSymbol } from '../../../types.js';
+import type { ExtractedSymbol } from '../../types.js';
 import { nameFromPath } from '../helpers.js';
 
 export function parseAuraMeta(

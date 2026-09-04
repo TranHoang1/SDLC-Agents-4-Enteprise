@@ -15,12 +15,11 @@ import { getDbAdapter } from '../../admin/db/core.js';
 import { resolveIndexTempDir } from './index-temp-dir.js';
 import { GraphRepository } from '../../database/repositories/GraphRepository.js';
 import { requireProjectId } from '../../engine/query/code-intel-isolation.js';
-import { resolveWithinWorkspace } from '../../shared/path-safety.js';
 import { validateSession } from '../../admin/db/sessions.js';
-import type { FileDependency } from '../../engine/parsers/types.js';
 import {
   handleFullIndex, handleFileEvents, handleCancel, handleProgress,
 } from './api-index-decoupled.js';
+import { PegaService } from '../../modules/pega/PegaService.js';
 
 interface SourceFile {
   path: string;
@@ -304,6 +303,12 @@ export function registerIndexRoutes(app: Hono, registry: ModuleRegistry, logger:
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
     return handleIngestDocsFromTemp(c, registry, logger, session.userId);
   });
+  // SA4E-209: Sync Pega rules to KB (graph projection)
+  app.post('/api/index/sync-pega-rules', async (c) => {
+    const session = await requireAuth(c);
+    if (!session) return c.json({ error: 'Unauthorized' }, 401);
+    return handleSyncPegaRules(c, registry, logger);
+  });
   app.post('/api/index/cancel', async (c) => {
     const session = await requireAuth(c);
     if (!session) return c.json({ error: 'Unauthorized' }, 401);
@@ -443,6 +448,38 @@ async function handleIngestDocsFromTemp(c: Context, registry: ModuleRegistry, lo
     return c.json({ ingested, errors, total: files.length });
   } catch (err: any) {
     return indexError(c, err, logger, 'Error ingesting documents from Temp');
+  }
+}
+
+/** SA4E-209: Trigger async Pega rules sync — returns 202 immediately, runs in background. */
+async function handleSyncPegaRules(c: Context, registry: ModuleRegistry, logger: Logger) {
+  try {
+    const body = await c.req.json<{ projectId?: string }>();
+    if (!body.projectId) {
+      return c.json({ error: 'projectId is required', action: 'Include projectId in request body' }, 400);
+    }
+    const memModule = registry.getModule('memory') as any;
+    if (!memModule || memModule.status !== 'ready') {
+      return c.json({ error: 'Memory module not ready', action: 'Wait for server initialization' }, 503);
+    }
+    // Fire-and-forget: run sync in background, report via progress polling
+    const service = new PegaService(memModule.getEngine());
+    service.syncIndexedRulesToKb(body.projectId)
+      .then((result) => {
+        logger.info({ projectId: body.projectId, synced: result.synced, errors: result.errors },
+          '[sync-pega-rules] Pega graph sync complete');
+      })
+      .catch((err: any) => {
+        logger.error({ err, projectId: body.projectId }, '[sync-pega-rules] Background sync failed');
+      });
+    return c.json({
+      status: 'started',
+      message: 'Pega sync started — poll GET /api/index/progress for status',
+      projectId: body.projectId,
+    }, 202);
+  } catch (err: any) {
+    logger.error({ err }, '[sync-pega-rules] Failed to start');
+    return c.json({ error: 'Pega sync failed', details: err.message }, 500);
   }
 }
 

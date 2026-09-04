@@ -25,17 +25,18 @@ export class PendingTaskRepository {
     if (existing) return existing.id;
 
     const result = await this.db.runAsync(
-      `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, project_id, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ${this.dialect.now()})`,
+      `INSERT INTO pending_tasks (task_type, entry_id, status, payload, max_retries, project_id, priority, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ${this.dialect.now()})`,
       [input.task_type, input.entry_id, TaskStatus.PENDING,
-       JSON.stringify(input.payload), input.max_retries ?? 3, input.project_id ?? null],
+        JSON.stringify(input.payload), input.max_retries ?? 3, input.project_id ?? null,
+        input.priority ?? 0],
     );
     return result.lastInsertRowid as number;
   }
 
   async claimNext(): Promise<PendingTask | null> {
     const task = await this.db.getAsync<PendingTask>(
-      `SELECT * FROM pending_tasks WHERE status = ? ORDER BY created_at ASC LIMIT 1`,
+      `SELECT * FROM pending_tasks WHERE status = ? ORDER BY priority DESC, created_at ASC LIMIT 1`,
       [TaskStatus.PENDING],
     );
     if (!task) return null;
@@ -63,7 +64,7 @@ export class PendingTaskRepository {
    */
   async claimBatch(count: number): Promise<PendingTask[]> {
     const candidates = await this.db.allAsync<PendingTask>(
-      `SELECT * FROM pending_tasks WHERE status = ? ORDER BY created_at ASC LIMIT ?`,
+      `SELECT * FROM pending_tasks WHERE status = ? ORDER BY priority DESC, created_at ASC LIMIT ?`,
       [TaskStatus.PENDING, count],
     );
     const claimed: PendingTask[] = [];

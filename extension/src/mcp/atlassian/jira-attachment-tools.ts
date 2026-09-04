@@ -1,6 +1,8 @@
 /**
- * SA4E-110 — Jira attachment tools (3 tools) registered in-process.
- * attach_file, get_attachments, delete_attachment.
+ * SA4E-110 + SA4E-229 — Jira attachment tools (4 tools) registered in-process.
+ * attach_file, get_attachments, delete_attachment (SA4E-110).
+ * download_attachment (SA4E-229): download via the extension authenticated session,
+ * avoiding the 403 seen when webfetch is used directly.
  * Note: jira_attach_file requires file system access from extension host.
  */
 import { readFile } from "fs/promises";
@@ -45,6 +47,53 @@ export function registerJiraAttachmentTools(client: AtlassianHttpClient): void {
     const { attachment_id } = args as any;
     await client.request("DELETE", `/rest/api/2/attachment/${attachment_id}`);
     return toResult({ status: 204, data: { success: true } });
+  });
+
+  registerTool("jira_download_attachment", "Download an attachment's content via the extension authenticated session (fixes 403 on webfetch)", {
+    type: "object",
+    properties: {
+      attachment_id: { type: "string", description: "Jira attachment ID (e.g. 11263)" },
+      attachment_url: { type: "string", description: "Full attachment content URL" },
+      return_format: { type: "string", enum: ["base64", "text"], default: "base64" },
+    },
+    required: [],
+  }, async (args) => {
+    const { attachment_id, attachment_url, return_format } = args as any;
+    if (!attachment_id && !attachment_url) {
+      return toErrorResult(new Error("VALIDATION_ERROR: provide attachment_id or attachment_url"));
+    }
+    try {
+      let contentUrl = attachment_url;
+      let meta: any = undefined;
+      if (attachment_id) {
+        const metaRes = await client.request("GET", `/rest/api/2/attachment/${attachment_id}`);
+        meta = metaRes.data as any;
+        contentUrl = meta?.content;
+        if (!contentUrl) return toErrorResult(new Error(`NOT_FOUND: attachment ${attachment_id} has no content URL`));
+      }
+      const path = new URL(contentUrl).pathname + new URL(contentUrl).search;
+      const buf = await client.requestRaw("GET", path);
+      if (!buf) return toErrorResult(new Error("NOT_FOUND: attachment content could not be downloaded"));
+      const mimeType = meta?.mimeType ?? "application/octet-stream";
+      const filename = meta?.filename ?? "attachment";
+      const size = buf.byteLength;
+      const base64 = Buffer.from(buf).toString(return_format === "text" ? "utf8" : "base64");
+      return toResult({
+        status: 200,
+        data: {
+          content_base64: return_format === "text" ? undefined : base64,
+          content_text: return_format === "text" ? Buffer.from(buf).toString("utf8") : undefined,
+          mime_type: mimeType,
+          filename,
+          size_bytes: size,
+        },
+      });
+    } catch (e: any) {
+      const msg = e?.message ?? String(e);
+      if (msg.includes("404") || msg.includes("NOT_FOUND")) return toErrorResult(new Error("NOT_FOUND: attachment not found"));
+      if (msg.includes("403")) return toErrorResult(new Error("FORBIDDEN: check Atlassian credentials"));
+      return toErrorResult(e);
+    }
   });
 }
 

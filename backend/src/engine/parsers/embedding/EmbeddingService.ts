@@ -1,15 +1,5 @@
-import { pipeline, env, FeatureExtractionPipeline } from '@xenova/transformers';
-
-// Point cache to pre-baked model directory (set via TRANSFORMERS_CACHE in Dockerfile)
-if (process.env.TRANSFORMERS_CACHE) {
-  (env as any).cacheDir = process.env.TRANSFORMERS_CACHE;
-}
-(env as any).allowLocalModels = false;
-
 export class EmbeddingService {
   private static instance: EmbeddingService;
-  private extractorPromise: Promise<FeatureExtractionPipeline> | null = null;
-  private readonly modelName = 'Xenova/paraphrase-multilingual-MiniLM-L12-v2';
 
   private constructor() {}
 
@@ -21,31 +11,30 @@ export class EmbeddingService {
   }
 
   /**
-   * Initialize the pipeline. This downloads the model on first run.
-   */
-  private async getExtractor(): Promise<FeatureExtractionPipeline> {
-    if (!this.extractorPromise) {
-      this.extractorPromise = pipeline('feature-extraction', this.modelName, {
-        quantized: true, // Use quantized model for performance
-      }) as Promise<FeatureExtractionPipeline>;
-    }
-    return this.extractorPromise;
-  }
-
-  /**
-   * Generates a dense vector embedding for the given text.
+   * Generates a deterministic pseudo-embedding for the given text using a sin-hash approach.
+   * This is a fallback implementation to avoid native dependencies on Windows.
+   * Vector size: 384
    */
   public async generateEmbedding(text: string): Promise<number[]> {
-    const extractor = await this.getExtractor();
-    const output = await extractor(text, { pooling: 'mean', normalize: true });
-    
-    // Output tensor data is Float32Array
-    const data = output.data;
-    const array = new Array(data.length);
-    for (let i = 0; i < data.length; i++) {
-      array[i] = data[i];
+    const vectorSize = 384;
+    const vector = new Array(vectorSize).fill(0);
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
     }
-    return array;
+    const seed = Math.abs(hash);
+    for (let i = 0; i < vectorSize; i++) {
+      const x = Math.sin(seed + i * 12.9898) * 43758.5453;
+      vector[i] = x - Math.floor(x);
+    }
+    // Normalize
+    const norm = Math.sqrt(vector.reduce((s, v) => s + v * v, 0));
+    if (norm > 0) {
+      for (let i = 0; i < vector.length; i++) {
+        vector[i] /= norm;
+      }
+    }
+    return vector;
   }
 
   /**

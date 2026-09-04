@@ -34,7 +34,7 @@ export function registerAtlassianLocalTools(credService: AtlassianCredentialServ
   registerJiraAgileTools(client);       // 5 tools
   registerJiraUserTools(client);        // 4 tools
   registerJiraWorklogTools(client);     // 3 tools
-  registerJiraAttachmentTools(client);  // 3 tools
+  registerJiraAttachmentTools(client);  // 4 tools (incl. SA4E-229 jira_download_attachment)
   registerJiraFieldTools(client);       // 5 tools (includes jira_get_custom_field)
 
   // Confluence tools (23 total)

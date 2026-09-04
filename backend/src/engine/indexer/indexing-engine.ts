@@ -26,6 +26,9 @@ import { getDbAdapter } from '../../admin/db/core.js';
 import type { IndexResult } from '../parsers/types.js';
 import type { ProgressPhase } from './types.js';
 import { CodeEnrichmentTaskCreator } from '../enrichment/CodeEnrichmentTaskCreator.js';
+import { ChecksumService } from './checksum-service.js';
+import { FileChecksumRepository } from '../../database/repositories/FileChecksumRepository.js';
+import * as crypto from 'crypto';
 
 
 const logger = pino({ name: 'indexing-engine' });
@@ -48,6 +51,8 @@ export class IndexingEngine {
   private readonly graphSyncService: GraphSyncService;
   /** SA4E-107: Creates enrichment tasks after indexing. */
   private readonly enrichmentTaskCreator: CodeEnrichmentTaskCreator;
+  /** SA4E-101: running tally of checksum-skipped files, surfaced via progress events. */
+  private indexSkipped = 0;
 
   constructor(adapter: DatabaseAdapter, config: AppConfig) {
     this.adapter = adapter;
@@ -101,7 +106,7 @@ export class IndexingEngine {
     return;
   }
 
-  async runFullIndex(scope?: Partial<IndexScope>, signal?: AbortSignal): Promise<void> {
+  async runFullIndex(scope?: Partial<IndexScope>, signal?: AbortSignal, userId?: string): Promise<void> {
     const { projectId, workspace } = resolveScope(scope, {
       projectId: this.config.projectId,
       workspace: this.config.workspace,
@@ -111,6 +116,13 @@ export class IndexingEngine {
     logger.error(`[indexer] Starting full index (project=${projectId})...`);
     await new Promise<void>(resolve => setImmediate(resolve));
     try {
+      // SA4E-101: Checksum service setup
+      let checksumService: ChecksumService | undefined;
+      let storedChecksums: Map<string, string> | undefined;
+      if (userId) {
+        checksumService = new ChecksumService(new FileChecksumRepository());
+        storedChecksums = await checksumService.preloadChecksums(userId, projectId).catch(() => new Map());
+      }
       // Phase: scanning (SA4E-78: async scan, non-blocking)
       this.emitProgress(projectId, 'scanning', 0, 0);
       const files = await scanWorkspaceAsync({ ...this.config, workspace });
@@ -119,7 +131,7 @@ export class IndexingEngine {
       logger.error(`[indexer] Found ${files.length} files to index`);
       // Phase: indexing
       this.emitProgress(projectId, 'indexing', 0, files.length);
-      await this.indexFiles(files, projectId, signal);
+      await this.indexFiles(files, projectId, signal, userId, checksumService, storedChecksums);
       if (signal?.aborted) { this.emitProgress(projectId, 'cancelled', 0, 0); return; }
 
       // Phase: resolving
@@ -142,16 +154,23 @@ export class IndexingEngine {
       logSfdxStats(this.adapter, this.config, logger);
       this.registerWorkspace(projectId, workspace);
 
-      this.emitProgress(projectId, 'complete', files.length, files.length);
+      this.emitProgress(projectId, 'complete', files.length, files.length, undefined, this.indexSkipped);
       logger.error('[indexer] Full index complete');
     } finally {
       this.indexing.delete(projectId);
     }
   }
 
-  /** SA4E-78: Emit progress event via EventEmitter (Observer pattern). */
-  private emitProgress(projectId: string, phase: ProgressPhase, current: number, total: number, currentFile?: string): void {
-    this.progressEmitter.emit('progress', { projectId, phase, current, total, currentFile });
+  /** SA4E-78/SA4E-101: Emit progress event via EventEmitter (Observer pattern). */
+  private emitProgress(
+    projectId: string,
+    phase: ProgressPhase,
+    current: number,
+    total: number,
+    currentFile?: string,
+    skipped?: number,
+  ): void {
+    this.progressEmitter.emit('progress', { projectId, phase, current, total, currentFile, skipped });
   }
 
   /** SA4E-99: Public method for external callers (e.g., api-index route after batch upload). */
@@ -238,14 +257,32 @@ export class IndexingEngine {
   /**
    * SA4E-53: replaced prepare() calls with inline runAsync/allAsync.
    * SA4E-78: added signal for cooperative cancellation at batch boundaries.
+   * SA4E-101: checksum upsert & cleanup.
    */
-  private async indexFiles(files: ScannedFile[], projectId: string, signal?: AbortSignal): Promise<void> {
-    const { filesToIndex, skippedCount } = await this.registerFilesForIndex(files, projectId, signal);
-    if (signal?.aborted) return;
+  private async indexFiles(files: ScannedFile[], projectId: string, signal?: AbortSignal, userId?: string, checksumService?: ChecksumService, storedChecksums?: Map<string, string>): Promise<void> {
+      const { filesToIndex, skippedCount } = await this.registerFilesForIndex(files, projectId, signal, storedChecksums, checksumService);
+      this.indexSkipped = skippedCount;
+      if (signal?.aborted) return;
     const counts = this.treeSitterReady && this.treeSitterIndexer
       ? await this.indexFileSymbolsTreeSitter(filesToIndex, projectId, signal)
       : await this.indexFileSymbolsRegexFallback(filesToIndex, projectId, signal);
     logger.error(`[indexer] Indexed ${counts.treeSitterCount} files via tree-sitter, ${counts.regexCount} via regex fallback, ${skippedCount} unchanged`);
+    // SA4E-101: upsert checksums for processed files and cleanup deleted
+    if (userId && checksumService) {
+      const currentPaths = files.map(f => f.relativePath);
+      // Upsert checksums for files that were indexed
+      await Promise.allSettled(filesToIndex.map(async (file) => {
+        try {
+          const content = fs.readFileSync(file.absolutePath);
+          const checksum = checksumService.computeChecksum(content);
+          await checksumService.upsert(userId, projectId, file.relativePath, checksum);
+        } catch {
+          // non-fatal
+        }
+      }));
+      // Cleanup checksums for files no longer present
+      await checksumService.cleanupDeleted(userId, projectId, currentPaths).catch(() => undefined);
+    }
   }
 
   /**
@@ -253,7 +290,7 @@ export class IndexingEngine {
    * SA4E-53: replaces prepare()+transaction() with runAsync()+transactionAsync().
    * SA4E-78: abort check at batch boundaries.
    */
-  private async registerFilesForIndex(files: ScannedFile[], projectId: string, signal?: AbortSignal) {
+  private async registerFilesForIndex(files: ScannedFile[], projectId: string, signal?: AbortSignal, storedChecksums?: Map<string, string>, checksumService?: ChecksumService) {
     const filesToIndex: ScannedFile[] = [];
     let skippedCount = 0;
     const BATCH = 200;
@@ -265,6 +302,19 @@ export class IndexingEngine {
       const batch = files.slice(i, i + BATCH);
       await this.adapter.transactionAsync(async () => {
         for (const file of batch) {
+          // SA4E-101: checksum-based skip
+          if (storedChecksums && checksumService) {
+            try {
+              const content = fs.readFileSync(file.absolutePath);
+              const checksum = checksumService.computeChecksum(content);
+              if (storedChecksums.get(file.relativePath) === checksum) {
+                skippedCount++;
+                continue;
+              }
+            } catch {
+              // fall through to normal check
+            }
+          }
           if (await isFileUnchanged(this.adapter, file, projectId)) { skippedCount++; continue; }
           filesToIndex.push(file);
           await this.adapter.runAsync(insertSql, [
@@ -275,7 +325,7 @@ export class IndexingEngine {
         }
       });
       const lastFile = batch[batch.length - 1]?.relativePath || '';
-      this.emitProgress(projectId, 'indexing', Math.min(i + BATCH, files.length), files.length, lastFile);
+      this.emitProgress(projectId, 'indexing', Math.min(i + BATCH, files.length), files.length, lastFile, skippedCount);
       await new Promise<void>(resolve => setImmediate(resolve));
     }
     return { filesToIndex, skippedCount };

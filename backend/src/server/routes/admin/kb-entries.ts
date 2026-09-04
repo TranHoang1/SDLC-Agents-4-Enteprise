@@ -222,20 +222,23 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
       }
       try {
         const { PendingTaskRepository } = await import('../../../modules/memory/task-queue/PendingTaskRepository.js');
-        const { TaskType } = await import('../../../modules/memory/task-queue/models.js');
+        const { TaskType, TaskPriority } = await import('../../../modules/memory/task-queue/models.js');
         const taskRepo = new PendingTaskRepository(indexAdapter);
-        await taskRepo.create({
+        const taskId = await taskRepo.create({
           task_type: TaskType.TAG_ENRICHMENT,
           entry_id: entry.id,
           payload: { entry_id: entry.id, content: (entry.summary || entry.content || '').slice(0, 2000), existing_tags: '', options: { threshold: 0.6, autoApply: true } },
+          priority: TaskPriority.HIGH,
         });
-        return c.json({ status: 'queued', message: 'Enrichment task created. Will be processed by background worker.' });
+        return c.json({ status: 'queued', task_id: taskId, message: 'High-priority enrichment task created. Poll /enrich/poll for status (15s timeout).' });
       } catch (err: any) {
         return c.json({ status: 'error', message: err.message }, 500);
       }
     }
 
-    // Branch: Code symbols (original flow)
+    // Branch: Code symbols — push a HIGH_PRIORITY task into the queue (SA4E-155).
+    // The TaskWorker picks it up ahead of bulk backlog (priority DESC ordering) and
+    // performs the LLM enrichment. The caller polls GET ../enrich/poll for the result.
     if (!entryId.startsWith('code:') && !entryId.startsWith('sym-')) {
       return c.json({ error: 'Unsupported entry type for on-demand enrichment' }, 400);
     }
@@ -258,76 +261,114 @@ export function createKbEntriesRoutes(ctx: AdminContext): Hono {
     );
     const filePath = fileRow?.relative_path || '';
 
-    // Try to enrich via backend LLM
     try {
-      const { CodeEnrichmentHandler } = await import('../../../engine/enrichment/CodeEnrichmentHandler.js');
-      const { LLMService } = await import('../../../modules/memory/llm/LLMService.js');
-      const { loadPersistedLLMConfig } = await import('../../../admin/admin-db.js');
-
-      // Build LLM config from env + DB overrides
-      const envConfig = {
-        provider: (process.env.LLM_PROVIDER || 'lmstudio') as any,
-        model: process.env.LLM_MODEL || 'qwen2.5-vl-7b-instruct',
-        baseUrl: process.env.LLM_BASE_URL || 'http://localhost:1234/v1',
-        apiKey: process.env.LLM_API_KEY || undefined,
-        temperature: parseFloat(process.env.LLM_TEMPERATURE || '0.3'),
-        maxTokens: parseInt(process.env.LLM_MAX_TOKENS || '800', 10),
-      };
-      let llmConfig = envConfig;
-      try {
-        const dbOverrides = await loadPersistedLLMConfig();
-        llmConfig = {
-          ...envConfig,
-          ...(dbOverrides.provider && { provider: dbOverrides.provider as any }),
-          ...(dbOverrides.model && { model: dbOverrides.model }),
-          ...(dbOverrides.baseUrl && { baseUrl: dbOverrides.baseUrl }),
-          ...(dbOverrides.apiKey && dbOverrides.apiKey !== '***' && { apiKey: dbOverrides.apiKey }),
-          ...(dbOverrides.temperature !== undefined && { temperature: dbOverrides.temperature }),
-          ...(dbOverrides.maxTokens !== undefined && { maxTokens: dbOverrides.maxTokens }),
-        };
-      } catch { /* DB not ready — use env config */ }
-
-      const llmService = new LLMService(llmConfig);
-      const enrichHandler = new CodeEnrichmentHandler(indexAdapter, llmService, ctx.logger);
-
-      // Build a proper PendingTask payload matching CodeEnrichmentPayloadSchema
-      const fakeTask = {
-        id: 0,
-        payload: JSON.stringify({
+      const { PendingTaskRepository } = await import('../../../modules/memory/task-queue/PendingTaskRepository.js');
+      const { TaskType, TaskPriority } = await import('../../../modules/memory/task-queue/models.js');
+      const taskRepo = new PendingTaskRepository(indexAdapter);
+      const taskId = await taskRepo.create({
+        task_type: TaskType.CODE_ENRICHMENT,
+        entry_id: numId,
+        payload: {
           symbolId: numId,
           symbolName: sym.name,
           symbolKind: sym.kind,
           projectId: projectId,
           filePath: filePath,
           workspaceType: sym.kind.startsWith('pega_') ? 'pega' : 'standard',
-        }),
-        task_type: 'CODE_ENRICHMENT',
-        status: 'PENDING',
-        created_at: new Date().toISOString(),
-      };
-      await enrichHandler.enrichSymbol(fakeTask as any);
-
-      // Re-fetch updated data
-      const updated = await indexAdapter.getAsync<{ summary: string | null; pseudo_code: string | null; llm_tags: string | null }>(
-        'SELECT summary, pseudo_code, llm_tags FROM symbols WHERE id = ?', [numId],
-      );
+        },
+        project_id: projectId,
+        priority: TaskPriority.HIGH,
+      });
       return c.json({
-        status: 'enriched',
+        status: 'queued',
+        task_id: taskId,
+        message: 'High-priority enrichment task created. Poll /enrich/poll for status (15s timeout).',
+      });
+    } catch (err: any) {
+      ctx.logger.warn({ symbolId, err: err.message }, '[on-demand-enrich] Failed to enqueue task');
+      return c.json({ status: 'error', message: err.message }, 500);
+    }
+  });
+
+  /**
+   * SA4E-155: Poll the status of an on-demand enrichment task.
+   * Caller (extension/webview) polls every 500ms up to 15s. Returns the latest task
+   * status for the entry; when COMPLETED it includes the enrichment result.
+   */
+  app.get('/api/admin/kb/entries/:id/enrich/poll', async (c) => {
+    const user = await ctx.requireAuth(c);
+    if (user instanceof Response) return user;
+    const permCheck = await ctx.requirePermission(c, user.userId, 'KB_READ');
+    if (permCheck instanceof Response) return permCheck;
+    let entryId = c.req.param('id');
+
+    const { getDbAdapter } = await import('../../../admin/db/core.js');
+    const indexAdapter = getDbAdapter();
+
+    // Resolve pega: → code: symbol id
+    if (entryId.startsWith('pega:')) {
+      const resolved = await resolvePegaSymbolId(ctx, entryId.replace('pega:', ''));
+      if (!resolved) return c.json({ error: 'Pega rule not found' }, 404);
+      entryId = `code:${resolved}`;
+    }
+
+    let taskType: string;
+    let numericId: number;
+    if (entryId.startsWith('kb-entry:')) {
+      taskType = 'TAG_ENRICHMENT';
+      numericId = parseInt(entryId.replace('kb-entry:', ''), 10);
+    } else if (entryId.startsWith('code:') || entryId.startsWith('sym-')) {
+      taskType = 'CODE_ENRICHMENT';
+      numericId = parseInt(entryId.replace('code:', '').replace('sym-', ''), 10);
+    } else {
+      return c.json({ error: 'Unsupported entry type for enrichment poll' }, 400);
+    }
+    if (isNaN(numericId)) return c.json({ error: 'Invalid entry ID' }, 400);
+
+    const { TaskStatus } = await import('../../../modules/memory/task-queue/models.js');
+    const task = await indexAdapter.getAsync<{ id: number; status: string }>(
+      `SELECT id, status FROM pending_tasks WHERE entry_id = ? AND task_type = ? ORDER BY id DESC LIMIT 1`,
+      [numericId, taskType],
+    );
+    if (!task) return c.json({ status: 'not_found' });
+
+    if (task.status === TaskStatus.COMPLETED) {
+      if (taskType === 'CODE_ENRICHMENT') {
+        const updated = await indexAdapter.getAsync<{ summary: string | null; pseudo_code: string | null; llm_tags: string | null }>(
+          'SELECT summary, pseudo_code, llm_tags FROM symbols WHERE id = ?', [numericId],
+        );
+        return c.json({
+          status: 'completed',
+          task_id: task.id,
+          enrichment: {
+            summary: updated?.summary || null,
+            pseudoCode: updated?.pseudo_code || null,
+            llmTags: updated?.llm_tags ? JSON.parse(updated.llm_tags) : null,
+            status: 'COMPLETED',
+          },
+        });
+      }
+      const entry = await indexAdapter.getAsync<{ enrichment_status: string | null; structured_map: string | null; summary: string | null }>(
+        'SELECT enrichment_status, structured_map, summary FROM knowledge_entries WHERE id = ?', [numericId],
+      );
+      const map = entry?.structured_map ? JSON.parse(entry.structured_map) : {};
+      return c.json({
+        status: 'completed',
+        task_id: task.id,
         enrichment: {
-          summary: updated?.summary || null,
-          pseudoCode: updated?.pseudo_code || null,
-          llmTags: updated?.llm_tags ? JSON.parse(updated.llm_tags) : null,
+          summary: map.summary || entry?.summary || null,
+          pseudoCode: null,
+          llmTags: map.tags || null,
           status: 'COMPLETED',
         },
       });
-    } catch (err: any) {
-      ctx.logger.warn({ symbolId, err: err.message }, '[on-demand-enrich] Backend LLM enrichment failed');
-      return c.json({
-        status: 'llm_unavailable',
-        message: 'Backend LLM not available. Extension-side enrichment may be used as fallback.',
-        error: err.message,
-      }, 503);
     }
+
+    if (task.status === TaskStatus.FAILED) {
+      return c.json({ status: 'failed', task_id: task.id, message: 'Enrichment task failed. Extension fallback may be used.' }, 410);
+    }
+
+    return c.json({ status: task.status.toLowerCase(), task_id: task.id });
   });
 
   /** Save enrichment data from extension-side LLM (fallback path). */

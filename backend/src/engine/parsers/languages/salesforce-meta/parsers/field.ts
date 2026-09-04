@@ -1,4 +1,4 @@
-import type { ExtractedSymbol, ExtractedRelationship } from '../../../types.js';
+import type { ExtractedSymbol, ExtractedRelationship } from '../../types.js';
 import { extractXmlValues, nameFromPath, inferObjectFromFieldPath } from '../helpers.js';
 
 export function parseField(

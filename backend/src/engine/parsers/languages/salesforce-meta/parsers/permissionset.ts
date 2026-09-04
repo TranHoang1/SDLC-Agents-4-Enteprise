@@ -1,4 +1,4 @@
-import type { ExtractedSymbol, ExtractedRelationship } from '../../../types.js';
+import type { ExtractedSymbol, ExtractedRelationship } from '../../types.js';
 import { nameFromPath } from '../helpers.js';
 
 export function parsePermissionset(source: string, filePath: string, symbols: ExtractedSymbol[], _rel: ExtractedRelationship[]): void {

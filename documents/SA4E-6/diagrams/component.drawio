@@ -1,0 +1,57 @@
+<mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+  <root>
+    <mxCell id="0" />
+    <mxCell id="1" parent="0" />
+    <mxCell id="title" value="&lt;b&gt;SA4E-6 Sandbox Execution — Component Diagram&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=14;" vertex="1" parent="1">
+      <mxGeometry x="430" y="10" width="520" height="30" as="geometry" />
+    </mxCell>
+    <mxCell id="sec_boundary" value="External Reused Module" style="rounded=1;dashed=1;fillColor=#f5f5f5;strokeColor=#0288d1;verticalAlign=top;fontStyle=1;fontSize=11;spacingTop=6;html=1;" vertex="1" parent="1">
+      <mxGeometry x="900" y="120" width="300" height="300" as="geometry" />
+    </mxCell>
+    <mxCell id="security_module" value="«component»&#10;SecurityModule&#10;(SA4E-167 GateGuard)&#10;+ applyHardening(profile)" style="shape=component;whiteSpace=wrap;html=1;fillColor=#e1f5fe;strokeColor=#0288d1;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="960" y="180" width="180" height="80" as="geometry" />
+    </mxCell>
+    <mxCell id="sandbox_module" value="«component»&#10;SandboxModule&#10;+ getToolHandlers()&#10;+ getToolDefinitions()&#10;«provides IModule»" style="shape=component;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="60" y="140" width="210" height="100" as="geometry" />
+    </mxCell>
+    <mxCell id="execution_manager" value="«component»&#10;ExecutionManager&#10;- sessionStore&#10;- reaper&#10;- executor: IExecutor&#10;+ createSession()&#10;+ execute()&#10;+ destroySession()" style="shape=component;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="60" y="320" width="230" height="160" as="geometry" />
+    </mxCell>
+    <mxCell id="docker_exec" value="«component»&#10;DockerExecutor&#10;«implements IExecutor»&#10;+ createSession()&#10;+ execute()&#10;+ destroySession()" style="shape=component;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="360" y="340" width="230" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="local_exec" value="«component»&#10;LocalExecutor&#10;«implements IExecutor»&#10;+ createSession()&#10;+ execute()&#10;+ destroySession()" style="shape=component;whiteSpace=wrap;html=1;fillColor=#f3e5f5;strokeColor=#9673a6;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="360" y="520" width="230" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="session_store" value="«component»&#10;SessionStore&#10;- sessions: Map&#10;+ register()&#10;+ get()&#10;+ remove()" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="660" y="340" width="210" height="110" as="geometry" />
+    </mxCell>
+    <mxCell id="reaper" value="«component»&#10;Reaper&#10;- intervalMs&#10;+ start()&#10;+ tick()" style="shape=component;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;" vertex="1" parent="1">
+      <mxGeometry x="660" y="520" width="210" height="90" as="geometry" />
+    </mxCell>
+    <mxCell id="iexecutor" value="«interface»&#10;IExecutor&#10;+ createSession()&#10;+ destroySession()&#10;+ execute()&#10;+ isAvailable()" style="shape=component;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;align=left;spacingLeft=8;verticalAlign=top;spacingTop=4;dashed=1;" vertex="1" parent="1">
+      <mxGeometry x="360" y="120" width="230" height="130" as="geometry" />
+    </mxCell>
+    <mxCell id="d1" value="uses" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;fontSize=9;" edge="1" parent="1" source="sandbox_module" target="execution_manager">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d2" value="uses (strategy)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;fontSize=9;" edge="1" parent="1" source="execution_manager" target="iexecutor">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d3" value="implements" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#82b366;fontSize=9;" edge="1" parent="1" source="docker_exec" target="iexecutor">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d4" value="implements" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=block;endFill=1;dashed=1;strokeColor=#82b366;fontSize=9;" edge="1" parent="1" source="local_exec" target="iexecutor">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d5" value="manages" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;fontSize=9;" edge="1" parent="1" source="execution_manager" target="session_store">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d6" value="schedules" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#666666;fontSize=9;" edge="1" parent="1" source="execution_manager" target="reaper">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+    <mxCell id="d7" value="uses (BR-12)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;endArrow=open;endFill=0;dashed=1;strokeColor=#0288d1;fontSize=9;" edge="1" parent="1" source="docker_exec" target="security_module">
+      <mxGeometry relative="1" as="geometry" />
+    </mxCell>
+  </root>
+</mxGraphModel>

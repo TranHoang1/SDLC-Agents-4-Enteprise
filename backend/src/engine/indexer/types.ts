@@ -1,5 +1,5 @@
 /**
- * SA4E-78 — Indexer type definitions for decoupled architecture.
+ * SA4E-78 / SA4E-101 — Indexer type definitions for decoupled architecture.
  * Shared interfaces for file events, progress tracking, and operation management.
  */
 
@@ -25,12 +25,31 @@ export type ProgressPhase =
   | 'cancelled'
   | 'error';
 
-/** Runtime status of a tracked index operation. */
-export type OperationStatus = 'running' | 'completed' | 'cancelled' | 'failed';
+/**
+ * Runtime status of a tracked index operation.
+ * SA4E-101 extends with `interrupted` (backend restart mid-run) and
+ * `superseded` (auto-cancelled by a newer run per BR-11).
+ */
+export type OperationStatus =
+  | 'running'
+  | 'interrupted'
+  | 'completed'
+  | 'cancelled'
+  | 'failed'
+  | 'superseded';
 
-/** Progress snapshot emitted at batch boundaries. */
+/** Checksum-based skip statistics (SA4E-101, UC-07). */
+export interface ChecksumStats {
+  files_skipped: number;
+  files_processed: number;
+  files_pending: number;
+}
+
+/** Progress snapshot emitted at batch boundaries / returned by the progress API. */
 export interface ProgressEvent {
   operationId: string;
+  /** Runtime status of the operation; `idle` is only returned by the API when no op exists. */
+  status: OperationStatus | 'idle';
   phase: ProgressPhase;
   current: number;
   total: number;
@@ -38,7 +57,10 @@ export interface ProgressEvent {
   message?: string;
   currentFile?: string;
   startedAt: string;
+  updatedAt?: string;
   elapsedMs: number;
+  /** Checksum skip stats (nullable on cold-path fallback). */
+  checksumStats: ChecksumStats | null;
 }
 
 /** Result summary returned from the file-events endpoint. */
