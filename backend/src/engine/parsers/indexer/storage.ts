@@ -48,7 +48,7 @@ export async function storeResults(
     // SA4E-104: JSP fallback — if parser returned no symbols for .jsp files,
     // create minimal jsp_page symbol to prevent complete symbol loss
     if (filePath.toLowerCase().endsWith('.jsp') && (!result.symbols || result.symbols.length === 0)) {
-      const name = filePath.split(/[\\/]\.jsp$/i).pop();
+      const name = filePath.split(/[\\/]\.jsp$/i).pop() || filePath;
       await adapter.runAsync(insertSymSql, [
         projectId, fileId, name, 'jsp_page', '', 1, 1, null, null, null,
       ]);
