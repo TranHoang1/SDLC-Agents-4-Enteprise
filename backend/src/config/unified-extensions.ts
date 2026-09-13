@@ -8,7 +8,8 @@ export const UNIFIED_EXTENSIONS = [
   'c', 'cpp', 'h', 'hpp',
   'cs', 'php', 'rb', 'scala', 'swift',
   'cls', 'trigger', 'apex', 'soql', 'page', 'component', 'cmp', 'app', 'evt', 'intf', 'tokens', 'pega',
-  'html', 'jsp', 'xml', 'sql', 'properties', 'yml', 'yaml', 'css'
+  'html', 'jsp', 'xml', 'sql', 'properties', 'yml', 'yaml', 'css',
+  'ps1'
 ] as const;
 
 export type UnifiedExtension = typeof UNIFIED_EXTENSIONS[number];

@@ -45,6 +45,7 @@ const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
   '.toml': 'toml',
   '.cls': 'apex',
   '.trigger': 'apex',
+  '.pega': 'pega',
   // ---- SA4E-223: new Salesforce simple extensions ----
   '.apex': 'apex',
   '.soql': 'apex',
@@ -62,6 +63,7 @@ const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
   '.xml': 'xml',
   '.properties': 'properties',
   '.css': 'css',
+  '.ps1': 'powershell',
 };
 
 /**

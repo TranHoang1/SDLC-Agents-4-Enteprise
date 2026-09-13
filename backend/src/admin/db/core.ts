@@ -65,6 +65,9 @@ export function getActiveDbConfig() {
 }
 
 let sqliteAdapter: SqliteAdapter | null = null;
+// Single shared init promise — initAdapters() awaits this same promise so no
+// caller (server boot, tests) can race schema creation / admin seeding.
+let sqliteReady: Promise<void> | null = null;
 
 /**
  * Get or create the unified SQLite adapter (singleton).
@@ -79,8 +82,8 @@ function getUnifiedSqliteAdapter(): SqliteAdapter {
     sqliteAdapter = new SqliteAdapter(DB_PATH);
     // SqliteAdapter.connect() is sync internally — safe to call eagerly
     void sqliteAdapter.connect();
-    // Fire-and-forget schema init; SQLite async wraps sync so this completes eagerly.
-    void initSchema(sqliteAdapter).then(() => seedDefaults(sqliteAdapter!))
+    const adapter = sqliteAdapter;
+    sqliteReady = initSchema(adapter).then(() => seedDefaults(adapter))
       .catch((err) => logger.error({ err }, '[admin] SQLite schema init failed'));
   }
   return sqliteAdapter;
@@ -124,6 +127,16 @@ export async function initAdapters(): Promise<void> {
   const engine = getActiveEngine();
   if (engine === 'sqlite') {
     getDbAdapter();
+    // Await the shared init (schema + admin seed) instead of returning
+    // immediately — otherwise the first login/seed-dependent query races init
+    // and fails (e.g. 401 in tests, missing tables).
+    if (sqliteReady) {
+      await sqliteReady;
+    } else {
+      const adapter = getDbAdapter();
+      await initSchema(adapter);
+      await seedDefaults(adapter);
+    }
     return;
   }
 

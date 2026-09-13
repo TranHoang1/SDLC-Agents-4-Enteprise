@@ -9,6 +9,7 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Hono } from 'hono';
 import { createAdminRoute } from '../admin.js';
+import { initAdapters } from '../../../admin/admin-db.js';
 import pino from 'pino';
 
 // Admin credentials from env (set by tests/vitest.setup.ts) — no hardcoded
@@ -22,6 +23,9 @@ let app: Hono;
 let authToken: string;
 
 beforeAll(async () => {
+  // Await shared DB init (schema + admin seed) — getDbAdapter() inits
+  // fire-and-forget, so login would otherwise race seeding and 401.
+  await initAdapters();
   app = new Hono();
   const adminRoute = createAdminRoute(logger);
   app.route('/', adminRoute);
