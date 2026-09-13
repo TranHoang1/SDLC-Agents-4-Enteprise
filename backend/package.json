@@ -1,7 +1,7 @@
 {
   "name": "sdlc-agent-4-enterprise-server",
   "version": "1.42.3",
-  "description": "Code Intelligence MCP Server \u2014 multi-agent SDLC pipeline with semantic memory, code graph, and draw.io integration",
+  "description": "Code Intelligence MCP Server — multi-agent SDLC pipeline with semantic memory, code graph, and draw.io integration",
   "main": "dist/index.js",
   "bin": {
     "sdlc-agent-4-enterprise-server": "dist/index.js"
