@@ -67,7 +67,6 @@ jobs:
 
       - name: Update version from tag
         run: |
-          cd extension
           jq ".version = \"${{ needs.version-check.outputs.version }}\"" package.json > package.json.tmp && mv package.json.tmp package.json
           git add package.json
 
@@ -110,7 +109,6 @@ jobs:
 
       - name: Update version from tag
         run: |
-          cd backend
           jq ".version = \"${{ needs.version-check.outputs.version }}\"" package.json > package.json.tmp && mv package.json.tmp package.json
           git add package.json
 
