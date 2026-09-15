@@ -94,12 +94,20 @@ export class MemoryModuleBuilder {
       this.mod.setDbManager(dbManager);
     }
 
-    // PostgreSQL: DatabaseManager (which applies the base SQLite schema) is
-    // skipped, so create the base memory tables here before migrations — the
-    // migrations only ALTER and would otherwise fail on missing relations.
+    // Ensure base memory tables exist in THIS adapter's view before versioned
+    // migrations (which only ALTER and would otherwise fail on missing relations).
     if (this.memAdapter.getEngine() === 'postgresql') {
+      // PostgreSQL: DatabaseManager (SQLite base schema) is skipped — create the
+      // PG-dialect base memory tables here (FTS handled separately via tsvector).
       const { ensurePostgresMemorySchema } = await import('./schema/tables-pg.js');
       await ensurePostgresMemorySchema(this.memAdapter);
+    } else if (this.memAdapter.getEngine() === 'sqlite') {
+      // SqliteAdapter works on an in-memory snapshot of the host file, so tables
+      // created elsewhere (native driver) may not be visible here on fresh DBs —
+      // migrate001 then failed with "no such table: knowledge_entries", leaving
+      // the memory module in error and /health at 503 forever. Idempotent.
+      const { MEMORY_SCHEMA } = await import('./schema/index.js');
+      await this.memAdapter.execAsync(MEMORY_SCHEMA);
     }
 
     // Run versioned migrations via DatabaseAdapter

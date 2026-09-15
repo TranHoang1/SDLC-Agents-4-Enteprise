@@ -77,19 +77,19 @@ const parsed = AuditLogInputSchema.safeParse(args);
     return textResult({ entries, count: entries.length });
   }
 
-  private handleAddPattern(pattern?: string, description?: string, projectId?: string): ToolResult {
+  private async handleAddPattern(pattern?: string, description?: string, projectId?: string): Promise<ToolResult> {
     if (!pattern) return errorResult('Missing required field: pattern');
     try {
-      const added = this.service.addPattern(pattern, description ?? '', projectId);
+      const added = await this.service.addPattern(pattern, description ?? '', projectId);
       return textResult({ success: true, pattern: added });
 } catch (err) {
       return errorResult(`Failed to add pattern: ${(err as Error).message}`);
     }
   }
 
-  private handleRemovePattern(patternId?: string): ToolResult {
+  private async handleRemovePattern(patternId?: string): Promise<ToolResult> {
     if (!patternId) return errorResult('Missing required field: pattern_id');
-    const removed = this.service.removePattern(patternId);
+    const removed = await this.service.removePattern(patternId);
     if (!removed) return errorResult('Pattern not found or is a default pattern (cannot remove)');
     return textResult({ success: true, removed: patternId });
   }

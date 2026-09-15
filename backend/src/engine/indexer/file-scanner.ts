@@ -58,6 +58,12 @@ const EXTENSION_LANGUAGE_MAP: Record<string, string> = {
   '.tokens': 'aura',
   // ---- SA4E-... LWC HTML template support ----
   '.html': 'lwc-html',
+  // ---- SA4E-261: Tier B extensions for unified whitelist ----
+  '.jsp': 'jsp',
+  '.xml': 'xml',
+  '.properties': 'properties',
+  '.css': 'css',
+  '.ps1': 'powershell',
 };
 
 /**
@@ -155,7 +161,7 @@ function processFile(fullPath: string, relPath: string, config: AppConfig, root:
 
   const ext = getExtension(fullPath);
   // Allow through if simple extension matches OR if compound extension detected (salesforce-meta)
-  if (!config.includeExtensions.includes(ext) && ext !== '.kts' && language !== 'salesforce-meta') return null;
+  if (!config.includeExtensions.includes(ext) && ext !== '.kts' && language !== 'salesforce-meta' && ext !== '.jsp') return null;
 
   try {
     // F-01: reject symlinks that escape the workspace (realpath containment).

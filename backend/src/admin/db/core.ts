@@ -65,10 +65,16 @@ export function getActiveDbConfig() {
 }
 
 let sqliteAdapter: SqliteAdapter | null = null;
+// Single shared init promise — initAdapters() awaits this same promise so no
+// caller (server boot, tests) can race schema creation / admin seeding.
+let sqliteReady: Promise<void> | null = null;
 
 /**
  * Get or create the unified SQLite adapter (singleton).
- * Handles directory creation, WAL mode, and schema initialization.
+ * Handles directory creation and WAL mode. Schema init is done separately via
+ * initAdapters() (async, cross-engine) so the seeding path is identical for
+ * SQLite and PostgreSQL. SqliteAdapter async methods wrap sync calls, so awaiting
+ * initSchema/seedDefaults on SQLite resolves synchronously in practice.
  * Note: SqliteAdapter.connect() is synchronous internally (just wraps sync calls).
  */
 function getUnifiedSqliteAdapter(): SqliteAdapter {
@@ -76,8 +82,9 @@ function getUnifiedSqliteAdapter(): SqliteAdapter {
     sqliteAdapter = new SqliteAdapter(DB_PATH);
     // SqliteAdapter.connect() is sync internally — safe to call eagerly
     void sqliteAdapter.connect();
-    initSchema(sqliteAdapter);
-    seedDefaults(sqliteAdapter);
+    const adapter = sqliteAdapter;
+    sqliteReady = initSchema(adapter).then(() => seedDefaults(adapter))
+      .catch((err) => logger.error({ err }, '[admin] SQLite schema init failed'));
   }
   return sqliteAdapter;
 }
@@ -120,6 +127,16 @@ export async function initAdapters(): Promise<void> {
   const engine = getActiveEngine();
   if (engine === 'sqlite') {
     getDbAdapter();
+    // Await the shared init (schema + admin seed) instead of returning
+    // immediately — otherwise the first login/seed-dependent query races init
+    // and fails (e.g. 401 in tests, missing tables).
+    if (sqliteReady) {
+      await sqliteReady;
+    } else {
+      const adapter = getDbAdapter();
+      await initSchema(adapter);
+      await seedDefaults(adapter);
+    }
     return;
   }
 
@@ -133,14 +150,8 @@ export async function initAdapters(): Promise<void> {
   // PostgreSQL/MySQL require async + engine-specific DDL (SERIAL, NOW()::TEXT,
   // ON CONFLICT) — the sync initSchema/seedDefaults path is SQLite-only.
   try {
-    if (engine === 'postgresql') {
-      const { ensurePostgresAdminSchema, seedDefaultsPg } = await import('./schema-pg.js');
-      await ensurePostgresAdminSchema(adapter);
-      await seedDefaultsPg(adapter);
-    } else {
-      initSchema(adapter);
-      seedDefaults(adapter);
-    }
+    await initSchema(adapter);
+    await seedDefaults(adapter);
   } catch (err) {
     logger.error({ err }, '[admin] Failed to init schema/seed defaults');
   }

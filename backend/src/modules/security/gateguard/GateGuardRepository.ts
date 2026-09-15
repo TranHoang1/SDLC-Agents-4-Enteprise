@@ -84,7 +84,7 @@ export class GateGuardRepository {
     }
   }
 
-  /** BR-1204: Append-only audit insert — never update or delete (cross-engine async) */
+  /** BR-1204: Append-only audit insert — never update or delete */
   async insertAudit(params: InsertAuditParams): Promise<void> {
     await this.adapter.runAsync(
       'INSERT INTO gateguard_audit' +
@@ -102,7 +102,7 @@ export class GateGuardRepository {
     );
   }
 
-  /** Query audit entries with optional filters (cross-engine async) */
+  /** Query audit entries with optional filters */
   async queryAudit(projectId?: string, limit = 50, actionFilter?: GateGuardAction): Promise<AuditEntry[]> {
     let sql = 'SELECT * FROM gateguard_audit WHERE 1=1';
     const params: unknown[] = [];
@@ -122,7 +122,7 @@ export class GateGuardRepository {
     return rows.map(mapAuditRow);
   }
 
-  /** Load all custom denylist patterns for a project (cross-engine async) */
+  /** Load all custom denylist patterns for a project */
   async getPatterns(projectId?: string): Promise<DenyPattern[]> {
     let sql = 'SELECT * FROM gateguard_denylist WHERE 1=1';
     const params: unknown[] = [];
@@ -134,7 +134,7 @@ export class GateGuardRepository {
     return rows.map(mapPatternRow);
   }
 
-  /** Add a custom denylist pattern (cross-engine async) */
+  /** Add a custom denylist pattern */
   async addPattern(pattern: DenyPattern): Promise<void> {
     await this.adapter.runAsync(
       'INSERT INTO gateguard_denylist (id, regex, description, is_default, project_id)' +
@@ -143,7 +143,7 @@ export class GateGuardRepository {
     );
   }
 
-  /** Remove a custom denylist pattern by ID — cannot remove defaults (cross-engine async) */
+  /** Remove a custom denylist pattern by ID — cannot remove defaults */
   async removePattern(patternId: string): Promise<boolean> {
     const result = await this.adapter.runAsync(
       'DELETE FROM gateguard_denylist WHERE id = ? AND is_default = 0',

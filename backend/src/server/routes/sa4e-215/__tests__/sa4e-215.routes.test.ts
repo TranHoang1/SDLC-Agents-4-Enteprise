@@ -11,7 +11,7 @@
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Hono } from 'hono';
-import { getDbAdapter } from '../../../../admin/admin-db.js';
+import { getDbAdapter, initAdapters } from '../../../../admin/admin-db.js';
 import { ensureSa4e215Tables } from '../../../../database/schema-registry/ensure-sa4e-215.js';
 import { createSa4e215Route } from '../index.js';
 
@@ -36,7 +36,10 @@ async function authHeaders() {
 beforeAll(async () => {
   app = new Hono();
   app.route('/', createSa4e215Route());
-  ensureSa4e215Tables(); // also triggers getDbAdapter() -> initSchema + seedDefaults
+  // Await shared DB init first (project_registry table), then SA4E-215 tables —
+  // both were fire-and-forget/unawaited, so INSERTs raced table creation.
+  await initAdapters();
+  await ensureSa4e215Tables(); // also triggers getDbAdapter() -> initSchema + seedDefaults
   const adapter = getDbAdapter();
   await adapter.runAsync(
     'INSERT INTO project_registry (project_id, display_name) VALUES (?, ?) ON CONFLICT DO NOTHING',
