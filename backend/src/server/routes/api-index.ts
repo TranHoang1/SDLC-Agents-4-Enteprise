@@ -20,7 +20,7 @@ import {
   handleFullIndex, handleFileEvents, handleCancel, handleProgress,
 } from './api-index-decoupled.js';
 import { PegaService } from '../../modules/pega/PegaService.js';
-import { UNIFIED_EXTENSIONS } from '../../config/unified-extensions';
+import { UNIFIED_EXTENSIONS } from '../../config/unified-extensions.js';
 
 interface SourceFile {
   path: string;
